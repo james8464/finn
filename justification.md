@@ -1,6 +1,6 @@
 # Why Plumb
 
-**10 October 2026 — product rationale, not a claim of proven demand.** Plumb is an iPhone-first workout-technique companion. The app is planned; the repository is still at the starter-app stage.
+**Updated 11 October 2026 — product rationale, not a claim of proven demand.** Plumb is an iPhone-first workout-technique companion. An initial squat flow and local comparison now exist, but real-camera and expert validation are still pending.
 
 ## 1. The problem worth solving
 

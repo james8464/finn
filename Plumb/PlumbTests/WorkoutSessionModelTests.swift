@@ -113,11 +113,36 @@ struct WorkoutSessionModelTests {
         #expect(cue == nil)
     }
 
-    private func trace(reps: Int) -> [PoseFrame] {
+    @Test func secondSetPersistsAndComparesWithinSession() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: "PlumbModelTests-\(UUID().uuidString)", directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = LocalSessionStore(url: directory.appending(path: "sessions.json"))
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for sample in trace(reps: 6, amplitude: 0.20) { source.emit(sample) }
+        await model.endSet()
+        let sessionID = try #require(model.currentSession?.id)
+
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for sample in trace(reps: 6, amplitude: 0.13) { source.emit(sample) }
+        await model.endSet()
+
+        #expect(model.currentSession?.id == sessionID)
+        #expect(model.currentSession?.sets.count == 2)
+        #expect(model.comparison?.rangeDirection == .shorter)
+        #expect(try store.load().first?.sets.count == 2)
+    }
+
+    private func trace(reps: Int, amplitude: Double = 0.20) -> [PoseFrame] {
         (0...(reps * 20)).map { index in
             let phase = Double(index % 20) / 20
             return frame(time: Double(index) * 0.1,
-                         hipY: 0.42 + 0.20 * (1 - cos(2 * .pi * phase)) / 2)
+                         hipY: 0.42 + amplitude * (1 - cos(2 * .pi * phase)) / 2)
         }
     }
 

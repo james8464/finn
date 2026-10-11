@@ -1,6 +1,6 @@
 # Plumb — three-minute pitch
 
-**Working pitch, 10 October 2026.** The concept is planned; the repository currently contains a starter iPhone app and brand work, not a functioning camera coach. Demonstrations must identify which steps are live and which are recorded or simulated.
+**Working pitch, updated 11 October 2026.** The repository contains a simulator-tested iPhone squat flow and brand work. Real-camera pose quality and coaching claims remain unvalidated on a physical iPhone. Demonstrations must identify which steps are live and which are recorded or simulated.
 
 ## One line
 

@@ -1,6 +1,6 @@
 # Plumb — product and build plan
 
-**Working plan, updated 11 October 2026.** Plumb is a proposed iPhone-first strength-training companion. The visible app is still an Xcode starter; a tested rep analyzer, evidence gate, and provisional cue selector now exist behind it. Live camera capture, an end-to-end coaching flow, Watch app, subscriptions, and workout history have not been implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
+**Working plan, updated 11 October 2026.** Plumb is an iPhone-first strength-training companion in development. The app now includes a squat setup/capture/result flow, a tested rep analyzer and evidence gate, a provisional cue selector, and local derived-summary history with second-set comparison. These pass simulator tests; real-camera orientation and coaching quality still require physical-device and expert validation. Watch integration and subscriptions have not been implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
 
 The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md). It scopes the first complete iPhone squat loop and its validation gate; later integrations remain in this broader product plan.
 
@@ -204,7 +204,7 @@ For the next-set loop, measure whether the user understands the evidence, whethe
 
 ### Honest status rule
 
-The current repository is a starter app and brand assets. Do not claim camera coaching, Watch integration, live cues, subscriptions, or injury reduction in a pitch or screenshot until the behavior exists and has been tested. A demo recording must be identified as a recording.
+The repository now includes a simulator-tested camera-to-result flow, local set history, and brand assets. Do not claim validated coaching accuracy, Watch integration, live cues, subscriptions, or injury reduction in a pitch or screenshot until the behavior exists and has been tested on a physical device. A demo recording or synthetic input must be identified as such.
 
 ## 8. Risk register
 

@@ -18,8 +18,13 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Measured reps"].exists)
         XCTAssertTrue(app.staticTexts["Your range became shorter in the last two reps."].exists)
-        app.buttons["Try another set"].tap()
+        app.buttons["Try this next set"].tap()
         XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 5))
+        app.buttons["Start set"].tap()
+        XCTAssertTrue(app.buttons["Stop set"].waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        app.buttons["Stop set"].tap()
+        XCTAssertTrue(app.staticTexts["Compared with your previous set"].waitForExistence(timeout: 5))
     }
 
     @MainActor

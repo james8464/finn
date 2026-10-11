@@ -4,9 +4,10 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
     @State private var model: WorkoutSessionModel
+    @State private var deleteCandidate: UUID?
 
-    @MainActor init(source: any PoseStreaming) {
-        _model = State(initialValue: WorkoutSessionModel(source: source))
+    @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore()) {
+        _model = State(initialValue: WorkoutSessionModel(source: source, store: store))
     }
 
     var body: some View {
@@ -36,6 +37,17 @@ struct ContentView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { Task { await model.backgrounded() } }
         }
+        .confirmationDialog("Delete this session?", isPresented: Binding(
+            get: { deleteCandidate != nil },
+            set: { if !$0 { deleteCandidate = nil } }
+        )) {
+            Button("Delete session", role: .destructive) {
+                if let id = deleteCandidate { model.deleteHistory(id: id) }
+                deleteCandidate = nil
+            }
+        } message: {
+            Text("Its measured set summaries will be removed from this iPhone.")
+        }
     }
 
     private var setup: some View {
@@ -63,6 +75,7 @@ struct ContentView: View {
                 Text("Plumb observes movement from one camera angle. It cannot judge every part of your technique or prevent injury.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                historySection
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
@@ -150,6 +163,12 @@ struct ContentView: View {
                                 .foregroundStyle(.secondary)
                         }
                         repList(analysis.reps)
+                        if let comparison = model.comparison {
+                            comparisonView(comparison)
+                        } else if (model.currentSession?.sets.count ?? 0) >= 2 {
+                            Text("These sets used different camera views, so Plumb can’t compare them reliably.")
+                                .foregroundStyle(.secondary)
+                        }
                     case .insufficientView(let reason):
                         Text("Couldn’t assess this set").font(.largeTitle.bold())
                         Text(reason)
@@ -163,13 +182,85 @@ struct ContentView: View {
                         Text("Camera capture stopped before the set was complete.")
                     }
                 }
-                Button("Try another set") { Task { await model.startPreview() } }
+                Button(retakeLabel) { Task { await model.startPreview() } }
                     .buttonStyle(.borderedProminent).controlSize(.large)
-                Button("Done") { Task { await model.cancel() } }
+                Button("Done") { Task { await model.finishSession() } }
                     .buttonStyle(.bordered)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
+        }
+    }
+
+    private var retakeLabel: String {
+        if case .insufficientView = model.result { return "Retake set" }
+        if case .measured(_, let cue) = model.result, cue != nil { return "Try this next set" }
+        return "Try another set"
+    }
+
+    @ViewBuilder private var historySection: some View {
+        if model.historyError {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Couldn’t read saved history").font(.headline)
+                Text("You can move the damaged file aside and start a new local history.")
+                    .font(.subheadline).foregroundStyle(.secondary)
+                Button("Recover history") { model.recoverHistory() }
+                    .buttonStyle(.bordered)
+            }
+        } else if !model.history.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Recent sessions").font(.headline)
+                ForEach(model.history.prefix(3)) { session in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(session.startedAt, style: .date)
+                            Text("\(session.sets.count) measured sets")
+                                .font(.subheadline).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button("Delete") { deleteCandidate = session.id }
+                            .font(.subheadline)
+                            .accessibilityLabel("Delete session from \(session.startedAt.formatted(date: .abbreviated, time: .omitted))")
+                    }
+                    Divider()
+                }
+            }
+        }
+    }
+
+    private func comparisonView(_ comparison: Comparison) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Compared with your previous set").font(.headline)
+            HStack {
+                comparisonMetric("Set 1", range: comparison.firstMedianRange,
+                                 duration: comparison.firstMedianDuration)
+                Spacer()
+                comparisonMetric("Set 2", range: comparison.secondMedianRange,
+                                 duration: comparison.secondMedianDuration)
+            }
+            Text(comparisonStatement(comparison.rangeDirection))
+            .font(.subheadline.weight(.semibold))
+            Text("This comparison describes one camera-visible measure, not overall technique or safety.")
+                .font(.footnote).foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 12)
+    }
+
+    private func comparisonMetric(_ title: String, range: Double, duration: Double) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.subheadline.weight(.semibold))
+            Text("Range: \(range.formatted(.number.precision(.fractionLength(2))))")
+            Text("Tempo: \(duration.formatted(.number.precision(.fractionLength(1)))) s")
+        }
+        .font(.subheadline)
+        .monospacedDigit()
+    }
+
+    private func comparisonStatement(_ direction: RangeDirection) -> String {
+        switch direction {
+        case .longer: return "Camera-measured range was longer in set 2."
+        case .shorter: return "Camera-measured range was shorter in set 2."
+        case .noClearChange: return "No clear measured range change between sets."
         }
     }
 

@@ -43,7 +43,7 @@ nonisolated enum AnalysisOutcome: Equatable {
     case failed(String)
 }
 
-nonisolated enum BodySide: String, Codable {
+nonisolated enum BodySide: String, Codable, Equatable {
     case left
     case right
 }
@@ -77,4 +77,50 @@ nonisolated struct Cue: Codable, Equatable {
     let laterMedian: Double
     let observation: String
     let nextAction: String
+}
+
+nonisolated enum ExerciseKind: String, Codable, Equatable {
+    case bodyweightSquat
+}
+
+nonisolated enum CameraView: String, Codable, Equatable {
+    case side
+    case front
+}
+
+nonisolated enum CueResponse: String, Codable, Equatable {
+    case unanswered
+    case notRelevant
+}
+
+nonisolated struct SetSummary: Codable, Equatable, Identifiable {
+    let id: UUID
+    let sessionID: UUID
+    let capturedAt: Date
+    let bodySide: BodySide
+    let analysis: SetAnalysis
+    let cue: Cue?
+    var cueResponse: CueResponse
+    let exercise: ExerciseKind
+    let cameraView: CameraView
+
+    init(id: UUID, sessionID: UUID, capturedAt: Date, bodySide: BodySide,
+         analysis: SetAnalysis, cue: Cue?, cueResponse: CueResponse,
+         exercise: ExerciseKind = .bodyweightSquat, cameraView: CameraView = .side) {
+        self.id = id
+        self.sessionID = sessionID
+        self.capturedAt = capturedAt
+        self.bodySide = bodySide
+        self.analysis = analysis
+        self.cue = cue
+        self.cueResponse = cueResponse
+        self.exercise = exercise
+        self.cameraView = cameraView
+    }
+}
+
+nonisolated struct WorkoutSessionSummary: Codable, Equatable, Identifiable {
+    let id: UUID
+    let startedAt: Date
+    var sets: [SetSummary]
 }

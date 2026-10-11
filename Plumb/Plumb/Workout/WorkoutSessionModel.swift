@@ -24,6 +24,7 @@ nonisolated enum WorkoutResult {
 @MainActor
 final class WorkoutSessionModel {
     private let source: any PoseStreaming
+    @ObservationIgnored private let store: (any SessionStoring)?
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
     private var isStopping = false
@@ -32,11 +33,20 @@ final class WorkoutSessionModel {
     private(set) var result: WorkoutResult?
     private(set) var frameCount = 0
     private(set) var cueDismissed = false
+    private(set) var currentSession: WorkoutSessionSummary?
+    private(set) var comparison: Comparison?
+    private(set) var history: [WorkoutSessionSummary] = []
+    private(set) var historyError = false
     var isRecording: Bool { stage == .capturing }
     var previewSession: AVCaptureSession { source.previewSession }
 
-    init(source: any PoseStreaming) {
+    init(source: any PoseStreaming, store: (any SessionStoring)? = nil) {
         self.source = source
+        self.store = store
+        if let store {
+            do { history = try store.load() }
+            catch { historyError = true }
+        }
     }
 
     func startPreview() async {
@@ -109,18 +119,73 @@ final class WorkoutSessionModel {
         completeAnalysis()
     }
 
-    func dismissCue() { cueDismissed = true }
+    func dismissCue() {
+        cueDismissed = true
+        guard var session = currentSession, session.sets.last?.cue != nil else { return }
+        session.sets[session.sets.count - 1].cueResponse = .notRelevant
+        currentSession = session
+        save(session)
+    }
 
     private func completeAnalysis() {
         switch SquatAnalyzer.analyze(frames) {
         case .analyzed(let analysis):
-            result = .measured(analysis, CueSelector.select(from: analysis))
+            let cue = CueSelector.select(from: analysis)
+            result = .measured(analysis, cue)
+            record(analysis: analysis, cue: cue)
         case .insufficientView(let reason):
             result = .insufficientView(reason)
         case .failed(let reason):
             result = .failed(reason)
         }
         stage = .result
+    }
+
+    func finishSession() async {
+        await cancel()
+        currentSession = nil
+        comparison = nil
+    }
+
+    func deleteHistory(id: UUID) {
+        guard let store else { return }
+        do {
+            try store.delete(id: id)
+            history = try store.load()
+            if currentSession?.id == id { currentSession = nil; comparison = nil }
+        } catch { historyError = true }
+    }
+
+    func recoverHistory() {
+        guard let store else { return }
+        do {
+            _ = try store.recoverCorruptStore()
+            history = try store.load()
+            historyError = false
+        } catch { historyError = true }
+    }
+
+    private func record(analysis: SetAnalysis, cue: Cue?) {
+        guard case .usable(let side) = EvidenceGate.assess(frames) else { return }
+        var session = currentSession ?? WorkoutSessionSummary(id: UUID(), startedAt: .now, sets: [])
+        session.sets.append(SetSummary(
+            id: UUID(), sessionID: session.id, capturedAt: .now,
+            bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered
+        ))
+        currentSession = session
+        if session.sets.count >= 2 {
+            comparison = SetComparison.compare(session.sets[session.sets.count - 2], session.sets.last!)
+        }
+        save(session)
+    }
+
+    private func save(_ session: WorkoutSessionSummary) {
+        guard let store else { return }
+        do {
+            try store.save(session)
+            history = try store.load().sorted { $0.startedAt > $1.startedAt }
+            historyError = false
+        } catch { historyError = true }
     }
 
     func cancel() async {

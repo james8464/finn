@@ -130,10 +130,10 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 **Interfaces:** Each `WorkoutSessionSummary` has a stable ID and one or more `SetSummary` values; comparison becomes available after the second set. `SetComparison.compare(_:_:)` compares only like exercise/rubric/angle records and returns `nil` when evidence is incompatible. The store saves derived summaries and user cue responses, never raw frames or movie paths in this milestone.
 
-- [ ] Write failing tests `summaryRoundTrip`, `secondSetSameSession`, `incompatibleComparison`, `deleteSession`, and `corruptStoreRecovery`. Assert `#expect(loaded.first?.sets.count == 2)`, `#expect(SetComparison.compare(first, wrongAngle) == nil)`, and that the serialized record has no frame bytes or clip URL.
-- [ ] Run unit tests and confirm failure.
-- [ ] Implement atomic Application Support storage and a clear delete action. Show the first and second set side by side using their measured range/tempo and a cautious “changed / no clear change” statement; do not equate metric change with safer movement.
-- [ ] Rerun tests and manually complete two sets on a physical iPhone. Commit this task.
+- [x] Write failing tests for summary round-trip, second-set comparison, incompatible view/rubric/session, delete, and corrupt-store recovery. Assert two sets persist and serialized records contain no frames or clip URL.
+- [x] Run unit tests and confirm the missing summary model fails compilation before implementation.
+- [x] Implement atomic Application Support storage and a confirmed delete action. Show the first and second set side by side using measured range/tempo and a cautious “changed / no clear change” statement. Keep a damaged file as a backup only after an explicit recovery action.
+- [ ] Rerun the full simulator suite and manually complete two sets on a physical iPhone. The full iOS 27 simulator suite passed 41 tests, including the two-set UI flow, on 11 October; physical iPhone remains unavailable to Xcode.
 
 ## Task 6: Grounded Foundation Models recap
 
