@@ -60,6 +60,24 @@ final class WorkoutFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testDismissedCueAcknowledgesFeedback() {
+        let app = XCUIApplication()
+        app.launchArguments.append("-plumb-ui-demo")
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        let notRelevant = app.buttons["Not relevant"]
+        XCTAssertTrue(notRelevant.waitForExistence(timeout: 5))
+        notRelevant.tap()
+        XCTAssertTrue(app.staticTexts["Observation marked not relevant."].exists)
+        XCTAssertFalse(app.staticTexts["No clear pattern to call out in this set."].exists)
+    }
+
+    @MainActor
     private func capture(_ app: XCUIApplication, name: String) {
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = name

@@ -11,6 +11,8 @@ Place the iPhone upright at about hip height, a few steps away. Keep your head a
 
 The rep count and relative range are camera-based estimates from one view. A cue is shown only when Plumb's current evidence rules support it. A shorter or longer camera-measured range does not by itself mean a set was safer, better, or worse. Stop exercising if you feel pain and seek qualified advice where appropriate.
 
+Plumb needs at least four measured reps before it can show an observation. A measured set may still have no cue when there is no clear, camera-supported pattern.
+
 ## Privacy and deletion
 
 Plumb does not save a workout movie. Set summaries are saved in the app's local storage and may be included in your iPhone's device backup if enabled. Open **History** and tap **Delete** to remove one session, or **Delete all local data** to remove all saved sessions and recovery backups from the app. See the [privacy policy](privacy-policy.md).

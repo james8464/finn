@@ -181,15 +181,24 @@ struct ContentView: View {
                         Text("Set reviewed").font(.largeTitle.bold())
                         Text("\(analysis.reps.count) measured reps")
                             .font(.title2.weight(.semibold)).monospacedDigit()
-                        if let cue, !model.cueDismissed {
-                            Text(cue.observation).font(.title3.weight(.semibold))
-                            Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
-                                .foregroundStyle(.secondary)
-                            Text(cue.nextAction)
-                            Button("Not relevant") { model.dismissCue() }
-                                .buttonStyle(.bordered)
+                        if let cue {
+                            if model.cueDismissed {
+                                Text("Observation marked not relevant.").font(.title3)
+                            } else {
+                                Text(cue.observation).font(.title3.weight(.semibold))
+                                Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
+                                    .foregroundStyle(.secondary)
+                                Text(cue.nextAction)
+                                Button("Not relevant") { model.dismissCue() }
+                                    .buttonStyle(.bordered)
+                            }
                         } else {
-                            Text("No clear change to call out in this set.").font(.title3)
+                            if analysis.reps.count < 4 {
+                                Text("Plumb needs at least four measured reps before it can show an observation.")
+                                    .font(.title3)
+                            } else {
+                                Text("No clear pattern to call out in this set.").font(.title3)
+                            }
                             Text("This is a camera measurement, not a full technique assessment.")
                                 .foregroundStyle(.secondary)
                         }
