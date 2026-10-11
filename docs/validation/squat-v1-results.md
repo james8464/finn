@@ -1,6 +1,6 @@
 # Squat v1 validation results
 
-**Status: not started. Updated 11 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. The current 68-test iOS 27 simulator pass verifies implementation behavior, not real-camera accuracy.
+**Status: not started. Updated 11 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. The current 69-test iOS 27 simulator pass verifies implementation behavior, not real-camera accuracy. It includes a stalled-frame capture-limit regression.
 
 ## Simulator UI check · 11 October 2026
 

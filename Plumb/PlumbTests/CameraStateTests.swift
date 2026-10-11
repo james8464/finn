@@ -119,6 +119,26 @@ struct CameraStateTests {
         await source.stop()
     }
 
+    @Test func setLimitEndsCaptureWhenFramesStopArriving() async throws {
+        let driver = FakeCaptureDriver()
+        let source = CameraPoseSource(authorize: { true }, driver: driver,
+                                      setDurationLimit: .milliseconds(25))
+        let stream = try await source.start()
+        await source.prepareForSet()
+
+        for _ in 0..<50 where source.state != .idle {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        guard source.state == .idle else {
+            await source.stop()
+            Issue.record("The set limit must end capture even when no frames arrive")
+            return
+        }
+        #expect(source.endedAtLimit)
+        var iterator = stream.makeAsyncIterator()
+        #expect(await iterator.next() == nil)
+    }
+
     @Test func cancellingPermissionPromptDoesNotOpenCamera() async throws {
         let driver = FakeCaptureDriver()
         var permissionReply: CheckedContinuation<Bool, Never>?

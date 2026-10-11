@@ -40,18 +40,22 @@ nonisolated enum CameraSourceState: Equatable {
 final class CameraPoseSource: PoseStreaming {
     private let authorize: @MainActor () async -> Bool
     private let driver: any CameraCaptureDriving
+    private let setDurationLimit: Duration
     private var runID: UUID?
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var forwardTask: Task<Void, Never>?
+    private var limitTask: Task<Void, Never>?
     private var isSetActive = false
 
     private(set) var state: CameraSourceState = .idle
     private(set) var endedAtLimit = false
     var previewSession: AVCaptureSession { driver.session }
 
-    init(authorize: @escaping @MainActor () async -> Bool, driver: any CameraCaptureDriving) {
+    init(authorize: @escaping @MainActor () async -> Bool, driver: any CameraCaptureDriving,
+         setDurationLimit: Duration = .seconds(120)) {
         self.authorize = authorize
         self.driver = driver
+        self.setDurationLimit = setDurationLimit
     }
 
     static func live() -> CameraPoseSource {
@@ -65,7 +69,14 @@ final class CameraPoseSource: PoseStreaming {
     }
 
     func prepareForSet() async {
-        if state == .running { isSetActive = true }
+        guard state == .running, !isSetActive, let currentID = runID else { return }
+        isSetActive = true
+        limitTask = Task { @MainActor [weak self, setDurationLimit] in
+            do { try await Task.sleep(for: setDurationLimit) } catch { return }
+            guard let self, self.runID == currentID, self.isSetActive else { return }
+            self.endedAtLimit = true
+            await self.stop()
+        }
     }
 
     func start() async throws -> AsyncStream<PoseFrame> {
@@ -129,6 +140,9 @@ final class CameraPoseSource: PoseStreaming {
             if self.runID == currentID {
                 self.runID = nil
                 self.state = .interrupted
+                self.isSetActive = false
+                self.limitTask?.cancel()
+                self.limitTask = nil
                 self.continuation?.finish()
                 self.continuation = nil
                 await self.driver.stop()
@@ -141,6 +155,8 @@ final class CameraPoseSource: PoseStreaming {
         runID = nil
         state = .idle
         isSetActive = false
+        limitTask?.cancel()
+        limitTask = nil
         continuation?.finish()
         continuation = nil
         forwardTask?.cancel()
