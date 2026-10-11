@@ -17,6 +17,7 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Video is processed on this iPhone and never saved."].exists)
         XCTAssertTrue(app.staticTexts["Saved summaries may be included in your device backup."].exists)
         XCTAssertTrue(app.staticTexts["Delete saved sessions in History."].exists)
+        XCTAssertTrue(app.links["Full privacy policy"].exists)
     }
 
     @MainActor

@@ -134,6 +134,7 @@ struct ContentView: View {
                     Text("Optional explanation").font(.headline)
                     Text("On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.")
                 }
+                Link("Full privacy policy", destination: URL(string: "https://james8464.github.io/hackathon-project/privacy.html")!)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)

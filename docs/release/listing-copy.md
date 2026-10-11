@@ -6,8 +6,8 @@ This copy describes the implemented iPhone squat release. Review it against the 
 - **Subtitle:** See your next set clearly
 - **Primary category:** Health & Fitness
 - **Keywords (draft):** squat,workout,exercise,rep,training,fitness,movement
-- **Support URL:** [public support page pending]
-- **Privacy policy URL:** [public privacy policy page pending]
+- **Support URL:** https://james8464.github.io/hackathon-project/support.html
+- **Privacy policy URL:** https://james8464.github.io/hackathon-project/privacy.html
 
 ## Description
 

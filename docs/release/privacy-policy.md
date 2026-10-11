@@ -1,5 +1,7 @@
 # Plumb privacy policy
 
+**Published URL:** https://james8464.github.io/hackathon-project/privacy.html
+
 **Effective date:** 11 October 2026. This policy describes the current iPhone release candidate; recheck the final signed upload before App Store submission.
 
 - **Publisher:** James Durup

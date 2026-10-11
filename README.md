@@ -17,6 +17,7 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 - [`docs/validation/physical-iphone-run.md`](docs/validation/physical-iphone-run.md): step-by-step device smoke run when the iPhone is available
 - [`docs/validation/squat-v1-results.md`](docs/validation/squat-v1-results.md): actual results status; no real sets collected yet
 - [`docs/release/app-store-submission.md`](docs/release/app-store-submission.md): release checks and App Store Connect status
+- [Public support](https://james8464.github.io/hackathon-project/support.html) and [privacy policy](https://james8464.github.io/hackathon-project/privacy.html): live pages for the current iPhone candidate
 - [`docs/release/app-privacy-answers.md`](docs/release/app-privacy-answers.md): source-backed draft of App Store privacy answers for the current iPhone build
 - [`justification.md`](justification.md): why a focused camera technique companion is worth testing
 - [`market research.md`](market%20research.md): primary-source alternatives and customer research plan
