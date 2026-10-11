@@ -102,7 +102,17 @@ struct WorkoutSessionModelTests {
         let model = WorkoutSessionModel(source: source)
         await model.startPreview()
         #expect(model.isRecording == false)
-        guard case .error = model.stage else { Issue.record("Expected permission error"); return }
+        #expect(model.stage == .error(.permissionDenied))
+    }
+
+    @Test func unavailableCameraDoesNotOfferSettingsRecovery() async throws {
+        let source = TestPoseSource()
+        source.startError = .unavailable
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        #expect(model.stage == .error(.unavailable))
+        #expect(model.isRecording == false)
+        #expect(CameraIssue.unavailable.offersSettings == false)
     }
 
     @Test func durationLimitReviewsCollectedSet() async throws {

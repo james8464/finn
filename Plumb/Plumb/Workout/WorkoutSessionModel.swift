@@ -10,7 +10,34 @@ nonisolated enum WorkoutStage: Equatable {
     case capturing
     case analyzing
     case result
-    case error(String)
+    case error(CameraIssue)
+}
+
+nonisolated enum CameraIssue: Equatable {
+    case permissionDenied
+    case unavailable
+    case interrupted
+    case startFailed
+
+    var title: String {
+        switch self {
+        case .permissionDenied: "Camera access needed"
+        case .unavailable: "Camera unavailable"
+        case .interrupted: "Camera interrupted"
+        case .startFailed: "Couldn’t start camera"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .permissionDenied: "Allow camera access in Settings."
+        case .unavailable: "The camera is unavailable right now. Try again in a moment."
+        case .interrupted: "Camera capture stopped. Try again."
+        case .startFailed: "Try again in a moment."
+        }
+    }
+
+    var offersSettings: Bool { self == .permissionDenied }
 }
 
 nonisolated enum WorkoutResult {
@@ -121,16 +148,16 @@ final class WorkoutSessionModel {
                     self.result = .interrupted
                     self.stage = .result
                 } else if self.stage == .framing || self.isCountingDown {
-                    self.stage = .error("Camera capture was interrupted. Try again.")
+                    self.stage = .error(.interrupted)
                 }
                 await self.source.stop()
             }
         } catch CameraSourceError.denied {
-            if stage == .openingCamera { stage = .error("Allow camera access in Settings.") }
+            if stage == .openingCamera { stage = .error(.permissionDenied) }
         } catch CameraSourceError.unavailable {
-            if stage == .openingCamera { stage = .error("This iPhone camera is unavailable. Try again when it is free.") }
+            if stage == .openingCamera { stage = .error(.unavailable) }
         } catch {
-            if stage == .openingCamera { stage = .error("The camera could not start. Try again.") }
+            if stage == .openingCamera { stage = .error(.startFailed) }
         }
     }
 

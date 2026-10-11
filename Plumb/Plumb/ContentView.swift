@@ -32,7 +32,7 @@ struct ContentView: View {
                 case .openingCamera: ProgressView("Opening camera")
                 case .framing, .countdown, .capturing, .analyzing: capture
                 case .result: result
-                case .error(let message): failure(message)
+                case .error(let issue): failure(issue)
                 }
             }
             .navigationTitle("Plumb")
@@ -130,21 +130,23 @@ struct ContentView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Camera").font(.headline)
+                    Text("Camera").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Video is processed on this iPhone and never saved.")
                     Text("Plumb uses the camera to measure a bodyweight squat from the side. Camera frames and pose points stay on this iPhone.")
                 }
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Saved results").font(.headline)
+                    Text("Saved results").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Measured set summaries are saved on this iPhone so you can review previous sets.")
                     Text("Saved summaries may be included in your device backup.")
                     Text("Delete saved sessions in History.")
                 }
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Optional explanation").font(.headline)
+                    Text("Optional explanation").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.")
                 }
                 Link("Full privacy policy", destination: URL(string: "https://james8464.github.io/hackathon-project/privacy.html")!)
+                    .frame(minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
@@ -462,21 +464,32 @@ struct ContentView: View {
         }
     }
 
-    private func failure(_ message: String) -> some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Camera unavailable").font(.largeTitle.bold())
-            Text(message)
-            Button("Open Settings") {
-                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+    private func failure(_ issue: CameraIssue) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text(issue.title).font(.largeTitle.bold())
+                Text(issue.message)
+                    .fixedSize(horizontal: false, vertical: true)
+                if issue.offersSettings {
+                    Button("Open Settings") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                if issue.offersSettings {
+                    Button("Try again") {
+                        Task { await model.cancel(); await model.startPreview() }
+                    }
+                    .buttonStyle(.bordered)
+                } else {
+                    Button("Try again") {
+                        Task { await model.cancel(); await model.startPreview() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
             }
-            .buttonStyle(.borderedProminent)
-            Button("Try again") {
-                Task { await model.cancel(); await model.startPreview() }
-            }
-            .buttonStyle(.bordered)
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(24)
     }
 }

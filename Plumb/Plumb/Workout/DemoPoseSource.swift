@@ -6,11 +6,17 @@ import Foundation
 @MainActor
 final class DemoPoseSource: PoseStreaming {
     let previewSession = AVCaptureSession()
+    private let startError: CameraSourceError?
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var feedTask: Task<Void, Never>?
     private var setNumber = 0
 
+    init(startError: CameraSourceError? = nil) {
+        self.startError = startError
+    }
+
     func start() async throws -> AsyncStream<PoseFrame> {
+        if let startError { throw startError }
         let stream = AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(3)) { continuation in
             self.continuation = continuation
         }

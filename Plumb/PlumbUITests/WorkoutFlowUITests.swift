@@ -22,6 +22,9 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launch()
         app.buttons["Privacy"].tap()
         XCTAssertTrue(app.navigationBars["Privacy"].exists)
+        XCTAssertTrue(app.staticTexts["Camera"].exists)
+        XCTAssertTrue(app.staticTexts["Saved results"].exists)
+        XCTAssertTrue(app.staticTexts["Optional explanation"].exists)
         XCTAssertTrue(app.staticTexts["Video is processed on this iPhone and never saved."].exists)
         XCTAssertTrue(app.staticTexts["Saved summaries may be included in your device backup."].exists)
         XCTAssertTrue(app.staticTexts["Delete saved sessions in History."].exists)
@@ -59,6 +62,7 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(deny.waitForExistence(timeout: 10))
         deny.tap()
 
+        XCTAssertTrue(app.staticTexts["Camera access needed"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Allow camera access in Settings."].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Open Settings"].exists)
         XCTAssertTrue(app.buttons["Try again"].exists)
@@ -68,6 +72,25 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Try again"].tap()
         XCTAssertTrue(app.staticTexts["Allow camera access in Settings."].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["Analyzing live"].exists)
+    }
+
+    @MainActor
+    func testUnavailableCameraOffersRetryWithoutSettings() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-plumb-ui-demo", "-plumb-ui-camera-unavailable",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityM",
+            "-UIUserInterfaceStyle", "Dark",
+        ]
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        XCTAssertTrue(app.staticTexts["Camera unavailable"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["The camera is unavailable right now. Try again in a moment."].exists)
+        XCTAssertTrue(app.buttons["Try again"].exists)
+        XCTAssertTrue(app.buttons["Try again"].isHittable)
+        XCTAssertFalse(app.buttons["Open Settings"].exists)
+        capture(app, name: "Unavailable camera large text")
+        try app.performAccessibilityAudit()
     }
 
     @MainActor
