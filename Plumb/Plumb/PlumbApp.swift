@@ -4,6 +4,7 @@ import SwiftUI
 struct PlumbApp: App {
     var body: some Scene {
         WindowGroup {
+            #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") {
                 ContentView(source: DemoPoseSource(), store: LocalSessionStore(
                     url: FileManager.default.temporaryDirectory
@@ -13,6 +14,9 @@ struct PlumbApp: App {
             } else {
                 ContentView(source: CameraPoseSource.live())
             }
+            #else
+            ContentView(source: CameraPoseSource.live())
+            #endif
         }
     }
 }

@@ -1,3 +1,4 @@
+#if DEBUG
 import AVFoundation
 import Foundation
 
@@ -55,3 +56,4 @@ final class DemoRecapGenerator: RecapGenerating {
         GeneratedRecap(explanation: "", evidenceRepNumbers: [])
     }
 }
+#endif

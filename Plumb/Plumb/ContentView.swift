@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var model: WorkoutSessionModel
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
+    #if DEBUG
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") }
     private var isValidationMode: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-validation") }
     private var isCaptureStage: Bool {
@@ -15,6 +16,7 @@ struct ContentView: View {
         default: return false
         }
     }
+    #endif
 
     @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore(),
                     narrator: ComparisonNarrator? = nil) {
@@ -37,6 +39,7 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .overlay(alignment: .top) {
+            #if DEBUG
             if isDemo && !isCaptureStage {
                 Text("DEMO INPUT")
                     .font(.caption.bold())
@@ -44,6 +47,7 @@ struct ContentView: View {
                     .background(.yellow, in: Capsule())
                     .padding(.top, 6)
             }
+            #endif
         }
         .tint(colorScheme == .dark
               ? Color(red: 143 / 255, green: 225 / 255, blue: 188 / 255)
@@ -138,6 +142,7 @@ struct ContentView: View {
                 .ignoresSafeArea()
                 .accessibilityHidden(true)
             VStack(spacing: 16) {
+                #if DEBUG
                 if isDemo {
                     Text("DEMO INPUT")
                         .font(.caption.bold())
@@ -145,6 +150,7 @@ struct ContentView: View {
                         .padding(6)
                         .background(.yellow, in: Capsule())
                 }
+                #endif
                 status
                 Spacer()
                 if model.stage == .framing {
@@ -255,12 +261,14 @@ struct ContentView: View {
                         Text("Camera capture stopped before the set was complete.")
                     }
                 }
+                #if DEBUG
                 if isValidationMode, let milliseconds = model.lastStopToResultMilliseconds {
                     Text("Validation timing · Stop to result: \(milliseconds) ms")
                         .font(.footnote.monospacedDigit())
                         .foregroundStyle(.secondary)
                         .accessibilityIdentifier("validation.stopToResult")
                 }
+                #endif
                 Button(retakeLabel) { Task { await model.startPreview() } }
                     .buttonStyle(.borderedProminent).controlSize(.large)
                 Button("Done") { Task { await model.finishSession() } }

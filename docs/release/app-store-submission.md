@@ -14,7 +14,7 @@
 | Local signing identities | One Apple Development identity is present; no Apple Distribution identity was found on 11 October |
 | Connected physical iPhone | iPhone 16 Pro Max appears in Xcode's device list but was **unavailable** on 11 October |
 | Repository | Public GitHub repository, `main` branch |
-| Test status | 55 iOS 27 simulator tests passed; unsigned iPhone Release build and archive succeeded; physical validation pending |
+| Test status | 55 iOS 27 simulator tests passed after the Release split; unsigned iPhone Release build and archive check succeeded; physical validation pending |
 
 James can purchase or confirm the Apple Developer Program membership. The team must then verify the Account Holder can enter App Store Connect, that the bundle ID belongs to the team, and that distribution signing works. A configured Xcode team ID alone does not establish these conditions.
 
@@ -24,7 +24,7 @@ James can purchase or confirm the Apple Developer Program membership. The team m
 2. Confirm the publisher name and public support email. Host and check public **HTTPS** support and privacy policy pages based on [`support.md`](support.md) and [`privacy-policy.md`](privacy-policy.md). The app now has a native Privacy summary on setup; add and verify its link to the final public policy. The Markdown drafts and in-app summary alone are not App Store URLs.
 3. Audit the final binary's data flows and complete App Privacy answers. A [source-backed answer draft](app-privacy-answers.md) proposes “Data Not Collected” for the current build; the final answer must match the exact uploaded binary and account configuration. Apple requires a privacy policy URL and app privacy responses for iOS: [App privacy help](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy).
 4. Capture truthful screenshots from the implemented iPhone app. A [setup-screen candidate](screenshots/iphone-18-pro-max-setup.jpg) now exists at an accepted iPhone 18 Pro Max size, with [capture provenance](screenshots/README.md). It was taken from the normal simulator app, not a physical camera run. Final result and comparison screenshots remain pending physical-device validation. Do not pass the labeled synthetic demo feed off as a real camera workout. See [screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications).
-5. Verify a Release build, signing, first-launch permission, denial/recovery, set capture, retake, second set, comparison, local deletion, background interruption, offline behavior, large text, VoiceOver order, and no placeholder claims. The 11 October unsigned archive contains the expected bundle ID, version, camera permission text, and icon assets; an accidentally bundled team Git guide was removed from the app target. The unsigned archive cannot be uploaded as a distribution build.
+5. Verify a Release build, signing, first-launch permission, denial/recovery, set capture, retake, second set, comparison, local deletion, background interruption, offline behavior, large text, VoiceOver order, and no placeholder claims. Run [`verify-archive.sh`](verify-archive.sh) against the final `.xcarchive` to check that Debug-only synthetic demo and validation markers are absent. The 11 October unsigned archive contains the expected bundle ID, version, camera permission text, and icon assets; an accidentally bundled team Git guide was removed from the app target. The unsigned archive cannot be uploaded as a distribution build.
 
 ## Upload and submission
 
@@ -37,4 +37,4 @@ James can purchase or confirm the Apple Developer Program membership. The team m
 
 | Date/time (Paris) | Version/build | State | Evidence / owner |
 | --- | --- | --- | --- |
-| 11 October 2026 | 1.0/1 local project | Not uploaded | Unsigned archive and setup screenshot candidate checked; distribution signing, account access, physical device, public URLs, result screenshots, and final validation pending |
+| 11 October 2026 | 1.0/1 local project | Not uploaded | Unsigned archive and setup screenshot candidate checked; test-only demo and validation markers excluded from Release binary; distribution signing, account access, physical device, public URLs, result screenshots, and final validation pending |

@@ -7,7 +7,7 @@ This copy describes the implemented iPhone squat release. Review it against the 
 - **Primary category:** Health & Fitness
 - **Keywords (draft):** squat,workout,exercise,rep,training,fitness,movement
 - **Support URL:** [public support page pending]
-**Privacy policy URL:** [public privacy policy page pending]
+- **Privacy policy URL:** [public privacy policy page pending]
 
 ## Description
 
@@ -25,4 +25,4 @@ First bodyweight-squat review, evidence-linked results, local session history, a
 
 ## App Review notes — draft
 
-No account is required. The app requests Camera permission when the person taps **Set up camera**. Place the iPhone upright at about hip height with a full side view of one person doing bodyweight squats. The set result appears after **Stop set**; a short or poor view returns a retake prompt. Video is processed locally and is not saved. Saved sessions can be deleted individually or all at once from **History**. **Explain comparison** uses Apple's on-device Foundation Models only if available; otherwise it uses a reviewed local template. No paid feature or HealthKit permission is in this build. Reviewers can use the app without a demo account. Do not use the synthetic `-plumb-ui-demo` launch argument for App Store screenshots or review claims.
+No account is required. The app requests Camera permission when the person taps **Set up camera**. Place the iPhone upright at about hip height with a full side view of one person doing bodyweight squats. The set result appears after **Stop set**; a short or poor view returns a retake prompt. Video is processed locally and is not saved. Saved sessions can be deleted individually or all at once from **History**. **Explain comparison** uses Apple's on-device Foundation Models only if available; otherwise it uses a reviewed local template. No paid feature or HealthKit permission is in this build. Reviewers can use the app without a demo account.
