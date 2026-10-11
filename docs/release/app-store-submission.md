@@ -11,6 +11,7 @@
 | Bundle ID | `com.james8464.Plumb` in the project; ownership in App Store Connect unconfirmed |
 | Version/build | 1.0 / 1; increment build for each upload |
 | Xcode team | `Z29CKRV8C9` configured; paid Program membership and distribution rights unconfirmed |
+| Local signing identities | One Apple Development identity is present; no Apple Distribution identity was found on 11 October |
 | Connected physical iPhone | iPhone 16 Pro Max appears in Xcode's device list but was **unavailable** on 11 October |
 | Repository | Public GitHub repository, `main` branch |
 | Test status | 49 iOS 27 simulator tests passed; unsigned iPhone Release build succeeded; physical validation pending |
