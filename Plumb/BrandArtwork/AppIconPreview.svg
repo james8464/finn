@@ -1,15 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <title>Plumb icon flat study: movement inside a camera frame</title>
+  <title>Plumb icon flat study: upright person inside a camera frame</title>
   <rect width="1024" height="1024" fill="#FFFFFF"/>
   <g fill="none" stroke="#141414" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
     <path d="M210 320V210H320"/>
     <path d="M720 810H810V720"/>
   </g>
-  <g fill="none" stroke="#141414" stroke-width="48" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M563 357L466 527"/>
-    <path d="M536 393L658 429L720 396"/>
-    <path d="M466 527L614 570L608 732L701 732"/>
-    <path d="M466 527L365 635L345 735L275 735"/>
+  <g fill="none" stroke="#141414" stroke-width="44" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M512 356V515"/>
+    <path d="M494 395L420 540"/>
+    <path d="M530 395L604 540"/>
+    <path d="M512 515L425 733L385 733"/>
+    <path d="M512 515L599 733L639 733"/>
   </g>
-  <circle cx="587" cy="286" r="52" fill="#141414"/>
+  <circle cx="512" cy="286" r="50" fill="#141414"/>
 </svg>

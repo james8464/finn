@@ -9,7 +9,7 @@ The Figma guide is the identity reference for the iPhone app: purpose, mark, col
 
 ## Idea and identity
 
-**Plumb** is a calm, observant workout-technique companion. The mark is a single person in motion; two open corners in the iPhone icon evoke the camera observing a set. The mark never implies that there is one perfect posture for everyone. The promise is **“Find your line.”** Preserve the pose and leave generous clear space. Use the layered [Icon Composer source](../Plumb/Plumb/AppIcon.icon) for the iPhone icon and the flat mark for editorial materials.
+**Plumb** is a calm, observant workout-technique companion. The mark is a simple upright person; two open corners in the iPhone icon evoke the camera observing a set. The neutral stance avoids implying that there is one perfect posture for everyone. The promise is **“Find your line.”** Preserve the figure's proportions and leave generous clear space. Use the layered [Icon Composer source](../Plumb/Plumb/AppIcon.icon) for the iPhone icon and the flat mark for editorial materials.
 
 ## Colour
 

@@ -1,10 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="560" height="560" viewBox="225 220 560 560">
-  <title>Plumb moving figure mark</title>
-  <g fill="none" stroke="#141414" stroke-width="48" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M563 357L466 527"/>
-    <path d="M536 393L658 429L720 396"/>
-    <path d="M466 527L614 570L608 732L701 732"/>
-    <path d="M466 527L365 635L345 735L275 735"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="560" viewBox="230 220 560 560">
+  <title>Plumb upright person mark</title>
+  <g fill="none" stroke="#141414" stroke-width="44" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M512 356V515"/>
+    <path d="M494 395L420 540"/>
+    <path d="M530 395L604 540"/>
+    <path d="M512 515L425 733L385 733"/>
+    <path d="M512 515L599 733L639 733"/>
   </g>
-  <circle cx="587" cy="286" r="52" fill="#141414"/>
+  <circle cx="512" cy="286" r="50" fill="#141414"/>
 </svg>

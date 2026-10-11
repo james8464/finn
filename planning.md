@@ -220,7 +220,7 @@ The current repository is a starter app and brand assets. Do not claim camera co
 
 ## 9. Decision log
 
-- **10 October 2026:** The team selected Plumb's workout-technique concept. The iPhone camera is the required sensor; Watch and AirPods are optional. Post-set feedback is the first dependable product experience, with live coaching reserved for validation. The revised monochrome icon shows a person in motion within open camera corners, linking the identity to the capture-and-feedback loop.
+- **10 October 2026:** The team selected Plumb's workout-technique concept. The iPhone camera is the required sensor; Watch and AirPods are optional. Post-set feedback is the first dependable product experience, with live coaching reserved for validation. The monochrome icon shows an upright person within open camera corners, linking the identity to the capture-and-feedback loop without suggesting a prescribed exercise pose.
 
 ## 10. Primary platform references
 

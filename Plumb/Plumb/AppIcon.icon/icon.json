@@ -39,10 +39,11 @@
           ],
           "glass" : false,
           "image-name" : "Athlete.svg",
-          "name" : "Moving person",
+          "name" : "Upright person",
           "opacity" : 1
         }
       ],
+      "name" : "Plumb mark",
       "refractivity" : {
         "depth" : 0,
         "enabled" : true,
