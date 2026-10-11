@@ -57,6 +57,9 @@ final class WorkoutSessionModel {
     func startPreview() async {
         guard stage == .ready || stage == .result else { return }
         stage = .openingCamera
+        await collectionTask?.value
+        collectionTask = nil
+        guard stage == .openingCamera else { return }
         result = nil
         cueDismissed = false
         frames = []
@@ -121,6 +124,7 @@ final class WorkoutSessionModel {
         await source.stop()
         await collectionTask?.value
         collectionTask = nil
+        guard stage == .analyzing else { return }
         completeAnalysis()
     }
 
@@ -135,6 +139,11 @@ final class WorkoutSessionModel {
     private func completeAnalysis() {
         switch SquatAnalyzer.analyze(frames) {
         case .analyzed(let analysis):
+            guard !analysis.reps.isEmpty else {
+                result = .insufficientView("No complete squat repetitions were measured. Try another set with your full body in view.")
+                stage = .result
+                return
+            }
             let cue = CueSelector.select(from: analysis)
             result = .measured(analysis, cue)
             record(analysis: analysis, cue: cue)
@@ -159,6 +168,18 @@ final class WorkoutSessionModel {
             try store.delete(id: id)
             history = try store.load()
             if currentSession?.id == id { currentSession = nil; comparison = nil }
+        } catch { historyError = true }
+    }
+
+    func deleteAllData() {
+        guard let store else { return }
+        do {
+            try store.deleteAll()
+            history = []
+            currentSession = nil
+            comparison = nil
+            comparisonRecap = nil
+            historyError = false
         } catch { historyError = true }
     }
 
@@ -214,7 +235,14 @@ final class WorkoutSessionModel {
         result = nil
     }
 
-    func backgrounded() async { await cancel() }
+    func backgrounded() async {
+        switch stage {
+        case .openingCamera, .framing, .countdown, .capturing, .analyzing:
+            await cancel()
+        case .ready, .result, .error:
+            break
+        }
+    }
 
     private var isCountingDown: Bool {
         if case .countdown = stage { return true }

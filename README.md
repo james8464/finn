@@ -13,6 +13,9 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 - [`Design/README.md`](Design/README.md): Plumb brand theme, colors, typography, icon, and live Figma guide
 - [`planning.md`](planning.md): experience, scoped MVP, technical approach, privacy, validation, and timeline
 - [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md): task-by-task plan for the first real iPhone squat session
+- [`docs/validation/squat-v1-protocol.md`](docs/validation/squat-v1-protocol.md): consent, physical-device test, annotation, and claim gates
+- [`docs/validation/squat-v1-results.md`](docs/validation/squat-v1-results.md): actual results status; no real sets collected yet
+- [`docs/release/app-store-submission.md`](docs/release/app-store-submission.md): release checks and App Store Connect status
 - [`justification.md`](justification.md): why a focused camera technique companion is worth testing
 - [`market research.md`](market%20research.md): primary-source alternatives and customer research plan
 - [`pitch.md`](pitch.md): three-minute story, demo path, and claim boundaries

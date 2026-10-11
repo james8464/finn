@@ -1,0 +1,31 @@
+# Plumb privacy policy — publication draft
+
+**Draft updated 11 October 2026. Do not publish until the publisher name, contact address, public URL, and release build are confirmed.**
+
+- **Publisher:** [legal publisher name pending]
+- **Contact:** [public support email pending]
+**Effective date:** [publication date pending]
+
+Plumb is an iPhone workout companion for reviewing a bodyweight squat from a side view. It works without an account.
+
+## Camera and workout data
+
+With your permission, Plumb uses the iPhone camera during a set to estimate body position and count camera-visible repetitions. Camera frames are processed on your device. Plumb does not record a movie, save camera frames, or upload them to a Plumb server. The temporary pose trace is used to calculate the set result and is discarded when you leave or start a new capture.
+
+Plumb saves derived set summaries on your iPhone: session and set identifiers, date, squat rubric version, camera side, rep timing and relative range, analysis confidence, a selected observation if any, and your response to that observation. These summaries are stored in the app's local Application Support area. They are not automatically sent to us or shared with other users.
+
+You can delete a saved session from Recent sessions or choose **Delete all local data** in the app. The latter also removes any damaged-history backup created when you explicitly recover a corrupted local history. Removing the app also removes its local app data under normal iOS behavior.
+
+## Optional Apple Intelligence wording
+
+When available on your device, the app can ask Apple's on-device Foundation Models framework to reword an already measured comparison after you tap **Explain comparison**. It receives only the two derived set measurements, comparison direction, cue category, and referenced rep numbers. Plumb checks the response and shows reviewed fallback wording if generation is unavailable, late, or inconsistent. This feature does not send camera images or raw pose traces to the model and Plumb does not operate an AI server.
+
+## Accounts, analytics, and sharing
+
+The current release candidate has no account, advertising SDK, third-party analytics, HealthKit integration, cloud sync, or in-app purchase flow. It does not ask for microphone access. If these practices change in a later version, this policy and the App Store privacy answers must be updated before release.
+
+## Your choices and contact
+
+You can deny camera access or change it in iOS Settings; without camera access, live set review is unavailable. You can delete local results in the app. For questions about this policy or data handling, contact [public support email pending].
+
+The team will update this policy when features or data practices change. This draft covers the app's current implementation, not separately consented research recordings used to validate the product.

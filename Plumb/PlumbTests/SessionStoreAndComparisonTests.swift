@@ -75,6 +75,21 @@ struct SessionStoreAndComparisonTests {
         #expect(try store.load().isEmpty)
     }
 
+    @Test func deleteAllRemovesRecoveredBackupToo() throws {
+        let url = temporaryURL()
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data("broken".utf8).write(to: url)
+        let store = LocalSessionStore(url: url)
+        let backup = try store.recoverCorruptStore()
+        let id = UUID()
+        try store.save(WorkoutSessionSummary(id: id, startedAt: .now,
+                                             sets: [set(sessionID: id, range: 0.4)]))
+        try store.deleteAll()
+        #expect(try store.load().isEmpty)
+        #expect(!FileManager.default.fileExists(atPath: backup.path))
+    }
+
     private func temporaryURL() -> URL {
         FileManager.default.temporaryDirectory
             .appending(path: "PlumbStoreTests-\(UUID().uuidString)", directoryHint: .isDirectory)

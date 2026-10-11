@@ -9,6 +9,7 @@ nonisolated protocol SessionStoring {
     func load() throws -> [WorkoutSessionSummary]
     func save(_ session: WorkoutSessionSummary) throws
     func delete(id: UUID) throws
+    func deleteAll() throws
     func recoverCorruptStore() throws -> URL
 }
 
@@ -41,6 +42,20 @@ nonisolated struct LocalSessionStore: SessionStoring {
     func delete(id: UUID) throws {
         let remaining = try load().filter { $0.id != id }
         try write(remaining)
+    }
+
+    func deleteAll() throws {
+        let directory = url.deletingLastPathComponent()
+        guard FileManager.default.fileExists(atPath: directory.path) else { return }
+        let contents = try FileManager.default.contentsOfDirectory(at: directory,
+                                                                   includingPropertiesForKeys: nil)
+        for file in contents {
+            let name = file.lastPathComponent
+            if name == url.lastPathComponent ||
+                (name.hasPrefix("sessions-corrupt-") && name.hasSuffix(".json")) {
+                try FileManager.default.removeItem(at: file)
+            }
+        }
     }
 
     /// Moves damaged data aside before starting an empty history. The caller must request this action.

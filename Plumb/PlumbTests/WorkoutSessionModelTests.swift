@@ -113,6 +113,34 @@ struct WorkoutSessionModelTests {
         #expect(cue == nil)
     }
 
+    @Test func noCompleteRepOffersRetake() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for index in 0...40 { source.emit(frame(time: Double(index) * 0.1, hipY: 0.42)) }
+        await model.endSet()
+        guard case .insufficientView = model.result else {
+            Issue.record("A stationary trace should offer a retake")
+            return
+        }
+        #expect(model.currentSession == nil)
+    }
+
+    @Test func backgroundKeepsFinishedResult() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for sample in trace(reps: 6) { source.emit(sample) }
+        await model.endSet()
+        await model.backgrounded()
+        guard case .measured = model.result else {
+            Issue.record("Completed review should survive backgrounding")
+            return
+        }
+    }
+
     @Test func secondSetPersistsAndComparesWithinSession() async throws {
         let directory = FileManager.default.temporaryDirectory
             .appending(path: "PlumbModelTests-\(UUID().uuidString)", directoryHint: .isDirectory)

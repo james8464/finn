@@ -152,7 +152,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 **Interfaces:** A frozen `SquatRubric.v1` plus annotated set fixtures yields a reproducible report: setup success, exact-match rep count, emitted-cue coverage and expert agreement, post-set latency, device/lighting breakdown, and failure examples.
 
-- [ ] Write the annotation sheet/protocol before tuning: consent, device/iOS, angle, distance/height, lighting, body visibility, human rep boundaries, and expert cue judgment. Separate tuning participants from the holdout participants.
+- [x] Write the annotation protocol before tuning: consent, device/iOS, angle, distance/height, lighting, body visibility, human rep boundaries, and expert cue judgment. Keep participants separate between tuning and holdout.
 - [ ] Capture at least 30 consenting squat sets, including difficult views, and have a qualified trainer or movement specialist review every emitted cue category. Mark any recording used for the demo as recorded.
 - [ ] Run the full `PlumbTests` and `PlumbUITests` suites, then measure the spec's proposed gates on physical devices: setup 80% within two attempts, rep count 90% exact-match, emitted-cue agreement 80%, and result within 5 seconds. Record coverage alongside cue agreement.
 - [ ] If a gate fails, suppress the affected claim and keep the honest retake path; any *presentation* fallback must be explicitly introduced as a recorded test set. Publish the measured result and remaining limits in `squat-v1-results.md`; update project status, then commit.
@@ -163,9 +163,9 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 **Interfaces:** A release candidate has a stable bundle ID and version/build number, iPhone-only screenshots of real implemented screens, support and privacy URLs, app privacy answers, review notes explaining camera-only analysis and any optional AI wording, and an archived/uploaded build. Account access and signing are external dependencies.
 
-- [ ] Confirm Apple Developer Program membership, App Store Connect role, signing team, bundle ID ownership, and a physical iOS 27 test iPhone early. If any is missing, assign an owner immediately; document the blocker rather than waiting until the build days.
-- [ ] Draft truthful listing copy and capture screenshots only from implemented screens. Prepare a public privacy policy/support URL and App Privacy answers matching actual data flow; the local Markdown is source copy, not a substitute for a hosted URL.
-- [ ] Run a Release build and physical-device smoke pass: first launch, permission denied/recovered, set capture, retake, comparison, delete, no-network fallback, and background interruption. Verify no placeholder or demo-only claim appears in the submitted app.
+- [ ] Confirm Apple Developer Program membership, App Store Connect role, signing team, bundle ID ownership, and a physical iOS 27 test iPhone early. Xcode team ID is configured, but membership/distribution rights are unconfirmed; James indicated he can purchase the membership. Physical iPhone 16 Pro Max is listed as unavailable to Xcode.
+- [ ] Draft truthful listing copy and capture screenshots only from implemented screens. Listing, support, privacy, and App Review note drafts now exist in `docs/release`; public HTTPS URLs, publisher/contact fields, final App Privacy answers, and real screenshots remain open.
+- [ ] Run a Release build and physical-device smoke pass: first launch, permission denied/recovered, set capture, retake, comparison, delete, no-network fallback, and background interruption. An unsigned iPhone Release build succeeds and 49 simulator tests pass; physical-device smoke pass remains open.
 - [ ] Archive, upload, and select the build in App Store Connect; complete metadata and review notes. Record the actual status: uploaded, ready for review, submitted, or approved. Do not describe an upload as App Review approval. Submission is a team/account action and may require the account holder's credentials.
 
 ## Subsequent plans, after the iPhone gate

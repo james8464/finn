@@ -2,9 +2,11 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openURL) private var openURL
     @State private var model: WorkoutSessionModel
     @State private var deleteCandidate: UUID?
+    @State private var deleteAllRequested = false
 
     @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore(),
                     narrator: ComparisonNarrator? = nil) {
@@ -35,7 +37,9 @@ struct ContentView: View {
                     .padding(.top, 6)
             }
         }
-        .tint(Color(red: 31 / 255, green: 106 / 255, blue: 83 / 255))
+        .tint(colorScheme == .dark
+              ? Color(red: 143 / 255, green: 225 / 255, blue: 188 / 255)
+              : Color(red: 31 / 255, green: 106 / 255, blue: 83 / 255))
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { Task { await model.backgrounded() } }
         }
@@ -49,6 +53,12 @@ struct ContentView: View {
             }
         } message: {
             Text("Its measured set summaries will be removed from this iPhone.")
+        }
+        .alert("Delete all local data?", isPresented: $deleteAllRequested) {
+            Button("Delete all data", role: .destructive) { model.deleteAllData() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This removes saved sessions and any recovered history backups from this iPhone.")
         }
     }
 
@@ -78,6 +88,10 @@ struct ContentView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 historySection
+                Button("Delete all local data", role: .destructive) {
+                    deleteAllRequested = true
+                }
+                .font(.footnote)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
