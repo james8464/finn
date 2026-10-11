@@ -26,6 +26,13 @@
 
 **Decision gates:** First, the six-rep scripted trace and physical camera preview must work. Next, enough consenting real sets and expert review must support any automated cue the app displays. Only then add generated recap wording. If the rubric misses the validation threshold, submit a narrower app that presents measured reps and transparent “view too weak” outcomes; do not claim accurate technique diagnosis. Separately, verify Apple Developer Program and App Store Connect access now: the team reported that access is not yet confirmed on 11 October.
 
+| Approach considered | Decision for this challenge |
+| --- | --- |
+| Ask a multimodal foundation model to judge each video frame | Defer. It could produce a persuasive but unmeasured form claim, and frame-by-frame inference adds latency. [Apple's Foundation Models guidance](https://developer.apple.com/documentation/foundationmodels/generating-content-and-performing-tasks-with-foundation-models) says its on-device language model is not the right tool for basic math; Vision joints plus a deterministic rubric are easier to audit. |
+| Vision 3D pose and absolute joint angles | Evaluate later. [Vision 3D](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) can estimate 3D joints, but depth and camera view vary; a side-view within-person comparison is the smaller claim to validate first. |
+| Watch heart rate, AirPods speech, or an App Intent in the first demo | Defer until the iPhone loop works. These extend context and convenience but cannot establish whether a squat rep was measured correctly. |
+| Vision 2D + deterministic evidence + optional Foundation Models recap | Build. It gives the demo a visible Apple-native measurement and a useful AI explanation, while preserving an offline fallback and a clear line between fact and wording. |
+
 ## Global Constraints
 
 - First calibrated exercise: **bodyweight squat from a side view**. No universal form score, diagnosis, load prescription, or claim of injury prevention.
@@ -90,10 +97,10 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 **Interfaces:** `EvidenceGate.assess(_:)` decides whether the side-view trace supports analysis. `CueSelector.select(from:)` returns at most one `Cue` with rep numbers, measured contrast, plain-language observation, and one optional next action; `nil` means no supported cue.
 
-- [ ] Write failing tests `missingRequiredJoints`, `lowConfidence`, `bystanderPresent`, `shortTrace`, `stableRange`, and `lateRangeDecrease`. Assert `#expect(gate.assess(weakTrace).isRejected)`, `#expect(selector.select(from: stableSet) == nil)`, and `#expect(selector.select(from: decreasingSet)?.repNumbers == [5, 6])`.
-- [ ] Run the unit-test command from Task 1 and confirm failure.
-- [ ] Implement a persistent-side choice and coverage gate. Suppress analysis if required points disappear for too much of the set or the subject scale/position changes enough that within-set range cannot be compared. Cue wording must describe the observed change, never its medical cause or an absolute depth target.
-- [ ] Rerun unit tests; review the exact cue copy with a qualified trainer before automated coaching is presented as validated. Commit this task.
+- [x] Write failing tests for missing required joints, low confidence, bystanders, short traces, unstable framing, stable range, and later shorter range. Add a regression test that the analyzer abstains when the gate rejects a view.
+- [x] Run the tests and observe the missing gate/selector failure, then the analyzer-abstention regression failure.
+- [x] Implement one persistent-side choice, ≥80% required-joint coverage, bystander and ankle-drift checks, and one conservative range-change cue. The analyzer consumes the gate's side decision.
+- [x] Rerun the full scheme: 17 tests pass, 0 fail on iPhone 18 Pro simulator (iOS 27.0). The exact cue copy still requires qualified trainer review before any public accuracy claim; commit this task.
 
 ## Task 3: Real camera and pose stream
 
@@ -114,7 +121,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 - [ ] Write failing model tests `startStop`, `cancelCountdown`, `backgroundStopsCapture`, `shortSetAbstains`, and `noMeaningfulChange`. Assert `#expect(model.result?.kind == .insufficientView)` after an unusable trace and `#expect(model.isRecording == false)` after interruption. Write one UI test that starts from setup, follows a scripted six-rep pose source, sees evidence-linked result, and can retake.
 - [ ] Run the relevant unit and UI tests; confirm failure.
-- [ ] Build setup and framing guidance, explicit recording indicator, large controls, progress/countdown, and four distinct result states. Show the observed rep numbers and a small range/tempo timeline behind the cue; offer **Try this next set**, **Not relevant**, and **Retake**. When the evidence gate rejects a set, show a concrete placement tip and do not present a confident rep count. Use a launch argument only for deterministic UI testing; label any in-app demo data as demo.
+- [ ] Build setup and framing guidance, explicit recording indicator, large controls, progress/countdown, and four distinct result states. Show the observed rep numbers and a small range/tempo timeline behind the cue; offer **Try this next set**, **Not relevant**, and **Retake**. Let standard SwiftUI navigation controls use Liquid Glass, keeping the camera and measured result content on standard backgrounds rather than covering them with glass cards. When the evidence gate rejects a set, show a concrete placement tip and do not present a confident rep count. Use a launch argument only for deterministic UI testing; label any in-app demo data as demo.
 - [ ] Rerun tests, inspect light/dark mode and Dynamic Type, and verify VoiceOver order and that the Stop control remains visible. Commit this task.
 
 ## Task 5: Local history and second-set comparison

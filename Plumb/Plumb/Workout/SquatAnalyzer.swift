@@ -1,6 +1,6 @@
 import Foundation
 
-enum SquatRubric {
+nonisolated enum SquatRubric {
     static let version = "squat-side-v1"
     static let minimumJointConfidence = 0.6
     static let descentThreshold = 0.10
@@ -11,7 +11,7 @@ enum SquatRubric {
     static let maximumRepDuration = 8.0
 }
 
-enum SquatAnalyzer {
+nonisolated enum SquatAnalyzer {
     private enum Phase {
         case standing
         case descending(start: TimeInterval, peak: Double)
@@ -26,12 +26,13 @@ enum SquatAnalyzer {
     }
 
     static func analyze(_ frames: [PoseFrame]) -> AnalysisOutcome {
-        guard !frames.isEmpty else {
-            return .insufficientView("No movement was captured.")
+        guard case .usable(let side) = EvidenceGate.assess(frames) else {
+            return .insufficientView("Move the phone so your full body stays visible.")
         }
 
-        let side = preferredSide(in: frames)
-        let samples = frames.compactMap { sample(from: $0, side: side) }
+        let joints: (BodyJoint, BodyJoint) = side == .left
+            ? (.leftHip, .leftAnkle) : (.rightHip, .rightAnkle)
+        let samples = frames.compactMap { sample(from: $0, side: joints) }
         guard samples.count >= 5 else {
             return .insufficientView("Keep your hip and ankle visible for the whole set.")
         }
@@ -90,12 +91,6 @@ enum SquatAnalyzer {
 
         let confidence = samples.map(\.confidence).reduce(0, +) / Double(samples.count)
         return .analyzed(SetAnalysis(reps: reps, confidence: confidence, rubricVersion: SquatRubric.version))
-    }
-
-    private static func preferredSide(in frames: [PoseFrame]) -> (BodyJoint, BodyJoint) {
-        let left = frames.filter { validPair(in: $0, hip: .leftHip, ankle: .leftAnkle) }.count
-        let right = frames.filter { validPair(in: $0, hip: .rightHip, ankle: .rightAnkle) }.count
-        return left >= right ? (.leftHip, .leftAnkle) : (.rightHip, .rightAnkle)
     }
 
     private static func validPair(in frame: PoseFrame, hip: BodyJoint, ankle: BodyJoint) -> Bool {
