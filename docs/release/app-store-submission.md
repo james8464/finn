@@ -14,7 +14,7 @@
 | Local signing identities | One Apple Development identity is present; no Apple Distribution identity was found on 11 October |
 | Connected physical iPhone | iPhone 16 Pro Max appears in Xcode's device list but was **unavailable** on 11 October |
 | Repository | Public GitHub repository, `main` branch |
-| Test status | 55 iOS 27 simulator tests passed after the Release split; unsigned iPhone Release build and archive check succeeded; physical validation pending |
+| Test status | 58 iOS 27 simulator tests passed, including setup, Privacy, capture, and first-result accessibility audits; unsigned iPhone Release archive check succeeded; physical validation pending |
 
 James can purchase or confirm the Apple Developer Program membership. The team must then verify the Account Holder can enter App Store Connect, that the bundle ID belongs to the team, and that distribution signing works. A configured Xcode team ID alone does not establish these conditions.
 

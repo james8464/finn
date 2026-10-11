@@ -26,6 +26,8 @@ The Figma guide is the identity reference for the iPhone app: purpose, mark, col
 
 The icon is strictly black and white in its main appearances. In the app, use dynamic semantic iOS colours for backgrounds, labels, separators, warnings, and errors. Evergreen, Signal, and Mint are restrained interior accents; Mint stays out of small text on white. The Figma file includes Light, Dark, and increased contrast modes. The camera view should leave the person and their movement clearly visible.
 
+The capture **Stop set** control uses a deeper red (`#C62828`) with white text so the label remains legible. This is a recording control, not a brand accent.
+
 Use SF Symbols for interface actions where appropriate. Keep the app icon and brand mark custom; Apple's [SF Symbols guidance](https://developer.apple.com/design/human-interface-guidelines/sf-symbols) prohibits using the symbols, or confusingly similar images, in app icons and logos.
 
 ## Typography

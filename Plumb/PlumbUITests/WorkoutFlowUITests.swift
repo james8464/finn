@@ -2,6 +2,13 @@ import XCTest
 
 final class WorkoutFlowUITests: XCTestCase {
     @MainActor
+    func testSetupAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launch()
+        try app.performAccessibilityAudit()
+    }
+
+    @MainActor
     func testPrivacySummaryIsReachableFromSetup() {
         let app = XCUIApplication()
         app.launch()
@@ -10,6 +17,30 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Video is processed on this iPhone and never saved."].exists)
         XCTAssertTrue(app.staticTexts["Saved summaries may be included in your device backup."].exists)
         XCTAssertTrue(app.staticTexts["Delete saved sessions in History."].exists)
+    }
+
+    @MainActor
+    func testPrivacyScreenAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launch()
+        app.buttons["Privacy"].tap()
+        try app.performAccessibilityAudit()
+    }
+
+    @MainActor
+    func testCaptureAndResultAccessibilityAudits() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("-plumb-ui-demo")
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        try app.performAccessibilityAudit()
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
     }
 
     @MainActor
@@ -32,6 +63,9 @@ final class WorkoutFlowUITests: XCTestCase {
         capture(app, name: "First result")
         XCTAssertTrue(app.staticTexts["Measured reps"].exists)
         XCTAssertTrue(app.staticTexts["Your range became shorter in the last two reps."].exists)
+        let firstRep = app.descendants(matching: .any).matching(identifier: "rep.1").firstMatch
+        XCTAssertTrue(firstRep.exists)
+        XCTAssertTrue(firstRep.label.contains("relative camera-observed range"))
         app.buttons["Try this next set"].tap()
         XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 5))
         app.buttons["Start set"].tap()

@@ -98,7 +98,6 @@ struct ContentView: View {
                     .controlSize(.large)
                 Text("Plumb observes movement from one camera angle. It cannot judge every part of your technique or prevent injury.")
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
                 NavigationLink {
                     historyPage
                 } label: {
@@ -118,19 +117,26 @@ struct ContentView: View {
     }
 
     private var privacyPage: some View {
-        List {
-            Section("Camera") {
-                Text("Video is processed on this iPhone and never saved.")
-                Text("Plumb uses the camera to measure a bodyweight squat from the side. Camera frames and pose points are not sent to Plumb.")
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Camera").font(.headline)
+                    Text("Video is processed on this iPhone and never saved.")
+                    Text("Plumb uses the camera to measure a bodyweight squat from the side. Camera frames and pose points stay on this iPhone.")
+                }
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Saved results").font(.headline)
+                    Text("Measured set summaries are saved on this iPhone so you can review previous sets.")
+                    Text("Saved summaries may be included in your device backup.")
+                    Text("Delete saved sessions in History.")
+                }
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Optional explanation").font(.headline)
+                    Text("On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.")
+                }
             }
-            Section("Saved results") {
-                Text("Measured set summaries are saved on this iPhone so you can review previous sets.")
-                Text("Saved summaries may be included in your device backup.")
-                Text("Delete saved sessions in History.")
-            }
-            Section("Optional explanation") {
-                Text("On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.")
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
         }
         .navigationTitle("Privacy")
     }
@@ -167,7 +173,7 @@ struct ContentView: View {
                     }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
-                        .tint(.red)
+                        .tint(Color(red: 198 / 255, green: 40 / 255, blue: 40 / 255))
                 } else if case .countdown(let count) = model.stage {
                     Text("\(count)")
                         .font(.system(size: 72, weight: .semibold, design: .rounded))
@@ -221,7 +227,6 @@ struct ContentView: View {
                             } else {
                                 Text(cue.observation).font(.title3.weight(.semibold))
                                 Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
-                                    .foregroundStyle(.secondary)
                                 Text(cue.nextAction)
                                 Button("Not relevant") { model.dismissCue() }
                                     .buttonStyle(.bordered)
@@ -391,17 +396,21 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Measured reps").font(.headline)
             ForEach(reps, id: \.number) { rep in
-                HStack {
-                    Text("Rep \(rep.number)")
-                    Spacer()
-                    Text(rep.duration.formatted(.number.precision(.fractionLength(1))) + " s")
-                        .monospacedDigit()
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Rep \(rep.number)")
+                        Spacer()
+                        Text(rep.duration.formatted(.number.precision(.fractionLength(1))) + " s")
+                            .monospacedDigit()
+                    }
+                    .font(.subheadline)
+                    ProgressView(value: min(1, rep.normalizedHipTravel / 0.6))
+                        .tint(.secondary)
                 }
-                .font(.subheadline)
-                ProgressView(value: min(1, rep.normalizedHipTravel / 0.6))
-                    .tint(.secondary)
-                    .accessibilityLabel("Relative camera-observed range for rep \(rep.number)")
-                    .accessibilityValue(rep.normalizedHipTravel.formatted(.number.precision(.fractionLength(2))))
+                .frame(minHeight: 44)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Rep \(rep.number), \(rep.duration.formatted(.number.precision(.fractionLength(1)))) seconds, relative camera-observed range \(rep.normalizedHipTravel.formatted(.number.precision(.fractionLength(2))))")
+                .accessibilityIdentifier("rep.\(rep.number)")
                 Divider()
             }
         }
