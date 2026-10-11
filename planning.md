@@ -83,7 +83,7 @@ No automatic exercise recognition across the whole gym, load prescription, injur
 
 ### Cut order when time is short
 
-Cut Watch integration, then Foundation Models phrasing, then speech, then a second exercise. Keep real iPhone capture, a confidence-aware observation, and an honest post-set result. If pose analysis itself fails, present a clearly labeled video self-review prototype rather than fabricated AI feedback.
+Cut Watch integration, then speech, then a second exercise. Keep real iPhone capture, a confidence-aware observation, and an honest post-set result. A small Foundation Models comparison recap is an optional challenge enhancement only after the core loop is stable; it must have an on-device availability check and reviewed fallback. If pose analysis itself fails, show an honest retake path in the app and use a clearly labeled recorded test set in the presentation rather than fabricated AI feedback.
 
 ## 4. Technical plan
 
@@ -192,7 +192,7 @@ For the next-set loop, measure whether the user understands the evidence, whethe
 
 ## 7. Challenge timeline and release gate
 
-**10–12 October:** finalize the Plumb concept and brand, stabilize the iPhone project, implement camera setup and one squat analysis loop, then test on a real phone. **13–14 October:** annotate test sets, tune confidence gates, rehearse the set-to-set demo, and add optional speech only if the core loop holds. **15–16 October:** present the working path at the Build Challenge with a recorded fallback. Public release and App Store submission require separate safety, privacy, accessibility, device, and review work.
+**10–12 October:** finalize the Plumb concept and brand, stabilize the iPhone project, implement camera setup and one squat analysis loop, then test on a real phone. **13–14 October:** annotate test sets, tune confidence gates, rehearse the set-to-set demo, and add a grounded Foundation Models recap only if the core loop holds. **15–16 October:** present the working path at the Build Challenge, upload a release candidate through App Store Connect if signing and account access are ready, and complete truthful listing/privacy/review materials. The [challenge brief](https://luma.com/cmdf-bc2) asks for a working product, a monetization path, and a build submitted through App Store Connect. Upload, App Review approval, and public release are separate states; release claims require the safety, privacy, accessibility, and device checks appropriate to the shipped feature set.
 
 ### Demo script
 

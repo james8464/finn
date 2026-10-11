@@ -40,7 +40,7 @@ Plumb turns an iPhone camera into a private technique mirror: after a strength s
 
 **What is the business?** A proposed freemium allowance for analyzed sets and a paid tier for more analysis and comparison history. Pricing is a hypothesis, not a current subscription.
 
-**What can you ship for the challenge?** The target is one real iPhone camera-to-cue loop for a side-view bodyweight squat. Watch, live audio, and generative wording are additions if the core loop is reliable. Public release requires separate validation and App Store work.
+**What can you ship for the challenge?** The target is one real iPhone camera-to-cue loop for a side-view bodyweight squat and a build uploaded through App Store Connect. A grounded Foundation Models comparison recap is an addition if the core loop is reliable; Watch and live audio remain later work. Uploading a build is distinct from App Review approval or public release.
 
 ## Claims to avoid until proven
 

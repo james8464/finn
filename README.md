@@ -4,7 +4,7 @@
 
 The iPhone is the core experience. Apple Watch workout data and spoken feedback through AirPods are optional additions. Apple Foundation Models may help phrase validated observations on eligible devices; the coaching facts come from camera pose analysis and exercise-specific rules, with a non-generative fallback. Plumb is a fitness aid, not medical advice or a guarantee of safe technique.
 
-**Current state (11 October 2026):** this repository contains the renamed Xcode starter app, the Plumb icon, brand assets, the product plan, and a detailed first-build implementation plan. The visible app screen introduces the concept. Camera analysis, Watch integration, coaching, subscriptions, and workout history are not implemented. The challenge goal is a tested iPhone camera-to-cue prototype for a side-view bodyweight squat; public release has a separate validation gate.
+**Current state (11 October 2026):** this repository contains the renamed Xcode starter app, the Plumb icon, brand assets, the product plan, and a detailed first-build implementation plan. The visible app screen introduces the concept. Camera analysis, Watch integration, coaching, subscriptions, and workout history are not implemented. The challenge goal is a tested iPhone camera-to-cue experience for a side-view bodyweight squat, a credible product pitch, and an App Store Connect build submission; public availability depends on further review and validation.
 
 Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 

@@ -10,15 +10,32 @@
 
 **Spec:** [`planning.md`](../../../planning.md), especially sections 2–4 and 6–7. Current product state is in [`README.md`](../../../README.md).
 
+## Product objective and challenge strategy
+
+**User objective:** A solo lifter can understand one camera-visible change in their own squat set, try a specific adjustment, and see whether that measured pattern changed in a second set. Success is the person's comprehension and repeat use, not a universal “form score.”
+
+**Business objective:** Prove that this loop is more useful than recording and manually reviewing a clip. Test setup friction, cue relevance, willingness to repeat, and willingness to pay for deeper history with the interviews in the product plan. Do not build subscriptions before this value is demonstrated.
+
+**Challenge objective:** The [Build Challenge brief](https://luma.com/cmdf-bc2) asks for a clear use case, working core experience, path to monetization, and a build submitted through App Store Connect. It names Apple Intelligence/Foundation Models, on-device AI, Liquid Glass, App Intents, and StoreKit as technologies teams *can* explore. It publishes no scoring rubric. Our strategy is an inference from that brief: make a reliable, memorable **scan → evidence → one cue → try again → compare** demo, show a credible business test, and use Apple technology only where it improves that loop.
+
+**Apple-native moment:** Vision extracts 2D pose points on device; SwiftUI uses system controls and restrained Liquid Glass for navigation over the camera preview; Foundation Models can explain a validated set-to-set comparison in plain language on eligible devices. The deterministic fallback produces the same facts when the model is unavailable. This demonstrates on-device intelligence and privacy without asking a language model to judge biomechanics or invent measurements. Apple recommends model availability checks and guided generation, while its HIG asks apps to disclose AI use and limits. See [Foundation Models availability](https://developer.apple.com/documentation/foundationmodels/generating-content-and-performing-tasks-with-foundation-models), [guided generation](https://developer.apple.com/documentation/foundationmodels/generating-swift-data-structures-with-guided-generation), [Generative AI HIG](https://developer.apple.com/design/human-interface-guidelines/generative-ai), and [materials guidance](https://developer.apple.com/design/human-interface-guidelines/materials).
+
+**Release distinction:** By 16 October, target an App Store Connect build and complete listing draft; actual App Review approval and public availability are outside the team's control. Remove starter/placeholder text from the submitted binary. Apple requires complete metadata, a selected build, truthful screenshots, and app privacy disclosures; a fitness app must avoid unsupported accuracy or physical-safety claims. See [submission steps](https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/submit-an-app), [app privacy](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy), and [App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/).
+
+**What should make the pitch memorable:** In three minutes, show a real first set, point to exactly which reps caused one observation, and show a second set with a measured change or an honest “no clear change.” State what Vision measured, what Foundation Models merely worded (if available), and what stays on the device. Pair that with two or three user interview findings and a simple willingness-to-pay test; the event explicitly expects business teammates to test assumptions and prepare the launch. Have a labeled recorded run ready in case venue lighting disrupts the live camera. Do not spend demo time on a speculative Watch screen or a decorative AI chat.
+
+**Decision gates:** First, the six-rep scripted trace and physical camera preview must work. Next, enough consenting real sets and expert review must support any automated cue the app displays. Only then add generated recap wording. If the rubric misses the validation threshold, submit a narrower app that presents measured reps and transparent “view too weak” outcomes; do not claim accurate technique diagnosis. Separately, verify Apple Developer Program and App Store Connect access now: the team reported that access is not yet confirmed on 11 October.
+
 ## Global Constraints
 
 - First calibrated exercise: **bodyweight squat from a side view**. No universal form score, diagnosis, load prescription, or claim of injury prevention.
 - One cue at most per set, supported by named reps and a measured signal. Abstain when evidence is weak; a valid result may have no cue.
-- Camera frames stay on device and are not recorded to a movie file in this milestone. Persist only derived set summaries; no microphone or HealthKit permission.
+- Camera frames stay on device and are not recorded to a movie file in this milestone. Persist only derived set summaries; no microphone or HealthKit permission. A failed analysis shows a retake path in-app; a separate recorded demo is clearly identified as such.
 - Keep the current iOS 27.0 deployment target, as confirmed on 11 October 2026. Change the first shipping target to iPhone-only (`TARGETED_DEVICE_FAMILY = 1`) until an iPad flow is designed and tested.
 - Use system typography, Dynamic Type, VoiceOver labels, clear visual recording status, large start/stop controls, and reduced-motion-safe feedback.
 - Use the restrained Plumb palette and typography in [`Design/README.md`](../../../Design/README.md); native controls and SF Symbols are preferred over custom dashboard chrome.
 - A simulator proves flow and logic only. A physical iPhone is required to validate camera framing, pose quality, heat, and latency.
+- A Foundation Models feature may describe or simplify validated observations only. It must check availability, use a typed output, validate references against local evidence, disclose AI wording, and fall back to reviewed copy.
 
 ## Review Focus
 
@@ -46,6 +63,7 @@ The Xcode project uses synchronized source groups, so new Swift files under `Plu
 | `Plumb/Plumb/Workout/WorkoutSessionModel.swift` | `@MainActor` session state, countdown, frame collection, cancellation, outcome routing |
 | `Plumb/Plumb/Workout/WorkoutViews.swift` | Setup, framing, capture, result, comparison, and failure views |
 | `Plumb/Plumb/Workout/LocalSessionStore.swift` | `load() throws -> [WorkoutSessionSummary]`, `save(_:) throws`, `delete(id:) throws`; atomic local JSON |
+| `Plumb/Plumb/Workout/ComparisonNarrator.swift` | deterministic recap plus optional Foundation Models recap from structured `Comparison` facts |
 | `Plumb/Plumb/ContentView.swift`, `Plumb/Plumb/PlumbApp.swift` | Replace starter copy with entry point and dependency wiring |
 | `Plumb/Plumb.xcodeproj/project.pbxproj` | Camera usage string and iPhone-only target family; retain iOS 27.0 |
 
@@ -61,10 +79,10 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 **Interfaces:** Consumes `[PoseFrame]`; produces `AnalysisOutcome` with timestamped `RepMetric` records. No AVFoundation or Vision types enter this layer.
 
-- [ ] Write failing Swift Testing cases `sixCompleteReps`, `incompleteFinalRep`, `irregularSpacing`, and `stationaryTrace`. A synthetic trace with six 2-second cycles must satisfy `#expect(reps.count == 6)` and `#expect(reps.map(\.number) == [1, 2, 3, 4, 5, 6])`; append a downward-only segment and assert the count remains six. Use fixture time in seconds, not frame positions.
-- [ ] Run `xcodebuild -project Plumb/Plumb.xcodeproj -scheme Plumb -destination 'platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0' -only-testing:PlumbTests test`; confirm the new tests fail for missing implementation.
-- [ ] Implement smoothing plus standing/down/up hysteresis in `SquatAnalyzer.analyze(_:)`. Normalize hip travel to the subject's standing hip-to-ankle distance; calculate within-set range and tempo only. Keep initial thresholds in a named `SquatRubric.v1` and label them provisional.
-- [ ] Rerun the same command; tests pass. Commit this task.
+- [x] Write failing Swift Testing cases for six complete reps, an incomplete final rep, dropped frames, stationary motion, and an empty trace. The six-cycle fixture asserts numbered reps and bounded duration/range using seconds rather than frame indexes.
+- [x] Run the new tests and observe compilation fail because `PoseFrame` and the analyzer do not exist yet.
+- [x] Implement smoothing plus standing/down/up hysteresis in `SquatAnalyzer.analyze(_:)`. Normalize hip travel to the subject's standing hip-to-ankle distance; calculate within-set range and tempo only. Keep initial thresholds in `SquatRubric` and label them provisional.
+- [x] Rerun the new tests and full scheme: 8 tests pass, 0 fail on iPhone 18 Pro simulator (iOS 27.0). Commit this task.
 
 ## Task 2: Evidence quality and cue rules
 
@@ -110,7 +128,18 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 - [ ] Implement atomic Application Support storage and a clear delete action. Show the first and second set side by side using their measured range/tempo and a cautious “changed / no clear change” statement; do not equate metric change with safer movement.
 - [ ] Rerun tests and manually complete two sets on a physical iPhone. Commit this task.
 
-## Task 6: Validation and demo gate
+## Task 6: Grounded Foundation Models recap
+
+**Files:** Create `ComparisonNarrator.swift`; extend `WorkoutViews.swift`; create `Plumb/PlumbTests/ComparisonNarratorTests.swift`.
+
+**Interfaces:** `ComparisonNarrator.recap(for: Comparison) async -> Recap` returns a short, typed recap plus `.appleIntelligence` or `.template` provenance. The model sees only the two set summaries, accepted metric delta, cue category, and evidence rep numbers. It never sees pixels, raw pose frames, or Health data.
+
+- [ ] Write failing tests `unavailableModelUsesTemplate`, `invalidReferenceUsesTemplate`, `timeoutUsesTemplate`, and `validGeneratedRecap`. Assert all four preserve the same deterministic measured facts; a generated recap with unknown rep numbers or new numeric claims is discarded.
+- [ ] Run unit tests and confirm failure. On a real Apple Intelligence-eligible iPhone, confirm `SystemLanguageModel.default.availability` before attempting generation; simulator success alone does not count.
+- [ ] Implement a small `@Generable` response with one plain-language explanation and an evidence-rep list. Validate the list against the selected `Comparison`, reject unsupported numbers and medical/safety language, cap output length, and fall back to reviewed template copy on unavailability, error, or timeout. Show a subtle “Worded with Apple Intelligence” label only when generated wording is actually used; facts remain visible separately.
+- [ ] Rerun tests and review generated outputs against a fixed prompt set, including poor tracking and no-clear-change cases. Commit this task. If the core camera loop is behind schedule, keep the template and move this task behind Task 8 rather than shipping an unreliable AI feature.
+
+## Task 7: Validation and demo gate
 
 **Files:** Create `docs/validation/squat-v1-protocol.md` and `docs/validation/squat-v1-results.md`; update `README.md` and `planning.md` with measured status only.
 
@@ -119,19 +148,29 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 - [ ] Write the annotation sheet/protocol before tuning: consent, device/iOS, angle, distance/height, lighting, body visibility, human rep boundaries, and expert cue judgment. Separate tuning participants from the holdout participants.
 - [ ] Capture at least 30 consenting squat sets, including difficult views, and have a qualified trainer or movement specialist review every emitted cue category. Mark any recording used for the demo as recorded.
 - [ ] Run the full `PlumbTests` and `PlumbUITests` suites, then measure the spec's proposed gates on physical devices: setup 80% within two attempts, rep count 90% exact-match, emitted-cue agreement 80%, and result within 5 seconds. Record coverage alongside cue agreement.
-- [ ] If a gate fails, suppress the affected claim or use the clearly labeled self-review fallback. Publish the measured result and remaining limits in `squat-v1-results.md`; update project status, then commit.
+- [ ] If a gate fails, suppress the affected claim and keep the honest retake path; any *presentation* fallback must be explicitly introduced as a recorded test set. Publish the measured result and remaining limits in `squat-v1-results.md`; update project status, then commit.
+
+## Task 8: App Store Connect submission track
+
+**Files:** Create `docs/release/app-store-submission.md`, `docs/release/privacy-policy.md`, and final listing copy; update `README.md` with actual build/submission status.
+
+**Interfaces:** A release candidate has a stable bundle ID and version/build number, iPhone-only screenshots of real implemented screens, support and privacy URLs, app privacy answers, review notes explaining camera-only analysis and any optional AI wording, and an archived/uploaded build. Account access and signing are external dependencies.
+
+- [ ] Confirm Apple Developer Program membership, App Store Connect role, signing team, bundle ID ownership, and a physical iOS 27 test iPhone early. If any is missing, assign an owner immediately; document the blocker rather than waiting until the build days.
+- [ ] Draft truthful listing copy and capture screenshots only from implemented screens. Prepare a public privacy policy/support URL and App Privacy answers matching actual data flow; the local Markdown is source copy, not a substitute for a hosted URL.
+- [ ] Run a Release build and physical-device smoke pass: first launch, permission denied/recovered, set capture, retake, comparison, delete, no-network fallback, and background interruption. Verify no placeholder or demo-only claim appears in the submitted app.
+- [ ] Archive, upload, and select the build in App Store Connect; complete metadata and review notes. Record the actual status: uploaded, ready for review, submitted, or approved. Do not describe an upload as App Review approval. Submission is a team/account action and may require the account holder's credentials.
 
 ## Subsequent plans, after the iPhone gate
 
-Tasks 1 and 3 can advance in parallel; Task 2 needs Task 1's models; Task 4 joins Tasks 1–3; Task 5 follows Task 4. Start Task 6's consent and annotation protocol immediately, then collect sets as soon as capture runs. For the 16 October challenge, prioritize a truthful physical-device camera-to-result path over optional integrations. The validation report decides which claims are safe to show in the demo; it is not an App Store release gate by itself.
+Tasks 1 and 3 can advance in parallel; Task 2 needs Task 1's models; Task 4 joins Tasks 1–3; Task 5 follows Task 4. Start Task 7's consent and annotation protocol and Task 8's account/metadata checks immediately, then collect sets as soon as capture runs. Task 6 follows Task 5 only if the physical-device core loop is stable. For the 16 October challenge, prioritize a truthful camera-to-result build and submission readiness. A validation report constrains which claims appear in the app and demo; uploading a build does not establish that its coaching accuracy is validated.
 
 | Order | Independent plan | Entry condition |
 | --- | --- | --- |
 | 1 | Spoken post-set cue through system audio, including paired AirPods | Core cue wording approved; audio remains optional |
 | 2 | Apple Watch workout context and user-controlled HealthKit save | iPhone loop stable; watchOS target and paired-device testing available |
-| 3 | Foundation Models phrasing of structured, validated observations | Runtime availability/fallback tested; output constrained to existing facts |
-| 4 | Push-up rubric and then carefully gated live cues | Separate labeled data, expert review, latency and distraction tests |
-| 5 | Saved clips, sharing, subscriptions | Explicit retention/deletion design and user value validated |
+| 3 | Push-up rubric and then carefully gated live cues | Separate labeled data, expert review, latency and distraction tests |
+| 4 | Saved clips, sharing, subscriptions | Explicit retention/deletion design and user value validated |
 
 ## Platform references
 
