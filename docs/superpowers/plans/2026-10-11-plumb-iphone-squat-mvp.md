@@ -78,7 +78,7 @@ Contract conventions: `PoseFrame.time` is seconds from capture start; joint coor
 
 `SetSummary` stores set/session IDs, exercise and rubric version, side-view camera angle, start/end times, rep metrics and boundaries, cue evidence, confidence, and the person's cue response. It has no video or clip URL field in this version.
 
-Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 on ≥80% of sampled frames; at least four complete reps before an automated cue; a rep lasting 0.8–8 seconds; a depth-range cue only when the median of the last two valid reps is at least 15% shorter than the median of the first two. Limit a set to two minutes and 1,800 sampled pose frames. These are engineering hypotheses, not movement standards. Tune against a development set, then freeze before the holdout evaluation.
+Provisional `SquatRubric.v2` values: required joint confidence ≥0.6 on ≥80% of sampled frames, with no selected-side tracking gap longer than 0.75 seconds; at least four complete reps before an automated cue; a rep lasting 0.8–8 seconds; a relative-range cue only when the median of the last two valid reps is at least 15% shorter than the median of the first two. Limit a set to two minutes and 1,800 sampled pose frames. Version 2 adds the temporal tracking gate; no participant sets were collected under version 1. These are engineering hypotheses, not movement standards. Freeze the app commit and rubric before the holdout evaluation.
 
 ## Task 1: Deterministic squat analysis
 
@@ -101,6 +101,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 - [x] Run the tests and observe the missing gate/selector failure, then the analyzer-abstention regression failure.
 - [x] Implement one persistent-side choice, ≥80% required-joint coverage, bystander and ankle-drift checks, and one conservative range-change cue. The analyzer consumes the gate's side decision.
 - [x] Rerun the full scheme: 17 tests pass, 0 fail on iPhone 18 Pro simulator (iOS 27.0). The exact cue copy still requires qualified trainer review before any public accuracy claim; commit this task.
+- [x] Reject a set when selected-side tracking is lost for more than 0.75 seconds despite high overall coverage, and show a retake instead of joining measurements across the gap. A regression failed before the change and passed afterward. This rule begins `squat-side-v2`; the full 70-test iOS 27 simulator suite passed on 12 October. Physical-set false rejection remains unmeasured.
 
 ## Task 3: Real camera and pose stream
 
@@ -112,7 +113,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 - [x] Run unit tests and confirm the missing capture protocol fails compilation before implementation.
 - [x] Add `NSCameraUsageDescription` with a plain reason for on-device movement analysis and set `TARGETED_DEVICE_FAMILY = 1` in both app configurations, retaining iOS 27.0. Use the front camera, unmirrored analysis coordinates, serial video output with late-frame discard, at most 15 Vision samples per second, and only normalized pose records. Capture stops at two minutes. Portrait rotation is configured but still requires physical-device confirmation.
 - [x] Reset the two-minute timer when the set begins, so time spent positioning the camera in preview does not consume the recording limit. The focused camera tests and full 50-test iOS 27 simulator suite pass.
-- [ ] Run unit tests and a simulator build; then check a physical iPhone for preview orientation, camera interruption, and bounded memory. The full iOS 27 simulator suite now passes 69 tests; source tests confirm capture can start after permission changes and that a wall-clock guard ends a set even when pose frames stop arriving. The physical iPhone 16 Pro Max remains unavailable to Xcode, so device checks remain open.
+- [ ] Run unit tests and a simulator build; then check a physical iPhone for preview orientation, camera interruption, and bounded memory. The full iOS 27 simulator suite now passes 70 tests; source tests confirm capture can start after permission changes and that a wall-clock guard ends a set even when pose frames stop arriving. The physical iPhone 16 Pro Max remains unavailable to Xcode, so device checks remain open.
 
 ## Task 4: One complete SwiftUI set
 
@@ -124,7 +125,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 - [x] Run the model tests before implementation and confirm the missing model fails compilation; run the UI test against the implemented flow.
 - [x] Build setup and framing guidance, explicit recording indicator, large controls, countdown, and measured/insufficient/interrupted/error results. Show rep numbers and compact relative-range and duration evidence. Offer **Try another set**, **Not relevant**, and a clear retake path. Use native SwiftUI controls and label the simulator-only demo input.
 - [x] Clarify that one to three measured reps are too few for a pattern observation; keep other no-cue wording neutral. A dismissed cue now acknowledges the person's feedback instead of claiming no pattern. The new UI regression and full 52-test iOS 27 simulator suite pass.
-- [ ] Rerun the full simulator suite, inspect light/dark mode and Dynamic Type, and verify VoiceOver order and that the Stop control remains visible. The full iOS 27 simulator suite passes 69 tests, including a dark-mode, large-text Stop control check and automated accessibility audits of setup, Privacy, camera-denial recovery, capture, result, comparison, and empty/saved History. Light and dark setup screens and captured result/comparison UI screens were visually inspected on 11 October. Physical-device layout, capture, and VoiceOver order remain open.
+- [ ] Rerun the full simulator suite, inspect light/dark mode and Dynamic Type, and verify VoiceOver order and that the Stop control remains visible. The full iOS 27 simulator suite passes 70 tests, including a dark-mode, large-text Stop control check and automated accessibility audits of setup, Privacy, camera-denial recovery, capture, result, comparison, and empty/saved History. Light and dark setup screens and captured result/comparison UI screens were visually inspected on 11 October. Physical-device layout, capture, and VoiceOver order remain open.
 
 ## Task 5: Local history and second-set comparison
 
@@ -154,7 +155,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 **Files:** Create `docs/validation/squat-v1-protocol.md`, `docs/validation/squat-v1-template.csv`, `docs/validation/score_squat_v1.py`, and `docs/validation/squat-v1-results.md`; update `README.md` and `planning.md` with measured status only.
 
-**Interfaces:** A frozen `SquatRubric.v1` plus annotated set fixtures yields a reproducible report: setup success, exact-match rep count, emitted-cue coverage and expert agreement, post-set latency, device/lighting breakdown, and failure examples.
+**Interfaces:** A frozen `SquatRubric.v2` plus annotated set fixtures yields a reproducible report: setup success, exact-match rep count, emitted-cue coverage and expert agreement, post-set latency, device/lighting breakdown, and failure examples.
 
 - [x] Write the annotation protocol before tuning: consent, device/iOS, angle, distance/height, lighting, body visibility, human rep boundaries, and expert cue judgment. Keep participants separate between tuning and holdout.
 - [x] Add a blank collection template and reproducible holdout scorer. It rejects split leaks and mixed commits, shows denominator and breakdowns, and cannot pass incomplete or underpowered gates. No participant data has been entered.
@@ -172,7 +173,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 - [ ] Confirm Apple Developer Program membership, App Store Connect role, signing team, bundle ID ownership, and a physical iOS 27 test iPhone early. Xcode team ID is configured, but membership/distribution rights are unconfirmed; James indicated he can purchase the membership. Physical iPhone 16 Pro Max is listed as unavailable to Xcode; its last cached pairing record says Developer Mode was disabled. The [release checklist](../../release/app-store-submission.md) now gives the phone setup steps, which must be verified on the connected device.
 - [ ] Draft truthful listing copy and capture screenshots only from implemented screens. Listing, support, privacy, App Review notes, and a source-backed App Privacy answer draft exist in `docs/release`; public support/privacy URLs are live with the supplied publisher/contact, and the iPhone Privacy screen links to the policy. A normal-app setup screenshot was captured from an iOS 27 iPhone 18 Pro Max simulator. Result/comparison screenshots and final App Privacy publication remain open.
-- [ ] Run a Release build and physical-device smoke pass: first launch, permission denied/recovered, set capture, retake, comparison, delete, no-network fallback, and background interruption. A fresh unsigned iPhone Release archive succeeds; the archive contains expected app metadata/icon assets without team-only documents and excludes Debug-only synthetic demo and validation code. The full 69-test simulator suite passes; denied-permission UI and source recovery are covered, while Settings-to-camera recovery and the rest of the physical-device smoke pass remain open.
+- [ ] Run a Release build and physical-device smoke pass: first launch, permission denied/recovered, set capture, retake, comparison, delete, no-network fallback, and background interruption. A fresh unsigned iPhone Release archive succeeds; the archive contains expected app metadata/icon assets without team-only documents and excludes Debug-only synthetic demo and validation code. The full 70-test simulator suite passes; denied-permission UI and source recovery are covered, while Settings-to-camera recovery and the rest of the physical-device smoke pass remain open.
 - [ ] Archive, upload, and select the build in App Store Connect; complete metadata and review notes. Record the actual status: uploaded, ready for review, submitted, or approved. Do not describe an upload as App Review approval. Submission is a team/account action and may require the account holder's credentials.
 
 ## Subsequent plans, after the iPhone gate

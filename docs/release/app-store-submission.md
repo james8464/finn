@@ -15,7 +15,7 @@
 | Connected physical iPhone | iPhone 16 Pro Max is **unavailable** to Xcode on 11 October. The last known pairing record says it was last connected on 1 October and Developer Mode was disabled; confirm both settings on the phone rather than treating cached device data as current |
 | Repository | Public GitHub repository, `main` branch |
 | Public pages | [Support](https://james8464.github.io/hackathon-project/support.html) and [privacy policy](https://james8464.github.io/hackathon-project/privacy.html) published via GitHub Pages on 11 October; both returned HTTPS 200 with the supplied publisher/contact details |
-| Test status | 69 iOS 27 simulator tests passed on 11 October, including a stalled-frame time-limit regression; a separate manual iPhone 18 Pro Max simulator run inspected setup, Privacy, synthetic capture/results, comparison, rep details, and saved History. The unsigned iPhone Release archive check succeeded; physical validation remains pending |
+| Test status | 70 iOS 27 simulator tests passed on 12 October, including stalled-frame time-limit and long tracking-loss regressions; a separate manual iPhone 18 Pro Max simulator run inspected setup, Privacy, synthetic capture/results, comparison, rep details, and saved History. A fresh unsigned iPhone Release archive check succeeded; physical validation remains pending |
 
 James can purchase or confirm the Apple Developer Program membership. The team must then verify the Account Holder can enter App Store Connect, that the bundle ID belongs to the team, and that distribution signing works. A configured Xcode team ID alone does not establish these conditions.
 

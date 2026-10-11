@@ -54,6 +54,7 @@ nonisolated enum EvidenceReason: String, Codable {
     case lowConfidence
     case multiplePeople
     case unstableFraming
+    case trackingGap
 }
 
 nonisolated enum EvidenceAssessment: Equatable {

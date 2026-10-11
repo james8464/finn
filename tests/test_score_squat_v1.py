@@ -16,8 +16,9 @@ def row(set_id, participant_id, **changes):
         "device_model": "iPhone 18 Pro",
         "ios_build": "27.0",
         "app_commit": "abc123",
-        "rubric_version": "squat-side-v1",
+        "rubric_version": "squat-side-v2",
         "side": "left",
+        "view_category": "side",
         "lighting": "bright_even",
         "body_visible": "yes",
         "bystander": "no",
@@ -33,6 +34,7 @@ def row(set_id, participant_id, **changes):
         "expert_supported": "",
         "expert_show": "",
         "expert_unassessable": "",
+        "expert_view_suitable": "yes",
         "result_latency_ms": "3200",
         "failure_reason": "",
     }

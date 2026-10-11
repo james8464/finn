@@ -37,7 +37,7 @@ struct SessionStoreAndComparisonTests {
         let otherSession = set(sessionID: UUID(), range: 0.3)
         let wrongSide = set(sessionID: id, range: 0.3, side: .right)
         let wrongAngle = set(sessionID: id, range: 0.3, view: .front)
-        let wrongRubric = set(sessionID: id, range: 0.3, rubric: "squat-side-v2")
+        let wrongRubric = set(sessionID: id, range: 0.3, rubric: "squat-side-v1")
         #expect(SetComparison.compare(first, otherSession) == nil)
         #expect(SetComparison.compare(first, wrongSide) == nil)
         #expect(SetComparison.compare(first, wrongAngle) == nil)

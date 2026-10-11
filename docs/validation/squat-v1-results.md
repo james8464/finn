@@ -1,6 +1,6 @@
 # Squat v1 validation results
 
-**Status: not started. Updated 11 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. The current 69-test iOS 27 simulator pass verifies implementation behavior, not real-camera accuracy. It includes a stalled-frame capture-limit regression.
+**Status: not started. Updated 12 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. The current 70-test iOS 27 simulator pass verifies implementation behavior, not real-camera accuracy. It includes stalled-frame capture-limit and long tracking-loss regressions. The new 0.75-second retake gate still needs measurement on real sets.
 
 ## Simulator UI check · 11 October 2026
 
@@ -8,7 +8,7 @@ Built and launched commit `8c2959e` on the iPhone 18 Pro Max simulator (iOS 27.0
 
 | Evidence | Current state |
 | --- | --- |
-| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v1` |
+| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v2` |
 | Tuning sets | 0 |
 | Holdout sets | 0 |
 | Physical iPhone camera pass | Pending; iPhone 16 Pro Max was unavailable to Xcode on 11 October. Use the [physical run sheet](physical-iphone-run.md) once available |

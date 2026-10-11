@@ -1,12 +1,12 @@
 # Plumb squat v1 validation protocol
 
-**Frozen draft: 11 October 2026. Status: no participant sets collected yet.** The team must record the device, app commit, and rubric version before collecting the holdout. Do not use this document to imply that the coaching cue is validated.
+**Draft updated: 12 October 2026. Status: no participant sets collected yet.** The team must record the device, app commit, and rubric version before collecting the holdout. Do not use this document to imply that the coaching cue is validated.
 
 ## Question and claims
 
 For a bodyweight squat filmed from one side, can a new user set up the phone, obtain the same rep count as a human annotator, and receive at most one relevant, camera-supported observation within five seconds of stopping? The app measures a within-person 2D pattern. It does not grade overall form, diagnose an injury, or determine that a rep is safe.
 
-The frozen implementation is `SquatRubric.version = squat-side-v1`. Keep the gate thresholds and cue wording fixed for the holdout. Any change starts a new rubric version and a new holdout.
+The current implementation is `SquatRubric.version = squat-side-v2`. Version 2 adds a conservative retake when selected-side tracking is lost for more than 0.75 seconds, even if overall joint coverage exceeds 80%. Version 1 had an aggregate-only coverage check; no participant sets were collected under it. Freeze the app commit, gate thresholds, and cue wording before the holdout. Any change after that starts a new rubric version and a new holdout. The `squat-v1` filenames denote the first validation round, not the algorithm version.
 
 ## Participants and consent
 
@@ -30,7 +30,7 @@ The facilitator gives the same setup instruction shown in the app, then lets the
 
 ## Sheet columns
 
-Use [`squat-v1-template.csv`](squat-v1-template.csv). It includes the capture matrix above, the two original human counts, the adjudicated count, and the specialist's cue and view-rejection judgments. Keep one row per attempted set, including unusable and interrupted sets. Use `tuning` or `holdout` for `split`; `measured`, `insufficient_view`, `failed`, or `interrupted` for `app_outcome`; `side`, `three_quarter`, `front`, or `unclear` for `view_category`; and `yes` or `no` for judgment fields. The specialist should fill `expert_view_suitable` for **every holdout set**, including measured and rejected outcomes, before seeing the app result. For an emitted cue, use `rangeDecreased` for `cue_kind` and semicolon-separated one-based app rep numbers (for example `5;6`) for `cue_rep_numbers`. Leave `adjudicated_reps` blank only when the reference is genuinely uncountable. Leave `app_reps` blank unless the outcome is `measured`. The app commit and `squat-side-v1` rubric must stay fixed throughout the holdout.
+Use [`squat-v1-template.csv`](squat-v1-template.csv). It includes the capture matrix above, the two original human counts, the adjudicated count, and the specialist's cue and view-rejection judgments. Keep one row per attempted set, including unusable and interrupted sets. Use `tuning` or `holdout` for `split`; `measured`, `insufficient_view`, `failed`, or `interrupted` for `app_outcome`; `side`, `three_quarter`, `front`, or `unclear` for `view_category`; and `yes` or `no` for judgment fields. The specialist should fill `expert_view_suitable` for **every holdout set**, including measured and rejected outcomes, before seeing the app result. For an emitted cue, use `rangeDecreased` for `cue_kind` and semicolon-separated one-based app rep numbers (for example `5;6`) for `cue_rep_numbers`. Leave `adjudicated_reps` blank only when the reference is genuinely uncountable. Leave `app_reps` blank unless the outcome is `measured`. The app commit and `squat-side-v2` rubric must stay fixed throughout the holdout.
 
 For scored sets, stop the capture with **Stop set**. In Xcode's Run scheme, add the launch argument `-plumb-validation` on the physical iPhone. The result screen then shows **Validation timing · Stop to result: N ms**; copy N into `result_latency_ms`. The clock begins in the Stop button action and includes camera shutdown, analysis, and local save when applicable. This readout is not persisted and is absent during a normal launch. Record any 120-second automatic stop separately as `failure_reason=auto_limit` with latency blank, then collect another manually stopped set for the latency gate. Do not use validation-mode screens as App Store screenshots.
 

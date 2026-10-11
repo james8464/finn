@@ -1,7 +1,7 @@
 import Foundation
 
 nonisolated enum SquatRubric {
-    static let version = "squat-side-v1"
+    static let version = "squat-side-v2"
     static let minimumJointConfidence = 0.6
     static let descentThreshold = 0.10
     static let completionThreshold = 0.03
@@ -9,6 +9,7 @@ nonisolated enum SquatRubric {
     static let minimumHipTravel = 0.15
     static let minimumRepDuration = 0.8
     static let maximumRepDuration = 8.0
+    static let maximumTrackingGap = 0.75
 }
 
 nonisolated enum SquatAnalyzer {
@@ -26,7 +27,12 @@ nonisolated enum SquatAnalyzer {
     }
 
     static func analyze(_ frames: [PoseFrame]) -> AnalysisOutcome {
-        guard case .usable(let side) = EvidenceGate.assess(frames) else {
+        let side: BodySide
+        switch EvidenceGate.assess(frames) {
+        case .usable(let acceptedSide): side = acceptedSide
+        case .reject(.trackingGap):
+            return .insufficientView("Tracking was lost during the set. Keep your whole body visible and try again.")
+        case .reject:
             return .insufficientView("Move the phone so your full body stays visible.")
         }
 

@@ -32,6 +32,19 @@ struct EvidenceAndCueTests {
         #expect(EvidenceGate.assess(Array(clearTrace().prefix(5))) == .reject(.tooShort))
     }
 
+    @Test func rejectsLongTrackingLossDespiteHighOverallCoverage() {
+        let frames = clearTrace(sampleCount: 101).enumerated().map { index, frame in
+            (40...48).contains(index)
+                ? PoseFrame(time: frame.time, subjectCount: 1, joints: [:])
+                : frame
+        }
+        #expect(EvidenceGate.assess(frames).isRejected)
+        guard case .insufficientView = SquatAnalyzer.analyze(frames) else {
+            Issue.record("A tracking gap must not produce a measured set")
+            return
+        }
+    }
+
     @Test func rejectsUnstableFraming() {
         let frames = clearTrace().enumerated().map { index, frame in
             let drift = Double(index) * 0.006
@@ -59,8 +72,9 @@ struct EvidenceAndCueTests {
         #expect(CueSelector.select(from: measuredSet([0.42, 0.30, 0.25])) == nil)
     }
 
-    private func clearTrace(confidence: Double = 0.99, subjectCount: Int = 1) -> [PoseFrame] {
-        (0...30).map { index in
+    private func clearTrace(confidence: Double = 0.99, subjectCount: Int = 1,
+                            sampleCount: Int = 31) -> [PoseFrame] {
+        (0..<sampleCount).map { index in
             PoseFrame(time: Double(index) * 0.1, subjectCount: subjectCount, joints: [
                 .leftHip: JointPoint(x: 0.47, y: 0.42, confidence: confidence),
                 .leftKnee: JointPoint(x: 0.49, y: 0.70, confidence: confidence),
