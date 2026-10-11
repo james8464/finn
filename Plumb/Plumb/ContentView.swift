@@ -101,10 +101,34 @@ struct ContentView: View {
                     Label("History", systemImage: "clock.arrow.circlepath")
                 }
                 .buttonStyle(.bordered)
+                NavigationLink {
+                    privacyPage
+                } label: {
+                    Label("Privacy", systemImage: "hand.raised")
+                }
+                .buttonStyle(.bordered)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
+    }
+
+    private var privacyPage: some View {
+        List {
+            Section("Camera") {
+                Text("Video is processed on this iPhone and never saved.")
+                Text("Plumb uses the camera to measure a bodyweight squat from the side. Camera frames and pose points are not sent to Plumb.")
+            }
+            Section("Saved results") {
+                Text("Measured set summaries are saved on this iPhone so you can review previous sets.")
+                Text("Saved summaries may be included in your device backup.")
+                Text("Delete saved sessions in History.")
+            }
+            Section("Optional explanation") {
+                Text("On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.")
+            }
+        }
+        .navigationTitle("Privacy")
     }
 
     private var capture: some View {

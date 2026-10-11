@@ -2,6 +2,17 @@ import XCTest
 
 final class WorkoutFlowUITests: XCTestCase {
     @MainActor
+    func testPrivacySummaryIsReachableFromSetup() {
+        let app = XCUIApplication()
+        app.launch()
+        app.buttons["Privacy"].tap()
+        XCTAssertTrue(app.navigationBars["Privacy"].exists)
+        XCTAssertTrue(app.staticTexts["Video is processed on this iPhone and never saved."].exists)
+        XCTAssertTrue(app.staticTexts["Saved summaries may be included in your device backup."].exists)
+        XCTAssertTrue(app.staticTexts["Delete saved sessions in History."].exists)
+    }
+
+    @MainActor
     func testDemoSetShowsMeasuredResultAndRetake() {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")

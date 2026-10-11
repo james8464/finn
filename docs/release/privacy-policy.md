@@ -4,6 +4,7 @@
 
 - **Publisher:** [legal publisher name pending]
 - **Contact:** [public support email pending]
+
 **Effective date:** [publication date pending]
 
 Plumb is an iPhone workout companion for reviewing a bodyweight squat from a side view. It works without an account.

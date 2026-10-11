@@ -16,6 +16,7 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 - [`docs/validation/squat-v1-protocol.md`](docs/validation/squat-v1-protocol.md): consent, physical-device test, annotation, and claim gates
 - [`docs/validation/squat-v1-results.md`](docs/validation/squat-v1-results.md): actual results status; no real sets collected yet
 - [`docs/release/app-store-submission.md`](docs/release/app-store-submission.md): release checks and App Store Connect status
+- [`docs/release/app-privacy-answers.md`](docs/release/app-privacy-answers.md): source-backed draft of App Store privacy answers for the current iPhone build
 - [`justification.md`](justification.md): why a focused camera technique companion is worth testing
 - [`market research.md`](market%20research.md): primary-source alternatives and customer research plan
 - [`pitch.md`](pitch.md): three-minute story, demo path, and claim boundaries
