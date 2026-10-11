@@ -28,12 +28,16 @@ final class WorkoutSessionModel {
     @ObservationIgnored private let narrator: ComparisonNarrator
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
+    private var previewFrames: [PoseFrame] = []
+    private var lastPreviewFrameAt: ContinuousClock.Instant?
+    private var framingWatchdog: Task<Void, Never>?
     private var isStopping = false
     @ObservationIgnored private var stopTappedAt: ContinuousClock.Instant?
 
     private(set) var stage: WorkoutStage = .ready
     private(set) var result: WorkoutResult?
     private(set) var frameCount = 0
+    private(set) var framingStatus: FramingStatus = .checking
     private(set) var lastStopToResultMilliseconds: Int?
     private(set) var cueDismissed = false
     private(set) var currentSession: WorkoutSessionSummary?
@@ -68,6 +72,11 @@ final class WorkoutSessionModel {
         cueDismissed = false
         frames = []
         frameCount = 0
+        previewFrames = []
+        lastPreviewFrameAt = nil
+        framingStatus = .checking
+        framingWatchdog?.cancel()
+        framingWatchdog = nil
         do {
             let stream = try await source.start()
             guard stage == .openingCamera else {
@@ -76,9 +85,26 @@ final class WorkoutSessionModel {
             }
             stage = .framing
             isStopping = false
+            framingWatchdog = Task { @MainActor [weak self] in
+                while !Task.isCancelled {
+                    do { try await Task.sleep(for: .milliseconds(250)) } catch { return }
+                    guard let self, self.stage == .framing else { return }
+                    if let lastPreviewFrameAt = self.lastPreviewFrameAt,
+                       lastPreviewFrameAt.duration(to: .now) >= .seconds(1) {
+                        self.previewFrames = []
+                        self.framingStatus = .checking
+                    }
+                }
+            }
             collectionTask = Task { @MainActor [weak self] in
                 guard let self else { return }
                 for await frame in stream {
+                    if self.stage == .framing {
+                        self.previewFrames.append(frame)
+                        if self.previewFrames.count > 5 { self.previewFrames.removeFirst() }
+                        self.lastPreviewFrameAt = .now
+                        self.framingStatus = EvidenceGate.previewStatus(self.previewFrames)
+                    }
                     if (self.stage == .capturing || (self.stage == .analyzing && self.isStopping)) &&
                         self.frames.count < 1_800 {
                         self.frames.append(frame)
@@ -86,6 +112,8 @@ final class WorkoutSessionModel {
                     }
                 }
                 guard !self.isStopping else { return }
+                self.framingWatchdog?.cancel()
+                self.framingWatchdog = nil
                 if self.stage == .capturing && self.source.endedAtLimit {
                     self.stage = .analyzing
                     self.completeAnalysis()
@@ -108,6 +136,8 @@ final class WorkoutSessionModel {
 
     func beginSet(countdown: Int = 3) async {
         guard stage == .framing else { return }
+        framingWatchdog?.cancel()
+        framingWatchdog = nil
         frames = []
         frameCount = 0
         for remaining in stride(from: max(0, countdown), through: 1, by: -1) {
@@ -239,10 +269,15 @@ final class WorkoutSessionModel {
     func cancel() async {
         isStopping = true
         stage = .ready
+        framingWatchdog?.cancel()
+        framingWatchdog = nil
         await source.stop()
         await collectionTask?.value
         collectionTask = nil
         frames = []
+        previewFrames = []
+        lastPreviewFrameAt = nil
+        framingStatus = .checking
         frameCount = 0
         result = nil
         lastStopToResultMilliseconds = nil

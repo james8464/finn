@@ -4,6 +4,43 @@ import Testing
 
 @MainActor
 struct WorkoutSessionModelTests {
+    @Test func framingFeedbackNeedsStableVisibleLandmarksAndClearsOnLoss() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        #expect(model.framingStatus == .checking)
+
+        for index in 0..<5 { source.emit(frame(time: Double(index) * 0.1, hipY: 0.42)) }
+        for _ in 0..<30 where model.framingStatus != .landmarksVisible {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(model.framingStatus == .landmarksVisible)
+
+        for index in 5..<10 {
+            source.emit(PoseFrame(time: Double(index) * 0.1, subjectCount: 1, joints: [:]))
+        }
+        for _ in 0..<30 where model.framingStatus != .adjustPosition {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(model.framingStatus == .adjustPosition)
+        await model.cancel()
+        #expect(model.framingStatus == .checking)
+    }
+
+    @Test func framingFeedbackExpiresWhenCameraFramesStop() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        for index in 0..<5 { source.emit(frame(time: Double(index) * 0.1, hipY: 0.42)) }
+        for _ in 0..<30 where model.framingStatus != .landmarksVisible {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(model.framingStatus == .landmarksVisible)
+        try await Task.sleep(for: .milliseconds(1_600))
+        #expect(model.framingStatus == .checking)
+        await model.cancel()
+    }
+
     @Test func startAndStopProducesMeasuredResult() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)

@@ -4,6 +4,7 @@
 - [Editable local Figma copy](Plumb%20%E2%80%94%20Brand%20Theme.fig)
 - [Brand preview](Plumb%20Brand%20Theme%20preview.png)
 - [Production app icon and flat artwork](../Plumb/BrandArtwork/README.md)
+- [iPhone experience review and Apple design references](../docs/design/iphone-experience-review.md)
 
 The Figma guide is the identity reference for the iPhone app: purpose, mark, colour, type, voice, and icon appearance. It deliberately defines a brand rather than fixed screen layouts. The local `.fig` file is a saved snapshot; edit the live file for new decisions, then save a fresh project copy.
 
@@ -22,9 +23,9 @@ The Figma guide is the identity reference for the iPhone app: purpose, mark, col
 | Mist | `#DCE8E1` | Subtle supporting surface |
 | Evergreen | `#1F6A53` | Light appearance action tint |
 | Mint | `#BEEBD6` | Sparse interior accent, never part of the app icon |
-| Signal | `#8FE1BC` | Dark appearance action tint |
+| Signal | `#2B845F` | Dark appearance action tint; white button text passes contrast checks |
 
-The icon is strictly black and white in its main appearances. In the app, use dynamic semantic iOS colours for backgrounds, labels, separators, warnings, and errors. Evergreen, Signal, and Mint are restrained interior accents; Mint stays out of small text on white. The Figma file includes Light, Dark, and increased contrast modes. The camera view should leave the person and their movement clearly visible.
+The icon is strictly black and white in its main appearances. In the app, use dynamic semantic iOS colours for backgrounds, labels, separators, warnings, and errors. Evergreen and Signal are restrained action colours; Mint stays out of small text and filled buttons. The live Figma file includes Light, Dark, and increased contrast modes with the tested Signal value; the local `.fig` file is an earlier snapshot. The camera view should leave the person and their movement clearly visible.
 
 The capture **Stop set** control uses a deeper red (`#C62828`) with white text so the label remains legible. History uses the same red for its destructive delete action. This is a functional control colour, not a brand accent.
 

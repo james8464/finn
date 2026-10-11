@@ -67,6 +67,12 @@ nonisolated enum EvidenceAssessment: Equatable {
     }
 }
 
+nonisolated enum FramingStatus: Equatable {
+    case checking
+    case adjustPosition
+    case landmarksVisible
+}
+
 nonisolated enum CueKind: String, Codable {
     case rangeDecreased
 }

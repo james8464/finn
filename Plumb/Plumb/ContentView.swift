@@ -50,7 +50,7 @@ struct ContentView: View {
             #endif
         }
         .tint(colorScheme == .dark
-              ? Color(red: 143 / 255, green: 225 / 255, blue: 188 / 255)
+              ? Color(red: 43 / 255, green: 132 / 255, blue: 95 / 255)
               : Color(red: 31 / 255, green: 106 / 255, blue: 83 / 255))
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { Task { await model.backgrounded() } }
@@ -76,44 +76,54 @@ struct ContentView: View {
 
     private var setup: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 0) {
                 Image("PlumbMark")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 52, height: 52)
+                    .frame(width: 42, height: 42)
                     .accessibilityHidden(true)
+                    .padding(.bottom, 36)
                 Text("Find your line.")
                     .font(.largeTitle.bold())
+                    .padding(.bottom, 12)
                 Text("Review one camera-visible pattern in a bodyweight squat set, then try again.")
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 14) {
+                    .font(.body)
+                    .padding(.bottom, 40)
+                VStack(alignment: .leading, spacing: 18) {
                     Label("Place your iPhone at hip height, a few steps away.", systemImage: "iphone.gen3")
                     Label("Turn sideways and keep your whole body in view.", systemImage: "figure.stand")
-                    Label("Your video is processed on this iPhone and not saved.", systemImage: "lock.shield")
                 }
-                .padding(.vertical, 12)
+                .font(.body)
+                .padding(.bottom, 40)
                 Button("Set up camera") { Task { await model.startPreview() } }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
+                    .padding(.bottom, 16)
+                Text("Analyzed on this iPhone. No video saved.")
+                    .font(.footnote)
+                    .padding(.bottom, 20)
                 Text("Plumb observes movement from one camera angle. It cannot judge every part of your technique or prevent injury.")
                     .font(.footnote)
-                NavigationLink {
-                    historyPage
-                } label: {
-                    Label("History", systemImage: "clock.arrow.circlepath")
+                    .padding(.bottom, 32)
+                HStack(spacing: 24) {
+                    NavigationLink { historyPage } label: {
+                        Text("History")
+                            .frame(minWidth: 88, minHeight: 48)
+                            .contentShape(Rectangle())
+                    }
+                    NavigationLink { privacyPage } label: {
+                        Text("Privacy")
+                            .frame(minWidth: 88, minHeight: 48)
+                            .contentShape(Rectangle())
+                    }
                 }
-                .buttonStyle(.bordered)
-                NavigationLink {
-                    privacyPage
-                } label: {
-                    Label("Privacy", systemImage: "hand.raised")
-                }
-                .buttonStyle(.bordered)
+                .font(.subheadline)
+                .buttonStyle(.plain)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     private var privacyPage: some View {
@@ -201,9 +211,21 @@ struct ContentView: View {
             if model.isRecording {
                 Image(systemName: "viewfinder")
                 Text("Analyzing live")
+            } else if model.stage == .framing {
+                switch model.framingStatus {
+                case .checking:
+                    Image(systemName: "viewfinder")
+                    Text("Checking leg visibility")
+                case .adjustPosition:
+                    Image(systemName: "viewfinder")
+                    Text("Show hip, knee and ankle")
+                case .landmarksVisible:
+                    Image(systemName: "checkmark.circle.fill")
+                    Text("Hip, knee and ankle visible")
+                }
             } else {
                 Image(systemName: "viewfinder")
-                Text(model.stage == .framing ? "Position your phone" : "Get ready")
+                Text("Get ready")
             }
         }
         .font(.subheadline.weight(.semibold))
@@ -230,7 +252,9 @@ struct ContentView: View {
                                 Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
                                 Text(cue.nextAction)
                                 Button("Not relevant") { model.dismissCue() }
-                                    .buttonStyle(.bordered)
+                                    .buttonStyle(.plain)
+                                    .frame(minHeight: 48)
+                                    .contentShape(Rectangle())
                             }
                         } else {
                             if analysis.reps.count < 4 {
@@ -249,9 +273,13 @@ struct ContentView: View {
                         } else if (model.currentSession?.sets.count ?? 0) >= 2 {
                             Text("These sets used different camera views, so Plumb can’t compare them reliably.")
                                 .foregroundStyle(.secondary)
-                            repList(analysis.reps)
+                            DisclosureGroup("Rep details") {
+                                repList(analysis.reps)
+                            }
                         } else {
-                            repList(analysis.reps)
+                            DisclosureGroup("Rep details") {
+                                repList(analysis.reps)
+                            }
                         }
                     case .insufficientView(let reason):
                         Text("Couldn’t assess this set").font(.largeTitle.bold())
@@ -277,7 +305,9 @@ struct ContentView: View {
                 Button(retakeLabel) { Task { await model.startPreview() } }
                     .buttonStyle(.borderedProminent).controlSize(.large)
                 Button("Done") { Task { await model.finishSession() } }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.plain)
+                    .frame(minWidth: 88, minHeight: 48, alignment: .leading)
+                    .contentShape(Rectangle())
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
@@ -363,8 +393,10 @@ struct ContentView: View {
             .font(.subheadline.weight(.semibold))
             Text("This comparison describes one camera-visible measure, not overall technique or safety.")
                 .font(.footnote)
-            Text("Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view.")
-                .font(.footnote)
+            DisclosureGroup("How range is measured") {
+                Text("Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view.")
+                    .font(.footnote)
+            }
             if let recap = model.comparisonRecap {
                 Text(recap.text)
                     .font(.subheadline)
@@ -379,7 +411,9 @@ struct ContentView: View {
                 ProgressView("Writing comparison note")
             } else {
                 Button("Explain comparison") { Task { await model.explainComparison() } }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.plain)
+                    .frame(minHeight: 48, alignment: .leading)
+                    .contentShape(Rectangle())
             }
         }
         .padding(.vertical, 12)

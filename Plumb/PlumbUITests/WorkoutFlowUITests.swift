@@ -9,6 +9,14 @@ final class WorkoutFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testSetupDarkModeAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append(contentsOf: ["-UIUserInterfaceStyle", "Dark"])
+        app.launch()
+        try app.performAccessibilityAudit()
+    }
+
+    @MainActor
     func testPrivacySummaryIsReachableFromSetup() {
         let app = XCUIApplication()
         app.launch()
@@ -23,6 +31,15 @@ final class WorkoutFlowUITests: XCTestCase {
     @MainActor
     func testPrivacyScreenAccessibilityAudit() throws {
         let app = XCUIApplication()
+        app.launch()
+        app.buttons["Privacy"].tap()
+        try app.performAccessibilityAudit()
+    }
+
+    @MainActor
+    func testPrivacyDarkModeAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append(contentsOf: ["-UIUserInterfaceStyle", "Dark"])
         app.launch()
         app.buttons["Privacy"].tap()
         try app.performAccessibilityAudit()
@@ -70,6 +87,9 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
         app.buttons["Set up camera"].tap()
+        XCTAssertTrue(app.staticTexts["Checking leg visibility"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Hip, knee and ankle visible"].exists)
+        try app.performAccessibilityAudit()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
         XCTAssertTrue(stop.waitForExistence(timeout: 6))
@@ -125,6 +145,8 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["validation.stopToResult"].exists)
         capture(app, name: "First result")
+        XCTAssertFalse(app.staticTexts["Measured reps"].exists)
+        app.buttons["Rep details"].tap()
         XCTAssertTrue(app.staticTexts["Measured reps"].exists)
         XCTAssertTrue(app.staticTexts["Your range became shorter in the last two reps."].exists)
         let firstRep = app.descendants(matching: .any).matching(identifier: "rep.1").firstMatch
@@ -138,7 +160,14 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Compared with your previous set"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Camera-measured range was longer in set 2."].exists)
+        XCTAssertTrue(app.buttons["How range is measured"].exists)
+        let methodText = app.staticTexts.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Relative range compares hip travel")
+        ).firstMatch
+        XCTAssertFalse(methodText.exists)
         capture(app, name: "Comparison")
+        app.buttons["How range is measured"].tap()
+        XCTAssertTrue(methodText.exists)
         app.buttons["Explain comparison"].tap()
         XCTAssertTrue(app.staticTexts["Comparison note"].waitForExistence(timeout: 5))
         app.buttons["Done"].tap()

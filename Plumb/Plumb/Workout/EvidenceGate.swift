@@ -1,6 +1,22 @@
 import Foundation
 
 nonisolated enum EvidenceGate {
+    static func previewStatus(_ frames: [PoseFrame]) -> FramingStatus {
+        guard frames.count >= 5 else { return .checking }
+        let sides: [[BodyJoint]] = [
+            [.leftHip, .leftKnee, .leftAnkle],
+            [.rightHip, .rightKnee, .rightAnkle],
+        ]
+        let visible = sides.contains { joints in
+            frames.filter { frame in
+                frame.subjectCount == 1 && joints.allSatisfy { joint in
+                    (frame.joints[joint]?.confidence ?? 0) >= SquatRubric.minimumJointConfidence
+                }
+            }.count >= 4
+        }
+        return visible ? .landmarksVisible : .adjustPosition
+    }
+
     static func assess(_ frames: [PoseFrame]) -> EvidenceAssessment {
         guard let first = frames.first, let last = frames.last,
               last.time - first.time >= 2 else {

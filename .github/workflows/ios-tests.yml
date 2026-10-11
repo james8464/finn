@@ -1,0 +1,52 @@
+name: iOS simulator checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  simulator:
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+      - name: Select iOS 27 iPhone simulator
+        run: |
+          xcrun simctl list devices available -j > "$RUNNER_TEMP/devices.json"
+          DEVICE_ID=$(python3 - <<'PY'
+          import json, os
+          with open(os.environ['RUNNER_TEMP'] + '/devices.json') as file:
+              runtimes = json.load(file)['devices']
+          iphones = [device for runtime, devices in runtimes.items() if 'iOS-27' in runtime
+                     for device in devices if device['name'].startswith('iPhone')]
+          if not iphones:
+              raise SystemExit('No iOS 27 iPhone simulator is available')
+          print(iphones[0]['udid'])
+          PY
+          )
+          echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
+      - name: Test analysis and iPhone flows
+        run: |
+          xcodebuild test \
+            -project Plumb/Plumb.xcodeproj \
+            -scheme Plumb \
+            -destination "platform=iOS Simulator,id=$DEVICE_ID" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            -resultBundlePath "$RUNNER_TEMP/Plumb.xcresult" \
+            -parallel-testing-enabled NO \
+            -collect-test-diagnostics never \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Test validation scorer
+        run: python3 -m unittest discover -s docs/validation -p 'test_*.py'
+      - name: Upload failed test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plumb-test-report
+          path: ${{ runner.temp }}/Plumb.xcresult
+          if-no-files-found: ignore

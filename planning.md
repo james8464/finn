@@ -1,6 +1,6 @@
 # Plumb — product and build plan
 
-**Working plan, updated 11 October 2026.** Plumb is an iPhone-first strength-training companion in development. The app now includes a squat setup/capture/result flow, a tested rep analyzer and evidence gate, a provisional cue selector, local derived-summary history with second-set comparison, and an optional guarded Foundation Models wording layer. These pass simulator tests; real-camera orientation, generated wording, and coaching quality still require physical-device and expert validation. Watch integration and subscriptions have not been implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
+**Working plan, updated 12 October 2026.** Plumb is an iPhone-first strength-training companion in development. The app now includes a squat setup/capture/result flow, a tested rep analyzer and evidence gate, a provisional cue selector, local derived-summary history with second-set comparison, and an optional guarded Foundation Models wording layer. These pass simulator tests; real-camera orientation, generated wording, and coaching quality still require physical-device and expert validation. Watch integration and subscriptions have not been implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
 
 The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md). It scopes the first complete iPhone squat loop and its validation gate; later integrations remain in this broader product plan.
 
@@ -24,15 +24,16 @@ The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-ipho
 4. **Private by default.** Process video on device where practical; do not retain raw footage unless the person explicitly saves it.
 5. **Works without accessories.** iPhone camera and an on-device rules fallback form the base experience. Watch, AirPods, and Foundation Models are optional enhancements.
 6. **Respect physical limits.** Do not diagnose pain or prescribe load. Encourage stopping if an exercise causes pain and seeking qualified advice when appropriate.
+7. **Quiet, native presentation.** One primary action per stage, plain evidence, system typography and controls, and no decorative AI interface. See the [iPhone experience review](docs/design/iphone-experience-review.md) for Apple HIG and award-winning app references.
 
 ## 2. The experience
 
 ### Primary journey
 
 1. Choose an exercise and read a short setup card: phone on a stable surface, side view, entire body and equipment in frame, enough light, clear floor.
-2. Grant camera access when starting capture. Plumb checks framing and joint visibility before the set; it never starts analysis silently.
+2. Grant camera access when starting capture. Plumb shows whether hip, knee, and ankle landmarks stay visible before the set; a side view is still guided by instructions rather than automatically verified. It never starts analysis silently.
 3. Tap or use a short countdown to start. The first build analyses a live frame stream on the iPhone without saving a video. Optional clip saving is a later feature requiring a separate, explicit choice.
-4. After the set, Plumb displays rep count, a timeline, one prioritized observation, and the supporting measured reps. A later opt-in clip or temporary pose overlay may show a visual example once its privacy and accuracy have been tested.
+4. After the set, Plumb displays measured rep count, one prioritized observation, and supporting rep details. A richer timeline, opt-in clip, or temporary pose overlay may follow once its usefulness, privacy, and accuracy have been tested.
 5. The person chooses **Try this next set**, **Not relevant**, or **Retake**. A follow-up set shows whether the observed pattern changed.
 6. Optional Apple Watch records workout context such as elapsed time and heart rate. Optional spoken cues play through the current audio output, including paired AirPods.
 
@@ -76,6 +77,9 @@ The Watch's heart rate describes effort context; it cannot prove whether a rep h
 - Carefully gated live cues when pose confidence, latency, and cue usefulness meet thresholds. One short cue at most per relevant event, with a quiet mode.
 - Trainer review, optional shared clips, tailored programs, and a coach account.
 - Progress trends built around consistency and user goals rather than a universal form score.
+- Optional cross-device history or trainer sharing with a real account and clear deletion controls. Offer Sign in with Apple only when one of these benefits exists, after someone has tried a set; never require an account for local capture. Current local history has no account or sync service.
+
+**Account decision:** If the next feature is private history across a person's own Apple devices, evaluate [CloudKit private database](https://developer.apple.com/documentation/cloudkit/ckcontainer/privateclouddatabase) sync first; it uses the person's iCloud account without creating a separate Plumb login. If trainer sharing or web access needs a Plumb account, add [Sign in with Apple](https://developer.apple.com/design/human-interface-guidelines/sign-in-with-apple/) through the system control after that workflow exists. Sync only derived summaries unless the person explicitly chooses to share a clip. Design conflict resolution, account deletion, and updated privacy disclosures before enabling either path. The current prototype keeps every set usable offline without sign-in.
 
 ### Explicit exclusions for the first build
 
