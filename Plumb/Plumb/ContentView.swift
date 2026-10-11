@@ -239,7 +239,6 @@ struct ContentView: View {
                                 Text("No clear pattern to call out in this set.").font(.title3)
                             }
                             Text("This is a camera measurement, not a full technique assessment.")
-                                .foregroundStyle(.secondary)
                         }
                         if let comparison = model.comparison {
                             comparisonView(comparison)
@@ -294,10 +293,16 @@ struct ContentView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 historySection
-                Button("Delete all local data", role: .destructive) {
+                Button(role: .destructive) {
                     deleteAllRequested = true
+                } label: {
+                    Text("Delete all local data")
+                        .font(.subheadline)
+                        .foregroundStyle(Color(red: 198 / 255, green: 40 / 255, blue: 40 / 255))
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                 }
-                .font(.subheadline)
+                .buttonStyle(.plain)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
@@ -322,10 +327,16 @@ struct ContentView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(session.startedAt.formatted(date: .abbreviated, time: .shortened))
                             Text("\(session.sets.count) measured sets")
-                                .font(.subheadline).foregroundStyle(.secondary)
+                                .font(.subheadline)
                         }
                         Spacer()
-                        Button("Delete") { deleteCandidate = session.id }
+                        Button {
+                            deleteCandidate = session.id
+                        } label: {
+                            Text("Delete")
+                                .frame(minWidth: 70, minHeight: 44, alignment: .trailing)
+                                .contentShape(Rectangle())
+                        }
                             .font(.subheadline)
                             .accessibilityLabel("Delete session from \(session.startedAt.formatted(date: .abbreviated, time: .omitted))")
                     }
@@ -334,7 +345,6 @@ struct ContentView: View {
             }
         } else {
             Text("No saved sessions yet.")
-                .foregroundStyle(.secondary)
         }
     }
 
@@ -351,9 +361,9 @@ struct ContentView: View {
             Text(comparisonStatement(comparison.rangeDirection))
             .font(.subheadline.weight(.semibold))
             Text("This comparison describes one camera-visible measure, not overall technique or safety.")
-                .font(.footnote).foregroundStyle(.secondary)
+                .font(.footnote)
             Text("Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view.")
-                .font(.footnote).foregroundStyle(.secondary)
+                .font(.footnote)
             if let recap = model.comparisonRecap {
                 Text(recap.text)
                     .font(.subheadline)

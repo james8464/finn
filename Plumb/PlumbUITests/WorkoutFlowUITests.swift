@@ -28,6 +28,17 @@ final class WorkoutFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testHistoryAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launch()
+        app.buttons["History"].tap()
+        app.buttons["Delete all local data"].tap()
+        app.buttons["Delete all data"].tap()
+        XCTAssertTrue(app.staticTexts["No saved sessions yet."].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
+    }
+
+    @MainActor
     func testCaptureAndResultAccessibilityAudits() throws {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
@@ -40,6 +51,31 @@ final class WorkoutFlowUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit()
+    }
+
+    @MainActor
+    func testComparisonAndSavedHistoryAccessibilityAudits() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("-plumb-ui-demo")
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        for setIndex in 1...2 {
+            app.buttons["Start set"].tap()
+            let stop = app.buttons["Stop set"]
+            XCTAssertTrue(stop.waitForExistence(timeout: 6))
+            Thread.sleep(forTimeInterval: 4)
+            stop.tap()
+            XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+            if setIndex == 1 {
+                app.buttons["Try this next set"].tap()
+            }
+        }
+        XCTAssertTrue(app.staticTexts["Compared with your previous set"].exists)
+        try app.performAccessibilityAudit()
+        app.buttons["Done"].tap()
+        app.buttons["History"].tap()
+        XCTAssertTrue(app.staticTexts["Saved sessions"].waitForExistence(timeout: 5))
         try app.performAccessibilityAudit()
     }
 
