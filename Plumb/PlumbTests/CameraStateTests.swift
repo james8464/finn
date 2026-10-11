@@ -20,6 +20,26 @@ struct CameraStateTests {
         #expect(source.state == .idle)
     }
 
+    @Test func cameraCanStartAfterPermissionChangesFromDeniedToGranted() async throws {
+        let driver = FakeCaptureDriver()
+        let authorization = MutableAuthorization()
+        let source = CameraPoseSource(authorize: { authorization.granted }, driver: driver)
+
+        do {
+            _ = try await source.start()
+            Issue.record("Denied camera access must fail before capture starts")
+        } catch let error as CameraSourceError {
+            #expect(error == .denied)
+        }
+        #expect(driver.startCount == 0)
+
+        authorization.granted = true
+        _ = try await source.start()
+        #expect(source.state == .running)
+        #expect(driver.startCount == 1)
+        await source.stop()
+    }
+
     @Test func unavailableCameraDoesNotStartCapture() async {
         let driver = FakeCaptureDriver()
         driver.isAvailable = false
@@ -142,6 +162,11 @@ struct CameraStateTests {
     private func frame(time: Double) -> PoseFrame {
         PoseFrame(time: time, subjectCount: 1, joints: [:])
     }
+}
+
+@MainActor
+private final class MutableAuthorization {
+    var granted = false
 }
 
 @MainActor

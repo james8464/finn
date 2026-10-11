@@ -28,6 +28,31 @@ final class WorkoutFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testDeniedCameraShowsRecoveryWithoutRecording() throws {
+        let app = XCUIApplication()
+        app.resetAuthorizationStatus(for: .camera)
+        app.launch()
+        app.buttons["Set up camera"].tap()
+
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let deny = springboard.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] %@ AND label CONTAINS[c] %@", "Don", "Allow")
+        ).firstMatch
+        XCTAssertTrue(deny.waitForExistence(timeout: 10))
+        deny.tap()
+
+        XCTAssertTrue(app.staticTexts["Allow camera access in Settings to record a set."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Open Settings"].exists)
+        XCTAssertTrue(app.buttons["Try again"].exists)
+        XCTAssertFalse(app.staticTexts["Recording"].exists)
+        try app.performAccessibilityAudit()
+
+        app.buttons["Try again"].tap()
+        XCTAssertTrue(app.staticTexts["Allow camera access in Settings to record a set."].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Recording"].exists)
+    }
+
+    @MainActor
     func testHistoryAccessibilityAudit() throws {
         let app = XCUIApplication()
         app.launch()
