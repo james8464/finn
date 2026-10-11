@@ -124,7 +124,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 - [x] Run the model tests before implementation and confirm the missing model fails compilation; run the UI test against the implemented flow.
 - [x] Build setup and framing guidance, explicit recording indicator, large controls, countdown, and measured/insufficient/interrupted/error results. Show rep numbers and compact relative-range and duration evidence. Offer **Try another set**, **Not relevant**, and a clear retake path. Use native SwiftUI controls and label the simulator-only demo input.
 - [x] Clarify that one to three measured reps are too few for a pattern observation; keep other no-cue wording neutral. A dismissed cue now acknowledges the person's feedback instead of claiming no pattern. The new UI regression and full 52-test iOS 27 simulator suite pass.
-- [ ] Rerun the full simulator suite, inspect light/dark mode and Dynamic Type, and verify VoiceOver order and that the Stop control remains visible. The full iOS 27 simulator suite passed 34 tests, including a dark-mode, large-text Stop control UI check, on 11 October. Physical-device layout, capture, and VoiceOver inspection remain open.
+- [ ] Rerun the full simulator suite, inspect light/dark mode and Dynamic Type, and verify VoiceOver order and that the Stop control remains visible. The full iOS 27 simulator suite passes 55 tests, including a dark-mode, large-text Stop control UI check. Light and dark setup screens and the captured result/comparison UI test screens were visually inspected on 11 October. Physical-device layout, capture, and VoiceOver inspection remain open.
 
 ## Task 5: Local history and second-set comparison
 
