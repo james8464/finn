@@ -29,10 +29,12 @@ final class WorkoutSessionModel {
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
     private var isStopping = false
+    @ObservationIgnored private var stopTappedAt: ContinuousClock.Instant?
 
     private(set) var stage: WorkoutStage = .ready
     private(set) var result: WorkoutResult?
     private(set) var frameCount = 0
+    private(set) var lastStopToResultMilliseconds: Int?
     private(set) var cueDismissed = false
     private(set) var currentSession: WorkoutSessionSummary?
     private(set) var comparison: Comparison?
@@ -61,6 +63,8 @@ final class WorkoutSessionModel {
         collectionTask = nil
         guard stage == .openingCamera else { return }
         result = nil
+        lastStopToResultMilliseconds = nil
+        stopTappedAt = nil
         cueDismissed = false
         frames = []
         frameCount = 0
@@ -117,8 +121,9 @@ final class WorkoutSessionModel {
         stage = .capturing
     }
 
-    func endSet() async {
+    func endSet(tappedAt: ContinuousClock.Instant = ContinuousClock.now) async {
         guard stage == .capturing else { return }
+        stopTappedAt = tappedAt
         isStopping = true
         stage = .analyzing
         await source.stop()
@@ -137,11 +142,19 @@ final class WorkoutSessionModel {
     }
 
     private func completeAnalysis() {
+        defer {
+            if let stopTappedAt {
+                let parts = stopTappedAt.duration(to: ContinuousClock.now).components
+                lastStopToResultMilliseconds = max(0, Int(parts.seconds) * 1_000 +
+                                                   Int(parts.attoseconds / 1_000_000_000_000_000))
+            }
+            stopTappedAt = nil
+            stage = .result
+        }
         switch SquatAnalyzer.analyze(frames) {
         case .analyzed(let analysis):
             guard !analysis.reps.isEmpty else {
                 result = .insufficientView("No complete squat repetitions were measured. Try another set with your full body in view.")
-                stage = .result
                 return
             }
             let cue = CueSelector.select(from: analysis)
@@ -152,7 +165,6 @@ final class WorkoutSessionModel {
         case .failed(let reason):
             result = .failed(reason)
         }
-        stage = .result
     }
 
     func finishSession() async {
@@ -233,6 +245,8 @@ final class WorkoutSessionModel {
         frames = []
         frameCount = 0
         result = nil
+        lastStopToResultMilliseconds = nil
+        stopTappedAt = nil
     }
 
     func backgrounded() async {

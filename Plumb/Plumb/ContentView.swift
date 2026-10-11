@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") }
+    private var isValidationMode: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-validation") }
     private var isCaptureStage: Bool {
         switch model.stage {
         case .framing, .countdown, .capturing, .analyzing: return true
@@ -130,7 +131,10 @@ struct ContentView: View {
                         .controlSize(.large)
                 } else if model.stage == .capturing {
                     Text("Move at your own pace")
-                    Button("Stop set") { Task { await model.endSet() } }
+                    Button("Stop set") {
+                        let tappedAt = ContinuousClock.now
+                        Task { await model.endSet(tappedAt: tappedAt) }
+                    }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
                         .tint(.red)
@@ -226,6 +230,12 @@ struct ContentView: View {
                         Text("Set interrupted").font(.largeTitle.bold())
                         Text("Camera capture stopped before the set was complete.")
                     }
+                }
+                if isValidationMode, let milliseconds = model.lastStopToResultMilliseconds {
+                    Text("Validation timing · Stop to result: \(milliseconds) ms")
+                        .font(.footnote.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("validation.stopToResult")
                 }
                 Button(retakeLabel) { Task { await model.startPreview() } }
                     .buttonStyle(.borderedProminent).controlSize(.large)

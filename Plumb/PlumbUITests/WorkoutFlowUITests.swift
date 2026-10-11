@@ -17,6 +17,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Stop set"].tap()
 
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["validation.stopToResult"].exists)
         capture(app, name: "First result")
         XCTAssertTrue(app.staticTexts["Measured reps"].exists)
         XCTAssertTrue(app.staticTexts["Your range became shorter in the last two reps."].exists)
@@ -75,6 +76,22 @@ final class WorkoutFlowUITests: XCTestCase {
         notRelevant.tap()
         XCTAssertTrue(app.staticTexts["Observation marked not relevant."].exists)
         XCTAssertFalse(app.staticTexts["No clear pattern to call out in this set."].exists)
+    }
+
+    @MainActor
+    func testValidationLaunchShowsStopTiming() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-plumb-ui-demo", "-plumb-validation"]
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        let timing = app.staticTexts["validation.stopToResult"]
+        XCTAssertTrue(timing.waitForExistence(timeout: 5))
+        XCTAssertTrue(timing.label.contains("Stop to result:"))
     }
 
     @MainActor

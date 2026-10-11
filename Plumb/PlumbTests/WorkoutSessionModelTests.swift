@@ -21,6 +21,20 @@ struct WorkoutSessionModelTests {
         #expect(analysis.reps.count == 6)
     }
 
+    @Test func stopTimingUsesTapInstantAndClearsForNextSet() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for frame in trace(reps: 6) { source.emit(frame) }
+        let tappedAt = ContinuousClock.now.advanced(by: .milliseconds(-20))
+        await model.endSet(tappedAt: tappedAt)
+        #expect((model.lastStopToResultMilliseconds ?? -1) >= 20)
+        await model.startPreview()
+        #expect(model.lastStopToResultMilliseconds == nil)
+        await model.cancel()
+    }
+
     @Test func shortSetAbstains() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
@@ -69,6 +83,7 @@ struct WorkoutSessionModelTests {
             return
         }
         #expect(analysis.reps.count == 6)
+        #expect(model.lastStopToResultMilliseconds == nil)
     }
 
     @Test func cancellingCountdownNeverRecords() async throws {
