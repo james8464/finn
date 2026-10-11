@@ -40,16 +40,23 @@ final class ComparisonNarrator {
 
     func recap(for comparison: Comparison) async -> Recap {
         guard generator.available else { return template(for: comparison) }
-        let generated = await withTaskGroup(of: GeneratedRecap?.self) { group in
-            group.addTask { [generator] in try? await generator.generate(for: comparison) }
-            group.addTask { [timeout] in
-                try? await Task.sleep(for: timeout)
-                return nil
+        let stream = AsyncStream<GeneratedRecap?>(bufferingPolicy: .bufferingNewest(1)) { continuation in
+            let generation = Task { @MainActor [generator] in
+                continuation.yield(try? await generator.generate(for: comparison))
+                continuation.finish()
             }
-            let first = await group.next() ?? nil
-            group.cancelAll()
-            return first
+            let timer = Task.detached { [timeout] in
+                guard (try? await Task.sleep(for: timeout)) != nil else { return }
+                continuation.yield(nil)
+                continuation.finish()
+            }
+            continuation.onTermination = { @Sendable _ in
+                generation.cancel()
+                timer.cancel()
+            }
         }
+        var iterator = stream.makeAsyncIterator()
+        let generated = await iterator.next() ?? nil
         guard let generated, isValid(generated, for: comparison) else {
             return template(for: comparison)
         }

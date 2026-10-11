@@ -145,7 +145,8 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 - [x] Write failing tests for unavailable model, invalid rep reference, unsupported claim, timeout, and valid generated wording. The recap always carries the same deterministic comparison facts.
 - [ ] Run unit tests and confirm failure. The missing narrator failed compilation, then five focused tests passed. A real Apple Intelligence-eligible iPhone is still needed to verify availability and actual output.
 - [x] Implement a small `@Generable` response with one plain-language explanation and an evidence-rep list. Validate direction, references, length, numeric and medical/safety terms; fall back to reviewed copy on unavailability, error, or timeout. Label generated wording only when used; measured facts stay visible separately.
-- [ ] Rerun the full suite and review real generated outputs against a fixed prompt set, including poor tracking and no-clear-change cases. The full iOS 27 simulator suite passed 46 tests on 11 October; eligible-device output review remains open. Do not present simulated fallback as a successful model run.
+- [x] Make the three-second fallback independent of model-task cancellation. A regression test with a generator that ignores cancellation failed at 358 ms for a 20 ms limit, then passed with the new race; the full iOS 27 simulator suite passed 51 tests.
+- [ ] Review real generated outputs against a fixed prompt set, including poor tracking and no-clear-change cases. Eligible-device output review remains open. Do not present simulated fallback as a successful model run.
 
 ## Task 7: Validation and demo gate
 
@@ -167,7 +168,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 - [ ] Confirm Apple Developer Program membership, App Store Connect role, signing team, bundle ID ownership, and a physical iOS 27 test iPhone early. Xcode team ID is configured, but membership/distribution rights are unconfirmed; James indicated he can purchase the membership. Physical iPhone 16 Pro Max is listed as unavailable to Xcode.
 - [ ] Draft truthful listing copy and capture screenshots only from implemented screens. Listing, support, privacy, and App Review note drafts now exist in `docs/release`; a normal-app setup screenshot has been captured from an iOS 27 iPhone 18 Pro Max simulator. Result/comparison screenshots, public HTTPS URLs, publisher/contact fields, and final App Privacy answers remain open.
-- [ ] Run a Release build and physical-device smoke pass: first launch, permission denied/recovered, set capture, retake, comparison, delete, no-network fallback, and background interruption. An unsigned iPhone Release build and archive succeed, the archive contains expected app metadata/icon assets without team-only documents, and 50 simulator tests pass; physical-device smoke pass remains open.
+- [ ] Run a Release build and physical-device smoke pass: first launch, permission denied/recovered, set capture, retake, comparison, delete, no-network fallback, and background interruption. An unsigned iPhone Release build and archive succeed, the archive contains expected app metadata/icon assets without team-only documents, and 51 simulator tests pass; physical-device smoke pass remains open.
 - [ ] Archive, upload, and select the build in App Store Connect; complete metadata and review notes. Record the actual status: uploaded, ready for review, submitted, or approved. Do not describe an upload as App Review approval. Submission is a team/account action and may require the account holder's credentials.
 
 ## Subsequent plans, after the iPhone gate

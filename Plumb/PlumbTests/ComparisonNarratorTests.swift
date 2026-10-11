@@ -42,6 +42,16 @@ struct ComparisonNarratorTests {
         #expect(recap.facts == comparison())
     }
 
+    @Test func timeoutDoesNotWaitForGeneratorThatIgnoresCancellation() async {
+        let clock = ContinuousClock()
+        let started = clock.now
+        let recap = await ComparisonNarrator(generator: NonCooperativeGenerator(),
+                                             timeout: .milliseconds(20))
+            .recap(for: comparison())
+        #expect(recap.source == .template)
+        #expect(started.duration(to: clock.now) < .milliseconds(300))
+    }
+
     @Test func validGeneratedRecapKeepsDeterministicFacts() async {
         let generator = StubRecapGenerator(output: GeneratedRecap(
             explanation: "Your camera-measured range was shorter in the second set. Try a steadier pace.",
@@ -59,6 +69,19 @@ struct ComparisonNarratorTests {
                    firstMedianRange: 0.4, secondMedianRange: 0.3,
                    firstMedianDuration: 1.5, secondMedianDuration: 1.6,
                    rangeDirection: .shorter, cueRepNumbers: [5, 6], cueKind: .rangeDecreased)
+    }
+}
+
+@MainActor
+private final class NonCooperativeGenerator: RecapGenerating {
+    let available = true
+
+    func generate(for comparison: Comparison) async throws -> GeneratedRecap {
+        await Task.detached {
+            try? await Task.sleep(for: .milliseconds(600))
+            return GeneratedRecap(explanation: "Your range was shorter.",
+                                  evidenceRepNumbers: [5, 6])
+        }.value
     }
 }
 
