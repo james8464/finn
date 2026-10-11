@@ -200,6 +200,29 @@ final class WorkoutFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testLargeTextSetupCaptureAndResultAccessibilityAudits() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-plumb-ui-demo",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityM",
+            "-UIUserInterfaceStyle", "Dark",
+        ]
+        app.launch()
+        capture(app, name: "Large text dark setup")
+        try app.performAccessibilityAudit()
+        app.buttons["Set up camera"].tap()
+        try app.performAccessibilityAudit()
+        app.buttons["Start set"].tap()
+        XCTAssertTrue(app.buttons["Stop set"].waitForExistence(timeout: 6))
+        try app.performAccessibilityAudit()
+        Thread.sleep(forTimeInterval: 4)
+        app.buttons["Stop set"].tap()
+        XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        capture(app, name: "Large text dark result")
+        try app.performAccessibilityAudit()
+    }
+
+    @MainActor
     func testDismissedCueAcknowledgesFeedback() {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
