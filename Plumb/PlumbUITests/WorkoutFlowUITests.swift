@@ -8,6 +8,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.staticTexts["DEMO INPUT"].exists)
+        capture(app, name: "Setup")
         app.buttons["Set up camera"].tap()
         XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 5))
         app.buttons["Start set"].tap()
@@ -16,6 +17,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Stop set"].tap()
 
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        capture(app, name: "First result")
         XCTAssertTrue(app.staticTexts["Measured reps"].exists)
         XCTAssertTrue(app.staticTexts["Your range became shorter in the last two reps."].exists)
         app.buttons["Try this next set"].tap()
@@ -25,8 +27,18 @@ final class WorkoutFlowUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Compared with your previous set"].waitForExistence(timeout: 5))
+        capture(app, name: "Comparison")
         app.buttons["Explain comparison"].tap()
         XCTAssertTrue(app.staticTexts["Comparison note"].waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+        let history = app.buttons["History"]
+        XCTAssertTrue(history.waitForExistence(timeout: 5))
+        history.tap()
+        XCTAssertTrue(app.staticTexts["Saved sessions"].waitForExistence(timeout: 5))
+        let delete = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Delete session from")).firstMatch
+        delete.tap()
+        app.buttons["Delete session"].tap()
+        XCTAssertTrue(app.staticTexts["No saved sessions yet."].waitForExistence(timeout: 5))
     }
 
     @MainActor
@@ -43,6 +55,15 @@ final class WorkoutFlowUITests: XCTestCase {
         let stop = app.buttons["Stop set"]
         XCTAssertTrue(stop.waitForExistence(timeout: 6))
         XCTAssertTrue(stop.isHittable)
+        capture(app, name: "Large text dark capture")
         stop.tap()
+    }
+
+    @MainActor
+    private func capture(_ app: XCUIApplication, name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 }

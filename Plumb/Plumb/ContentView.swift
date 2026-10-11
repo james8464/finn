@@ -7,6 +7,13 @@ struct ContentView: View {
     @State private var model: WorkoutSessionModel
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
+    private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") }
+    private var isCaptureStage: Bool {
+        switch model.stage {
+        case .framing, .countdown, .capturing, .analyzing: return true
+        default: return false
+        }
+    }
 
     @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore(),
                     narrator: ComparisonNarrator? = nil) {
@@ -29,7 +36,7 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .overlay(alignment: .top) {
-            if ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") {
+            if isDemo && !isCaptureStage {
                 Text("DEMO INPUT")
                     .font(.caption.bold())
                     .padding(6)
@@ -87,11 +94,12 @@ struct ContentView: View {
                 Text("Plumb observes movement from one camera angle. It cannot judge every part of your technique or prevent injury.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                historySection
-                Button("Delete all local data", role: .destructive) {
-                    deleteAllRequested = true
+                NavigationLink {
+                    historyPage
+                } label: {
+                    Label("History", systemImage: "clock.arrow.circlepath")
                 }
-                .font(.footnote)
+                .buttonStyle(.bordered)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
@@ -105,6 +113,13 @@ struct ContentView: View {
                 .ignoresSafeArea()
                 .accessibilityHidden(true)
             VStack(spacing: 16) {
+                if isDemo {
+                    Text("DEMO INPUT")
+                        .font(.caption.bold())
+                        .foregroundStyle(.black)
+                        .padding(6)
+                        .background(.yellow, in: Capsule())
+                }
                 status
                 Spacer()
                 if model.stage == .framing {
@@ -129,8 +144,8 @@ struct ContentView: View {
                 }
                 if model.stage != .analyzing {
                     Button("Cancel") { Task { await model.cancel() } }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
+                        .buttonStyle(.plain)
+                        .frame(minWidth: 120, minHeight: 44)
                 }
             }
             .font(.headline)
@@ -144,7 +159,7 @@ struct ContentView: View {
         HStack(spacing: 10) {
             if model.isRecording {
                 Circle().fill(.red).frame(width: 11, height: 11)
-                Text("Recording · \(model.frameCount) pose samples")
+                Text("Recording")
             } else {
                 Image(systemName: "viewfinder")
                 Text(model.stage == .framing ? "Position your phone" : "Get ready")
@@ -178,12 +193,17 @@ struct ContentView: View {
                             Text("This is a camera measurement, not a full technique assessment.")
                                 .foregroundStyle(.secondary)
                         }
-                        repList(analysis.reps)
                         if let comparison = model.comparison {
                             comparisonView(comparison)
+                            DisclosureGroup("Rep details") {
+                                repList(analysis.reps)
+                            }
                         } else if (model.currentSession?.sets.count ?? 0) >= 2 {
                             Text("These sets used different camera views, so Plumb can’t compare them reliably.")
                                 .foregroundStyle(.secondary)
+                            repList(analysis.reps)
+                        } else {
+                            repList(analysis.reps)
                         }
                     case .insufficientView(let reason):
                         Text("Couldn’t assess this set").font(.largeTitle.bold())
@@ -214,6 +234,21 @@ struct ContentView: View {
         return "Try another set"
     }
 
+    private var historyPage: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                historySection
+                Button("Delete all local data", role: .destructive) {
+                    deleteAllRequested = true
+                }
+                .font(.subheadline)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
+        }
+        .navigationTitle("History")
+    }
+
     @ViewBuilder private var historySection: some View {
         if model.historyError {
             VStack(alignment: .leading, spacing: 8) {
@@ -225,11 +260,11 @@ struct ContentView: View {
             }
         } else if !model.history.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Recent sessions").font(.headline)
-                ForEach(model.history.prefix(3)) { session in
+                Text("Saved sessions").font(.headline)
+                ForEach(model.history) { session in
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(session.startedAt, style: .date)
+                            Text(session.startedAt.formatted(date: .abbreviated, time: .shortened))
                             Text("\(session.sets.count) measured sets")
                                 .font(.subheadline).foregroundStyle(.secondary)
                         }
@@ -241,6 +276,9 @@ struct ContentView: View {
                     Divider()
                 }
             }
+        } else {
+            Text("No saved sessions yet.")
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -257,6 +295,8 @@ struct ContentView: View {
             Text(comparisonStatement(comparison.rangeDirection))
             .font(.subheadline.weight(.semibold))
             Text("This comparison describes one camera-visible measure, not overall technique or safety.")
+                .font(.footnote).foregroundStyle(.secondary)
+            Text("Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view.")
                 .font(.footnote).foregroundStyle(.secondary)
             if let recap = model.comparisonRecap {
                 Text(recap.text)
@@ -282,7 +322,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title).font(.subheadline.weight(.semibold))
             Text("Range: \(range.formatted(.number.precision(.fractionLength(2))))")
-            Text("Tempo: \(duration.formatted(.number.precision(.fractionLength(1)))) s")
+            Text("Rep time: \(duration.formatted(.number.precision(.fractionLength(1)))) s")
         }
         .font(.subheadline)
         .monospacedDigit()

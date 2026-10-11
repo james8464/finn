@@ -13,7 +13,7 @@ The rep count and relative range are camera-based estimates from one view. A cue
 
 ## Privacy and deletion
 
-Plumb does not save a workout movie. Saved set summaries stay on your iPhone. In Recent sessions, tap **Delete** to remove one session. Tap **Delete all local data** to remove all saved sessions and recovery backups. See the [privacy policy](privacy-policy.md).
+Plumb does not save a workout movie. Saved set summaries stay on your iPhone. Open **History** and tap **Delete** to remove one session, or **Delete all local data** to remove all saved sessions and recovery backups. See the [privacy policy](privacy-policy.md).
 
 ## Troubleshooting
 

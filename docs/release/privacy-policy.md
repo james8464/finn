@@ -14,7 +14,7 @@ With your permission, Plumb uses the iPhone camera during a set to estimate body
 
 Plumb saves derived set summaries on your iPhone: session and set identifiers, date, squat rubric version, camera side, rep timing and relative range, analysis confidence, a selected observation if any, and your response to that observation. These summaries are stored in the app's local Application Support area. They are not automatically sent to us or shared with other users.
 
-You can delete a saved session from Recent sessions or choose **Delete all local data** in the app. The latter also removes any damaged-history backup created when you explicitly recover a corrupted local history. Removing the app also removes its local app data under normal iOS behavior.
+You can open **History** to delete a saved session or choose **Delete all local data**. The latter also removes any damaged-history backup created when you explicitly recover a corrupted local history. Removing the app also removes its local app data under normal iOS behavior.
 
 ## Optional Apple Intelligence wording
 
