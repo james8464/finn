@@ -4,7 +4,7 @@
 
 The iPhone is the core experience. Apple Watch workout data and spoken feedback through AirPods are optional additions. Apple Foundation Models may help phrase validated observations on eligible devices; the coaching facts come from camera pose analysis and exercise-specific rules, with a non-generative fallback. Plumb is a fitness aid, not medical advice or a guarantee of safe technique.
 
-**Current state (10 October 2026):** this repository contains the renamed Xcode starter app, a new Plumb icon, brand assets, and the product plan. The visible app screen introduces the concept. Camera analysis, Watch integration, coaching, subscriptions, and workout history are not implemented. The challenge goal is a tested iPhone camera-to-cue prototype for a side-view bodyweight squat; public release has a separate validation gate.
+**Current state (11 October 2026):** this repository contains the renamed Xcode starter app, the Plumb icon, brand assets, the product plan, and a detailed first-build implementation plan. The visible app screen introduces the concept. Camera analysis, Watch integration, coaching, subscriptions, and workout history are not implemented. The challenge goal is a tested iPhone camera-to-cue prototype for a side-view bodyweight squat; public release has a separate validation gate.
 
 Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 
@@ -12,6 +12,7 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 
 - [`Design/README.md`](Design/README.md): Plumb brand theme, colors, typography, icon, and live Figma guide
 - [`planning.md`](planning.md): experience, scoped MVP, technical approach, privacy, validation, and timeline
+- [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md): task-by-task plan for the first real iPhone squat session
 - [`justification.md`](justification.md): why a focused camera technique companion is worth testing
 - [`market research.md`](market%20research.md): primary-source alternatives and customer research plan
 - [`pitch.md`](pitch.md): three-minute story, demo path, and claim boundaries

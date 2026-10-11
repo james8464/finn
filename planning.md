@@ -2,6 +2,8 @@
 
 **Working plan, 10 October 2026.** Plumb is a proposed iPhone-first strength-training companion. The checked-in app is still an Xcode starter; no camera analysis, coaching, Watch app, subscriptions, or workout history has been implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
 
+The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md). It scopes the first complete iPhone squat loop and its validation gate; later integrations remain in this broader product plan.
+
 ## 1. Product thesis
 
 **One line:** Plumb uses an iPhone camera to observe an exercise set and returns one clear, evidence-linked technique cue that the person can try on the next set.
@@ -222,6 +224,7 @@ The current repository is a starter app and brand assets. Do not claim camera co
 
 - **10 October 2026:** The team selected Plumb's workout-technique concept. The iPhone camera is the required sensor; Watch and AirPods are optional. Post-set feedback is the first dependable product experience, with live coaching reserved for validation.
 - **11 October 2026:** The monochrome icon adopted a custom rounded P within open camera corners. The mark suggests alignment and camera feedback without prescribing a particular exercise pose.
+- **11 October 2026:** For the first camera-to-cue build, keep the Xcode project's iOS 27.0 deployment target and support iPhone first. An iPad experience requires its own design and validation before the target includes iPad.
 
 ## 10. Primary platform references
 
