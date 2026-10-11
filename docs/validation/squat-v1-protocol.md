@@ -64,6 +64,6 @@ For a zero-cue holdout, agreement is **not measurable**, not 100%. Report misses
 
 ## Device run and release decision
 
-Before the 16 October demo, complete first launch permission, denial/recovery, preview orientation, six reps, short/partial set, interruption, repeat set, comparison, history deletion, reduced-motion/large-text/VoiceOver, low-light, heat, and offline checks on a physical iOS 27 iPhone. Record the device, build, date, result, and open defects in [`squat-v1-results.md`](squat-v1-results.md). A simulator run verifies logic and UI automation only.
+Before the 16 October demo, use the [physical iPhone run sheet](physical-iphone-run.md) to complete first launch permission, denial/recovery, preview orientation, six reps, short/partial set, interruption, repeat set, comparison, history deletion, reduced-motion/large-text/VoiceOver, low-light, heat, and offline checks on a physical iOS 27 iPhone. Record the device, build, date, result, and open defects in [`squat-v1-results.md`](squat-v1-results.md). A simulator run verifies logic and UI automation only.
 
 If the physical run or specialist review is incomplete, the presentation must identify the simulator feed or recorded test set. The app must not claim validated technique coaching or show a confident cue when evidence is weak.

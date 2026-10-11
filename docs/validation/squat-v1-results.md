@@ -2,12 +2,16 @@
 
 **Status: not started. Updated 11 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. The current 68-test iOS 27 simulator pass verifies implementation behavior, not real-camera accuracy.
 
+## Simulator UI check · 11 October 2026
+
+Built and launched commit `8c2959e` on the iPhone 18 Pro Max simulator (iOS 27.0). The normal launch showed setup, Privacy, and empty History. A separate run with the explicitly labeled `DEMO INPUT` synthetic feed completed two six-rep sets. I inspected the first result and late-set range cue, the second result and set comparison, the optional comparison explanation, expanded rep details, and the saved two-set History summary. Text and controls were readable and the long result scrolled to **Done**. The comparison explanation returned the reviewed wording on this simulator. This was a visual/manual app-flow check; no real camera frames, pose accuracy, real Foundation Models output, or human coaching quality were tested. The synthetic demo must not be presented as a physical workout or used for App Store result screenshots.
+
 | Evidence | Current state |
 | --- | --- |
 | Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v1` |
 | Tuning sets | 0 |
 | Holdout sets | 0 |
-| Physical iPhone camera pass | Pending; iPhone 16 Pro Max was unavailable to Xcode on 11 October |
+| Physical iPhone camera pass | Pending; iPhone 16 Pro Max was unavailable to Xcode on 11 October. Use the [physical run sheet](physical-iphone-run.md) once available |
 | Specialist cue reviews | 0 |
 | Setup success | Not measured |
 | Exact rep count | Not measured |

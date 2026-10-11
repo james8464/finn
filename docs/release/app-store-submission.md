@@ -12,11 +12,15 @@
 | Version/build | 1.0 / 1; increment build for each upload |
 | Xcode team | `Z29CKRV8C9` configured; paid Program membership and distribution rights unconfirmed |
 | Local signing identities | One Apple Development identity is present; no Apple Distribution identity was found on 11 October |
-| Connected physical iPhone | iPhone 16 Pro Max appears in Xcode's device list but was **unavailable** on 11 October |
+| Connected physical iPhone | iPhone 16 Pro Max is **unavailable** to Xcode on 11 October. The last known pairing record says it was last connected on 1 October and Developer Mode was disabled; confirm both settings on the phone rather than treating cached device data as current |
 | Repository | Public GitHub repository, `main` branch |
-| Test status | 68 iOS 27 simulator tests passed on 11 October, including camera-denial recovery UI and accessibility checks plus setup, Privacy, capture, result, comparison, and empty/saved History audits; unsigned iPhone Release archive check succeeded; physical validation pending |
+| Test status | 68 iOS 27 simulator tests passed on 11 October; a separate manual iPhone 18 Pro Max simulator run inspected setup, Privacy, synthetic capture/results, comparison, rep details, and saved History. The unsigned iPhone Release archive check succeeded; physical validation remains pending |
 
 James can purchase or confirm the Apple Developer Program membership. The team must then verify the Account Holder can enter App Store Connect, that the bundle ID belongs to the team, and that distribution signing works. A configured Xcode team ID alone does not establish these conditions.
+
+## Physical iPhone setup needed for validation
+
+Connect and unlock the iPhone 16 Pro Max with a suitable cable, accept any **Trust This Computer** prompt, then open **Settings → Privacy & Security → Developer Mode** on the iPhone. Turn it on, restart when prompted, and confirm **Enable** with the device passcode after restart. Reopen Xcode's Device Hub and verify the phone changes from unavailable to available before trying a development-signed run. The Developer Mode status above is from a cached, offline pairing record and must be rechecked once connected. [Apple's Developer Mode instructions](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device) and [physical-device run guide](https://developer.apple.com/documentation/xcode/running-your-app-on-simulated-or-physical-devices) describe these steps. A personal Apple Account can be used for a development run; App Store upload still requires the appropriate distribution access.
 
 ## Required before archive/upload
 
