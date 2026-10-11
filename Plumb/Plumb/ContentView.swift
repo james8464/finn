@@ -85,7 +85,7 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     Label("Place your iPhone at hip height, a few steps away.", systemImage: "iphone.gen3")
                     Label("Turn sideways and keep your whole body in view.", systemImage: "figure.stand")
-                    Label("Your video stays on this iPhone and is not saved.", systemImage: "lock.shield")
+                    Label("Your video is processed on this iPhone and not saved.", systemImage: "lock.shield")
                 }
                 .padding(.vertical, 12)
                 Button("Set up camera") { Task { await model.startPreview() } }
