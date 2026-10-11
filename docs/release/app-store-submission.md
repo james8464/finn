@@ -23,7 +23,7 @@ James can purchase or confirm the Apple Developer Program membership. The team m
 1. Finish the physical iPhone checks and holdout/expert review in [`../validation/squat-v1-protocol.md`](../validation/squat-v1-protocol.md). Narrow any unvalidated claims in the app and listing. Review actual Foundation Models output on an eligible device; if unavailable, keep the deterministic fallback.
 2. Confirm the publisher name and public support email. Host and check public **HTTPS** support and privacy policy pages based on [`support.md`](support.md) and [`privacy-policy.md`](privacy-policy.md). The Markdown drafts alone are not App Store URLs.
 3. Audit the final binary's data flows and complete App Privacy answers. The current code has no app server, third-party SDK, account, analytics, or cloud sync, but the final answer must match the exact uploaded build. Apple requires a privacy policy URL and app privacy responses for iOS: [App privacy help](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy).
-4. Capture truthful screenshots from the implemented iPhone app. At least one current iPhone Dynamic Island display screenshot is required; the iPad requirement does not apply to this iPhone-only target. Do not pass the labeled synthetic demo feed off as a real camera workout. See [screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications).
+4. Capture truthful screenshots from the implemented iPhone app. A [setup-screen candidate](screenshots/iphone-18-pro-max-setup.jpg) now exists at an accepted iPhone 18 Pro Max size, with [capture provenance](screenshots/README.md). It was taken from the normal simulator app, not a physical camera run. Final result and comparison screenshots remain pending physical-device validation. Do not pass the labeled synthetic demo feed off as a real camera workout. See [screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications).
 5. Verify a Release build, signing, first-launch permission, denial/recovery, set capture, retake, second set, comparison, local deletion, background interruption, offline behavior, large text, VoiceOver order, and no placeholder claims.
 
 ## Upload and submission
@@ -37,4 +37,4 @@ James can purchase or confirm the Apple Developer Program membership. The team m
 
 | Date/time (Paris) | Version/build | State | Evidence / owner |
 | --- | --- | --- | --- |
-| 11 October 2026 | 1.0/1 local project | Not uploaded | Account access, physical device, public URLs, and final validation pending |
+| 11 October 2026 | 1.0/1 local project | Not uploaded | Setup screenshot candidate captured; account access, physical device, public URLs, result screenshots, and final validation pending |
