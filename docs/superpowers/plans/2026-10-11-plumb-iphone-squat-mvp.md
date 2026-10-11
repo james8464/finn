@@ -119,10 +119,10 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 **Interfaces:** The model moves through `ready → framing → countdown → capturing → analyzing → result`, with permission, interruption, insufficient-view, and analysis-failed exits. It accepts an injected pose source so tests can feed known traces.
 
-- [ ] Write failing model tests `startStop`, `cancelCountdown`, `backgroundStopsCapture`, `shortSetAbstains`, and `noMeaningfulChange`. Assert `#expect(model.result?.kind == .insufficientView)` after an unusable trace and `#expect(model.isRecording == false)` after interruption. Write one UI test that starts from setup, follows a scripted six-rep pose source, sees evidence-linked result, and can retake.
-- [ ] Run the relevant unit and UI tests; confirm failure.
-- [ ] Build setup and framing guidance, explicit recording indicator, large controls, progress/countdown, and four distinct result states. Show the observed rep numbers and a small range/tempo timeline behind the cue; offer **Try this next set**, **Not relevant**, and **Retake**. Let standard SwiftUI navigation controls use Liquid Glass, keeping the camera and measured result content on standard backgrounds rather than covering them with glass cards. When the evidence gate rejects a set, show a concrete placement tip and do not present a confident rep count. Use a launch argument only for deterministic UI testing; label any in-app demo data as demo.
-- [ ] Rerun tests, inspect light/dark mode and Dynamic Type, and verify VoiceOver order and that the Stop control remains visible. Commit this task.
+- [x] Write failing model tests for start/stop, countdown cancellation, background exit, short sets, stable sets, interrupted capture, denied camera, and duration limit. The UI test uses a labeled six-rep demo source, checks the evidence-linked cue, and starts another set.
+- [x] Run the model tests before implementation and confirm the missing model fails compilation; run the UI test against the implemented flow.
+- [x] Build setup and framing guidance, explicit recording indicator, large controls, countdown, and measured/insufficient/interrupted/error results. Show rep numbers and compact relative-range and duration evidence. Offer **Try another set**, **Not relevant**, and a clear retake path. Use native SwiftUI controls and label the simulator-only demo input.
+- [ ] Rerun the full simulator suite, inspect light/dark mode and Dynamic Type, and verify VoiceOver order and that the Stop control remains visible. The full iOS 27 simulator suite passed 34 tests, including a dark-mode, large-text Stop control UI check, on 11 October. Physical-device layout, capture, and VoiceOver inspection remain open.
 
 ## Task 5: Local history and second-set comparison
 

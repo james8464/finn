@@ -4,7 +4,11 @@ import SwiftUI
 struct PlumbApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") {
+                ContentView(source: DemoPoseSource())
+            } else {
+                ContentView(source: CameraPoseSource.live())
+            }
         }
     }
 }

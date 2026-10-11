@@ -1,6 +1,20 @@
 import AVFoundation
 
 @MainActor
+protocol PoseStreaming: AnyObject {
+    var previewSession: AVCaptureSession { get }
+    var endedAtLimit: Bool { get }
+    func prepareForSet() async
+    func start() async throws -> AsyncStream<PoseFrame>
+    func stop() async
+}
+
+extension PoseStreaming {
+    var endedAtLimit: Bool { false }
+    func prepareForSet() async {}
+}
+
+@MainActor
 protocol CameraCaptureDriving: AnyObject {
     var session: AVCaptureSession { get }
     var isAvailable: Bool { get }
@@ -12,16 +26,18 @@ nonisolated enum CameraSourceError: Error, Equatable {
     case denied
     case unavailable
     case alreadyRunning
+    case cancelled
 }
 
 nonisolated enum CameraSourceState: Equatable {
     case idle
+    case starting
     case running
     case interrupted
 }
 
 @MainActor
-final class CameraPoseSource {
+final class CameraPoseSource: PoseStreaming {
     private let authorize: @MainActor () async -> Bool
     private let driver: any CameraCaptureDriving
     private var runID: UUID?
@@ -29,6 +45,7 @@ final class CameraPoseSource {
     private var forwardTask: Task<Void, Never>?
 
     private(set) var state: CameraSourceState = .idle
+    private(set) var endedAtLimit = false
     var previewSession: AVCaptureSession { driver.session }
 
     init(authorize: @escaping @MainActor () async -> Bool, driver: any CameraCaptureDriving) {
@@ -47,13 +64,33 @@ final class CameraPoseSource {
     }
 
     func start() async throws -> AsyncStream<PoseFrame> {
-        guard state != .running else { throw CameraSourceError.alreadyRunning }
-        guard await authorize() else { throw CameraSourceError.denied }
-        guard driver.isAvailable else { throw CameraSourceError.unavailable }
-
-        let backendStream = try await driver.start()
+        guard state != .running && state != .starting else { throw CameraSourceError.alreadyRunning }
         let currentID = UUID()
         runID = currentID
+        state = .starting
+        guard await authorize() else {
+            if runID == currentID { runID = nil; state = .idle }
+            throw CameraSourceError.denied
+        }
+        guard runID == currentID else { throw CameraSourceError.cancelled }
+        guard driver.isAvailable else {
+            runID = nil
+            state = .idle
+            throw CameraSourceError.unavailable
+        }
+
+        let backendStream: AsyncStream<PoseFrame>
+        do {
+            backendStream = try await driver.start()
+        } catch {
+            if runID == currentID { runID = nil; state = .idle }
+            throw error
+        }
+        guard runID == currentID else {
+            await driver.stop()
+            throw CameraSourceError.cancelled
+        }
+        endedAtLimit = false
         state = .running
         let stream = AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(3)) { continuation in
             self.continuation = continuation
@@ -71,6 +108,7 @@ final class CameraPoseSource {
                     joints: frame.joints
                 ))
                 if elapsed >= 120 {
+                    self.endedAtLimit = true
                     await self.stop()
                     break
                 }

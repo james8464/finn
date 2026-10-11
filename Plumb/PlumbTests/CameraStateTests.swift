@@ -76,6 +76,47 @@ struct CameraStateTests {
         #expect(await iterator.next()?.time == 120)
         #expect(await iterator.next() == nil)
         #expect(source.state == .idle)
+        #expect(source.endedAtLimit)
+    }
+
+    @Test func cancellingPermissionPromptDoesNotOpenCamera() async throws {
+        let driver = FakeCaptureDriver()
+        var permissionReply: CheckedContinuation<Bool, Never>?
+        let source = CameraPoseSource(authorize: {
+            await withCheckedContinuation { permissionReply = $0 }
+        }, driver: driver)
+        let attempt = Task { try await source.start() }
+        for _ in 0..<100 where source.state != .starting { await Task.yield() }
+        #expect(source.state == .starting)
+        await source.stop()
+        permissionReply?.resume(returning: true)
+        do {
+            _ = try await attempt.value
+            Issue.record("Cancelled authorization must not open the camera")
+        } catch let error as CameraSourceError {
+            #expect(error == .cancelled)
+        }
+        #expect(driver.startCount == 0)
+    }
+
+    @Test func secondStartDuringPermissionPromptIsRejected() async throws {
+        let driver = FakeCaptureDriver()
+        var permissionReply: CheckedContinuation<Bool, Never>?
+        let source = CameraPoseSource(authorize: {
+            await withCheckedContinuation { permissionReply = $0 }
+        }, driver: driver)
+        let attempt = Task { try await source.start() }
+        for _ in 0..<100 where source.state != .starting { await Task.yield() }
+        do {
+            _ = try await source.start()
+            Issue.record("Second start must be rejected")
+        } catch let error as CameraSourceError {
+            #expect(error == .alreadyRunning)
+        }
+        permissionReply?.resume(returning: true)
+        _ = try await attempt.value
+        #expect(driver.startCount == 1)
+        await source.stop()
     }
 
     private func frame(time: Double) -> PoseFrame {
