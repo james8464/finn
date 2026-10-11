@@ -6,10 +6,6 @@
 	objectVersion = 110;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		1A14373D3075614000CFBBF6 /* GIT guide.md in Resources */ = {isa = PBXBuildFile; fileRef = 1A14373C3075614000CFBBF6 /* GIT guide.md */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		1A14370A30755F8100CFBBF6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -203,7 +199,6 @@
 		1A1436F830755F8000CFBBF6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
-				1A14373D3075614000CFBBF6 /* GIT guide.md in Resources */,
 			);
 		};
 		1A14370730755F8100CFBBF6 /* Resources */ = {
