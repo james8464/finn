@@ -11,7 +11,7 @@ Plumb is an iPhone workout companion for reviewing a bodyweight squat from a sid
 
 ## Camera and workout data
 
-With your permission, Plumb uses the iPhone camera during a set to estimate body position and count camera-visible repetitions. Camera frames are processed on your device. Plumb does not record a movie, save camera frames, or upload them to a Plumb server. The temporary pose trace is used to calculate the set result and is discarded when you leave or start a new capture.
+With your permission, Plumb uses the iPhone camera during a set to estimate body position and count camera-visible repetitions. Camera frames are processed on your device. Plumb does not record a movie, save camera frames, or upload them to a Plumb server. The temporary pose trace is held in memory for the current result and cleared when you finish the session or start a new capture.
 
 Plumb saves derived set summaries on your iPhone: session and set identifiers, date, squat rubric version, camera side, rep timing and relative range, analysis confidence, a selected observation if any, and your response to that observation. These summaries are stored in the app's local Application Support area. They are not automatically sent to us or shared with other users.
 

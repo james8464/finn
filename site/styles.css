@@ -1,0 +1,33 @@
+:root{color-scheme:light dark;--paper:#fff;--ink:#141414;--quiet:#606963;--line:#dce3dd;--accent:#1f6a53}
+@media(prefers-color-scheme:dark){:root{--paper:#141414;--ink:#f5f7f3;--quiet:#b9c5bc;--line:#39473e;--accent:#8fe1bc}}
+*{box-sizing:border-box}
+html{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;font-size:17px;line-height:1.55;background:var(--paper);color:var(--ink)}
+body{margin:0}
+a{color:var(--accent);text-underline-offset:.2em}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:2px}
+.skip{position:absolute;left:-1000px;top:0;padding:.5rem;background:var(--paper)}
+.skip:focus{left:1rem;top:1rem;z-index:2}
+.shell{width:min(100% - 2.5rem,720px);margin:auto}
+header{border-bottom:1px solid var(--line)}
+header .shell{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:76px}
+.wordmark{font-size:1.35rem;font-weight:700;letter-spacing:-.045em;text-decoration:none;color:var(--ink)}
+nav{display:flex;gap:1.5rem;font-size:.9rem}
+nav a{text-decoration:none;color:var(--quiet)}
+nav a[aria-current=page]{color:var(--ink);font-weight:600}
+main{padding:clamp(3rem,8vw,6rem) 0 5rem}
+.eyebrow{color:var(--quiet);font-size:.76rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase}
+h1{font-size:clamp(2.6rem,8vw,4.4rem);line-height:1.04;letter-spacing:-.06em;margin:.75rem 0 1.3rem}
+.lede{font-size:clamp(1.1rem,2.8vw,1.4rem);line-height:1.45;color:var(--quiet);max-width:38rem;margin:0 0 3.5rem}
+h2{font-size:1.28rem;line-height:1.25;letter-spacing:-.025em;margin:0 0 1rem}
+section{border-top:1px solid var(--line);padding:1.8rem 0 2.2rem}
+section p:first-of-type{margin-top:0}
+section p:last-child,section ul:last-child{margin-bottom:0}
+p,li{max-width:40rem}
+li+li{margin-top:.55rem}
+ul{padding-left:1.25rem}
+.meta{color:var(--quiet);font-size:.88rem}
+.links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.links a{display:block;border-top:1px solid var(--line);padding:1.2rem 0;text-decoration:none;font-weight:600}
+.links span{display:block;color:var(--quiet);font-size:.9rem;font-weight:400;margin-top:.25rem}
+footer{border-top:1px solid var(--line);padding:1.5rem 0 3rem;color:var(--quiet);font-size:.82rem}
+@media(max-width:520px){header .shell{min-height:68px}nav{gap:1rem}.links{grid-template-columns:1fr}}
