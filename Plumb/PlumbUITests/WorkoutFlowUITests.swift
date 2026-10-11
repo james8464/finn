@@ -59,14 +59,14 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(deny.waitForExistence(timeout: 10))
         deny.tap()
 
-        XCTAssertTrue(app.staticTexts["Allow camera access in Settings to analyze a set."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Allow camera access in Settings."].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Open Settings"].exists)
         XCTAssertTrue(app.buttons["Try again"].exists)
         XCTAssertFalse(app.staticTexts["Analyzing live"].exists)
         try app.performAccessibilityAudit()
 
         app.buttons["Try again"].tap()
-        XCTAssertTrue(app.staticTexts["Allow camera access in Settings to analyze a set."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Allow camera access in Settings."].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["Analyzing live"].exists)
     }
 

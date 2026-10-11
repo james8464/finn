@@ -126,7 +126,7 @@ final class WorkoutSessionModel {
                 await self.source.stop()
             }
         } catch CameraSourceError.denied {
-            if stage == .openingCamera { stage = .error("Allow camera access in Settings to analyze a set.") }
+            if stage == .openingCamera { stage = .error("Allow camera access in Settings.") }
         } catch CameraSourceError.unavailable {
             if stage == .openingCamera { stage = .error("This iPhone camera is unavailable. Try again when it is free.") }
         } catch {

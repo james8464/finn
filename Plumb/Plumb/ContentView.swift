@@ -171,8 +171,9 @@ struct ContentView: View {
                 status
                 Spacer()
                 if model.stage == .framing {
-                    Text("Stand sideways. Keep your head and feet in frame.")
+                    Text("\u{00A0}Stand sideways. Show head to toe.\u{00A0}")
                         .multilineTextAlignment(.center)
+                        .accessibilityLabel("Stand sideways. Show head to toe.")
                     Button("Start set") { Task { await model.beginSet() } }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
