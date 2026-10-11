@@ -4,15 +4,15 @@
 
 ## One line
 
-Plumb turns an iPhone camera into a private technique mirror: after a strength set, it shows one specific, evidence-linked cue to try on the next set.
+Plumb turns an iPhone camera into a private technique mirror: after a supported set, it shows one evidence-linked cue when the view can support it.
 
 ## The story
 
 **The problem (0:00–0:35).** Most people train without anyone watching their form. A video tutorial can show an ideal movement, but it cannot tell you what changed in *your* last six reps. Recording yourself helps, yet reviewing every clip and knowing what to look for takes time and expertise.
 
-**The product (0:35–1:25).** Put your iPhone where it can see your full body, choose a supported exercise, and do a set. Plumb tracks visible joint motion on device. It identifies the reps, shows the evidence, and offers one short cue. The next set becomes a small experiment: did that observable pattern change? It speaks in plain language and tells you when the camera view is too weak to judge.
+**The product (0:35–1:25).** Put your iPhone where it can see your full body from the side and do a bodyweight squat set. Plumb tracks visible joint motion on device. It identifies the reps, shows the evidence, and offers one short cue when the view supports it. The next set becomes a small experiment: did that observable pattern change? It uses plain language and tells you when the camera view is too weak to judge.
 
-**The Apple ecosystem (1:25–1:55).** The iPhone camera is the core sensor. An optional Apple Watch can add workout and effort context. AirPods can deliver a quiet spoken cue; compatible AirPods heart-rate data may add context in a later, permissioned workout flow. Apple Foundation Models can make a validated observation easier to understand on supported devices, with a deterministic fallback everywhere else. The model does not invent the movement measurement.
+**The Apple ecosystem (1:25–1:55).** The iPhone camera is the core sensor. Vision estimates pose on device. On eligible iPhones, Foundation Models can reword the measured set-to-set comparison, with a deterministic fallback. The model does not invent the movement measurement. Watch workout context and AirPods audio are possible later additions; neither is needed for this first release.
 
 **Why Plumb (1:55–2:25).** Existing products offer classes, hardware-based form feedback, running analysis, or coach video review. Plumb's proposed wedge is a focused iPhone-only loop for self-directed strength training: evidence, one cue, another set, and visible progress. Privacy and uncertainty are part of that loop. We will test whether people find it useful enough to return and pay for a deeper history.
 
@@ -20,23 +20,23 @@ Plumb turns an iPhone camera into a private technique mirror: after a strength s
 
 ## Demo path
 
-1. Show the branded setup guide and side-view bodyweight squat selection.
-2. Frame the whole body and start a short set on a physical iPhone. If the venue makes live capture unreliable, introduce the fallback as a **recorded test set**.
-3. Show detected reps, the selected observation, its timestamp/rep evidence, and a confidence label.
-4. Show a second set with a change in the observed metric, or show the honest low-confidence retake path.
-5. Mention Watch, AirPods, and Foundation Models only at the level actually implemented in the build.
+1. Show the branded setup guide for the supported side-view bodyweight squat.
+2. Frame the whole body and start a short set on a physical iPhone. If live capture is unreliable, introduce a consented **recorded test set** or clearly label the Debug-only scripted feed as a **synthetic UI demonstration**.
+3. Show measured reps, the observation and its referenced rep numbers, plus the relative range and rep-time evidence. Explain that the app abstains when the view is too weak.
+4. Show a second set with a measured range change, or show the honest retake path. A synthetic comparison demonstrates the interface, not coaching accuracy.
+5. Describe Watch and AirPods as later work; explain that the optional Foundation Models feature only rewords a measured comparison on eligible devices.
 
 ## Judge questions
 
 **Is this a medical or injury-prevention app?** No. Plumb observes limited camera-visible movement patterns and offers general training cues. It does not diagnose pain, certify safety, prescribe weight, or replace a qualified professional.
 
-**Does the AI watch raw video and decide what good form is?** The proposed pipeline uses Vision pose points and exercise-specific rules for factual observations. Foundation Models may phrase a validated observation; if unavailable, reviewed templates work offline.
+**Does the AI watch raw video and decide what good form is?** No. Vision extracts pose points and a deterministic squat rule produces the measurement. Foundation Models may reword a measured comparison; if unavailable, reviewed templates work offline.
 
 **Can it coach live?** Post-set feedback is the first target. Live prompts are a later feature gated by tracking confidence, latency, and user testing so cues do not distract or mislead.
 
 **Do I need a Watch or AirPods?** No. The iPhone is enough for the core experience. Accessories add context or audio delivery, not the underlying pose measurement.
 
-**Why is a single-camera result trustworthy?** It is trustworthy only within a tested exercise and camera angle. Plumb links each cue to evidence and suppresses feedback when important joints are obscured. The team will measure agreement with annotated sets and expert review before broader claims.
+**Why is a single-camera result trustworthy?** Its accuracy has not yet been established on a physical iPhone. Plumb links each provisional cue to named reps and withholds feedback when important joints are obscured. The team must measure agreement with annotated sets and expert review before broader claims.
 
 **What is the business?** A proposed freemium allowance for analyzed sets and a paid tier for more analysis and comparison history. Pricing is a hypothesis, not a current subscription.
 

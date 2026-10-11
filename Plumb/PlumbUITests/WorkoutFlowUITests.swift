@@ -39,6 +39,7 @@ final class WorkoutFlowUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Compared with your previous set"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Camera-measured range was longer in set 2."].exists)
         capture(app, name: "Comparison")
         app.buttons["Explain comparison"].tap()
         XCTAssertTrue(app.staticTexts["Comparison note"].waitForExistence(timeout: 5))

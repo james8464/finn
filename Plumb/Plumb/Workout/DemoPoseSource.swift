@@ -8,6 +8,7 @@ final class DemoPoseSource: PoseStreaming {
     let previewSession = AVCaptureSession()
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var feedTask: Task<Void, Never>?
+    private var setNumber = 0
 
     func start() async throws -> AsyncStream<PoseFrame> {
         let stream = AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(3)) { continuation in
@@ -17,11 +18,13 @@ final class DemoPoseSource: PoseStreaming {
     }
 
     func prepareForSet() async {
+        setNumber += 1
+        let currentSet = setNumber
         feedTask = Task { @MainActor [weak self] in
             for index in 0...120 {
                 guard !Task.isCancelled else { return }
                 try? await Task.sleep(for: .milliseconds(25))
-                self?.continuation?.yield(Self.frame(index: index))
+                self?.continuation?.yield(Self.frame(index: index, setNumber: currentSet))
             }
         }
     }
@@ -33,9 +36,9 @@ final class DemoPoseSource: PoseStreaming {
         continuation = nil
     }
 
-    private static func frame(index: Int) -> PoseFrame {
+    private static func frame(index: Int, setNumber: Int) -> PoseFrame {
         let phase = Double(index % 20) / 20
-        let amplitude = index / 20 >= 4 ? 0.13 : 0.20
+        let amplitude = setNumber == 1 ? (index / 20 >= 4 ? 0.13 : 0.20) : 0.24
         let hipY = 0.42 + amplitude * (1 - cos(2 * .pi * phase)) / 2
         let joints: [BodyJoint: JointPoint] = [
             .leftHip: JointPoint(x: 0.47, y: hipY, confidence: 0.99),
