@@ -31,8 +31,8 @@ The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-ipho
 
 1. Choose an exercise and read a short setup card: phone on a stable surface, side view, entire body and equipment in frame, enough light, clear floor.
 2. Grant camera access when starting capture. Plumb checks framing and joint visibility before the set; it never starts analysis silently.
-3. Tap or use a short countdown to start. The phone records a set or processes frames without saving video, depending on the user's choice.
-4. After the set, Plumb displays rep count, a timeline, one prioritized observation, confidence, and a short clip or pose overlay only if footage was saved.
+3. Tap or use a short countdown to start. The first build analyses a live frame stream on the iPhone without saving a video. Optional clip saving is a later feature requiring a separate, explicit choice.
+4. After the set, Plumb displays rep count, a timeline, one prioritized observation, and the supporting measured reps. A later opt-in clip or temporary pose overlay may show a visual example once its privacy and accuracy have been tested.
 5. The person chooses **Try this next set**, **Not relevant**, or **Retake**. A follow-up set shows whether the observed pattern changed.
 6. Optional Apple Watch records workout context such as elapsed time and heart rate. Optional spoken cues play through the current audio output, including paired AirPods.
 
@@ -49,14 +49,14 @@ A side-view capture detects six reps. The last two show a shorter observed depth
 | AirPods | Optional spoken cue through normal system audio routing | No AirPods-only API or pairing requirement |
 | Apple Intelligence-capable device | Optional Foundation Models wording of structured observations | Availability check and deterministic text fallback |
 
-The Watch's heart rate describes effort context; it cannot prove whether a rep has good form. AirPods carry a cue; they do not measure pose. This distinction must remain clear in product copy.
+The Watch's heart rate describes effort context; it cannot prove whether a rep has good form. A later watchOS prototype could use timestamped accelerometer motion to test whether rep boundaries and tempo improve when camera evidence is weak. That requires synchronization, paired-device tests, and a measured advantage over iPhone-only analysis before it becomes a product claim. AirPods carry a cue; they do not measure pose. This distinction must remain clear in product copy.
 
 ## 3. Scope and priorities
 
 ### Prototype: one complete evidence loop
 
 - Branded iPhone app with camera permission, setup guidance, framing feedback, and a real capture session.
-- **Bodyweight squat, side view** as the first calibrated exercise. Count reps and calculate a limited set of observable, testable signals: depth-range consistency, rep tempo, and tracking confidence.
+- **Bodyweight squat, side view** as the first calibrated exercise. Count reps and calculate a limited set of observable, testable signals: camera-relative hip-range consistency, rep duration, and tracking confidence. A required setup instruction is not proof of the actual viewpoint; validation must count false measured outcomes from unsuitable front and three-quarter views.
 - A post-set summary with one evidence-linked cue, uncertainty language, and a second-set comparison.
 - On-device storage of exercise name, date, rep count, derived metrics, selected cue, and user response. Raw video is discarded by default.
 - A deterministic coaching template that works without Foundation Models or network access.
@@ -91,7 +91,7 @@ Cut Watch integration, then speech, then a second exercise. Keep real iPhone cap
 
 - **SwiftUI** for the iPhone experience; system text styles, Dynamic Type, VoiceOver labels, Dark Mode, and large workout controls.
 - **AVFoundation** for camera frames through `AVCaptureVideoDataOutput`. Discard late frames rather than building an unbounded processing queue.
-- **Vision** body-pose observations. Begin with 2D points and per-joint confidence; evaluate 3D pose where supported and useful. 3D estimates can use depth metadata when available but are not equivalent to clinical measurement.
+- **Vision** body-pose observations. Begin with timestamped 2D points and per-joint confidence from a live frame stream, not isolated still photos. Avoid universal joint-angle cutoffs: a 2D projection changes with camera viewpoint. [Apple's 3D body-pose API](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) is a later comparison candidate; it can use depth metadata when available but returns the most prominent person and does not by itself establish accuracy or bystander safety.
 - A **deterministic exercise engine** converts a time series of pose points into rep phases and observed metrics. It owns every factual coaching claim.
 - **Foundation Models**, if available, only summarizes a small structured observation and chooses wording from allowed cue categories. Check model availability at runtime; fallback to reviewed templates. Do not send raw video to a language model for the MVP.
 - **SwiftData or a small local store** for workout summaries and preferences. Raw clips are opt-in and deletable.
@@ -112,7 +112,11 @@ Camera frame
   → post-set cue + user response
 ```
 
-Each observation stores its exercise, camera angle, involved joints, confidence, metric, threshold version, and rep/time range. Thresholds are product hypotheses reviewed with trainers, not medical constants. The app should suppress a cue if the required joints are missing, a rep is incomplete, the camera moves, another person dominates the frame, or evidence conflicts.
+The fuller observation contract should include exercise, assessed viewpoint, involved joints, confidence, metric, threshold version, and rep/time range. The current prototype stores a smaller derived summary and does not claim to know its actual camera angle. Thresholds are product hypotheses reviewed with trainers, not medical constants. The app should suppress a cue if the required joints are missing, a rep is incomplete, the camera moves, another person dominates the frame, or evidence conflicts.
+
+**Viewpoint is an unresolved measurement gate.** The current side-view rubric uses relative 2D movement and joint visibility; it has no validated automatic test that the actual view is side-on. The validation sheet therefore separates the observed camera viewpoint from a specialist's suitability judgment and counts measured results on unsuitable views. Only after labeled front, side, and three-quarter sets exist should the team test a geometric view classifier or a [Vision 3D](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) variant against the frozen iPhone-only baseline. A poor view should produce a retake request, never a confident range or technique claim.
+
+**Research sequence after the first build:** benchmark 3D pose and any camera-view classifier on real devices, then test personal calibration against expert-labeled sound reps, and finally compare synchronized Watch accelerometer plus camera data with camera-only rep boundaries and tempo. Personal calibration can detect within-person drift; it cannot establish that the baseline rep was technically sound. Temporary best/worst pose overlays could help explain a cue, but storing any frame, even briefly in memory, requires an explicit on-screen privacy description, bystander handling, and deletion at set end. These are experiments, not implemented features or a reason to broaden the first-build claim.
 
 ### Initial exercise rubric to validate
 
@@ -169,7 +173,7 @@ The first acquisition wedge is a useful shareable *result*, not a social feed: a
 - Interview at least 6 self-directed lifters and 3 qualified trainers about camera setup, cue usefulness, and willingness to retake a set.
 - Record at least 30 consenting test sets across varied participants and settings for the first exercise; annotate rep boundaries and whether each proposed cue is visible. This is a minimum learning set, not a claim of statistical validation.
 - Review every initial cue with a qualified trainer or movement specialist and document disagreements.
-- Compare Plumb's rep count and cue labels against human annotations. Break results down by lighting, angle, occlusion, body size, and device.
+- Compare Plumb's rep count and cue labels against human annotations. Break results down by lighting, actual camera viewpoint, occlusion, body size, and device. Count every measured result on a specialist-labeled unsuitable view; reporting only rejected bad views would hide false confidence.
 - Run a usability test: can a first-time user set up the phone, complete a set, understand the cue, and try it again without help?
 
 ### Internal gates

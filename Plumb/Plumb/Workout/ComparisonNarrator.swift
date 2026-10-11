@@ -79,16 +79,28 @@ final class ComparisonNarrator {
     private func isValid(_ generated: GeneratedRecap, for comparison: Comparison) -> Bool {
         let text = generated.explanation.trimmingCharacters(in: .whitespacesAndNewlines)
         let lower = text.lowercased()
+        let words = Set(lower.split(whereSeparator: { !$0.isLetter }).map(String.init))
         guard !text.isEmpty, text.count <= 180,
               generated.evidenceRepNumbers.sorted() == comparison.cueRepNumbers.sorted(),
               !text.contains(where: \.isNumber),
-              !["safe", "injury", "pain", "medical", "diagnos", "knee", "hip", "spine", "percent", "degree"]
+              text.hasSuffix("."), text.filter({ $0 == "." }).count == 1,
+              !text.contains("?"), !text.contains("!"), !text.contains("\n"),
+              !words.contains("not"), !words.contains("never"), !lower.contains("n't"),
+              !["safe", "injury", "pain", "medical", "diagnos", "knee", "hip", "spine", "ankle", "back", "percent", "degree",
+                "better", "worse", "improv", "perfect", "techniq", "form", "try ", "should ", "must ", "need ", "aim ", "focus ",
+                "more", "less", "increase", "decrease"]
                 .contains(where: lower.contains),
               lower.contains("range") else { return false }
         switch comparison.rangeDirection {
-        case .longer: return lower.contains("longer")
-        case .shorter: return lower.contains("shorter")
-        case .noClearChange: return lower.contains("no clear")
+        case .longer:
+            return lower.contains("range was longer") && lower.contains("second set") &&
+                !words.contains("shorter") && !lower.contains("no clear")
+        case .shorter:
+            return lower.contains("range was shorter") && lower.contains("second set") &&
+                !words.contains("longer") && !lower.contains("no clear")
+        case .noClearChange:
+            return lower.contains("no clear") && lower.contains("range change") &&
+                lower.contains("sets") && !words.contains("longer") && !words.contains("shorter")
         }
     }
 }
@@ -109,8 +121,9 @@ private final class AppleRecapGenerator: RecapGenerating {
     func generate(for comparison: Comparison) async throws -> GeneratedRecap {
         let instructions = """
             Rewrite only the supplied camera-measured squat-set comparison in one plain sentence.
-            Use the word range and preserve its direction exactly. Do not add measurements, body-part
-            diagnoses, safety claims, advice, or numbers in the sentence. Return the evidence rep
+            Say "range was longer/shorter in the second set" when the direction is longer/shorter,
+            or "no clear range change between sets" when there is no clear change. Do not add
+            measurements, body-part diagnoses, safety claims, advice, or numbers. Return the evidence rep
             numbers exactly as supplied, without adding or removing any.
             """
         let prompt = """

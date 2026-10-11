@@ -9,10 +9,10 @@ from pathlib import Path
 
 COLUMNS = (
     "set_id participant_id split consent_version capture_date device_model ios_build "
-    "app_commit rubric_version camera orientation side distance_m camera_height_cm "
+    "app_commit rubric_version camera orientation side view_category distance_m camera_height_cm "
     "lighting clothing_contrast body_visible bystander setup_attempts reference_method "
     "human_reps_a human_reps_b adjudicated_reps app_outcome app_reps cue_kind "
-    "cue_rep_numbers expert_supported expert_show expert_unassessable "
+    "cue_rep_numbers expert_supported expert_show expert_unassessable expert_view_suitable "
     "result_latency_ms capture_duration_s interruption thermal_issue failure_reason notes"
 ).split()
 RUBRIC = "squat-side-v1"
@@ -70,10 +70,15 @@ def evaluate(rows):
             "measured", "insufficient_view", "failed", "interrupted"
         }:
             raise ValidationError(f"{set_id}: invalid app_outcome")
+        if row.get("view_category", "").strip() not in {
+            "side", "three_quarter", "front", "unclear"
+        }:
+            raise ValidationError(f"{set_id}: invalid view_category")
         for field in ("body_visible", "bystander"):
             if row.get(field, "").strip() not in {"yes", "no"}:
                 raise ValidationError(f"{set_id}: {field} must be yes or no")
-        for field in ("expert_supported", "expert_show", "expert_unassessable"):
+        for field in ("expert_supported", "expert_show", "expert_unassessable",
+                      "expert_view_suitable"):
             if row.get(field, "").strip() not in {"", "yes", "no"}:
                 raise ValidationError(f"{set_id}: {field} must be yes, no, or blank")
         for field in ("setup_attempts", "human_reps_a", "human_reps_b", "adjudicated_reps", "app_reps", "result_latency_ms"):
@@ -140,9 +145,14 @@ def evaluate(rows):
     timely = sum(_number(row, "result_latency_ms") <= 5000 for row in timed)
     rejected = [row for row in holdout if row["app_outcome"] == "insufficient_view"]
     abstention_reviewed = [row for row in rejected if row.get("expert_unassessable", "").strip()]
+    view_labels_complete = all(row.get("expert_view_suitable", "").strip() for row in holdout)
+    unsuitable = [row for row in holdout if row.get("expert_view_suitable") == "no"]
+    unsuitable_measured = sum(row["app_outcome"] == "measured" for row in unsuitable)
+    view_status = ("unverified" if not holdout or not view_labels_complete else
+                   "not measurable" if not unsuitable else "reported")
 
     breakdown = {}
-    for field in ("device_model", "lighting", "side"):
+    for field in ("device_model", "lighting", "side", "view_category"):
         groups = defaultdict(list)
         for row in holdout:
             groups[row[field]].append(row)
@@ -175,6 +185,7 @@ def evaluate(rows):
         "abstention": _metric(sum(row["expert_unassessable"] == "yes" for row in abstention_reviewed),
                               len(rejected), "reported" if len(abstention_reviewed) == len(rejected)
                               and rejected else "unverified"),
+        "unsuitable_view_acceptance": _metric(unsuitable_measured, len(unsuitable), view_status),
         "breakdown": breakdown, "failures": failures,
     }
 
@@ -190,7 +201,8 @@ def render_report(result):
     labels = (("setup", "Setup within two attempts"), ("rep_count", "Exact rep count"),
               ("cue_agreement", "Cue agreement"), ("cue_reviews", "Cue reviews complete"),
               ("cue_coverage", "Cue coverage"), ("latency", "Results within 5 seconds"),
-              ("abstention", "Reviewer agrees with view rejection"))
+              ("abstention", "Reviewer agrees with view rejection"),
+              ("unsuitable_view_acceptance", "Measured on unsuitable view (lower is better)"))
     for key, label in labels:
         metric = result[key]
         lines.append(f"| {label} | {metric['numerator']} / {metric['denominator']} | "
