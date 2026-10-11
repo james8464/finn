@@ -41,15 +41,15 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(deny.waitForExistence(timeout: 10))
         deny.tap()
 
-        XCTAssertTrue(app.staticTexts["Allow camera access in Settings to record a set."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Allow camera access in Settings to analyze a set."].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Open Settings"].exists)
         XCTAssertTrue(app.buttons["Try again"].exists)
-        XCTAssertFalse(app.staticTexts["Recording"].exists)
+        XCTAssertFalse(app.staticTexts["Analyzing live"].exists)
         try app.performAccessibilityAudit()
 
         app.buttons["Try again"].tap()
-        XCTAssertTrue(app.staticTexts["Allow camera access in Settings to record a set."].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.staticTexts["Recording"].exists)
+        XCTAssertTrue(app.staticTexts["Allow camera access in Settings to analyze a set."].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Analyzing live"].exists)
     }
 
     @MainActor
@@ -72,6 +72,8 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
         XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        XCTAssertTrue(app.staticTexts["Analyzing live"].exists)
+        XCTAssertFalse(app.staticTexts["Recording"].exists)
         try app.performAccessibilityAudit()
         Thread.sleep(forTimeInterval: 4)
         stop.tap()

@@ -17,7 +17,7 @@ Plumb uses your iPhone camera to review a bodyweight squat from the side. Set yo
 
 Your workout video is not saved. Derived set summaries are stored locally in Plumb, and you can delete them in the app. On eligible devices, Apple Intelligence can help phrase a measured comparison; reviewed wording is always available when it cannot.
 
-Plumb observes one camera angle. It cannot assess every part of your movement, diagnose an injury, or guarantee safe technique. It will ask for a retake when the view is too weak.
+Plumb observes one camera angle. It cannot assess every part of your movement, diagnose an injury, or guarantee safe technique. It asks for a retake when required joints or complete repetitions are missing. It cannot yet verify that every camera position is suitable for a side-view measurement.
 
 ## What's new, version 1.0
 

@@ -198,8 +198,8 @@ struct ContentView: View {
     private var status: some View {
         HStack(spacing: 10) {
             if model.isRecording {
-                Circle().fill(.red).frame(width: 11, height: 11)
-                Text("Recording")
+                Image(systemName: "viewfinder")
+                Text("Analyzing live")
             } else {
                 Image(systemName: "viewfinder")
                 Text(model.stage == .framing ? "Position your phone" : "Get ready")
