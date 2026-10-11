@@ -108,10 +108,10 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 **Interfaces:** `CameraPoseSource.start() async throws -> AsyncStream<PoseFrame>` checks `.video` authorization and owns `AVCaptureSession`; `stop()` ends capture and finishes the stream. The preview displays the same session. It reports denied, unavailable, and interrupted states distinctly.
 
-- [ ] Write tests `cameraDenied`, `cameraUnavailable`, `captureInterrupted`, and `restartAfterStop` with an injected authorization/capture seam. Assert denied capture throws before session start, interruption finishes the stream, and `#expect((nextAttempt.first?.time ?? .infinity) < 0.2)` so the second attempt has a fresh time base.
-- [ ] Run unit tests and confirm failure.
-- [ ] Add `NSCameraUsageDescription` with a plain reason for on-device movement analysis and set `TARGETED_DEVICE_FAMILY = 1` in both app configurations, retaining iOS 27.0. Start with the front camera so the person can see framing; do not mirror the analysis coordinates. Configure `AVCaptureVideoDataOutput` on a serial queue with late-frame discard and a maximum 15 pose samples per second; run `VNDetectHumanBodyPoseRequest` and emit only normalized joints, counts, confidence, and timestamps. Handle camera orientation in the coordinate conversion. At two minutes, stop capture and finish analysis rather than growing the trace further.
-- [ ] Run unit tests and a simulator build; then check a physical iPhone for preview orientation, camera interruption, and bounded memory. Commit this task.
+- [x] Write tests `cameraDenied`, `cameraUnavailable`, `captureInterrupted`, and `restartAfterStop` with an injected authorization/capture seam. The second attempt starts at time zero; a fifth test checks the two-minute cap.
+- [x] Run unit tests and confirm the missing capture protocol fails compilation before implementation.
+- [x] Add `NSCameraUsageDescription` with a plain reason for on-device movement analysis and set `TARGETED_DEVICE_FAMILY = 1` in both app configurations, retaining iOS 27.0. Use the front camera, unmirrored analysis coordinates, serial video output with late-frame discard, at most 15 Vision samples per second, and only normalized pose records. Capture stops at two minutes. Portrait rotation is configured but still requires physical-device confirmation.
+- [ ] Run unit tests and a simulator build; then check a physical iPhone for preview orientation, camera interruption, and bounded memory. The full iOS 27 simulator suite passed (22 tests, 0 failures) on 11 October; physical iPhone 16 Pro Max was listed as unavailable to Xcode, so the device check remains open.
 
 ## Task 4: One complete SwiftUI set
 
