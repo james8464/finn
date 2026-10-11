@@ -6,8 +6,10 @@ struct ContentView: View {
     @State private var model: WorkoutSessionModel
     @State private var deleteCandidate: UUID?
 
-    @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore()) {
-        _model = State(initialValue: WorkoutSessionModel(source: source, store: store))
+    @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore(),
+                    narrator: ComparisonNarrator? = nil) {
+        _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
+                                                         narrator: narrator))
     }
 
     var body: some View {
@@ -242,6 +244,22 @@ struct ContentView: View {
             .font(.subheadline.weight(.semibold))
             Text("This comparison describes one camera-visible measure, not overall technique or safety.")
                 .font(.footnote).foregroundStyle(.secondary)
+            if let recap = model.comparisonRecap {
+                Text(recap.text)
+                    .font(.subheadline)
+                if recap.source == .appleIntelligence {
+                    Text("Worded with Apple Intelligence")
+                        .font(.caption).foregroundStyle(.secondary)
+                } else {
+                    Text("Comparison note")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            } else if model.isGeneratingRecap {
+                ProgressView("Writing comparison note")
+            } else {
+                Button("Explain comparison") { Task { await model.explainComparison() } }
+                    .buttonStyle(.bordered)
+            }
         }
         .padding(.vertical, 12)
     }

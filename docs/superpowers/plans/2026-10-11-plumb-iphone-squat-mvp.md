@@ -141,10 +141,10 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 **Interfaces:** `ComparisonNarrator.recap(for: Comparison) async -> Recap` returns a short, typed recap plus `.appleIntelligence` or `.template` provenance. The model sees only the two set summaries, accepted metric delta, cue category, and evidence rep numbers. It never sees pixels, raw pose frames, or Health data.
 
-- [ ] Write failing tests `unavailableModelUsesTemplate`, `invalidReferenceUsesTemplate`, `timeoutUsesTemplate`, and `validGeneratedRecap`. Assert all four preserve the same deterministic measured facts; a generated recap with unknown rep numbers or new numeric claims is discarded.
-- [ ] Run unit tests and confirm failure. On a real Apple Intelligence-eligible iPhone, confirm `SystemLanguageModel.default.availability` before attempting generation; simulator success alone does not count.
-- [ ] Implement a small `@Generable` response with one plain-language explanation and an evidence-rep list. Validate the list against the selected `Comparison`, reject unsupported numbers and medical/safety language, cap output length, and fall back to reviewed template copy on unavailability, error, or timeout. Show a subtle “Worded with Apple Intelligence” label only when generated wording is actually used; facts remain visible separately.
-- [ ] Rerun tests and review generated outputs against a fixed prompt set, including poor tracking and no-clear-change cases. Commit this task. If the core camera loop is behind schedule, keep the template and move this task behind Task 8 rather than shipping an unreliable AI feature.
+- [x] Write failing tests for unavailable model, invalid rep reference, unsupported claim, timeout, and valid generated wording. The recap always carries the same deterministic comparison facts.
+- [ ] Run unit tests and confirm failure. The missing narrator failed compilation, then five focused tests passed. A real Apple Intelligence-eligible iPhone is still needed to verify availability and actual output.
+- [x] Implement a small `@Generable` response with one plain-language explanation and an evidence-rep list. Validate direction, references, length, numeric and medical/safety terms; fall back to reviewed copy on unavailability, error, or timeout. Label generated wording only when used; measured facts stay visible separately.
+- [ ] Rerun the full suite and review real generated outputs against a fixed prompt set, including poor tracking and no-clear-change cases. The full iOS 27 simulator suite passed 46 tests on 11 October; eligible-device output review remains open. Do not present simulated fallback as a successful model run.
 
 ## Task 7: Validation and demo gate
 

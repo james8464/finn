@@ -25,6 +25,7 @@ nonisolated enum WorkoutResult {
 final class WorkoutSessionModel {
     private let source: any PoseStreaming
     @ObservationIgnored private let store: (any SessionStoring)?
+    @ObservationIgnored private let narrator: ComparisonNarrator
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
     private var isStopping = false
@@ -37,12 +38,16 @@ final class WorkoutSessionModel {
     private(set) var comparison: Comparison?
     private(set) var history: [WorkoutSessionSummary] = []
     private(set) var historyError = false
+    private(set) var comparisonRecap: Recap?
+    private(set) var isGeneratingRecap = false
     var isRecording: Bool { stage == .capturing }
     var previewSession: AVCaptureSession { source.previewSession }
 
-    init(source: any PoseStreaming, store: (any SessionStoring)? = nil) {
+    init(source: any PoseStreaming, store: (any SessionStoring)? = nil,
+         narrator: ComparisonNarrator? = nil) {
         self.source = source
         self.store = store
+        self.narrator = narrator ?? ComparisonNarrator()
         if let store {
             do { history = try store.load() }
             catch { historyError = true }
@@ -145,6 +150,7 @@ final class WorkoutSessionModel {
         await cancel()
         currentSession = nil
         comparison = nil
+        comparisonRecap = nil
     }
 
     func deleteHistory(id: UUID) {
@@ -173,10 +179,19 @@ final class WorkoutSessionModel {
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered
         ))
         currentSession = session
+        comparisonRecap = nil
         if session.sets.count >= 2 {
             comparison = SetComparison.compare(session.sets[session.sets.count - 2], session.sets.last!)
         }
         save(session)
+    }
+
+    func explainComparison() async {
+        guard let comparison, !isGeneratingRecap else { return }
+        isGeneratingRecap = true
+        let recap = await narrator.recap(for: comparison)
+        if self.comparison == comparison { comparisonRecap = recap }
+        isGeneratingRecap = false
     }
 
     private func save(_ session: WorkoutSessionSummary) {

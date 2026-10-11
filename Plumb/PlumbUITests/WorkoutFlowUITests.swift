@@ -25,6 +25,8 @@ final class WorkoutFlowUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Compared with your previous set"].waitForExistence(timeout: 5))
+        app.buttons["Explain comparison"].tap()
+        XCTAssertTrue(app.staticTexts["Comparison note"].waitForExistence(timeout: 5))
     }
 
     @MainActor

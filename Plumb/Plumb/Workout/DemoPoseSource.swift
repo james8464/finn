@@ -47,3 +47,11 @@ final class DemoPoseSource: PoseStreaming {
         return PoseFrame(time: Double(index) * 0.1, subjectCount: 1, joints: joints)
     }
 }
+
+@MainActor
+final class DemoRecapGenerator: RecapGenerating {
+    var available: Bool { false }
+    func generate(for comparison: Comparison) async throws -> GeneratedRecap {
+        GeneratedRecap(explanation: "", evidenceRepNumbers: [])
+    }
+}

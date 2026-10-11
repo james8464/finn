@@ -14,6 +14,8 @@ nonisolated struct Comparison: Codable, Equatable {
     let firstMedianDuration: TimeInterval
     let secondMedianDuration: TimeInterval
     let rangeDirection: RangeDirection
+    let cueRepNumbers: [Int]
+    let cueKind: CueKind?
 }
 
 nonisolated enum SetComparison {
@@ -44,7 +46,9 @@ nonisolated enum SetComparison {
             secondMedianRange: secondRange,
             firstMedianDuration: median(first.analysis.reps.map(\.duration)),
             secondMedianDuration: median(second.analysis.reps.map(\.duration)),
-            rangeDirection: direction
+            rangeDirection: direction,
+            cueRepNumbers: second.cue?.repNumbers ?? [],
+            cueKind: second.cue?.kind
         )
     }
 
