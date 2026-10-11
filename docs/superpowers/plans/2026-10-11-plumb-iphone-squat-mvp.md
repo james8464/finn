@@ -111,6 +111,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 - [x] Write tests `cameraDenied`, `cameraUnavailable`, `captureInterrupted`, and `restartAfterStop` with an injected authorization/capture seam. The second attempt starts at time zero; a fifth test checks the two-minute cap.
 - [x] Run unit tests and confirm the missing capture protocol fails compilation before implementation.
 - [x] Add `NSCameraUsageDescription` with a plain reason for on-device movement analysis and set `TARGETED_DEVICE_FAMILY = 1` in both app configurations, retaining iOS 27.0. Use the front camera, unmirrored analysis coordinates, serial video output with late-frame discard, at most 15 Vision samples per second, and only normalized pose records. Capture stops at two minutes. Portrait rotation is configured but still requires physical-device confirmation.
+- [x] Reset the two-minute timer when the set begins, so time spent positioning the camera in preview does not consume the recording limit. The focused camera tests and full 50-test iOS 27 simulator suite pass.
 - [ ] Run unit tests and a simulator build; then check a physical iPhone for preview orientation, camera interruption, and bounded memory. The full iOS 27 simulator suite passed (22 tests, 0 failures) on 11 October; physical iPhone 16 Pro Max was listed as unavailable to Xcode, so the device check remains open.
 
 ## Task 4: One complete SwiftUI set
@@ -166,7 +167,7 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 - [ ] Confirm Apple Developer Program membership, App Store Connect role, signing team, bundle ID ownership, and a physical iOS 27 test iPhone early. Xcode team ID is configured, but membership/distribution rights are unconfirmed; James indicated he can purchase the membership. Physical iPhone 16 Pro Max is listed as unavailable to Xcode.
 - [ ] Draft truthful listing copy and capture screenshots only from implemented screens. Listing, support, privacy, and App Review note drafts now exist in `docs/release`; public HTTPS URLs, publisher/contact fields, final App Privacy answers, and real screenshots remain open.
-- [ ] Run a Release build and physical-device smoke pass: first launch, permission denied/recovered, set capture, retake, comparison, delete, no-network fallback, and background interruption. An unsigned iPhone Release build succeeds and 49 simulator tests pass; physical-device smoke pass remains open.
+- [ ] Run a Release build and physical-device smoke pass: first launch, permission denied/recovered, set capture, retake, comparison, delete, no-network fallback, and background interruption. An unsigned iPhone Release build succeeds and 50 simulator tests pass; physical-device smoke pass remains open.
 - [ ] Archive, upload, and select the build in App Store Connect; complete metadata and review notes. Record the actual status: uploaded, ready for review, submitted, or approved. Do not describe an upload as App Review approval. Submission is a team/account action and may require the account holder's credentials.
 
 ## Subsequent plans, after the iPhone gate

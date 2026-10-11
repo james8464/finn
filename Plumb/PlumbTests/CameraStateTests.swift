@@ -72,11 +72,31 @@ struct CameraStateTests {
         var iterator = stream.makeAsyncIterator()
         driver.emit(frame(time: 25))
         #expect(await iterator.next()?.time == 0)
+        await source.prepareForSet()
         driver.emit(frame(time: 145))
+        #expect(await iterator.next()?.time == 0)
+        driver.emit(frame(time: 265))
         #expect(await iterator.next()?.time == 120)
         #expect(await iterator.next() == nil)
         #expect(source.state == .idle)
         #expect(source.endedAtLimit)
+    }
+
+    @Test func previewTimeDoesNotConsumeSetLimit() async throws {
+        let driver = FakeCaptureDriver()
+        let source = CameraPoseSource(authorize: { true }, driver: driver)
+        let stream = try await source.start()
+        var iterator = stream.makeAsyncIterator()
+        driver.emit(frame(time: 10))
+        _ = await iterator.next()
+        driver.emit(frame(time: 200))
+        _ = await iterator.next()
+        #expect(source.state == .running)
+        #expect(!source.endedAtLimit)
+        await source.prepareForSet()
+        driver.emit(frame(time: 205))
+        #expect(await iterator.next()?.time == 0)
+        await source.stop()
     }
 
     @Test func cancellingPermissionPromptDoesNotOpenCamera() async throws {

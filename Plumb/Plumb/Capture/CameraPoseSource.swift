@@ -43,6 +43,7 @@ final class CameraPoseSource: PoseStreaming {
     private var runID: UUID?
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var forwardTask: Task<Void, Never>?
+    private var isSetActive = false
 
     private(set) var state: CameraSourceState = .idle
     private(set) var endedAtLimit = false
@@ -61,6 +62,10 @@ final class CameraPoseSource: PoseStreaming {
             default: return false
             }
         }, driver: AVCameraCaptureDriver())
+    }
+
+    func prepareForSet() async {
+        if state == .running { isSetActive = true }
     }
 
     func start() async throws -> AsyncStream<PoseFrame> {
@@ -91,23 +96,31 @@ final class CameraPoseSource: PoseStreaming {
             throw CameraSourceError.cancelled
         }
         endedAtLimit = false
+        isSetActive = false
         state = .running
         let stream = AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(3)) { continuation in
             self.continuation = continuation
         }
         forwardTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            var firstTime: TimeInterval?
+            var previewFirstTime: TimeInterval?
+            var setFirstTime: TimeInterval?
             for await frame in backendStream {
                 guard self.runID == currentID else { break }
-                if firstTime == nil { firstTime = frame.time }
-                let elapsed = max(0, frame.time - (firstTime ?? frame.time))
+                let elapsed: TimeInterval
+                if self.isSetActive {
+                    if setFirstTime == nil { setFirstTime = frame.time }
+                    elapsed = max(0, frame.time - (setFirstTime ?? frame.time))
+                } else {
+                    if previewFirstTime == nil { previewFirstTime = frame.time }
+                    elapsed = max(0, frame.time - (previewFirstTime ?? frame.time))
+                }
                 self.continuation?.yield(PoseFrame(
                     time: elapsed,
                     subjectCount: frame.subjectCount,
                     joints: frame.joints
                 ))
-                if elapsed >= 120 {
+                if self.isSetActive && elapsed >= 120 {
                     self.endedAtLimit = true
                     await self.stop()
                     break
@@ -127,6 +140,7 @@ final class CameraPoseSource: PoseStreaming {
     func stop() async {
         runID = nil
         state = .idle
+        isSetActive = false
         continuation?.finish()
         continuation = nil
         forwardTask?.cancel()
