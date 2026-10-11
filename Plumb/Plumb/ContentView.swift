@@ -350,6 +350,7 @@ struct ContentView: View {
                 ProgressView(value: min(1, rep.normalizedHipTravel / 0.6))
                     .tint(.secondary)
                     .accessibilityLabel("Relative camera-observed range for rep \(rep.number)")
+                    .accessibilityValue(rep.normalizedHipTravel.formatted(.number.precision(.fractionLength(2))))
                 Divider()
             }
         }
