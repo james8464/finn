@@ -148,11 +148,12 @@ Provisional `SquatRubric.v1` starting values: required joint confidence ≥0.6 o
 
 ## Task 7: Validation and demo gate
 
-**Files:** Create `docs/validation/squat-v1-protocol.md` and `docs/validation/squat-v1-results.md`; update `README.md` and `planning.md` with measured status only.
+**Files:** Create `docs/validation/squat-v1-protocol.md`, `docs/validation/squat-v1-template.csv`, `docs/validation/score_squat_v1.py`, and `docs/validation/squat-v1-results.md`; update `README.md` and `planning.md` with measured status only.
 
 **Interfaces:** A frozen `SquatRubric.v1` plus annotated set fixtures yields a reproducible report: setup success, exact-match rep count, emitted-cue coverage and expert agreement, post-set latency, device/lighting breakdown, and failure examples.
 
 - [x] Write the annotation protocol before tuning: consent, device/iOS, angle, distance/height, lighting, body visibility, human rep boundaries, and expert cue judgment. Keep participants separate between tuning and holdout.
+- [x] Add a blank collection template and reproducible holdout scorer. It rejects split leaks and mixed commits, shows denominator and breakdowns, and cannot pass incomplete or underpowered gates. No participant data has been entered.
 - [ ] Capture at least 30 consenting squat sets, including difficult views, and have a qualified trainer or movement specialist review every emitted cue category. Mark any recording used for the demo as recorded.
 - [ ] Run the full `PlumbTests` and `PlumbUITests` suites, then measure the spec's proposed gates on physical devices: setup 80% within two attempts, rep count 90% exact-match, emitted-cue agreement 80%, and result within 5 seconds. Record coverage alongside cue agreement.
 - [ ] If a gate fails, suppress the affected claim and keep the honest retake path; any *presentation* fallback must be explicitly introduced as a recorded test set. Publish the measured result and remaining limits in `squat-v1-results.md`; update project status, then commit.

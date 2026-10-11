@@ -30,7 +30,7 @@ The facilitator gives the same setup instruction shown in the app, then lets the
 
 ## Sheet columns
 
-`set_id, participant_id, split, consent_version, device_model, ios_build, app_commit, rubric_version, side, distance_m, camera_height_cm, lighting, body_visible, bystander, setup_attempts, reference_method, human_reps_a, human_reps_b, adjudicated_reps, app_outcome, app_reps, cue_kind, cue_rep_numbers, expert_supported, expert_show, result_latency_ms, capture_duration_s, failure_reason, notes`.
+Use [`squat-v1-template.csv`](squat-v1-template.csv). It includes the capture matrix above, the two original human counts, the adjudicated count, and the specialist's cue and view-rejection judgments. Keep one row per attempted set, including unusable and interrupted sets. Use `tuning` or `holdout` for `split`; `measured`, `insufficient_view`, `failed`, or `interrupted` for `app_outcome`; and `yes` or `no` for judgment fields. For an emitted cue, use `rangeDecreased` for `cue_kind` and semicolon-separated one-based app rep numbers (for example `5;6`) for `cue_rep_numbers`. Leave `adjudicated_reps` blank only when the reference is genuinely uncountable. Leave `app_reps` blank unless the outcome is `measured`. Use milliseconds from Stop to the final result for `result_latency_ms`. The app commit and `squat-side-v1` rubric must stay fixed throughout the holdout.
 
 Do not put names, email addresses, raw frames, clip URLs, or reference video in this sheet. Keep a separate consent ledger under team control.
 
@@ -46,6 +46,16 @@ Compute each metric on the holdout, plus a breakdown by device, lighting, side, 
 | Cue coverage | Sets with an emitted cue / usable sets | Report; no target yet |
 | Result latency | Stop tap to final result, measured on physical iPhone | ≤5 seconds for the proposed demo gate |
 | Abstention accuracy | Rejected difficult views that the reviewer agrees are unassessable / rejected views | Report |
+
+At least 18 **countable holdout sets** are needed before the exact-count gate can pass; the 18-set holdout minimum alone can include uncountable views. A cue agrees only when the specialist marks both the observation supported and the wording worth showing. The cue-agreement gate needs at least five emitted, reviewed holdout cues; every emitted cue needs both judgments. This minimum is a practical evidence floor, not a statistical confidence claim. A measured result needs a latency value before the five-second gate can pass. Missing evidence is unverified, never a pass.
+
+Run the standard-library scorer against a copy of the template containing consented rows:
+
+```sh
+python3 docs/validation/score_squat_v1.py path/to/consented-sets.csv --output path/to/holdout-report.md
+```
+
+The scorer refuses to overwrite an existing report, rejects mixed app commits or participants in both splits, and prints holdout metrics and device/lighting/side breakdowns. Keep consented participant data outside the public repository unless the team has explicit permission to publish it. Copy verified summary counts into [`squat-v1-results.md`](squat-v1-results.md) after specialist review.
 
 For a zero-cue holdout, agreement is **not measurable**, not 100%. Report misses and false confidence separately. If a gate fails, narrow or suppress the affected claim and retain the retake path. Do not tune to the holdout result and still call it holdout performance.
 

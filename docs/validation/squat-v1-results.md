@@ -16,3 +16,5 @@
 | Foundation Models real-output review | Not measured on an eligible device |
 
 Follow [`squat-v1-protocol.md`](squat-v1-protocol.md) before entering results. Record numerator/denominator and device breakdown for every metric. Keep failures in the report, including view rejection, bystanders, dropped frames, and any misleading cue. Do not replace missing results with simulator or scripted trace numbers.
+
+The [blank collection template](squat-v1-template.csv) and [scorer](score_squat_v1.py) are ready. No participant sheet has been scored; all gates remain unverified.
