@@ -1,6 +1,6 @@
-# Plumb support — publication draft
+# Plumb support
 
-- **Public contact:** [support email pending]
+- **Public contact:** jamesdurup@icloud.com
 **Supported release:** iPhone, iOS 27 or later, bodyweight squat from a side view.
 
 ## Set up a squat review
@@ -24,4 +24,4 @@ Plumb does not save a workout movie. Set summaries are saved in the app's local 
 - **No measured result:** improve lighting, keep only one person in view, and keep hip, knee, and ankle visible.
 - **Apple Intelligence note unavailable:** the app shows a reviewed comparison note on unsupported or unready devices.
 
-For help, contact [support email pending].
+For help, contact jamesdurup@icloud.com.

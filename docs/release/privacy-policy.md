@@ -1,11 +1,9 @@
-# Plumb privacy policy — publication draft
+# Plumb privacy policy
 
-**Draft updated 11 October 2026. Do not publish until the publisher name, contact address, public URL, and release build are confirmed.**
+**Effective date:** 11 October 2026. This policy describes the current iPhone release candidate; recheck the final signed upload before App Store submission.
 
-- **Publisher:** [legal publisher name pending]
-- **Contact:** [public support email pending]
-
-**Effective date:** [publication date pending]
+- **Publisher:** James Durup
+- **Contact:** jamesdurup@icloud.com
 
 Plumb is an iPhone workout companion for reviewing a bodyweight squat from a side view. It works without an account.
 
@@ -29,6 +27,6 @@ The current release candidate has no account, advertising SDK, third-party analy
 
 ## Your choices and contact
 
-You can deny camera access or change it in iOS Settings; without camera access, live set review is unavailable. You can delete local results in the app. For questions about this policy or data handling, contact [public support email pending].
+You can deny camera access or change it in iOS Settings; without camera access, live set review is unavailable. You can delete local results in the app. For questions about this policy or data handling, contact jamesdurup@icloud.com.
 
-The team will update this policy when features or data practices change. This draft covers the app's current implementation, not separately consented research recordings used to validate the product.
+This policy will be updated when features or data practices change. It covers the app's current implementation, not separately consented research recordings used to validate the product.
