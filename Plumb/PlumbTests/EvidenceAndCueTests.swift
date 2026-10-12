@@ -28,6 +28,32 @@ struct EvidenceAndCueTests {
         #expect(EvidenceGate.assess(frames) == .reject(.multiplePeople))
     }
 
+    @Test func rejectsBriefSustainedBystanderInLongSet() {
+        let frames = clearTrace(sampleCount: 101).enumerated().map { index, frame in
+            (40...44).contains(index)
+                ? PoseFrame(time: frame.time, subjectCount: 2, joints: frame.joints)
+                : frame
+        }
+        #expect(EvidenceGate.assess(frames) == .reject(.multiplePeople))
+        #expect(SquatAnalyzer.analyze(frames) == .insufficientView(
+            "Another person was in view. Keep only yourself in frame and try again."
+        ))
+    }
+
+    @Test func isolatedExtraPersonDetectionDoesNotDiscardSet() {
+        let frames = clearTrace().enumerated().map { index, frame in
+            index == 15 ? PoseFrame(time: frame.time, subjectCount: 2, joints: frame.joints) : frame
+        }
+        #expect(EvidenceGate.assess(frames) == .usable(.left))
+    }
+
+    @Test func noPersonIsNotReportedAsBystander() {
+        let frames = clearTrace().map { frame in
+            PoseFrame(time: frame.time, subjectCount: 0, joints: [:])
+        }
+        #expect(EvidenceGate.assess(frames) == .reject(.missingJoints))
+    }
+
     @Test func rejectsShortTrace() {
         #expect(EvidenceGate.assess(Array(clearTrace().prefix(5))) == .reject(.tooShort))
     }

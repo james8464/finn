@@ -23,9 +23,20 @@ nonisolated enum EvidenceGate {
             return .reject(.tooShort)
         }
 
-        let crowded = frames.filter { $0.subjectCount != 1 }.count
-        if Double(crowded) / Double(frames.count) > 0.2 {
+        let bystanderFrames = frames.filter { $0.subjectCount > 1 }.count
+        if Double(bystanderFrames) / Double(frames.count) > 0.2 {
             return .reject(.multiplePeople)
+        }
+        var bystanderStart: TimeInterval?
+        for frame in frames {
+            if frame.subjectCount > 1 && bystanderStart == nil {
+                bystanderStart = frame.time
+            }
+            if let bystanderStart,
+               frame.time - bystanderStart >= SquatRubric.maximumBystanderDuration {
+                return .reject(.multiplePeople)
+            }
+            if frame.subjectCount == 1 { bystanderStart = nil }
         }
 
         let sides: [(BodySide, [BodyJoint])] = [

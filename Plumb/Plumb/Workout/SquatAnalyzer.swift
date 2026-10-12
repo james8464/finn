@@ -10,6 +10,7 @@ nonisolated enum SquatRubric {
     static let minimumRepDuration = 0.8
     static let maximumRepDuration = 8.0
     static let maximumTrackingGap = 0.75
+    static let maximumBystanderDuration = 0.35
 }
 
 nonisolated enum SquatAnalyzer {
@@ -30,6 +31,8 @@ nonisolated enum SquatAnalyzer {
         let side: BodySide
         switch EvidenceGate.assess(frames) {
         case .usable(let acceptedSide): side = acceptedSide
+        case .reject(.multiplePeople):
+            return .insufficientView("Another person was in view. Keep only yourself in frame and try again.")
         case .reject(.trackingGap):
             return .insufficientView("Tracking was lost during the set. Keep your whole body visible and try again.")
         case .reject:
