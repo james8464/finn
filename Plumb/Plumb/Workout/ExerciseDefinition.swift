@@ -167,6 +167,18 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
         }
     }
 
+    /// A depth in words, such as "hips 11% of leg length down" or "elbow bent 28°".
+    func formattedDepth(_ value: Double) -> String {
+        switch (rangeUnit, signal) {
+        case (.bodyLengthFraction, _):
+            return "hips \(Int((value * 100).rounded()))% of your leg length down"
+        case (.degrees, .jointBend(_, let vertex, _)):
+            return "\(vertex.rawValue) bent \(Int(value.rounded()))°"
+        case (.degrees, _):
+            return "\(Int(value.rounded()))°"
+        }
+    }
+
     func accessibleRange(_ value: Double) -> String {
         switch rangeUnit {
         case .bodyLengthFraction: value.formatted(.number.precision(.fractionLength(2)))
@@ -228,12 +240,12 @@ nonisolated extension ExerciseDefinition {
     /// Side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.
     static let pushUp = ExerciseDefinition(
         kind: .pushUp,
-        rubricVersion: "push-up-side-v1",
+        rubricVersion: "push-up-side-v2",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.shoulder, .elbow, .wrist], anchor: .wrist),
         signal: .jointBend(from: .shoulder, vertex: .elbow, to: .wrist),
         phases: RepPhases(leaveTop: 25, reachBottom: 40, returnFromBottom: 10, backAtTop: 15,
-                          minimumDuration: 0.6, maximumDuration: 8.0),
+                          minimumDuration: 0.4, maximumDuration: 8.0),
         rangeUnit: .degrees,
         rangeDisplayScale: 120,
         minimumBodyScale: 0.03,
@@ -268,12 +280,12 @@ nonisolated extension ExerciseDefinition {
     /// camera-facing leg (hip, knee, ankle).
     static let staticLunge = ExerciseDefinition(
         kind: .staticLunge,
-        rubricVersion: "static-lunge-side-v1",
+        rubricVersion: "static-lunge-side-v2",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .hip, vertex: .knee, to: .ankle),
         phases: RepPhases(leaveTop: 20, reachBottom: 35, returnFromBottom: 10, backAtTop: 15,
-                          minimumDuration: 0.8, maximumDuration: 8.0),
+                          minimumDuration: 0.5, maximumDuration: 8.0),
         rangeUnit: .degrees,
         rangeDisplayScale: 120,
         minimumBodyScale: 0.03,
@@ -307,12 +319,12 @@ nonisolated extension ExerciseDefinition {
     /// Side-view stiff-leg deadlift, measured as hip hinge (shoulder, hip, knee). Feet stay planted.
     static let stiffLegDeadlift = ExerciseDefinition(
         kind: .stiffLegDeadlift,
-        rubricVersion: "stiff-leg-deadlift-side-v1",
+        rubricVersion: "stiff-leg-deadlift-side-v2",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.shoulder, .hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .shoulder, vertex: .hip, to: .knee),
         phases: RepPhases(leaveTop: 20, reachBottom: 35, returnFromBottom: 10, backAtTop: 15,
-                          minimumDuration: 1.0, maximumDuration: 10.0),
+                          minimumDuration: 0.6, maximumDuration: 10.0),
         rangeUnit: .degrees,
         rangeDisplayScale: 120,
         minimumBodyScale: 0.03,

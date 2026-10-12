@@ -5,30 +5,118 @@ import Testing
 struct ExerciseAnalyzerTests {
     // MARK: Squat stays identical
 
-    @Test func squatThroughGenericEngineMatchesFrozenSquatV2OnVariedTraces() {
+    /// squat-side-v3 loosens the evidence gate and the rep ending on purpose (v2 refused every
+    /// real squat video tried). It must still accept every set v2 accepted and almost never
+    /// count fewer reps on the same synthetic traces.
+    @Test func squatV3KeepsEverythingV2MeasuredOnVariedTraces() {
         var generator = SplitMix64(seed: 20261012)
-        var measured = 0
-        var abstained = 0
+        var both = 0, same = 0, fewer = 0, lostByV3 = 0
         for _ in 0..<600 {
             let frames = randomSquatTrace(using: &generator)
-            let current = SquatAnalyzer.analyze(frames)
-            let frozen = FrozenSquatV2.analyze(frames)
-            #expect(current == frozen)
-            if case .analyzed(let analysis) = current, !analysis.reps.isEmpty { measured += 1 }
-            if case .insufficientView = current { abstained += 1 }
+            switch (SquatAnalyzer.analyze(frames), FrozenSquatV2.analyze(frames)) {
+            case (.analyzed(let current), .analyzed(let frozen)):
+                both += 1
+                if current.reps.count == frozen.reps.count { same += 1 }
+                if current.reps.count < frozen.reps.count { fewer += 1 }
+                #expect(current.reps.count >= frozen.reps.count - 1)
+            case (_, .analyzed):
+                lostByV3 += 1
+            default:
+                break
+            }
         }
-        // The traces must exercise both paths, or the comparison proves little.
-        #expect(measured > 120)
-        #expect(abstained > 60)
+        #expect(lostByV3 == 0)
+        #expect(both > 200)
+        #expect(same > both / 2)
+        #expect(fewer <= both / 20)
     }
 
-    @Test func squatDefinitionKeepsSquatV2Values() {
+    @Test func realisticConfidenceSquatIsCounted() throws {
+        // Real side-view video gives the hip about 0.5 confidence; v2's 0.6 floor refused it.
+        var generator = SplitMix64(seed: 77)
+        let frames = (0...120).map { index -> PoseFrame in
+            let hipY = 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
+            return squatFrame(time: Double(index) * 0.1, hipY: hipY,
+                              confidence: Double.random(in: 0.38...0.6, using: &generator))
+        }
+        #expect(FrozenSquatV2.analyze(frames) != SquatAnalyzer.analyze(frames))
+        let analysis = try measured(SquatAnalyzer.analyze(frames))
+        #expect(analysis.reps.count == 6)
+    }
+
+    @Test func setStartingMidDescentStillCounts() throws {
+        let frames = (6...126).map { index in
+            squatFrame(time: Double(index) * 0.1,
+                       hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
+        }
+        let analysis = try measured(SquatAnalyzer.analyze(frames))
+        #expect(analysis.reps.count >= 5)
+    }
+
+    @Test func tenDegreePhoneTiltDoesNotChangeTheCount() throws {
+        let upright = (0...120).map { index in
+            squatFrame(time: Double(index) * 0.1,
+                       hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
+        }
+        let angle = 10.0 * .pi / 180
+        let tilted = upright.map { frame in
+            PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints.mapValues { point in
+                let dx = point.x - 0.5, dy = point.y - 0.6
+                return JointPoint(x: 0.5 + dx * cos(angle) - dy * sin(angle),
+                                  y: 0.6 + dx * sin(angle) + dy * cos(angle), confidence: point.confidence)
+            })
+        }
+        let straight = try measured(SquatAnalyzer.analyze(upright))
+        let leaning = try measured(SquatAnalyzer.analyze(tilted))
+        #expect(leaning.reps.count == straight.reps.count)
+    }
+
+    @Test func oneMisplacedAnkleDoesNotLookLikeAMovingPhone() throws {
+        let frames = (0...120).map { index -> PoseFrame in
+            let frame = squatFrame(time: Double(index) * 0.1,
+                                   hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2,
+                                   ankleShift: index == 60 ? 0.4 : 0)
+            return frame
+        }
+        let analysis = try measured(SquatAnalyzer.analyze(frames))
+        #expect(analysis.reps.count == 6)
+    }
+
+    @Test func shallowMovementsAreExplainedInNumbers() {
+        let frames = (0...120).map { index in
+            squatFrame(time: Double(index) * 0.1,
+                       hipY: 0.42 + 0.05 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
+        }
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: .squat)
+        guard case .analyzed(let analysis) = outcome, let diagnostics else {
+            Issue.record("A shallow set is still analyzed")
+            return
+        }
+        #expect(analysis.reps.isEmpty)
+        let text = diagnostics.explanation(for: .squat, counted: 0) ?? ""
+        #expect(text.contains("a rep needs hips 15% of your leg length down"))
+    }
+
+    @Test func refusalsSayWhatWasMissing() {
+        let hidden = (0...40).map { index in
+            PoseFrame(time: Double(index) * 0.1, subjectCount: 1, joints: index % 2 == 0
+                ? squatFrame(time: 0, hipY: 0.42).joints : [:])
+        }
+        guard case .insufficientView(let reason) = SquatAnalyzer.analyze(hidden) else {
+            Issue.record("Half-hidden joints must be refused")
+            return
+        }
+        #expect(reason.contains("%"))
+        #expect(reason.contains("hip, knee and ankle"))
+    }
+
+    @Test func squatDefinitionUsesSquatV3Values() {
         let squat = ExerciseDefinition.squat
-        #expect(squat.rubricVersion == "squat-side-v2")
+        #expect(squat.rubricVersion == "squat-side-v3")
         #expect(squat.signal == .verticalTravel(joint: .hip, reference: .ankle))
         #expect(squat.evidence == EvidenceRequirement(joints: [.hip, .knee, .ankle], anchor: .ankle))
         #expect(squat.phases == RepPhases(leaveTop: 0.10, reachBottom: 0.15, returnFromBottom: 0.04,
-                                          backAtTop: 0.03, minimumDuration: 0.8, maximumDuration: 8.0))
+                                          backAtTop: 0.05, minimumDuration: 0.5, maximumDuration: 8.0))
         #expect(squat.minimumBodyScale == 0.1)
         #expect(squat.copy.observation == "Your range became shorter in the last two reps.")
         #expect(squat.copy.nextAction == "Try a pace you can keep consistent.")
@@ -75,7 +163,7 @@ struct ExerciseAnalyzerTests {
     @Test func pushUpCountsSixElbowBendReps() throws {
         let analysis = try measured(ExerciseAnalyzer.analyze(pushUpTrace(reps: 6), as: .pushUp))
         #expect(analysis.reps.count == 6)
-        #expect(analysis.rubricVersion == "push-up-side-v1")
+        #expect(analysis.rubricVersion == "push-up-side-v2")
         #expect(analysis.reps.map(\.number) == [1, 2, 3, 4, 5, 6])
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 75 && $0.relativeRange < 95 })
         #expect(analysis.reps.allSatisfy { $0.duration > 1.0 && $0.duration < 2.1 })
@@ -147,7 +235,7 @@ struct ExerciseAnalyzerTests {
     @Test func staticLungeCountsKneeBendReps() throws {
         let analysis = try measured(ExerciseAnalyzer.analyze(lungeTrace(reps: 6), as: .staticLunge))
         #expect(analysis.reps.count == 6)
-        #expect(analysis.rubricVersion == "static-lunge-side-v1")
+        #expect(analysis.rubricVersion == "static-lunge-side-v2")
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 60 && $0.relativeRange < 80 })
     }
 
@@ -161,7 +249,7 @@ struct ExerciseAnalyzerTests {
         let analysis = try measured(ExerciseAnalyzer.analyze(hingeTrace(reps: 5),
                                                              as: .stiffLegDeadlift))
         #expect(analysis.reps.count == 5)
-        #expect(analysis.rubricVersion == "stiff-leg-deadlift-side-v1")
+        #expect(analysis.rubricVersion == "stiff-leg-deadlift-side-v2")
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 65 && $0.relativeRange < 85 })
         #expect(analysis.reps.allSatisfy { $0.duration > 1.4 && $0.duration < 2.6 })
     }
@@ -187,8 +275,13 @@ struct ExerciseAnalyzerTests {
         let gap = hingeTrace(reps: 5).enumerated().map { index, frame in
             (40...50).contains(index) ? PoseFrame(time: frame.time, subjectCount: 1, joints: [:]) : frame
         }
-        #expect(ExerciseAnalyzer.analyze(gap, as: .stiffLegDeadlift) == .insufficientView(
-            "Tracking was lost during the set. Keep your whole body visible and try again."))
+        guard case .insufficientView(let reason) = ExerciseAnalyzer.analyze(gap, as: .stiffLegDeadlift) else {
+            Issue.record("A long tracking gap must be refused")
+            return
+        }
+        #expect(reason.hasPrefix("Tracking was lost during the set. Keep your whole body visible and try again."))
+        // Frames 40 to 50 are empty: tracked at frame 39, then again at 51, 0.1 s apart.
+        #expect(reason.contains("1.2 s"))
     }
 
     // MARK: History compatibility

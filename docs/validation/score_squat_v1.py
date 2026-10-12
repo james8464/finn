@@ -15,7 +15,7 @@ COLUMNS = (
     "cue_rep_numbers expert_supported expert_show expert_unassessable expert_view_suitable "
     "result_latency_ms capture_duration_s interruption thermal_issue failure_reason notes"
 ).split()
-RUBRIC = "squat-side-v2"
+RUBRIC = "squat-side-v3"
 
 
 class ValidationError(ValueError):

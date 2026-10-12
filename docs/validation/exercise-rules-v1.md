@@ -1,25 +1,43 @@
 # Exercise rules v1 and the 3D camera-angle check
 
-**Status on 12 October 2026: implemented and tested on the iOS 27 simulator with synthetic pose traces only.** No real set, expert review, or physical-iPhone run exists yet for anything on this page. The squat keeps its own protocol in [`squat-v1-protocol.md`](squat-v1-protocol.md).
+**Status on 12 October 2026: implemented and tested on the iOS 27 simulator with synthetic pose traces, and replayed on Vision poses from public side-view videos (see "Replay on real videos" below).** No expert review or physical-iPhone run exists yet for anything on this page. The squat keeps its own protocol in [`squat-v1-protocol.md`](squat-v1-protocol.md).
 
 ## How a rule is written
 
 Each exercise is one entry in [`ExerciseDefinition.swift`](../../Plumb/Plumb/Workout/ExerciseDefinition.swift). It names the joints that must stay visible on the side facing the camera, a joint that should stay still (planted feet or hands), one movement signal, the thresholds of the two phases of a rep, the expected camera view, and every sentence the app shows. One analyzer runs every entry with the same state machine and the same evidence gate as the squat.
 
-The first five tracked frames set the starting value, so a set has to start in the top position. A rep begins when the signal leaves the top phase, counts only if it reaches the bottom phase and comes back by a set margin, and ends when the signal is back at the top. Reps outside the duration window are dropped.
+The starting value comes from the whole set, not its first frames: the 10th percentile of hip height for the squat (hips at their highest) and the 90th percentile of the joint angle for the others (joint at its most open). A set can therefore start mid-movement. Each rep is measured from its own local top, the highest or most open point since the previous rep ended, because a real phone's view drifts by a few percent during a set and people doing continuous reps rarely stand all the way up. A rep begins when the signal leaves that local top, counts only if it reaches the bottom phase and comes back by the return margin, and ends when the person is back near the top or has come back 65% of that rep's depth. Reps outside the duration window are dropped. After a set, the result says how many movements were too shallow (with the deepest one and the depth needed), too fast or too slow, or unfinished, so a set with no counted rep is never left unexplained.
 
 | Exercise | Rubric | Signal on the camera-facing side | Must stay visible | Still joint | Leave top / reach bottom / back at top / return margin | Rep duration |
 | --- | --- | --- | --- | --- | --- | --- |
-| Bodyweight squat | `squat-side-v2` | Hip drop divided by standing hip-to-ankle height | hip, knee, ankle | ankle | 0.10 / 0.15 / 0.03 / 0.04 | 0.8 to 8 s |
-| Push-up | `push-up-side-v1` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.6 to 8 s |
-| Static lunge | `static-lunge-side-v1` | Knee angle closing (hip, knee, ankle), degrees | hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.8 to 8 s |
-| Stiff-leg deadlift | `stiff-leg-deadlift-side-v1` | Hip angle closing (shoulder, hip, knee), degrees | shoulder, hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 1 to 10 s |
+| Bodyweight squat | `squat-side-v3` | Hip drop divided by standing hip-to-ankle height | hip, knee, ankle | ankle | 0.10 / 0.15 / 0.05 / 0.04 | 0.5 to 8 s |
+| Push-up | `push-up-side-v2` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.4 to 8 s |
+| Static lunge | `static-lunge-side-v2` | Knee angle closing (hip, knee, ankle), degrees | hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.5 to 8 s |
+| Stiff-leg deadlift | `stiff-leg-deadlift-side-v2` | Hip angle closing (shoulder, hip, knee), degrees | shoulder, hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.6 to 10 s |
+
+The rep durations are shorter than in the first versions because a rep now ends 65% of the way back up instead of at the very top; at the old minimums, one-second squats on real video were dropped as too fast.
 
 Angles are computed in pixel proportions: the y distance is scaled by the image height divided by its width before the angle is taken.
 
-All four use the squat's evidence rules: joint confidence at least 0.6, the required joints present and confident in 80% of frames, no tracking gap over 0.75 s, no second person for 0.35 s or in over 20% of frames, the still joint moving less than 8% of the frame, and a set of at least 2 seconds. They also share the observation rule: when the last two reps' range is 85% or less of the first two, the result names those reps ("Your elbow bend became smaller in the last two reps.") and suggests "Try a pace you can keep consistent." Comparisons only pair sets of the same exercise in one session.
+All four use the squat's evidence rules: joint confidence at least 0.3, the required joints present and confident in 80% of frames, no tracking gap over 0.75 s, no second person for 0.35 s or in over 20% of frames, the still joint staying within 10% of the frame (spread between its 10th and 90th percentile positions, so one misplaced detection does not count as the phone moving), and a set of at least 2 seconds. A refusal names what was missing, with numbers: the share of frames where the joints were seen and the hardest joint to see, the length and start of the tracking gap, or how far the still joint moved. They also share the observation rule: when the last two reps' range is 85% or less of the first two, the result names those reps ("Your elbow bend became smaller in the last two reps.") and suggests "Try a pace you can keep consistent." Comparisons only pair sets of the same exercise in one session.
 
-A test replays 600 synthetic squat traces through a frozen copy of the previous squat analyzer and requires the same outcome for each, so `squat-side-v2` behaves as before.
+A test replays 600 synthetic squat traces through a frozen copy of `squat-side-v2`. Version 3 must measure every set version 2 measured, give the same count on more than half of them, count fewer reps on at most one set in twenty, and never more than one rep fewer. On the current code: 281 sets measured by both, 177 with the same count, 1 with one rep fewer, none lost.
+
+## Replay on real videos
+
+Version 2 counted no squat on Guilhem's iPhone. To reproduce it without filming anyone, the app's own Vision request was run over 50 side-view squat videos and 48 push-up videos from the Mendeley dataset used for exercise recognition (CC BY 4.0, see `tools/exercise-classifier/angle-model/README.md`; the videos and poses stay outside the repository), and the analyzer was replayed on those poses with the 3D check off.
+
+| | `squat-side-v2` | `squat-side-v3` |
+| --- | --- | --- |
+| Squat videos measured | 0 of 50 | 42 of 50 |
+| Why refused | joint confidence under 0.6 on every video: Vision gives real hips about 0.5 | still joint moved 10 to 18% (5 videos, phones in a busy gym), joints seen in under 80% of frames (2), 0.8 s tracking gap (1) |
+| Counts | | 7 to 22 reps per 30-second video |
+
+There is no human count for these videos yet. Two checks stand in for one. A separate counter that finds dips in the smoothed hip height, with no state machine and no thresholds from the app, agrees within one rep on all 42 measured videos and exactly on 19. Counting by eye on stills taken three times a second gave about 15 reps for subject 002 (app: 15) and 16 for subject 014 (app: 16). Earlier drafts of version 3 counted 11 and 10 on them; on subject 014 the person stopped coming back to the set's starting height after a few reps, so later reps were timed from that last full stand and dropped as longer than 8 s. Measuring each rep from its own local top fixed it.
+
+Push-ups: 33 of 48 measured with `push-up-side-v2`. Counts are low on several "bad form" videos where the elbow bends less than 40°, which is the rule working; 24 of 33 agree within one rep with the same kind of dip counter on the elbow angle. Lunges and deadlifts have no real video.
+
+A 10° phone tilt changes neither count: the squat signal is a ratio of vertical distances on the same frame, the knee angle does not depend on the frame's rotation, and the 3D check measures the body's axis relative to the camera. `tenDegreePhoneTiltDoesNotChangeTheCount` covers it.
 
 ## Limits
 
@@ -49,4 +67,4 @@ A test replays 600 synthetic squat traces through a frozen copy of the previous 
 6. For each exercise, count reps by hand and compare with the app on a few sets, including a deliberately shallow set and an incomplete last rep.
 7. If the check refuses side-on sets, switch it off in Options for the demo and say so; the 2D visibility rules still run.
 
-For the squat holdout in [`squat-v1-protocol.md`](squat-v1-protocol.md), keep the 3D switch in one position for every holdout set and write which one in `notes`, because it can refuse a set that `squat-side-v2` alone would have measured.
+For the squat holdout in [`squat-v1-protocol.md`](squat-v1-protocol.md), keep the 3D switch in one position for every holdout set and write which one in `notes`, because it can refuse a set that `squat-side-v3` alone would have measured.
