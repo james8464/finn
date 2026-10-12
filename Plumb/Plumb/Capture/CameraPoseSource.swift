@@ -41,6 +41,7 @@ final class CameraPoseSource: PoseStreaming {
     private let authorize: @MainActor () async -> Bool
     private let driver: any CameraCaptureDriving
     private let setDurationLimit: Duration
+    private let setDurationLimitSeconds: TimeInterval
     private var runID: UUID?
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var forwardTask: Task<Void, Never>?
@@ -56,6 +57,9 @@ final class CameraPoseSource: PoseStreaming {
         self.authorize = authorize
         self.driver = driver
         self.setDurationLimit = setDurationLimit
+        let components = setDurationLimit.components
+        self.setDurationLimitSeconds = Double(components.seconds)
+            + Double(components.attoseconds) / 1e18
     }
 
     static func live() -> CameraPoseSource {
@@ -131,7 +135,7 @@ final class CameraPoseSource: PoseStreaming {
                     subjectCount: frame.subjectCount,
                     joints: frame.joints
                 ))
-                if self.isSetActive && elapsed >= 120 {
+                if self.isSetActive && elapsed >= self.setDurationLimitSeconds {
                     self.endedAtLimit = true
                     await self.stop()
                     break

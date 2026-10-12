@@ -102,6 +102,27 @@ struct CameraStateTests {
         #expect(source.endedAtLimit)
     }
 
+    @Test func frameLimitUsesConfiguredSetDuration() async throws {
+        let driver = FakeCaptureDriver()
+        let source = CameraPoseSource(authorize: { true }, driver: driver,
+                                      setDurationLimit: .seconds(3))
+        let stream = try await source.start()
+        var iterator = stream.makeAsyncIterator()
+        await source.prepareForSet()
+        driver.emit(frame(time: 40))
+        #expect(await iterator.next()?.time == 0)
+        driver.emit(frame(time: 43))
+        #expect(await iterator.next()?.time == 3)
+        try await Task.sleep(for: .milliseconds(500))
+        guard source.state == .idle else {
+            await source.stop()
+            Issue.record("The configured frame limit must stop capture before the wall-clock watchdog")
+            return
+        }
+        #expect(await iterator.next() == nil)
+        #expect(source.endedAtLimit)
+    }
+
     @Test func previewTimeDoesNotConsumeSetLimit() async throws {
         let driver = FakeCaptureDriver()
         let source = CameraPoseSource(authorize: { true }, driver: driver)
