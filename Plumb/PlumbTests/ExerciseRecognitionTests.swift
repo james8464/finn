@@ -152,8 +152,9 @@ struct RecognitionSessionTests {
         #expect(model.resultExercise == .pushUp)
         #expect(classifier.calls == 0)
 
-        let (unequipped, unequippedSource) = makeModel(classifier: nil, recognizes: true)
+        let (unequipped, unequippedSource) = makeModel(classifier: nil, recognizes: true, rules: false)
         #expect(!unequipped.usesExerciseRecognition)
+        #expect(unequipped.recognitionMethod == .unavailable)
         unequipped.selectedExercise = .pushUp
         await capture(unequipped, unequippedSource, pushUpTrace(reps: 6))
         #expect(unequipped.recognition == .notAttempted)
@@ -171,13 +172,14 @@ struct RecognitionSessionTests {
         #expect(second.recognizesExercise)
     }
 
-    private func makeModel(classifier: ScriptedClassifier?,
-                           recognizes: Bool) -> (WorkoutSessionModel, RecognitionPoseSource) {
+    private func makeModel(classifier: ScriptedClassifier?, recognizes: Bool,
+                           rules: Bool = true) -> (WorkoutSessionModel, RecognitionPoseSource) {
         let defaults = UserDefaults(suiteName: "PlumbRecognition-\(UUID().uuidString)")!
         let preferences = PlumbPreferences(defaults: defaults)
         preferences.recognizesExercise = recognizes
         let source = RecognitionPoseSource()
-        return (WorkoutSessionModel(source: source, exerciseClassifier: classifier,
+        return (WorkoutSessionModel(source: source, exerciseClassifier: classifier, angleClassifier: nil,
+                                    ruleClassifier: rules ? AngleRuleClassifier() : nil,
                                     preferences: preferences), source)
     }
 

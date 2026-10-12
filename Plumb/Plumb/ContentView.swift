@@ -278,10 +278,10 @@ struct ContentView: View {
                     Text("Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone.")
                 }
                 Divider()
-                if model.hasExerciseClassifier {
+                if model.recognitionMethod != .unavailable {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Optional exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
-                        Text("When you turn it on in Options, an on-device model reads pose points after a set to recognize the exercise. Pose points and video stay on this iPhone.")
+                        Text("When you turn it on in Options, Plumb reads pose points after a set to recognize the exercise. Pose points and video stay on this iPhone.")
                     }
                     Divider()
                 }
@@ -308,16 +308,21 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 24) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
-                    if model.hasExerciseClassifier {
+                    if model.recognitionMethod != .unavailable {
                         Toggle("Recognize the exercise automatically", isOn: Binding(
                             get: { model.recognizesExercise },
                             set: { model.recognizesExercise = $0 }
                         ))
                         .frame(minHeight: 44)
                         .accessibilityIdentifier("options.recognizeExercise")
+                    }
+                    switch model.recognitionMethod {
+                    case .keypointModel, .angleModel:
                         Text("After each set, an on-device model trained by the Plumb team guesses the exercise from your pose points. If it isn’t confident, Plumb uses the exercise you chose. Its accuracy is still being tested.")
-                    } else {
-                        Text("This build has no trained recognition model, so Plumb uses the exercise you choose on the first screen.")
+                    case .angleRules:
+                        Text("After each set, Plumb guesses the exercise from your joint angles: which joint bends, how far, and how your torso is tilted. This build has no trained model yet. If the guess isn’t clear, Plumb uses the exercise you chose.")
+                    case .unavailable:
+                        Text("This build has no exercise recognition, so Plumb uses the exercise you choose on the first screen.")
                     }
                 }
                 Divider()

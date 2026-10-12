@@ -67,6 +67,8 @@ final class WorkoutSessionModel {
     @ObservationIgnored private let narrator: ComparisonNarrator
     @ObservationIgnored private let preferences: PlumbPreferences
     @ObservationIgnored private let exerciseClassifier: (any ExerciseClassifying)?
+    @ObservationIgnored private let angleClassifier: (any AngleWindowClassifying)?
+    @ObservationIgnored private let ruleClassifier: (any AngleWindowClassifying)?
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
     private var previewFrames: [PoseFrame] = []
@@ -97,7 +99,14 @@ final class WorkoutSessionModel {
     var recognizesExercise: Bool {
         didSet { preferences.recognizesExercise = recognizesExercise }
     }
-    var hasExerciseClassifier: Bool { exerciseClassifier != nil }
+    /// True when a trained model (keypoint or angle) ships with this build.
+    var hasExerciseClassifier: Bool { exerciseClassifier != nil || angleClassifier != nil }
+    var recognitionMethod: RecognitionMethod {
+        if exerciseClassifier != nil { return .keypointModel }
+        if angleClassifier != nil { return .angleModel }
+        if ruleClassifier != nil { return .angleRules }
+        return .unavailable
+    }
     /// Whether Vision 3D pose may refuse a set filmed from the wrong angle. On by default.
     var checksCameraAngle: Bool {
         didSet {
@@ -108,7 +117,7 @@ final class WorkoutSessionModel {
     }
     /// The 3D camera-angle verdict for the latest analyzed set, kept for the validation readout.
     private(set) var lastViewVerdict: ViewCheck.Verdict = .unavailable
-    var usesExerciseRecognition: Bool { recognizesExercise && hasExerciseClassifier }
+    var usesExerciseRecognition: Bool { recognizesExercise && recognitionMethod != .unavailable }
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
     private(set) var lastStopToResultMilliseconds: Int?
@@ -130,11 +139,15 @@ final class WorkoutSessionModel {
     init(source: any PoseStreaming, store: (any SessionStoring)? = nil,
          narrator: ComparisonNarrator? = nil,
          exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
+         angleClassifier: (any AngleWindowClassifying)? = CoreMLAngleClassifier.bundled(),
+         ruleClassifier: (any AngleWindowClassifying)? = AngleRuleClassifier(),
          preferences: PlumbPreferences = .standard) {
         self.source = source
         self.store = store
         self.narrator = narrator ?? ComparisonNarrator()
         self.exerciseClassifier = exerciseClassifier
+        self.angleClassifier = angleClassifier
+        self.ruleClassifier = ruleClassifier
         self.preferences = preferences
         self.recognizesExercise = preferences.recognizesExercise
         self.checksCameraAngle = preferences.checksCameraAngle
@@ -326,8 +339,11 @@ final class WorkoutSessionModel {
     }
 
     private func recognizeExercise() -> ExerciseRecognition {
-        guard recognizesExercise, let exerciseClassifier, !frames.isEmpty else { return .notAttempted }
-        return ExerciseRecognizer.recognize(frames, using: exerciseClassifier)
+        guard recognizesExercise, !frames.isEmpty else { return .notAttempted }
+        if let exerciseClassifier { return ExerciseRecognizer.recognize(frames, using: exerciseClassifier) }
+        if let angleClassifier { return AngleRecognizer.recognize(frames, using: angleClassifier) }
+        if let ruleClassifier { return AngleRecognizer.recognize(frames, using: ruleClassifier) }
+        return .notAttempted
     }
 
     func finishSession() async {

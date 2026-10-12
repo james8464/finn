@@ -1,32 +1,5 @@
 import Foundation
 
-/// A joint named without its body side. The evidence gate picks the side the camera tracks best.
-nonisolated enum JointRole: String, Equatable, Sendable {
-    case shoulder
-    case elbow
-    case wrist
-    case hip
-    case knee
-    case ankle
-
-    func joint(on side: BodySide) -> BodyJoint {
-        switch (self, side) {
-        case (.shoulder, .left): .leftShoulder
-        case (.shoulder, .right): .rightShoulder
-        case (.elbow, .left): .leftElbow
-        case (.elbow, .right): .rightElbow
-        case (.wrist, .left): .leftWrist
-        case (.wrist, .right): .rightWrist
-        case (.hip, .left): .leftHip
-        case (.hip, .right): .rightHip
-        case (.knee, .left): .leftKnee
-        case (.knee, .right): .rightKnee
-        case (.ankle, .left): .leftAnkle
-        case (.ankle, .right): .rightAnkle
-        }
-    }
-}
-
 /// How one per-frame number is read from 2D pose points. Rep phases are detected on this signal.
 nonisolated enum MovementSignal: Equatable, Sendable {
     /// Downward travel of `joint` from its starting height, divided by the starting vertical

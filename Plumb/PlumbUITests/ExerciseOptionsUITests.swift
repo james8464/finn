@@ -2,14 +2,18 @@ import XCTest
 
 final class ExerciseOptionsUITests: XCTestCase {
     @MainActor
-    func testOptionsExplainManualChoiceWithoutTrainedModel() throws {
+    func testOptionsExplainAngleRulesWithoutTrainedModel() throws {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
         app.buttons["Options"].tap()
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["This build has no trained recognition model, so Plumb uses the exercise you choose on the first screen."].exists)
-        XCTAssertFalse(app.switches["options.recognizeExercise"].exists)
+        // XCTest refuses identifier queries longer than 128 characters, so match the start.
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
+            format: "label BEGINSWITH %@", "After each set, Plumb guesses the exercise from your joint angles")).firstMatch.exists)
+        let toggle = app.switches["options.recognizeExercise"]
+        XCTAssertTrue(toggle.exists)
+        XCTAssertEqual(toggle.value as? String, "0")
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ])
