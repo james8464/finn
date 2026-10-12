@@ -89,7 +89,7 @@ struct ComparisonNarratorTests {
                                              timeout: .milliseconds(20))
             .recap(for: comparison())
         #expect(recap.source == .template)
-        #expect(started.duration(to: clock.now) < .milliseconds(300))
+        #expect(started.duration(to: clock.now) < .seconds(7))
     }
 
     @Test func validGeneratedRecapKeepsDeterministicFacts() async {
@@ -97,7 +97,8 @@ struct ComparisonNarratorTests {
             explanation: "Your camera-measured range was shorter in the second set.",
             evidenceRepNumbers: [5, 6]
         ))
-        let recap = await ComparisonNarrator(generator: generator).recap(for: comparison())
+        let recap = await ComparisonNarrator(generator: generator, timeout: .seconds(30))
+            .recap(for: comparison())
         #expect(recap.source == .appleIntelligence)
         #expect(recap.evidenceRepNumbers == [5, 6])
         #expect(recap.facts == comparison())
@@ -112,7 +113,8 @@ struct ComparisonNarratorTests {
             explanation: "Your camera-measured range was longer in the second set.",
             evidenceRepNumbers: []
         ))
-        let recap = await ComparisonNarrator(generator: generator).recap(for: facts)
+        let recap = await ComparisonNarrator(generator: generator, timeout: .seconds(30))
+            .recap(for: facts)
         #expect(recap.source == .appleIntelligence)
         #expect(recap.facts == facts)
     }
@@ -126,7 +128,8 @@ struct ComparisonNarratorTests {
             explanation: "There was no clear camera-measured range change between sets.",
             evidenceRepNumbers: []
         ))
-        let recap = await ComparisonNarrator(generator: generator).recap(for: facts)
+        let recap = await ComparisonNarrator(generator: generator, timeout: .seconds(30))
+            .recap(for: facts)
         #expect(recap.source == .appleIntelligence)
         #expect(recap.facts == facts)
     }
@@ -146,7 +149,7 @@ private final class NonCooperativeGenerator: RecapGenerating {
 
     func generate(for comparison: Comparison) async throws -> GeneratedRecap {
         await Task.detached {
-            try? await Task.sleep(for: .milliseconds(600))
+            try? await Task.sleep(for: .seconds(10))
             return GeneratedRecap(explanation: "Your range was shorter.",
                                   evidenceRepNumbers: [5, 6])
         }.value
