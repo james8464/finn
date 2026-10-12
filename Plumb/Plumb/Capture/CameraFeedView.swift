@@ -30,14 +30,15 @@ struct CameraFeedView: View {
 }
 
 /// Bones and joints of the tracked person: white when Vision is sure of them, orange when the
-/// analysis would ignore them, with the measured angle beside the key joint.
+/// analysis would ignore them, with the measured angle beside the key joint. Other people are
+/// drawn thin and grey.
 private struct SkeletonOverlay: View {
     let model: WorkoutSessionModel
     let mirrored: Bool
 
     var body: some View {
         GeometryReader { proxy in
-            if let frame = model.livePose, !frame.joints.isEmpty {
+            if let frame = model.livePose, !frame.joints.isEmpty || !(frame.bystanders ?? []).isEmpty {
                 let geometry = SkeletonGeometry(frame: frame, exercise: model.captureExercise.definition,
                                                 size: proxy.size, mirrored: mirrored)
                 Canvas { context, size in
@@ -55,6 +56,17 @@ private struct SkeletonOverlay: View {
     private func draw(_ geometry: SkeletonGeometry, in context: inout GraphicsContext, size canvas: CGSize) {
         let clear = Color.white
         let weak = Color.orange
+        let ignored = Color.gray.opacity(0.55)
+        for bone in geometry.bystanderBones {
+            var path = Path()
+            path.move(to: bone.from)
+            path.addLine(to: bone.to)
+            context.stroke(path, with: .color(ignored), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+        }
+        for point in geometry.bystanderJoints {
+            context.fill(Path(ellipseIn: CGRect(x: point.x - 3, y: point.y - 3, width: 6, height: 6)),
+                         with: .color(ignored))
+        }
         for bone in geometry.bones {
             var path = Path()
             path.move(to: bone.from)

@@ -27,6 +27,9 @@ nonisolated struct SkeletonGeometry: Equatable {
     let joints: [Joint]
     let bones: [Bone]
     let angle: AngleLabel?
+    /// Other people, drawn greyed out: Plumb ignores them.
+    let bystanderBones: [Bone]
+    let bystanderJoints: [CGPoint]
 
     static let boneList: [(BodyJoint, BodyJoint)] = [
         (.leftShoulder, .rightShoulder), (.leftHip, .rightHip),
@@ -48,9 +51,11 @@ nonisolated struct SkeletonGeometry: Equatable {
         joints = frame.joints
             .sorted { $0.key.rawValue < $1.key.rawValue }
             .map { Joint(joint: $0.key, point: place($0.value), reliable: reliable($0.value)) }
-        bones = Self.boneList.compactMap { pair in
-            guard let a = frame.joints[pair.0], let b = frame.joints[pair.1] else { return nil }
-            return Bone(from: place(a), to: place(b), reliable: reliable(a) && reliable(b))
+        bones = Self.bones(of: frame.joints, place: place)
+        let others = frame.bystanders ?? []
+        bystanderBones = others.flatMap { Self.bones(of: $0, place: place) }
+        bystanderJoints = others.flatMap { person in
+            person.values.filter { $0.confidence >= EvidenceRubric.minimumJointConfidence }.map(place)
         }
 
         let roles = exercise.displayedAngle
@@ -66,6 +71,16 @@ nonisolated struct SkeletonGeometry: Equatable {
                                reliable: reliable(from) && reliable(vertex) && reliable(to))
         } else {
             angle = nil
+        }
+    }
+
+    private static func bones(of joints: [BodyJoint: JointPoint],
+                              place: (JointPoint) -> CGPoint) -> [Bone] {
+        boneList.compactMap { pair in
+            guard let a = joints[pair.0], let b = joints[pair.1] else { return nil }
+            let reliable = a.confidence >= EvidenceRubric.minimumJointConfidence
+                && b.confidence >= EvidenceRubric.minimumJointConfidence
+            return Bone(from: place(a), to: place(b), reliable: reliable)
         }
     }
 
@@ -97,6 +112,7 @@ nonisolated struct SkeletonGeometry: Equatable {
         let reliableCount = joints.filter(\.reliable).count
         var parts = ["\(joints.count) joints", "\(reliableCount) clear"]
         if let angle { parts.append(angle.text) }
+        if !bystanderBones.isEmpty || !bystanderJoints.isEmpty { parts.append("other people ignored") }
         return parts.joined(separator: ", ")
     }
 }

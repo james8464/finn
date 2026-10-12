@@ -4,7 +4,9 @@ nonisolated enum SquatRubric {
     /// v3 (12 October 2026): evidence floor 0.3 instead of 0.6, robust still-joint check, and the
     /// top position taken from the whole set instead of its first frames. v2 refused all 50 real
     /// side-view squat videos it was tried on.
-    static let version = "squat-side-v3"
+    /// v4 (12 October 2026): follows one athlete, so other people in view no longer refuse the
+    /// set, and the athlete may be hidden by someone else for up to 3 s (see `EvidenceRubric`).
+    static let version = "squat-side-v4"
     static let minimumJointConfidence = EvidenceRubric.minimumJointConfidence
     static let descentThreshold = 0.10
     /// v3: 0.05 (was 0.03), about twice Vision's hip jitter on real side-view video.

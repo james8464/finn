@@ -21,11 +21,21 @@ nonisolated struct JointPoint: Codable, Equatable {
     let confidence: Double
 }
 
+/// How the person doing the set was followed in a frame.
+nonisolated enum AthleteTracking: String, Codable, Equatable, Sendable {
+    /// `joints` are the athlete's; anyone else is in `bystanders` and ignored.
+    case tracked
+    /// The athlete is not visible in this frame (hidden, out of view, or not yet found).
+    case hidden
+}
+
 nonisolated struct PoseFrame: Codable, Equatable {
     /// Seconds since the current capture began.
     let time: TimeInterval
+    /// People Vision found in the frame, the athlete included.
     let subjectCount: Int
     /// Vision coordinates normalized to the image: x by its width, y by its height, origin at top left.
+    /// With `athleteTracking` set, these are the athlete's joints only.
     let joints: [BodyJoint: JointPoint]
     /// Image height divided by width. Joint angles scale y by this so both axes use the same unit.
     let aspectRatio: Double
@@ -34,20 +44,34 @@ nonisolated struct PoseFrame: Codable, Equatable {
     /// Degrees between the body's left-right axis and the camera's line of sight, from Vision 3D pose.
     /// 0 is a true side view and 90 faces the camera. Nil when no 3D estimate exists for this frame.
     let profileDeviationDegrees: Double?
+    /// Nil for frames from a source that does not follow one person (tests, older recordings);
+    /// the evidence gate then refuses sets with someone else in view.
+    let athleteTracking: AthleteTracking?
+    /// Everyone else Vision found, for drawing them greyed out. Never analyzed.
+    let bystanders: [[BodyJoint: JointPoint]]?
 
     init(time: TimeInterval, subjectCount: Int, joints: [BodyJoint: JointPoint],
-         aspectRatio: Double = 1, keypoints: [Float]? = nil, profileDeviationDegrees: Double? = nil) {
+         aspectRatio: Double = 1, keypoints: [Float]? = nil, profileDeviationDegrees: Double? = nil,
+         athleteTracking: AthleteTracking? = nil, bystanders: [[BodyJoint: JointPoint]]? = nil) {
         self.time = time
         self.subjectCount = subjectCount
         self.joints = joints
         self.aspectRatio = aspectRatio
         self.keypoints = keypoints
         self.profileDeviationDegrees = profileDeviationDegrees
+        self.athleteTracking = athleteTracking
+        self.bystanders = bystanders
     }
 
     func retimed(to time: TimeInterval) -> PoseFrame {
         PoseFrame(time: time, subjectCount: subjectCount, joints: joints, aspectRatio: aspectRatio,
-                  keypoints: keypoints, profileDeviationDegrees: profileDeviationDegrees)
+                  keypoints: keypoints, profileDeviationDegrees: profileDeviationDegrees,
+                  athleteTracking: athleteTracking, bystanders: bystanders)
+    }
+
+    /// The athlete's joints are in this frame and can be measured, whoever else is around.
+    var athleteVisible: Bool {
+        athleteTracking == .tracked || (athleteTracking == nil && subjectCount == 1)
     }
 }
 
