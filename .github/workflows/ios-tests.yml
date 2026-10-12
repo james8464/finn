@@ -39,6 +39,7 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             -resultBundlePath "$RUNNER_TEMP/Plumb.xcresult" \
             -parallel-testing-enabled YES \
+            -maximum-parallel-testing-workers 1 \
             -collect-test-diagnostics never \
             CODE_SIGNING_ALLOWED=NO
       - name: Test validation scorer
