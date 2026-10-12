@@ -64,8 +64,9 @@ fastlane/test_output
 __pycache__/
 *.pyc
 
-# Exercise classifier recordings and clips stay outside the repository
+# Recordings of real people stay outside the repository; only synthetic fixtures are tracked.
 *.mov
 *.MOV
 *.mp4
 *.m4v
+!tools/replay/fixtures/*.mp4

@@ -31,6 +31,11 @@ jobs:
           )
           echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
       - name: Test analysis and iPhone flows
+        env:
+          TEST_RUNNER_PLUMB_VIDEO_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps.mp4
+          TEST_RUNNER_PLUMB_VIDEO_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps-poses.json
+          TEST_RUNNER_PLUMB_VIDEO_SECONDS: '12'
+          TEST_RUNNER_PLUMB_VIDEO_EXPECTED_REPS: '6'
         run: |
           xcodebuild test \
             -project Plumb/Plumb.xcodeproj \
@@ -42,6 +47,8 @@ jobs:
             -maximum-parallel-testing-workers 1 \
             -collect-test-diagnostics never \
             CODE_SIGNING_ALLOWED=NO
+      - name: Replay generated workout videos through Vision
+        run: tools/replay/test_generated_videos.sh
       - name: Test validation scorer
         run: python3 -m unittest discover -s docs/validation -p 'test_*.py'
       - name: Upload failed test report

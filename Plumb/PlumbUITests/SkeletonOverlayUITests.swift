@@ -19,8 +19,8 @@ final class SkeletonOverlayUITests: XCTestCase {
         XCTAssertEqual(XCTWaiter().wait(for: [gone], timeout: 8), .completed)
     }
 
-    /// Plays a real side-view squat video on the camera screen. It runs only when the test runner
-    /// is given a file, because videos of people stay out of the repository:
+    /// Plays a side-view squat video on the camera screen. It runs when the test runner
+    /// is given a file, including the repository's synthetic exercise fixture:
     /// `TEST_RUNNER_PLUMB_VIDEO_FILE=/path/to/video.mp4 xcodebuild test …`. Vision body pose does
     /// not run on the simulator, so also pass `TEST_RUNNER_PLUMB_VIDEO_POSES`, poses recorded from
     /// the same file on a Mac. `TEST_RUNNER_PLUMB_VIDEO_SECONDS` sets the set length (default 32).
@@ -55,6 +55,9 @@ final class SkeletonOverlayUITests: XCTestCase {
         XCTAssertTrue(outcome.waitForExistence(timeout: 15))
         attachScreenshot(named: "Result")
         print("PLUMB_VIDEO_RESULT \(outcome.label)")
+        if let expected = environment["PLUMB_VIDEO_EXPECTED_REPS"] {
+            XCTAssertEqual(outcome.label, "\(expected) measured reps")
+        }
     }
 
     @MainActor
