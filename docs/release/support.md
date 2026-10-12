@@ -17,7 +17,7 @@ Plumb needs at least four measured reps before it can show an observation. A mea
 
 ## Privacy and deletion
 
-Plumb does not save a workout movie. Set summaries are saved in the app's local storage and may be included in your iPhone's device backup if enabled. After a measured set, **Share summary** opens the iOS Share Sheet with text only; you choose where it goes. Open **History** and tap **Delete** to remove one session, or **Delete all local data** to remove all saved sessions and recovery backups from the app. See the [privacy policy](privacy-policy.md).
+Plumb does not save a workout movie. Set summaries are saved in the app's local storage and may be included in your iPhone's device backup if enabled. After a measured set, **Share summary** opens the iOS Share Sheet with text only; if two compatible sets exist, it includes their measured range-change direction. You choose where the text goes. Open **History** and tap **Delete** to remove one session, or **Delete all local data** to remove all saved sessions and recovery backups from the app. See the [privacy policy](privacy-policy.md).
 
 ## Troubleshooting
 

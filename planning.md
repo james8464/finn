@@ -60,7 +60,7 @@ The Watch's heart rate describes effort context; it cannot prove whether a rep h
 - **Bodyweight squat, side view** as the first calibrated exercise. Count reps and calculate a limited set of observable, testable signals: camera-relative hip-range consistency, rep duration, and tracking confidence. A required setup instruction is not proof of the actual viewpoint; validation must count false measured outcomes from unsuitable front and three-quarter views.
 - A post-set summary with one evidence-linked cue, uncertainty language, and a second-set comparison.
 - On-device storage of exercise name, date, rep count, derived metrics, selected cue, and user response. Raw video is discarded by default. Saved summaries and recovered-history backups request [iOS complete file protection](https://developer.apple.com/documentation/uikit/encrypting-your-app-s-files), so the app accesses them while the device is unlocked; locked-device behavior still needs a physical-iPhone check.
-- Optional, user-initiated sharing of a measured set's text summary through the iOS Share Sheet. It excludes dismissed observations and never includes video or camera frames.
+- Optional, user-initiated sharing of a measured set's text summary through the iOS Share Sheet. When two compatible sets have been measured, the text also states the camera-measured range change or that no clear change was found. It excludes dismissed observations and never includes video or camera frames.
 - A deterministic coaching template that works without Foundation Models or network access.
 - Clear demo labels if using a seeded sample; a recorded example must never be presented as live tracking.
 

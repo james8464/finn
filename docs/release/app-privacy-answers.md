@@ -11,7 +11,7 @@ Choose **“No, we do not collect data from this app”** for the current Plumb 
 | Camera frames | AVFoundation delivers frames to Vision on the iPhone; no movie or frame file is written | None through the app |
 | Pose points and analysis | Held in memory for the set; used for rep count and one provisional cue | None through the app |
 | Set summaries and feedback | JSON in the app's local Application Support directory; removable in History | None through the app |
-| User-initiated summary export | A text summary opens in the system Share Sheet only after the person taps **Share summary**; the person chooses the destination | None through the app |
+| User-initiated summary export | A text summary of the latest measured set and, when available, its compatible two-set range change opens in the system Share Sheet only after the person taps **Share summary**; the person chooses the destination | None through the app |
 | Optional recap | Apple's Foundation Models receives structured comparison facts on eligible devices; no Plumb server or third-party model endpoint | None through the app |
 | Validation timing | A local result-screen readout only when Xcode launches with `-plumb-validation`; not saved or uploaded | None through the app |
 

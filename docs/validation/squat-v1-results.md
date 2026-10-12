@@ -1,6 +1,6 @@
 # Squat v1 validation results
 
-**Status: not started. Updated 12 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. The current 70-test iOS 27 simulator pass verifies implementation behavior, not real-camera accuracy. It includes stalled-frame capture-limit and long tracking-loss regressions. The new 0.75-second retake gate still needs measurement on real sets.
+**Status: not started. Updated 12 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. A local 86-test iOS 27 simulator pass and a [successful hosted simulator workflow](https://github.com/james8464/hackathon-project/actions/runs/38194946081) verify implementation behavior, not real-camera accuracy. They include stalled-frame capture-limit and long tracking-loss regressions. The 0.75-second retake gate still needs measurement on real sets.
 
 ## Simulator UI check · 11 October 2026
 

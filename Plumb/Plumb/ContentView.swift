@@ -321,7 +321,8 @@ struct ContentView: View {
                             }
                         }
                         ShareLink(item: SetShareSummary.text(for: analysis, cue: cue,
-                                                              cueDismissed: model.cueDismissed)) {
+                                                              cueDismissed: model.cueDismissed,
+                                                              comparison: model.comparison)) {
                             Label("Share summary", systemImage: "square.and.arrow.up")
                                 .frame(minHeight: 44, alignment: .leading)
                         }
