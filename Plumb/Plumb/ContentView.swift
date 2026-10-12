@@ -436,7 +436,12 @@ struct ContentView: View {
                     Text(captureCopy.checkingVisibility)
                 case .adjustPosition:
                     Image(systemName: "viewfinder")
-                    Text(captureCopy.showJoints)
+                    if let joint = model.unclearJoint {
+                        // Théophile: say which joint is unclear instead of guessing.
+                        Text("\(joint.rawValue.capitalized) not clear: step back or add light")
+                    } else {
+                        Text(captureCopy.showJoints)
+                    }
                 case .landmarksVisible:
                     Image(systemName: "checkmark.circle.fill")
                     Text(captureCopy.jointsVisible)
@@ -554,6 +559,10 @@ struct ContentView: View {
                                  : "These sets used different camera views, so Plumb can’t compare them reliably.")
                                 .foregroundStyle(PlumbStyle.supportingText)
                         }
+                        if let extremes = model.repExtremes {
+                            repExtremesView(extremes)
+                            Divider().padding(.vertical, 12)
+                        }
                         DisclosureGroup("Rep details") {
                             repList(analysis.reps, exercise: model.resultExercise)
                         }
@@ -630,6 +639,53 @@ struct ContentView: View {
         }
     }
     #endif
+
+    /// The set's deepest and shallowest reps side by side, drawn from their pose points.
+    private func repExtremesView(_ extremes: RepExtremes) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Deepest and shallowest rep")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            HStack(alignment: .top, spacing: 12) {
+                repSnapshotView(extremes.deepest, title: "Deepest")
+                repSnapshotView(extremes.shallowest, title: "Shallowest")
+            }
+            Text("Drawn from the pose points of each rep’s lowest moment. No image is kept.")
+                .font(.footnote)
+                .foregroundStyle(PlumbStyle.supportingText)
+        }
+        .accessibilityIdentifier("result.repExtremes")
+    }
+
+    private func repSnapshotView(_ snapshot: RepSnapshot, title: String) -> some View {
+        let definition = model.resultExercise.definition
+        let cropped = SkeletonGeometry.cropped(snapshot.frame)
+        let angleText = cropped.flatMap {
+            SkeletonGeometry(frame: $0, exercise: definition, size: CGSize(width: 100, height: 100),
+                             mirrored: false).angle?.text
+        }
+        return VStack(alignment: .leading, spacing: 6) {
+            Canvas { context, size in
+                guard let cropped else { return }
+                let geometry = SkeletonGeometry(frame: cropped, exercise: definition, size: size, mirrored: false)
+                SkeletonPainter.draw(geometry, in: &context, size: size, clear: .primary,
+                                     labelText: Color(uiColor: .systemBackground), lineWidth: 2.5)
+            }
+            .frame(height: 180)
+            .accessibilityHidden(true)
+            Text("\(title) · rep \(snapshot.number)")
+                .font(.subheadline.weight(.semibold))
+            Text(definition.formattedDepth(snapshot.range))
+                .font(.footnote)
+                .foregroundStyle(PlumbStyle.supportingText)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(title) rep, rep \(snapshot.number), \(definition.formattedDepth(snapshot.range))"
+                            + (angleText.map { ", \($0)" } ?? ""))
+    }
 
     private var resultTitle: String {
         switch model.result {

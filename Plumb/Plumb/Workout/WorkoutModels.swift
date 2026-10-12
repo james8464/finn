@@ -113,6 +113,34 @@ nonisolated struct SetAnalysis: Codable, Equatable {
     let rubricVersion: String
 }
 
+/// One rep's lowest moment, kept in memory to draw its skeleton on the result.
+nonisolated struct RepSnapshot: Equatable {
+    let number: Int
+    let range: Double
+    let frame: PoseFrame
+}
+
+/// The deepest and shallowest reps of a measured set, compared within the person's own set
+/// rather than against a universal target.
+nonisolated struct RepExtremes: Equatable {
+    let deepest: RepSnapshot
+    let shallowest: RepSnapshot
+
+    static func make(_ analysis: SetAnalysis, frames: [PoseFrame],
+                     definition: ExerciseDefinition) -> RepExtremes? {
+        guard analysis.reps.count >= 2,
+              let deep = analysis.reps.max(by: { $0.relativeRange < $1.relativeRange }),
+              let shallow = analysis.reps.min(by: { $0.relativeRange < $1.relativeRange }),
+              deep.number != shallow.number,
+              let deepFrame = ExerciseAnalyzer.deepestFrame(of: deep, in: frames, as: definition),
+              let shallowFrame = ExerciseAnalyzer.deepestFrame(of: shallow, in: frames, as: definition)
+        else { return nil }
+        return RepExtremes(deepest: RepSnapshot(number: deep.number, range: deep.relativeRange, frame: deepFrame),
+                           shallowest: RepSnapshot(number: shallow.number, range: shallow.relativeRange,
+                                                   frame: shallowFrame))
+    }
+}
+
 nonisolated enum AnalysisOutcome: Equatable {
     case analyzed(SetAnalysis)
     case insufficientView(String)

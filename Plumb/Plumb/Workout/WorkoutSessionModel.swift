@@ -92,6 +92,9 @@ final class WorkoutSessionModel {
     private(set) var resultExercise: ExerciseKind = .bodyweightSquat
     /// Why some movements of a measured set did not count, in numbers; nil when all counted.
     private(set) var movementNote: String?
+    /// The deepest and shallowest reps of the latest measured set, drawn on the result. Pose
+    /// points only, kept in memory and never saved.
+    private(set) var repExtremes: RepExtremes?
     /// What the optional exercise classifier concluded for the latest set.
     private(set) var recognition: ExerciseRecognition = .notAttempted
     /// Whether Plumb recognizes the exercise after a set (joint-angle rules unless the trained
@@ -127,6 +130,8 @@ final class WorkoutSessionModel {
     var usesExerciseRecognition: Bool { recognizesExercise && recognitionMethod != .unavailable }
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
+    /// While framing, the joint that keeps the set from starting cleanly, named on screen.
+    private(set) var unclearJoint: JointRole?
     private(set) var lastStopToResultMilliseconds: Int?
     private(set) var cueDismissed = false
     private(set) var currentSession: WorkoutSessionSummary?
@@ -175,6 +180,7 @@ final class WorkoutSessionModel {
         recognition = .notAttempted
         result = nil
         movementNote = nil
+        repExtremes = nil
         lastStopToResultMilliseconds = nil
         stopTappedAt = nil
         cueDismissed = false
@@ -313,6 +319,7 @@ final class WorkoutSessionModel {
         let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(
             frames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore)
         movementNote = nil
+        repExtremes = nil
         switch outcome {
         case .analyzed(let analysis):
             let explanation = diagnostics?.explanation(for: definition, counted: analysis.reps.count)
@@ -322,6 +329,7 @@ final class WorkoutSessionModel {
                 return
             }
             movementNote = explanation
+            repExtremes = RepExtremes.make(analysis, frames: frames, definition: definition)
             let cue = CueSelector.select(from: analysis, exercise: definition)
             result = .measured(analysis, cue)
             record(analysis: analysis, cue: cue, exercise: exercise)
@@ -344,6 +352,8 @@ final class WorkoutSessionModel {
         } else {
             framingStatus = EvidenceGate.previewStatus(previewFrames, requirement: definition.evidence)
         }
+        unclearJoint = framingStatus == .adjustPosition
+            ? EvidenceGate.unclearJoint(previewFrames, requirement: definition.evidence) : nil
     }
 
     private func recognizeExercise() -> ExerciseRecognition {
@@ -487,6 +497,7 @@ final class WorkoutSessionModel {
         frameCount = 0
         result = nil
         movementNote = nil
+        repExtremes = nil
         lastStopToResultMilliseconds = nil
         stopTappedAt = nil
     }
