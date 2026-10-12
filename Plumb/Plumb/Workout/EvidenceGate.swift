@@ -117,6 +117,25 @@ nonisolated enum EvidenceGate {
         }
     }
 
+    /// The required joint that is least often clear in recent framing frames, when it is the
+    /// reason the joints are not all visible: "Hip not clear" rather than "Show hip, knee and
+    /// ankle". Nil when nobody is in view or every joint is clear often enough.
+    static func unclearJoint(_ frames: [PoseFrame], requirement: EvidenceRequirement = .squat) -> JointRole? {
+        let seen = frames.filter { $0.athleteVisible && !$0.joints.isEmpty }
+        guard seen.count >= 3 else { return nil }
+        let side = bestSide(seen, requirement: requirement).side
+        let shares = requirement.joints.map { role -> (JointRole, Double) in
+            let clear = seen.filter {
+                ($0.joints[role.joint(on: side)]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence
+            }.count
+            return (role, Double(clear) / Double(seen.count))
+        }
+        guard let weakest = shares.min(by: { $0.1 < $1.1 }), weakest.1 < EvidenceRubric.minimumCoverage else {
+            return nil
+        }
+        return weakest.0
+    }
+
     // MARK: Measurements
 
     private static func bestSide(_ frames: [PoseFrame], requirement: EvidenceRequirement)

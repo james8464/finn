@@ -107,6 +107,25 @@ nonisolated struct SkeletonGeometry: Equatable {
         return total(.right) > total(.left) ? .right : .left
     }
 
+    /// The athlete's joints re-framed to fill a box around them (15% margin), for drawing one
+    /// pose on its own. Angles are unchanged: the aspect ratio is carried along.
+    static func cropped(_ frame: PoseFrame) -> PoseFrame? {
+        let points = frame.joints.values
+        guard points.count >= 2, let minX = points.map(\.x).min(), let maxX = points.map(\.x).max(),
+              let minY = points.map(\.y).min(), let maxY = points.map(\.y).max() else { return nil }
+        let width = max(maxX - minX, 0.01)
+        let height = max(maxY - minY, 0.01)
+        let left = minX - 0.15 * width
+        let top = minY - 0.15 * height
+        let boxWidth = width * 1.3
+        let boxHeight = height * 1.3
+        let joints = frame.joints.mapValues { point in
+            JointPoint(x: (point.x - left) / boxWidth, y: (point.y - top) / boxHeight, confidence: point.confidence)
+        }
+        return PoseFrame(time: frame.time, subjectCount: 1, joints: joints,
+                         aspectRatio: boxHeight * frame.aspectRatio / boxWidth)
+    }
+
     /// A short description for VoiceOver and UI tests.
     var summary: String {
         let reliableCount = joints.filter(\.reliable).count

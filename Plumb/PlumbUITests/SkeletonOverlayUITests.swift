@@ -19,6 +19,27 @@ final class SkeletonOverlayUITests: XCTestCase {
         XCTAssertEqual(XCTWaiter().wait(for: [gone], timeout: 8), .completed)
     }
 
+    /// The demo set's reps shrink after the fourth, so the result has a deepest and a shallowest rep.
+    @MainActor
+    func testResultDrawsTheDeepestAndShallowestRep() {
+        let app = XCUIApplication()
+        app.launchArguments += ["-plumb-ui-demo"]
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        XCTAssertTrue(app.staticTexts["Deepest and shallowest rep"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(
+            format: "label BEGINSWITH %@", "Deepest rep, rep ")).firstMatch.exists)
+        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(
+            format: "label BEGINSWITH %@", "Shallowest rep, rep ")).firstMatch.exists)
+        app.swipeUp()
+        attachScreenshot(named: "Deepest and shallowest rep")
+    }
+
     /// Plays a side-view squat video on the camera screen. It runs when the test runner
     /// is given a file, including the repository's synthetic exercise fixture:
     /// `TEST_RUNNER_PLUMB_VIDEO_FILE=/path/to/video.mp4 xcodebuild test …`. Vision body pose does
@@ -54,6 +75,10 @@ final class SkeletonOverlayUITests: XCTestCase {
             format: "label ENDSWITH %@ OR label == %@", "measured reps", "Couldn’t assess this set")).firstMatch
         XCTAssertTrue(outcome.waitForExistence(timeout: 15))
         attachScreenshot(named: "Result")
+        if app.staticTexts["Deepest and shallowest rep"].exists {
+            app.swipeUp()
+            attachScreenshot(named: "Deepest and shallowest rep")
+        }
         print("PLUMB_VIDEO_RESULT \(outcome.label)")
         if let expected = environment["PLUMB_VIDEO_EXPECTED_REPS"] {
             XCTAssertEqual(outcome.label, "\(expected) measured reps")
