@@ -165,7 +165,7 @@ nonisolated extension ExerciseKind {
 }
 
 nonisolated extension ExerciseDefinition {
-    /// Side-view bodyweight squat. Values come from `SquatRubric` so `squat-side-v2` is unchanged.
+    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v3`).
     static let squat = ExerciseDefinition(
         kind: .bodyweightSquat,
         rubricVersion: SquatRubric.version,
