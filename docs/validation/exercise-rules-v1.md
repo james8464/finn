@@ -49,22 +49,39 @@ A 10° phone tilt changes neither count: the squat signal is a ratio of vertical
 
 ## 3D camera-angle check
 
-**What it does.** About four times per second (every fourth processed frame at 15 fps), the capture code runs `VNDetectHumanBodyPose3DRequest` on the same camera frame as the 2D pose. From the camera-relative positions of the hips and shoulders, it computes the angle between the body's left-right axis and the line from the camera to the hips: 0° is a true side view, 90° faces the camera or turns away from it. While framing, when at least three of the last five estimates give a median above 30°, the status reads "Turn your side to the camera". After a set with at least four estimates whose median is above 30°, Plumb shows "This exercise needs a side view. Turn so your side faces the camera, then try again." instead of a result. With fewer estimates it does not decide and the 2D rules apply alone, as on the simulator.
+**What it does.** About four times per second (every fourth processed frame at 15 fps), the capture code runs `VNDetectHumanBodyPose3DRequest` on the same camera frame as the 2D pose. It moves the hips and shoulders into the camera's frame with `cameraOriginMatrix` and computes the angle between the body's left-right axis and the line from the camera to the hips: 0° is a true side view, 90° faces the camera or turns away from it.
+
+- Median of the set's estimates at 30° or less: nothing to say.
+- Above 30°: the set is measured, and the result adds "Plumb saw you about N° from side-on. Turn a little more side-on next time; counts are most reliable from the side." While framing, three of the last five estimates above 30° show "Turn a little: side to the camera". Neither stops the set.
+- At 75° or more, with estimates spanning at least 3 s: the set is refused with "This exercise needs a side view. Turn so your side faces the camera, then try again. Plumb measured about N° away from the view it needs."
+- Fewer than four estimates: no decision, and the 2D rules apply alone, as on the simulator.
+
+**What went wrong before (fixed 12 October 2026).** Earlier builds took joint positions from `cameraRelativePosition`, which only shifts each joint by the root's position without turning it into the camera's axes. Every body then looked square to the camera, and the check refused every set with a 30° limit: run through the app's capture code, 50 public side-view squat videos gave medians of 74 to 89°, and all 50 were refused. This is the likely reason squats were never counted on a real iPhone.
+
+**Measured since the fix.** Vision 3D pose on the Mac, every 0.5 s, on the Mendeley squat videos (CC BY 4.0, kept outside the repository):
+
+| Camera view | Videos | Median per video, 10th / 50th / 90th percentile | At 75° or more |
+| --- | --- | --- | --- |
+| Side | 50 | 14° / 21° / 47° | 0 |
+| Diagonal | 50 | 40° / 48° / 59° | 0 |
+| Front | 50 | 82° / 85° / 87° | 50 |
+
+So 75° separates front views from the rest on these videos. 30° sends the turn tip to 15 of the 50 side videos: the phones in this dataset were placed by hand in a busy gym and not all are square to the person, and Vision 3D pose is noisy (single estimates often read 60 to 75° on side videos). That is why only the median over several seconds can refuse.
 
 **Switch.** Options → **Check the camera angle in 3D**, on by default. Turning it off stops the 3D requests.
 
 **Validation readout.** Launch from Xcode with `-plumb-validation`. While framing, a capsule shows "3D view: N° from profile" or "no estimate". The result shows the set's median, the number of estimates, and whether the check accepted or refused the set. These lines exist only in Debug builds.
 
-**Simulator coverage.** Unit tests check the geometry on synthetic bodies turned 0°, 15°, 45°, 60°, and 90°, with swapped left and right labels, the median rule, the framing prompt, and the switch. A Debug-only demo feed (`-plumb-ui-demo-front-view`) attaches a fixed 75° value so UI tests can follow the refusal path. None of this shows how Vision 3D pose behaves on a real person.
+**Simulator coverage.** Unit tests check the geometry on synthetic bodies turned 0°, 15°, 45°, 60°, and 90°, with swapped left and right labels, the median rule, the three outcomes, a brief front view that does not refuse, the framing prompt, and the switch. A Debug-only demo feed (`-plumb-ui-demo-front-view`) attaches a fixed 75° value so UI tests can follow the refusal path. Vision 3D pose does not run on the simulator; the table above comes from the Mac.
 
 ## To check on a physical iPhone
 
 1. With `-plumb-validation`, frame yourself side-on. If the capsule keeps saying "no estimate", the 3D request is not running on this device; note the model and iOS build.
-2. Stand side-on, at about 45°, facing the camera, and with your back to it. Write down the readout for each. Side-on should read well under 30° and the other three well above it. Change `ViewCheck.maximumSideDeviationDegrees` only from those readings, and record the change.
+2. Stand side-on, at about 45°, facing the camera, and with your back to it. Write down the readout for each. Side-on should read under 30°, 45° between 30 and 75°, and the front and back views 75° or more. Change `ViewCheck.maximumSideDeviationDegrees` or `clearlyFrontDegrees` only from those readings, and record the change.
 3. Repeat side-on in the push-up position (body horizontal) and at the bottom of a deadlift (torso bent). The hip and shoulder axis should still read low.
 4. Try both sides facing the camera.
 5. Compare a two-minute set with the check on and off: frame rate, heat, and "Stop to result" latency.
 6. For each exercise, count reps by hand and compare with the app on a few sets, including a deliberately shallow set and an incomplete last rep.
-7. If the check refuses side-on sets, switch it off in Options for the demo and say so; the 2D visibility rules still run.
+7. If the check refuses a side-on set, note the readout, switch it off in Options for the demo, and say so; the 2D visibility rules still run.
 
 For the squat holdout in [`squat-v1-protocol.md`](squat-v1-protocol.md), keep the 3D switch in one position for every holdout set and write which one in `notes`, because it can refuse a set that `squat-side-v3` alone would have measured.

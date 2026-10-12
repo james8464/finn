@@ -45,8 +45,15 @@ struct ViewCheckTests {
     @Test func setVerdictUsesTheMedianAndNeedsEnoughEstimates() {
         #expect(ViewCheck.assess(frames(deviations: [10, 80, 12, 9, 15]), expected: .side)
                 == .matches(medianDeviation: 12, estimates: 5))
+        // Off side-on but not clearly frontal: measured, with a tip.
         #expect(ViewCheck.assess(frames(deviations: [50, 60, 12, 70]), expected: .side)
-                == .mismatch(medianDeviation: 60, estimates: 4))
+                == .angled(medianDeviation: 60, estimates: 4))
+        // Clearly frontal over three seconds: refused.
+        #expect(ViewCheck.assess(frames(deviations: [70, 80, 75, 90]), expected: .side)
+                == .mismatch(medianDeviation: 80, estimates: 4))
+        // Clearly frontal, but only for a second and a half: still measured.
+        #expect(ViewCheck.assess(frames(deviations: [70, 80, 75, 90], spacing: 0.5), expected: .side)
+                == .angled(medianDeviation: 80, estimates: 4))
         #expect(ViewCheck.assess(frames(deviations: [80, 80, 80]), expected: .side) == .unavailable)
         #expect(ViewCheck.assess(frames(deviations: []), expected: .side) == .unavailable)
     }
@@ -63,19 +70,43 @@ struct ViewCheckTests {
             (.staticLunge, lungeTrace(reps: 6)), (.stiffLegDeadlift, hingeTrace(reps: 5)),
         ]
         for (definition, trace) in traces {
-            let front = withDeviation(trace, 70)
+            let front = withDeviation(trace, 85)
             guard case .insufficientView(let reason) = ExerciseAnalyzer.analyze(front, as: definition) else {
                 Issue.record("\(definition.kind) should refuse a front view")
                 continue
             }
             #expect(reason.hasPrefix(ExpectedView.side.wrongViewMessage))
-            #expect(reason.contains("70°"))
+            #expect(reason.contains("85°"))
             guard case .analyzed(let ignored) = ExerciseAnalyzer.analyze(front, as: definition, viewCheck: .ignore)
             else {
                 Issue.record("\(definition.kind) should measure when the check is off")
                 continue
             }
             #expect(!ignored.reps.isEmpty)
+        }
+    }
+
+    @Test func anAngledViewIsMeasuredWithATip() throws {
+        let trace = squatTrace()
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(withDeviation(trace, 45), as: .squat)
+        guard case .analyzed(let angled) = outcome, case .analyzed(let plain) = SquatAnalyzer.analyze(trace) else {
+            Issue.record("A 45° view must be measured")
+            return
+        }
+        #expect(angled.reps.count == plain.reps.count)
+        let tip = try #require(diagnostics?.explanation(for: .squat, counted: angled.reps.count))
+        #expect(tip.contains("about 45° from side-on"))
+    }
+
+    @Test func aBriefFrontViewDoesNotRefuseTheSet() {
+        // Facing the camera for the first two seconds only (while getting into place).
+        let trace = squatTrace().enumerated().map { index, frame in
+            PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints,
+                      profileDeviationDegrees: index.isMultiple(of: 4) ? (frame.time < 2 ? 85 : 10) : nil)
+        }
+        guard case .analyzed = SquatAnalyzer.analyze(trace) else {
+            Issue.record("Two seconds facing the camera must not refuse the set")
+            return
         }
     }
 
@@ -86,9 +117,10 @@ struct ViewCheckTests {
         #expect(SquatAnalyzer.analyze(withDeviation(trace, 70, every: 50)) == SquatAnalyzer.analyze(trace))
     }
 
-    private func frames(deviations: [Double]) -> [PoseFrame] {
+    private func frames(deviations: [Double], spacing: Double = 1) -> [PoseFrame] {
         deviations.enumerated().map {
-            PoseFrame(time: Double($0.offset), subjectCount: 1, joints: [:], profileDeviationDegrees: $0.element)
+            PoseFrame(time: Double($0.offset) * spacing, subjectCount: 1, joints: [:],
+                      profileDeviationDegrees: $0.element)
         }
     }
 

@@ -1,13 +1,20 @@
 import Foundation
 import simd
 
-/// Camera-angle check from Vision 3D body pose (`VNDetectHumanBodyPose3DRequest`). It refuses
-/// a set filmed from the front or at an angle when the rubric needs a side view. When no 3D
-/// estimate is available, it does not decide, and the 2D visibility rules apply alone.
-/// The threshold is a starting value: it has not been measured on real sets.
+/// Camera-angle check from Vision 3D body pose (`VNDetectHumanBodyPose3DRequest`). It never
+/// stops a set from being counted unless the person was clearly facing the camera (or facing
+/// away) for several seconds. Between a side view and that, it only says to turn a little.
+/// When no 3D estimate is available, it does not decide, and the 2D visibility rules apply alone.
 nonisolated enum ViewCheck {
-    /// Largest median deviation from a true profile still treated as a side view.
+    /// Largest median deviation from a true profile still treated as a side view. Above it, the
+    /// framing screen and the result suggest turning a little; the set is still measured.
     static let maximumSideDeviationDegrees = 30.0
+    /// From this median deviation a set counts as filmed from the front. Measured on 150 public
+    /// gym videos (Mendeley, 12 October 2026): video medians were 85° for front views (all 50 at
+    /// 75° or more), 48° for diagonal views, and 21° for side views (none at 75°).
+    static let clearlyFrontDegrees = 75.0
+    /// A front view refuses the set only when its estimates span at least this long.
+    static let minimumFrontDuration: TimeInterval = 3
     /// Fewer 3D estimates than this over a set means the check could not run.
     static let minimumSetEstimates = 4
     /// Recent estimates needed before the framing screen asks the person to turn.
@@ -15,6 +22,9 @@ nonisolated enum ViewCheck {
 
     enum Verdict: Equatable {
         case matches(medianDeviation: Double, estimates: Int)
+        /// Not side-on, but not clearly and lastingly frontal either: measured, with a suggestion.
+        case angled(medianDeviation: Double, estimates: Int)
+        /// Clearly frontal for at least `minimumFrontDuration`: the set is refused.
         case mismatch(medianDeviation: Double, estimates: Int)
         case unavailable
     }
@@ -41,12 +51,18 @@ nonisolated enum ViewCheck {
     }
 
     static func assess(_ frames: [PoseFrame], expected: ExpectedView) -> Verdict {
-        let deviations = frames.compactMap(\.profileDeviationDegrees)
+        let estimates = frames.filter { $0.profileDeviationDegrees != nil }
+        let deviations = estimates.compactMap(\.profileDeviationDegrees)
         guard deviations.count >= minimumSetEstimates else { return .unavailable }
         let median = median(deviations)
-        return fits(median, expected: expected)
-            ? .matches(medianDeviation: median, estimates: deviations.count)
-            : .mismatch(medianDeviation: median, estimates: deviations.count)
+        if fits(median, expected: expected) {
+            return .matches(medianDeviation: median, estimates: deviations.count)
+        }
+        let span = (estimates.last?.time ?? 0) - (estimates.first?.time ?? 0)
+        if median >= clearlyFrontDegrees && span >= minimumFrontDuration {
+            return .mismatch(medianDeviation: median, estimates: deviations.count)
+        }
+        return .angled(medianDeviation: median, estimates: deviations.count)
     }
 
     /// True when the latest estimates agree the person is not in the expected view.

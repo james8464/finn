@@ -319,7 +319,7 @@ struct ContentView: View {
                     ))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.checkCameraAngle")
-                    Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one, and asks you to turn when the exercise needs a side view. The angle limit has not been tested on real sets yet. If Plumb asks you to turn while your side already faces the camera, switch this off.")
+                    Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. It only refuses a set when you clearly face the camera, or face away, for several seconds. If it asks you to turn while your side already faces the camera, switch this off.")
                 }
             }
             .font(.body)
@@ -623,6 +623,8 @@ struct ContentView: View {
             return "no 3D estimate"
         case .matches(let median, let count):
             return "median \(Int(median.rounded()))° from profile, \(count) estimates, accepted"
+        case .angled(let median, let count):
+            return "median \(Int(median.rounded()))° from profile, \(count) estimates, measured with a turn tip"
         case .mismatch(let median, let count):
             return "median \(Int(median.rounded()))° from profile, \(count) estimates, refused"
         }
