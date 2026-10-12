@@ -69,6 +69,9 @@ struct ContentView: View {
         #endif
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { Task { await model.backgrounded() } }
+            if phase == .active && model.historyIssue == .unavailable {
+                model.retryHistory()
+            }
         }
         .confirmationDialog("Delete this session?", isPresented: Binding(
             get: { deleteCandidate != nil },
@@ -283,6 +286,17 @@ struct ContentView: View {
                         Text("Set reviewed").font(.largeTitle.bold())
                         Text("\(analysis.reps.count) measured reps")
                             .font(.title2.weight(.semibold)).monospacedDigit()
+                        if model.historyIssue != nil {
+                            Text("Couldn’t confirm this set was saved.")
+                                .font(.subheadline)
+                            if model.historyIssue == .unavailable {
+                                Button("Retry saving") { model.retryHistory() }
+                                    .frame(minHeight: 44, alignment: .leading)
+                            } else {
+                                NavigationLink("Review history") { historyPage }
+                                    .frame(minHeight: 44, alignment: .leading)
+                            }
+                        }
                         if let cue {
                             if model.cueDismissed {
                                 Text("Observation marked not relevant.").font(.title3)
@@ -398,12 +412,23 @@ struct ContentView: View {
     }
 
     @ViewBuilder private var historySection: some View {
-        if model.historyError {
+        if model.historyIssue == .corrupted {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Couldn’t read saved history").font(.headline)
                 Text("You can move the damaged file aside and start a new local history.")
                     .font(.subheadline).foregroundStyle(.secondary)
                 Button("Recover history") { model.recoverHistory() }
+                    .buttonStyle(.bordered)
+            }
+        } else if model.historyIssue == .unavailable {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(model.hasPendingDeletion ? "Deletion couldn’t finish" : "History temporarily unavailable")
+                    .font(.headline)
+                Text(model.hasPendingDeletion
+                     ? "Tap Try again to finish removing the local data."
+                     : "The saved file could not be accessed. Unlock this iPhone, then try again.")
+                    .font(.subheadline).foregroundStyle(.secondary)
+                Button("Try again") { model.retryHistory() }
                     .buttonStyle(.bordered)
             }
         } else if !model.history.isEmpty {

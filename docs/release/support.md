@@ -24,6 +24,7 @@ Plumb does not save a workout movie. Set summaries are saved in the app's local 
 - **Camera denied:** open iOS Settings for Plumb and allow Camera.
 - **Camera unavailable:** close another app using the camera and try again.
 - **No measured result:** improve lighting, keep only one person in view, and keep hip, knee, and ankle visible.
+- **History temporarily unavailable or deletion unfinished:** unlock your iPhone and tap **Try again**. If a result says it could not confirm saving, keep Plumb open until retry succeeds; unsaved work and pending deletion retries are lost if the app terminates. **Recover history** appears only for a confirmed damaged file and moves that file to a local backup.
 - **Apple Intelligence note unavailable:** the app shows a reviewed comparison note on unsupported or unready devices.
 
 For help, contact jamesdurup@icloud.com.

@@ -2,6 +2,11 @@ import AVFoundation
 import Foundation
 import Observation
 
+nonisolated enum HistoryIssue: Equatable {
+    case corrupted
+    case unavailable
+}
+
 nonisolated enum WorkoutStage: Equatable {
     case ready
     case openingCamera
@@ -59,6 +64,9 @@ final class WorkoutSessionModel {
     private var lastPreviewFrameAt: ContinuousClock.Instant?
     private var framingWatchdog: Task<Void, Never>?
     private var isStopping = false
+    @ObservationIgnored private var pendingSessions: [UUID: WorkoutSessionSummary] = [:]
+    @ObservationIgnored private var pendingDeleteIDs: Set<UUID> = []
+    @ObservationIgnored private var pendingDeleteAll = false
     @ObservationIgnored private var stopTappedAt: ContinuousClock.Instant?
 
     private(set) var stage: WorkoutStage = .ready
@@ -70,9 +78,10 @@ final class WorkoutSessionModel {
     private(set) var currentSession: WorkoutSessionSummary?
     private(set) var comparison: Comparison?
     private(set) var history: [WorkoutSessionSummary] = []
-    private(set) var historyError = false
+    private(set) var historyIssue: HistoryIssue?
     private(set) var comparisonRecap: Recap?
     private(set) var isGeneratingRecap = false
+    var hasPendingDeletion: Bool { pendingDeleteAll || !pendingDeleteIDs.isEmpty }
     var isRecording: Bool { stage == .capturing }
     var previewSession: AVCaptureSession { source.previewSession }
 
@@ -82,8 +91,8 @@ final class WorkoutSessionModel {
         self.store = store
         self.narrator = narrator ?? ComparisonNarrator()
         if let store {
-            do { history = try store.load() }
-            catch { historyError = true }
+            do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
+            catch { historyIssue = Self.issue(for: error) }
         }
     }
 
@@ -232,33 +241,55 @@ final class WorkoutSessionModel {
     }
 
     func deleteHistory(id: UUID) {
-        guard let store else { return }
-        do {
-            try store.delete(id: id)
-            history = try store.load()
-            if currentSession?.id == id { currentSession = nil; comparison = nil }
-        } catch { historyError = true }
-    }
-
-    func deleteAllData() {
-        guard let store else { return }
-        do {
-            try store.deleteAll()
-            history = []
+        guard store != nil else { return }
+        pendingSessions.removeValue(forKey: id)
+        if !pendingDeleteAll { pendingDeleteIDs.insert(id) }
+        if currentSession?.id == id {
             currentSession = nil
             comparison = nil
             comparisonRecap = nil
-            historyError = false
-        } catch { historyError = true }
+        }
+        retryHistory()
+    }
+
+    func deleteAllData() {
+        guard store != nil else { return }
+        pendingDeleteAll = true
+        pendingDeleteIDs = []
+        pendingSessions = [:]
+        currentSession = nil
+        comparison = nil
+        comparisonRecap = nil
+        retryHistory()
     }
 
     func recoverHistory() {
-        guard let store else { return }
+        guard let store, historyIssue == .corrupted else { return }
         do {
             _ = try store.recoverCorruptStore()
-            history = try store.load()
-            historyError = false
-        } catch { historyError = true }
+            retryHistory()
+        } catch { historyIssue = Self.issue(for: error) }
+    }
+
+    func retryHistory() {
+        guard let store else { return }
+        do {
+            if pendingDeleteAll {
+                try store.deleteAll()
+                pendingDeleteAll = false
+            }
+            for id in Array(pendingDeleteIDs) {
+                try store.delete(id: id)
+                pendingDeleteIDs.remove(id)
+            }
+            _ = try store.load()
+            for session in pendingSessions.values {
+                try store.save(session)
+            }
+            history = try store.load().sorted { $0.startedAt > $1.startedAt }
+            pendingSessions = [:]
+            historyIssue = nil
+        } catch { historyIssue = Self.issue(for: error) }
     }
 
     private func record(analysis: SetAnalysis, cue: Cue?) {
@@ -285,12 +316,16 @@ final class WorkoutSessionModel {
     }
 
     private func save(_ session: WorkoutSessionSummary) {
-        guard let store else { return }
-        do {
-            try store.save(session)
-            history = try store.load().sorted { $0.startedAt > $1.startedAt }
-            historyError = false
-        } catch { historyError = true }
+        guard store != nil else { return }
+        pendingSessions[session.id] = session
+        retryHistory()
+    }
+
+    private static func issue(for error: Error) -> HistoryIssue {
+        if let storeError = error as? SessionStoreError, storeError == .corrupted {
+            return .corrupted
+        }
+        return .unavailable
     }
 
     func cancel() async {

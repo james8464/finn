@@ -228,6 +228,134 @@ struct WorkoutSessionModelTests {
         #expect(try store.load().first?.sets.count == 2)
     }
 
+    @Test func temporarilyUnavailableHistoryCanRetryAndSaveCurrentSet() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: "PlumbUnavailableStore-\(UUID().uuidString)", directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appending(path: "sessions.json", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: storeURL, withIntermediateDirectories: true)
+        let store = LocalSessionStore(url: storeURL)
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+        #expect(model.historyIssue == .unavailable)
+
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for sample in trace(reps: 6) { source.emit(sample) }
+        await model.endSet()
+        let pendingID = try #require(model.currentSession?.id)
+        #expect(model.currentSession?.sets.count == 1)
+        #expect(model.historyIssue == .unavailable)
+
+        model.recoverHistory()
+        #expect(FileManager.default.fileExists(atPath: storeURL.path))
+        #expect(model.historyIssue == .unavailable)
+
+        await model.finishSession()
+        #expect(model.currentSession == nil)
+        try FileManager.default.removeItem(at: storeURL)
+        model.retryHistory()
+        #expect(model.historyIssue == nil)
+        #expect(model.history.first?.id == pendingID)
+        #expect(try store.load().first?.sets.count == 1)
+    }
+
+    @Test func corruptHistoryNeedsExplicitRecovery() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: "PlumbCorruptModelStore-\(UUID().uuidString)", directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appending(path: "sessions.json")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try Data("broken".utf8).write(to: storeURL)
+        let model = WorkoutSessionModel(source: TestPoseSource(),
+                                        store: LocalSessionStore(url: storeURL))
+        #expect(model.historyIssue == .corrupted)
+        #expect(FileManager.default.fileExists(atPath: storeURL.path))
+        model.retryHistory()
+        #expect(model.historyIssue == .corrupted)
+        #expect(FileManager.default.fileExists(atPath: storeURL.path))
+        model.recoverHistory()
+        #expect(model.historyIssue == nil)
+        #expect(!FileManager.default.fileExists(atPath: storeURL.path))
+        #expect(try FileManager.default.contentsOfDirectory(atPath: directory.path)
+            .contains(where: { $0.hasPrefix("sessions-corrupt-") }))
+    }
+
+    @Test func failedDeleteAllNeverResavesAnUnsavedSet() async throws {
+        let store = ToggleSessionStore()
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for sample in trace(reps: 6) { source.emit(sample) }
+        await model.endSet()
+        #expect(model.historyIssue == .unavailable)
+        #expect(model.currentSession?.sets.count == 1)
+
+        model.deleteAllData()
+        #expect(model.historyIssue == .unavailable)
+        store.blocked = false
+        model.retryHistory()
+        #expect(model.historyIssue == nil)
+        #expect(model.history.isEmpty)
+        #expect(try store.load().isEmpty)
+    }
+
+    @Test func failedDeleteOneNeverResavesThatPendingSet() async throws {
+        let store = ToggleSessionStore()
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for sample in trace(reps: 6) { source.emit(sample) }
+        await model.endSet()
+        let id = try #require(model.currentSession?.id)
+
+        model.deleteHistory(id: id)
+        #expect(model.historyIssue == .unavailable)
+        store.blocked = false
+        model.retryHistory()
+        #expect(model.historyIssue == nil)
+        #expect(model.history.isEmpty)
+        #expect(try store.load().isEmpty)
+    }
+
+    @Test func partiallyFailedDeleteAllIsRetriedBeforeReportingSuccess() throws {
+        let store = ToggleSessionStore()
+        store.blocked = false
+        let id = UUID()
+        try store.save(WorkoutSessionSummary(id: id, startedAt: .now, sets: []))
+        let model = WorkoutSessionModel(source: TestPoseSource(), store: store)
+        #expect(model.history.count == 1)
+
+        store.failNextDeleteAllAfterClearing = true
+        model.deleteAllData()
+        #expect(model.historyIssue == .unavailable)
+        #expect(store.deleteAllAttempts == 1)
+        model.retryHistory()
+        #expect(store.deleteAllAttempts == 2)
+        #expect(model.historyIssue == nil)
+        #expect(model.history.isEmpty)
+    }
+
+    @Test func failedDeleteOneIsRetriedOnExistingSavedSession() throws {
+        let store = ToggleSessionStore()
+        store.blocked = false
+        let id = UUID()
+        try store.save(WorkoutSessionSummary(id: id, startedAt: .now, sets: []))
+        let model = WorkoutSessionModel(source: TestPoseSource(), store: store)
+        #expect(model.history.map(\.id) == [id])
+
+        store.blocked = true
+        model.deleteHistory(id: id)
+        #expect(model.historyIssue == .unavailable)
+        store.blocked = false
+        model.retryHistory()
+        #expect(model.historyIssue == nil)
+        #expect(model.history.isEmpty)
+        #expect(try store.load().isEmpty)
+    }
+
     private func trace(reps: Int, amplitude: Double = 0.20) -> [PoseFrame] {
         (0...(reps * 20)).map { index in
             let phase = Double(index % 20) / 20
@@ -246,6 +374,44 @@ struct WorkoutSessionModelTests {
             .rightAnkle: JointPoint(x: 0.57, y: 0.90, confidence: 0.99),
         ])
     }
+}
+
+nonisolated private final class ToggleSessionStore: SessionStoring, @unchecked Sendable {
+    nonisolated(unsafe) var blocked = true
+    nonisolated(unsafe) var failNextDeleteAllAfterClearing = false
+    private(set) var deleteAllAttempts = 0
+    private var sessions: [WorkoutSessionSummary] = []
+
+    func load() throws -> [WorkoutSessionSummary] {
+        if blocked { throw CocoaError(.fileReadNoPermission) }
+        return sessions
+    }
+
+    func save(_ session: WorkoutSessionSummary) throws {
+        if blocked { throw CocoaError(.fileWriteNoPermission) }
+        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
+            sessions[index] = session
+        } else {
+            sessions.append(session)
+        }
+    }
+
+    func delete(id: UUID) throws {
+        if blocked { throw CocoaError(.fileWriteNoPermission) }
+        sessions.removeAll { $0.id == id }
+    }
+
+    func deleteAll() throws {
+        deleteAllAttempts += 1
+        if blocked { throw CocoaError(.fileWriteNoPermission) }
+        sessions = []
+        if failNextDeleteAllAfterClearing {
+            failNextDeleteAllAfterClearing = false
+            throw CocoaError(.fileWriteUnknown)
+        }
+    }
+
+    func recoverCorruptStore() throws -> URL { throw SessionStoreError.notCorrupted }
 }
 
 @MainActor

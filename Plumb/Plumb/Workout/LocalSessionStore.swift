@@ -15,11 +15,14 @@ nonisolated protocol SessionStoring {
 
 nonisolated struct LocalSessionStore: SessionStoring {
     let url: URL
+    private let removeItem: (URL) throws -> Void
 
-    init(url: URL? = nil) {
+    init(url: URL? = nil,
+         removeItem: @escaping (URL) throws -> Void = { try FileManager.default.removeItem(at: $0) }) {
         self.url = url ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appending(path: "Plumb", directoryHint: .isDirectory)
             .appending(path: "sessions.json")
+        self.removeItem = removeItem
     }
 
     func load() throws -> [WorkoutSessionSummary] {
@@ -50,12 +53,13 @@ nonisolated struct LocalSessionStore: SessionStoring {
         guard FileManager.default.fileExists(atPath: directory.path) else { return }
         let contents = try FileManager.default.contentsOfDirectory(at: directory,
                                                                    includingPropertiesForKeys: nil)
-        for file in contents {
-            let name = file.lastPathComponent
-            if name == url.lastPathComponent ||
-                (name.hasPrefix("sessions-corrupt-") && name.hasSuffix(".json")) {
-                try FileManager.default.removeItem(at: file)
-            }
+        let backups = contents.filter { file in
+            file.lastPathComponent.hasPrefix("sessions-corrupt-") &&
+                file.lastPathComponent.hasSuffix(".json")
+        }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+        for backup in backups { try removeItem(backup) }
+        if let primary = contents.first(where: { $0.lastPathComponent == url.lastPathComponent }) {
+            try removeItem(primary)
         }
     }
 

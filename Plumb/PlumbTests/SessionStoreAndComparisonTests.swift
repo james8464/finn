@@ -135,6 +135,26 @@ struct SessionStoreAndComparisonTests {
         #expect(!FileManager.default.fileExists(atPath: backup.path))
     }
 
+    @Test func failedBackupDeletionKeepsMainHistoryVisible() throws {
+        let url = temporaryURL()
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        let directory = url.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try Data("[]".utf8).write(to: url)
+        let backup = directory.appending(path: "sessions-corrupt-blocked.json")
+        try Data("broken".utf8).write(to: backup)
+        var attempts: [String] = []
+        let store = LocalSessionStore(url: url, removeItem: { file in
+            attempts.append(file.lastPathComponent)
+            if file == backup { throw CocoaError(.fileWriteNoPermission) }
+            try FileManager.default.removeItem(at: file)
+        })
+
+        #expect(throws: CocoaError.self) { try store.deleteAll() }
+        #expect(FileManager.default.fileExists(atPath: url.path))
+        #expect(attempts == [backup.lastPathComponent])
+    }
+
     private func temporaryURL() -> URL {
         FileManager.default.temporaryDirectory
             .appending(path: "PlumbStoreTests-\(UUID().uuidString)", directoryHint: .isDirectory)
