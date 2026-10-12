@@ -1,8 +1,14 @@
-# Exercise classifier: filming, training, installing
+# Exercise recognition: rules, angle model, and action classifier
 
-Plumb can recognize which exercise a person did, so it picks the right rubric without a manual choice. This folder holds what the team needs to build that model on Thursday morning: a clip format, a script that cuts and labels recordings, and a Create ML training script. No trained model exists yet. Until one is added to the app, Plumb uses the exercise chosen on the first screen, and the Options page says so.
+Plumb can recognize which exercise a person did, so it picks the right rubric without a manual choice. After a set, with Options → **Recognize the exercise automatically** turned on, the app uses the first of these that the build has:
 
-The classifier only answers "which exercise is this". It does not judge technique. The rep counting and the observation still come from the rules in `Plumb/Plumb/Workout/ExerciseDefinition.swift`.
+1. a Create ML action classifier on Vision keypoint sequences (`PlumbExerciseClassifier.mlmodel`), trained from the team's own clips; the filming and training steps below are for this one;
+2. a boosted-tree classifier on joint-angle windows (`PlumbAngleClassifier.mlmodel`), trained on 12 October from public videos and synthetic poses; see [`angle-model/README.md`](angle-model/README.md);
+3. hand-written rules on the same joint angles, which need no training and ship in every build.
+
+None of the two models is in the repository yet. If no recognizer is confident, Plumb uses the exercise chosen on the first screen, and the result says so.
+
+Recognition only answers "which exercise is this". It does not judge technique. The rep counting and the observation still come from the rules in `Plumb/Plumb/Workout/ExerciseDefinition.swift`.
 
 ## Classes
 
