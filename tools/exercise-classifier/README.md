@@ -1,8 +1,15 @@
-# Exercise classifier: filming, training, installing
+# Exercise recognition: angle rules, and optional trained models
 
-Plumb can recognize which exercise a person did, so it picks the right rubric without a manual choice. This folder holds what the team needs to build that model on Thursday morning: a clip format, a script that cuts and labels recordings, and a Create ML training script. No trained model exists yet. Until one is added to the app, Plumb uses the exercise chosen on the first screen, and the Options page says so.
+Plumb recognizes which exercise a person did from Vision joint angles, with hand-written rules that need no training and ship in every build (`AngleRules` in `PoseWindowFeatures.swift`). Options → **Recognize the exercise automatically** is on by default; when the rules are not sure, Plumb uses the exercise chosen on the first screen. The team chose this as Plumb's method on 12 October 2026: the Vision skeleton, joint angles, and ranges of good movement.
 
-The classifier only answers "which exercise is this". It does not judge technique. The rep counting and the observation still come from the rules in `Plumb/Plumb/Workout/ExerciseDefinition.swift`.
+Trained models are optional and get no further work for now. The tools in this folder stay so the team can try one later. When a build includes a model, Options shows **Use the trained model instead (experimental)**, off by default; switched on, the app uses the first model the build has:
+
+1. a Create ML action classifier on Vision keypoint sequences (`PlumbExerciseClassifier.mlmodel`), trained from the team's own clips; the filming and training steps below are for this one;
+2. a boosted-tree classifier on joint-angle windows (`PlumbAngleClassifier.mlmodel`), trained on 12 October from public videos and synthetic poses; see [`angle-model/README.md`](angle-model/README.md).
+
+None of the two models is in the repository yet. If no recognizer is confident, Plumb uses the exercise chosen on the first screen, and the result says so.
+
+Recognition only answers "which exercise is this". It does not judge technique. The rep counting and the observation still come from the rules in `Plumb/Plumb/Workout/ExerciseDefinition.swift`.
 
 ## Classes
 
@@ -57,7 +64,7 @@ The defaults are a 15 fps pose rate and a 30-frame window, so each prediction co
 cp ~/plumb-clips/PlumbExerciseClassifier.mlmodel Plumb/Plumb/PlumbExerciseClassifier.mlmodel
 ```
 
-Xcode compiles it into the app on the next build; no project change is needed. The Options page then shows **Recognize the exercise automatically**, off by default. When it is on, after each set Plumb classifies overlapping 2-second windows of the captured poses (at most 40). It uses the recognized exercise only when at least 60% of the windows agree on it with a confidence of 0.8 or more. Otherwise, or when the winner is `other` or `none`, it uses the exercise chosen on the first screen, and the result screen says which one it used. These two thresholds are starting values, not measured ones.
+Xcode compiles it into the app on the next build; no project change is needed. The Options page then shows **Use the trained model instead (experimental)**, off by default. When it is on, after each set Plumb classifies overlapping 2-second windows of the captured poses (at most 40). It uses the recognized exercise only when at least 60% of the windows agree on it with a confidence of 0.8 or more. Otherwise, or when the winner is `other` or `none`, it uses the exercise chosen on the first screen, and the result screen says which one it used. These two thresholds are starting values, not measured ones.
 
 The repository is public. The model contains no video, but it was trained on the team's poses; decide together before committing it. Delete the recordings and clips once the model is final.
 

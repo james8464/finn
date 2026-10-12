@@ -67,6 +67,8 @@ final class WorkoutSessionModel {
     @ObservationIgnored private let narrator: ComparisonNarrator
     @ObservationIgnored private let preferences: PlumbPreferences
     @ObservationIgnored private let exerciseClassifier: (any ExerciseClassifying)?
+    @ObservationIgnored private let angleClassifier: (any AngleWindowClassifying)?
+    @ObservationIgnored private let ruleClassifier: (any AngleWindowClassifying)?
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
     private var previewFrames: [PoseFrame] = []
@@ -92,12 +94,26 @@ final class WorkoutSessionModel {
     private(set) var movementNote: String?
     /// What the optional exercise classifier concluded for the latest set.
     private(set) var recognition: ExerciseRecognition = .notAttempted
-    /// Whether to let the on-device classifier pick the exercise after a set. It only has an
-    /// effect when this build includes a trained model; the chosen exercise stays the fallback.
+    /// Whether Plumb recognizes the exercise after a set (joint-angle rules unless the trained
+    /// model is switched on). On by default; the chosen exercise stays the fallback.
     var recognizesExercise: Bool {
         didSet { preferences.recognizesExercise = recognizesExercise }
     }
-    var hasExerciseClassifier: Bool { exerciseClassifier != nil }
+    /// Whether a bundled trained model replaces the rules. Off by default, and only offered when
+    /// this build includes a model.
+    var usesTrainedModel: Bool {
+        didSet { preferences.usesTrainedModel = usesTrainedModel }
+    }
+    /// True when a trained model (keypoint or angle) ships with this build.
+    var hasExerciseClassifier: Bool { exerciseClassifier != nil || angleClassifier != nil }
+    var recognitionMethod: RecognitionMethod {
+        if usesTrainedModel {
+            if exerciseClassifier != nil { return .keypointModel }
+            if angleClassifier != nil { return .angleModel }
+        }
+        if ruleClassifier != nil { return .angleRules }
+        return .unavailable
+    }
     /// Whether Vision 3D pose may refuse a set filmed from the wrong angle. On by default.
     var checksCameraAngle: Bool {
         didSet {
@@ -108,7 +124,7 @@ final class WorkoutSessionModel {
     }
     /// The 3D camera-angle verdict for the latest analyzed set, kept for the validation readout.
     private(set) var lastViewVerdict: ViewCheck.Verdict = .unavailable
-    var usesExerciseRecognition: Bool { recognizesExercise && hasExerciseClassifier }
+    var usesExerciseRecognition: Bool { recognizesExercise && recognitionMethod != .unavailable }
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
     private(set) var lastStopToResultMilliseconds: Int?
@@ -130,13 +146,18 @@ final class WorkoutSessionModel {
     init(source: any PoseStreaming, store: (any SessionStoring)? = nil,
          narrator: ComparisonNarrator? = nil,
          exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
+         angleClassifier: (any AngleWindowClassifying)? = CoreMLAngleClassifier.bundled(),
+         ruleClassifier: (any AngleWindowClassifying)? = AngleRuleClassifier(),
          preferences: PlumbPreferences = .standard) {
         self.source = source
         self.store = store
         self.narrator = narrator ?? ComparisonNarrator()
         self.exerciseClassifier = exerciseClassifier
+        self.angleClassifier = angleClassifier
+        self.ruleClassifier = ruleClassifier
         self.preferences = preferences
         self.recognizesExercise = preferences.recognizesExercise
+        self.usesTrainedModel = preferences.usesTrainedModel
         self.checksCameraAngle = preferences.checksCameraAngle
         if let store {
             do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
@@ -326,8 +347,18 @@ final class WorkoutSessionModel {
     }
 
     private func recognizeExercise() -> ExerciseRecognition {
-        guard recognizesExercise, let exerciseClassifier, !frames.isEmpty else { return .notAttempted }
-        return ExerciseRecognizer.recognize(frames, using: exerciseClassifier)
+        guard recognizesExercise, !frames.isEmpty else { return .notAttempted }
+        switch recognitionMethod {
+        case .keypointModel:
+            if let exerciseClassifier { return ExerciseRecognizer.recognize(frames, using: exerciseClassifier) }
+        case .angleModel:
+            if let angleClassifier { return AngleRecognizer.recognize(frames, using: angleClassifier) }
+        case .angleRules:
+            if let ruleClassifier { return AngleRecognizer.recognize(frames, using: ruleClassifier) }
+        case .unavailable:
+            break
+        }
+        return .notAttempted
     }
 
     func finishSession() async {

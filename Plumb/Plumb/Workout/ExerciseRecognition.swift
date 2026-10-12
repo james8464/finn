@@ -11,6 +11,17 @@ nonisolated enum ExerciseRecognition: Equatable {
     case uncertain
 }
 
+/// Which recognizer the app uses, in order of preference.
+nonisolated enum RecognitionMethod: Equatable {
+    /// A Create ML action classifier on Vision keypoint sequences.
+    case keypointModel
+    /// A trained classifier on joint-angle window features.
+    case angleModel
+    /// Hand-written rules on the same joint-angle features; needs no trained model.
+    case angleRules
+    case unavailable
+}
+
 nonisolated struct ClassifierPrediction: Equatable, Sendable {
     let label: String
     let confidence: Double
@@ -45,20 +56,23 @@ nonisolated enum ExerciseRecognizer {
             starts = (0..<maximumWindows).map { starts[Int((Double($0) * step).rounded())] }
         }
 
-        var classified = 0
+        let predictions = starts.compactMap {
+            try? classifier.classify(window: Array(poses[$0..<($0 + length)]))
+        }
+        return decide(predictions)
+    }
+
+    /// One decision from per-window predictions: a supported exercise only when at least
+    /// `minimumAgreement` of the classified windows name it with `minimumWindowConfidence`.
+    static func decide(_ predictions: [ClassifierPrediction]) -> ExerciseRecognition {
         var votes: [String: Int] = [:]
-        for start in starts {
-            guard let prediction = try? classifier.classify(window: Array(poses[start..<(start + length)]))
-            else { continue }
-            classified += 1
-            if prediction.confidence >= minimumWindowConfidence {
-                votes[prediction.label, default: 0] += 1
-            }
+        for prediction in predictions where prediction.confidence >= minimumWindowConfidence {
+            votes[prediction.label, default: 0] += 1
         }
         let ranked = votes.sorted { $0.value > $1.value }
-        guard classified > 0, let winner = ranked.first,
+        guard !predictions.isEmpty, let winner = ranked.first,
               ranked.dropFirst().first?.value != winner.value else { return .uncertain }
-        let agreement = Double(winner.value) / Double(classified)
+        let agreement = Double(winner.value) / Double(predictions.count)
         guard agreement >= minimumAgreement,
               let definition = ExerciseDefinition.definition(forClassifierLabel: winner.key) else {
             return .uncertain

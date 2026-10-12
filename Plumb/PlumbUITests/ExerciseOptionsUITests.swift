@@ -2,14 +2,19 @@ import XCTest
 
 final class ExerciseOptionsUITests: XCTestCase {
     @MainActor
-    func testOptionsExplainManualChoiceWithoutTrainedModel() throws {
+    func testOptionsExplainAngleRulesAndTurnThemOnByDefault() throws {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
         app.buttons["Options"].tap()
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["This build has no trained recognition model, so Plumb uses the exercise you choose on the first screen."].exists)
-        XCTAssertFalse(app.switches["options.recognizeExercise"].exists)
+        // XCTest refuses identifier queries longer than 128 characters, so match the start.
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
+            format: "label BEGINSWITH %@", "After each set, Plumb guesses the exercise from your joint angles")).firstMatch.exists)
+        let toggle = app.switches["options.recognizeExercise"]
+        XCTAssertTrue(toggle.exists)
+        XCTAssertEqual(toggle.value as? String, "1")
+        XCTAssertFalse(app.switches["options.useTrainedModel"].exists)
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ])
@@ -33,12 +38,13 @@ final class ExerciseOptionsUITests: XCTestCase {
     }
 
     @MainActor
-    func testRecognitionSwitchUsesDemoClassifierAndReportsIt() throws {
+    func testTrainedModelSwitchUsesDemoClassifierAndReportsIt() throws {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-recognition"]
         app.launch()
         app.buttons["Options"].tap()
-        let toggle = app.switches["options.recognizeExercise"]
+        XCTAssertEqual(app.switches["options.recognizeExercise"].value as? String, "1")
+        let toggle = app.switches["options.useTrainedModel"]
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         XCTAssertEqual(toggle.value as? String, "0")
         toggle.switches.firstMatch.tap()
@@ -47,7 +53,7 @@ final class ExerciseOptionsUITests: XCTestCase {
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ])
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        XCTAssertTrue(app.staticTexts["Plumb will try to recognize the exercise after the set. If it isn’t confident, it uses your choice."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["After the set, Plumb also checks which exercise you did. If it isn’t sure, it keeps your choice."].waitForExistence(timeout: 5))
 
         app.buttons["Set up camera"].tap()
         app.buttons["Start set"].tap()
