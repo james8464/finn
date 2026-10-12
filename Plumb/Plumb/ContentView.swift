@@ -28,6 +28,7 @@ struct ContentView: View {
     }
     #if DEBUG
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") }
+    private var isVideoFileInput: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-video-file") }
     private var usesTestDarkAppearance: Bool {
         ProcessInfo.processInfo.arguments.contains("-plumb-ui-dark")
     }
@@ -362,9 +363,8 @@ struct ContentView: View {
     private var capture: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            CameraPreview(session: model.previewSession)
+            CameraFeedView(model: model)
                 .ignoresSafeArea()
-                .accessibilityHidden(true)
             LinearGradient(colors: [.clear, .black.opacity(0.76)],
                            startPoint: .center, endPoint: .bottom)
                 .ignoresSafeArea()
@@ -372,8 +372,8 @@ struct ContentView: View {
                 .accessibilityHidden(true)
             VStack(spacing: 16) {
                 #if DEBUG
-                if isDemo {
-                    Text("DEMO INPUT")
+                if isDemo || isVideoFileInput {
+                    Text(isDemo ? "DEMO INPUT" : "VIDEO FILE INPUT")
                         .font(.caption.bold())
                         .foregroundStyle(.black)
                         .padding(6)

@@ -122,6 +122,10 @@ final class WorkoutSessionModel {
     var hasPendingDeletion: Bool { pendingDeleteAll || !pendingDeleteIDs.isEmpty }
     var isRecording: Bool { stage == .capturing }
     var previewSession: AVCaptureSession { source.previewSession }
+    /// The frames shown on the camera screen; nil when the source has no picture (demo input).
+    var previewFeed: PreviewFeed? { source.previewFeed }
+    /// The newest pose while the camera screen is open, for the live skeleton.
+    private(set) var livePose: PoseFrame?
 
     init(source: any PoseStreaming, store: (any SessionStoring)? = nil,
          narrator: ComparisonNarrator? = nil,
@@ -159,6 +163,7 @@ final class WorkoutSessionModel {
         previewDeviations = []
         lastViewVerdict = .unavailable
         lastPreviewFrameAt = nil
+        livePose = nil
         framingStatus = .checking
         framingWatchdog?.cancel()
         framingWatchdog = nil
@@ -186,6 +191,10 @@ final class WorkoutSessionModel {
             collectionTask = Task { @MainActor [weak self] in
                 guard let self else { return }
                 for await frame in stream {
+                    switch self.stage {
+                    case .framing, .countdown, .capturing: self.livePose = frame
+                    default: self.livePose = nil
+                    }
                     if self.stage == .framing {
                         self.previewFrames.append(frame)
                         if self.previewFrames.count > 5 { self.previewFrames.removeFirst() }
@@ -198,6 +207,7 @@ final class WorkoutSessionModel {
                         self.frameCount = self.frames.count
                     }
                 }
+                self.livePose = nil
                 guard !self.isStopping else { return }
                 self.framingWatchdog?.cancel()
                 self.framingWatchdog = nil
@@ -441,6 +451,7 @@ final class WorkoutSessionModel {
         previewFrames = []
         previewDeviations = []
         lastPreviewFrameAt = nil
+        livePose = nil
         framingStatus = .checking
         frameCount = 0
         result = nil

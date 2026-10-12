@@ -18,7 +18,7 @@ if ! command -v rg >/dev/null 2>&1; then
 fi
 
 contents=$(strings -a "$binary")
-if matches=$(printf '%s\n' "$contents" | rg 'DemoPoseSource|DemoRecapGenerator|DemoExerciseClassifier|DEMO INPUT|-plumb-ui-demo|-plumb-validation|validation\.stopToResult'); then
+if matches=$(printf '%s\n' "$contents" | rg 'DemoPoseSource|DemoRecapGenerator|DemoExerciseClassifier|DEMO INPUT|-plumb-ui-demo|-plumb-validation|validation\.stopToResult|VideoFilePoseSource|VIDEO FILE INPUT|-plumb-video-file|-plumb-video-poses'); then
     echo "Release archive contains test-only demo or validation code:" >&2
     echo "$matches" >&2
     exit 1
