@@ -18,6 +18,7 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 - [`docs/validation/physical-iphone-run.md`](docs/validation/physical-iphone-run.md): step-by-step device smoke run when the iPhone is available
 - [`docs/validation/squat-v1-results.md`](docs/validation/squat-v1-results.md): actual results status; no real sets collected yet
 - [`docs/validation/exercise-rules-v1.md`](docs/validation/exercise-rules-v1.md): push-up, lunge, and deadlift rules, the 3D camera-angle check, and what each still needs on a physical iPhone
+- [`tools/replay/README.md`](tools/replay/README.md): generated simulator sets for every exercise, missing-joint refusal, and Mac replay of a saved video through Vision and the production analyzer
 - [`tools/exercise-classifier/README.md`](tools/exercise-classifier/README.md): clip format, labeling, Create ML training, and installing the exercise classifier
 - [`docs/release/app-store-submission.md`](docs/release/app-store-submission.md): release checks and App Store Connect status
 - [Public support](https://james8464.github.io/hackathon-project/support.html) and [privacy policy](https://james8464.github.io/hackathon-project/privacy.html): live pages for the current iPhone candidate
@@ -41,3 +42,5 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 3. Choose an iPhone simulator or connected iPhone and build the `Plumb` scheme.
 
 The layered Icon Composer source is [`Plumb/Plumb/AppIcon.icon`](Plumb/Plumb/AppIcon.icon). Flat marks and a preview are in [`Plumb/BrandArtwork`](Plumb/BrandArtwork).
+
+The capture screen shows an elapsed clock while a set is active. For repeatable development testing, the Debug build has generated six-rep fixtures for all four exercises and a missing-wrist case. The fixtures test app behavior without doing a workout; they do not validate pose detection or coaching accuracy on real people. See the [replay guide](tools/replay/README.md) for simulator commands and saved-video analysis on a Mac.

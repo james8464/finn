@@ -23,6 +23,44 @@ final class WorkoutFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testCaptureShowsElapsedTimeAndResetsForNextSet() {
+        let app = XCUIApplication()
+        app.launchArguments.append("-plumb-ui-demo")
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        XCTAssertFalse(app.staticTexts["capture.elapsed"].exists)
+        app.buttons["Start set"].tap()
+        let elapsed = app.staticTexts["capture.elapsed"]
+        XCTAssertTrue(elapsed.waitForExistence(timeout: 6))
+        capture(app, name: "Active set light")
+        let initial = elapsed.value as? String
+        Thread.sleep(forTimeInterval: 2)
+        XCTAssertNotEqual(elapsed.value as? String, initial)
+        Thread.sleep(forTimeInterval: 2)
+        app.buttons["Stop set"].tap()
+        XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        XCTAssertFalse(elapsed.exists)
+        app.buttons["Try this next set"].tap()
+        app.buttons["Start set"].tap()
+        XCTAssertTrue(elapsed.waitForExistence(timeout: 6))
+        let restarted = elapsed.value as? String ?? ""
+        XCTAssertTrue(["00:00", "00:01"].contains(restarted), restarted)
+    }
+
+    @MainActor
+    func testDarkCaptureKeepsCameraAndControlsClear() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-plumb-ui-demo", "-plumb-ui-dark"]
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        XCTAssertTrue(app.staticTexts["capture.elapsed"].waitForExistence(timeout: 6))
+        XCTAssertTrue(app.buttons["Stop set"].isHittable)
+        capture(app, name: "Active set dark")
+        try app.performAccessibilityAudit()
+    }
+
+    @MainActor
     func testSetupAccessibilityAudit() throws {
         let app = XCUIApplication()
         app.launch()

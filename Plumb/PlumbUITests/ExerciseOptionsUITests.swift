@@ -38,6 +38,61 @@ final class ExerciseOptionsUITests: XCTestCase {
     }
 
     @MainActor
+    func testDemoPushUpCanBeMeasuredWithoutPerformingOne() {
+        let app = XCUIApplication()
+        app.launchArguments.append("-plumb-ui-demo")
+        app.launch()
+        app.buttons["setup.exercise"].tap()
+        app.buttons["Push-up"].tap()
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        XCTAssertTrue(app.staticTexts["6 measured reps"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Your elbow bend became smaller in the last two reps."].exists)
+    }
+
+    @MainActor
+    func testDemoLungeAndDeadliftProduceMeasuredSets() {
+        for exercise in ["Static lunge", "Stiff-leg deadlift"] {
+            let app = XCUIApplication()
+            app.launchArguments.append("-plumb-ui-demo")
+            app.launch()
+            app.buttons["setup.exercise"].tap()
+            app.buttons[exercise].tap()
+            app.buttons["Set up camera"].tap()
+            app.buttons["Start set"].tap()
+            let stop = app.buttons["Stop set"]
+            XCTAssertTrue(stop.waitForExistence(timeout: 6), exercise)
+            Thread.sleep(forTimeInterval: 5)
+            stop.tap()
+            XCTAssertTrue(app.staticTexts["6 measured reps"].waitForExistence(timeout: 5), exercise)
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    func testDemoMissingWristRefusesPushUpWithoutInventingReps() {
+        let app = XCUIApplication()
+        app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-missing-wrist"]
+        app.launch()
+        app.buttons["setup.exercise"].tap()
+        app.buttons["Push-up"].tap()
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        XCTAssertTrue(app.staticTexts["Couldn’t assess this set"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
+            format: "label CONTAINS %@", "wrist was hardest to see")).firstMatch.exists)
+        XCTAssertFalse(app.staticTexts["6 measured reps"].exists)
+    }
+
+    @MainActor
     func testTrainedModelSwitchUsesDemoClassifierAndReportsIt() throws {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-recognition"]

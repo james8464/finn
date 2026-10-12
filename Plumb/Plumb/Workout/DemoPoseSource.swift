@@ -9,13 +9,17 @@ final class DemoPoseSource: PoseStreaming {
     private let startError: CameraSourceError?
     /// Synthetic 3D profile deviation attached to every fourth frame, to exercise the angle check.
     private let profileDeviation: Double?
+    private let missingWrist: Bool
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var feedTask: Task<Void, Never>?
     private var setNumber = 0
+    private var exercise: ExerciseKind = .bodyweightSquat
 
-    init(startError: CameraSourceError? = nil, profileDeviation: Double? = nil) {
+    init(startError: CameraSourceError? = nil, profileDeviation: Double? = nil,
+         missingWrist: Bool = false) {
         self.startError = startError
         self.profileDeviation = profileDeviation
+        self.missingWrist = missingWrist
     }
 
     func start() async throws -> AsyncStream<PoseFrame> {
@@ -29,14 +33,22 @@ final class DemoPoseSource: PoseStreaming {
     func prepareForSet() async {
         setNumber += 1
         let currentSet = setNumber
+        let currentExercise = exercise
         feedTask = Task { @MainActor [weak self] in
-            for index in 0...120 {
+            let framesPerRep = currentExercise == .stiffLegDeadlift ? 25 : 20
+            for index in 0...(6 * framesPerRep) {
                 guard !Task.isCancelled else { return }
                 try? await Task.sleep(for: .milliseconds(25))
                 self?.continuation?.yield(Self.frame(index: index, setNumber: currentSet,
-                                                     profileDeviation: self?.profileDeviation))
+                                                     exercise: currentExercise,
+                                                     profileDeviation: self?.profileDeviation,
+                                                     missingWrist: self?.missingWrist ?? false))
             }
         }
+    }
+
+    func configure(for exercise: ExerciseKind) {
+        self.exercise = exercise
     }
 
     func stop() async {
@@ -46,19 +58,62 @@ final class DemoPoseSource: PoseStreaming {
         continuation = nil
     }
 
-    private static func frame(index: Int, setNumber: Int, profileDeviation: Double?) -> PoseFrame {
-        let phase = Double(index % 20) / 20
-        let amplitude = setNumber == 1 ? (index / 20 >= 4 ? 0.13 : 0.20) : 0.24
-        let hipY = 0.42 + amplitude * (1 - cos(2 * .pi * phase)) / 2
-        let joints: [BodyJoint: JointPoint] = [
-            .leftHip: JointPoint(x: 0.47, y: hipY, confidence: 0.99),
-            .leftKnee: JointPoint(x: 0.49, y: 0.70, confidence: 0.99),
-            .leftAnkle: JointPoint(x: 0.51, y: 0.90, confidence: 0.99),
-            .rightHip: JointPoint(x: 0.53, y: hipY, confidence: 0.99),
-            .rightKnee: JointPoint(x: 0.55, y: 0.70, confidence: 0.99),
-            .rightAnkle: JointPoint(x: 0.57, y: 0.90, confidence: 0.99),
-        ]
-        return PoseFrame(time: Double(index) * 0.1, subjectCount: 1, joints: joints,
+    private static func frame(index: Int, setNumber: Int, exercise: ExerciseKind,
+                              profileDeviation: Double?, missingWrist: Bool) -> PoseFrame {
+        let framesPerRep = exercise == .stiffLegDeadlift ? 25 : 20
+        let phase = Double(index % framesPerRep) / Double(framesPerRep)
+        let motion = (1 - cos(2 * .pi * phase)) / 2
+        let late = index / framesPerRep >= 4
+        let joints: [BodyJoint: JointPoint]
+        func point(_ x: Double, _ y: Double) -> JointPoint {
+            JointPoint(x: x, y: y, confidence: 0.95)
+        }
+        switch exercise {
+        case .bodyweightSquat:
+            let amplitude = setNumber == 1 ? (late ? 0.13 : 0.20) : 0.24
+            let hipY = 0.42 + amplitude * motion
+            joints = [
+                .leftHip: point(0.47, hipY), .leftKnee: point(0.49, 0.70),
+                .leftAnkle: point(0.51, 0.90), .rightHip: point(0.53, hipY),
+                .rightKnee: point(0.55, 0.70), .rightAnkle: point(0.57, 0.90),
+            ]
+        case .pushUp:
+            let bend = setNumber == 1 ? (late ? 55.0 : 90.0) : 95.0
+            let angle = (170 - bend * motion) * .pi / 180
+            let shoulderX = 0.30 + 0.14 * sin(angle)
+            let shoulderY = 0.66 + 0.14 * cos(angle)
+            joints = [
+                .leftWrist: point(0.30, 0.80), .leftElbow: point(0.30, 0.66),
+                .leftShoulder: point(shoulderX, shoulderY),
+                .leftHip: point(shoulderX + 0.25, shoulderY + 0.03),
+                .leftKnee: point((shoulderX + 0.25 + 0.85) / 2,
+                                 (shoulderY + 0.03 + 0.80) / 2),
+                .leftAnkle: point(0.85, 0.80),
+            ]
+        case .staticLunge:
+            let bend = setNumber == 1 ? (late ? 48.0 : 75.0) : 85.0
+            let angle = (172 - bend * motion) * .pi / 180
+            let hipX = 0.45 + 0.20 * sin(angle)
+            let hipY = 0.70 + 0.20 * cos(angle)
+            joints = [
+                .rightAnkle: point(0.45, 0.90), .rightKnee: point(0.45, 0.70),
+                .rightHip: point(hipX, hipY), .rightShoulder: point(hipX, hipY - 0.25),
+            ]
+        case .stiffLegDeadlift:
+            let bend = setNumber == 1 ? (late ? 50.0 : 80.0) : 90.0
+            let angle = (175 - bend * motion) * .pi / 180
+            let shoulderX = 0.50 + 0.30 * sin(angle)
+            let shoulderY = 0.55 + 0.30 * cos(angle)
+            joints = [
+                .leftAnkle: point(0.50, 0.90), .leftKnee: point(0.50, 0.72),
+                .leftHip: point(0.50, 0.55), .leftShoulder: point(shoulderX, shoulderY),
+                .leftElbow: point(shoulderX, shoulderY + 0.12),
+                .leftWrist: point(shoulderX, shoulderY + 0.24),
+            ]
+        }
+        let visibleJoints = missingWrist && exercise == .pushUp
+            ? joints.filter { $0.key != .leftWrist } : joints
+        return PoseFrame(time: Double(index) * 0.1, subjectCount: 1, joints: visibleJoints,
                          profileDeviationDegrees: index.isMultiple(of: 4) ? profileDeviation : nil)
     }
 }

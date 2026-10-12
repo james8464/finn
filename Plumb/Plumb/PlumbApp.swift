@@ -24,7 +24,9 @@ struct PlumbApp: App {
                     ProcessInfo.processInfo.arguments.contains("-plumb-ui-camera-unavailable")
                     ? .unavailable : nil,
                     profileDeviation: ProcessInfo.processInfo.arguments
-                        .contains("-plumb-ui-demo-front-view") ? 75 : nil), store: LocalSessionStore(
+                        .contains("-plumb-ui-demo-front-view") ? 75 : nil,
+                    missingWrist: ProcessInfo.processInfo.arguments
+                        .contains("-plumb-ui-demo-missing-wrist")), store: LocalSessionStore(
                     url: FileManager.default.temporaryDirectory
                         .appending(path: "PlumbDemo-\(UUID().uuidString)", directoryHint: .isDirectory)
                         .appending(path: "sessions.json")),

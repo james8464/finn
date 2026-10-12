@@ -128,6 +128,7 @@ final class WorkoutSessionModel {
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
     private(set) var lastStopToResultMilliseconds: Int?
+    private(set) var captureStartedAt: Date?
     private(set) var cueDismissed = false
     private(set) var currentSession: WorkoutSessionSummary?
     private(set) var comparison: Comparison?
@@ -176,6 +177,7 @@ final class WorkoutSessionModel {
         result = nil
         movementNote = nil
         lastStopToResultMilliseconds = nil
+        captureStartedAt = nil
         stopTappedAt = nil
         cueDismissed = false
         frames = []
@@ -189,6 +191,7 @@ final class WorkoutSessionModel {
         framingWatchdog?.cancel()
         framingWatchdog = nil
         source.setCameraAngleEstimation(checksCameraAngle)
+        source.configure(for: captureExercise)
         do {
             let stream = try await source.start()
             guard stage == .openingCamera else {
@@ -266,6 +269,7 @@ final class WorkoutSessionModel {
         guard stage == .framing || stage == .countdown(1) else { return }
         await source.prepareForSet()
         guard stage == .framing || stage == .countdown(1) else { return }
+        captureStartedAt = .now
         stage = .capturing
     }
 
@@ -485,6 +489,7 @@ final class WorkoutSessionModel {
         livePose = nil
         framingStatus = .checking
         frameCount = 0
+        captureStartedAt = nil
         result = nil
         movementNote = nil
         lastStopToResultMilliseconds = nil

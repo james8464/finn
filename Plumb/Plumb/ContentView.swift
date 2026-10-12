@@ -393,7 +393,19 @@ struct ContentView: View {
                         .controlSize(.large)
                         .tint(.white)
                 } else if model.stage == .capturing {
-                    Text("Move at your own pace")
+                    if let startedAt = model.captureStartedAt {
+                        TimelineView(.periodic(from: startedAt, by: 1)) { timeline in
+                            let seconds = max(0, Int(timeline.date.timeIntervalSince(startedAt)))
+                            let time = String(format: "%02d:%02d", seconds / 60, seconds % 60)
+                            Text(time)
+                                .font(.title2.weight(.semibold))
+                                .monospacedDigit()
+                                .fixedSize(horizontal: true, vertical: false)
+                                .accessibilityLabel("Elapsed time")
+                                .accessibilityValue(time)
+                                .accessibilityIdentifier("capture.elapsed")
+                        }
+                    }
                     Button {
                         let tappedAt = ContinuousClock.now
                         Task { await model.endSet(tappedAt: tappedAt) }

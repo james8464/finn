@@ -9,6 +9,8 @@ protocol PoseStreaming: AnyObject {
     func prepareForSet() async
     func start() async throws -> AsyncStream<PoseFrame>
     func stop() async
+    /// Allows a source to prepare exercise-specific input. Live camera sources ignore this.
+    func configure(for exercise: ExerciseKind)
     /// Turns Vision 3D camera-angle estimates on or off for the frames that follow.
     func setCameraAngleEstimation(_ enabled: Bool)
 }
@@ -17,6 +19,7 @@ extension PoseStreaming {
     var previewFeed: PreviewFeed? { nil }
     var endedAtLimit: Bool { false }
     func prepareForSet() async {}
+    func configure(for exercise: ExerciseKind) {}
     func setCameraAngleEstimation(_ enabled: Bool) {}
 }
 
