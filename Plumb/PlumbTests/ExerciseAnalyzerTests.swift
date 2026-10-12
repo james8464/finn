@@ -5,12 +5,12 @@ import Testing
 struct ExerciseAnalyzerTests {
     // MARK: Squat stays identical
 
-    /// squat-side-v3 loosens the evidence gate and the rep ending on purpose (v2 refused every
+    /// squat-side-v4 loosens the evidence gate and the rep ending on purpose (v2 refused every
     /// real squat video tried). It must still accept every set v2 accepted and almost never
     /// count fewer reps on the same synthetic traces.
-    @Test func squatV3KeepsEverythingV2MeasuredOnVariedTraces() {
+    @Test func currentSquatKeepsEverythingV2MeasuredOnVariedTraces() {
         var generator = SplitMix64(seed: 20261012)
-        var both = 0, same = 0, fewer = 0, lostByV3 = 0
+        var both = 0, same = 0, fewer = 0, lostByCurrent = 0
         for _ in 0..<600 {
             let frames = randomSquatTrace(using: &generator)
             switch (SquatAnalyzer.analyze(frames), FrozenSquatV2.analyze(frames)) {
@@ -20,12 +20,12 @@ struct ExerciseAnalyzerTests {
                 if current.reps.count < frozen.reps.count { fewer += 1 }
                 #expect(current.reps.count >= frozen.reps.count - 1)
             case (_, .analyzed):
-                lostByV3 += 1
+                lostByCurrent += 1
             default:
                 break
             }
         }
-        #expect(lostByV3 == 0)
+        #expect(lostByCurrent == 0)
         #expect(both > 200)
         #expect(same > both / 2)
         #expect(fewer <= both / 20)
@@ -110,9 +110,9 @@ struct ExerciseAnalyzerTests {
         #expect(reason.contains("hip, knee and ankle"))
     }
 
-    @Test func squatDefinitionUsesSquatV3Values() {
+    @Test func squatDefinitionUsesSquatV4Values() {
         let squat = ExerciseDefinition.squat
-        #expect(squat.rubricVersion == "squat-side-v3")
+        #expect(squat.rubricVersion == "squat-side-v4")
         #expect(squat.signal == .verticalTravel(joint: .hip, reference: .ankle))
         #expect(squat.evidence == EvidenceRequirement(joints: [.hip, .knee, .ankle], anchor: .ankle))
         #expect(squat.phases == RepPhases(leaveTop: 0.10, reachBottom: 0.15, returnFromBottom: 0.04,
@@ -163,7 +163,7 @@ struct ExerciseAnalyzerTests {
     @Test func pushUpCountsSixElbowBendReps() throws {
         let analysis = try measured(ExerciseAnalyzer.analyze(pushUpTrace(reps: 6), as: .pushUp))
         #expect(analysis.reps.count == 6)
-        #expect(analysis.rubricVersion == "push-up-side-v2")
+        #expect(analysis.rubricVersion == "push-up-side-v3")
         #expect(analysis.reps.map(\.number) == [1, 2, 3, 4, 5, 6])
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 75 && $0.relativeRange < 95 })
         #expect(analysis.reps.allSatisfy { $0.duration > 1.0 && $0.duration < 2.1 })
@@ -235,7 +235,7 @@ struct ExerciseAnalyzerTests {
     @Test func staticLungeCountsKneeBendReps() throws {
         let analysis = try measured(ExerciseAnalyzer.analyze(lungeTrace(reps: 6), as: .staticLunge))
         #expect(analysis.reps.count == 6)
-        #expect(analysis.rubricVersion == "static-lunge-side-v2")
+        #expect(analysis.rubricVersion == "static-lunge-side-v3")
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 60 && $0.relativeRange < 80 })
     }
 
@@ -249,7 +249,7 @@ struct ExerciseAnalyzerTests {
         let analysis = try measured(ExerciseAnalyzer.analyze(hingeTrace(reps: 5),
                                                              as: .stiffLegDeadlift))
         #expect(analysis.reps.count == 5)
-        #expect(analysis.rubricVersion == "stiff-leg-deadlift-side-v2")
+        #expect(analysis.rubricVersion == "stiff-leg-deadlift-side-v3")
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 65 && $0.relativeRange < 85 })
         #expect(analysis.reps.allSatisfy { $0.duration > 1.4 && $0.duration < 2.6 })
     }

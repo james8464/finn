@@ -10,18 +10,34 @@ The starting value comes from the whole set, not its first frames: the 10th perc
 
 | Exercise | Rubric | Signal on the camera-facing side | Must stay visible | Still joint | Leave top / reach bottom / back at top / return margin | Rep duration |
 | --- | --- | --- | --- | --- | --- | --- |
-| Bodyweight squat | `squat-side-v3` | Hip drop divided by standing hip-to-ankle height | hip, knee, ankle | ankle | 0.10 / 0.15 / 0.05 / 0.04 | 0.5 to 8 s |
-| Push-up | `push-up-side-v2` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.4 to 8 s |
-| Static lunge | `static-lunge-side-v2` | Knee angle closing (hip, knee, ankle), degrees | hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.5 to 8 s |
-| Stiff-leg deadlift | `stiff-leg-deadlift-side-v2` | Hip angle closing (shoulder, hip, knee), degrees | shoulder, hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.6 to 10 s |
+| Bodyweight squat | `squat-side-v4` | Hip drop divided by standing hip-to-ankle height | hip, knee, ankle | ankle | 0.10 / 0.15 / 0.05 / 0.04 | 0.5 to 8 s |
+| Push-up | `push-up-side-v3` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.4 to 8 s |
+| Static lunge | `static-lunge-side-v3` | Knee angle closing (hip, knee, ankle), degrees | hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.5 to 8 s |
+| Stiff-leg deadlift | `stiff-leg-deadlift-side-v3` | Hip angle closing (shoulder, hip, knee), degrees | shoulder, hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.6 to 10 s |
 
 The rep durations are shorter than in the first versions because a rep now ends 65% of the way back up instead of at the very top; at the old minimums, one-second squats on real video were dropped as too fast.
 
 Angles are computed in pixel proportions: the y distance is scaled by the image height divided by its width before the angle is taken.
 
-All four use the squat's evidence rules: joint confidence at least 0.3, the required joints present and confident in 80% of frames, no tracking gap over 0.75 s, no second person for 0.35 s or in over 20% of frames, the still joint staying within 10% of the frame (spread between its 10th and 90th percentile positions, so one misplaced detection does not count as the phone moving), and a set of at least 2 seconds. A refusal names what was missing, with numbers: the share of frames where the joints were seen and the hardest joint to see, the length and start of the tracking gap, or how far the still joint moved. They also share the observation rule: when the last two reps' range is 85% or less of the first two, the result names those reps ("Your elbow bend became smaller in the last two reps.") and suggests "Try a pace you can keep consistent." Comparisons only pair sets of the same exercise in one session.
+All four use the squat's evidence rules: joint confidence at least 0.3, the required joints present and confident in 80% of frames, no tracking gap over 0.75 s (3 s while someone else is in view, see "Other people in view" below), the still joint staying within 10% of the frame (spread between its 10th and 90th percentile positions, so one misplaced detection does not count as the phone moving), and a set of at least 2 seconds. A refusal names what was missing, with numbers: the share of frames where the joints were seen and the hardest joint to see, the length and start of the tracking gap, or how far the still joint moved. They also share the observation rule: when the last two reps' range is 85% or less of the first two, the result names those reps ("Your elbow bend became smaller in the last two reps.") and suggests "Try a pace you can keep consistent." Comparisons only pair sets of the same exercise in one session.
 
-A test replays 600 synthetic squat traces through a frozen copy of `squat-side-v2`. Version 3 must measure every set version 2 measured, give the same count on more than half of them, count fewer reps on at most one set in twenty, and never more than one rep fewer. On the current code: 281 sets measured by both, 177 with the same count, 1 with one rep fewer, none lost.
+A test replays 600 synthetic squat traces through a frozen copy of `squat-side-v2`. The current version must measure every set version 2 measured, give the same count on more than half of them, count fewer reps on at most one set in twenty, and never more than one rep fewer. On the current code: 281 sets measured by both, 177 with the same count, 1 with one rep fewer, none lost.
+
+## Other people in view
+
+Since `squat-side-v4` (and `*-side-v3` for the other exercises), Plumb follows one athlete instead of refusing a set when someone else is in view. `AthleteTracker` picks the most prominent person while framing (large and near the centre) and moves to someone else only if they are clearly more prominent. When the set starts it locks onto that person. In every frame it takes the person whose clear joints are closest to where the athlete's same joints were last seen; the median distance must stay under 12% of the athlete's size between frames, up to a third after a gap. Comparing joint by joint keeps the track when Vision drops the legs for a frame. When two people fit almost equally well, the frame has no athlete rather than risk a swap. Other people are drawn thin and grey on the camera screen and never analyzed. The 3D view check only uses an estimate whose root falls on the athlete.
+
+A frame without the athlete is a gap. A gap while someone else is in view (usually walking between the athlete and the phone) may last 3 s; a gap with nobody in view keeps the 0.75 s limit. A longer occlusion is refused with "Someone else was in view and Plumb lost you for 4.1 s, starting 7.9 s into the set...". Frames from a source that does not follow one person keep the old rule: another person for 0.35 s or in over 20% of frames refuses the set.
+
+The same 50 Mendeley squat videos were run through the app's own capture analysis on a Mac (Vision, then the tracker, then the squat rubric). Other people are in view in most of them: in 45 of 50 for at least a fifth of the frames.
+
+| 50 gym videos, app capture path | Without tracking (v3 rules) | With tracking (v4) |
+| --- | --- | --- |
+| Measured | 5 | 44 |
+| Refused | 45, "Another person was in view" | 6: joints seen in under 80% of frames (3), ankle moved 11 to 18% (3) |
+| Counts within one rep of the dip counter | | 43 of 44 (21 exact) |
+
+The one count off by more than a rep is a "bad form" set (9 against 13 dips). Videos with someone walking right in front of the athlete are rare in this set, so the 3 s occlusion limit is a starting value.
 
 ## Replay on real videos
 
@@ -84,4 +100,4 @@ So 75° separates front views from the rest on these videos. 30° sends the turn
 6. For each exercise, count reps by hand and compare with the app on a few sets, including a deliberately shallow set and an incomplete last rep.
 7. If the check refuses a side-on set, note the readout, switch it off in Options for the demo, and say so; the 2D visibility rules still run.
 
-For the squat holdout in [`squat-v1-protocol.md`](squat-v1-protocol.md), keep the 3D switch in one position for every holdout set and write which one in `notes`, because it can refuse a set that `squat-side-v3` alone would have measured.
+For the squat holdout in [`squat-v1-protocol.md`](squat-v1-protocol.md), keep the 3D switch in one position for every holdout set and write which one in `notes`, because it can refuse a set that `squat-side-v4` alone would have measured.

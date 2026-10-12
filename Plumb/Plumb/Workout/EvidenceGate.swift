@@ -3,9 +3,14 @@ import Foundation
 /// Evidence rules shared by every exercise. They describe tracking quality, not technique.
 /// Version 3 of the squat rubric loosened them after real side-view videos showed Vision
 /// reporting hips at about 0.5 confidence: the 0.6 floor of version 2 refused every real set.
+/// Version 4 follows one athlete: other people no longer refuse a set, and a gap while someone
+/// else is in view (usually walking between the athlete and the phone) may last longer.
 nonisolated enum EvidenceRubric {
     static let minimumJointConfidence = 0.3
     static let maximumTrackingGap = 0.75
+    /// A gap in the athlete's tracking while other people are in view.
+    static let maximumOcclusionGap = 3.0
+    /// Only for frames that do not follow one athlete (`PoseFrame.athleteTracking == nil`).
     static let maximumBystanderDuration = 0.35
     static let minimumCoverage = 0.8
     /// Spread between the 10th and 90th percentile of the still joint's position, so one
@@ -21,7 +26,7 @@ nonisolated enum EvidenceGate {
         let sides: [[BodyJoint]] = [requirement.joints(on: .left), requirement.joints(on: .right)]
         let visible = sides.contains { joints in
             frames.filter { frame in
-                frame.subjectCount == 1 && joints.allSatisfy { joint in
+                frame.athleteVisible && joints.allSatisfy { joint in
                     (frame.joints[joint]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence
                 }
             }.count >= 4
@@ -36,12 +41,16 @@ nonisolated enum EvidenceGate {
             return .reject(.tooShort)
         }
 
-        let bystanderFrames = frames.filter { $0.subjectCount > 1 }.count
-        if Double(bystanderFrames) / Double(frames.count) > 0.2 {
-            return .reject(.multiplePeople)
-        }
-        if longestBystanderRun(frames) >= EvidenceRubric.maximumBystanderDuration {
-            return .reject(.multiplePeople)
+        // Frames that follow one athlete ignore everyone else. Without that, nobody can tell
+        // whose joints these are, so another person in view refuses the set.
+        if !frames.contains(where: { $0.athleteTracking != nil }) {
+            let bystanderFrames = frames.filter { $0.subjectCount > 1 }.count
+            if Double(bystanderFrames) / Double(frames.count) > 0.2 {
+                return .reject(.multiplePeople)
+            }
+            if longestBystanderRun(frames) >= EvidenceRubric.maximumBystanderDuration {
+                return .reject(.multiplePeople)
+            }
         }
 
         let best = bestSide(frames, requirement: requirement)
@@ -52,7 +61,7 @@ nonisolated enum EvidenceGate {
         guard Double(best.confident) / total >= EvidenceRubric.minimumCoverage else {
             return .reject(.lowConfidence)
         }
-        if longestTrackingGap(frames, joints: best.joints).duration > EvidenceRubric.maximumTrackingGap {
+        if tooLongGap(frames, joints: best.joints) != nil {
             return .reject(.trackingGap)
         }
         guard anchorMovement(frames, requirement: requirement, side: best.side)
@@ -85,10 +94,19 @@ nonisolated enum EvidenceGate {
                 + "Your \(weakest.role.rawValue) was hardest to see (\(weakest.share)% of frames). "
                 + "Move the phone so your whole body is in view, with even light."
         case .trackingGap:
-            let gap = longestTrackingGap(frames, joints: bestSide(frames, requirement: requirement).joints)
+            let joints = bestSide(frames, requirement: requirement).joints
+            let gap = tooLongGap(frames, joints: joints)
+                ?? trackingGaps(frames, joints: joints).max { $0.duration < $1.duration }
+                ?? TrackingGap(start: frames.first?.time ?? 0, duration: 0, occluded: false)
+            let start = gap.start - (frames.first?.time ?? 0)
+            if gap.occluded {
+                return String(format: "Someone else was in view and Plumb lost you for %.1f s, starting %.1f s "
+                              + "into the set. Plumb ignores other people, but it has to see you: keep a clear "
+                              + "line between you and the phone, then try again.", gap.duration, start)
+            }
             return String(format: "Tracking was lost during the set. Keep your whole body visible and try again. "
                           + "Plumb lost your %@ for %.1f s, starting %.1f s into the set.",
-                          jointList, gap.duration, gap.start - (frames.first?.time ?? 0))
+                          jointList, gap.duration, start)
         case .unstableFraming:
             let movement = anchorMovement(frames, requirement: requirement,
                                           side: bestSide(frames, requirement: requirement).side)
@@ -132,23 +150,45 @@ nonisolated enum EvidenceGate {
         return longest
     }
 
-    private static func longestTrackingGap(_ frames: [PoseFrame], joints: [BodyJoint])
-        -> (start: TimeInterval, duration: TimeInterval) {
-        guard let first = frames.first, let last = frames.last else { return (0, 0) }
+    private struct TrackingGap {
+        let start: TimeInterval
+        let duration: TimeInterval
+        /// Someone else was in view while the athlete was missing.
+        let occluded: Bool
+        var limit: TimeInterval {
+            occluded ? EvidenceRubric.maximumOcclusionGap : EvidenceRubric.maximumTrackingGap
+        }
+    }
+
+    /// Stretches without the athlete's required joints, from the set's start to its end.
+    private static func trackingGaps(_ frames: [PoseFrame], joints: [BodyJoint]) -> [TrackingGap] {
+        guard let first = frames.first, let last = frames.last else { return [] }
+        var gaps: [TrackingGap] = []
         var lastTracked = first.time
-        var longest = (start: first.time, duration: 0.0)
-        for frame in frames where frame.subjectCount == 1 && joints.allSatisfy({ joint in
-            (frame.joints[joint]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence
-        }) {
-            if frame.time - lastTracked > longest.duration {
-                longest = (lastTracked, frame.time - lastTracked)
+        var occluded = false
+        for frame in frames {
+            let visible = frame.athleteVisible && joints.allSatisfy { joint in
+                (frame.joints[joint]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence
             }
-            lastTracked = frame.time
+            if visible {
+                if frame.time > lastTracked {
+                    gaps.append(TrackingGap(start: lastTracked, duration: frame.time - lastTracked,
+                                            occluded: occluded))
+                }
+                lastTracked = frame.time
+                occluded = false
+            } else if frame.athleteTracking != nil, !(frame.bystanders ?? []).isEmpty {
+                occluded = true
+            }
         }
-        if last.time - lastTracked > longest.duration {
-            longest = (lastTracked, last.time - lastTracked)
+        if last.time > lastTracked {
+            gaps.append(TrackingGap(start: lastTracked, duration: last.time - lastTracked, occluded: occluded))
         }
-        return longest
+        return gaps
+    }
+
+    private static func tooLongGap(_ frames: [PoseFrame], joints: [BodyJoint]) -> TrackingGap? {
+        trackingGaps(frames, joints: joints).first { $0.duration > $0.limit }
     }
 
     private static func anchorMovement(_ frames: [PoseFrame], requirement: EvidenceRequirement,

@@ -68,6 +68,8 @@ nonisolated enum VideoFileReader {
                      yield: @Sendable (PoseFrame) -> Void) async {
         let asset = AVURLAsset(url: url)
         let analyzer = PoseFrameAnalyzer()
+        // A set (played once) follows the person picked on its first frame throughout.
+        if !looping { analyzer.lockAthlete() }
         repeat {
             guard let track = try? await asset.loadTracks(withMediaType: .video).first,
                   let composition = try? await AVVideoComposition.videoComposition(withPropertiesOf: asset),

@@ -56,6 +56,10 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
         processor.setCameraAngleEstimation(enabled)
     }
 
+    func lockAthlete() {
+        processor.requestAthlete(locked: true)
+    }
+
     /// Turns the frames so the person stands upright in them, whatever the phone's orientation.
     func setCaptureRotation(_ degrees: Double) {
         queue.async {
@@ -116,6 +120,7 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var lastSampleTime: Double = -.infinity
     private var estimatesCameraAngle = true
+    private var athleteRequest: Bool?
     private let previewSink: PreviewFrameSink?
     // Used only on the capture queue.
     private let analyzer = PoseFrameAnalyzer()
@@ -131,10 +136,19 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
         lock.unlock()
     }
 
+    /// Lock onto the current athlete (a set starts) or pick again (a new preview), applied on
+    /// the capture queue before the next analyzed frame.
+    func requestAthlete(locked: Bool) {
+        lock.lock()
+        athleteRequest = locked
+        lock.unlock()
+    }
+
     func makeStream() -> AsyncStream<PoseFrame> {
         lock.lock()
         defer { lock.unlock() }
         lastSampleTime = -.infinity
+        athleteRequest = false
         return AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(3)) { continuation in
             self.continuation = continuation
         }
@@ -162,10 +176,17 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
         let analyze = time - lastSampleTime >= PoseFrameAnalyzer.minimumInterval
         if analyze { lastSampleTime = time }
         let estimateAngle = estimatesCameraAngle
+        let request = analyze ? athleteRequest : nil
+        if request != nil { athleteRequest = nil }
         lock.unlock()
 
         previewSink?.enqueue(sampleBuffer)
         guard analyze, let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        switch request {
+        case true?: analyzer.lockAthlete()
+        case false?: analyzer.releaseAthlete()
+        case nil: break
+        }
         yield(analyzer.analyze(pixelBuffer, time: time, estimateAngle: estimateAngle))
     }
 

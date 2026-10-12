@@ -2,7 +2,8 @@ import CoreML
 import CoreVideo
 import Vision
 
-/// Runs Vision on one upright, unmirrored frame and returns the pose record Plumb keeps.
+/// Runs Vision on one upright, unmirrored frame and returns the pose record Plumb keeps: the
+/// athlete's joints, picked and followed by `AthleteTracker`, and everyone else as bystanders.
 /// The camera and the Debug video-file source share it, so both analyze frames the same way.
 /// Not thread-safe: call it from one queue.
 nonisolated final class PoseFrameAnalyzer {
@@ -15,6 +16,13 @@ nonisolated final class PoseFrameAnalyzer {
     private let poseRequest3D = VNDetectHumanBodyPose3DRequest()
     private let sequenceHandler = VNSequenceRequestHandler()
     private var analyzedFrames = 0
+    private var tracker = AthleteTracker()
+
+    /// Keep following the current athlete until `releaseAthlete()`; called when a set starts.
+    func lockAthlete() { tracker.lock() }
+
+    /// Pick the most prominent person again on the next frame.
+    func releaseAthlete() { tracker.reset() }
 
     func analyze(_ pixelBuffer: CVPixelBuffer, time: TimeInterval, estimateAngle: Bool) -> PoseFrame {
         let width = CVPixelBufferGetWidth(pixelBuffer)
@@ -25,29 +33,34 @@ nonisolated final class PoseFrameAnalyzer {
         do {
             try handler.perform([request])
         } catch {
-            return PoseFrame(time: time, subjectCount: 0, joints: [:], aspectRatio: aspectRatio)
+            return PoseFrame(time: time, subjectCount: 0, joints: [:], aspectRatio: aspectRatio,
+                             athleteTracking: .hidden)
         }
 
         let observations = request.results ?? []
-        let subject = observations.first
+        let people = observations.map(Self.joints(of:))
+        let athlete = tracker.select(people, aspectRatio: aspectRatio, time: time)
         var joints: [BodyJoint: JointPoint] = [:]
         var keypoints: [Float]?
-        if let subject {
+        if let athlete {
             // The same 18-point layout Create ML extracts from training clips.
-            if let array = try? subject.keypointsMultiArray() {
+            if let array = try? observations[athlete].keypointsMultiArray() {
                 let values = MLShapedArray<Float>(converting: array).scalars
                 keypoints = values.count == ExerciseRecognizer.keypointCount ? values : nil
             }
-            joints = Self.joints(of: subject)
+            joints = people[athlete]
         }
         analyzedFrames += 1
         var profileDeviation: Double?
-        if estimateAngle, subject != nil, analyzedFrames % Self.cameraAngleInterval == 0 {
-            profileDeviation = cameraAngle(in: pixelBuffer)
+        if estimateAngle, athlete != nil, analyzedFrames % Self.cameraAngleInterval == 0 {
+            profileDeviation = cameraAngle(in: pixelBuffer, athlete: joints)
         }
+        let bystanders = people.indices.filter { $0 != athlete }.map { people[$0] }.filter { !$0.isEmpty }
         return PoseFrame(time: time, subjectCount: observations.count, joints: joints,
                          aspectRatio: aspectRatio, keypoints: keypoints,
-                         profileDeviationDegrees: profileDeviation)
+                         profileDeviationDegrees: profileDeviation,
+                         athleteTracking: athlete == nil ? .hidden : .tracked,
+                         bystanders: bystanders)
     }
 
     /// Vision's points use a bottom-left origin; Plumb's use top-left, like the screen.
@@ -70,14 +83,25 @@ nonisolated final class PoseFrameAnalyzer {
         return joints
     }
 
-    /// Profile deviation from Vision 3D pose, or nil when the request fails or the hips are not
-    /// estimated. Vision gives each joint relative to the body's root, in the body's own axes, and
-    /// `cameraOriginMatrix` takes those into the camera's frame. `cameraRelativePosition` only
-    /// shifts them by the root's position without turning them, so the body always looked square
-    /// to the camera: every set read as filmed from the front (74 to 89° on 50 side-view videos).
-    private func cameraAngle(in pixelBuffer: CVPixelBuffer) -> Double? {
+    /// Profile deviation from Vision 3D pose, or nil when the request fails, the hips are not
+    /// estimated, or the 3D body Vision chose is not the athlete (its root falls outside the
+    /// athlete's 2D joints). Vision gives each joint relative to the body's root, in the body's
+    /// own axes, and `cameraOriginMatrix` takes those into the camera's frame.
+    /// `cameraRelativePosition` only shifts them by the root's position without turning them, so
+    /// the body always looked square to the camera: every set read as filmed from the front
+    /// (74 to 89° on 50 side-view videos).
+    private func cameraAngle(in pixelBuffer: CVPixelBuffer, athlete: [BodyJoint: JointPoint]) -> Double? {
         guard (try? sequenceHandler.perform([poseRequest3D], on: pixelBuffer, orientation: .up)) != nil,
-              let body = poseRequest3D.results?.first else { return nil }
+              let body = poseRequest3D.results?.first,
+              let root = try? body.pointInImage(.root) else { return nil }
+        let xs = athlete.values.map(\.x)
+        let ys = athlete.values.map(\.y)
+        guard let minX = xs.min(), let maxX = xs.max(), let minY = ys.min(), let maxY = ys.max() else { return nil }
+        let margin = 0.1 * max(maxX - minX, maxY - minY)
+        let rootX = Double(root.location.x)
+        let rootY = 1 - Double(root.location.y)
+        guard (minX - margin...maxX + margin).contains(rootX),
+              (minY - margin...maxY + margin).contains(rootY) else { return nil }
         let toCamera = body.cameraOriginMatrix
         func position(_ joint: VNHumanBodyPose3DObservation.JointName) -> SIMD3<Double>? {
             guard let local = try? body.recognizedPoint(joint).position.columns.3 else { return nil }

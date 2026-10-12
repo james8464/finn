@@ -32,6 +32,8 @@ protocol CameraCaptureDriving: AnyObject {
     var cameraDevice: AVCaptureDevice? { get }
     /// Rotates captured frames so the person stands upright in them.
     func setCaptureRotation(_ degrees: Double)
+    /// Keeps the analysis on the person it follows now, for the whole set.
+    func lockAthlete()
 }
 
 extension CameraCaptureDriving {
@@ -39,6 +41,7 @@ extension CameraCaptureDriving {
     var previewSink: PreviewFrameSink? { nil }
     var cameraDevice: AVCaptureDevice? { nil }
     func setCaptureRotation(_ degrees: Double) {}
+    func lockAthlete() {}
 }
 
 nonisolated enum CameraSourceError: Error, Equatable {
@@ -107,6 +110,7 @@ final class CameraPoseSource: PoseStreaming {
     func prepareForSet() async {
         guard state == .running, !isSetActive, let currentID = runID else { return }
         isSetActive = true
+        driver.lockAthlete()
         limitTask = Task { @MainActor [weak self, setDurationLimit] in
             do { try await Task.sleep(for: setDurationLimit) } catch { return }
             guard let self, self.runID == currentID, self.isSetActive else { return }

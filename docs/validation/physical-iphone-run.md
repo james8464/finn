@@ -1,6 +1,6 @@
 # Plumb physical iPhone run sheet
 
-Use this on a connected iOS 27 iPhone before claiming a working camera-to-result experience. Record the device model, iOS build, Plumb commit/build, tester, date, and each result in [`squat-v1-results.md`](squat-v1-results.md). This smoke run checks the app path; it is **not** a substitute for the 30-set holdout or specialist review in [`squat-v1-protocol.md`](squat-v1-protocol.md). Use a consenting tester, bodyweight squats only, and keep bystanders out of frame.
+Use this on a connected iOS 27 iPhone before claiming a working camera-to-result experience. Record the device model, iOS build, Plumb commit/build, tester, date, and each result in [`squat-v1-results.md`](squat-v1-results.md). This smoke run checks the app path; it is **not** a substitute for the 30-set holdout or specialist review in [`squat-v1-protocol.md`](squat-v1-protocol.md). Use a consenting tester and bodyweight squats only. Anyone else who appears in a check must have agreed to it.
 
 | Check | Action | Expected result to verify |
 | --- | --- | --- |
@@ -8,6 +8,7 @@ Use this on a connected iOS 27 iPhone before claiming a working camera-to-result
 | Denied permission | Deny Camera, tap **Try again**, then allow Camera in Settings and return | No live-analysis state while denied; the next attempt opens the preview without reinstalling |
 | Setup and orientation | Place the phone upright at hip height, a few steps away; turn sideways | Full body fits in the preview; no unexpected mirroring or rotated pose result |
 | Live skeleton | While framing, raise one arm, then squat slowly | Bones sit on the limbs and follow them without visible lag; the knee label changes as you bend; orange dashes appear only on joints that are hidden or blurred |
+| Other people | During a set, a second consenting person walks behind the tester, then in front of the phone for about one second, then stands still to one side in view | Their skeleton is grey; the tester's stays white and never jumps to them; the walk-through does not change the count; standing in front for more than 3 s gives the "Someone else was in view" retake |
 | Phone orientation | Frame yourself with the phone in portrait, then turned sideways each way, with rotation lock off and on | Picture and skeleton stay upright and on the body in every case; the picture behaves like a mirror (your right hand rises on the right of the screen); a squat filmed with the phone sideways still counts |
 | First measured set | Do about six unloaded squats, tap **Stop set** | Count and named rep evidence match what the tester saw; any cue is camera-supported and understandable |
 | Short or incomplete set | Stop after fewer than four full reps, then try an incomplete final rep | No unsupported technique cue or invented complete rep; retake path remains clear |

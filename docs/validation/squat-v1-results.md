@@ -8,7 +8,8 @@ Built and launched commit `8c2959e` on the iPhone 18 Pro Max simulator (iOS 27.0
 
 | Evidence | Current state |
 | --- | --- |
-| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v3` |
+| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v4` |
+| App capture path on public gym videos | 44 of 50 measured with athlete tracking (5 without); 43 of 44 within one rep of an independent dip counter. See "Other people in view" in [`exercise-rules-v1.md`](exercise-rules-v1.md) |
 | Replay on public videos (not participants) | 42 of 50 Mendeley side-view squat videos measured by `squat-side-v3` (0 of 50 by `squat-side-v2`); counts within one rep of an independent dip counter on all 42; no human count. See [`exercise-rules-v1.md`](exercise-rules-v1.md) |
 | Tuning sets | 0 |
 | Holdout sets | 0 |
