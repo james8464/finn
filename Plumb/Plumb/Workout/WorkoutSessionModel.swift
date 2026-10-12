@@ -88,6 +88,8 @@ final class WorkoutSessionModel {
     private(set) var result: WorkoutResult?
     /// The exercise whose rubric produced `result`.
     private(set) var resultExercise: ExerciseKind = .bodyweightSquat
+    /// Why some movements of a measured set did not count, in numbers; nil when all counted.
+    private(set) var movementNote: String?
     /// What the optional exercise classifier concluded for the latest set.
     private(set) var recognition: ExerciseRecognition = .notAttempted
     /// Whether to let the on-device classifier pick the exercise after a set. It only has an
@@ -147,6 +149,7 @@ final class WorkoutSessionModel {
         captureExercise = selectedExercise
         recognition = .notAttempted
         result = nil
+        movementNote = nil
         lastStopToResultMilliseconds = nil
         stopTappedAt = nil
         cueDismissed = false
@@ -276,13 +279,18 @@ final class WorkoutSessionModel {
         let definition = exercise.definition
         resultExercise = exercise
         lastViewVerdict = ViewCheck.assess(frames, expected: definition.expectedView)
-        switch ExerciseAnalyzer.analyze(frames, as: definition,
-                                        viewCheck: checksCameraAngle ? .enforce : .ignore) {
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(
+            frames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore)
+        movementNote = nil
+        switch outcome {
         case .analyzed(let analysis):
+            let explanation = diagnostics?.explanation(for: definition, counted: analysis.reps.count)
             guard !analysis.reps.isEmpty else {
-                result = .insufficientView(definition.copy.noCompleteReps)
+                result = .insufficientView([definition.copy.noCompleteReps, explanation]
+                    .compactMap { $0 }.joined(separator: " "))
                 return
             }
+            movementNote = explanation
             let cue = CueSelector.select(from: analysis, exercise: definition)
             result = .measured(analysis, cue)
             record(analysis: analysis, cue: cue, exercise: exercise)
@@ -436,6 +444,7 @@ final class WorkoutSessionModel {
         framingStatus = .checking
         frameCount = 0
         result = nil
+        movementNote = nil
         lastStopToResultMilliseconds = nil
         stopTappedAt = nil
     }

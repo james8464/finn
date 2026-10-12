@@ -491,6 +491,11 @@ struct ContentView: View {
                             .monospacedDigit()
                             .foregroundStyle(PlumbStyle.supportingText)
                         recognitionNote
+                        if let note = model.movementNote {
+                            Text(note)
+                                .font(.subheadline)
+                                .accessibilityIdentifier("result.movementNote")
+                        }
                         if model.historyIssue != nil {
                             Text("Couldn’t confirm this set was saved.")
                                 .font(.subheadline)

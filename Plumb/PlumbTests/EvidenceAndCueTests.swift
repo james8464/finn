@@ -19,7 +19,7 @@ struct EvidenceAndCueTests {
     }
 
     @Test func rejectsLowJointConfidence() {
-        let frames = clearTrace(confidence: 0.4)
+        let frames = clearTrace(confidence: 0.2)
         #expect(EvidenceGate.assess(frames) == .reject(.lowConfidence))
     }
 

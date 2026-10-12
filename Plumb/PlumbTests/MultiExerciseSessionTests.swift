@@ -23,7 +23,7 @@ struct MultiExerciseSessionTests {
             Issue.record("Expected a measured push-up set, got \(String(describing: model.result))")
             return
         }
-        #expect(analysis.rubricVersion == "push-up-side-v1")
+        #expect(analysis.rubricVersion == "push-up-side-v2")
         #expect(analysis.reps.count == 6)
         #expect(model.resultExercise == .pushUp)
         #expect(try store.load().first?.sets.first?.exercise == .pushUp)
@@ -73,7 +73,7 @@ struct MultiExerciseSessionTests {
         await capture(model, source, lungeTrace(reps: 6, bend: 0))
         #expect({
             if case .insufficientView(let message) = model.result {
-                return message == ExerciseDefinition.staticLunge.copy.noCompleteReps
+                return message.hasPrefix(ExerciseDefinition.staticLunge.copy.noCompleteReps)
             }
             return false
         }())

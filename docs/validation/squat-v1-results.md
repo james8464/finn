@@ -8,7 +8,8 @@ Built and launched commit `8c2959e` on the iPhone 18 Pro Max simulator (iOS 27.0
 
 | Evidence | Current state |
 | --- | --- |
-| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v2` |
+| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v3` |
+| Replay on public videos (not participants) | 42 of 50 Mendeley side-view squat videos measured by `squat-side-v3` (0 of 50 by `squat-side-v2`); counts within one rep of an independent dip counter on all 42; no human count. See [`exercise-rules-v1.md`](exercise-rules-v1.md) |
 | Tuning sets | 0 |
 | Holdout sets | 0 |
 | Physical iPhone camera pass | Pending; iPhone 16 Pro Max was unavailable to Xcode on 11 October. Use the [physical run sheet](physical-iphone-run.md) once available |

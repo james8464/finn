@@ -15,7 +15,8 @@ final class CameraAngleUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
         XCTAssertTrue(app.staticTexts["Couldn’t assess this set"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["This exercise needs a side view. Turn so your side faces the camera, then try again."].exists)
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
+            format: "label BEGINSWITH %@", "This exercise needs a side view. Turn so your side faces the camera")).firstMatch.exists)
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ])

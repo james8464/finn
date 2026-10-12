@@ -64,8 +64,12 @@ struct ViewCheckTests {
         ]
         for (definition, trace) in traces {
             let front = withDeviation(trace, 70)
-            #expect(ExerciseAnalyzer.analyze(front, as: definition)
-                    == .insufficientView(ExpectedView.side.wrongViewMessage))
+            guard case .insufficientView(let reason) = ExerciseAnalyzer.analyze(front, as: definition) else {
+                Issue.record("\(definition.kind) should refuse a front view")
+                continue
+            }
+            #expect(reason.hasPrefix(ExpectedView.side.wrongViewMessage))
+            #expect(reason.contains("70°"))
             guard case .analyzed(let ignored) = ExerciseAnalyzer.analyze(front, as: definition, viewCheck: .ignore)
             else {
                 Issue.record("\(definition.kind) should measure when the check is off")
@@ -127,7 +131,7 @@ struct ViewCheckSessionTests {
         let (model, source) = makeModel()
         await capture(model, source, withDeviation(pushUpTrace(reps: 6), 75), exercise: .pushUp)
         #expect({
-            if case .insufficientView(let reason) = model.result { return reason == ExpectedView.side.wrongViewMessage }
+            if case .insufficientView(let reason) = model.result { return reason.hasPrefix(ExpectedView.side.wrongViewMessage) }
             return false
         }())
         #expect(model.lastViewVerdict == .mismatch(medianDeviation: 75, estimates: 31))
