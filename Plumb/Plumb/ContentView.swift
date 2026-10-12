@@ -13,6 +13,13 @@ struct ContentView: View {
             traits.userInterfaceStyle == .dark ? .black : .white
         })
     }
+    private var destructiveLabelColor: Color {
+        Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 1, green: 69 / 255, blue: 58 / 255, alpha: 1)
+                : UIColor(red: 198 / 255, green: 40 / 255, blue: 40 / 255, alpha: 1)
+        })
+    }
     #if DEBUG
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") }
     private var usesTestDarkAppearance: Bool {
@@ -404,7 +411,7 @@ struct ContentView: View {
                 } label: {
                     Text("Delete all local data")
                         .font(.subheadline)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(destructiveLabelColor)
                         .frame(minHeight: 44)
                         .contentShape(Rectangle())
                 }

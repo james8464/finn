@@ -27,7 +27,7 @@ The Figma guide is the identity reference for the iPhone app: purpose, mark, col
 
 The icon is strictly black and white in its main appearances. The current iPhone app uses a near-black primary action in Light Mode and white in Dark Mode, with white and black labels respectively. This keeps the workout flow in the same quiet palette as the mark. Use dynamic semantic iOS colours for backgrounds, labels, separators, warnings, and errors. Evergreen and Signal remain optional brand accents for editorial material; Mint stays out of small text and filled buttons. The live Figma file includes Light, Dark, and increased contrast modes with the tested Signal value; its action examples precede the current monochrome app treatment and need to be updated at the next brand-file revision. The local `.fig` file is an earlier snapshot. The camera view should leave the person and their movement clearly visible.
 
-The capture **Stop set** control uses a deeper red (`#C62828`) with white text so the label remains legible. History uses the adaptive system red for its destructive delete action. This is a functional control colour, not a brand accent.
+The capture **Stop set** control uses a deeper red (`#C62828`) with white text so the label remains legible. History uses `#C62828` for its destructive delete action in Light Mode and `#FF453A` in Dark Mode, keeping the text readable in both appearances. This is a functional control colour, not a brand accent.
 
 Use SF Symbols for interface actions where appropriate. Keep the app icon and brand mark custom; Apple's [SF Symbols guidance](https://developer.apple.com/design/human-interface-guidelines/sf-symbols) prohibits using the symbols, or confusingly similar images, in app icons and logos.
 
