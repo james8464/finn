@@ -1,7 +1,4 @@
 import AVFoundation
-import CoreML
-import ImageIO
-import Vision
 
 nonisolated enum CameraCaptureError: Error {
     case noFrontCamera
@@ -12,13 +9,18 @@ nonisolated enum CameraCaptureError: Error {
 nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @unchecked Sendable {
     nonisolated(unsafe) let session = AVCaptureSession()
     private let queue = DispatchQueue(label: "com.plumb.camera.capture")
-    private let processor = PoseFrameProcessor()
+    private let processor: PoseFrameProcessor
     private var configured = false
     private var interruptionObserver: NSObjectProtocol?
+    nonisolated let previewSink: PreviewFrameSink? = PreviewFrameSink()
+    nonisolated let cameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
 
-    var isAvailable: Bool {
-        AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) != nil
+    override init() {
+        processor = PoseFrameProcessor(previewSink: previewSink)
+        super.init()
     }
+
+    var isAvailable: Bool { cameraDevice != nil }
 
     func start() async throws -> AsyncStream<PoseFrame> {
         let stream = processor.makeStream()
@@ -54,6 +56,16 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
         processor.setCameraAngleEstimation(enabled)
     }
 
+    /// Turns the frames so the person stands upright in them, whatever the phone's orientation.
+    func setCaptureRotation(_ degrees: Double) {
+        queue.async {
+            guard let connection = self.session.outputs.first?.connection(with: .video),
+                  connection.isVideoRotationAngleSupported(degrees),
+                  connection.videoRotationAngle != degrees else { return }
+            connection.videoRotationAngle = degrees
+        }
+    }
+
     func stop() async {
         processor.finish()
         if let interruptionObserver {
@@ -69,8 +81,7 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
     }
 
     private func configure() throws {
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
-        else { throw CameraCaptureError.noFrontCamera }
+        guard let camera = cameraDevice else { throw CameraCaptureError.noFrontCamera }
 
         session.beginConfiguration()
         defer { session.commitConfiguration() }
@@ -88,7 +99,9 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
         session.addOutput(output)
         output.setSampleBufferDelegate(processor, queue: queue)
         if let connection = output.connection(with: .video) {
+            // Portrait until the screen's rotation coordinator reports the phone's orientation.
             if connection.isVideoRotationAngleSupported(90) { connection.videoRotationAngle = 90 }
+            // Vision reads unmirrored frames; only the on-screen picture is mirrored.
             if connection.isVideoMirroringSupported {
                 connection.automaticallyAdjustsVideoMirroring = false
                 connection.isVideoMirrored = false
@@ -103,12 +116,14 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var lastSampleTime: Double = -.infinity
     private var estimatesCameraAngle = true
-    /// Runs every Nth processed frame (about 4 per second at 15 fps) to bound the extra cost.
-    private static let cameraAngleInterval = 4
-    // Used only on the capture queue. The 3D request is stateful, so it is reused across frames.
-    private let poseRequest3D = VNDetectHumanBodyPose3DRequest()
-    private let sequenceHandler = VNSequenceRequestHandler()
-    private var processedFrames = 0
+    private let previewSink: PreviewFrameSink?
+    // Used only on the capture queue.
+    private let analyzer = PoseFrameAnalyzer()
+
+    init(previewSink: PreviewFrameSink?) {
+        self.previewSink = previewSink
+        super.init()
+    }
 
     func setCameraAngleEstimation(_ enabled: Bool) {
         lock.lock()
@@ -139,76 +154,19 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
         let time = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer))
         guard time.isFinite else { return }
         lock.lock()
-        guard continuation != nil, time - lastSampleTime >= 1.0 / 15 else {
+        guard continuation != nil else {
             lock.unlock()
             return
         }
-        lastSampleTime = time
+        // Every frame goes on screen; the analysis keeps 15 per second.
+        let analyze = time - lastSampleTime >= PoseFrameAnalyzer.minimumInterval
+        if analyze { lastSampleTime = time }
         let estimateAngle = estimatesCameraAngle
         lock.unlock()
 
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let width = CVPixelBufferGetWidth(pixelBuffer)
-        let height = CVPixelBufferGetHeight(pixelBuffer)
-        let aspectRatio = width > 0 && height > 0 ? Double(height) / Double(width) : 1
-        let request = VNDetectHumanBodyPoseRequest()
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
-        do {
-            try handler.perform([request])
-        } catch {
-            yield(PoseFrame(time: time, subjectCount: 0, joints: [:], aspectRatio: aspectRatio))
-            return
-        }
-
-        let observations = request.results ?? []
-        let subject = observations.first
-        var joints: [BodyJoint: JointPoint] = [:]
-        var keypoints: [Float]?
-        if let subject {
-            // The same 18-point layout Create ML extracts from training clips.
-            if let array = try? subject.keypointsMultiArray() {
-                let values = MLShapedArray<Float>(converting: array).scalars
-                keypoints = values.count == ExerciseRecognizer.keypointCount ? values : nil
-            }
-            let mapping: [(BodyJoint, VNHumanBodyPoseObservation.JointName)] = [
-                (.leftHip, .leftHip), (.leftKnee, .leftKnee), (.leftAnkle, .leftAnkle),
-                (.rightHip, .rightHip), (.rightKnee, .rightKnee), (.rightAnkle, .rightAnkle),
-                (.leftShoulder, .leftShoulder), (.leftElbow, .leftElbow), (.leftWrist, .leftWrist),
-                (.rightShoulder, .rightShoulder), (.rightElbow, .rightElbow), (.rightWrist, .rightWrist),
-            ]
-            for (name, visionName) in mapping {
-                guard let point = try? subject.recognizedPoint(visionName), point.confidence > 0 else { continue }
-                joints[name] = JointPoint(
-                    x: min(1, max(0, Double(point.location.x))),
-                    y: min(1, max(0, 1 - Double(point.location.y))),
-                    confidence: Double(point.confidence)
-                )
-            }
-        }
-        processedFrames += 1
-        var profileDeviation: Double?
-        if estimateAngle, subject != nil, processedFrames % Self.cameraAngleInterval == 0 {
-            profileDeviation = cameraAngle(in: pixelBuffer)
-        }
-        yield(PoseFrame(time: time, subjectCount: observations.count, joints: joints,
-                        aspectRatio: aspectRatio, keypoints: keypoints,
-                        profileDeviationDegrees: profileDeviation))
-    }
-
-    /// Profile deviation from Vision 3D pose of the most prominent person, or nil when the
-    /// request fails or the hips are not estimated.
-    private func cameraAngle(in pixelBuffer: CVPixelBuffer) -> Double? {
-        guard (try? sequenceHandler.perform([poseRequest3D], on: pixelBuffer, orientation: .up)) != nil,
-              let body = poseRequest3D.results?.first else { return nil }
-        func position(_ joint: VNHumanBodyPose3DObservation.JointName) -> SIMD3<Double>? {
-            guard let matrix = try? body.cameraRelativePosition(joint) else { return nil }
-            let column = matrix.columns.3
-            return SIMD3(Double(column.x), Double(column.y), Double(column.z))
-        }
-        guard let leftHip = position(.leftHip), let rightHip = position(.rightHip) else { return nil }
-        return ViewCheck.profileDeviation(leftHip: leftHip, rightHip: rightHip,
-                                          leftShoulder: position(.leftShoulder),
-                                          rightShoulder: position(.rightShoulder))
+        previewSink?.enqueue(sampleBuffer)
+        guard analyze, let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        yield(analyzer.analyze(pixelBuffer, time: time, estimateAngle: estimateAngle))
     }
 
     private func yield(_ frame: PoseFrame) {

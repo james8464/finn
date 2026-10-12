@@ -3,6 +3,8 @@ import AVFoundation
 @MainActor
 protocol PoseStreaming: AnyObject {
     var previewSession: AVCaptureSession { get }
+    /// The frames shown on the camera screen, the same ones the analysis receives.
+    var previewFeed: PreviewFeed? { get }
     var endedAtLimit: Bool { get }
     func prepareForSet() async
     func start() async throws -> AsyncStream<PoseFrame>
@@ -12,6 +14,7 @@ protocol PoseStreaming: AnyObject {
 }
 
 extension PoseStreaming {
+    var previewFeed: PreviewFeed? { nil }
     var endedAtLimit: Bool { false }
     func prepareForSet() async {}
     func setCameraAngleEstimation(_ enabled: Bool) {}
@@ -24,10 +27,18 @@ protocol CameraCaptureDriving: AnyObject {
     func start() async throws -> AsyncStream<PoseFrame>
     func stop() async
     func setCameraAngleEstimation(_ enabled: Bool)
+    /// Where every captured frame is sent for display.
+    var previewSink: PreviewFrameSink? { get }
+    var cameraDevice: AVCaptureDevice? { get }
+    /// Rotates captured frames so the person stands upright in them.
+    func setCaptureRotation(_ degrees: Double)
 }
 
 extension CameraCaptureDriving {
     func setCameraAngleEstimation(_ enabled: Bool) {}
+    var previewSink: PreviewFrameSink? { nil }
+    var cameraDevice: AVCaptureDevice? { nil }
+    func setCaptureRotation(_ degrees: Double) {}
 }
 
 nonisolated enum CameraSourceError: Error, Equatable {
@@ -59,6 +70,7 @@ final class CameraPoseSource: PoseStreaming {
     private(set) var state: CameraSourceState = .idle
     private(set) var endedAtLimit = false
     var previewSession: AVCaptureSession { driver.session }
+    let previewFeed: PreviewFeed?
 
     init(authorize: @escaping @MainActor () async -> Bool, driver: any CameraCaptureDriving,
          setDurationLimit: Duration = .seconds(120)) {
@@ -68,6 +80,14 @@ final class CameraPoseSource: PoseStreaming {
         let components = setDurationLimit.components
         self.setDurationLimitSeconds = Double(components.seconds)
             + Double(components.attoseconds) / 1e18
+        if let sink = driver.previewSink {
+            // The front camera is shown like a mirror.
+            let feed = PreviewFeed(isMirrored: true, device: driver.cameraDevice, sink: sink)
+            feed.onCaptureRotation = { [weak driver] degrees in driver?.setCaptureRotation(degrees) }
+            previewFeed = feed
+        } else {
+            previewFeed = nil
+        }
     }
 
     static func live() -> CameraPoseSource {
