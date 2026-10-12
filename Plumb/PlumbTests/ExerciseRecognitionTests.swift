@@ -160,16 +160,24 @@ struct RecognitionSessionTests {
         #expect(unequipped.recognition == .notAttempted)
     }
 
-    @Test func switchIsRememberedAndDefaultsOff() throws {
+    @Test func rulesAreOnByDefaultAndTheTrainedModelIsOff() throws {
         let defaults = try #require(UserDefaults(suiteName: "PlumbRecognitionPrefs-\(UUID().uuidString)"))
         let preferences = PlumbPreferences(defaults: defaults)
-        let first = WorkoutSessionModel(source: RecognitionPoseSource(), exerciseClassifier: nil,
+        let first = WorkoutSessionModel(source: RecognitionPoseSource(),
+                                        exerciseClassifier: ScriptedClassifier { _ in ("squat", 0.99) },
                                         preferences: preferences)
-        #expect(first.recognizesExercise == false)
-        first.recognizesExercise = true
+        #expect(first.recognizesExercise)
+        #expect(!first.usesTrainedModel)
+        #expect(first.recognitionMethod == .angleRules)
+        first.recognizesExercise = false
+        first.usesTrainedModel = true
+        #expect(first.recognitionMethod == .keypointModel)
         let second = WorkoutSessionModel(source: RecognitionPoseSource(), exerciseClassifier: nil,
                                          preferences: preferences)
-        #expect(second.recognizesExercise)
+        #expect(!second.recognizesExercise)
+        #expect(second.usesTrainedModel)
+        // Without a model in the build, the rules still run.
+        #expect(second.recognitionMethod == .angleRules)
     }
 
     private func makeModel(classifier: ScriptedClassifier?, recognizes: Bool,
@@ -177,6 +185,7 @@ struct RecognitionSessionTests {
         let defaults = UserDefaults(suiteName: "PlumbRecognition-\(UUID().uuidString)")!
         let preferences = PlumbPreferences(defaults: defaults)
         preferences.recognizesExercise = recognizes
+        preferences.usesTrainedModel = classifier != nil
         let source = RecognitionPoseSource()
         return (WorkoutSessionModel(source: source, exerciseClassifier: classifier, angleClassifier: nil,
                                     ruleClassifier: rules ? AngleRuleClassifier() : nil,

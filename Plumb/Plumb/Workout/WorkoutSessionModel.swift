@@ -94,16 +94,23 @@ final class WorkoutSessionModel {
     private(set) var movementNote: String?
     /// What the optional exercise classifier concluded for the latest set.
     private(set) var recognition: ExerciseRecognition = .notAttempted
-    /// Whether to let the on-device classifier pick the exercise after a set. It only has an
-    /// effect when this build includes a trained model; the chosen exercise stays the fallback.
+    /// Whether Plumb recognizes the exercise after a set (joint-angle rules unless the trained
+    /// model is switched on). On by default; the chosen exercise stays the fallback.
     var recognizesExercise: Bool {
         didSet { preferences.recognizesExercise = recognizesExercise }
+    }
+    /// Whether a bundled trained model replaces the rules. Off by default, and only offered when
+    /// this build includes a model.
+    var usesTrainedModel: Bool {
+        didSet { preferences.usesTrainedModel = usesTrainedModel }
     }
     /// True when a trained model (keypoint or angle) ships with this build.
     var hasExerciseClassifier: Bool { exerciseClassifier != nil || angleClassifier != nil }
     var recognitionMethod: RecognitionMethod {
-        if exerciseClassifier != nil { return .keypointModel }
-        if angleClassifier != nil { return .angleModel }
+        if usesTrainedModel {
+            if exerciseClassifier != nil { return .keypointModel }
+            if angleClassifier != nil { return .angleModel }
+        }
         if ruleClassifier != nil { return .angleRules }
         return .unavailable
     }
@@ -150,6 +157,7 @@ final class WorkoutSessionModel {
         self.ruleClassifier = ruleClassifier
         self.preferences = preferences
         self.recognizesExercise = preferences.recognizesExercise
+        self.usesTrainedModel = preferences.usesTrainedModel
         self.checksCameraAngle = preferences.checksCameraAngle
         if let store {
             do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
@@ -340,9 +348,16 @@ final class WorkoutSessionModel {
 
     private func recognizeExercise() -> ExerciseRecognition {
         guard recognizesExercise, !frames.isEmpty else { return .notAttempted }
-        if let exerciseClassifier { return ExerciseRecognizer.recognize(frames, using: exerciseClassifier) }
-        if let angleClassifier { return AngleRecognizer.recognize(frames, using: angleClassifier) }
-        if let ruleClassifier { return AngleRecognizer.recognize(frames, using: ruleClassifier) }
+        switch recognitionMethod {
+        case .keypointModel:
+            if let exerciseClassifier { return ExerciseRecognizer.recognize(frames, using: exerciseClassifier) }
+        case .angleModel:
+            if let angleClassifier { return AngleRecognizer.recognize(frames, using: angleClassifier) }
+        case .angleRules:
+            if let ruleClassifier { return AngleRecognizer.recognize(frames, using: ruleClassifier) }
+        case .unavailable:
+            break
+        }
         return .notAttempted
     }
 

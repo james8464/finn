@@ -132,7 +132,7 @@ struct ContentView: View {
                     .padding(.bottom, 20)
                 exercisePicker
                 if model.usesExerciseRecognition {
-                    Text("Plumb will try to recognize the exercise after the set. If it isn’t confident, it uses your choice.")
+                    Text("After the set, Plumb also checks which exercise you did. If it isn’t sure, it keeps your choice.")
                         .font(.footnote)
                         .foregroundStyle(PlumbStyle.supportingText)
                         .padding(.top, 4)
@@ -281,7 +281,7 @@ struct ContentView: View {
                 if model.recognitionMethod != .unavailable {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Optional exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
-                        Text("When you turn it on in Options, Plumb reads pose points after a set to recognize the exercise. Pose points and video stay on this iPhone.")
+                        Text("Unless you turn it off in Options, Plumb reads pose points after a set to recognize the exercise from your joint angles. Pose points and video stay on this iPhone.")
                     }
                     Divider()
                 }
@@ -320,9 +320,17 @@ struct ContentView: View {
                     case .keypointModel, .angleModel:
                         Text("After each set, an on-device model trained by the Plumb team guesses the exercise from your pose points. If it isn’t confident, Plumb uses the exercise you chose. Its accuracy is still being tested.")
                     case .angleRules:
-                        Text("After each set, Plumb guesses the exercise from your joint angles: which joint bends, how far, and how your torso is tilted. This build has no trained model yet. If the guess isn’t clear, Plumb uses the exercise you chose.")
+                        Text("After each set, Plumb guesses the exercise from your joint angles: which joint bends, how far, and how your torso is tilted. If the guess isn’t clear, Plumb uses the exercise you chose.")
                     case .unavailable:
                         Text("This build has no exercise recognition, so Plumb uses the exercise you choose on the first screen.")
+                    }
+                    if model.hasExerciseClassifier {
+                        Toggle("Use the trained model instead (experimental)", isOn: Binding(
+                            get: { model.usesTrainedModel },
+                            set: { model.usesTrainedModel = $0 }
+                        ))
+                        .frame(minHeight: 44)
+                        .accessibilityIdentifier("options.useTrainedModel")
                     }
                 }
                 Divider()
@@ -359,9 +367,8 @@ struct ContentView: View {
                 .font(.subheadline)
                 .accessibilityIdentifier("result.recognition")
         case .uncertain:
-            Text("Plumb couldn’t recognize the exercise confidently, so it used your choice: \(chosen).")
-                .font(.subheadline)
-                .accessibilityIdentifier("result.recognition")
+            // Not sure: the person's own choice was used, as they expect. Nothing to add.
+            EmptyView()
         }
     }
 
