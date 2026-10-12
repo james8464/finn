@@ -85,13 +85,15 @@ struct MultiExerciseSessionTests {
         model.selectedExercise = .pushUp
         await model.startPreview()
         for index in 0..<5 { source.emit(squatFrame(time: Double(index) * 0.1, hipY: 0.42)) }
-        for _ in 0..<30 where model.framingStatus == .checking {
-            try await Task.sleep(for: .milliseconds(10))
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        while model.framingStatus == .checking && ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(20))
         }
         #expect(model.framingStatus == .adjustPosition)
         for frame in pushUpTrace(reps: 1).prefix(5) { source.emit(frame) }
-        for _ in 0..<30 where model.framingStatus != .landmarksVisible {
-            try await Task.sleep(for: .milliseconds(10))
+        let visibleDeadline = ContinuousClock.now.advanced(by: .seconds(5))
+        while model.framingStatus != .landmarksVisible && ContinuousClock.now < visibleDeadline {
+            try await Task.sleep(for: .milliseconds(20))
         }
         #expect(model.framingStatus == .landmarksVisible)
         await model.cancel()

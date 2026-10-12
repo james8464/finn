@@ -105,13 +105,12 @@ struct ComparisonNarratorTests {
     }
 
     @Test func timeoutDoesNotWaitForGeneratorThatIgnoresCancellation() async {
-        let clock = ContinuousClock()
-        let started = clock.now
-        let recap = await ComparisonNarrator(generator: NonCooperativeGenerator(),
+        let generator = NonCooperativeGenerator()
+        let recap = await ComparisonNarrator(generator: generator,
                                              timeout: .milliseconds(20))
             .recap(for: comparison())
         #expect(recap.source == .template)
-        #expect(started.duration(to: clock.now) < .seconds(7))
+        #expect(!generator.didFinish, "The timeout must return before the generator finishes.")
     }
 
     @Test func validGeneratedRecapKeepsDeterministicFacts() async {
@@ -168,13 +167,16 @@ struct ComparisonNarratorTests {
 @MainActor
 private final class NonCooperativeGenerator: RecapGenerating {
     let available = true
+    private(set) var didFinish = false
 
     func generate(for comparison: Comparison) async throws -> GeneratedRecap {
-        await Task.detached {
+        let recap = await Task.detached {
             try? await Task.sleep(for: .seconds(10))
             return GeneratedRecap(explanation: "Your range was shorter.",
                                   evidenceRepNumbers: [5, 6])
         }.value
+        didFinish = true
+        return recap
     }
 }
 

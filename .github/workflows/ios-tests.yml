@@ -50,8 +50,10 @@ jobs:
             -collect-test-diagnostics never \
             CODE_SIGNING_ALLOWED=NO
       - name: Replay generated workout videos through Vision
+        if: always()
         run: tools/replay/test_generated_videos.sh
       - name: Test validation scorer
+        if: always()
         run: python3 -m unittest discover -s docs/validation -p 'test_*.py'
       - name: Upload failed test report
         if: failure()
