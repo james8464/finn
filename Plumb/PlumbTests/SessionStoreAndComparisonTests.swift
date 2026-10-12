@@ -21,6 +21,42 @@ struct SessionStoreAndComparisonTests {
         #expect(!serialized.contains("pixelBuffer"))
     }
 
+    @Test func savedHistoryUsesCompleteFileProtection() throws {
+        let url = temporaryURL()
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        let store = LocalSessionStore(url: url)
+        let id = UUID()
+        try store.save(WorkoutSessionSummary(id: id, startedAt: .now,
+                                             sets: [set(sessionID: id, range: 0.4)]))
+        #expect(try url.resourceValues(forKeys: [.fileProtectionKey]).fileProtection == .complete)
+        try store.save(WorkoutSessionSummary(id: id, startedAt: .now,
+                                             sets: [set(sessionID: id, range: 0.3)]))
+        #expect(try url.resourceValues(forKeys: [.fileProtectionKey]).fileProtection == .complete)
+    }
+
+    @Test func loadingLegacyHistoryUpgradesFileProtection() throws {
+        let url = temporaryURL()
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data("[]".utf8).write(to: url, options: .atomic)
+        let store = LocalSessionStore(url: url)
+        #expect(try store.load().isEmpty)
+        let protection = try url.resourceValues(forKeys: [.fileProtectionKey]).fileProtection
+        #expect(protection == .complete)
+    }
+
+    @Test func loadingHistoryUpgradesExistingCorruptBackupProtection() throws {
+        let url = temporaryURL()
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        let directory = url.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let backup = directory.appending(path: "sessions-corrupt-legacy.json")
+        try Data("broken".utf8).write(to: backup, options: .atomic)
+        #expect(try LocalSessionStore(url: url).load().isEmpty)
+        let protection = try backup.resourceValues(forKeys: [.fileProtectionKey]).fileProtection
+        #expect(protection == .complete)
+    }
+
     @Test func secondSetComparisonUsesSameSession() {
         let id = UUID()
         let first = set(sessionID: id, range: 0.4)
@@ -72,6 +108,7 @@ struct SessionStoreAndComparisonTests {
         #expect(throws: SessionStoreError.corrupted) { try store.load() }
         let backup = try store.recoverCorruptStore()
         #expect(FileManager.default.fileExists(atPath: backup.path))
+        #expect(try backup.resourceValues(forKeys: [.fileProtectionKey]).fileProtection == .complete)
         #expect(try store.load().isEmpty)
     }
 

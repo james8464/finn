@@ -23,6 +23,7 @@ nonisolated struct LocalSessionStore: SessionStoring {
     }
 
     func load() throws -> [WorkoutSessionSummary] {
+        try protectExistingHistory()
         guard FileManager.default.fileExists(atPath: url.path) else { return [] }
         let data = try Data(contentsOf: url)
         do { return try JSONDecoder().decode([WorkoutSessionSummary].self, from: data) }
@@ -75,6 +76,24 @@ nonisolated struct LocalSessionStore: SessionStoring {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
                                                 withIntermediateDirectories: true)
         let data = try JSONEncoder().encode(sessions)
-        try data.write(to: url, options: .atomic)
+        try data.write(to: url, options: [.atomic, .completeFileProtection])
+        try (url as NSURL).setResourceValue(URLFileProtection.complete,
+                                            forKey: .fileProtectionKey)
+    }
+
+    private func protectExistingHistory() throws {
+        let directory = url.deletingLastPathComponent()
+        guard FileManager.default.fileExists(atPath: directory.path) else { return }
+        let files = try FileManager.default.contentsOfDirectory(at: directory,
+                                                                 includingPropertiesForKeys: [.fileProtectionKey])
+        for file in files {
+            let name = file.lastPathComponent
+            guard name == url.lastPathComponent ||
+                    (name.hasPrefix("sessions-corrupt-") && name.hasSuffix(".json")) else { continue }
+            if try file.resourceValues(forKeys: [.fileProtectionKey]).fileProtection != .complete {
+                try (file as NSURL).setResourceValue(URLFileProtection.complete,
+                                                    forKey: .fileProtectionKey)
+            }
+        }
     }
 }
