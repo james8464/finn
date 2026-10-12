@@ -1,14 +1,22 @@
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openURL) private var openURL
     @State private var model: WorkoutSessionModel
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
+    private var primaryButtonLabelColor: Color {
+        Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .black : .white
+        })
+    }
     #if DEBUG
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") }
+    private var usesTestDarkAppearance: Bool {
+        ProcessInfo.processInfo.arguments.contains("-plumb-ui-dark")
+    }
     private var isValidationMode: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-validation") }
     private var isCaptureStage: Bool {
         switch model.stage {
@@ -43,15 +51,18 @@ struct ContentView: View {
             if isDemo && !isCaptureStage {
                 Text("DEMO INPUT")
                     .font(.caption.bold())
+                    .foregroundStyle(.black)
                     .padding(6)
                     .background(.yellow, in: Capsule())
                     .padding(.top, 6)
+                    .accessibilityHidden(true)
             }
             #endif
         }
-        .tint(colorScheme == .dark
-              ? Color(red: 43 / 255, green: 132 / 255, blue: 95 / 255)
-              : Color(red: 31 / 255, green: 106 / 255, blue: 83 / 255))
+        .tint(.accentColor)
+        #if DEBUG
+        .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
+        #endif
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { Task { await model.backgrounded() } }
         }
@@ -83,10 +94,10 @@ struct ContentView: View {
                     .frame(width: 42, height: 42)
                     .accessibilityHidden(true)
                     .padding(.bottom, 36)
-                Text("Find your line.")
+                Text("Check your squat.")
                     .font(.largeTitle.bold())
                     .padding(.bottom, 12)
-                Text("Review one camera-visible pattern in a bodyweight squat set, then try again.")
+                Text("Get one observation after a set of squats. Try another set to see what changed.")
                     .font(.body)
                     .padding(.bottom, 40)
                 VStack(alignment: .leading, spacing: 18) {
@@ -95,14 +106,10 @@ struct ContentView: View {
                 }
                 .font(.body)
                 .padding(.bottom, 40)
-                Button("Set up camera") { Task { await model.startPreview() } }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .padding(.bottom, 16)
                 Text("Analyzed on this iPhone. No video saved.")
                     .font(.footnote)
                     .padding(.bottom, 20)
-                Text("Plumb observes movement from one camera angle. It cannot judge every part of your technique or prevent injury.")
+                Text("Plumb observes one camera view. It cannot assess your whole technique or prevent injury.")
                     .font(.footnote)
                     .padding(.bottom, 32)
                 HStack(spacing: 24) {
@@ -122,6 +129,20 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
+        }
+        .safeAreaInset(edge: .bottom) {
+            Button {
+                Task { await model.startPreview() }
+            } label: {
+                Text("Set up camera")
+                    .foregroundStyle(primaryButtonLabelColor)
+                    .frame(maxWidth: .infinity)
+            }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(.regularMaterial)
         }
         .toolbar(.hidden, for: .navigationBar)
     }
@@ -177,7 +198,9 @@ struct ContentView: View {
                     Text("\u{00A0}Stand sideways. Show head to toe.\u{00A0}")
                         .multilineTextAlignment(.center)
                         .accessibilityLabel("Stand sideways. Show head to toe.")
-                    Button("Start set") { Task { await model.beginSet() } }
+                    Button { Task { await model.beginSet() } } label: {
+                        Text("Start set").foregroundStyle(primaryButtonLabelColor)
+                    }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
                 } else if model.stage == .capturing {
@@ -242,6 +265,14 @@ struct ContentView: View {
     private var result: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                HStack {
+                    Spacer()
+                    Button("Done") { Task { await model.finishSession() } }
+                        .font(.body)
+                        .buttonStyle(.plain)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
                 if let result = model.result {
                     switch result {
                     case .measured(let analysis, let cue):
@@ -285,6 +316,13 @@ struct ContentView: View {
                                 repList(analysis.reps)
                             }
                         }
+                        ShareLink(item: SetShareSummary.text(for: analysis, cue: cue,
+                                                              cueDismissed: model.cueDismissed)) {
+                            Label("Share summary", systemImage: "square.and.arrow.up")
+                                .frame(minHeight: 44, alignment: .leading)
+                        }
+                        .accessibilityIdentifier("result.shareSummary")
+                        .accessibilityHint("Shares the measured summary without video")
                     case .insufficientView(let reason):
                         Text("Couldn’t assess this set").font(.largeTitle.bold())
                         Text(reason)
@@ -306,16 +344,25 @@ struct ContentView: View {
                         .accessibilityIdentifier("validation.stopToResult")
                 }
                 #endif
-                Button(retakeLabel) { Task { await model.startPreview() } }
-                    .buttonStyle(.borderedProminent).controlSize(.large)
-                Button("Done") { Task { await model.finishSession() } }
-                    .buttonStyle(.plain)
-                    .frame(minWidth: 88, minHeight: 48, alignment: .leading)
-                    .contentShape(Rectangle())
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
+        .safeAreaInset(edge: .bottom) {
+            Button {
+                Task { await model.startPreview() }
+            } label: {
+                Text(retakeLabel)
+                    .foregroundStyle(primaryButtonLabelColor)
+                    .frame(maxWidth: .infinity)
+            }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(.regularMaterial)
+        }
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     private var retakeLabel: String {
@@ -386,15 +433,16 @@ struct ContentView: View {
     private func comparisonView(_ comparison: Comparison) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Compared with your previous set").font(.headline)
-            HStack {
-                comparisonMetric("Set 1", range: comparison.firstMedianRange,
-                                 duration: comparison.firstMedianDuration)
-                Spacer()
-                comparisonMetric("Set 2", range: comparison.secondMedianRange,
-                                 duration: comparison.secondMedianDuration)
-            }
             Text(comparisonStatement(comparison.rangeDirection))
-            .font(.subheadline.weight(.semibold))
+                .font(.title3.weight(.semibold))
+            DisclosureGroup("Set measurements") {
+                VStack(alignment: .leading, spacing: 12) {
+                    comparisonMetric("Set 1", range: comparison.firstMedianRange,
+                                     duration: comparison.firstMedianDuration)
+                    comparisonMetric("Set 2", range: comparison.secondMedianRange,
+                                     duration: comparison.secondMedianDuration)
+                }
+            }
             Text("This comparison describes one camera-visible measure, not overall technique or safety.")
                 .font(.footnote)
             DisclosureGroup("How range is measured") {
@@ -472,8 +520,10 @@ struct ContentView: View {
                 Text(issue.message)
                     .fixedSize(horizontal: false, vertical: true)
                 if issue.offersSettings {
-                    Button("Open Settings") {
+                    Button {
                         if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                    } label: {
+                        Text("Open Settings").foregroundStyle(primaryButtonLabelColor)
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -483,8 +533,10 @@ struct ContentView: View {
                     }
                     .buttonStyle(.bordered)
                 } else {
-                    Button("Try again") {
+                    Button {
                         Task { await model.cancel(); await model.startPreview() }
+                    } label: {
+                        Text("Try again").foregroundStyle(primaryButtonLabelColor)
                     }
                     .buttonStyle(.borderedProminent)
                 }

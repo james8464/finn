@@ -2,6 +2,27 @@ import XCTest
 
 final class WorkoutFlowUITests: XCTestCase {
     @MainActor
+    func testPrimaryActionsStayNearBottomOfWorkoutFlow() {
+        let app = XCUIApplication()
+        app.launchArguments.append("-plumb-ui-demo")
+        app.launch()
+
+        let setup = app.buttons["Set up camera"]
+        XCTAssertTrue(setup.waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(setup.frame.midY, app.frame.height * 0.7)
+        setup.tap()
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+
+        let nextSet = app.buttons["Try this next set"]
+        XCTAssertTrue(nextSet.waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(nextSet.frame.midY, app.frame.height * 0.7)
+    }
+
+    @MainActor
     func testSetupAccessibilityAudit() throws {
         let app = XCUIApplication()
         app.launch()
@@ -11,7 +32,7 @@ final class WorkoutFlowUITests: XCTestCase {
     @MainActor
     func testSetupDarkModeAccessibilityAudit() throws {
         let app = XCUIApplication()
-        app.launchArguments.append(contentsOf: ["-UIUserInterfaceStyle", "Dark"])
+        app.launchArguments.append("-plumb-ui-dark")
         app.launch()
         try app.performAccessibilityAudit()
     }
@@ -44,7 +65,7 @@ final class WorkoutFlowUITests: XCTestCase {
     @MainActor
     func testPrivacyDarkModeAccessibilityAudit() throws {
         let app = XCUIApplication()
-        app.launchArguments.append(contentsOf: ["-UIUserInterfaceStyle", "Dark"])
+        app.launchArguments.append("-plumb-ui-dark")
         app.launch()
         app.buttons["Privacy"].tap()
         try app.performAccessibilityAudit()
@@ -82,7 +103,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launchArguments = [
             "-plumb-ui-demo", "-plumb-ui-camera-unavailable",
             "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityM",
-            "-UIUserInterfaceStyle", "Dark",
+            "-plumb-ui-dark",
         ]
         app.launch()
         app.buttons["Set up camera"].tap()
@@ -169,6 +190,8 @@ final class WorkoutFlowUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["validation.stopToResult"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)
+            .matching(identifier: "result.shareSummary").firstMatch.exists)
         capture(app, name: "First result")
         XCTAssertFalse(app.staticTexts["Measured reps"].exists)
         app.buttons["Rep details"].tap()
@@ -185,11 +208,18 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Compared with your previous set"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Camera-measured range was longer in set 2."].exists)
+        let rangeMetric = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Range:")).firstMatch
+        XCTAssertFalse(rangeMetric.exists)
+        app.buttons["Set measurements"].tap()
+        XCTAssertTrue(rangeMetric.exists)
+        XCTAssertGreaterThan(app.staticTexts["Set 2"].frame.minY,
+                             app.staticTexts["Set 1"].frame.maxY)
         XCTAssertTrue(app.buttons["How range is measured"].exists)
         let methodText = app.staticTexts.matching(
             NSPredicate(format: "label BEGINSWITH %@", "Relative range compares hip travel")
         ).firstMatch
         XCTAssertFalse(methodText.exists)
+        app.buttons["Set measurements"].tap()
         capture(app, name: "Comparison")
         app.buttons["How range is measured"].tap()
         XCTAssertTrue(methodText.exists)
@@ -212,7 +242,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launchArguments = [
             "-plumb-ui-demo",
             "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityM",
-            "-UIUserInterfaceStyle", "Dark",
+            "-plumb-ui-dark",
         ]
         app.launch()
         app.buttons["Set up camera"].tap()
@@ -230,7 +260,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launchArguments = [
             "-plumb-ui-demo",
             "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityM",
-            "-UIUserInterfaceStyle", "Dark",
+            "-plumb-ui-dark",
         ]
         app.launch()
         capture(app, name: "Large text dark setup")

@@ -136,7 +136,7 @@ Provisional `SquatRubric.v2` values: required joint confidence ≥0.6 on ≥80% 
 
 - [x] Write failing tests for summary round-trip, second-set comparison, incompatible view/rubric/session, delete, and corrupt-store recovery. Assert two sets persist and serialized records contain no frames or clip URL.
 - [x] Run unit tests and confirm the missing summary model fails compilation before implementation.
-- [x] Implement atomic Application Support storage and a confirmed delete action. Show the first and second set side by side using measured range/tempo and a cautious “changed / no clear change” statement. Keep a damaged file as a backup only after an explicit recovery action. Saved summaries, rewrites, legacy files, and recovered backups now request iOS complete file protection; simulator tests verify the resulting file attribute. Lock/unlock behavior remains a physical-device check.
+- [x] Implement atomic Application Support storage and a confirmed delete action. Show a cautious “changed / no clear change” statement before disclosing measured range/tempo for the first and second sets. Keep a damaged file as a backup only after an explicit recovery action. Saved summaries, rewrites, legacy files, and recovered backups request iOS complete file protection. Simulator tests check the resulting attribute where the simulator exposes it; GitHub's simulator currently does not. Lock/unlock behavior remains a physical-device check.
 - [ ] Rerun the full simulator suite and manually complete two sets on a physical iPhone. The full iOS 27 simulator suite passed 41 tests, including the two-set UI flow, on 11 October; physical iPhone remains unavailable to Xcode.
 
 ## Task 6: Grounded Foundation Models recap

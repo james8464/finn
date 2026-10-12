@@ -21,7 +21,9 @@ struct SessionStoreAndComparisonTests {
         #expect(!serialized.contains("pixelBuffer"))
     }
 
-    @Test func savedHistoryUsesCompleteFileProtection() throws {
+    @Test(.enabled(if: fileProtectionAttributeAvailable(),
+                   "This simulator does not expose file protection metadata"))
+    func savedHistoryUsesCompleteFileProtection() throws {
         let url = temporaryURL()
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
         let store = LocalSessionStore(url: url)
@@ -34,7 +36,9 @@ struct SessionStoreAndComparisonTests {
         #expect(try url.resourceValues(forKeys: [.fileProtectionKey]).fileProtection == .complete)
     }
 
-    @Test func loadingLegacyHistoryUpgradesFileProtection() throws {
+    @Test(.enabled(if: fileProtectionAttributeAvailable(),
+                   "This simulator does not expose file protection metadata"))
+    func loadingLegacyHistoryUpgradesFileProtection() throws {
         let url = temporaryURL()
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -45,7 +49,9 @@ struct SessionStoreAndComparisonTests {
         #expect(protection == .complete)
     }
 
-    @Test func loadingHistoryUpgradesExistingCorruptBackupProtection() throws {
+    @Test(.enabled(if: fileProtectionAttributeAvailable(),
+                   "This simulator does not expose file protection metadata"))
+    func loadingHistoryUpgradesExistingCorruptBackupProtection() throws {
         let url = temporaryURL()
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
         let directory = url.deletingLastPathComponent()
@@ -108,7 +114,9 @@ struct SessionStoreAndComparisonTests {
         #expect(throws: SessionStoreError.corrupted) { try store.load() }
         let backup = try store.recoverCorruptStore()
         #expect(FileManager.default.fileExists(atPath: backup.path))
-        #expect(try backup.resourceValues(forKeys: [.fileProtectionKey]).fileProtection == .complete)
+        if fileProtectionAttributeAvailable() {
+            #expect(try backup.resourceValues(forKeys: [.fileProtectionKey]).fileProtection == .complete)
+        }
         #expect(try store.load().isEmpty)
     }
 
@@ -145,5 +153,20 @@ struct SessionStoreAndComparisonTests {
                           bodySide: side,
                           analysis: SetAnalysis(reps: reps, confidence: 0.95, rubricVersion: rubric),
                           cue: nil, cueResponse: .unanswered, cameraView: view)
+    }
+}
+
+private func fileProtectionAttributeAvailable() -> Bool {
+    let directory = FileManager.default.temporaryDirectory
+        .appending(path: "PlumbProtectionProbe-\(UUID().uuidString)", directoryHint: .isDirectory)
+    let url = directory.appending(path: "probe")
+    defer { try? FileManager.default.removeItem(at: directory) }
+    do {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try Data().write(to: url)
+        try (url as NSURL).setResourceValue(URLFileProtection.complete, forKey: .fileProtectionKey)
+        return try url.resourceValues(forKeys: [.fileProtectionKey]).fileProtection == .complete
+    } catch {
+        return false
     }
 }

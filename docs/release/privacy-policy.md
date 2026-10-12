@@ -13,7 +13,7 @@ Plumb is an iPhone workout companion for reviewing a bodyweight squat from a sid
 
 With your permission, Plumb uses the iPhone camera during a set to estimate body position and count camera-visible repetitions. Camera frames are processed on your device. Plumb does not record a movie, save camera frames, or upload them to a Plumb server. The temporary pose trace is held in memory for the current result and cleared when you finish the session or start a new capture.
 
-Plumb saves derived set summaries on your iPhone: session and set identifiers, date, squat rubric version, camera side, rep timing and relative range, analysis confidence, a selected observation if any, and your response to that observation. These summaries are stored in the app's local Application Support area. They are not automatically sent to us or shared with other users.
+Plumb saves derived set summaries on your iPhone: session and set identifiers, date, squat rubric version, camera side, rep timing and relative range, analysis confidence, a selected observation if any, and your response to that observation. These summaries are stored in the app's local Application Support area. They are not automatically sent to us or shared with other users. If you tap **Share summary** after a measured set, the iOS Share Sheet lets you choose where to send a text summary of the rep count and any observation you have not marked irrelevant. It contains no video or camera frames.
 
 iOS may include local Application Support data in your device backup, including iCloud Backup if you enable it. Plumb does not operate or access that backup. See Apple's [file-system guidance](https://developer.apple.com/documentation/foundation/using-the-file-system-effectively).
 
@@ -25,7 +25,7 @@ When available on your device, the app can ask Apple's on-device Foundation Mode
 
 ## Accounts, analytics, and sharing
 
-The current release candidate has no account, advertising SDK, third-party analytics, HealthKit integration, cloud sync, or in-app purchase flow. It does not ask for microphone access. If these practices change in a later version, this policy and the App Store privacy answers must be updated before release.
+The current release candidate has no account, advertising SDK, third-party analytics, HealthKit integration, cloud sync, or in-app purchase flow. It does not ask for microphone access. Plumb does not record which Share Sheet destination you choose or upload the summary to a Plumb server. If these practices change in a later version, this policy and the App Store privacy answers must be updated before release.
 
 ## Your choices and contact
 
