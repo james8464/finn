@@ -16,6 +16,24 @@ nonisolated struct Comparison: Codable, Equatable {
     let rangeDirection: RangeDirection
     let cueRepNumbers: [Int]
     let cueKind: CueKind?
+    /// Both sets share this exercise; ranges use its unit.
+    let exercise: ExerciseKind
+
+    init(firstSetID: UUID, secondSetID: UUID, firstMedianRange: Double, secondMedianRange: Double,
+         firstMedianDuration: TimeInterval, secondMedianDuration: TimeInterval,
+         rangeDirection: RangeDirection, cueRepNumbers: [Int], cueKind: CueKind?,
+         exercise: ExerciseKind = .bodyweightSquat) {
+        self.firstSetID = firstSetID
+        self.secondSetID = secondSetID
+        self.firstMedianRange = firstMedianRange
+        self.secondMedianRange = secondMedianRange
+        self.firstMedianDuration = firstMedianDuration
+        self.secondMedianDuration = secondMedianDuration
+        self.rangeDirection = rangeDirection
+        self.cueRepNumbers = cueRepNumbers
+        self.cueKind = cueKind
+        self.exercise = exercise
+    }
 }
 
 nonisolated enum SetComparison {
@@ -26,13 +44,13 @@ nonisolated enum SetComparison {
               first.cameraView == second.cameraView,
               first.bodySide == second.bodySide,
               first.analysis.rubricVersion == second.analysis.rubricVersion,
-              first.analysis.confidence >= SquatRubric.minimumJointConfidence,
-              second.analysis.confidence >= SquatRubric.minimumJointConfidence,
+              first.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
+              second.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
               first.analysis.reps.count >= 4,
               second.analysis.reps.count >= 4 else { return nil }
 
-        let firstRange = median(first.analysis.reps.map(\.normalizedHipTravel))
-        let secondRange = median(second.analysis.reps.map(\.normalizedHipTravel))
+        let firstRange = median(first.analysis.reps.map(\.relativeRange))
+        let secondRange = median(second.analysis.reps.map(\.relativeRange))
         guard firstRange > 0 else { return nil }
         let ratio = secondRange / firstRange
         let direction: RangeDirection
@@ -48,7 +66,8 @@ nonisolated enum SetComparison {
             secondMedianDuration: median(second.analysis.reps.map(\.duration)),
             rangeDirection: direction,
             cueRepNumbers: second.cue?.repNumbers ?? [],
-            cueKind: second.cue?.kind
+            cueKind: second.cue?.kind,
+            exercise: second.exercise
         )
     }
 

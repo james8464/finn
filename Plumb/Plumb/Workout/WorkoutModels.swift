@@ -7,6 +7,12 @@ nonisolated enum BodyJoint: String, Codable, Hashable {
     case rightHip
     case rightKnee
     case rightAnkle
+    case leftShoulder
+    case leftElbow
+    case leftWrist
+    case rightShoulder
+    case rightElbow
+    case rightWrist
 }
 
 nonisolated struct JointPoint: Codable, Equatable {
@@ -19,16 +25,62 @@ nonisolated struct PoseFrame: Codable, Equatable {
     /// Seconds since the current capture began.
     let time: TimeInterval
     let subjectCount: Int
+    /// Vision coordinates normalized to the image: x by its width, y by its height, origin at top left.
     let joints: [BodyJoint: JointPoint]
+    /// Image height divided by width. Joint angles scale y by this so both axes use the same unit.
+    let aspectRatio: Double
+    /// Vision's 18-point body keypoints (shape [1, 3, 18], flattened) for the optional exercise classifier.
+    let keypoints: [Float]?
+    /// Degrees between the body's left-right axis and the camera's line of sight, from Vision 3D pose.
+    /// 0 is a true side view and 90 faces the camera. Nil when no 3D estimate exists for this frame.
+    let profileDeviationDegrees: Double?
+
+    init(time: TimeInterval, subjectCount: Int, joints: [BodyJoint: JointPoint],
+         aspectRatio: Double = 1, keypoints: [Float]? = nil, profileDeviationDegrees: Double? = nil) {
+        self.time = time
+        self.subjectCount = subjectCount
+        self.joints = joints
+        self.aspectRatio = aspectRatio
+        self.keypoints = keypoints
+        self.profileDeviationDegrees = profileDeviationDegrees
+    }
+
+    func retimed(to time: TimeInterval) -> PoseFrame {
+        PoseFrame(time: time, subjectCount: subjectCount, joints: joints, aspectRatio: aspectRatio,
+                  keypoints: keypoints, profileDeviationDegrees: profileDeviationDegrees)
+    }
 }
 
 nonisolated struct RepMetric: Codable, Equatable {
     let number: Int
     let startTime: TimeInterval
     let endTime: TimeInterval
-    let normalizedHipTravel: Double
+    /// Range of this rep in its exercise's own unit: the squat stores hip travel divided by
+    /// standing leg length; angle-based exercises store degrees of bend from the starting position.
+    let relativeRange: Double
 
     var duration: TimeInterval { endTime - startTime }
+    /// The squat's original name for `relativeRange`, kept for existing callers and saved history.
+    var normalizedHipTravel: Double { relativeRange }
+
+    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, relativeRange: Double) {
+        self.number = number
+        self.startTime = startTime
+        self.endTime = endTime
+        self.relativeRange = relativeRange
+    }
+
+    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, normalizedHipTravel: Double) {
+        self.init(number: number, startTime: startTime, endTime: endTime,
+                  relativeRange: normalizedHipTravel)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case number
+        case startTime
+        case endTime
+        case relativeRange = "normalizedHipTravel"
+    }
 }
 
 nonisolated struct SetAnalysis: Codable, Equatable {
@@ -71,6 +123,8 @@ nonisolated enum FramingStatus: Equatable {
     case checking
     case adjustPosition
     case landmarksVisible
+    /// Vision 3D pose sees the person from an angle the exercise does not support.
+    case turnToExpectedView
 }
 
 nonisolated enum CueKind: String, Codable {
@@ -86,8 +140,11 @@ nonisolated struct Cue: Codable, Equatable {
     let nextAction: String
 }
 
-nonisolated enum ExerciseKind: String, Codable, Equatable {
+nonisolated enum ExerciseKind: String, Codable, Equatable, CaseIterable {
     case bodyweightSquat
+    case pushUp
+    case staticLunge
+    case stiffLegDeadlift
 }
 
 nonisolated enum CameraView: String, Codable, Equatable {

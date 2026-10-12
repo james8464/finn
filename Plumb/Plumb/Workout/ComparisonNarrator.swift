@@ -65,15 +65,39 @@ final class ComparisonNarrator {
                      source: .appleIntelligence, facts: comparison)
     }
 
+    /// Reviewed wording used whenever generation is unavailable, slow, or invalid.
     private func template(for comparison: Comparison) -> Recap {
+        let copy = comparison.exercise.definition.copy
         let text: String
         switch comparison.rangeDirection {
-        case .longer: text = "Camera-measured range was longer in your second set."
-        case .shorter: text = "Camera-measured range was shorter in your second set."
-        case .noClearChange: text = "There was no clear camera-measured range change between sets."
+        case .longer: text = "Camera-measured \(copy.rangeNoun) was \(copy.moreRange) in your second set."
+        case .shorter: text = "Camera-measured \(copy.rangeNoun) was \(copy.lessRange) in your second set."
+        case .noClearChange: text = "There was no clear camera-measured \(copy.rangeNoun) change between sets."
         }
         return Recap(text: text, evidenceRepNumbers: comparison.cueRepNumbers,
                      source: .template, facts: comparison)
+    }
+
+    /// Accepts only sentences from a closed set built from the exercise's own vocabulary, so the
+    /// model can choose wording but cannot add a cause, a number, advice, or another exercise.
+    static func acceptedSentences(for comparison: Comparison) -> Set<String> {
+        let copy = comparison.exercise.definition.copy
+        let noun = copy.rangeNoun
+        switch comparison.rangeDirection {
+        case .longer, .shorter:
+            let direction = comparison.rangeDirection == .longer ? copy.moreRange : copy.lessRange
+            let subjects = ["Your camera-measured \(noun)", "Your measured \(noun)", "Your \(noun)",
+                            "The camera-measured \(noun)", "Your \(copy.shareNoun) \(noun)"]
+            let endings = ["the second set.", "your second set."]
+            return Set(subjects.flatMap { subject in
+                endings.map { ending in "\(subject) was \(direction) in \(ending)" }
+            })
+        case .noClearChange:
+            return ["There was no clear camera-measured \(noun) change between sets.",
+                    "There was no clear \(noun) change between sets.",
+                    "There was no clear camera-measured \(noun) change between your sets.",
+                    "There was no clear \(noun) change between your sets."]
+        }
     }
 
     private func isValid(_ generated: GeneratedRecap, for comparison: Comparison) -> Bool {
@@ -81,21 +105,7 @@ final class ComparisonNarrator {
         guard generated.evidenceRepNumbers.sorted() == comparison.cueRepNumbers.sorted() else {
             return false
         }
-        switch comparison.rangeDirection {
-        case .longer, .shorter:
-            let direction = comparison.rangeDirection == .longer ? "longer" : "shorter"
-            let subjects = ["Your camera-measured range", "Your measured range", "Your range",
-                            "The camera-measured range"]
-            let endings = ["the second set.", "your second set."]
-            return subjects.contains { subject in
-                endings.contains { ending in text == "\(subject) was \(direction) in \(ending)" }
-            }
-        case .noClearChange:
-            return ["There was no clear camera-measured range change between sets.",
-                    "There was no clear range change between sets.",
-                    "There was no clear camera-measured range change between your sets.",
-                    "There was no clear range change between your sets."].contains(text)
-        }
+        return Self.acceptedSentences(for: comparison).contains(text)
     }
 }
 
@@ -113,17 +123,31 @@ private final class AppleRecapGenerator: RecapGenerating {
     }
 
     func generate(for comparison: Comparison) async throws -> GeneratedRecap {
+        let definition = comparison.exercise.definition
+        let copy = definition.copy
         let instructions = """
-            Choose one plain sentence about the supplied camera-measured comparison. For longer or
-            shorter, use "Your camera-measured range was longer/shorter in the second set." with
+            Choose one plain sentence about the supplied camera-measured comparison. For \(copy.moreRange) or
+            \(copy.lessRange), use "Your camera-measured \(copy.rangeNoun) was \(copy.moreRange)/\(copy.lessRange) in the second set." with
             the supplied direction. For no clear change, use "There was no clear camera-measured
-            range change between sets." Do not add causes, measurements, body-part diagnoses,
+            \(copy.rangeNoun) change between sets." Do not add causes, measurements, body-part diagnoses,
             safety claims, advice, or numbers. Return the evidence rep numbers exactly as supplied.
             """
+        let direction: String
+        switch comparison.rangeDirection {
+        case .longer: direction = copy.moreRange
+        case .shorter: direction = copy.lessRange
+        case .noClearChange: direction = comparison.rangeDirection.rawValue
+        }
+        let measure: String
+        switch definition.rangeUnit {
+        case .bodyLengthFraction: measure = "relative range"
+        case .degrees: measure = "\(copy.rangeNoun) in degrees from the starting position"
+        }
         let prompt = """
-            Direction: \(comparison.rangeDirection.rawValue).
-            First relative range: \(comparison.firstMedianRange).
-            Second relative range: \(comparison.secondMedianRange).
+            Exercise: \(copy.name), side view.
+            Direction: \(direction).
+            First \(measure): \(comparison.firstMedianRange).
+            Second \(measure): \(comparison.secondMedianRange).
             First median rep duration: \(comparison.firstMedianDuration) seconds.
             Second median rep duration: \(comparison.secondMedianDuration) seconds.
             Cue category: \(comparison.cueKind?.rawValue ?? "none").

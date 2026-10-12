@@ -2,34 +2,53 @@ import Foundation
 
 nonisolated enum SquatRubric {
     static let version = "squat-side-v2"
-    static let minimumJointConfidence = 0.6
+    static let minimumJointConfidence = EvidenceRubric.minimumJointConfidence
     static let descentThreshold = 0.10
     static let completionThreshold = 0.03
     static let ascentFromPeakThreshold = 0.04
     static let minimumHipTravel = 0.15
     static let minimumRepDuration = 0.8
     static let maximumRepDuration = 8.0
-    static let maximumTrackingGap = 0.75
-    static let maximumBystanderDuration = 0.35
+    static let maximumTrackingGap = EvidenceRubric.maximumTrackingGap
+    static let maximumBystanderDuration = EvidenceRubric.maximumBystanderDuration
 }
 
+/// The side-view squat, now one entry in `ExerciseDefinition`. Kept for existing callers.
 nonisolated enum SquatAnalyzer {
+    static func analyze(_ frames: [PoseFrame]) -> AnalysisOutcome {
+        ExerciseAnalyzer.analyze(frames, as: .squat)
+    }
+}
+
+/// Counts reps for any `ExerciseDefinition` with one state machine over a single movement signal:
+/// top phase → leaving the top → bottom reached → back at the top. It abstains instead of guessing
+/// when the evidence gate rejects the view or the signal joints are not tracked.
+nonisolated enum ExerciseAnalyzer {
+    /// Whether 3D camera-angle estimates in the frames may reject the set.
+    enum ViewCheckPolicy: Equatable {
+        case enforce
+        case ignore
+    }
+
     private enum Phase {
-        case standing
+        case top
         case descending(start: TimeInterval, peak: Double)
         case ascending(start: TimeInterval, peak: Double)
     }
 
     private struct Sample {
         let time: TimeInterval
-        let hipY: Double
-        let ankleY: Double
+        /// Hip height for vertical travel, joint angle in degrees for a bend.
+        let value: Double
+        /// Reference height for vertical travel, shortest limb segment for a bend.
+        let scale: Double
         let confidence: Double
     }
 
-    static func analyze(_ frames: [PoseFrame]) -> AnalysisOutcome {
+    static func analyze(_ frames: [PoseFrame], as definition: ExerciseDefinition,
+                        viewCheck: ViewCheckPolicy = .enforce) -> AnalysisOutcome {
         let side: BodySide
-        switch EvidenceGate.assess(frames) {
+        switch EvidenceGate.assess(frames, requirement: definition.evidence) {
         case .usable(let acceptedSide): side = acceptedSide
         case .reject(.multiplePeople):
             return .insufficientView("Another person was in view. Keep only yourself in frame and try again.")
@@ -38,82 +57,122 @@ nonisolated enum SquatAnalyzer {
         case .reject:
             return .insufficientView("Move the phone so your full body stays visible.")
         }
+        // Without 3D estimates (simulator, older devices, switched off) this check does not run.
+        if viewCheck == .enforce,
+           case .mismatch = ViewCheck.assess(frames, expected: definition.expectedView) {
+            return .insufficientView(definition.expectedView.wrongViewMessage)
+        }
 
-        let joints: (BodyJoint, BodyJoint) = side == .left
-            ? (.leftHip, .leftAnkle) : (.rightHip, .rightAnkle)
-        let samples = frames.compactMap { sample(from: $0, side: joints) }
+        let samples = frames.compactMap { sample(from: $0, signal: definition.signal, side: side) }
         guard samples.count >= 5 else {
-            return .insufficientView("Keep your hip and ankle visible for the whole set.")
+            return .insufficientView(definition.copy.keepJointsVisible)
         }
 
         let opening = Array(samples.prefix(5))
-        let standingHipY = median(opening.map(\.hipY))
-        let ankleY = median(opening.map(\.ankleY))
-        let standingLegLength = ankleY - standingHipY
-        guard standingLegLength > 0.1 else {
-            return .insufficientView("Move the phone back so your full body is visible.")
+        let baseline = median(opening.map(\.value))
+        let travel: (Double) -> Double
+        switch definition.signal {
+        case .verticalTravel:
+            let standingLength = median(opening.map(\.scale)) - baseline
+            guard standingLength > definition.minimumBodyScale else {
+                return .insufficientView(definition.copy.bodyTooSmall)
+            }
+            travel = { max(0, ($0 - baseline) / standingLength) }
+        case .jointBend:
+            guard median(opening.map(\.scale)) > definition.minimumBodyScale else {
+                return .insufficientView(definition.copy.bodyTooSmall)
+            }
+            travel = { max(0, baseline - $0) }
         }
 
-        let hipPositions = samples.indices.map { index -> Double in
+        let smoothed = samples.indices.map { index -> Double in
             let lower = max(0, index - 1)
             let upper = min(samples.count - 1, index + 1)
             let window = samples[lower...upper]
-            return window.map(\.hipY).reduce(0, +) / Double(window.count)
+            return window.map(\.value).reduce(0, +) / Double(window.count)
         }
 
-        var phase: Phase = .standing
-        var lastStandingTime = samples[0].time
+        let phases = definition.phases
+        var phase: Phase = .top
+        var lastTopTime = samples[0].time
         var reps: [RepMetric] = []
         for (index, sample) in samples.enumerated() {
-            let travel = max(0, (hipPositions[index] - standingHipY) / standingLegLength)
+            let distance = travel(smoothed[index])
             switch phase {
-            case .standing:
-                if travel <= SquatRubric.completionThreshold {
-                    lastStandingTime = sample.time
+            case .top:
+                if distance <= phases.backAtTop {
+                    lastTopTime = sample.time
                 }
-                if travel >= SquatRubric.descentThreshold {
-                    phase = .descending(start: lastStandingTime, peak: travel)
+                if distance >= phases.leaveTop {
+                    phase = .descending(start: lastTopTime, peak: distance)
                 }
             case .descending(let start, let peak):
-                let updatedPeak = max(peak, travel)
-                if updatedPeak >= SquatRubric.minimumHipTravel &&
-                    updatedPeak - travel >= SquatRubric.ascentFromPeakThreshold {
+                let updatedPeak = max(peak, distance)
+                if updatedPeak >= phases.reachBottom &&
+                    updatedPeak - distance >= phases.returnFromBottom {
                     phase = .ascending(start: start, peak: updatedPeak)
                 } else {
                     phase = .descending(start: start, peak: updatedPeak)
                 }
             case .ascending(let start, let peak):
-                if travel <= SquatRubric.completionThreshold {
+                if distance <= phases.backAtTop {
                     let duration = sample.time - start
-                    if (SquatRubric.minimumRepDuration...SquatRubric.maximumRepDuration).contains(duration) {
+                    if (phases.minimumDuration...phases.maximumDuration).contains(duration) {
                         reps.append(RepMetric(
                             number: reps.count + 1,
                             startTime: start,
                             endTime: sample.time,
-                            normalizedHipTravel: peak
+                            relativeRange: peak
                         ))
                     }
-                    phase = .standing
+                    phase = .top
                 }
             }
         }
 
         let confidence = samples.map(\.confidence).reduce(0, +) / Double(samples.count)
-        return .analyzed(SetAnalysis(reps: reps, confidence: confidence, rubricVersion: SquatRubric.version))
+        return .analyzed(SetAnalysis(reps: reps, confidence: confidence,
+                                     rubricVersion: definition.rubricVersion))
     }
 
-    private static func validPair(in frame: PoseFrame, hip: BodyJoint, ankle: BodyJoint) -> Bool {
-        guard let hipPoint = frame.joints[hip], let anklePoint = frame.joints[ankle] else { return false }
-        return hipPoint.confidence >= SquatRubric.minimumJointConfidence &&
-            anklePoint.confidence >= SquatRubric.minimumJointConfidence
+    /// Angle at `vertex` in degrees, with y scaled by the image aspect ratio so it matches x.
+    static func angle(from a: JointPoint, vertex b: JointPoint, to c: JointPoint,
+                      aspectRatio: Double) -> Double? {
+        let first = (x: a.x - b.x, y: (a.y - b.y) * aspectRatio)
+        let second = (x: c.x - b.x, y: (c.y - b.y) * aspectRatio)
+        let firstLength = hypot(first.x, first.y)
+        let secondLength = hypot(second.x, second.y)
+        guard firstLength > 0, secondLength > 0 else { return nil }
+        let cosine = (first.x * second.x + first.y * second.y) / (firstLength * secondLength)
+        return acos(min(1, max(-1, cosine))) * 180 / .pi
     }
 
-    private static func sample(from frame: PoseFrame, side: (BodyJoint, BodyJoint)) -> Sample? {
-        guard validPair(in: frame, hip: side.0, ankle: side.1),
-              let hip = frame.joints[side.0],
-              let ankle = frame.joints[side.1] else { return nil }
-        return Sample(time: frame.time, hipY: hip.y, ankleY: ankle.y,
-                      confidence: min(hip.confidence, ankle.confidence))
+    private static func confidentPoint(_ role: JointRole, in frame: PoseFrame,
+                                       side: BodySide) -> JointPoint? {
+        guard let point = frame.joints[role.joint(on: side)],
+              point.confidence >= EvidenceRubric.minimumJointConfidence else { return nil }
+        return point
+    }
+
+    private static func sample(from frame: PoseFrame, signal: MovementSignal,
+                               side: BodySide) -> Sample? {
+        switch signal {
+        case .verticalTravel(let jointRole, let referenceRole):
+            guard let joint = confidentPoint(jointRole, in: frame, side: side),
+                  let reference = confidentPoint(referenceRole, in: frame, side: side) else { return nil }
+            return Sample(time: frame.time, value: joint.y, scale: reference.y,
+                          confidence: min(joint.confidence, reference.confidence))
+        case .jointBend(let fromRole, let vertexRole, let toRole):
+            guard let from = confidentPoint(fromRole, in: frame, side: side),
+                  let vertex = confidentPoint(vertexRole, in: frame, side: side),
+                  let to = confidentPoint(toRole, in: frame, side: side),
+                  let angle = angle(from: from, vertex: vertex, to: to,
+                                    aspectRatio: frame.aspectRatio) else { return nil }
+            let firstSegment = hypot(from.x - vertex.x, (from.y - vertex.y) * frame.aspectRatio)
+            let secondSegment = hypot(to.x - vertex.x, (to.y - vertex.y) * frame.aspectRatio)
+            return Sample(time: frame.time, value: angle, scale: min(firstSegment, secondSegment),
+                          confidence: min(from.confidence, vertex.confidence, to.confidence))
+        }
     }
 
     private static func median(_ values: [Double]) -> Double {

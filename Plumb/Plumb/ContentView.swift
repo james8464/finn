@@ -45,9 +45,13 @@ struct ContentView: View {
     #endif
 
     @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore(),
-                    narrator: ComparisonNarrator? = nil) {
+                    narrator: ComparisonNarrator? = nil,
+                    exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
+                    preferences: PlumbPreferences = .standard) {
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
-                                                         narrator: narrator))
+                                                         narrator: narrator,
+                                                         exerciseClassifier: exerciseClassifier,
+                                                         preferences: preferences))
     }
 
     var body: some View {
@@ -118,22 +122,30 @@ struct ContentView: View {
                         .accessibilityHidden(true)
                         .padding(.bottom, 32)
                 }
-                Text("Squat check")
+                Text(selectedCopy.setupTitle)
                     .font(.largeTitle.bold())
                     .padding(.bottom, 8)
                 Text("One clear observation after each set.")
                     .font(.body)
                     .foregroundStyle(PlumbStyle.supportingText)
+                    .padding(.bottom, 20)
+                exercisePicker
+                if model.usesExerciseRecognition {
+                    Text("Plumb will try to recognize the exercise after the set. If it isn’t confident, it uses your choice.")
+                        .font(.footnote)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                        .padding(.top, 4)
+                }
                 Divider()
                     .padding(.vertical, 30)
                 Text("Before you start")
                     .font(.headline)
                     .padding(.bottom, 20)
                 VStack(spacing: 0) {
-                    setupStep("Place your iPhone", detail: "At hip height, a few steps away.",
+                    setupStep(selectedCopy.placementTitle, detail: selectedCopy.placementDetail,
                               symbol: "iphone.gen3")
                     Divider().padding(.leading, 44)
-                    setupStep("Stand sideways", detail: "Keep your whole body in view.",
+                    setupStep(selectedCopy.stanceTitle, detail: selectedCopy.stanceDetail,
                               symbol: "figure.stand")
                 }
                 Label("Analyzed on this iPhone. No video saved.", systemImage: "lock.shield")
@@ -174,11 +186,56 @@ struct ContentView: View {
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink { optionsPage } label: {
+                    Label("Options", systemImage: "slider.horizontal.3")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink { privacyPage } label: {
                     Label("Privacy", systemImage: "hand.raised")
                 }
             }
         }
+    }
+
+    private var selectedCopy: ExerciseCopy { model.selectedExercise.definition.copy }
+    private var captureCopy: ExerciseCopy { model.captureExercise.definition.copy }
+
+    private var exercisePicker: some View {
+        Menu {
+            Picker("Exercise", selection: Binding(
+                get: { model.selectedExercise },
+                set: { model.selectedExercise = $0 }
+            )) {
+                ForEach(ExerciseKind.allCases, id: \.self) { kind in
+                    Text(kind.definition.copy.name).tag(kind)
+                }
+            }
+        } label: {
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                : AnyLayout(HStackLayout(spacing: 12))
+            layout {
+                Text("Exercise")
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
+                HStack(spacing: 8) {
+                    Text(selectedCopy.name)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .accessibilityHidden(true)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .accessibilityIdentifier("setup.exercise")
+        .accessibilityLabel("Exercise: \(selectedCopy.name)")
+        .accessibilityHint("Choose the exercise to check")
     }
 
     private func setupStep(_ title: String, detail: String, symbol: String) -> some View {
@@ -204,7 +261,7 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Camera").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Video is processed on this iPhone and never saved.")
-                    Text("Plumb uses the camera to measure a bodyweight squat from the side. Camera frames and pose points stay on this iPhone.")
+                    Text("Plumb uses the camera to measure a supported exercise from the side. Camera frames and pose points stay on this iPhone.")
                     Text("One camera view cannot assess your whole technique or prevent injury.")
                 }
                 Divider()
@@ -220,6 +277,13 @@ struct ContentView: View {
                     Text("Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone.")
                 }
                 Divider()
+                if model.hasExerciseClassifier {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Optional exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
+                        Text("When you turn it on in Options, an on-device model reads pose points after a set to recognize the exercise. Pose points and video stay on this iPhone.")
+                    }
+                    Divider()
+                }
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Optional explanation").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.")
@@ -236,6 +300,63 @@ struct ContentView: View {
         .scrollIndicators(.hidden)
         .navigationTitle("Privacy")
         .navigationBarTitleDisplayMode(.large)
+    }
+
+    private var optionsPage: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
+                    if model.hasExerciseClassifier {
+                        Toggle("Recognize the exercise automatically", isOn: Binding(
+                            get: { model.recognizesExercise },
+                            set: { model.recognizesExercise = $0 }
+                        ))
+                        .frame(minHeight: 44)
+                        .accessibilityIdentifier("options.recognizeExercise")
+                        Text("After each set, an on-device model trained by the Plumb team guesses the exercise from your pose points. If it isn’t confident, Plumb uses the exercise you chose. Its accuracy is still being tested.")
+                    } else {
+                        Text("This build has no trained recognition model, so Plumb uses the exercise you choose on the first screen.")
+                    }
+                }
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Camera angle").font(.headline).accessibilityAddTraits(.isHeader)
+                    Toggle("Check the camera angle in 3D", isOn: Binding(
+                        get: { model.checksCameraAngle },
+                        set: { model.checksCameraAngle = $0 }
+                    ))
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.checkCameraAngle")
+                    Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one, and asks you to turn when the exercise needs a side view. The angle limit has not been tested on real sets yet. If Plumb asks you to turn while your side already faces the camera, switch this off.")
+                }
+            }
+            .font(.body)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
+        }
+        .scrollIndicators(.hidden)
+        .navigationTitle("Options")
+        .navigationBarTitleDisplayMode(.large)
+    }
+
+    @ViewBuilder private var recognitionNote: some View {
+        let chosen = model.captureExercise.definition.copy.name
+        switch model.recognition {
+        case .notAttempted:
+            EmptyView()
+        case .recognized(let kind, _):
+            let name = kind.definition.copy.name
+            Text(kind == model.captureExercise
+                 ? "Recognized as \(name) on this iPhone."
+                 : "Recognized as \(name) on this iPhone, so Plumb used it instead of \(chosen).")
+                .font(.subheadline)
+                .accessibilityIdentifier("result.recognition")
+        case .uncertain:
+            Text("Plumb couldn’t recognize the exercise confidently, so it used your choice: \(chosen).")
+                .font(.subheadline)
+                .accessibilityIdentifier("result.recognition")
+        }
     }
 
     private var capture: some View {
@@ -260,11 +381,22 @@ struct ContentView: View {
                 }
                 #endif
                 status
+                #if DEBUG
+                if isValidationMode && model.stage == .framing {
+                    Text(model.previewDeviations.isEmpty ? "3D view: no estimate"
+                         : "3D view: \(Int(model.previewDeviations.sorted()[model.previewDeviations.count / 2].rounded()))° from profile")
+                        .font(.footnote.monospacedDigit())
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.black.opacity(0.68), in: Capsule())
+                        .accessibilityIdentifier("validation.liveView")
+                }
+                #endif
                 Spacer()
                 if model.stage == .framing {
-                    Text("\u{00A0}Stand sideways. Show head to toe.\u{00A0}")
+                    Text("\u{00A0}\(captureCopy.framingPrompt)\u{00A0}")
                         .multilineTextAlignment(.center)
-                        .accessibilityLabel("Stand sideways. Show head to toe.")
+                        .accessibilityLabel(captureCopy.framingPrompt)
                     Button { Task { await model.beginSet() } } label: {
                         Text("Start set").foregroundStyle(.black)
                     }
@@ -312,13 +444,16 @@ struct ContentView: View {
                 switch model.framingStatus {
                 case .checking:
                     Image(systemName: "viewfinder")
-                    Text("Checking leg visibility")
+                    Text(captureCopy.checkingVisibility)
                 case .adjustPosition:
                     Image(systemName: "viewfinder")
-                    Text("Show hip, knee and ankle")
+                    Text(captureCopy.showJoints)
                 case .landmarksVisible:
                     Image(systemName: "checkmark.circle.fill")
-                    Text("Hip, knee and ankle visible")
+                    Text(captureCopy.jointsVisible)
+                case .turnToExpectedView:
+                    Image(systemName: "arrow.turn.up.right")
+                    Text(model.captureExercise.definition.expectedView.turnPrompt)
                 }
             } else {
                 Image(systemName: "viewfinder")
@@ -355,6 +490,7 @@ struct ContentView: View {
                             .font(.title3)
                             .monospacedDigit()
                             .foregroundStyle(PlumbStyle.supportingText)
+                        recognitionNote
                         if model.historyIssue != nil {
                             Text("Couldn’t confirm this set was saved.")
                                 .font(.subheadline)
@@ -423,23 +559,19 @@ struct ContentView: View {
                         Divider().padding(.vertical, 8)
                         if let comparison = model.comparison {
                             comparisonView(comparison)
-                            DisclosureGroup("Rep details") {
-                                repList(analysis.reps)
-                            }
-                        } else if (model.currentSession?.sets.count ?? 0) >= 2 {
-                            Text("These sets used different camera views, so Plumb can’t compare them reliably.")
+                        } else if let gap = model.comparisonGap {
+                            Text(gap == .differentExercise
+                                 ? "Plumb compares sets of the same exercise. Do another set of this exercise to compare."
+                                 : "These sets used different camera views, so Plumb can’t compare them reliably.")
                                 .foregroundStyle(PlumbStyle.supportingText)
-                            DisclosureGroup("Rep details") {
-                                repList(analysis.reps)
-                            }
-                        } else {
-                            DisclosureGroup("Rep details") {
-                                repList(analysis.reps)
-                            }
+                        }
+                        DisclosureGroup("Rep details") {
+                            repList(analysis.reps, exercise: model.resultExercise)
                         }
                         ShareLink(item: SetShareSummary.text(for: analysis, cue: cue,
                                                               cueDismissed: model.cueDismissed,
-                                                              comparison: model.comparison)) {
+                                                              comparison: model.comparison,
+                                                              exercise: model.resultExercise)) {
                             Label("Share summary", systemImage: "square.and.arrow.up")
                                 .frame(minHeight: 44, alignment: .leading)
                         }
@@ -448,8 +580,9 @@ struct ContentView: View {
                         .accessibilityHint("Shares the measured summary without video")
                     case .insufficientView(let reason):
                         Text("Couldn’t assess this set").font(.largeTitle.bold())
+                        recognitionNote
                         Text(reason)
-                        Text("Move the phone farther back and keep your hip, knee, and ankle visible.")
+                        Text(model.resultExercise.definition.copy.retakeHint)
                             .foregroundStyle(PlumbStyle.supportingText)
                     case .failed(let reason):
                         Text("Couldn’t review this set").font(.largeTitle.bold())
@@ -465,6 +598,12 @@ struct ContentView: View {
                         .font(.footnote.monospacedDigit())
                         .foregroundStyle(PlumbStyle.supportingText)
                         .accessibilityIdentifier("validation.stopToResult")
+                }
+                if isValidationMode {
+                    Text("Validation 3D view · \(viewVerdictReadout(model.lastViewVerdict))")
+                        .font(.footnote.monospacedDigit())
+                        .foregroundStyle(PlumbStyle.supportingText)
+                        .accessibilityIdentifier("validation.viewCheck")
                 }
                 #endif
             }
@@ -489,6 +628,19 @@ struct ContentView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onDisappear { observationSpeaker.stop() }
     }
+
+    #if DEBUG
+    private func viewVerdictReadout(_ verdict: ViewCheck.Verdict) -> String {
+        switch verdict {
+        case .unavailable:
+            return "no 3D estimate"
+        case .matches(let median, let count):
+            return "median \(Int(median.rounded()))° from profile, \(count) estimates, accepted"
+        case .mismatch(let median, let count):
+            return "median \(Int(median.rounded()))° from profile, \(count) estimates, refused"
+        }
+    }
+    #endif
 
     private var retakeLabel: String {
         if case .insufficientView = model.result { return "Retake set" }
@@ -587,6 +739,8 @@ struct ContentView: View {
                     let set = session.sets[index]
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Set \(index + 1)").font(.title2.weight(.semibold))
+                        Text(set.exercise.definition.copy.name)
+                            .font(.subheadline.weight(.semibold))
                         Text("\(set.analysis.reps.count) measured reps")
                             .monospacedDigit()
                             .foregroundStyle(PlumbStyle.supportingText)
@@ -602,7 +756,7 @@ struct ContentView: View {
                             Text("No clear pattern to call out in this set.")
                         }
                         DisclosureGroup("Rep details") {
-                            repList(set.analysis.reps)
+                            repList(set.analysis.reps, exercise: set.exercise)
                         }
                         .padding(.top, 8)
                     }
@@ -624,7 +778,8 @@ struct ContentView: View {
     private func comparisonView(_ comparison: Comparison) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Compared with your previous set").font(.headline)
-            Text(model.comparisonRecap?.text ?? comparisonStatement(comparison.rangeDirection))
+            Text(model.comparisonRecap?.text
+                 ?? SetShareSummary.statement(for: comparison.rangeDirection, exercise: comparison.exercise))
                 .font(.title3.weight(.semibold))
             if model.comparisonRecap?.source == .appleIntelligence {
                 Text("Worded with Apple Intelligence")
@@ -633,15 +788,17 @@ struct ContentView: View {
             DisclosureGroup("Set measurements") {
                 VStack(alignment: .leading, spacing: 12) {
                     comparisonMetric("Set 1", range: comparison.firstMedianRange,
-                                     duration: comparison.firstMedianDuration)
+                                     duration: comparison.firstMedianDuration,
+                                     exercise: comparison.exercise)
                     comparisonMetric("Set 2", range: comparison.secondMedianRange,
-                                     duration: comparison.secondMedianDuration)
+                                     duration: comparison.secondMedianDuration,
+                                     exercise: comparison.exercise)
                 }
             }
             Text("This comparison describes one camera-visible measure, not overall technique or safety.")
                 .font(.footnote)
             DisclosureGroup("How range is measured") {
-                Text("Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view.")
+                Text(comparison.exercise.definition.copy.rangeExplanation)
                     .font(.footnote)
             }
             if model.isGeneratingRecap {
@@ -656,26 +813,22 @@ struct ContentView: View {
         .padding(.vertical, 12)
     }
 
-    private func comparisonMetric(_ title: String, range: Double, duration: Double) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    private func comparisonMetric(_ title: String, range: Double, duration: Double,
+                                  exercise: ExerciseKind) -> some View {
+        let definition = exercise.definition
+        let noun = definition.copy.rangeNoun
+        return VStack(alignment: .leading, spacing: 4) {
             Text(title).font(.subheadline.weight(.semibold))
-            Text("Range: \(range.formatted(.number.precision(.fractionLength(2))))")
+            Text("\(noun.prefix(1).uppercased() + noun.dropFirst()): \(definition.formattedRange(range))")
             Text("Rep time: \(duration.formatted(.number.precision(.fractionLength(1)))) s")
         }
         .font(.subheadline)
         .monospacedDigit()
     }
 
-    private func comparisonStatement(_ direction: RangeDirection) -> String {
-        switch direction {
-        case .longer: return "Camera-measured range was longer in set 2."
-        case .shorter: return "Camera-measured range was shorter in set 2."
-        case .noClearChange: return "No clear measured range change between sets."
-        }
-    }
-
-    private func repList(_ reps: [RepMetric]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    private func repList(_ reps: [RepMetric], exercise: ExerciseKind) -> some View {
+        let definition = exercise.definition
+        return VStack(alignment: .leading, spacing: 8) {
             Text("Measured reps").font(.headline)
             ForEach(reps, id: \.number) { rep in
                 VStack(alignment: .leading, spacing: 8) {
@@ -686,12 +839,12 @@ struct ContentView: View {
                             .monospacedDigit()
                     }
                     .font(.subheadline)
-                    ProgressView(value: min(1, rep.normalizedHipTravel / 0.6))
+                    ProgressView(value: min(1, rep.relativeRange / definition.rangeDisplayScale))
                         .tint(.secondary)
                 }
                 .frame(minHeight: 44)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Rep \(rep.number), \(rep.duration.formatted(.number.precision(.fractionLength(1)))) seconds, relative camera-observed range \(rep.normalizedHipTravel.formatted(.number.precision(.fractionLength(2))))")
+                .accessibilityLabel("Rep \(rep.number), \(rep.duration.formatted(.number.precision(.fractionLength(1)))) seconds, \(definition.copy.rangeAccessibilityName) \(definition.accessibleRange(rep.relativeRange))")
                 .accessibilityIdentifier("rep.\(rep.number)")
                 Divider()
             }

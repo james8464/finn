@@ -1,0 +1,59 @@
+import XCTest
+
+final class CameraAngleUITests: XCTestCase {
+    /// The Debug demo feed attaches a synthetic 75° profile deviation, standing in for a
+    /// front-facing person. It checks the refusal path, not the accuracy of Vision 3D pose.
+    @MainActor
+    func testFrontViewSetIsRefusedUntilTheCheckIsSwitchedOff() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-front-view"]
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        XCTAssertTrue(app.staticTexts["Couldn’t assess this set"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["This exercise needs a side view. Turn so your side faces the camera, then try again."].exists)
+        try app.performAccessibilityAudit(for: [
+            .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
+        ])
+
+        app.buttons["Done"].tap()
+        app.buttons["Options"].tap()
+        let toggle = app.switches["options.checkCameraAngle"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+        XCTAssertEqual(toggle.value as? String, "1")
+        toggle.switches.firstMatch.tap()
+        XCTAssertEqual(toggle.value as? String, "0")
+        try app.performAccessibilityAudit(for: [
+            .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
+        ])
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testValidationModeShowsTheThreeDimensionalVerdict() {
+        let app = XCUIApplication()
+        app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-front-view", "-plumb-validation"]
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        let readout = app.staticTexts["validation.viewCheck"]
+        XCTAssertTrue(readout.waitForExistence(timeout: 5))
+        XCTAssertTrue(readout.label.contains("75° from profile"))
+        XCTAssertTrue(readout.label.contains("refused"))
+    }
+}

@@ -45,7 +45,7 @@ Plumb turns an iPhone camera into a private technique mirror: after a supported 
 ## Claims to avoid until proven
 
 - “Prevents injuries” or “guarantees correct form”
-- “Works for every exercise and angle”
+- “Works for any exercise” or “any angle”: the app has four side-view rubrics (squat, push-up, static lunge, stiff-leg deadlift), none measured on real sets yet, and automatic exercise recognition needs a model the team has not trained
 - “Apple Watch or AirPods can see your form”
 - “AI personal trainer” without explaining the limited, evidence-based scope
 - “Private” if raw footage is uploaded or retained without explicit consent
