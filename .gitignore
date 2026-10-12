@@ -63,3 +63,9 @@ fastlane/test_output
 .DS_Store
 __pycache__/
 *.pyc
+
+# Exercise classifier recordings and clips stay outside the repository
+*.mov
+*.MOV
+*.mp4
+*.m4v

@@ -1,4 +1,5 @@
 import AVFoundation
+import CoreML
 import ImageIO
 import Vision
 
@@ -144,7 +145,13 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
         let observations = request.results ?? []
         let subject = observations.first
         var joints: [BodyJoint: JointPoint] = [:]
+        var keypoints: [Float]?
         if let subject {
+            // The same 18-point layout Create ML extracts from training clips.
+            if let array = try? subject.keypointsMultiArray() {
+                let values = MLShapedArray<Float>(converting: array).scalars
+                keypoints = values.count == ExerciseRecognizer.keypointCount ? values : nil
+            }
             let mapping: [(BodyJoint, VNHumanBodyPoseObservation.JointName)] = [
                 (.leftHip, .leftHip), (.leftKnee, .leftKnee), (.leftAnkle, .leftAnkle),
                 (.rightHip, .rightHip), (.rightKnee, .rightKnee), (.rightAnkle, .rightAnkle),
@@ -161,7 +168,7 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
             }
         }
         yield(PoseFrame(time: time, subjectCount: observations.count, joints: joints,
-                        aspectRatio: aspectRatio))
+                        aspectRatio: aspectRatio, keypoints: keypoints))
     }
 
     private func yield(_ frame: PoseFrame) {

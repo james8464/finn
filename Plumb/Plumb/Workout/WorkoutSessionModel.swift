@@ -65,6 +65,8 @@ final class WorkoutSessionModel {
     private let source: any PoseStreaming
     @ObservationIgnored private let store: (any SessionStoring)?
     @ObservationIgnored private let narrator: ComparisonNarrator
+    @ObservationIgnored private let preferences: PlumbPreferences
+    @ObservationIgnored private let exerciseClassifier: (any ExerciseClassifying)?
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
     private var previewFrames: [PoseFrame] = []
@@ -84,6 +86,15 @@ final class WorkoutSessionModel {
     private(set) var result: WorkoutResult?
     /// The exercise whose rubric produced `result`.
     private(set) var resultExercise: ExerciseKind = .bodyweightSquat
+    /// What the optional exercise classifier concluded for the latest set.
+    private(set) var recognition: ExerciseRecognition = .notAttempted
+    /// Whether to let the on-device classifier pick the exercise after a set. It only has an
+    /// effect when this build includes a trained model; the chosen exercise stays the fallback.
+    var recognizesExercise: Bool {
+        didSet { preferences.recognizesExercise = recognizesExercise }
+    }
+    var hasExerciseClassifier: Bool { exerciseClassifier != nil }
+    var usesExerciseRecognition: Bool { recognizesExercise && hasExerciseClassifier }
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
     private(set) var lastStopToResultMilliseconds: Int?
@@ -99,10 +110,15 @@ final class WorkoutSessionModel {
     var previewSession: AVCaptureSession { source.previewSession }
 
     init(source: any PoseStreaming, store: (any SessionStoring)? = nil,
-         narrator: ComparisonNarrator? = nil) {
+         narrator: ComparisonNarrator? = nil,
+         exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
+         preferences: PlumbPreferences = .standard) {
         self.source = source
         self.store = store
         self.narrator = narrator ?? ComparisonNarrator()
+        self.exerciseClassifier = exerciseClassifier
+        self.preferences = preferences
+        self.recognizesExercise = preferences.recognizesExercise
         if let store {
             do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
             catch { historyIssue = Self.issue(for: error) }
@@ -116,6 +132,7 @@ final class WorkoutSessionModel {
         collectionTask = nil
         guard stage == .openingCamera else { return }
         captureExercise = selectedExercise
+        recognition = .notAttempted
         result = nil
         lastStopToResultMilliseconds = nil
         stopTappedAt = nil
@@ -232,7 +249,14 @@ final class WorkoutSessionModel {
             stopTappedAt = nil
             stage = .result
         }
-        let exercise = captureExercise
+        let recognition = recognizeExercise()
+        self.recognition = recognition
+        let exercise: ExerciseKind
+        if case .recognized(let recognized, _) = recognition {
+            exercise = recognized
+        } else {
+            exercise = captureExercise
+        }
         let definition = exercise.definition
         resultExercise = exercise
         switch ExerciseAnalyzer.analyze(frames, as: definition) {
@@ -249,6 +273,11 @@ final class WorkoutSessionModel {
         case .failed(let reason):
             result = .failed(reason)
         }
+    }
+
+    private func recognizeExercise() -> ExerciseRecognition {
+        guard recognizesExercise, let exerciseClassifier, !frames.isEmpty else { return .notAttempted }
+        return ExerciseRecognizer.recognize(frames, using: exerciseClassifier)
     }
 
     func finishSession() async {

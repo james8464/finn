@@ -12,7 +12,11 @@ struct PlumbApp: App {
                     url: FileManager.default.temporaryDirectory
                         .appending(path: "PlumbDemo-\(UUID().uuidString)", directoryHint: .isDirectory)
                         .appending(path: "sessions.json")),
-                            narrator: ComparisonNarrator(generator: DemoRecapGenerator()))
+                            narrator: ComparisonNarrator(generator: DemoRecapGenerator()),
+                            exerciseClassifier: ProcessInfo.processInfo.arguments
+                                .contains("-plumb-ui-demo-recognition") ? DemoExerciseClassifier() : nil,
+                            preferences: PlumbPreferences(defaults: UserDefaults(
+                                suiteName: "PlumbDemo-\(UUID().uuidString)") ?? .standard))
             } else {
                 ContentView(source: CameraPoseSource.live())
             }

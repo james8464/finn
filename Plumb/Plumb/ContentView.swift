@@ -40,9 +40,13 @@ struct ContentView: View {
     #endif
 
     @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore(),
-                    narrator: ComparisonNarrator? = nil) {
+                    narrator: ComparisonNarrator? = nil,
+                    exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
+                    preferences: PlumbPreferences = .standard) {
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
-                                                         narrator: narrator))
+                                                         narrator: narrator,
+                                                         exerciseClassifier: exerciseClassifier,
+                                                         preferences: preferences))
     }
 
     var body: some View {
@@ -120,7 +124,12 @@ struct ContentView: View {
                     .font(.body)
                     .padding(.bottom, 24)
                 exercisePicker
-                    .padding(.bottom, 28)
+                    .padding(.bottom, model.usesExerciseRecognition ? 8 : 28)
+                if model.usesExerciseRecognition {
+                    Text("Plumb will try to recognize the exercise after the set. If it isn’t confident, it uses your choice.")
+                        .font(.footnote)
+                        .padding(.bottom, 28)
+                }
                 VStack(alignment: .leading, spacing: 16) {
                     Label(selectedCopy.placement, systemImage: "iphone.gen3")
                     Label(selectedCopy.stance, systemImage: "figure.stand")
@@ -130,7 +139,10 @@ struct ContentView: View {
                 Text("On-device analysis. No video saved. One camera view only.")
                     .font(.footnote)
                     .padding(.bottom, 28)
-                HStack(spacing: 24) {
+                let links = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                    : AnyLayout(HStackLayout(spacing: 24))
+                links {
                     NavigationLink { historyPage } label: {
                         Text("History")
                             .frame(minWidth: 88, minHeight: 48)
@@ -138,6 +150,11 @@ struct ContentView: View {
                     }
                     NavigationLink { privacyPage } label: {
                         Text("Privacy")
+                            .frame(minWidth: 88, minHeight: 48)
+                            .contentShape(Rectangle())
+                    }
+                    NavigationLink { optionsPage } label: {
+                        Text("Options")
                             .frame(minWidth: 88, minHeight: 48)
                             .contentShape(Rectangle())
                     }
@@ -227,6 +244,12 @@ struct ContentView: View {
                     Text("Optional audio").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone.")
                 }
+                if model.hasExerciseClassifier {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Optional exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
+                        Text("When you turn it on in Options, an on-device model reads pose points after a set to recognize the exercise. Pose points and video stay on this iPhone.")
+                    }
+                }
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Optional explanation").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.")
@@ -240,6 +263,49 @@ struct ContentView: View {
         }
         .scrollIndicators(.hidden)
         .navigationTitle("Privacy")
+    }
+
+    private var optionsPage: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
+                    if model.hasExerciseClassifier {
+                        Toggle("Recognize the exercise automatically", isOn: Binding(
+                            get: { model.recognizesExercise },
+                            set: { model.recognizesExercise = $0 }
+                        ))
+                        .frame(minHeight: 44)
+                        .accessibilityIdentifier("options.recognizeExercise")
+                        Text("After each set, an on-device model trained by the Plumb team guesses the exercise from your pose points. If it isn’t confident, Plumb uses the exercise you chose. Its accuracy is still being tested.")
+                    } else {
+                        Text("This build has no trained recognition model, so Plumb uses the exercise you choose on the first screen.")
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
+        }
+        .navigationTitle("Options")
+    }
+
+    @ViewBuilder private var recognitionNote: some View {
+        let chosen = model.captureExercise.definition.copy.name
+        switch model.recognition {
+        case .notAttempted:
+            EmptyView()
+        case .recognized(let kind, _):
+            let name = kind.definition.copy.name
+            Text(kind == model.captureExercise
+                 ? "Recognized as \(name) on this iPhone."
+                 : "Recognized as \(name) on this iPhone, so Plumb used it instead of \(chosen).")
+                .font(.subheadline)
+                .accessibilityIdentifier("result.recognition")
+        case .uncertain:
+            Text("Plumb couldn’t recognize the exercise confidently, so it used your choice: \(chosen).")
+                .font(.subheadline)
+                .accessibilityIdentifier("result.recognition")
+        }
     }
 
     private var capture: some View {
@@ -349,6 +415,7 @@ struct ContentView: View {
                         Text("Set reviewed").font(.largeTitle.bold())
                         Text("\(analysis.reps.count) measured reps")
                             .font(.title2.weight(.semibold)).monospacedDigit()
+                        recognitionNote
                         if model.historyIssue != nil {
                             Text("Couldn’t confirm this set was saved.")
                                 .font(.subheadline)
@@ -420,6 +487,7 @@ struct ContentView: View {
                         .accessibilityHint("Shares the measured summary without video")
                     case .insufficientView(let reason):
                         Text("Couldn’t assess this set").font(.largeTitle.bold())
+                        recognitionNote
                         Text(reason)
                         Text(model.resultExercise.definition.copy.retakeHint)
                             .foregroundStyle(.secondary)

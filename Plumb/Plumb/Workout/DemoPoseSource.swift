@@ -58,6 +58,16 @@ final class DemoPoseSource: PoseStreaming {
     }
 }
 
+/// Debug-only stand-in for a trained exercise classifier, so UI tests can reach the recognition
+/// path. It ignores the poses and always answers "squat". It is not a model and measures nothing.
+nonisolated final class DemoExerciseClassifier: ExerciseClassifying {
+    let windowLength = 30
+    let frameRate = 15.0
+    func classify(window: [[Float]]) throws -> ClassifierPrediction {
+        ClassifierPrediction(label: "squat", confidence: 0.95)
+    }
+}
+
 @MainActor
 final class DemoRecapGenerator: RecapGenerating {
     var available: Bool { false }
