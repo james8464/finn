@@ -45,6 +45,20 @@ struct EvidenceAndCueTests {
         }
     }
 
+    @Test func rejectsLongTrackingLossAtStart() {
+        let frames = clearTrace(sampleCount: 101).enumerated().map { index, frame in
+            index < 9 ? PoseFrame(time: frame.time, subjectCount: 1, joints: [:]) : frame
+        }
+        #expect(EvidenceGate.assess(frames) == .reject(.trackingGap))
+    }
+
+    @Test func rejectsLongTrackingLossAtEnd() {
+        let frames = clearTrace(sampleCount: 101).enumerated().map { index, frame in
+            index > 91 ? PoseFrame(time: frame.time, subjectCount: 1, joints: [:]) : frame
+        }
+        #expect(EvidenceGate.assess(frames) == .reject(.trackingGap))
+    }
+
     @Test func rejectsUnstableFraming() {
         let frames = clearTrace().enumerated().map { index, frame in
             let drift = Double(index) * 0.006

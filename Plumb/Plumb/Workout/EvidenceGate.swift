@@ -45,14 +45,17 @@ nonisolated enum EvidenceGate {
         guard Double(best.complete) / total >= 0.8 else { return .reject(.missingJoints) }
         guard Double(best.confident) / total >= 0.8 else { return .reject(.lowConfidence) }
 
-        var lastTrackedTime: TimeInterval?
+        var lastTrackedTime = first.time
         for frame in frames where frame.subjectCount == 1 && best.joints.allSatisfy({ joint in
             (frame.joints[joint]?.confidence ?? 0) >= SquatRubric.minimumJointConfidence
         }) {
-            if let lastTrackedTime, frame.time - lastTrackedTime > SquatRubric.maximumTrackingGap {
+            if frame.time - lastTrackedTime > SquatRubric.maximumTrackingGap {
                 return .reject(.trackingGap)
             }
             lastTrackedTime = frame.time
+        }
+        if last.time - lastTrackedTime > SquatRubric.maximumTrackingGap {
+            return .reject(.trackingGap)
         }
 
         let ankleJoint: BodyJoint = best.side == .left ? .leftAnkle : .rightAnkle
