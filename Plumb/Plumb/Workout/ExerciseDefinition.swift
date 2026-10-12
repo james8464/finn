@@ -46,6 +46,20 @@ nonisolated enum MovementSignal: Equatable, Sendable {
 /// The camera view a rubric was written for. Other views make its 2D measurements unreliable.
 nonisolated enum ExpectedView: String, Equatable, Sendable {
     case side
+
+    /// Framing prompt when Vision 3D pose sees the person from another angle.
+    var turnPrompt: String {
+        switch self {
+        case .side: "Turn your side to the camera"
+        }
+    }
+
+    /// Retake reason when most 3D estimates during the set disagree with this view.
+    var wrongViewMessage: String {
+        switch self {
+        case .side: "This exercise needs a side view. Turn so your side faces the camera, then try again."
+        }
+    }
 }
 
 nonisolated enum RangeUnit: Equatable, Sendable {

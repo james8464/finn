@@ -50,6 +50,10 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
         return stream
     }
 
+    func setCameraAngleEstimation(_ enabled: Bool) {
+        processor.setCameraAngleEstimation(enabled)
+    }
+
     func stop() async {
         processor.finish()
         if let interruptionObserver {
@@ -98,6 +102,19 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
     private let lock = NSLock()
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var lastSampleTime: Double = -.infinity
+    private var estimatesCameraAngle = true
+    /// Runs every Nth processed frame (about 4 per second at 15 fps) to bound the extra cost.
+    private static let cameraAngleInterval = 4
+    // Used only on the capture queue. The 3D request is stateful, so it is reused across frames.
+    private let poseRequest3D = VNDetectHumanBodyPose3DRequest()
+    private let sequenceHandler = VNSequenceRequestHandler()
+    private var processedFrames = 0
+
+    func setCameraAngleEstimation(_ enabled: Bool) {
+        lock.lock()
+        estimatesCameraAngle = enabled
+        lock.unlock()
+    }
 
     func makeStream() -> AsyncStream<PoseFrame> {
         lock.lock()
@@ -127,6 +144,7 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
             return
         }
         lastSampleTime = time
+        let estimateAngle = estimatesCameraAngle
         lock.unlock()
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
@@ -167,8 +185,30 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
                 )
             }
         }
+        processedFrames += 1
+        var profileDeviation: Double?
+        if estimateAngle, subject != nil, processedFrames % Self.cameraAngleInterval == 0 {
+            profileDeviation = cameraAngle(in: pixelBuffer)
+        }
         yield(PoseFrame(time: time, subjectCount: observations.count, joints: joints,
-                        aspectRatio: aspectRatio, keypoints: keypoints))
+                        aspectRatio: aspectRatio, keypoints: keypoints,
+                        profileDeviationDegrees: profileDeviation))
+    }
+
+    /// Profile deviation from Vision 3D pose of the most prominent person, or nil when the
+    /// request fails or the hips are not estimated.
+    private func cameraAngle(in pixelBuffer: CVPixelBuffer) -> Double? {
+        guard (try? sequenceHandler.perform([poseRequest3D], on: pixelBuffer, orientation: .up)) != nil,
+              let body = poseRequest3D.results?.first else { return nil }
+        func position(_ joint: VNHumanBodyPose3DObservation.JointName) -> SIMD3<Double>? {
+            guard let matrix = try? body.cameraRelativePosition(joint) else { return nil }
+            let column = matrix.columns.3
+            return SIMD3(Double(column.x), Double(column.y), Double(column.z))
+        }
+        guard let leftHip = position(.leftHip), let rightHip = position(.rightHip) else { return nil }
+        return ViewCheck.profileDeviation(leftHip: leftHip, rightHip: rightHip,
+                                          leftShoulder: position(.leftShoulder),
+                                          rightShoulder: position(.rightShoulder))
     }
 
     private func yield(_ frame: PoseFrame) {

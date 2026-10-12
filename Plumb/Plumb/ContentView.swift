@@ -282,6 +282,16 @@ struct ContentView: View {
                         Text("This build has no trained recognition model, so Plumb uses the exercise you choose on the first screen.")
                     }
                 }
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Camera angle").font(.headline).accessibilityAddTraits(.isHeader)
+                    Toggle("Check the camera angle in 3D", isOn: Binding(
+                        get: { model.checksCameraAngle },
+                        set: { model.checksCameraAngle = $0 }
+                    ))
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.checkCameraAngle")
+                    Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one, and asks you to turn when the exercise needs a side view. The angle limit has not been tested on real sets yet. If Plumb asks you to turn while your side already faces the camera, switch this off.")
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
@@ -325,6 +335,17 @@ struct ContentView: View {
                 }
                 #endif
                 status
+                #if DEBUG
+                if isValidationMode && model.stage == .framing {
+                    Text(model.previewDeviations.isEmpty ? "3D view: no estimate"
+                         : "3D view: \(Int(model.previewDeviations.sorted()[model.previewDeviations.count / 2].rounded()))° from profile")
+                        .font(.footnote.monospacedDigit())
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.black.opacity(0.68), in: Capsule())
+                        .accessibilityIdentifier("validation.liveView")
+                }
+                #endif
                 Spacer()
                 if model.stage == .framing {
                     Text("\u{00A0}\(captureCopy.framingPrompt)\u{00A0}")
@@ -382,6 +403,9 @@ struct ContentView: View {
                 case .landmarksVisible:
                     Image(systemName: "checkmark.circle.fill")
                     Text(captureCopy.jointsVisible)
+                case .turnToExpectedView:
+                    Image(systemName: "arrow.turn.up.right")
+                    Text(model.captureExercise.definition.expectedView.turnPrompt)
                 }
             } else {
                 Image(systemName: "viewfinder")
@@ -506,6 +530,12 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                         .accessibilityIdentifier("validation.stopToResult")
                 }
+                if isValidationMode {
+                    Text("Validation 3D view · \(viewVerdictReadout(model.lastViewVerdict))")
+                        .font(.footnote.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("validation.viewCheck")
+                }
                 #endif
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -529,6 +559,19 @@ struct ContentView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onDisappear { observationSpeaker.stop() }
     }
+
+    #if DEBUG
+    private func viewVerdictReadout(_ verdict: ViewCheck.Verdict) -> String {
+        switch verdict {
+        case .unavailable:
+            return "no 3D estimate"
+        case .matches(let median, let count):
+            return "median \(Int(median.rounded()))° from profile, \(count) estimates, accepted"
+        case .mismatch(let median, let count):
+            return "median \(Int(median.rounded()))° from profile, \(count) estimates, refused"
+        }
+    }
+    #endif
 
     private var retakeLabel: String {
         if case .insufficientView = model.result { return "Retake set" }

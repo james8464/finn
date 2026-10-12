@@ -70,6 +70,8 @@ final class WorkoutSessionModel {
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
     private var previewFrames: [PoseFrame] = []
+    /// Latest Vision 3D profile deviations seen while framing.
+    private(set) var previewDeviations: [Double] = []
     private var lastPreviewFrameAt: ContinuousClock.Instant?
     private var framingWatchdog: Task<Void, Never>?
     private var isStopping = false
@@ -94,6 +96,16 @@ final class WorkoutSessionModel {
         didSet { preferences.recognizesExercise = recognizesExercise }
     }
     var hasExerciseClassifier: Bool { exerciseClassifier != nil }
+    /// Whether Vision 3D pose may refuse a set filmed from the wrong angle. On by default.
+    var checksCameraAngle: Bool {
+        didSet {
+            preferences.checksCameraAngle = checksCameraAngle
+            source.setCameraAngleEstimation(checksCameraAngle)
+            if !checksCameraAngle { previewDeviations = [] }
+        }
+    }
+    /// The 3D camera-angle verdict for the latest analyzed set, kept for the validation readout.
+    private(set) var lastViewVerdict: ViewCheck.Verdict = .unavailable
     var usesExerciseRecognition: Bool { recognizesExercise && hasExerciseClassifier }
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
@@ -119,6 +131,7 @@ final class WorkoutSessionModel {
         self.exerciseClassifier = exerciseClassifier
         self.preferences = preferences
         self.recognizesExercise = preferences.recognizesExercise
+        self.checksCameraAngle = preferences.checksCameraAngle
         if let store {
             do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
             catch { historyIssue = Self.issue(for: error) }
@@ -140,10 +153,13 @@ final class WorkoutSessionModel {
         frames = []
         frameCount = 0
         previewFrames = []
+        previewDeviations = []
+        lastViewVerdict = .unavailable
         lastPreviewFrameAt = nil
         framingStatus = .checking
         framingWatchdog?.cancel()
         framingWatchdog = nil
+        source.setCameraAngleEstimation(checksCameraAngle)
         do {
             let stream = try await source.start()
             guard stage == .openingCamera else {
@@ -159,6 +175,7 @@ final class WorkoutSessionModel {
                     if let lastPreviewFrameAt = self.lastPreviewFrameAt,
                        lastPreviewFrameAt.duration(to: .now) >= .seconds(1) {
                         self.previewFrames = []
+                        self.previewDeviations = []
                         self.framingStatus = .checking
                     }
                 }
@@ -170,8 +187,7 @@ final class WorkoutSessionModel {
                         self.previewFrames.append(frame)
                         if self.previewFrames.count > 5 { self.previewFrames.removeFirst() }
                         self.lastPreviewFrameAt = .now
-                        self.framingStatus = EvidenceGate.previewStatus(
-                            self.previewFrames, requirement: self.captureExercise.definition.evidence)
+                        self.updateFramingStatus(with: frame)
                     }
                     if (self.stage == .capturing || (self.stage == .analyzing && self.isStopping)) &&
                         self.frames.count < 1_800 {
@@ -259,7 +275,9 @@ final class WorkoutSessionModel {
         }
         let definition = exercise.definition
         resultExercise = exercise
-        switch ExerciseAnalyzer.analyze(frames, as: definition) {
+        lastViewVerdict = ViewCheck.assess(frames, expected: definition.expectedView)
+        switch ExerciseAnalyzer.analyze(frames, as: definition,
+                                        viewCheck: checksCameraAngle ? .enforce : .ignore) {
         case .analyzed(let analysis):
             guard !analysis.reps.isEmpty else {
                 result = .insufficientView(definition.copy.noCompleteReps)
@@ -272,6 +290,20 @@ final class WorkoutSessionModel {
             result = .insufficientView(reason)
         case .failed(let reason):
             result = .failed(reason)
+        }
+    }
+
+    private func updateFramingStatus(with frame: PoseFrame) {
+        let definition = captureExercise.definition
+        if checksCameraAngle, let deviation = frame.profileDeviationDegrees {
+            previewDeviations.append(deviation)
+            if previewDeviations.count > 5 { previewDeviations.removeFirst() }
+        }
+        if checksCameraAngle,
+           ViewCheck.previewAsksToTurn(previewDeviations, expected: definition.expectedView) {
+            framingStatus = .turnToExpectedView
+        } else {
+            framingStatus = EvidenceGate.previewStatus(previewFrames, requirement: definition.evidence)
         }
     }
 
@@ -399,6 +431,7 @@ final class WorkoutSessionModel {
         collectionTask = nil
         frames = []
         previewFrames = []
+        previewDeviations = []
         lastPreviewFrameAt = nil
         framingStatus = .checking
         frameCount = 0

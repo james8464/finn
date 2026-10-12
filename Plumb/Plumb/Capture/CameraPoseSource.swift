@@ -7,11 +7,14 @@ protocol PoseStreaming: AnyObject {
     func prepareForSet() async
     func start() async throws -> AsyncStream<PoseFrame>
     func stop() async
+    /// Turns Vision 3D camera-angle estimates on or off for the frames that follow.
+    func setCameraAngleEstimation(_ enabled: Bool)
 }
 
 extension PoseStreaming {
     var endedAtLimit: Bool { false }
     func prepareForSet() async {}
+    func setCameraAngleEstimation(_ enabled: Bool) {}
 }
 
 @MainActor
@@ -20,6 +23,11 @@ protocol CameraCaptureDriving: AnyObject {
     var isAvailable: Bool { get }
     func start() async throws -> AsyncStream<PoseFrame>
     func stop() async
+    func setCameraAngleEstimation(_ enabled: Bool)
+}
+
+extension CameraCaptureDriving {
+    func setCameraAngleEstimation(_ enabled: Bool) {}
 }
 
 nonisolated enum CameraSourceError: Error, Equatable {
@@ -70,6 +78,10 @@ final class CameraPoseSource: PoseStreaming {
             default: return false
             }
         }, driver: AVCameraCaptureDriver())
+    }
+
+    func setCameraAngleEstimation(_ enabled: Bool) {
+        driver.setCameraAngleEstimation(enabled)
     }
 
     func prepareForSet() async {

@@ -123,6 +123,8 @@ nonisolated enum FramingStatus: Equatable {
     case checking
     case adjustPosition
     case landmarksVisible
+    /// Vision 3D pose sees the person from an angle the exercise does not support.
+    case turnToExpectedView
 }
 
 nonisolated enum CueKind: String, Codable {

@@ -24,6 +24,12 @@ nonisolated enum SquatAnalyzer {
 /// top phase → leaving the top → bottom reached → back at the top. It abstains instead of guessing
 /// when the evidence gate rejects the view or the signal joints are not tracked.
 nonisolated enum ExerciseAnalyzer {
+    /// Whether 3D camera-angle estimates in the frames may reject the set.
+    enum ViewCheckPolicy: Equatable {
+        case enforce
+        case ignore
+    }
+
     private enum Phase {
         case top
         case descending(start: TimeInterval, peak: Double)
@@ -39,7 +45,8 @@ nonisolated enum ExerciseAnalyzer {
         let confidence: Double
     }
 
-    static func analyze(_ frames: [PoseFrame], as definition: ExerciseDefinition) -> AnalysisOutcome {
+    static func analyze(_ frames: [PoseFrame], as definition: ExerciseDefinition,
+                        viewCheck: ViewCheckPolicy = .enforce) -> AnalysisOutcome {
         let side: BodySide
         switch EvidenceGate.assess(frames, requirement: definition.evidence) {
         case .usable(let acceptedSide): side = acceptedSide
@@ -49,6 +56,11 @@ nonisolated enum ExerciseAnalyzer {
             return .insufficientView("Tracking was lost during the set. Keep your whole body visible and try again.")
         case .reject:
             return .insufficientView("Move the phone so your full body stays visible.")
+        }
+        // Without 3D estimates (simulator, older devices, switched off) this check does not run.
+        if viewCheck == .enforce,
+           case .mismatch = ViewCheck.assess(frames, expected: definition.expectedView) {
+            return .insufficientView(definition.expectedView.wrongViewMessage)
         }
 
         let samples = frames.compactMap { sample(from: $0, signal: definition.signal, side: side) }
