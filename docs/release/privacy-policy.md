@@ -2,7 +2,7 @@
 
 **Published URL:** https://james8464.github.io/hackathon-project/privacy.html
 
-**Effective date:** 11 October 2026. This policy describes the current iPhone release candidate; recheck the final signed upload before App Store submission.
+**Effective date:** 12 October 2026. This policy describes the current iPhone release candidate; recheck the final signed upload before App Store submission.
 
 - **Publisher:** James Durup
 - **Contact:** jamesdurup@icloud.com
@@ -22,6 +22,10 @@ You can open **History** to delete a saved session or choose **Delete all local 
 ## Optional Apple Intelligence wording
 
 When available on your device, the app can ask Apple's on-device Foundation Models framework to reword an already measured comparison after you tap **Reword comparison**. It receives only the two derived set measurements, comparison direction, cue category, and referenced rep numbers. Plumb accepts only approved comparison wording with the supplied rep references and shows reviewed fallback wording if generation is unavailable, late, or inconsistent. This feature does not send camera images or raw pose traces to the model and Plumb does not operate an AI server.
+
+## Optional spoken observation
+
+If you tap **Listen to observation**, iOS speaks the measured rep count, the same displayed observation, and its next action through the current audio output. Plumb does not record or save this speech and does not use the microphone. Playback stops when you leave the result, mark the observation irrelevant, or tap **Stop speaking**.
 
 ## Accounts, analytics, and sharing
 

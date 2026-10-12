@@ -6,6 +6,7 @@ struct ContentView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var model: WorkoutSessionModel
+    @State private var observationSpeaker = ObservationSpeaker()
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
     private var primaryButtonLabelColor: Color {
@@ -76,6 +77,7 @@ struct ContentView: View {
         .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
         #endif
         .onChange(of: scenePhase) { _, phase in
+            if phase != .active { observationSpeaker.stop() }
             if phase == .background { Task { await model.backgrounded() } }
             if phase == .active && model.historyIssue == .unavailable {
                 model.retryHistory()
@@ -178,6 +180,10 @@ struct ContentView: View {
                     Text("Measured set summaries are saved on this iPhone so you can review previous sets.")
                     Text("Saved summaries may be included in your device backup.")
                     Text("Delete saved sessions in History.")
+                }
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Optional audio").font(.headline).accessibilityAddTraits(.isHeader)
+                    Text("Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone.")
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Optional explanation").font(.headline).accessibilityAddTraits(.isHeader)
@@ -286,7 +292,10 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     Spacer()
-                    Button("Done") { Task { await model.finishSession() } }
+                    Button("Done") {
+                        observationSpeaker.stop()
+                        Task { await model.finishSession() }
+                    }
                         .font(.body)
                         .buttonStyle(.plain)
                         .frame(minWidth: 44, minHeight: 44)
@@ -316,7 +325,24 @@ struct ContentView: View {
                                 Text(cue.observation).font(.title3.weight(.semibold))
                                 Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
                                 Text(cue.nextAction)
-                                Button("Not relevant") { model.dismissCue() }
+                                if let spokenText = SpokenObservation.text(for: analysis, cue: cue) {
+                                    Button {
+                                        if observationSpeaker.isSpeaking {
+                                            observationSpeaker.stop()
+                                        } else {
+                                            observationSpeaker.speak(spokenText)
+                                        }
+                                    } label: {
+                                        Label(observationSpeaker.isSpeaking ? "Stop speaking" : "Listen to observation",
+                                              systemImage: observationSpeaker.isSpeaking ? "stop.fill" : "speaker.wave.2")
+                                            .frame(minHeight: 44, alignment: .leading)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                Button("Not relevant") {
+                                    observationSpeaker.stop()
+                                    model.dismissCue()
+                                }
                                     .buttonStyle(.plain)
                                     .frame(minHeight: 48)
                                     .contentShape(Rectangle())
@@ -381,6 +407,7 @@ struct ContentView: View {
         }
         .safeAreaInset(edge: .bottom) {
             Button {
+                observationSpeaker.stop()
                 Task { await model.startPreview() }
             } label: {
                 Text(retakeLabel)
@@ -394,6 +421,7 @@ struct ContentView: View {
                 .background(.regularMaterial)
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onDisappear { observationSpeaker.stop() }
     }
 
     private var retakeLabel: String {

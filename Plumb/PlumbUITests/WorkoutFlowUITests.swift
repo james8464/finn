@@ -45,6 +45,8 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Privacy"].exists)
         XCTAssertTrue(app.staticTexts["Camera"].exists)
         XCTAssertTrue(app.staticTexts["Saved results"].exists)
+        XCTAssertTrue(app.staticTexts["Optional audio"].exists)
+        XCTAssertTrue(app.staticTexts["Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone."].exists)
         XCTAssertTrue(app.staticTexts["Optional explanation"].exists)
         XCTAssertTrue(app.staticTexts["Video is processed on this iPhone and never saved."].exists)
         XCTAssertTrue(app.staticTexts["Saved summaries may be included in your device backup."].exists)
@@ -83,6 +85,8 @@ final class WorkoutFlowUITests: XCTestCase {
             "Measured set summaries are saved on this iPhone so you can review previous sets.",
             "Saved summaries may be included in your device backup.",
             "Delete saved sessions in History.",
+            "Optional audio",
+            "Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone.",
             "Optional explanation",
             "On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.",
         ]
@@ -232,6 +236,31 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "rep.6").firstMatch.exists)
         Thread.sleep(forTimeInterval: 1)
         capture(app, name: "Saved session detail")
+    }
+
+    @MainActor
+    func testSpokenObservationIsOptionalAndStopsWhenDismissed() {
+        let app = XCUIApplication()
+        app.launchArguments.append("-plumb-ui-demo")
+        app.launch()
+        XCTAssertFalse(app.buttons["Listen to observation"].exists)
+        app.buttons["Set up camera"].tap()
+        app.buttons["Start set"].tap()
+        XCTAssertTrue(app.buttons["Stop set"].waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        app.buttons["Stop set"].tap()
+
+        let listen = app.buttons["Listen to observation"]
+        XCTAssertTrue(listen.waitForExistence(timeout: 5))
+        capture(app, name: "Result with optional speech")
+        listen.tap()
+        let stopSpeaking = app.buttons["Stop speaking"]
+        XCTAssertTrue(stopSpeaking.waitForExistence(timeout: 3))
+        stopSpeaking.tap()
+        XCTAssertTrue(listen.waitForExistence(timeout: 3))
+        app.buttons["Not relevant"].tap()
+        XCTAssertFalse(listen.exists)
+        XCTAssertFalse(stopSpeaking.exists)
     }
 
     @MainActor

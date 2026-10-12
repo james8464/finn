@@ -1,6 +1,6 @@
 # Plumb — product and build plan
 
-**Working plan, updated 12 October 2026.** Plumb is an iPhone-first strength-training companion in development. The app now includes a squat setup/capture/result flow, a tested rep analyzer and evidence gate, a provisional cue selector, local derived-summary history with saved-session detail and second-set comparison, and an optional guarded Foundation Models wording layer. These pass simulator tests; real-camera orientation, generated wording, and coaching quality still require physical-device and expert validation. Watch integration and subscriptions have not been implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
+**Working plan, updated 12 October 2026.** Plumb is an iPhone-first strength-training companion in development. The app now includes a squat setup/capture/result flow, a tested rep analyzer and evidence gate, a provisional cue selector, local derived-summary history with saved-session detail and second-set comparison, optional tap-to-speak post-set feedback, and an optional guarded Foundation Models wording layer. These pass simulator tests; real-camera orientation, spoken audio routing, generated wording, and coaching quality still require physical-device and expert validation. Watch integration and subscriptions have not been implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
 
 The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md). It scopes the first complete iPhone squat loop and its validation gate; later integrations remain in this broader product plan.
 
@@ -67,7 +67,7 @@ The Watch's heart rate describes effort context; it cannot prove whether a rep h
 ### Next if the prototype is reliable
 
 - Push-up from a side view, with a separately validated rubric such as body-line consistency and tempo.
-- Spoken post-set cue and audio-control options; output may route to AirPods.
+- Tap-to-speak post-set cue with a Stop control; output uses the system audio route and may reach paired AirPods. It is never automatic and does not request microphone access.
 - Optional Apple Watch companion and a real HealthKit workout session with user-controlled saving.
 - Foundation Models to turn **structured, validated** observations into concise, supportive language. The model cannot invent a new biomechanical finding or make a medical claim.
 - Saved clips, explicit retention controls, and side-by-side comparison.

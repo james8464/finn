@@ -15,6 +15,8 @@ The rep count and relative range are camera-based estimates from one view. A cue
 
 Plumb needs at least four measured reps before it can show an observation. A measured set may still have no cue when there is no clear, camera-supported pattern.
 
+When an observation appears, tap **Listen to observation** to hear the measured rep count, observation, and next action. Tap **Stop speaking** to end playback. Sound uses your current iPhone audio output, including paired headphones; playback never starts automatically.
+
 ## Privacy and deletion
 
 Plumb does not save a workout movie. Set summaries are saved in the app's local storage and may be included in your iPhone's device backup if enabled. After a measured set, **Share summary** opens the iOS Share Sheet with text only; if two compatible sets exist, it includes their measured range-change direction. You choose where the text goes. Open **History** and tap a session to review its measured sets and rep details. Tap **Delete** to remove one session, or **Delete all local data** to remove all saved sessions and recovery backups from the app. See the [privacy policy](privacy-policy.md).
