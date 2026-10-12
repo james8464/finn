@@ -2,12 +2,9 @@ import SwiftUI
 import UIKit
 
 private enum PlumbStyle {
-    static let accent = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 43 / 255, green: 132 / 255, blue: 95 / 255, alpha: 1)
-            : UIColor(red: 31 / 255, green: 106 / 255, blue: 83 / 255, alpha: 1)
-    })
+    static let ink = Color.primary
     static let supportingText = Color.primary.opacity(0.72)
+    static let primaryButtonText = Color(uiColor: .systemBackground)
 }
 
 struct ContentView: View {
@@ -18,7 +15,6 @@ struct ContentView: View {
     @State private var observationSpeaker = ObservationSpeaker()
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
-    private let primaryButtonLabelColor = Color.white
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -67,7 +63,7 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Plumb")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
         }
         .overlay(alignment: .top) {
             #if DEBUG
@@ -82,7 +78,7 @@ struct ContentView: View {
             }
             #endif
         }
-        .tint(PlumbStyle.accent)
+        .tint(PlumbStyle.ink)
         #if DEBUG
         .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
         #endif
@@ -115,55 +111,36 @@ struct ContentView: View {
     private var setup: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                if !dynamicTypeSize.isAccessibilitySize {
-                    Image("PlumbMark")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 32, height: 32)
-                        .accessibilityHidden(true)
-                        .padding(.bottom, 32)
-                }
-                Text(selectedCopy.setupTitle)
-                    .font(.largeTitle.bold())
-                    .padding(.bottom, 8)
-                Text("One clear observation after each set.")
-                    .font(.body)
+                Text("Review your movement after each set.")
                     .foregroundStyle(PlumbStyle.supportingText)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 28)
                 exercisePicker
                 if model.usesExerciseRecognition {
                     Text("Plumb will try to recognize the exercise after the set. If it isn’t confident, it uses your choice.")
                         .font(.footnote)
                         .foregroundStyle(PlumbStyle.supportingText)
-                        .padding(.top, 4)
+                        .padding(.top, 8)
                 }
-                Divider()
-                    .padding(.vertical, 30)
-                Text("Before you start")
-                    .font(.headline)
-                    .padding(.bottom, 20)
-                VStack(spacing: 0) {
-                    setupStep(selectedCopy.placementTitle, detail: selectedCopy.placementDetail,
-                              symbol: "iphone.gen3")
-                    Divider().padding(.leading, 44)
-                    setupStep(selectedCopy.stanceTitle, detail: selectedCopy.stanceDetail,
-                              symbol: "figure.stand")
-                }
-                Label("Analyzed on this iPhone. No video saved.", systemImage: "lock.shield")
+                Text("SET UP")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(PlumbStyle.supportingText)
+                    .padding(.top, 40)
+                    .padding(.bottom, 12)
+                setupStep(selectedCopy.placementTitle, detail: selectedCopy.placementDetail,
+                          symbol: "iphone.gen3")
+                Divider().padding(.leading, 44)
+                setupStep(selectedCopy.stanceTitle, detail: selectedCopy.stanceDetail,
+                          symbol: "figure.stand")
+
+                Text("Analysis stays on this iPhone. No video is saved.")
                     .font(.footnote)
                     .foregroundStyle(PlumbStyle.supportingText)
-                    .padding(.top, 28)
-                Text("Measurements come from one camera view.")
-                    .font(.footnote)
-                    .foregroundStyle(PlumbStyle.supportingText)
-                    .padding(.leading, 27)
-                    .padding(.top, 4)
+                    .padding(.top, 32)
             }
-            #if DEBUG
-            .padding(.top, isDemo && dynamicTypeSize.isAccessibilitySize ? 64 : 0)
-            #endif
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.top, 28)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
         .safeAreaInset(edge: .bottom) {
@@ -171,17 +148,17 @@ struct ContentView: View {
                 Task { await model.startPreview() }
             } label: {
                 Text("Set up camera")
-                    .foregroundStyle(primaryButtonLabelColor)
+                    .foregroundStyle(PlumbStyle.primaryButtonText)
                     .frame(maxWidth: .infinity)
             }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 20)
                 .padding(.vertical, 12)
                 .background(.bar)
         }
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
+            ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink { historyPage } label: {
                     Label("History", systemImage: "clock.arrow.circlepath")
                 }
@@ -244,15 +221,15 @@ struct ContentView: View {
             Image(systemName: symbol)
                 .font(.title3)
                 .frame(width: 28, height: 28)
-                .foregroundStyle(PlumbStyle.accent)
+                .foregroundStyle(.primary)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.body.weight(.semibold))
+                Text(title).font(.body)
                 Text(detail).font(.body).foregroundStyle(PlumbStyle.supportingText)
             }
             Spacer(minLength: 0)
         }
-        .padding(.vertical, 14)
+        .padding(.vertical, 12)
         .accessibilityElement(children: .combine)
     }
 
@@ -469,25 +446,24 @@ struct ContentView: View {
 
     private var result: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Spacer()
                     Button("Done") {
                         observationSpeaker.stop()
                         Task { await model.finishSession() }
                     }
-                        .font(.body)
-                        .buttonStyle(.plain)
-                        .frame(minWidth: 44, minHeight: 44)
-                        .contentShape(Rectangle())
+                    .buttonStyle(.plain)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
                 }
+                Text(resultTitle)
+                    .font(.largeTitle.bold())
                 if let result = model.result {
                     switch result {
                     case .measured(let analysis, let cue):
-                        Text("Set reviewed")
-                            .font(.largeTitle.bold())
                         Text("\(analysis.reps.count) measured reps")
-                            .font(.title3)
+                            .font(.subheadline)
                             .monospacedDigit()
                             .foregroundStyle(PlumbStyle.supportingText)
                         recognitionNote
@@ -508,17 +484,14 @@ struct ContentView: View {
                             }
                         }
                         if let cue {
-                            Divider().padding(.vertical, 8)
+                            Divider().padding(.vertical, 12)
                             if model.cueDismissed {
                                 Text("Observation marked not relevant.")
                                     .font(.body)
                                     .foregroundStyle(PlumbStyle.supportingText)
                             } else {
-                                Text("Observation")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(PlumbStyle.supportingText)
                                 Text(cue.observation)
-                                    .font(.title2.weight(.semibold))
+                                    .font(.title3.weight(.semibold))
                                 Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
                                     .font(.subheadline)
                                     .foregroundStyle(PlumbStyle.supportingText)
@@ -537,7 +510,6 @@ struct ContentView: View {
                                             .frame(minHeight: 44, alignment: .leading)
                                     }
                                     .buttonStyle(.plain)
-                                    .foregroundStyle(PlumbStyle.accent)
                                 }
                                 Button("Not relevant") {
                                     observationSpeaker.stop()
@@ -550,7 +522,7 @@ struct ContentView: View {
                                     .contentShape(Rectangle())
                             }
                         } else {
-                            Divider().padding(.vertical, 8)
+                            Divider().padding(.vertical, 12)
                             if analysis.reps.count < 4 {
                                 Text("Plumb needs at least four measured reps before it can show an observation.")
                                     .font(.title3)
@@ -561,7 +533,7 @@ struct ContentView: View {
                                 .font(.footnote)
                                 .foregroundStyle(PlumbStyle.supportingText)
                         }
-                        Divider().padding(.vertical, 8)
+                        Divider().padding(.vertical, 12)
                         if let comparison = model.comparison {
                             comparisonView(comparison)
                         } else if let gap = model.comparisonGap {
@@ -584,16 +556,13 @@ struct ContentView: View {
                         .accessibilityIdentifier("result.shareSummary")
                         .accessibilityHint("Shares the measured summary without video")
                     case .insufficientView(let reason):
-                        Text("Couldn’t assess this set").font(.largeTitle.bold())
                         recognitionNote
                         Text(reason)
                         Text(model.resultExercise.definition.copy.retakeHint)
                             .foregroundStyle(PlumbStyle.supportingText)
                     case .failed(let reason):
-                        Text("Couldn’t review this set").font(.largeTitle.bold())
                         Text(reason)
                     case .interrupted:
-                        Text("Set interrupted").font(.largeTitle.bold())
                         Text("Camera capture stopped before the set was complete.")
                     }
                 }
@@ -613,7 +582,8 @@ struct ContentView: View {
                 #endif
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
         }
         .safeAreaInset(edge: .bottom) {
             Button {
@@ -621,12 +591,12 @@ struct ContentView: View {
                 Task { await model.startPreview() }
             } label: {
                 Text(retakeLabel)
-                    .foregroundStyle(primaryButtonLabelColor)
+                    .foregroundStyle(PlumbStyle.primaryButtonText)
                     .frame(maxWidth: .infinity)
             }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 20)
                 .padding(.vertical, 12)
                 .background(.bar)
         }
@@ -647,6 +617,16 @@ struct ContentView: View {
     }
     #endif
 
+    private var resultTitle: String {
+        switch model.result {
+        case .measured: "Set reviewed"
+        case .insufficientView: "Couldn’t assess this set"
+        case .failed: "Couldn’t review this set"
+        case .interrupted: "Set interrupted"
+        case nil: "Set result"
+        }
+    }
+
     private var retakeLabel: String {
         if case .insufficientView = model.result { return "Retake set" }
         if case .measured(_, let cue) = model.result, cue != nil { return "Try this next set" }
@@ -654,18 +634,12 @@ struct ContentView: View {
     }
 
     private func nextAction(_ text: String) -> some View {
-        HStack(alignment: .top, spacing: 14) {
-            RoundedRectangle(cornerRadius: 2)
-                .fill(PlumbStyle.accent)
-                .frame(width: 3)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Next set")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(PlumbStyle.supportingText)
-                Text(text)
-                    .font(.body)
-            }
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Next set")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(PlumbStyle.supportingText)
+            Text(text)
+                .font(.body)
         }
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -879,7 +853,7 @@ struct ContentView: View {
                         if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
                     } label: {
                         Text("Open Settings")
-                            .foregroundStyle(primaryButtonLabelColor)
+                            .foregroundStyle(PlumbStyle.primaryButtonText)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
@@ -887,7 +861,6 @@ struct ContentView: View {
                         Task { await model.cancel(); await model.startPreview() }
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(PlumbStyle.accent)
                     .frame(minHeight: 44)
                     .contentShape(Rectangle())
                 } else {
@@ -895,7 +868,7 @@ struct ContentView: View {
                         Task { await model.cancel(); await model.startPreview() }
                     } label: {
                         Text("Try again")
-                            .foregroundStyle(primaryButtonLabelColor)
+                            .foregroundStyle(PlumbStyle.primaryButtonText)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)

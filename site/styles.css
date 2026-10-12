@@ -1,5 +1,5 @@
-:root{color-scheme:light dark;--paper:#fff;--ink:#141414;--quiet:#606963;--line:#dce3dd;--accent:#1f6a53}
-@media(prefers-color-scheme:dark){:root{--paper:#141414;--ink:#f5f7f3;--quiet:#b9c5bc;--line:#39473e;--accent:#8fe1bc}}
+:root{color-scheme:light dark;--paper:#fff;--ink:#141414;--quiet:#636366;--line:#c6c6c8;--accent:#141414}
+@media(prefers-color-scheme:dark){:root{--paper:#000;--ink:#fff;--quiet:#a1a1a6;--line:#38383a;--accent:#fff}}
 *{box-sizing:border-box}
 html{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;font-size:17px;line-height:1.55;background:var(--paper);color:var(--ink)}
 body{margin:0}

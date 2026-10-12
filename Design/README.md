@@ -6,7 +6,7 @@
 - [Production app icon and flat artwork](../Plumb/BrandArtwork/README.md)
 - [iPhone experience review and Apple design references](../docs/design/iphone-experience-review.md)
 
-The Figma guide is the identity reference for the iPhone app: purpose, mark, colour, type, voice, and icon appearance. It deliberately defines a brand rather than fixed screen layouts. The local `.fig` file is a saved snapshot; edit the live file for new decisions, then save a fresh project copy.
+The Figma guide is the identity reference for the iPhone app: purpose, mark, colour, type, voice, and icon appearance. It deliberately defines a brand rather than fixed screen layouts. The local `.fig` file and preview were refreshed from the live guide on 12 October 2026.
 
 ## Idea and identity
 
@@ -16,18 +16,16 @@ The Figma guide is the identity reference for the iPhone app: purpose, mark, col
 
 | Token | Hex | Role |
 | --- | --- | --- |
-| Black | `#141414` | Primary icon mark, text, and dark icon ground |
-| White | `#FFFFFF` | Light icon ground and reversed mark |
-| Ink | `#16231F` | Supporting text and interior brand ground |
-| Chalk | `#F5F7F3` | Quiet interior ground and reversed text |
-| Mist | `#DCE8E1` | Subtle supporting surface |
-| Evergreen | `#1F6A53` | Primary action and selective interactive accent in Light Mode |
-| Mint | `#BEEBD6` | Sparse interior accent, never part of the app icon |
-| Signal | `#2B845F` | Primary action and selective interactive accent in Dark Mode |
+| Black | `#000000` | Light appearance labels and primary action |
+| White | `#FFFFFF` | Light canvas; dark appearance labels and primary action |
+| Supporting | `#474747` | Reference for small supporting text in Light Mode |
+| Grouped | `#F2F2F7` | Reference for optional grouped surfaces in Light Mode |
+| Separator | `#C6C6C8` | Reference for quiet divisions in Light Mode |
+| Icon ink | `#141414` | Custom mark and dark icon ground |
 
-The icon is strictly black and white in its main appearances. The iPhone app uses white and black system surfaces, system typography, and Evergreen or Signal for the single primary action and a few interactive details. Green does not decorate content or encode an unsupported judgement about form. Keep supporting text dark enough to pass contrast checks in Light Mode. Use dynamic semantic iOS colours for backgrounds, labels, separators, warnings, and errors. Mint stays out of small text and filled buttons. The live Figma file includes Light, Dark, and increased contrast modes with the tested Signal value; the local `.fig` file is an earlier snapshot. The camera view should leave the person and their movement clearly visible.
+The iPhone interface uses semantic iOS colours (`systemBackground`, primary labels, system separators) and a monochrome adaptive action. Supporting copy uses 72% of the adaptive primary label because the default secondary gray missed a small-text contrast audit in Light Mode. The values above are Figma references, not fixed overrides for system colours. The system resolves Light, Dark, and increased contrast appearances. Reserve colour for meaningful platform states such as a destructive action; never use colour alone to communicate a form judgement. The camera view should leave the person and their movement clearly visible.
 
-The capture **Stop set** control is white over the camera in both appearances; red would suggest that Plumb is recording video. History uses `#C62828` for its destructive delete action in Light Mode and `#FF453A` in Dark Mode, keeping the text readable in both appearances. This is a functional control colour, not a brand accent.
+The capture **Stop set** control is white over the camera in both appearances; red would suggest that Plumb is recording video. History uses contrast-tested destructive red (`#C62828` in Light Mode, `#FF453A` in Dark Mode) only for deletion. This is a functional state, not a brand accent.
 
 Use SF Symbols for interface actions where appropriate. Keep the app icon and brand mark custom; Apple's [SF Symbols guidance](https://developer.apple.com/design/human-interface-guidelines/sf-symbols) prohibits using the symbols, or confusingly similar images, in app icons and logos.
 
@@ -35,7 +33,7 @@ Use SF Symbols for interface actions where appropriate. Keep the app icon and br
 
 - Use San Francisco through iOS system text styles and Dynamic Type. Regular carries guidance; Semibold marks decisions and key figures.
 - Use sentence case. Use monospaced digits for reps, time, and measured values. Avoid condensed display type and exaggerated tracking.
-- Figma's visible specimens use Inter because its renderer does not display SF Pro. The file retains named SF Pro text styles for handoff; Inter is not the app font.
+- Figma's visible specimens use Inter because its renderer does not display SF Pro. The file retains named SF Pro text styles for handoff; Inter is not the app font. Do not add a custom iOS font.
 
 ## Voice and imagery
 

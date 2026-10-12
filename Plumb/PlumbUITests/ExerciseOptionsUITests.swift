@@ -20,12 +20,12 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
-        XCTAssertTrue(app.staticTexts["Squat check"].waitForExistence(timeout: 5))
         let picker = app.buttons["setup.exercise"]
-        XCTAssertTrue(picker.exists)
+        XCTAssertTrue(picker.waitForExistence(timeout: 5))
+        XCTAssertEqual(picker.label, "Exercise: Squat")
         picker.tap()
         app.buttons["Push-up"].tap()
-        XCTAssertTrue(app.staticTexts["Push-up check"].waitForExistence(timeout: 5))
+        XCTAssertEqual(picker.label, "Exercise: Push-up")
         XCTAssertTrue(app.descendants(matching: .any).matching(
             NSPredicate(format: "label CONTAINS %@", "On the floor or a low step")).firstMatch.exists)
         app.buttons["Set up camera"].tap()
