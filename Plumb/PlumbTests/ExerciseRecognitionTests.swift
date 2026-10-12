@@ -130,7 +130,7 @@ struct RecognitionSessionTests {
             Issue.record("Expected a measured push-up set")
             return
         }
-        #expect(analysis.rubricVersion == "push-up-side-v3")
+        #expect(analysis.rubricVersion == "push-up-side-v4")
         #expect(model.currentSession?.sets.last?.exercise == .pushUp)
     }
 

@@ -6,7 +6,9 @@ nonisolated enum SquatRubric {
     /// side-view squat videos it was tried on.
     /// v4 (12 October 2026): follows one athlete, so other people in view no longer refuse the
     /// set, and the athlete may be hidden by someone else for up to 3 s (see `EvidenceRubric`).
-    static let version = "squat-side-v4"
+    /// v5 (13 October 2026): camera capture corroborates joints with a person mask so an ankle
+    /// inferred behind an obstruction cannot make a set appear measurable.
+    static let version = "squat-side-v5"
     static let minimumJointConfidence = EvidenceRubric.minimumJointConfidence
     static let descentThreshold = 0.10
     /// v3: 0.05 (was 0.03), about twice Vision's hip jitter on real side-view video.

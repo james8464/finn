@@ -165,7 +165,7 @@ nonisolated extension ExerciseKind {
 }
 
 nonisolated extension ExerciseDefinition {
-    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v4`).
+    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v5`).
     static let squat = ExerciseDefinition(
         kind: .bodyweightSquat,
         rubricVersion: SquatRubric.version,
@@ -213,7 +213,7 @@ nonisolated extension ExerciseDefinition {
     /// Side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.
     static let pushUp = ExerciseDefinition(
         kind: .pushUp,
-        rubricVersion: "push-up-side-v3",
+        rubricVersion: "push-up-side-v4",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.shoulder, .elbow, .wrist], anchor: .wrist),
         signal: .jointBend(from: .shoulder, vertex: .elbow, to: .wrist),
@@ -253,7 +253,7 @@ nonisolated extension ExerciseDefinition {
     /// camera-facing leg (hip, knee, ankle).
     static let staticLunge = ExerciseDefinition(
         kind: .staticLunge,
-        rubricVersion: "static-lunge-side-v3",
+        rubricVersion: "static-lunge-side-v4",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .hip, vertex: .knee, to: .ankle),
@@ -292,7 +292,7 @@ nonisolated extension ExerciseDefinition {
     /// Side-view stiff-leg deadlift, measured as hip hinge (shoulder, hip, knee). Feet stay planted.
     static let stiffLegDeadlift = ExerciseDefinition(
         kind: .stiffLegDeadlift,
-        rubricVersion: "stiff-leg-deadlift-side-v3",
+        rubricVersion: "stiff-leg-deadlift-side-v4",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.shoulder, .hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .shoulder, vertex: .hip, to: .knee),

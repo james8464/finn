@@ -1,6 +1,6 @@
 # Squat v1 validation results
 
-**Status: not started. Updated 12 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. A local 102-test iOS 27 simulator pass and a [successful hosted simulator workflow for the preceding commit](https://github.com/james8464/hackathon-project/actions/runs/38225538902) verify implementation behavior, not real-camera accuracy. New regressions now reject long tracking loss at the start and end of capture as well as in the middle. The 0.75-second retake gate still needs measurement on real sets. A provisional 0.35-second bystander window now triggers a retake in synthetic traces; its false-rejection rate in public gyms is unmeasured.
+**Status: participant validation not started. Updated 13 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. Simulator tests and four generated-video replays verify implementation behavior, not real-camera accuracy. The new covered-feet replay is refused after sampled person-mask corroboration; its false-refusal rate on real sets is unknown. The 0.75-second tracking retake gate and the bystander behavior still need measurement on physical iPhones.
 
 ## Simulator UI check · 11 October 2026
 
@@ -8,8 +8,9 @@ Built and launched commit `8c2959e` on the iPhone 18 Pro Max simulator (iOS 27.0
 
 | Evidence | Current state |
 | --- | --- |
-| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v4` |
-| App capture path on public gym videos | 44 of 50 measured with athlete tracking (5 without); 43 of 44 within one rep of an independent dip counter. See "Other people in view" in [`exercise-rules-v1.md`](exercise-rules-v1.md) |
+| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v5` |
+| Historical app capture path on public gym videos (v4, before person mask) | 44 of 50 measured with athlete tracking (5 without); 43 of 44 within one rep of an independent dip counter. The current v5 mask has not been replayed on this set. See "Other people in view" in [`exercise-rules-v1.md`](exercise-rules-v1.md) |
+| Generated video regressions (v5) | Six clear reps measured; standing still, hidden legs, and covered feet refused. These contain synthetic imagery and are not participant validation. |
 | Replay on public videos (not participants) | 42 of 50 Mendeley side-view squat videos measured by `squat-side-v3` (0 of 50 by `squat-side-v2`); counts within one rep of an independent dip counter on all 42; no human count. See [`exercise-rules-v1.md`](exercise-rules-v1.md) |
 | Tuning sets | 0 |
 | Holdout sets | 0 |

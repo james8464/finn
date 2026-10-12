@@ -102,7 +102,7 @@ struct TrackedSetEvidenceTests {
             return
         }
         #expect(analysis.reps.count == 10)
-        #expect(analysis.rubricVersion == "squat-side-v4")
+        #expect(analysis.rubricVersion == "squat-side-v5")
     }
 
     @Test func someoneWalkingInFrontForTwoSecondsIsBridged() {

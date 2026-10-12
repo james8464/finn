@@ -60,6 +60,30 @@ final class SkeletonOverlayUITests: XCTestCase {
         }
     }
 
+    /// Vision may infer an ankle behind an obstruction. The saved pose file includes person-mask
+    /// corroboration and must lead the normal workout flow to ask for a retake.
+    @MainActor
+    func testVideoWithHiddenFeetRequestsRetake() throws {
+        let environment = ProcessInfo.processInfo.environment
+        guard let video = environment["PLUMB_VIDEO_OCCLUDED_FILE"],
+              let poses = environment["PLUMB_VIDEO_OCCLUDED_POSES"] else {
+            throw XCTSkip("Set the occluded video and pose fixture paths to run this test.")
+        }
+        let app = XCUIApplication()
+        app.launchArguments += ["-plumb-video-file", video, "-plumb-video-poses", poses]
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["camera.skeleton"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Show hip, knee and ankle"].waitForExistence(timeout: 4))
+        XCTAssertFalse(app.staticTexts["Hip, knee and ankle visible"].exists)
+        app.buttons["Start set"].tap()
+        Thread.sleep(forTimeInterval: 12)
+        app.buttons["Stop set"].tap()
+        XCTAssertTrue(app.staticTexts["Couldn’t assess this set"].waitForExistence(timeout: 15))
+        XCTAssertFalse(app.staticTexts["6 measured reps"].exists)
+        attachScreenshot(named: "Covered feet request a retake")
+    }
+
     @MainActor
     private func attachScreenshot(named name: String) {
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())

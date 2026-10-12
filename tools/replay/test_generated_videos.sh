@@ -27,3 +27,20 @@ print("{}: {}, {} reps, {} frames".format(
 check_result "synthetic squat" "squat-six-reps.mp4" measured 6
 check_result "standing still" "standing-no-reps.mp4" retake 0
 check_result "lower body hidden" "squat-lower-body-hidden.mp4" retake 0
+check_result "feet hidden" "squat-feet-hidden.mp4" retake 0
+
+# The live five-frame preview must not claim all squat landmarks are visible while the feet
+# stay covered. A per-third-frame check without carrying its verdict forward can flicker.
+python3 - "$scratch/feet hidden-poses.json" <<'PY'
+import json, sys
+frames = json.load(open(sys.argv[1]))
+for index in range(10, len(frames)):
+    window = frames[index-4:index+1]
+    for side in ("left", "right"):
+        required = [side + role for role in ("Hip", "Knee", "Ankle")]
+        visible = sum(all(dict(zip(frame["joints"][::2], frame["joints"][1::2]))
+                          .get(joint, {}).get("confidence", 0) >= 0.3 for joint in required)
+                      for frame in window)
+        assert visible < 4, ("covered feet reported as visible", index, side, visible)
+print("feet hidden framing: stays in adjustPosition")
+PY

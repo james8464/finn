@@ -1,6 +1,6 @@
 # Exercise rules v1 and the 3D camera-angle check
 
-**Status on 12 October 2026: implemented and tested on the iOS 27 simulator with synthetic pose traces, and replayed on Vision poses from public side-view videos (see "Replay on real videos" below).** No expert review or physical-iPhone run exists yet for anything on this page. The squat keeps its own protocol in [`squat-v1-protocol.md`](squat-v1-protocol.md).
+**Status on 13 October 2026: implemented and tested on the iOS 27 simulator with synthetic pose traces and generated-video replays.** Earlier capture versions were replayed on Vision poses from public side-view videos (see "Replay on real videos" below); the current person-mask revision has not. No expert review or physical-iPhone run exists yet for anything on this page. The squat keeps its own protocol in [`squat-v1-protocol.md`](squat-v1-protocol.md).
 
 ## How a rule is written
 
@@ -10,16 +10,18 @@ The starting value comes from the whole set, not its first frames: the 10th perc
 
 | Exercise | Rubric | Signal on the camera-facing side | Must stay visible | Still joint | Leave top / reach bottom / back at top / return margin | Rep duration |
 | --- | --- | --- | --- | --- | --- | --- |
-| Bodyweight squat | `squat-side-v4` | Hip drop divided by standing hip-to-ankle height | hip, knee, ankle | ankle | 0.10 / 0.15 / 0.05 / 0.04 | 0.5 to 8 s |
-| Push-up | `push-up-side-v3` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.4 to 8 s |
-| Static lunge | `static-lunge-side-v3` | Knee angle closing (hip, knee, ankle), degrees | hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.5 to 8 s |
-| Stiff-leg deadlift | `stiff-leg-deadlift-side-v3` | Hip angle closing (shoulder, hip, knee), degrees | shoulder, hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.6 to 10 s |
+| Bodyweight squat | `squat-side-v5` | Hip drop divided by standing hip-to-ankle height | hip, knee, ankle | ankle | 0.10 / 0.15 / 0.05 / 0.04 | 0.5 to 8 s |
+| Push-up | `push-up-side-v4` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.4 to 8 s |
+| Static lunge | `static-lunge-side-v4` | Knee angle closing (hip, knee, ankle), degrees | hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.5 to 8 s |
+| Stiff-leg deadlift | `stiff-leg-deadlift-side-v4` | Hip angle closing (shoulder, hip, knee), degrees | shoulder, hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.6 to 10 s |
 
 The rep durations are shorter than in the first versions because a rep now ends 65% of the way back up instead of at the very top; at the old minimums, one-second squats on real video were dropped as too fast.
 
 Angles are computed in pixel proportions: the y distance is scaled by the image height divided by its width before the angle is taken.
 
 All four use the squat's evidence rules: joint confidence at least 0.3, the required joints present and confident in 80% of frames, no tracking gap over 0.75 s (3 s while someone else is in view, see "Other people in view" below), the still joint staying within 10% of the frame (spread between its 10th and 90th percentile positions, so one misplaced detection does not count as the phone moving), and a set of at least 2 seconds. A refusal names what was missing, with numbers: the share of frames where the joints were seen and the hardest joint to see, the length and start of the tracking gap, or how far the still joint moved. They also share the observation rule: when the last two reps' range is 85% or less of the first two, the result names those reps ("Your elbow bend became smaller in the last two reps.") and suggests "Try a pace you can keep consistent." Comparisons only pair sets of the same exercise in one session.
+
+Since the 13 October camera-capture revision (`squat-side-v5`, `*-side-v4`), every third analyzed frame also asks Vision for a fast person mask. A joint inside the skeleton but outside the person mask is removed before the evidence gate sees it; the mask verdict carries across the two intervening frames so framing guidance stays consistent. Repeated mask failures cause a retake. This guards against a confident ankle inferred behind an obstruction. The four generated video fixtures measure six clear squats and refuse no motion, hidden legs, and covered feet. Their abrupt pose changes and synthetic imagery do not establish sensitivity or specificity on real people. Person segmentation covers bystanders too, so the physical-device holdout must include partial occlusions, overlapping people, and false-refusal measurement.
 
 A test replays 600 synthetic squat traces through a frozen copy of `squat-side-v2`. The current version must measure every set version 2 measured, give the same count on more than half of them, count fewer reps on at most one set in twenty, and never more than one rep fewer. On the current code: 281 sets measured by both, 177 with the same count, 1 with one rep fewer, none lost.
 
@@ -100,4 +102,4 @@ So 75° separates front views from the rest on these videos. 30° sends the turn
 6. For each exercise, count reps by hand and compare with the app on a few sets, including a deliberately shallow set and an incomplete last rep.
 7. If the check refuses a side-on set, note the readout, switch it off in Options for the demo, and say so; the 2D visibility rules still run.
 
-For the squat holdout in [`squat-v1-protocol.md`](squat-v1-protocol.md), keep the 3D switch in one position for every holdout set and write which one in `notes`, because it can refuse a set that `squat-side-v4` alone would have measured.
+For the squat holdout in [`squat-v1-protocol.md`](squat-v1-protocol.md), keep the 3D switch in one position for every holdout set and write which one in `notes`, because it can refuse a set that `squat-side-v5` alone would have measured.

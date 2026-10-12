@@ -1,6 +1,6 @@
 # Plumb — product and build plan
 
-**Working plan, updated 12 October 2026.** Plumb is an iPhone-first strength-training companion in development. Exercises are now described as data, and the app checks a side-view squat plus first-draft push-up, static lunge, and stiff-leg deadlift rubrics that no real set has tested yet ([`exercise-rules-v1.md`](docs/validation/exercise-rules-v1.md)). A Vision 3D camera-angle check can refuse front or angled sets, and Create ML exercise recognition is wired in without a trained model ([`tools/exercise-classifier`](tools/exercise-classifier/README.md)). The app also includes a squat setup/capture/result flow, a tested rep analyzer and evidence gate, a provisional cue selector, local derived-summary history with saved-session detail and second-set comparison, optional tap-to-speak post-set feedback, and an optional guarded Foundation Models wording layer. These pass simulator tests; real-camera orientation, spoken audio routing, generated wording, and coaching quality still require physical-device and expert validation. Watch integration and subscriptions have not been implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
+**Working plan, updated 13 October 2026.** Plumb is an iPhone-first strength-training companion in development. The app has a camera, setup, set, and result loop for four side-view exercises, with a shared rep analyzer, athlete tracking, an evidence gate, local history and comparison, optional spoken feedback, and guarded Foundation Models wording. A sustained clearly frontal view can be refused; other angled views receive a placement tip. The latest capture revision checks sampled joints against a person mask and refuses the generated covered-feet test. Simulator and generated-video checks pass, but physical-device reliability, coaching quality, audio routing, and model wording still need validation. Apple Watch integration and subscriptions are not implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
 
 The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md). It scopes the first complete iPhone squat loop and its validation gate; later integrations remain in this broader product plan.
 
@@ -54,6 +54,19 @@ The Watch's heart rate describes effort context; it cannot prove whether a rep h
 
 ## 3. Scope and priorities
 
+### Build order for the challenge
+
+1. **Make value clear immediately on iPhone.** The first screen names the set-review purpose, lets someone choose an exercise, and puts camera setup one tap away. Capture should lead to one measured observation or a plain retake reason within the latency gate, without a decorative score or mandatory sign-in.
+2. **Validate the iPhone loop before adding a second sensor.** Run the camera, occlusion, camera-angle, performance, and expert-cue protocol on a physical iPhone. The person-mask check must be tested for both missed occlusions and false refusals on real clothing and backgrounds.
+3. **Prototype Apple Watch as the next device.** Start with a watchOS workout session, elapsed time, and discreet start/stop or haptic feedback, while the iPhone remains the form sensor and source of truth. Add accelerometer fusion only after synchronized sets show a measurable improvement in rep boundaries or tempo over camera-only analysis. Do not make the Watch a condition for use.
+4. **Add platform reach only when it serves this loop.** A widget or Live Activity could show an active session and return to the iPhone workout. Apple TV viewing and a second iPhone camera are stretch experiments requiring a clear viewing or measurement benefit, privacy review, and paired-device tests; they are not part of the submission claim.
+
+The movement-analysis interface may later be replaced or augmented by a team-provided engine. Keep the contract explicit: timestamped poses or movement events, per-joint confidence, recognized exercise, and a versioned evidence result. Benchmark the proposed engine against the same replay fixtures and consented holdout before displaying its coaching claims. No SDK, repository, or sample output has been provided yet, so the current on-device analyzer remains the working implementation.
+
+The repository and its support/privacy pages are public. Check ownership and license terms before adding any team or third-party analysis code or nonpublic training data. Repository visibility is a team decision because changing it can affect collaboration and the published pages; it is not an implementation prerequisite for the current iPhone work.
+
+**Business test:** Let someone complete a useful first set before any payment prompt. A freemium allowance, paid comparison/history depth, and trainer referrals are hypotheses to test with users; StoreKit, pricing, and conversion claims wait for a functioning paid tier and App Store setup. A text-only, user-initiated result share can invite a trainer without uploading video or requiring an account. Track activation as the share of new users who reach a measured result within two setup attempts, then measure a second-set return and willingness to pay with consented research rather than inventing traction.
+
 ### Prototype: one complete evidence loop
 
 - Branded iPhone app with camera permission, setup guidance, framing feedback, and a real capture session.
@@ -96,7 +109,7 @@ Cut Watch integration, then speech, then a second exercise. Keep real iPhone cap
 
 - **SwiftUI** for the iPhone experience; system text styles, Dynamic Type, VoiceOver labels, Dark Mode, and large workout controls.
 - **AVFoundation** for camera frames through `AVCaptureVideoDataOutput`. Discard late frames rather than building an unbounded processing queue.
-- **Vision** body-pose observations. Begin with timestamped 2D points and per-joint confidence from a live frame stream, not isolated still photos. Avoid universal joint-angle cutoffs: a 2D projection changes with camera viewpoint. [Apple's 3D body-pose API](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) is a later comparison candidate; it can use depth metadata when available but returns the most prominent person and does not by itself establish accuracy or bystander safety.
+- **Vision** body-pose observations from a live frame stream, not isolated still photos. Every third analyzed frame also uses a fast person mask to check that inferred joints have image evidence. Vision 3D body pose estimates the camera view on supported hardware; neither pose nor segmentation alone establishes coaching accuracy. Avoid universal joint-angle cutoffs because a 2D projection changes with viewpoint.
 - A **deterministic exercise engine** converts a time series of pose points into rep phases and observed metrics. It owns every factual coaching claim.
 - **Foundation Models**, if available, only summarizes a small structured observation and chooses wording from allowed cue categories. Check model availability at runtime; fallback to reviewed templates. Do not send raw video to a language model for the MVP.
 - **SwiftData or a small local store** for workout summaries and preferences. Raw clips are opt-in and deletable.
@@ -108,6 +121,7 @@ Cut Watch integration, then speech, then a second exercise. Keep real iPhone cap
 ```text
 Camera frame
   → Vision pose points + confidence
+  → sampled person-mask corroboration
   → orientation/framing/occlusion gate
   → smoothed joint trajectories
   → exercise-specific rep state machine
@@ -119,7 +133,7 @@ Camera frame
 
 The fuller observation contract should include exercise, assessed viewpoint, involved joints, confidence, metric, threshold version, and rep/time range. The current prototype stores a smaller derived summary and does not claim to know its actual camera angle. Thresholds are product hypotheses reviewed with trainers, not medical constants. The app should suppress a cue if the required joints are missing, a rep is incomplete, the camera moves, another person dominates the frame, or evidence conflicts.
 
-**Viewpoint is an unresolved measurement gate.** The current side-view rubric uses relative 2D movement and joint visibility; it has no validated automatic test that the actual view is side-on. The validation sheet therefore separates the observed camera viewpoint from a specialist's suitability judgment and counts measured results on unsuitable views. A [Vision 3D](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) camera-angle check is now in the app, behind an Options switch that is on by default: it refuses a set when most estimates are more than 30° from a profile. That limit is unmeasured. Labeled front, side, and three-quarter sets are still needed to set it and to compare it with the iPhone-only baseline. A poor view should produce a retake request, never a confident range or technique claim.
+**Viewpoint remains an unvalidated measurement gate.** The side-view rubric uses relative 2D movement and joint visibility; the validation sheet therefore separates actual camera viewpoint from a specialist's suitability judgment and counts measured results on unsuitable views. The [Vision 3D](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) check, on by default, suggests turning when the median is over 30° from profile and refuses only a sustained clearly frontal view at 75° or more. Those cutoffs were examined on public videos, but need physical iPhone confirmation and expert suitability labels. Labeled front, side, and three-quarter sets must reveal both false refusals and false acceptance.
 
 **Research sequence after the first build:** benchmark 3D pose and any camera-view classifier on real devices, then test personal calibration against expert-labeled sound reps, and finally compare synchronized Watch accelerometer plus camera data with camera-only rep boundaries and tempo. Personal calibration can detect within-person drift; it cannot establish that the baseline rep was technically sound. Temporary best/worst pose overlays could help explain a cue, but storing any frame, even briefly in memory, requires an explicit on-screen privacy description, bystander handling, and deletion at set end. These are experiments, not implemented features or a reason to broaden the first-build claim.
 

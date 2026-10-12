@@ -9,7 +9,7 @@ def row(set_id, participant_id, view, suitable, outcome):
     result = dict.fromkeys(COLUMNS, "")
     result.update(set_id=set_id, participant_id=participant_id, split="holdout",
                   consent_version="v1", device_model="iPhone", ios_build="27.0",
-                  app_commit="abc123", rubric_version="squat-side-v4", lighting="even",
+                  app_commit="abc123", rubric_version="squat-side-v5", lighting="even",
                   side="left", view_category=view, body_visible="yes", bystander="no",
                   setup_attempts="1", app_outcome=outcome,
                   app_reps="5" if outcome == "measured" else "",

@@ -36,6 +36,8 @@ jobs:
           TEST_RUNNER_PLUMB_VIDEO_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps-poses.json
           TEST_RUNNER_PLUMB_VIDEO_SECONDS: '12'
           TEST_RUNNER_PLUMB_VIDEO_EXPECTED_REPS: '6'
+          TEST_RUNNER_PLUMB_VIDEO_OCCLUDED_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden.mp4
+          TEST_RUNNER_PLUMB_VIDEO_OCCLUDED_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden-poses.json
         run: |
           xcodebuild test \
             -project Plumb/Plumb.xcodeproj \
