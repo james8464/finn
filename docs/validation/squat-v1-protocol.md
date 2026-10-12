@@ -6,7 +6,7 @@
 
 For a bodyweight squat filmed from one side, can a new user set up the phone, obtain the same rep count as a human annotator, and receive at most one relevant, camera-supported observation within five seconds of stopping? The app measures a within-person 2D pattern. It does not grade overall form, diagnose an injury, or determine that a rep is safe.
 
-The current implementation is `SquatRubric.version = squat-side-v2`. Version 2 adds a conservative retake when selected-side tracking is lost for more than 0.75 seconds, even if overall joint coverage exceeds 80%. Version 1 had an aggregate-only coverage check; no participant sets were collected under it. Freeze the app commit, gate thresholds, and cue wording before the holdout. Any change after that starts a new rubric version and a new holdout. The `squat-v1` filenames denote the first validation round, not the algorithm version.
+The current implementation is `SquatRubric.version = squat-side-v2`. Version 2 adds a conservative retake when selected-side tracking is lost for more than 0.75 seconds, even if overall joint coverage exceeds 80%. Version 1 had an aggregate-only coverage check; no participant sets were collected under it. Freeze the app commit, gate thresholds, and cue wording before the holdout. Any change after that starts a new rubric version and a new holdout. The Options switch **Check the camera angle in 3D** can refuse a squat set before `squat-side-v2` runs (see [`exercise-rules-v1.md`](exercise-rules-v1.md)); keep it in one position for the whole holdout and write which one in `notes`. The `squat-v1` filenames denote the first validation round, not the algorithm version.
 
 ## Participants and consent
 
