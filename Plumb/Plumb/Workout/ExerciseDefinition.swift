@@ -101,9 +101,10 @@ nonisolated struct ExerciseCopy: Equatable, Sendable {
     /// Lowercase noun used in shared text, such as "Plumb squat set".
     let shareNoun: String
     let setupTitle: String
-    let setupSummary: String
-    let placement: String
-    let stance: String
+    let placementTitle: String
+    let placementDetail: String
+    let stanceTitle: String
+    let stanceDetail: String
     let framingPrompt: String
     let checkingVisibility: String
     let showJoints: String
@@ -202,9 +203,10 @@ nonisolated extension ExerciseDefinition {
             name: "Squat",
             shareNoun: "squat",
             setupTitle: "Squat check",
-            setupSummary: "Check a set of squats, then see one observation you can use on your next set.",
-            placement: "Place your iPhone at hip height, a few steps away.",
-            stance: "Stand sideways, with your whole body in view.",
+            placementTitle: "Place your iPhone",
+            placementDetail: "At hip height, a few steps away.",
+            stanceTitle: "Stand sideways",
+            stanceDetail: "Keep your whole body in view.",
             framingPrompt: "Stand sideways. Show head to toe.",
             checkingVisibility: "Checking leg visibility",
             showJoints: "Show hip, knee and ankle",
@@ -240,9 +242,10 @@ nonisolated extension ExerciseDefinition {
             name: "Push-up",
             shareNoun: "push-up",
             setupTitle: "Push-up check",
-            setupSummary: "Check a set of push-ups, then see one observation you can use on your next set.",
-            placement: "Place your iPhone on the floor or a low step, a few steps away.",
-            stance: "Turn sideways and start at the top, with your arms straight.",
+            placementTitle: "Place your iPhone low",
+            placementDetail: "On the floor or a low step, a few steps away.",
+            stanceTitle: "Turn sideways",
+            stanceDetail: "Start at the top, with your arms straight.",
             framingPrompt: "Turn sideways. Keep your whole body in view.",
             checkingVisibility: "Checking arm visibility",
             showJoints: "Show shoulder, elbow and wrist",
@@ -279,9 +282,10 @@ nonisolated extension ExerciseDefinition {
             name: "Static lunge",
             shareNoun: "lunge",
             setupTitle: "Lunge check",
-            setupSummary: "Check a set of static lunges, then see one observation you can use on your next set.",
-            placement: "Place your iPhone at hip height, a few steps away.",
-            stance: "Stand sideways in a split stance with both feet planted. Keep the same front leg for each set.",
+            placementTitle: "Place your iPhone",
+            placementDetail: "At hip height, a few steps away.",
+            stanceTitle: "Stand sideways in a split stance",
+            stanceDetail: "Keep both feet planted and the same front leg for each set.",
             framingPrompt: "Stand sideways. Show head to toe.",
             checkingVisibility: "Checking leg visibility",
             showJoints: "Show hip, knee and ankle",
@@ -317,9 +321,10 @@ nonisolated extension ExerciseDefinition {
             name: "Stiff-leg deadlift",
             shareNoun: "stiff-leg deadlift",
             setupTitle: "Deadlift check",
-            setupSummary: "Check a set of stiff-leg deadlifts, then see one observation you can use on your next set.",
-            placement: "Place your iPhone at hip height, a few steps away.",
-            stance: "Stand sideways and start standing tall, with your whole body in view.",
+            placementTitle: "Place your iPhone",
+            placementDetail: "At hip height, a few steps away.",
+            stanceTitle: "Stand sideways",
+            stanceDetail: "Start standing tall, with your whole body in view.",
             framingPrompt: "Stand sideways. Show head to toe.",
             checkingVisibility: "Checking body visibility",
             showJoints: "Show shoulder, hip, knee and ankle",

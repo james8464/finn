@@ -1,6 +1,15 @@
 import SwiftUI
 import UIKit
 
+private enum PlumbStyle {
+    static let accent = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 43 / 255, green: 132 / 255, blue: 95 / 255, alpha: 1)
+            : UIColor(red: 31 / 255, green: 106 / 255, blue: 83 / 255, alpha: 1)
+    })
+    static let supportingText = Color.primary.opacity(0.72)
+}
+
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
@@ -9,11 +18,7 @@ struct ContentView: View {
     @State private var observationSpeaker = ObservationSpeaker()
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
-    private var primaryButtonLabelColor: Color {
-        Color(uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark ? .black : .white
-        })
-    }
+    private let primaryButtonLabelColor = Color.white
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -76,7 +81,7 @@ struct ContentView: View {
             }
             #endif
         }
-        .tint(.accentColor)
+        .tint(PlumbStyle.accent)
         #if DEBUG
         .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
         #endif
@@ -113,54 +118,45 @@ struct ContentView: View {
                     Image("PlumbMark")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 42, height: 42)
+                        .frame(width: 32, height: 32)
                         .accessibilityHidden(true)
-                        .padding(.bottom, 28)
+                        .padding(.bottom, 32)
                 }
                 Text(selectedCopy.setupTitle)
                     .font(.largeTitle.bold())
-                    .padding(.bottom, 12)
-                Text(selectedCopy.setupSummary)
+                    .padding(.bottom, 8)
+                Text("One clear observation after each set.")
                     .font(.body)
-                    .padding(.bottom, 24)
+                    .foregroundStyle(PlumbStyle.supportingText)
+                    .padding(.bottom, 20)
                 exercisePicker
-                    .padding(.bottom, model.usesExerciseRecognition ? 8 : 28)
                 if model.usesExerciseRecognition {
                     Text("Plumb will try to recognize the exercise after the set. If it isn’t confident, it uses your choice.")
                         .font(.footnote)
-                        .padding(.bottom, 28)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                        .padding(.top, 4)
                 }
-                VStack(alignment: .leading, spacing: 16) {
-                    Label(selectedCopy.placement, systemImage: "iphone.gen3")
-                    Label(selectedCopy.stance, systemImage: "figure.stand")
+                Divider()
+                    .padding(.vertical, 30)
+                Text("Before you start")
+                    .font(.headline)
+                    .padding(.bottom, 20)
+                VStack(spacing: 0) {
+                    setupStep(selectedCopy.placementTitle, detail: selectedCopy.placementDetail,
+                              symbol: "iphone.gen3")
+                    Divider().padding(.leading, 44)
+                    setupStep(selectedCopy.stanceTitle, detail: selectedCopy.stanceDetail,
+                              symbol: "figure.stand")
                 }
-                .font(.body)
-                .padding(.bottom, 36)
-                Text("On-device analysis. No video saved. One camera view only.")
+                Label("Analyzed on this iPhone. No video saved.", systemImage: "lock.shield")
                     .font(.footnote)
-                    .padding(.bottom, 28)
-                let links = dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-                    : AnyLayout(HStackLayout(spacing: 24))
-                links {
-                    NavigationLink { historyPage } label: {
-                        Text("History")
-                            .frame(minWidth: 88, minHeight: 48)
-                            .contentShape(Rectangle())
-                    }
-                    NavigationLink { privacyPage } label: {
-                        Text("Privacy")
-                            .frame(minWidth: 88, minHeight: 48)
-                            .contentShape(Rectangle())
-                    }
-                    NavigationLink { optionsPage } label: {
-                        Text("Options")
-                            .frame(minWidth: 88, minHeight: 48)
-                            .contentShape(Rectangle())
-                    }
-                }
-                .font(.subheadline)
-                .buttonStyle(.plain)
+                    .foregroundStyle(PlumbStyle.supportingText)
+                    .padding(.top, 28)
+                Text("Measurements come from one camera view.")
+                    .font(.footnote)
+                    .foregroundStyle(PlumbStyle.supportingText)
+                    .padding(.leading, 27)
+                    .padding(.top, 4)
             }
             #if DEBUG
             .padding(.top, isDemo && dynamicTypeSize.isAccessibilitySize ? 64 : 0)
@@ -168,6 +164,7 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
+        .scrollIndicators(.hidden)
         .safeAreaInset(edge: .bottom) {
             Button {
                 Task { await model.startPreview() }
@@ -180,9 +177,25 @@ struct ContentView: View {
                 .controlSize(.large)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
-                .background(.regularMaterial)
+                .background(.bar)
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                NavigationLink { historyPage } label: {
+                    Label("History", systemImage: "clock.arrow.circlepath")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink { optionsPage } label: {
+                    Label("Options", systemImage: "slider.horizontal.3")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink { privacyPage } label: {
+                    Label("Privacy", systemImage: "hand.raised")
+                }
+            }
+        }
     }
 
     private var selectedCopy: ExerciseCopy { model.selectedExercise.definition.copy }
@@ -204,12 +217,12 @@ struct ContentView: View {
                 : AnyLayout(HStackLayout(spacing: 12))
             layout {
                 Text("Exercise")
-                    .font(.subheadline)
+                    .font(.body)
                     .foregroundStyle(.primary)
                 if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
                 HStack(spacing: 8) {
                     Text(selectedCopy.name)
-                        .font(.headline)
+                        .font(.body.weight(.semibold))
                         .foregroundStyle(.primary)
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.footnote.weight(.semibold))
@@ -225,49 +238,73 @@ struct ContentView: View {
         .accessibilityHint("Choose the exercise to check")
     }
 
+    private func setupStep(_ title: String, detail: String, symbol: String) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            Image(systemName: symbol)
+                .font(.title3)
+                .frame(width: 28, height: 28)
+                .foregroundStyle(PlumbStyle.accent)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.body.weight(.semibold))
+                Text(detail).font(.body).foregroundStyle(PlumbStyle.supportingText)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 14)
+        .accessibilityElement(children: .combine)
+    }
+
     private var privacyPage: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: 24) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Camera").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Video is processed on this iPhone and never saved.")
                     Text("Plumb uses the camera to measure a supported exercise from the side. Camera frames and pose points stay on this iPhone.")
                     Text("One camera view cannot assess your whole technique or prevent injury.")
                 }
+                Divider()
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Saved results").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Measured set summaries are saved on this iPhone so you can review previous sets.")
                     Text("Saved summaries may be included in your device backup.")
                     Text("Delete saved sessions in History.")
                 }
+                Divider()
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Optional audio").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone.")
                 }
+                Divider()
                 if model.hasExerciseClassifier {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Optional exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
                         Text("When you turn it on in Options, an on-device model reads pose points after a set to recognize the exercise. Pose points and video stay on this iPhone.")
                     }
+                    Divider()
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Optional explanation").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.")
                 }
+                Divider()
                 Link("Full privacy policy", destination: URL(string: "https://james8464.github.io/hackathon-project/privacy.html")!)
                     .frame(minHeight: 44, alignment: .leading)
                     .contentShape(Rectangle())
             }
+            .font(.body)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
         .scrollIndicators(.hidden)
         .navigationTitle("Privacy")
+        .navigationBarTitleDisplayMode(.large)
     }
 
     private var optionsPage: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: 24) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
                     if model.hasExerciseClassifier {
@@ -282,6 +319,7 @@ struct ContentView: View {
                         Text("This build has no trained recognition model, so Plumb uses the exercise you choose on the first screen.")
                     }
                 }
+                Divider()
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Camera angle").font(.headline).accessibilityAddTraits(.isHeader)
                     Toggle("Check the camera angle in 3D", isOn: Binding(
@@ -293,10 +331,13 @@ struct ContentView: View {
                     Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one, and asks you to turn when the exercise needs a side view. The angle limit has not been tested on real sets yet. If Plumb asks you to turn while your side already faces the camera, switch this off.")
                 }
             }
+            .font(.body)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
+        .scrollIndicators(.hidden)
         .navigationTitle("Options")
+        .navigationBarTitleDisplayMode(.large)
     }
 
     @ViewBuilder private var recognitionNote: some View {
@@ -323,6 +364,11 @@ struct ContentView: View {
             Color.black.ignoresSafeArea()
             CameraPreview(session: model.previewSession)
                 .ignoresSafeArea()
+                .accessibilityHidden(true)
+            LinearGradient(colors: [.clear, .black.opacity(0.76)],
+                           startPoint: .center, endPoint: .bottom)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
                 .accessibilityHidden(true)
             VStack(spacing: 16) {
                 #if DEBUG
@@ -359,13 +405,15 @@ struct ContentView: View {
                         .tint(.white)
                 } else if model.stage == .capturing {
                     Text("Move at your own pace")
-                    Button("Stop set") {
+                    Button {
                         let tappedAt = ContinuousClock.now
                         Task { await model.endSet(tappedAt: tappedAt) }
+                    } label: {
+                        Text("Stop set").foregroundStyle(.black)
                     }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
-                        .tint(Color(red: 198 / 255, green: 40 / 255, blue: 40 / 255))
+                        .tint(.white)
                 } else if case .countdown(let count) = model.stage {
                     Text("\(count)")
                         .font(.system(size: 72, weight: .semibold, design: .rounded))
@@ -436,9 +484,12 @@ struct ContentView: View {
                 if let result = model.result {
                     switch result {
                     case .measured(let analysis, let cue):
-                        Text("Set reviewed").font(.largeTitle.bold())
+                        Text("Set reviewed")
+                            .font(.largeTitle.bold())
                         Text("\(analysis.reps.count) measured reps")
-                            .font(.title2.weight(.semibold)).monospacedDigit()
+                            .font(.title3)
+                            .monospacedDigit()
+                            .foregroundStyle(PlumbStyle.supportingText)
                         recognitionNote
                         if model.historyIssue != nil {
                             Text("Couldn’t confirm this set was saved.")
@@ -452,12 +503,22 @@ struct ContentView: View {
                             }
                         }
                         if let cue {
+                            Divider().padding(.vertical, 8)
                             if model.cueDismissed {
-                                Text("Observation marked not relevant.").font(.title3)
+                                Text("Observation marked not relevant.")
+                                    .font(.body)
+                                    .foregroundStyle(PlumbStyle.supportingText)
                             } else {
-                                Text(cue.observation).font(.title3.weight(.semibold))
+                                Text("Observation")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                                Text(cue.observation)
+                                    .font(.title2.weight(.semibold))
                                 Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
-                                Text(cue.nextAction)
+                                    .font(.subheadline)
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                                nextAction(cue.nextAction)
+                                    .padding(.top, 4)
                                 if let spokenText = SpokenObservation.text(for: analysis, cue: cue) {
                                     Button {
                                         if observationSpeaker.isSpeaking {
@@ -471,16 +532,20 @@ struct ContentView: View {
                                             .frame(minHeight: 44, alignment: .leading)
                                     }
                                     .buttonStyle(.plain)
+                                    .foregroundStyle(PlumbStyle.accent)
                                 }
                                 Button("Not relevant") {
                                     observationSpeaker.stop()
                                     model.dismissCue()
                                 }
                                     .buttonStyle(.plain)
-                                    .frame(minHeight: 48)
+                                    .font(.subheadline)
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                                    .frame(minHeight: 44)
                                     .contentShape(Rectangle())
                             }
                         } else {
+                            Divider().padding(.vertical, 8)
                             if analysis.reps.count < 4 {
                                 Text("Plumb needs at least four measured reps before it can show an observation.")
                                     .font(.title3)
@@ -488,14 +553,17 @@ struct ContentView: View {
                                 Text("No clear pattern to call out in this set.").font(.title3)
                             }
                             Text("This is a camera measurement, not a full technique assessment.")
+                                .font(.footnote)
+                                .foregroundStyle(PlumbStyle.supportingText)
                         }
+                        Divider().padding(.vertical, 8)
                         if let comparison = model.comparison {
                             comparisonView(comparison)
                         } else if let gap = model.comparisonGap {
                             Text(gap == .differentExercise
                                  ? "Plumb compares sets of the same exercise. Do another set of this exercise to compare."
                                  : "These sets used different camera views, so Plumb can’t compare them reliably.")
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(PlumbStyle.supportingText)
                         }
                         DisclosureGroup("Rep details") {
                             repList(analysis.reps, exercise: model.resultExercise)
@@ -507,6 +575,7 @@ struct ContentView: View {
                             Label("Share summary", systemImage: "square.and.arrow.up")
                                 .frame(minHeight: 44, alignment: .leading)
                         }
+                        .font(.subheadline)
                         .accessibilityIdentifier("result.shareSummary")
                         .accessibilityHint("Shares the measured summary without video")
                     case .insufficientView(let reason):
@@ -514,7 +583,7 @@ struct ContentView: View {
                         recognitionNote
                         Text(reason)
                         Text(model.resultExercise.definition.copy.retakeHint)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(PlumbStyle.supportingText)
                     case .failed(let reason):
                         Text("Couldn’t review this set").font(.largeTitle.bold())
                         Text(reason)
@@ -527,13 +596,13 @@ struct ContentView: View {
                 if isValidationMode, let milliseconds = model.lastStopToResultMilliseconds {
                     Text("Validation timing · Stop to result: \(milliseconds) ms")
                         .font(.footnote.monospacedDigit())
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(PlumbStyle.supportingText)
                         .accessibilityIdentifier("validation.stopToResult")
                 }
                 if isValidationMode {
                     Text("Validation 3D view · \(viewVerdictReadout(model.lastViewVerdict))")
                         .font(.footnote.monospacedDigit())
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(PlumbStyle.supportingText)
                         .accessibilityIdentifier("validation.viewCheck")
                 }
                 #endif
@@ -554,7 +623,7 @@ struct ContentView: View {
                 .controlSize(.large)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
-                .background(.regularMaterial)
+                .background(.bar)
         }
         .toolbar(.hidden, for: .navigationBar)
         .onDisappear { observationSpeaker.stop() }
@@ -579,109 +648,109 @@ struct ContentView: View {
         return "Try another set"
     }
 
-    private var historyPage: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                historySection
-                Button(role: .destructive) {
-                    deleteAllRequested = true
-                } label: {
-                    Text("Delete all local data")
-                        .font(.subheadline)
-                        .foregroundStyle(destructiveLabelColor)
-                        .frame(minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
+    private func nextAction(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(PlumbStyle.accent)
+                .frame(width: 3)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Next set")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(PlumbStyle.supportingText)
+                Text(text)
+                    .font(.body)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(24)
         }
-        .navigationTitle("History")
+        .fixedSize(horizontal: false, vertical: true)
     }
 
-    @ViewBuilder private var historySection: some View {
-        if model.historyIssue == .corrupted {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Couldn’t read saved history").font(.headline)
-                Text("You can move the damaged file aside and start a new local history.")
-                    .font(.subheadline).foregroundStyle(.secondary)
-                Button("Recover history") { model.recoverHistory() }
-                    .buttonStyle(.bordered)
-            }
-        } else if model.historyIssue == .unavailable {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(model.hasPendingDeletion ? "Deletion couldn’t finish" : "History temporarily unavailable")
-                    .font(.headline)
-                Text(model.hasPendingDeletion
-                     ? "Tap Try again to finish removing the local data."
-                     : "The saved file could not be accessed. Unlock this iPhone, then try again.")
-                    .font(.subheadline).foregroundStyle(.secondary)
-                Button("Try again") { model.retryHistory() }
-                    .buttonStyle(.bordered)
-            }
-        } else if !model.history.isEmpty {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Saved sessions").font(.headline)
-                ForEach(model.history) { session in
-                    HStack(spacing: 16) {
-                        NavigationLink { historyDetail(session) } label: {
-                            HStack(spacing: 12) {
-                                VStack(alignment: .leading, spacing: 2) {
+    private var historyPage: some View {
+        List {
+            if model.historyIssue == .corrupted {
+                Section {
+                    Text("Couldn’t read saved history").font(.headline)
+                    Text("You can move the damaged file aside and start a new local history.")
+                        .foregroundStyle(PlumbStyle.supportingText)
+                    Button("Recover history") { model.recoverHistory() }
+                }
+            } else if model.historyIssue == .unavailable {
+                Section {
+                    Text(model.hasPendingDeletion ? "Deletion couldn’t finish" : "History temporarily unavailable")
+                        .font(.headline)
+                    Text(model.hasPendingDeletion
+                         ? "Tap Try again to finish removing the local data."
+                         : "The saved file could not be accessed. Unlock this iPhone, then try again.")
+                        .foregroundStyle(PlumbStyle.supportingText)
+                    Button("Try again") { model.retryHistory() }
+                }
+            } else if model.history.isEmpty {
+                Text("No saved sessions yet.")
+                    .foregroundStyle(PlumbStyle.supportingText)
+            } else {
+                Section("Saved sessions") {
+                    ForEach(model.history) { session in
+                        HStack(spacing: 12) {
+                            NavigationLink { historyDetail(session) } label: {
+                                VStack(alignment: .leading, spacing: 4) {
                                     Text(session.startedAt.formatted(date: .abbreviated, time: .shortened))
                                     Text("\(session.sets.count) measured sets")
                                         .font(.subheadline)
+                                        .foregroundStyle(PlumbStyle.supportingText)
                                 }
-                                Spacer(minLength: 0)
-                                Image(systemName: "chevron.right")
-                                    .font(.footnote.weight(.semibold))
-                                    .foregroundStyle(.tertiary)
-                                    .accessibilityHidden(true)
+                                .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
                             }
-                            .frame(minHeight: 52)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("history.session")
-                        .accessibilityHint("Review measured sets")
-                        Button {
-                            deleteCandidate = session.id
-                        } label: {
-                            Text("Delete")
-                                .frame(minWidth: 70, minHeight: 44, alignment: .trailing)
-                                .contentShape(Rectangle())
-                        }
-                            .font(.subheadline)
+                            .accessibilityIdentifier("history.session")
+                            .accessibilityHint("Review measured sets")
+                            Button {
+                                deleteCandidate = session.id
+                            } label: {
+                                Image(systemName: "trash")
+                                    .frame(minWidth: 44, minHeight: 44)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(destructiveLabelColor)
                             .accessibilityLabel("Delete session from \(session.startedAt.formatted(date: .abbreviated, time: .omitted))")
+                        }
                     }
-                    Divider()
                 }
             }
-        } else {
-            Text("No saved sessions yet.")
+            Section {
+                Button(role: .destructive) { deleteAllRequested = true } label: {
+                    Text("Delete all local data")
+                        .foregroundStyle(destructiveLabelColor)
+                        .frame(minHeight: 44, alignment: .leading)
+                }
+            }
         }
+        .listStyle(.insetGrouped)
+        .navigationTitle("History")
     }
 
     private func historyDetail(_ session: WorkoutSessionSummary) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text(session.startedAt.formatted(date: .complete, time: .shortened))
-                    .font(.title2.weight(.semibold))
+                    .font(.subheadline)
+                    .foregroundStyle(PlumbStyle.supportingText)
+                    .padding(.bottom, 28)
                 ForEach(session.sets.indices, id: \.self) { index in
                     let set = session.sets[index]
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Set \(index + 1)").font(.headline)
+                        Text("Set \(index + 1)").font(.title2.weight(.semibold))
                         Text(set.exercise.definition.copy.name)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .font(.subheadline.weight(.semibold))
                         Text("\(set.analysis.reps.count) measured reps")
                             .monospacedDigit()
+                            .foregroundStyle(PlumbStyle.supportingText)
                         if let cue = set.cue {
                             if set.cueResponse == .notRelevant {
                                 Text("Observation marked not relevant.")
+                                    .foregroundStyle(PlumbStyle.supportingText)
                             } else {
-                                Text(cue.observation)
-                                Text(cue.nextAction)
+                                Text(cue.observation).font(.body.weight(.semibold))
+                                nextAction(cue.nextAction)
                             }
                         } else {
                             Text("No clear pattern to call out in this set.")
@@ -689,11 +758,16 @@ struct ContentView: View {
                         DisclosureGroup("Rep details") {
                             repList(set.analysis.reps, exercise: set.exercise)
                         }
+                        .padding(.top, 8)
                     }
-                    if index < session.sets.count - 1 { Divider() }
+                    if index < session.sets.count - 1 {
+                        Divider().padding(.vertical, 28)
+                    }
                 }
                 Text("These are camera measurements from one view, not a full technique assessment.")
                     .font(.footnote)
+                    .foregroundStyle(PlumbStyle.supportingText)
+                    .padding(.top, 32)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
@@ -709,7 +783,7 @@ struct ContentView: View {
                 .font(.title3.weight(.semibold))
             if model.comparisonRecap?.source == .appleIntelligence {
                 Text("Worded with Apple Intelligence")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(PlumbStyle.supportingText)
             }
             DisclosureGroup("Set measurements") {
                 VStack(alignment: .leading, spacing: 12) {
@@ -779,34 +853,54 @@ struct ContentView: View {
 
     private func failure(_ issue: CameraIssue) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 16) {
+                Image(systemName: "camera.fill")
+                    .font(.title)
+                    .foregroundStyle(PlumbStyle.supportingText)
+                    .accessibilityHidden(true)
+                    .padding(.bottom, 16)
                 Text(issue.title).font(.largeTitle.bold())
                 Text(issue.message)
                     .fixedSize(horizontal: false, vertical: true)
-                if issue.offersSettings {
-                    Button {
-                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
-                    } label: {
-                        Text("Open Settings").foregroundStyle(primaryButtonLabelColor)
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                if issue.offersSettings {
-                    Button("Try again") {
-                        Task { await model.cancel(); await model.startPreview() }
-                    }
-                    .buttonStyle(.bordered)
-                } else {
-                    Button {
-                        Task { await model.cancel(); await model.startPreview() }
-                    } label: {
-                        Text("Try again").foregroundStyle(primaryButtonLabelColor)
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
+                    .foregroundStyle(PlumbStyle.supportingText)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 8) {
+                if issue.offersSettings {
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                    } label: {
+                        Text("Open Settings")
+                            .foregroundStyle(primaryButtonLabelColor)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Button("Try again") {
+                        Task { await model.cancel(); await model.startPreview() }
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(PlumbStyle.accent)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                } else {
+                    Button {
+                        Task { await model.cancel(); await model.startPreview() }
+                    } label: {
+                        Text("Try again")
+                            .foregroundStyle(primaryButtonLabelColor)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+            .controlSize(.large)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .background(.bar)
+        }
+        .toolbar(.hidden, for: .navigationBar)
     }
 }

@@ -26,7 +26,8 @@ final class ExerciseOptionsUITests: XCTestCase {
         picker.tap()
         app.buttons["Push-up"].tap()
         XCTAssertTrue(app.staticTexts["Push-up check"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Place your iPhone on the floor or a low step, a few steps away."].exists)
+        XCTAssertTrue(app.descendants(matching: .any).matching(
+            NSPredicate(format: "label CONTAINS %@", "On the floor or a low step")).firstMatch.exists)
         app.buttons["Set up camera"].tap()
         XCTAssertTrue(app.staticTexts["Checking arm visibility"].waitForExistence(timeout: 5))
     }
