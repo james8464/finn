@@ -24,6 +24,10 @@ struct ContentView: View {
         default: return false
         }
     }
+    private var isErrorStage: Bool {
+        if case .error = model.stage { return true }
+        return false
+    }
     #endif
 
     @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore(),
@@ -48,7 +52,7 @@ struct ContentView: View {
         }
         .overlay(alignment: .top) {
             #if DEBUG
-            if isDemo && !isCaptureStage {
+            if isDemo && !isCaptureStage && !isErrorStage {
                 Text("DEMO INPUT")
                     .font(.caption.bold())
                     .foregroundStyle(.black)
