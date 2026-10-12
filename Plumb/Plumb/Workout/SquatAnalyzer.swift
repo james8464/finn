@@ -75,10 +75,19 @@ nonisolated enum ExerciseAnalyzer {
                                                                requirement: definition.evidence)), nil)
         }
         // Without 3D estimates (simulator, older devices, switched off) this check does not run.
-        if viewCheck == .enforce,
-           case .mismatch(let deviation, _) = ViewCheck.assess(frames, expected: definition.expectedView) {
-            return (.insufficientView(definition.expectedView.wrongViewMessage
-                + " Plumb measured about \(Int(deviation.rounded()))° away from the view it needs."), nil)
+        // Only a clearly frontal view held for several seconds refuses the set; an angled one is
+        // measured and the result suggests turning a little.
+        var angledView: Double?
+        if viewCheck == .enforce {
+            switch ViewCheck.assess(frames, expected: definition.expectedView) {
+            case .mismatch(let deviation, _):
+                return (.insufficientView(definition.expectedView.wrongViewMessage
+                    + " Plumb measured about \(Int(deviation.rounded()))° away from the view it needs."), nil)
+            case .angled(let deviation, _):
+                angledView = deviation
+            case .matches, .unavailable:
+                break
+            }
         }
 
         let samples = frames.compactMap { sample(from: $0, signal: definition.signal, side: side) }
@@ -121,7 +130,7 @@ nonisolated enum ExerciseAnalyzer {
         var localTop = Double.infinity
         var lastTopTime = samples[0].time
         var reps: [RepMetric] = []
-        var diagnostics = MovementDiagnostics(requiredDepth: phases.reachBottom)
+        var diagnostics = MovementDiagnostics(requiredDepth: phases.reachBottom, angledView: angledView)
         for (index, sample) in samples.enumerated() {
             let distance = travel(smoothed[index])
             switch phase {
@@ -240,6 +249,9 @@ nonisolated struct MovementDiagnostics: Equatable, Sendable {
     var outsideTempo = 0
     /// The set ended partway through a movement.
     var unfinished = false
+    /// Median 3D deviation from side-on when it was above the side-view limit but the set was
+    /// still measured.
+    var angledView: Double?
 
     /// Sentences for the result screen, or nil when every movement counted.
     func explanation(for definition: ExerciseDefinition, counted: Int) -> String? {
@@ -256,6 +268,9 @@ nonisolated struct MovementDiagnostics: Equatable, Sendable {
         }
         if unfinished {
             parts.append("The last movement did not come back to the starting position.")
+        }
+        if let angledView {
+            parts.append("Plumb saw you about \(Int(angledView.rounded()))° from side-on. Turn a little more side-on next time; counts are most reliable from the side.")
         }
         return parts.isEmpty ? nil : parts.joined(separator: " ")
     }

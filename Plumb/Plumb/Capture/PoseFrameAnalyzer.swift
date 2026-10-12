@@ -70,15 +70,19 @@ nonisolated final class PoseFrameAnalyzer {
         return joints
     }
 
-    /// Profile deviation from Vision 3D pose of the most prominent person, or nil when the
-    /// request fails or the hips are not estimated.
+    /// Profile deviation from Vision 3D pose, or nil when the request fails or the hips are not
+    /// estimated. Vision gives each joint relative to the body's root, in the body's own axes, and
+    /// `cameraOriginMatrix` takes those into the camera's frame. `cameraRelativePosition` only
+    /// shifts them by the root's position without turning them, so the body always looked square
+    /// to the camera: every set read as filmed from the front (74 to 89° on 50 side-view videos).
     private func cameraAngle(in pixelBuffer: CVPixelBuffer) -> Double? {
         guard (try? sequenceHandler.perform([poseRequest3D], on: pixelBuffer, orientation: .up)) != nil,
               let body = poseRequest3D.results?.first else { return nil }
+        let toCamera = body.cameraOriginMatrix
         func position(_ joint: VNHumanBodyPose3DObservation.JointName) -> SIMD3<Double>? {
-            guard let matrix = try? body.cameraRelativePosition(joint) else { return nil }
-            let column = matrix.columns.3
-            return SIMD3(Double(column.x), Double(column.y), Double(column.z))
+            guard let local = try? body.recognizedPoint(joint).position.columns.3 else { return nil }
+            let camera = toCamera * SIMD4<Float>(local.x, local.y, local.z, 1)
+            return SIMD3(Double(camera.x), Double(camera.y), Double(camera.z))
         }
         guard let leftHip = position(.leftHip), let rightHip = position(.rightHip) else { return nil }
         return ViewCheck.profileDeviation(leftHip: leftHip, rightHip: rightHip,

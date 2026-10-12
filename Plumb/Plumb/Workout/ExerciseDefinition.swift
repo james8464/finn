@@ -23,11 +23,11 @@ nonisolated enum ExpectedView: String, Equatable, Sendable {
     /// Framing prompt when Vision 3D pose sees the person from another angle.
     var turnPrompt: String {
         switch self {
-        case .side: "Turn your side to the camera"
+        case .side: "Turn a little: side to the camera"
         }
     }
 
-    /// Retake reason when most 3D estimates during the set disagree with this view.
+    /// Retake reason when the 3D estimates show the person clearly facing the camera for several seconds.
     var wrongViewMessage: String {
         switch self {
         case .side: "This exercise needs a side view. Turn so your side faces the camera, then try again."
