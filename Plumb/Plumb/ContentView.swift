@@ -4,6 +4,7 @@ import UIKit
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var model: WorkoutSessionModel
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
@@ -95,30 +96,29 @@ struct ContentView: View {
     private var setup: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                Image("PlumbMark")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 42, height: 42)
-                    .accessibilityHidden(true)
-                    .padding(.bottom, 36)
-                Text("Check your squat.")
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Image("PlumbMark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 42, height: 42)
+                        .accessibilityHidden(true)
+                        .padding(.bottom, 28)
+                }
+                Text("Squat check")
                     .font(.largeTitle.bold())
                     .padding(.bottom, 12)
-                Text("Get one observation after a set of squats. Try another set to see what changed.")
+                Text("Check a set of squats, then see one observation you can use on your next set.")
                     .font(.body)
-                    .padding(.bottom, 40)
-                VStack(alignment: .leading, spacing: 18) {
+                    .padding(.bottom, 36)
+                VStack(alignment: .leading, spacing: 16) {
                     Label("Place your iPhone at hip height, a few steps away.", systemImage: "iphone.gen3")
-                    Label("Turn sideways and keep your whole body in view.", systemImage: "figure.stand")
+                    Label("Stand sideways, with your whole body in view.", systemImage: "figure.stand")
                 }
                 .font(.body)
-                .padding(.bottom, 40)
-                Text("Analyzed on this iPhone. No video saved.")
+                .padding(.bottom, 36)
+                Text("On-device analysis. No video saved. One camera view only.")
                     .font(.footnote)
-                    .padding(.bottom, 20)
-                Text("Plumb observes one camera view. It cannot assess your whole technique or prevent injury.")
-                    .font(.footnote)
-                    .padding(.bottom, 32)
+                    .padding(.bottom, 28)
                 HStack(spacing: 24) {
                     NavigationLink { historyPage } label: {
                         Text("History")
@@ -134,6 +134,9 @@ struct ContentView: View {
                 .font(.subheadline)
                 .buttonStyle(.plain)
             }
+            #if DEBUG
+            .padding(.top, isDemo && dynamicTypeSize.isAccessibilitySize ? 64 : 0)
+            #endif
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
@@ -161,6 +164,7 @@ struct ContentView: View {
                     Text("Camera").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Video is processed on this iPhone and never saved.")
                     Text("Plumb uses the camera to measure a bodyweight squat from the side. Camera frames and pose points stay on this iPhone.")
+                    Text("One camera view cannot assess your whole technique or prevent injury.")
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Saved results").font(.headline).accessibilityAddTraits(.isHeader)
@@ -206,10 +210,11 @@ struct ContentView: View {
                         .multilineTextAlignment(.center)
                         .accessibilityLabel("Stand sideways. Show head to toe.")
                     Button { Task { await model.beginSet() } } label: {
-                        Text("Start set").foregroundStyle(primaryButtonLabelColor)
+                        Text("Start set").foregroundStyle(.black)
                     }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
+                        .tint(.white)
                 } else if model.stage == .capturing {
                     Text("Move at your own pace")
                     Button("Stop set") {
@@ -399,7 +404,7 @@ struct ContentView: View {
                 } label: {
                     Text("Delete all local data")
                         .font(.subheadline)
-                        .foregroundStyle(Color(red: 198 / 255, green: 40 / 255, blue: 40 / 255))
+                        .foregroundStyle(.red)
                         .frame(minHeight: 44)
                         .contentShape(Rectangle())
                 }
@@ -435,13 +440,26 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Saved sessions").font(.headline)
                 ForEach(model.history) { session in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(session.startedAt.formatted(date: .abbreviated, time: .shortened))
-                            Text("\(session.sets.count) measured sets")
-                                .font(.subheadline)
+                    HStack(spacing: 16) {
+                        NavigationLink { historyDetail(session) } label: {
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(session.startedAt.formatted(date: .abbreviated, time: .shortened))
+                                    Text("\(session.sets.count) measured sets")
+                                        .font(.subheadline)
+                                }
+                                Spacer(minLength: 0)
+                                Image(systemName: "chevron.right")
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundStyle(.tertiary)
+                                    .accessibilityHidden(true)
+                            }
+                            .frame(minHeight: 52)
+                            .contentShape(Rectangle())
                         }
-                        Spacer()
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("history.session")
+                        .accessibilityHint("Review measured sets")
                         Button {
                             deleteCandidate = session.id
                         } label: {
@@ -458,6 +476,42 @@ struct ContentView: View {
         } else {
             Text("No saved sessions yet.")
         }
+    }
+
+    private func historyDetail(_ session: WorkoutSessionSummary) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                Text(session.startedAt.formatted(date: .complete, time: .shortened))
+                    .font(.title2.weight(.semibold))
+                ForEach(session.sets.indices, id: \.self) { index in
+                    let set = session.sets[index]
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Set \(index + 1)").font(.headline)
+                        Text("\(set.analysis.reps.count) measured reps")
+                            .monospacedDigit()
+                        if let cue = set.cue {
+                            if set.cueResponse == .notRelevant {
+                                Text("Observation marked not relevant.")
+                            } else {
+                                Text(cue.observation)
+                                Text(cue.nextAction)
+                            }
+                        } else {
+                            Text("No clear pattern to call out in this set.")
+                        }
+                        DisclosureGroup("Rep details") {
+                            repList(set.analysis.reps)
+                        }
+                    }
+                    if index < session.sets.count - 1 { Divider() }
+                }
+                Text("These are camera measurements from one view, not a full technique assessment.")
+                    .font(.footnote)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
+        }
+        .navigationTitle("Session")
     }
 
     private func comparisonView(_ comparison: Comparison) -> some View {
