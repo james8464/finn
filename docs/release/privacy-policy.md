@@ -21,7 +21,7 @@ You can open **History** to delete a saved session or choose **Delete all local 
 
 ## Optional Apple Intelligence wording
 
-When available on your device, the app can ask Apple's on-device Foundation Models framework to reword an already measured comparison after you tap **Explain comparison**. It receives only the two derived set measurements, comparison direction, cue category, and referenced rep numbers. Plumb checks the response and shows reviewed fallback wording if generation is unavailable, late, or inconsistent. This feature does not send camera images or raw pose traces to the model and Plumb does not operate an AI server.
+When available on your device, the app can ask Apple's on-device Foundation Models framework to reword an already measured comparison after you tap **Reword comparison**. It receives only the two derived set measurements, comparison direction, cue category, and referenced rep numbers. Plumb accepts only approved comparison wording with the supplied rep references and shows reviewed fallback wording if generation is unavailable, late, or inconsistent. This feature does not send camera images or raw pose traces to the model and Plumb does not operate an AI server.
 
 ## Accounts, analytics, and sharing
 

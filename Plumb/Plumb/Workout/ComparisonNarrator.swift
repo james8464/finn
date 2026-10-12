@@ -78,29 +78,23 @@ final class ComparisonNarrator {
 
     private func isValid(_ generated: GeneratedRecap, for comparison: Comparison) -> Bool {
         let text = generated.explanation.trimmingCharacters(in: .whitespacesAndNewlines)
-        let lower = text.lowercased()
-        let words = Set(lower.split(whereSeparator: { !$0.isLetter }).map(String.init))
-        guard !text.isEmpty, text.count <= 180,
-              generated.evidenceRepNumbers.sorted() == comparison.cueRepNumbers.sorted(),
-              !text.contains(where: \.isNumber),
-              text.hasSuffix("."), text.filter({ $0 == "." }).count == 1,
-              !text.contains("?"), !text.contains("!"), !text.contains("\n"),
-              !words.contains("not"), !words.contains("never"), !lower.contains("n't"),
-              !["safe", "injury", "pain", "medical", "diagnos", "knee", "hip", "spine", "ankle", "back", "percent", "degree",
-                "better", "worse", "improv", "perfect", "techniq", "form", "try ", "should ", "must ", "need ", "aim ", "focus ",
-                "more", "less", "increase", "decrease"]
-                .contains(where: lower.contains),
-              lower.contains("range") else { return false }
+        guard generated.evidenceRepNumbers.sorted() == comparison.cueRepNumbers.sorted() else {
+            return false
+        }
         switch comparison.rangeDirection {
-        case .longer:
-            return lower.contains("range was longer") && lower.contains("second set") &&
-                !words.contains("shorter") && !lower.contains("no clear")
-        case .shorter:
-            return lower.contains("range was shorter") && lower.contains("second set") &&
-                !words.contains("longer") && !lower.contains("no clear")
+        case .longer, .shorter:
+            let direction = comparison.rangeDirection == .longer ? "longer" : "shorter"
+            let subjects = ["Your camera-measured range", "Your measured range", "Your range",
+                            "The camera-measured range"]
+            let endings = ["the second set.", "your second set."]
+            return subjects.contains { subject in
+                endings.contains { ending in text == "\(subject) was \(direction) in \(ending)" }
+            }
         case .noClearChange:
-            return lower.contains("no clear") && lower.contains("range change") &&
-                lower.contains("sets") && !words.contains("longer") && !words.contains("shorter")
+            return ["There was no clear camera-measured range change between sets.",
+                    "There was no clear range change between sets.",
+                    "There was no clear camera-measured range change between your sets.",
+                    "There was no clear range change between your sets."].contains(text)
         }
     }
 }
@@ -120,11 +114,11 @@ private final class AppleRecapGenerator: RecapGenerating {
 
     func generate(for comparison: Comparison) async throws -> GeneratedRecap {
         let instructions = """
-            Rewrite only the supplied camera-measured squat-set comparison in one plain sentence.
-            Say "range was longer/shorter in the second set" when the direction is longer/shorter,
-            or "no clear range change between sets" when there is no clear change. Do not add
-            measurements, body-part diagnoses, safety claims, advice, or numbers. Return the evidence rep
-            numbers exactly as supplied, without adding or removing any.
+            Choose one plain sentence about the supplied camera-measured comparison. For longer or
+            shorter, use "Your camera-measured range was longer/shorter in the second set." with
+            the supplied direction. For no clear change, use "There was no clear camera-measured
+            range change between sets." Do not add causes, measurements, body-part diagnoses,
+            safety claims, advice, or numbers. Return the evidence rep numbers exactly as supplied.
             """
         let prompt = """
             Direction: \(comparison.rangeDirection.rawValue).

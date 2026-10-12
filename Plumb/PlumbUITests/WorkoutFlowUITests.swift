@@ -251,8 +251,13 @@ final class WorkoutFlowUITests: XCTestCase {
         capture(app, name: "Comparison")
         app.buttons["How range is measured"].tap()
         XCTAssertTrue(methodText.exists)
-        app.buttons["Explain comparison"].tap()
-        XCTAssertTrue(app.staticTexts["Comparison note"].waitForExistence(timeout: 5))
+        app.buttons["Reword comparison"].tap()
+        XCTAssertTrue(app.staticTexts["Camera-measured range was longer in your second set."]
+            .waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Camera-measured range was longer in set 2."].exists)
+        XCTAssertFalse(app.staticTexts["Comparison note"].exists)
+        XCTAssertFalse(app.staticTexts["Worded with Apple Intelligence"].exists)
+        capture(app, name: "Reworded comparison")
         app.buttons["Done"].tap()
         let history = app.buttons["History"]
         XCTAssertTrue(history.waitForExistence(timeout: 5))

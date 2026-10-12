@@ -58,6 +58,28 @@ struct ComparisonNarratorTests {
         #expect(recap.source == .template)
     }
 
+    @Test func unsupportedCauseUsesTemplate() async {
+        let generator = StubRecapGenerator(output: GeneratedRecap(
+            explanation: "Your range was shorter in the second set because you got tired.",
+            evidenceRepNumbers: [5, 6]
+        ))
+        let recap = await ComparisonNarrator(generator: generator).recap(for: comparison())
+        #expect(recap.source == .template)
+    }
+
+    @Test func noClearChangeCannotAddUnmeasuredExplanation() async {
+        let facts = Comparison(firstSetID: UUID(), secondSetID: UUID(),
+                               firstMedianRange: 0.4, secondMedianRange: 0.41,
+                               firstMedianDuration: 1.5, secondMedianDuration: 1.6,
+                               rangeDirection: .noClearChange, cueRepNumbers: [], cueKind: nil)
+        let generator = StubRecapGenerator(output: GeneratedRecap(
+            explanation: "There was no clear range change between sets because your effort stayed consistent.",
+            evidenceRepNumbers: []
+        ))
+        let recap = await ComparisonNarrator(generator: generator).recap(for: facts)
+        #expect(recap.source == .template)
+    }
+
     @Test func noClearChangeCannotAlsoClaimLongerRange() async {
         let facts = Comparison(firstSetID: UUID(), secondSetID: UUID(),
                                firstMedianRange: 0.4, secondMedianRange: 0.41,

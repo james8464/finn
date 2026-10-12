@@ -438,8 +438,12 @@ struct ContentView: View {
     private func comparisonView(_ comparison: Comparison) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Compared with your previous set").font(.headline)
-            Text(comparisonStatement(comparison.rangeDirection))
+            Text(model.comparisonRecap?.text ?? comparisonStatement(comparison.rangeDirection))
                 .font(.title3.weight(.semibold))
+            if model.comparisonRecap?.source == .appleIntelligence {
+                Text("Worded with Apple Intelligence")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             DisclosureGroup("Set measurements") {
                 VStack(alignment: .leading, spacing: 12) {
                     comparisonMetric("Set 1", range: comparison.firstMedianRange,
@@ -454,20 +458,10 @@ struct ContentView: View {
                 Text("Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view.")
                     .font(.footnote)
             }
-            if let recap = model.comparisonRecap {
-                Text(recap.text)
-                    .font(.subheadline)
-                if recap.source == .appleIntelligence {
-                    Text("Worded with Apple Intelligence")
-                        .font(.caption).foregroundStyle(.secondary)
-                } else {
-                    Text("Comparison note")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-            } else if model.isGeneratingRecap {
-                ProgressView("Writing comparison note")
-            } else {
-                Button("Explain comparison") { Task { await model.explainComparison() } }
+            if model.isGeneratingRecap {
+                ProgressView("Rewording comparison")
+            } else if model.comparisonRecap == nil {
+                Button("Reword comparison") { Task { await model.explainComparison() } }
                     .buttonStyle(.plain)
                     .frame(minHeight: 48, alignment: .leading)
                     .contentShape(Rectangle())
