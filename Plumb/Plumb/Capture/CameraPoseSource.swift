@@ -130,11 +130,7 @@ final class CameraPoseSource: PoseStreaming {
                     if previewFirstTime == nil { previewFirstTime = frame.time }
                     elapsed = max(0, frame.time - (previewFirstTime ?? frame.time))
                 }
-                self.continuation?.yield(PoseFrame(
-                    time: elapsed,
-                    subjectCount: frame.subjectCount,
-                    joints: frame.joints
-                ))
+                self.continuation?.yield(frame.retimed(to: elapsed))
                 if self.isSetActive && elapsed >= self.setDurationLimitSeconds {
                     self.endedAtLimit = true
                     await self.stop()

@@ -45,6 +45,13 @@ nonisolated enum CameraIssue: Equatable {
     var offersSettings: Bool { self == .permissionDenied }
 }
 
+nonisolated enum ComparisonGap: Equatable {
+    /// No earlier set of the same exercise in this session.
+    case differentExercise
+    /// An earlier set of the same exercise exists but differs in side, rubric, or has too few reps.
+    case incompatibleSets
+}
+
 nonisolated enum WorkoutResult {
     case measured(SetAnalysis, Cue?)
     case insufficientView(String)
@@ -70,7 +77,13 @@ final class WorkoutSessionModel {
     @ObservationIgnored private var stopTappedAt: ContinuousClock.Instant?
 
     private(set) var stage: WorkoutStage = .ready
+    /// The exercise chosen on the setup screen. A capture keeps the exercise it started with.
+    var selectedExercise: ExerciseKind = .bodyweightSquat
+    /// The exercise used for the framing check and analysis of the current capture.
+    private(set) var captureExercise: ExerciseKind = .bodyweightSquat
     private(set) var result: WorkoutResult?
+    /// The exercise whose rubric produced `result`.
+    private(set) var resultExercise: ExerciseKind = .bodyweightSquat
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
     private(set) var lastStopToResultMilliseconds: Int?
@@ -102,6 +115,7 @@ final class WorkoutSessionModel {
         await collectionTask?.value
         collectionTask = nil
         guard stage == .openingCamera else { return }
+        captureExercise = selectedExercise
         result = nil
         lastStopToResultMilliseconds = nil
         stopTappedAt = nil
@@ -139,7 +153,8 @@ final class WorkoutSessionModel {
                         self.previewFrames.append(frame)
                         if self.previewFrames.count > 5 { self.previewFrames.removeFirst() }
                         self.lastPreviewFrameAt = .now
-                        self.framingStatus = EvidenceGate.previewStatus(self.previewFrames)
+                        self.framingStatus = EvidenceGate.previewStatus(
+                            self.previewFrames, requirement: self.captureExercise.definition.evidence)
                     }
                     if (self.stage == .capturing || (self.stage == .analyzing && self.isStopping)) &&
                         self.frames.count < 1_800 {
@@ -217,15 +232,18 @@ final class WorkoutSessionModel {
             stopTappedAt = nil
             stage = .result
         }
-        switch SquatAnalyzer.analyze(frames) {
+        let exercise = captureExercise
+        let definition = exercise.definition
+        resultExercise = exercise
+        switch ExerciseAnalyzer.analyze(frames, as: definition) {
         case .analyzed(let analysis):
             guard !analysis.reps.isEmpty else {
-                result = .insufficientView("No complete squat repetitions were measured. Try another set with your full body in view.")
+                result = .insufficientView(definition.copy.noCompleteReps)
                 return
             }
-            let cue = CueSelector.select(from: analysis)
+            let cue = CueSelector.select(from: analysis, exercise: definition)
             result = .measured(analysis, cue)
-            record(analysis: analysis, cue: cue)
+            record(analysis: analysis, cue: cue, exercise: exercise)
         case .insufficientView(let reason):
             result = .insufficientView(reason)
         case .failed(let reason):
@@ -292,19 +310,33 @@ final class WorkoutSessionModel {
         } catch { historyIssue = Self.issue(for: error) }
     }
 
-    private func record(analysis: SetAnalysis, cue: Cue?) {
-        guard case .usable(let side) = EvidenceGate.assess(frames) else { return }
+    private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind) {
+        guard case .usable(let side) = EvidenceGate.assess(
+            frames, requirement: exercise.definition.evidence) else { return }
         var session = currentSession ?? WorkoutSessionSummary(id: UUID(), startedAt: .now, sets: [])
-        session.sets.append(SetSummary(
+        let newSet = SetSummary(
             id: UUID(), sessionID: session.id, capturedAt: .now,
-            bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered
-        ))
+            bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,
+            exercise: exercise
+        )
+        let previousSameExercise = session.sets.last { $0.exercise == exercise }
+        session.sets.append(newSet)
         currentSession = session
         comparisonRecap = nil
-        if session.sets.count >= 2 {
-            comparison = SetComparison.compare(session.sets[session.sets.count - 2], session.sets.last!)
+        if let previousSameExercise {
+            comparison = SetComparison.compare(previousSameExercise, newSet)
+        } else {
+            comparison = nil
         }
         save(session)
+    }
+
+    /// Why a measured set has no comparison even though the session has earlier sets.
+    var comparisonGap: ComparisonGap? {
+        guard comparison == nil, let session = currentSession, session.sets.count >= 2,
+              let latest = session.sets.last else { return nil }
+        let earlier = session.sets.dropLast()
+        return earlier.contains { $0.exercise == latest.exercise } ? .incompatibleSets : .differentExercise
     }
 
     func explainComparison() async {

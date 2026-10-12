@@ -129,12 +129,15 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
         lock.unlock()
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
+        let aspectRatio = width > 0 && height > 0 ? Double(height) / Double(width) : 1
         let request = VNDetectHumanBodyPoseRequest()
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
         do {
             try handler.perform([request])
         } catch {
-            yield(PoseFrame(time: time, subjectCount: 0, joints: [:]))
+            yield(PoseFrame(time: time, subjectCount: 0, joints: [:], aspectRatio: aspectRatio))
             return
         }
 
@@ -145,6 +148,8 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
             let mapping: [(BodyJoint, VNHumanBodyPoseObservation.JointName)] = [
                 (.leftHip, .leftHip), (.leftKnee, .leftKnee), (.leftAnkle, .leftAnkle),
                 (.rightHip, .rightHip), (.rightKnee, .rightKnee), (.rightAnkle, .rightAnkle),
+                (.leftShoulder, .leftShoulder), (.leftElbow, .leftElbow), (.leftWrist, .leftWrist),
+                (.rightShoulder, .rightShoulder), (.rightElbow, .rightElbow), (.rightWrist, .rightWrist),
             ]
             for (name, visionName) in mapping {
                 guard let point = try? subject.recognizedPoint(visionName), point.confidence > 0 else { continue }
@@ -155,7 +160,8 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
                 )
             }
         }
-        yield(PoseFrame(time: time, subjectCount: observations.count, joints: joints))
+        yield(PoseFrame(time: time, subjectCount: observations.count, joints: joints,
+                        aspectRatio: aspectRatio))
     }
 
     private func yield(_ frame: PoseFrame) {

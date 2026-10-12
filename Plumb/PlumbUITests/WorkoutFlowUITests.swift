@@ -79,7 +79,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let visibleCopy = [
             "Camera",
             "Video is processed on this iPhone and never saved.",
-            "Plumb uses the camera to measure a bodyweight squat from the side. Camera frames and pose points stay on this iPhone.",
+            "Plumb uses the camera to measure a supported exercise from the side. Camera frames and pose points stay on this iPhone.",
             "One camera view cannot assess your whole technique or prevent injury.",
             "Saved results",
             "Measured set summaries are saved on this iPhone so you can review previous sets.",
