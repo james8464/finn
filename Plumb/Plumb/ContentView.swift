@@ -151,6 +151,7 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
+        .scrollIndicators(.hidden)
         .navigationTitle("Privacy")
     }
 
