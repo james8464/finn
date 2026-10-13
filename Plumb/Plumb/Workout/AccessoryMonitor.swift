@@ -19,8 +19,9 @@ final class AccessoryMonitor {
     ]
 
     /// Does nothing until `start`, so demo and test input never touch the watch or audio route.
-    init(watch: WatchBridge = .shared) {
-        self.watch = watch
+    /// A default argument is evaluated outside the main actor, so the shared bridge is chosen here.
+    init(watch: WatchBridge? = nil) {
+        self.watch = watch ?? .shared
     }
 
     var status: AccessoryStatus {

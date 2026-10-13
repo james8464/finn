@@ -786,180 +786,182 @@ struct ContentView: View {
     }
 
     private var result: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Spacer()
-                    Button("Done") {
-                        observationSpeaker.stop()
-                        Task { await model.finishSession() }
+        // The action sits below the scroll view, not over it: text scrolled under a translucent bar
+        // stays half visible and fails the contrast audit.
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Spacer()
+                        Button("Done") {
+                            observationSpeaker.stop()
+                            Task { await model.finishSession() }
+                        }
+                        .buttonStyle(.plain)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
-                    .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
-                }
-                Text(resultTitle)
-                    .font(.largeTitle.bold())
-                if model.endedEarly {
-                    Text("The camera stopped during the set. Plumb reviewed the part it captured.")
-                        .font(.footnote)
-                        .foregroundStyle(PlumbStyle.supportingText)
-                        .accessibilityIdentifier("result.endedEarly")
-                }
-                if model.endedHandsFree {
-                    Text("Plumb ended the set when you walked away or stopped moving.")
-                        .font(.footnote)
-                        .foregroundStyle(PlumbStyle.supportingText)
-                        .accessibilityIdentifier("result.endedHandsFree")
-                }
-                if let result = model.result {
-                    switch result {
-                    case .measured(let analysis, let cue):
-                        Text("\(analysis.reps.count) measured reps")
-                            .font(.subheadline)
-                            .monospacedDigit()
+                    Text(resultTitle)
+                        .font(.largeTitle.bold())
+                    if model.endedEarly {
+                        Text("The camera stopped during the set. Plumb reviewed the part it captured.")
+                            .font(.footnote)
                             .foregroundStyle(PlumbStyle.supportingText)
-                        recognitionNote
-                        if let note = model.movementNote {
-                            Text(note)
-                                .font(.subheadline)
-                                .accessibilityIdentifier("result.movementNote")
-                        }
-                        if let pattern = model.repeatedPattern {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Your most frequent pattern came back")
-                                    .font(.subheadline.weight(.semibold))
-                                Text(pattern.summary)
-                                    .font(.subheadline)
-                                    .foregroundStyle(PlumbStyle.supportingText)
-                                Text(pattern.focus)
-                                    .font(.subheadline)
-                            }
-                            .accessibilityElement(children: .combine)
-                            .accessibilityIdentifier("result.repeatedPattern")
-                        }
-                        if model.historyIssue != nil {
-                            Text("Couldn’t confirm this set was saved.")
-                                .font(.subheadline)
-                            if model.historyIssue == .unavailable {
-                                Button("Retry saving") { model.retryHistory() }
-                                    .frame(minHeight: 44, alignment: .leading)
-                            } else {
-                                NavigationLink("Review history") { historyPage }
-                                    .frame(minHeight: 44, alignment: .leading)
-                            }
-                        }
-                        if let cue {
-                            Divider().padding(.vertical, 12)
-                            if model.cueDismissed {
-                                Text("Observation marked not relevant.")
-                                    .font(.body)
-                                    .foregroundStyle(PlumbStyle.supportingText)
-                            } else {
-                                Text(cue.observation)
-                                    .font(.title3.weight(.semibold))
-                                Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
-                                    .font(.subheadline)
-                                    .foregroundStyle(PlumbStyle.supportingText)
-                                nextAction(cue.nextAction)
-                                    .padding(.top, 4)
-                                if let spokenText = SpokenObservation.text(for: analysis, cue: cue) {
-                                    Button {
-                                        if observationSpeaker.isSpeaking {
-                                            observationSpeaker.stop()
-                                        } else {
-                                            observationSpeaker.speak(spokenText)
-                                        }
-                                    } label: {
-                                        Label(observationSpeaker.isSpeaking ? "Stop speaking" : "Listen to observation",
-                                              systemImage: observationSpeaker.isSpeaking ? "stop.fill" : "speaker.wave.2")
-                                            .frame(minHeight: 44, alignment: .leading)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                                Button("Not relevant") {
-                                    observationSpeaker.stop()
-                                    model.dismissCue()
-                                }
-                                    .buttonStyle(.plain)
-                                    .font(.subheadline)
-                                    .foregroundStyle(PlumbStyle.supportingText)
-                                    .frame(minHeight: 44)
-                                    .contentShape(Rectangle())
-                            }
-                        } else {
-                            Divider().padding(.vertical, 12)
-                            if analysis.reps.count < 4 {
-                                Text("Plumb needs at least four measured reps before it can show an observation.")
-                                    .font(.title3)
-                            } else {
-                                Text("No clear pattern to call out in this set.").font(.title3)
-                            }
-                            Text("This is a camera measurement, not a full technique assessment.")
-                                .font(.footnote)
-                                .foregroundStyle(PlumbStyle.supportingText)
-                        }
-                        Divider().padding(.vertical, 12)
-                        if let comparison = model.comparison {
-                            comparisonView(comparison)
-                        } else if let gap = model.comparisonGap {
-                            Text(comparisonGapText(gap))
-                                .foregroundStyle(PlumbStyle.supportingText)
-                        }
-                        if let extremes = model.repExtremes {
-                            repExtremesView(extremes)
-                            Divider().padding(.vertical, 12)
-                        }
-                        DisclosureGroup("Rep details") {
-                            repList(analysis.reps, exercise: model.resultExercise)
-                        }
-                        ShareLink(item: SetShareSummary.text(for: analysis, cue: cue,
-                                                              cueDismissed: model.cueDismissed,
-                                                              comparison: model.comparison,
-                                                              exercise: model.resultExercise)) {
-                            Label("Share summary", systemImage: "square.and.arrow.up")
-                                .frame(minHeight: 44, alignment: .leading)
-                        }
-                        .font(.subheadline)
-                        .accessibilityIdentifier("result.shareSummary")
-                        .accessibilityHint("Shares the measured summary without video")
-                    case .insufficientView(let reason):
-                        recognitionNote
-                        Text(reason)
-                        if let hint = model.retakeHint {
-                            Text(hint)
-                                .foregroundStyle(PlumbStyle.supportingText)
-                        }
-                        // Changing an option here keeps the session, so the next set still compares.
-                        NavigationLink("Options") { optionsPage }
-                            .frame(minHeight: 44, alignment: .leading)
-                            .accessibilityIdentifier("result.options")
-                    case .failed(let reason):
-                        Text(reason)
-                    case .interrupted:
-                        Text("Camera capture stopped before the set was complete.")
+                            .accessibilityIdentifier("result.endedEarly")
                     }
+                    if model.endedHandsFree {
+                        Text("Plumb ended the set when you walked away or stopped moving.")
+                            .font(.footnote)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityIdentifier("result.endedHandsFree")
+                    }
+                    if let result = model.result {
+                        switch result {
+                        case .measured(let analysis, let cue):
+                            Text("\(analysis.reps.count) measured reps")
+                                .font(.subheadline)
+                                .monospacedDigit()
+                                .foregroundStyle(PlumbStyle.supportingText)
+                            recognitionNote
+                            if let note = model.movementNote {
+                                Text(note)
+                                    .font(.subheadline)
+                                    .accessibilityIdentifier("result.movementNote")
+                            }
+                            if let pattern = model.repeatedPattern {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Your most frequent pattern came back")
+                                        .font(.subheadline.weight(.semibold))
+                                    Text(pattern.summary)
+                                        .font(.subheadline)
+                                        .foregroundStyle(PlumbStyle.supportingText)
+                                    Text(pattern.focus)
+                                        .font(.subheadline)
+                                }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityIdentifier("result.repeatedPattern")
+                            }
+                            if model.historyIssue != nil {
+                                Text("Couldn’t confirm this set was saved.")
+                                    .font(.subheadline)
+                                if model.historyIssue == .unavailable {
+                                    Button("Retry saving") { model.retryHistory() }
+                                        .frame(minHeight: 44, alignment: .leading)
+                                } else {
+                                    NavigationLink("Review history") { historyPage }
+                                        .frame(minHeight: 44, alignment: .leading)
+                                }
+                            }
+                            if let cue {
+                                Divider().padding(.vertical, 12)
+                                if model.cueDismissed {
+                                    Text("Observation marked not relevant.")
+                                        .font(.body)
+                                        .foregroundStyle(PlumbStyle.supportingText)
+                                } else {
+                                    Text(cue.observation)
+                                        .font(.title3.weight(.semibold))
+                                    Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
+                                        .font(.subheadline)
+                                        .foregroundStyle(PlumbStyle.supportingText)
+                                    nextAction(cue.nextAction)
+                                        .padding(.top, 4)
+                                    if let spokenText = SpokenObservation.text(for: analysis, cue: cue) {
+                                        Button {
+                                            if observationSpeaker.isSpeaking {
+                                                observationSpeaker.stop()
+                                            } else {
+                                                observationSpeaker.speak(spokenText)
+                                            }
+                                        } label: {
+                                            Label(observationSpeaker.isSpeaking ? "Stop speaking" : "Listen to observation",
+                                                  systemImage: observationSpeaker.isSpeaking ? "stop.fill" : "speaker.wave.2")
+                                                .frame(minHeight: 44, alignment: .leading)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    Button("Not relevant") {
+                                        observationSpeaker.stop()
+                                        model.dismissCue()
+                                    }
+                                        .buttonStyle(.plain)
+                                        .font(.subheadline)
+                                        .foregroundStyle(PlumbStyle.supportingText)
+                                        .frame(minHeight: 44)
+                                        .contentShape(Rectangle())
+                                }
+                            } else {
+                                Divider().padding(.vertical, 12)
+                                if analysis.reps.count < 4 {
+                                    Text("Plumb needs at least four measured reps before it can show an observation.")
+                                        .font(.title3)
+                                } else {
+                                    Text("No clear pattern to call out in this set.").font(.title3)
+                                }
+                                Text("This is a camera measurement, not a full technique assessment.")
+                                    .font(.footnote)
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                            }
+                            Divider().padding(.vertical, 12)
+                            if let comparison = model.comparison {
+                                comparisonView(comparison)
+                            } else if let gap = model.comparisonGap {
+                                Text(comparisonGapText(gap))
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                            }
+                            if let extremes = model.repExtremes {
+                                repExtremesView(extremes)
+                                Divider().padding(.vertical, 12)
+                            }
+                            DisclosureGroup("Rep details") {
+                                repList(analysis.reps, exercise: model.resultExercise)
+                            }
+                            ShareLink(item: SetShareSummary.text(for: analysis, cue: cue,
+                                                                  cueDismissed: model.cueDismissed,
+                                                                  comparison: model.comparison,
+                                                                  exercise: model.resultExercise)) {
+                                Label("Share summary", systemImage: "square.and.arrow.up")
+                                    .frame(minHeight: 44, alignment: .leading)
+                            }
+                            .font(.subheadline)
+                            .accessibilityIdentifier("result.shareSummary")
+                            .accessibilityHint("Shares the measured summary without video")
+                        case .insufficientView(let reason):
+                            recognitionNote
+                            Text(reason)
+                            if let hint = model.retakeHint {
+                                Text(hint)
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                            }
+                            // Changing an option here keeps the session, so the next set still compares.
+                            NavigationLink("Options") { optionsPage }
+                                .frame(minHeight: 44, alignment: .leading)
+                                .accessibilityIdentifier("result.options")
+                        case .failed(let reason):
+                            Text(reason)
+                        case .interrupted:
+                            Text("Camera capture stopped before the set was complete.")
+                        }
+                    }
+                    #if DEBUG
+                    if isValidationMode, let milliseconds = model.lastStopToResultMilliseconds {
+                        Text("Validation timing · Stop to result: \(milliseconds) ms")
+                            .font(.footnote.monospacedDigit())
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityIdentifier("validation.stopToResult")
+                    }
+                    if isValidationMode {
+                        Text("Validation 3D view · \(viewVerdictReadout(model.lastViewVerdict))")
+                            .font(.footnote.monospacedDigit())
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityIdentifier("validation.viewCheck")
+                    }
+                    #endif
                 }
-                #if DEBUG
-                if isValidationMode, let milliseconds = model.lastStopToResultMilliseconds {
-                    Text("Validation timing · Stop to result: \(milliseconds) ms")
-                        .font(.footnote.monospacedDigit())
-                        .foregroundStyle(PlumbStyle.supportingText)
-                        .accessibilityIdentifier("validation.stopToResult")
-                }
-                if isValidationMode {
-                    Text("Validation 3D view · \(viewVerdictReadout(model.lastViewVerdict))")
-                        .font(.footnote.monospacedDigit())
-                        .foregroundStyle(PlumbStyle.supportingText)
-                        .accessibilityIdentifier("validation.viewCheck")
-                }
-                #endif
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 24)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 24)
-        }
-        .safeAreaInset(edge: .bottom) {
             Button {
                 observationSpeaker.stop()
                 Task { await model.startPreview() }
