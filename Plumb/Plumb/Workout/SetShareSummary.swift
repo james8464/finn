@@ -15,6 +15,8 @@ nonisolated enum SetShareSummary {
         } else if let cue {
             lines.append("Observation: \(cue.observation)")
             lines.append("Try next: \(cue.nextAction)")
+        } else if CueSelector.hasConsistentRange(analysis) {
+            lines.append("Observation: \(copy.consistentRangeMessage)")
         } else {
             lines.append("No clear observation in this set.")
         }

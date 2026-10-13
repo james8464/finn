@@ -20,7 +20,7 @@ Apple TV, a second iPhone camera, widgets, Live Activities, accounts, and subscr
 
 ## Current state · 13 October 2026
 
-**Working in the iPhone app:** side-view bodyweight squat, push-up, static lunge, and stiff-leg deadlift flows; live framing and skeleton; rep analysis and a provisional observation when evidence permits; retake guidance; local set history, comparison, text-only sharing, and optional spoken output. Foundation Models can reword a validated comparison when available, with a deterministic fallback. Video is analyzed locally and is not saved. There is no treadmill mode, Watch app, account, or subscription.
+**Working in the iPhone app:** side-view bodyweight squat, push-up, static lunge, and stiff-leg deadlift flows; live framing and skeleton; rep analysis and a provisional observation when evidence permits; a short reminder of the previous relevant cue during the next set; a qualified positive note when measured rep range is consistent; retake guidance; local set history, comparison, text-only sharing, and optional spoken output. Foundation Models can reword a validated comparison when available, with a deterministic fallback. Video is analyzed locally and is not saved. There is no treadmill mode, Watch app, account, or subscription. A consistent measured range does not certify perfect form.
 
 **Verified so far:** simulator UI tests and generated pose/video fixtures exercise the app, including hidden or covered body parts. These are repeatable engineering checks, not validation of coaching accuracy. Physical iPhone tests and qualified cue review remain open; [the results ledger](docs/validation/squat-v1-results.md) tracks that distinction. A debug demo must be identified as synthetic.
 
@@ -31,6 +31,7 @@ Apple TV, a second iPhone camera, widgets, Live Activities, accounts, and subscr
 | Need | Start here |
 | --- | --- |
 | Product scope and build order | [Planning](planning.md) |
+| Consolidated product decisions and feature status | [Product brief](docs/product/brief.md) · [Document index](docs/README.md) |
 | Brand, typography, color, and icon | [Design guide](Design/README.md) |
 | Physical-device validation and results | [Validation protocol](docs/validation/squat-v1-protocol.md) · [Results](docs/validation/squat-v1-results.md) |
 | Release and public claims | [Submission checklist](docs/release/app-store-submission.md) · [Privacy](docs/release/privacy-policy.md) |

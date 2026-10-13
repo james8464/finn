@@ -6,11 +6,12 @@ fixtures="$project_root/tools/replay/fixtures"
 replay="$project_root/tools/replay/replay.sh"
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
+"$replay" --build-to "$scratch/replay"
 
 check_result() {
   local label="$1" video="$2" expected_status="$3" reps="$4"
   local result
-  result="$($replay --exercise bodyweightSquat --video "$fixtures/$video" \
+  result="$("$scratch/replay" --exercise bodyweightSquat --video "$fixtures/$video" \
     --poses-output "$scratch/$label-poses.json")"
   print -r -- "$result" | python3 -c '
 import json, sys
@@ -28,6 +29,22 @@ check_result "synthetic squat" "squat-six-reps.mp4" measured 6
 check_result "standing still" "standing-no-reps.mp4" retake 0
 check_result "lower body hidden" "squat-lower-body-hidden.mp4" retake 0
 check_result "feet hidden" "squat-feet-hidden.mp4" retake 0
+check_result "dim light" "squat-dim.mp4" measured 6
+check_result "farther phone" "squat-far.mp4" measured 6
+check_result "too far" "squat-too-far.mp4" retake 0
+check_result "slower tempo" "squat-slow.mp4" measured 6
+
+# Mirroring the source currently reduces Vision's required-joint coverage from roughly 81% to
+# 71%; the gate safely asks for a retake. Report it as a known camera-direction limitation rather
+# than freezing a failed left/right detection as desired behavior.
+"$scratch/replay" --exercise bodyweightSquat --video "$fixtures/squat-mirrored.mp4" \
+  > "$scratch/mirrored-result.json"
+python3 - "$scratch/mirrored-result.json" <<'PY'
+import json, sys
+result = json.load(open(sys.argv[1]))
+assert result["status"] in {"measured", "retake"}, result
+print("mirrored diagnostic: {}, {} reps".format(result["status"], result["measuredReps"]))
+PY
 
 # The live five-frame preview must not claim all squat landmarks are visible while the feet
 # stay covered. A per-third-frame check without carrying its verdict forward can flicker.

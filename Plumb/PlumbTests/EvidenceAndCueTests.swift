@@ -100,6 +100,17 @@ struct EvidenceAndCueTests {
         #expect(CueSelector.select(from: measuredSet([0.40, 0.41, 0.40, 0.39, 0.40, 0.40])) == nil)
     }
 
+    @Test func steadyRangeGetsAQualifiedPositiveFinding() {
+        #expect(CueSelector.hasConsistentRange(measuredSet([0.40, 0.41, 0.40, 0.39, 0.40, 0.40])))
+        #expect(!CueSelector.hasConsistentRange(measuredSet([0.42, 0.41, 0.41, 0.40, 0.31, 0.30])))
+        #expect(!CueSelector.hasConsistentRange(measuredSet([0.40, 0.49, 0.38, 0.47, 0.40, 0.48])))
+        #expect(!CueSelector.hasConsistentRange(measuredSet([0.40, 0.40, 0.40])))
+        var lowConfidence = measuredSet([0.40, 0.40, 0.40, 0.40])
+        lowConfidence = SetAnalysis(reps: lowConfidence.reps, confidence: 0.2,
+                                    rubricVersion: lowConfidence.rubricVersion)
+        #expect(!CueSelector.hasConsistentRange(lowConfidence))
+    }
+
     @Test func laterShorterRangeCitesThoseReps() {
         let cue = CueSelector.select(from: measuredSet([0.42, 0.41, 0.41, 0.40, 0.31, 0.30]))
         #expect(cue?.kind == .rangeDecreased)

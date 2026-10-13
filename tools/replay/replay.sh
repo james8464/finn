@@ -2,8 +2,14 @@
 set -euo pipefail
 
 project_root="${0:A:h:h:h}"
-binary="${TMPDIR:-/tmp/}plumb-replay-$$"
-trap 'rm -f "$binary"' EXIT
+if [[ "${1:-}" == "--build-to" ]]; then
+  binary="$2"
+  build_only=true
+else
+  binary="${TMPDIR:-/tmp/}plumb-replay-$$"
+  build_only=false
+  trap 'rm -f "$binary"' EXIT
+fi
 
 xcrun swiftc -swift-version 6 -o "$binary" \
   "$project_root/tools/replay/ReplayVideo.swift" \
@@ -15,4 +21,5 @@ xcrun swiftc -swift-version 6 -o "$binary" \
   "$project_root/Plumb/Plumb/Workout/ExerciseRecognition.swift" \
   "$project_root/Plumb/Plumb/Workout/AthleteTracker.swift" \
   "$project_root/Plumb/Plumb/Capture/PoseFrameAnalyzer.swift"
+if $build_only; then exit 0; fi
 "$binary" "$@"

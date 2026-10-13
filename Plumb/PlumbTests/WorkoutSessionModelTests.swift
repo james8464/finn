@@ -175,6 +175,44 @@ struct WorkoutSessionModelTests {
         #expect(cue == nil)
     }
 
+    @Test func nextSetReminderUsesOnlyTheLastRelevantSameExerciseCue() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for sample in decliningTrace(reps: 6) { source.emit(sample) }
+        await model.endSet()
+        guard case .measured(_, let cue) = model.result else {
+            Issue.record("Expected a measured first set")
+            return
+        }
+        #expect(cue != nil)
+        await model.startPreview()
+        #expect(model.nextSetReminder == cue?.nextAction)
+        await model.beginSet(countdown: 0)
+        #expect(model.nextSetReminder == cue?.nextAction)
+        await model.cancel()
+        #expect(model.nextSetReminder == nil)
+
+        model.selectedExercise = .pushUp
+        await model.startPreview()
+        #expect(model.nextSetReminder == nil)
+        await model.cancel()
+    }
+
+    @Test func dismissedCueDoesNotBecomeANextSetReminder() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for sample in decliningTrace(reps: 6) { source.emit(sample) }
+        await model.endSet()
+        model.dismissCue()
+        await model.startPreview()
+        #expect(model.nextSetReminder == nil)
+        await model.cancel()
+    }
+
     @Test func noCompleteRepOffersRetake() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
@@ -359,6 +397,15 @@ struct WorkoutSessionModelTests {
     private func trace(reps: Int, amplitude: Double = 0.20) -> [PoseFrame] {
         (0...(reps * 20)).map { index in
             let phase = Double(index % 20) / 20
+            return frame(time: Double(index) * 0.1,
+                         hipY: 0.42 + amplitude * (1 - cos(2 * .pi * phase)) / 2)
+        }
+    }
+
+    private func decliningTrace(reps: Int) -> [PoseFrame] {
+        (0...(reps * 20)).map { index in
+            let phase = Double(index % 20) / 20
+            let amplitude = index / 20 >= reps - 2 ? 0.13 : 0.20
             return frame(time: Double(index) * 0.1,
                          hipY: 0.42 + amplitude * (1 - cos(2 * .pi * phase)) / 2)
         }

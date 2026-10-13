@@ -28,7 +28,7 @@ This ecosystem story is credible only if the first iPhone-only loop works. Plumb
 
 The market already has strength classes, rep tracking, specialist camera feedback, running gait analysis, and coach video review. Plumb's first position to test is **personal, evidence-linked movement feedback for short strength sets, available from an iPhone without new hardware**. Treadmill running could extend that idea to a continuous session, but needs its own gait rubric, safe setup, and expert validation. Its restraint is part of the product: exercise-specific support, one cue, low-confidence abstention, and visible comparison with the next set.
 
-This is a positioning hypothesis, not an uncontested category. Competitor features change; [market research](market%20research.md) records current primary-source comparisons and questions that need user interviews.
+This is a positioning hypothesis, not an uncontested category. Competitor features change; [market research](market-research.md) records current primary-source comparisons and questions that need user interviews.
 
 ## 5. Trust is a product requirement
 
@@ -46,7 +46,7 @@ The business should be judged by whether people complete a second set after seei
 
 The first prototype can show the integration of iPhone camera capture, pose observations, deterministic movement logic, privacy-conscious data handling, and a native SwiftUI experience. Optional Watch and spoken output tell a broader Apple ecosystem story without being necessary for the demo. A single reliable squat loop is a stronger proof than a polished mockup claiming universal AI coaching.
 
-The technical and product risks are visible: camera placement, pose occlusion, validating cues, on-device speed, and safety language. The [plan](planning.md) narrows the challenge build, defines test gates, and makes the unimplemented features explicit.
+The technical and product risks are visible: camera placement, pose occlusion, validating cues, on-device speed, and safety language. The [plan](../../planning.md) narrows the challenge build, defines test gates, and makes the unimplemented features explicit.
 
 ## Primary references
 

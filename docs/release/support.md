@@ -13,7 +13,7 @@ Place the iPhone upright at about hip height, a few steps away. Keep your head a
 
 The rep count and relative range are camera-based estimates from one view. A cue is shown only when Plumb's current evidence rules support it. Plumb may suggest turning the phone or refuse a clearly frontal view, but that check is not a guarantee that every measured view is suitable. Follow the side-view setup. A shorter or longer camera-measured range does not by itself mean a set was safer, better, or worse. Stop exercising if you feel pain and seek qualified advice where appropriate.
 
-Plumb needs at least four measured reps before it can show an observation. A measured set may still have no cue when there is no clear, camera-supported pattern.
+Plumb needs at least four measured reps before it can show an observation. A measured set may still have no cue when there is no clear, camera-supported pattern. If the measured reps have a consistent range, Plumb can name that one positive signal; it does not mean your overall form is perfect. A relevant cue from the previous set appears alongside the camera during the next set of the same exercise, unless you mark it **Not relevant**.
 
 When an observation appears, tap **Listen to observation** to hear the measured rep count, observation, and next action. Tap **Stop speaking** to end playback. Sound uses your current iPhone audio output, including paired headphones; playback never starts automatically.
 

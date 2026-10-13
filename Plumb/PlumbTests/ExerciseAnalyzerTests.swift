@@ -119,7 +119,7 @@ struct ExerciseAnalyzerTests {
                                           backAtTop: 0.05, minimumDuration: 0.5, maximumDuration: 8.0))
         #expect(squat.minimumBodyScale == 0.1)
         #expect(squat.copy.observation == "Your range became shorter in the last two reps.")
-        #expect(squat.copy.nextAction == "Try a pace you can keep consistent.")
+        #expect(squat.copy.nextAction == "Choose a range you can repeat on each rep.")
     }
 
     // MARK: Definitions are consistent data

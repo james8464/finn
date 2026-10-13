@@ -4,6 +4,8 @@
 
 The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md). It scopes the first complete iPhone squat loop and its validation gate; later integrations remain in this broader product plan.
 
+The [product brief](docs/product/brief.md) is the concise source for the product promise, feature order, and result language. This plan retains the detailed implementation choices, validation gates, and timeline.
+
 ## 1. Product thesis
 
 **One line:** Plumb uses an iPhone camera to observe movement and return one clear, evidence-linked observation the person can try in the next set or session.
@@ -33,13 +35,13 @@ The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-ipho
 1. Choose an exercise and read a short setup card: phone on a stable surface, side view, entire body and equipment in frame, enough light, clear floor.
 2. Grant camera access when starting capture. Plumb shows whether the joints required for the chosen exercise stay visible. Its 3D viewpoint check can suggest turning or reject a clearly frontal view, but actual camera suitability still needs physical-device validation. It never starts analysis silently.
 3. Tap or use a short countdown to start. The first build analyses a live frame stream on the iPhone without saving a video. Optional clip saving is a later feature requiring a separate, explicit choice.
-4. After the set, Plumb displays measured rep count, one prioritized observation, and supporting rep details. A richer timeline, opt-in clip, or temporary pose overlay may follow once its usefulness, privacy, and accuracy have been tested.
-5. The person chooses **Try this next set**, **Not relevant**, or **Retake**. A follow-up set shows whether the observed pattern changed.
+4. After the set, Plumb displays measured rep count, one prioritized observation, or a narrow positive note when measured rep range is consistent, plus supporting rep details. This is not a judgment of perfect overall form. A richer timeline, opt-in clip, or temporary pose overlay may follow once its usefulness, privacy, and accuracy have been tested.
+5. The person chooses **Try this next set**, **Not relevant**, or **Retake**. If the previous cue remains relevant and the next set is for the same exercise, a one-sentence reminder stays beside the camera through framing and capture. A follow-up set shows whether the observed pattern changed.
 6. Optional Apple Watch records workout context such as elapsed time and heart rate. Optional spoken cues play through the current audio output, including paired AirPods.
 
 ### Example: bodyweight squat
 
-A side-view capture detects six reps. The last two show a shorter observed depth range than the first four. Plumb says: “Your last two reps were shallower than your first four. Try a pace you can keep consistent.” The result identifies reps 5–6 and can show the measured range. It does **not** claim the user's squat is unsafe, diagnose mobility, or issue a universal depth target. If the feet or hips are obscured, it says “I couldn't assess depth reliably; move the phone farther back.”
+A side-view capture detects six reps. The last two have a shorter camera-observed range than the first two. Plumb says: “Your range became shorter in the last two reps.” Its next action is “Choose a range you can repeat on each rep.” The result identifies reps 5–6 and can show the measured range. It does **not** claim the user's squat is unsafe, diagnose mobility, or issue a universal depth target. If the feet or hips are obscured, it asks for a better view and a retake.
 
 ### What each device contributes
 
@@ -172,7 +174,7 @@ Keep the first implementation small enough to inspect: `ready → framing → co
 
 A saved **set summary** needs a stable session and set ID, exercise/rubric version, camera orientation, start/end time, rep boundaries, aggregate metrics, evidence for any selected cue, analysis confidence, and the person's response. Store a clip URL only after an explicit save. Keep pose traces only as long as required for the promised review and let the person delete the entire session. HealthKit identifiers, if added, belong in a separate optional record so a camera-only user never needs Health authorization.
 
-The interface should distinguish four outcomes: **observation available**, **no meaningful change found**, **insufficient view**, and **analysis failed**. “No meaningful change found” is a useful result; it should not be turned into an invented correction. If rep count is uncertain, show a range or abstain rather than an exact but brittle number. A cue card should contain the observed pattern, the reps or time that support it, one voluntary next action, and a way to dismiss it.
+The interface should distinguish five outcomes: **observation available**, **consistent measured range**, **no supported pattern**, **insufficient view**, and **analysis failed**. Consistency names one measured property; it does not certify overall technique. “No supported pattern” should not become an invented correction. If rep count is uncertain, show a range or abstain rather than an exact but brittle number. A cue card should contain the observed pattern, the reps or time that support it, one voluntary next action, and a way to dismiss it.
 
 ### Accessibility and workout context
 

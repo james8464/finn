@@ -15,13 +15,15 @@ Find your line, one set at a time.
 
 Plumb uses your iPhone camera to review a bodyweight squat from the side. Set your phone where your full body is visible, complete a set, and see the repetitions Plumb could measure. When the view supports it, Plumb highlights one specific pattern and the reps behind it. Try another set to compare the same camera-measured range and pace.
 
+If an observation is relevant, a short reminder appears beside the camera during the next set. If measured reps have a consistent range, Plumb can name that one positive signal. It does not certify perfect overall form.
+
 Your workout video is not saved. Derived set summaries are stored locally in Plumb, and you can delete them in the app. When an observation is available, you can choose to hear it through your iPhone or paired headphones. On eligible devices, Apple Intelligence can help phrase a measured comparison; reviewed wording is always available when it cannot.
 
 Plumb observes one camera angle. It cannot assess every part of your movement, diagnose an injury, or guarantee safe technique. It asks for a retake when required joints or complete repetitions are missing. It cannot yet verify that every camera position is suitable for a side-view measurement.
 
 ## What's new, version 1.0
 
-First bodyweight-squat review, evidence-linked results, optional spoken observations, local session history, and set-to-set comparison.
+First bodyweight-squat review, evidence-linked results, a next-set reminder, qualified range feedback, optional spoken observations, local session history, and set-to-set comparison.
 
 ## App Review notes — draft
 

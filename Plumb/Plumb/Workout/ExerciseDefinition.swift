@@ -97,6 +97,10 @@ nonisolated struct ExerciseCopy: Equatable, Sendable {
     let rangeExplanation: String
     /// Rep accessibility description of the range value.
     let rangeAccessibilityName: String
+
+    var consistentRangeMessage: String {
+        "Your measured \(rangeNoun) stayed consistent across these reps."
+    }
 }
 
 /// One exercise rubric as data: what to track, how a rep moves, which view it needs, and what to say.
@@ -204,7 +208,7 @@ nonisolated extension ExerciseDefinition {
             moreRange: "longer",
             lessRange: "shorter",
             observation: "Your range became shorter in the last two reps.",
-            nextAction: "Try a pace you can keep consistent.",
+            nextAction: "Choose a range you can repeat on each rep.",
             rangeExplanation: "Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view.",
             rangeAccessibilityName: "relative camera-observed range"
         )
@@ -243,7 +247,7 @@ nonisolated extension ExerciseDefinition {
             moreRange: "greater",
             lessRange: "smaller",
             observation: "Your elbow bend became smaller in the last two reps.",
-            nextAction: "Try a pace you can keep consistent.",
+            nextAction: "Keep your elbow bend similar from rep to rep.",
             rangeExplanation: "Elbow bend is how much your elbow angle closed from the starting position, as seen by the camera. Use it only to compare your own sets from the same view.",
             rangeAccessibilityName: "camera-observed elbow bend"
         )
@@ -283,7 +287,7 @@ nonisolated extension ExerciseDefinition {
             moreRange: "greater",
             lessRange: "smaller",
             observation: "Your knee bend became smaller in the last two reps.",
-            nextAction: "Try a pace you can keep consistent.",
+            nextAction: "Keep your knee bend similar from rep to rep.",
             rangeExplanation: "Knee bend is how much the knee angle on the side facing the camera closed from the starting position. Use it only to compare your own sets from the same view and front leg.",
             rangeAccessibilityName: "camera-observed knee bend"
         )
@@ -322,7 +326,7 @@ nonisolated extension ExerciseDefinition {
             moreRange: "greater",
             lessRange: "smaller",
             observation: "Your hip hinge became smaller in the last two reps.",
-            nextAction: "Try a pace you can keep consistent.",
+            nextAction: "Keep your hip hinge similar from rep to rep.",
             rangeExplanation: "Hip hinge is how much the angle between your torso and thigh closed from the starting position, as seen by the camera. Use it only to compare your own sets from the same view.",
             rangeAccessibilityName: "camera-observed hip hinge"
         )

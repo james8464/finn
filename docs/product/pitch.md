@@ -57,4 +57,4 @@ Plumb turns an iPhone camera into a private technique mirror: after a supported 
 - [Apple Foundation Models availability](https://developer.apple.com/documentation/foundationmodels/generating-content-and-performing-tasks-with-foundation-models)
 - [Apple HealthKit multi-device workout sample](https://developer.apple.com/documentation/healthkit/building-a-multidevice-workout-app)
 - [Apple AirPods Pro 3 workout heart rate](https://support.apple.com/en-lamr/guide/airpods/dev1b40fb47d/web)
-- Competitor evidence and open questions: [market research](market%20research.md)
+- Competitor evidence and open questions: [market research](market-research.md)

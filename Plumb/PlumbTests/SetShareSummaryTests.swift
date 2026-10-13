@@ -3,6 +3,19 @@ import Testing
 @testable import Plumb
 
 struct SetShareSummaryTests {
+    @Test func consistentMeasuredRangeIsSharedWithoutPerfectFormClaim() {
+        let analysis = SetAnalysis(
+            reps: [0.40, 0.41, 0.39, 0.40].enumerated().map { index, range in
+                RepMetric(number: index + 1, startTime: Double(index),
+                          endTime: Double(index + 1), relativeRange: range)
+            },
+            confidence: 0.95, rubricVersion: SquatRubric.version
+        )
+        let text = SetShareSummary.text(for: analysis, cue: nil, cueDismissed: false)
+        #expect(text.contains("Your measured range stayed consistent across these reps."))
+        #expect(!text.localizedCaseInsensitiveContains("perfect"))
+    }
+
     @Test func measuredSummaryIncludesRepCountAndActionWithoutMedia() {
         let analysis = SetAnalysis(
             reps: [RepMetric(number: 1, startTime: 0, endTime: 2, normalizedHipTravel: 0.4)],

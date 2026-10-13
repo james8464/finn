@@ -150,7 +150,7 @@ Maintain a small table for each hypothesis: source, date, sample, observed resul
 
 ### Decision thresholds
 
-The first release decision needs both **accuracy and usefulness**. The [product plan](planning.md) proposes initial internal gates for framing success, rep count, cue support, and post-set latency. If a category fails, either improve it or suppress it; do not compensate with more persuasive AI wording.
+The first release decision needs both **accuracy and usefulness**. The [product plan](../../planning.md) proposes initial internal gates for framing success, rep count, cue support, and post-set latency. If a category fails, either improve it or suppress it; do not compensate with more persuasive AI wording.
 
 ## 8. Open questions and evidence gaps
 

@@ -1,6 +1,6 @@
 # Squat v1 validation results
 
-**Status: participant validation not started. Updated 13 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. Simulator tests and four generated-video replays verify implementation behavior, not real-camera accuracy. The new covered-feet replay is refused after sampled person-mask corroboration; its false-refusal rate on real sets is unknown. The 0.75-second tracking retake gate and the bystander behavior still need measurement on physical iPhones.
+**Status: participant validation not started. Updated 13 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. Simulator tests and nine synthetic video clips verify implementation behavior, not real-camera accuracy. The covered-feet replay is refused after sampled person-mask corroboration; its false-refusal rate on real sets is unknown. The mirrored clip also refuses a set because Vision's required-joint coverage falls to about 71% versus the 80% gate. Whether this reflects a real camera-direction weakness must be checked on physical iPhones. The 0.75-second tracking retake gate and bystander behavior also need measurement.
 
 ## Simulator UI check · 11 October 2026
 
@@ -10,7 +10,7 @@ Built and launched commit `8c2959e` on the iPhone 18 Pro Max simulator (iOS 27.0
 | --- | --- |
 | Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v5` |
 | Historical app capture path on public gym videos (v4, before person mask) | 44 of 50 measured with athlete tracking (5 without); 43 of 44 within one rep of an independent dip counter. The current v5 mask has not been replayed on this set. See "Other people in view" in [`exercise-rules-v1.md`](exercise-rules-v1.md) |
-| Generated video regressions (v5) | Six clear reps measured; standing still, hidden legs, and covered feet refused. These contain synthetic imagery and are not participant validation. |
+| Generated video regressions (v5) | Original, dim, farther, and slower six-rep clips measured; standing still, hidden legs, covered feet, and too-small subject refused. The mirrored clip is a diagnostic retake. These clips reuse synthetic imagery and are not participant validation. [Replay details](../../tools/replay/README.md) |
 | Replay on public videos (not participants) | 42 of 50 Mendeley side-view squat videos measured by `squat-side-v3` (0 of 50 by `squat-side-v2`); counts within one rep of an independent dip counter on all 42; no human count. See [`exercise-rules-v1.md`](exercise-rules-v1.md) |
 | Tuning sets | 0 |
 | Holdout sets | 0 |
