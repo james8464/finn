@@ -281,6 +281,9 @@ final class WorkoutSessionModel {
             do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
             catch { historyIssue = Self.issue(for: error) }
         }
+        // iOS terminated Plumb after a set without Done: the session is still open, so the first
+        // screen offers to finish it and the next set joins it, as before the relaunch.
+        if let latest = history.first, latest.isOpen == true { currentSession = latest }
         refreshFitnessAccess()
     }
 
@@ -696,7 +699,11 @@ final class WorkoutSessionModel {
         currentSession = nil
         comparison = nil
         comparisonRecap = nil
-        if let finished { await saveToFitness(finished) }
+        guard var session = finished else { return }
+        // Ended: a relaunch no longer offers to finish it.
+        session.isOpen = nil
+        save(session)
+        await saveToFitness(session)
     }
 
     /// Re-reads Health's permission, which the person can change in Settings or Health at any time.
@@ -866,11 +873,14 @@ final class WorkoutSessionModel {
             frames, requirement: exercise.definition.evidence) else { return }
         let now = currentDate()
         // A set long after the previous one starts a new session; the earlier one ends as at Done.
-        if let open = currentSession, !open.continues(at: now) {
+        if var open = currentSession, !open.continues(at: now) {
             currentSession = nil
+            open.isOpen = nil
+            save(open)
             Task { await self.saveToFitness(open) }
         }
         var session = currentSession ?? WorkoutSessionSummary(id: UUID(), startedAt: now, sets: [])
+        session.isOpen = true
         let newSet = SetSummary(
             id: UUID(), sessionID: session.id, capturedAt: now,
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,

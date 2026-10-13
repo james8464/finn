@@ -328,6 +328,48 @@ struct FitnessSessionTests {
         #expect(setup.model.history.isEmpty)
     }
 
+    /// No Done after the last set, then iOS terminates Plumb (swiped away, or reclaimed in the
+    /// background). On the next launch the first screen still offers to finish the session, a set a
+    /// few minutes later joins it, and Done saves it to Apple Health once.
+    @Test func anOpenSessionSurvivesARelaunch() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let id = try #require(setup.model.currentSession?.id)
+
+        let clock = setup.clock
+        let source = TestSource()
+        let relaunched = WorkoutSessionModel(source: source, store: setup.store, preferences: setup.preferences,
+                                             fitness: setup.fitness, currentDate: { clock.date })
+        #expect(relaunched.unfinishedSession?.id == id)
+
+        clock.advance(by: 5 * 60)
+        await relaunched.startPreview()
+        await relaunched.beginSet(countdown: 0)
+        for frame in CaptureTraces.squats(reps: 6, from: 0) { source.emit(frame) }
+        await relaunched.endSet()
+        #expect(relaunched.currentSession?.id == id)
+        #expect(relaunched.currentSession?.sets.count == 2)
+        #expect(relaunched.comparison != nil)
+
+        await relaunched.finishSession()
+        #expect(setup.fitness.saved.map(\.sessionID) == [id])
+        let again = WorkoutSessionModel(source: TestSource(), store: setup.store, preferences: setup.preferences,
+                                        fitness: setup.fitness, currentDate: { clock.date })
+        #expect(again.unfinishedSession == nil)
+    }
+
+    /// Sessions saved before Plumb marked open ones are treated as finished: a relaunch does not
+    /// offer to finish every old session.
+    @Test func anOlderSessionWithoutTheOpenMarkIsNotReopened() throws {
+        let setup = try Setup(savesToFitness: true)
+        let old = WorkoutSessionSummary(id: UUID(), startedAt: setup.clock.date, sets: [])
+        try setup.store.save(old)
+        let relaunched = WorkoutSessionModel(source: TestSource(), store: setup.store, preferences: setup.preferences,
+                                             fitness: setup.fitness)
+        #expect(relaunched.history.map(\.id) == [old.id])
+        #expect(relaunched.unfinishedSession == nil)
+    }
+
     @Test func aSessionContinuesUpToTheLongestBreak() {
         let start = Date(timeIntervalSince1970: 1_800_000_000)
         let empty = WorkoutSessionSummary(id: UUID(), startedAt: start, sets: [])
