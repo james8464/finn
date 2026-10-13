@@ -1,6 +1,6 @@
 # Exercise rules v1 and the 3D camera-angle check
 
-**Status on 13 October 2026: implemented and tested on the iOS 27 simulator with synthetic pose traces and generated-video replays.** Earlier capture versions were replayed on Vision poses from public side-view videos (see "Replay on real videos" below); the current person-mask revision has not. No expert review or physical-iPhone run exists yet for anything on this page. The squat keeps its own protocol in [`squat-v1-protocol.md`](squat-v1-protocol.md).
+**Status on 13 October 2026: implemented and tested on the iOS 27 simulator with synthetic pose traces and generated-video replays.** The current person-mask capture path was also spot-checked on eleven selected public gym videos (see "Current capture-path spot check" below). No expert review or physical-iPhone run exists yet for anything on this page. The squat keeps its own protocol in [`squat-v1-protocol.md`](squat-v1-protocol.md).
 
 ## How a rule is written
 
@@ -23,7 +23,7 @@ All four use the squat's evidence rules: joint confidence at least 0.3, the requ
 
 ## Posture advice (new on 13 October)
 
-At the deepest phase of each completed rep, the analyzer takes the median posture reading from nearby frames. Supporting joints must have confidence of at least 0.5. The first two and last two reps must all have readings, and their movement ranges must be within 10%. Both final readings must rise beyond the first pair's average by the threshold below. An angled view above 30° suppresses posture advice when 3D angle estimates are available; missing supporting joints suppress it without losing otherwise valid rep counts. The result still shows at most one cue and falls back to the existing range observation when appropriate.
+At the deepest phase of each completed rep, the analyzer takes the median posture reading from nearby frames. Supporting joints must have confidence of at least 0.5. The first two and last two reps must all have readings, and their movement ranges must be within 10%. Both final readings must rise beyond the first pair's average by the threshold below. An angled view above 30° suppresses coaching cues, including the fallback range observation, when 3D angle estimates are available; the app keeps the count and offers a side-on camera tip. Missing supporting joints suppress posture advice without losing otherwise valid rep counts. The result still shows at most one cue.
 
 | Exercise | Camera-visible change | Minimum rise | Suggested focus |
 | --- | --- | --- | --- |
@@ -56,6 +56,19 @@ The one count off by more than a rep is a "bad form" set (9 against 13 dips). Vi
 
 ## Replay on real videos
 
+### Current capture-path spot check · 13 October 2026
+
+Eleven selected clips from the [Mendeley Data exercise video dataset, version 2](https://data.mendeley.com/datasets/kgbb3yn47p/2) (CC BY 4.0) were run through the current Mac replay of the app's Vision 2D/3D requests, sampled person mask, athlete tracking, view check, and exercise analyzer. HEVC clips were rewrapped for AVFoundation; the video data and extracted poses were kept outside the repository. This is a **convenience sample** across different people and camera views, not a holdout or a participant study. The dataset's good/bad labels do not verify a particular posture cue, and no independent human rep counts were made.
+
+| Exercise and view | Selected clips | Measured | Retake / reason |
+| --- | --- | --- | --- |
+| Squat, side | Good-form subjects 001, 002, 003 | 001: 18 reps; 002: 14 reps | 003: required joints visible with adequate confidence in only 34% of frames |
+| Squat, front | Good-form subjects 001, 004, 006 | None | 001: sustained front-view estimate about 87°; 004 and 006: required-joint coverage 74% and 72% |
+| Squat, diagonal | Good-form subjects 002, 005, 007 | 002: 14 reps; 005: 13 reps, with a camera-turn tip | 007: movement too shallow for the current rep rule |
+| Push-up, side | Bad-form subjects 001, 002 | 001: 6 reps; 002: 13 reps | None |
+
+The measured diagonal squat from subject 002 had a median 3D view deviation of about 62°. At that angle, 2D projected range and posture may be distorted; the app now withholds coaching cues while retaining the count and camera-turn tip. The selected clips show a capture path that works on some different people and refuses some unsuitable views. They cannot establish count accuracy, false-refusal rate, cue quality, or performance on a physical iPhone. The eleven files were chosen for quick coverage, not sampled randomly; the previously reported 50-video results below refer to older rubric/capture versions.
+
 Version 2 counted no squat on Guilhem's iPhone. To reproduce it without filming anyone, the app's own Vision request was run over 50 side-view squat videos and 48 push-up videos from the Mendeley dataset used for exercise recognition (CC BY 4.0, see `tools/exercise-classifier/angle-model/README.md`; the videos and poses stay outside the repository), and the analyzer was replayed on those poses with the 3D check off.
 
 | | `squat-side-v2` | `squat-side-v3` |
@@ -83,7 +96,7 @@ A 10° phone tilt changes neither count: the squat signal is a ratio of vertical
 **What it does.** About four times per second (every fourth processed frame at 15 fps), the capture code runs `VNDetectHumanBodyPose3DRequest` on the same camera frame as the 2D pose. It moves the hips and shoulders into the camera's frame with `cameraOriginMatrix` and computes the angle between the body's left-right axis and the line from the camera to the hips: 0° is a true side view, 90° faces the camera or turns away from it.
 
 - Median of the set's estimates at 30° or less: nothing to say.
-- Above 30°: the set is measured, and the result adds "Plumb saw you about N° from side-on. Turn a little more side-on next time; counts are most reliable from the side." While framing, three of the last five estimates above 30° show "Turn a little: side to the camera". Neither stops the set.
+- Above 30°: the set is measured without a coaching cue, and the result adds "Plumb saw you about N° from side-on. Turn a little more side-on next time; counts are most reliable from the side." While framing, three of the last five estimates above 30° show "Turn a little: side to the camera". Neither stops the set.
 - At 75° or more, with estimates spanning at least 3 s: the set is refused with "This exercise needs a side view. Turn so your side faces the camera, then try again. Plumb measured about N° away from the view it needs."
 - Fewer than four estimates: no decision, and the 2D rules apply alone, as on the simulator.
 

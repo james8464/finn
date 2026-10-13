@@ -175,6 +175,43 @@ struct WorkoutSessionModelTests {
         #expect(cue == nil)
     }
 
+    @Test func angledSetKeepsCountButWithholdsRangeAdvice() async throws {
+        let suite = "PlumbAngledCue-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let preferences = PlumbPreferences(defaults: defaults)
+        preferences.recognizesExercise = false
+        preferences.checksCameraAngle = true
+        let frames = (0...120).map { index -> PoseFrame in
+            let phase = Double(index % 20) / 20
+            let amplitude = index / 20 >= 4 ? 0.16 : 0.22
+            let pose = frame(time: Double(index) * 0.1,
+                             hipY: 0.42 + amplitude * (1 - cos(2 * .pi * phase)) / 2)
+            return PoseFrame(time: pose.time, subjectCount: 1, joints: pose.joints,
+                             profileDeviationDegrees: 45)
+        }
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .squat) else {
+            Issue.record("The angled set should retain measurable reps")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+        #expect(CueSelector.select(from: analysis, exercise: .squat)?.kind == .rangeDecreased)
+
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, preferences: preferences)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for pose in frames { source.emit(pose) }
+        await model.endSet()
+        guard case .measured(let result, let cue) = model.result else {
+            Issue.record("An angled view should keep its measured rep count")
+            return
+        }
+        #expect(result.reps.count == 6)
+        #expect(cue == nil)
+        #expect(model.movementNote?.contains("Turn a little more side-on") == true)
+    }
+
     @Test func noCompleteRepOffersRetake() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)

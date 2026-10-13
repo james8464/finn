@@ -60,7 +60,7 @@ _Updated 13 October 2026._
 - Checks that every detected joint lies on the person's silhouette, so a hidden ankle is not invented (new on 13 October).
 - Follows one athlete and ignores other people in view.
 - Optional: recognizes the exercise automatically and keeps the user's choice when unsure.
-- Posture advice requires clear supporting joints, a sufficiently side-on view when 3D angle is available, and comparable rep range; it abstains when those conditions are not met.
+- Coaching cues require a sufficiently side-on view when 3D angle is available. At a diagonal view, the app can retain the rep count and camera-turn tip while withholding posture and range cues that might be distorted. Posture advice also requires clear supporting joints and comparable rep range.
 
 **Not proven yet**
 
@@ -68,7 +68,7 @@ _Updated 13 October 2026._
 - Sixteen generated test videos cover a clear squat, no movement, hidden legs or feet, and twelve variants of light, size, framing, resolution, blur, apparent phone movement, tempo, and facing direction. Blur, phone shake, a very small subject, and the mirrored clip ask for a retake. All variants reuse one source person and motion; they do not establish accuracy across real people.
 - No qualified trainer has reviewed the coaching observations.
 - Posture-change thresholds have only simulator and synthetic-pose coverage; their usefulness and false-cue rate need physical-iPhone and trainer review.
-- The silhouette check has not yet been measured on the public videos.
+- A spot check of the current capture path on eleven selected public gym clips covered several people and side, diagonal, and front views. Four of nine squat clips and both push-up clips measured; the three front-view squat clips refused. There is no independent human count or cue review, and this selected sample cannot establish accuracy. [Replay details](docs/validation/exercise-rules-v1.md#current-capture-path-spot-check--13-october-2026).
 
 **Not built:** Apple Watch, Apple TV, AirPods head tracking, widgets, Live Activities, accounts, subscriptions.
 

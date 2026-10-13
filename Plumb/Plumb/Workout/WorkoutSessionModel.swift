@@ -326,7 +326,9 @@ final class WorkoutSessionModel {
                 return
             }
             movementNote = explanation
-            let cue = CueSelector.select(from: analysis, exercise: definition)
+            // A camera angle outside the supported side view can distort relative range.
+            let cue = diagnostics?.angledView == nil
+                ? CueSelector.select(from: analysis, exercise: definition) : nil
             result = .measured(analysis, cue)
             record(analysis: analysis, cue: cue, exercise: exercise)
         case .insufficientView(let reason):

@@ -47,8 +47,7 @@ jobs:
             -resultBundlePath "$RUNNER_TEMP/Plumb.xcresult" \
             -parallel-testing-enabled YES \
             -maximum-parallel-testing-workers 1 \
-            -collect-test-diagnostics never \
-            CODE_SIGNING_ALLOWED=NO
+            -collect-test-diagnostics never
       - name: Replay generated workout videos through Vision
         if: always()
         run: tools/replay/test_generated_videos.sh
