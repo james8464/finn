@@ -90,9 +90,8 @@ final class LiveAnnouncer: NSObject, LiveAnnouncing, AVSpeechSynthesizerDelegate
         Task { @MainActor [weak self] in self?.finishOne() }
     }
 
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Task { @MainActor [weak self] in self?.finishOne() }
-    }
+    /// Only `announce` cancels, and it resets the count itself.
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {}
 
     private func finishOne() {
         queued = max(0, queued - 1)

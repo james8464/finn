@@ -65,7 +65,8 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
             processor.finish()
         }
         // A hot phone: lighten the work before the system has to stop the camera mid-set.
-        pressureObservation = cameraDevice?.observe(\.systemPressureState, options: [.new]) {
+        // .initial applies the current level on every start: a set may begin hot, or after cooling.
+        pressureObservation = cameraDevice?.observe(\.systemPressureState, options: [.initial, .new]) {
             [weak self] device, _ in
             self?.adapt(to: device.systemPressureState.level)
         }

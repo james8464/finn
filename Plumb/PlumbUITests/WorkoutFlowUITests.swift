@@ -102,7 +102,9 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Camera"].exists)
         XCTAssertTrue(app.staticTexts["Saved results"].exists)
         XCTAssertTrue(app.staticTexts["Optional audio"].exists)
-        XCTAssertTrue(app.staticTexts["Plumb says the countdown, each rep, and short live observations, and you can tap to hear an observation, through your iPhone or headphones. Turn spoken reps off in Options. Plumb does not record sound or use the microphone."].exists)
+        // XCTest refuses identifier queries longer than 128 characters, so match the start.
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
+            format: "label BEGINSWITH %@", "Plumb says the countdown, each rep, and short live observations")).firstMatch.exists)
         XCTAssertTrue(app.staticTexts["Optional explanation"].exists)
         XCTAssertTrue(app.staticTexts["Video is processed on this iPhone and never saved."].exists)
         XCTAssertTrue(app.staticTexts["Saved summaries may be included in your device backup."].exists)
@@ -138,16 +140,18 @@ final class WorkoutFlowUITests: XCTestCase {
             "Plumb uses the camera to measure a supported exercise from the side. Camera frames and pose points stay on this iPhone.",
             "One camera view cannot assess your whole technique or prevent injury.",
             "Saved results",
-            "Measured set summaries are saved on this iPhone so you can review previous sets. They include which measured patterns each set showed, so Plumb can point out your most frequent one.",
+            "Measured set summaries are saved on this iPhone so you can review previous sets.",
             "Saved summaries may be included in your device backup.",
             "Delete saved sessions in History.",
             "Optional audio",
-            "Plumb says the countdown, each rep, and short live observations, and you can tap to hear an observation, through your iPhone or headphones. Turn spoken reps off in Options. Plumb does not record sound or use the microphone.",
+            "Plumb says the countdown, each rep, and short live observations",
             "Optional explanation",
             "On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.",
         ]
+        // Each entry is the start of a sentence: XCTest refuses identifier queries over 128 characters.
         for copy in visibleCopy {
-            XCTAssertTrue(app.staticTexts[copy].exists, "Privacy text is missing from accessibility: \(copy)")
+            XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", copy)).firstMatch.exists,
+                          "Privacy text is missing from accessibility: \(copy)")
         }
         let policyLink = app.links["Full privacy policy"]
         XCTAssertTrue(policyLink.exists)

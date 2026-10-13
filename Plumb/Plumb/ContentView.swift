@@ -591,6 +591,7 @@ struct ContentView: View {
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
                 .contentTransition(.numericText())
+                .animation(.snappy, value: model.liveRepCount)
             Text(model.liveRepCount == 1 ? "rep" : "reps")
                 .font(.headline)
         }
