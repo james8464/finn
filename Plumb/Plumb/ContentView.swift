@@ -909,10 +909,6 @@ struct ContentView: View {
                                 Text(comparisonGapText(gap))
                                     .foregroundStyle(PlumbStyle.supportingText)
                             }
-                            if let extremes = model.repExtremes {
-                                repExtremesView(extremes)
-                                Divider().padding(.vertical, 12)
-                            }
                             DisclosureGroup("Rep details") {
                                 repList(analysis.reps, exercise: model.resultExercise)
                             }
@@ -926,6 +922,12 @@ struct ContentView: View {
                             .font(.subheadline)
                             .accessibilityIdentifier("result.shareSummary")
                             .accessibilityHint("Shares the measured summary without video")
+                            // Last on the result, as in #10: higher up, the cards sat behind the bottom
+                            // button on a short result and the contrast audit measured them through it.
+                            if let extremes = model.repExtremes {
+                                Divider().padding(.vertical, 12)
+                                repExtremesView(extremes)
+                            }
                         case .insufficientView(let reason):
                             recognitionNote
                             Text(reason)
