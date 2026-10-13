@@ -190,6 +190,20 @@ nonisolated enum ExerciseAnalyzer {
                                       rubricVersion: definition.rubricVersion)), diagnostics)
     }
 
+    /// The frame where a rep went deepest (hips lowest, or the joint most bent), to draw it.
+    static func deepestFrame(of rep: RepMetric, in frames: [PoseFrame],
+                             as definition: ExerciseDefinition) -> PoseFrame? {
+        guard case .usable(let side) = EvidenceGate.assess(frames, requirement: definition.evidence) else {
+            return nil
+        }
+        let candidates = frames.filter { $0.time >= rep.startTime && $0.time <= rep.endTime }
+            .compactMap { frame in sample(from: frame, signal: definition.signal, side: side).map { (frame, $0.value) } }
+        switch definition.signal {
+        case .verticalTravel: return candidates.max { $0.1 < $1.1 }?.0
+        case .jointBend: return candidates.min { $0.1 < $1.1 }?.0
+        }
+    }
+
     /// Angle at `vertex` in degrees, with y scaled by the image aspect ratio so it matches x.
     static func angle(from a: JointPoint, vertex b: JointPoint, to c: JointPoint,
                       aspectRatio: Double) -> Double? {
