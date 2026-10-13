@@ -281,4 +281,7 @@ nonisolated struct WorkoutSessionSummary: Codable, Equatable, Identifiable {
     let id: UUID
     let startedAt: Date
     var sets: [SetSummary]
+    /// The Apple Health workout saved for this session, so it is never saved twice. Nil until then,
+    /// and in sessions saved before 13 October 2026 (decoded as absent).
+    var fitnessWorkout: FitnessWorkoutRecord? = nil
 }
