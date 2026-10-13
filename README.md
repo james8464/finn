@@ -1,125 +1,39 @@
 # Plumb
 
-> **TL;DR · 13 October 2026**
->
-> - **This file is the source of truth. Keep it true.**
-> - **Idea:** a fitness coach on iPhone + Apple Watch that aims to check every rep and give a timely correction. Track your progress and your workouts.
-> - **Today we have:** iPhone only, four side-view exercises.
-> - **Not built yet:** the full iPhone technology, the full app, the Apple Watch technology (and Apple TV, AirPods head tracking, widgets, Live Activities).
+Plumb is an iPhone workout companion that helps you see how your movement changes, one set at a time. Set the phone where its camera can see you, complete a supported exercise, and review one observation tied to visible movement. Then try another set and compare. When the view is too weak, Plumb asks for a retake instead of guessing.
 
-## Rules for AI agents and contributors
+## What Plumb is
 
-1. **Start here.** If a file disagrees with this README, follow the README and point out the conflict. Do not "correct" the README to match an older document.
-2. **Built means built.** Never describe a feature as working unless [Current state](#current-state) says so. Everything else in the vision is planned.
-3. **Keep this file true.** When you change what is built or the product direction, update this README in the same commit: the TL;DR, "Current state", and the date at the top.
+- **The first experience:** short strength sets viewed from the side. The iPhone analyzes a live camera stream on device; it does not save video. Rep counts and technique observations come from exercise-specific pose rules, with no universal “perfect form” score.
+- **The intended product:** more movements, including **treadmill running**. Running needs its own camera placement, gait signals, continuous-session summary, and validation. A strength-rep rubric cannot simply be reused for it.
+- **The Apple ecosystem:** iPhone remains sufficient by itself. A Watch companion is the next device milestone for workout timing, discreet controls, and optional heart-rate context. Spoken results can already use the current audio route, including paired AirPods. Foundation Models may phrase a measured comparison on eligible devices; reviewed wording remains the fallback. Neither Watch nor AirPods establishes technique quality on its own.
+- **The boundary:** Plumb is a fitness aid, not medical advice, an injury-prevention guarantee, or a replacement for a qualified coach.
 
-## Plumb idea
+## What we need to build
 
-The intended Plumb experience is a fitness coach on iPhone and Apple Watch. Prop your phone up once per exercise: the camera checks your posture and execution on every rep, while the Watch tracks reps, tempo, and effort, can tap your wrist when a validated issue appears, and can display real-time advice. iPhone and Apple Watch are the core of this vision. The goal is to deliver a correction as early as the evidence allows, then keep the workout's data in the app so you can track progress. These Watch and live-coaching features are planned, not in the current build.
+1. **Prove the iPhone loop on real people.** Test camera placement, rep counts, occlusion, lighting, different bodies and clothing, processing time, and every coaching cue on physical iPhones. Get consent before filming and specialist review before broader technique claims.
+2. **Finish the first release path.** Verify accessibility, privacy copy, audio behavior, signing, and a real App Store Connect upload. The current simulator and generated-video results do not establish real-person accuracy.
+3. **Prototype iPhone + Apple Watch.** Add a watchOS workout session and simple, discreet controls only after the iPhone result is dependable. Evaluate synchronized motion data against camera-only analysis before claiming sensor fusion improves it.
+4. **Design and validate treadmill running separately.** Define where the phone can safely sit, which side/rear view reveals a useful signal, how to handle occlusion and moving treadmill backgrounds, what a runner can act on, and what the app must withhold. Start with an expert-reviewed, post-run observation; do not promise live gait correction yet.
 
-Apple Foundation Models may help phrase validated observations on eligible devices; the coaching facts come from camera pose analysis and exercise-specific rules, with a non-generative fallback. The product is designed to say when the view is too weak to support a cue.
+Apple TV, a second iPhone camera, widgets, Live Activities, accounts, and subscriptions are later experiments. A team movement-analysis engine can be assessed when its interface and sample output are available. See [planning.md](planning.md) for priorities, technical boundaries, and release gates.
 
-We want Plumb to use as much of Apple's ecosystem as it can, with each device doing the job it is best at.
+## Current state · 13 October 2026
 
-- **AirPods** can deliver corrections directly to your ears. Motion-capable models may also provide head-motion data for a future, exercise-specific compensatory-movement check; whether that signal is useful and reliable needs device and coach validation. An optional post-set spoken observation already uses the current audio output, including paired AirPods. [Apple's headphone motion API](https://developer.apple.com/documentation/coremotion/cmheadphonemotionmanager) requires an availability check and motion permission.
-- **iPhone Duo** could stand on its own for camera placement; that setup still needs testing. [Apple describes its hands-free standing design](https://www.apple.com/iphone-duo/).
-- **Apple TV:** working out in the living room. The iPhone analyzes its live camera feed, and the feedback could appear on the TV.
+**Working in the iPhone app:** side-view bodyweight squat, push-up, static lunge, and stiff-leg deadlift flows; live framing and skeleton; rep analysis and a provisional observation when evidence permits; retake guidance; local set history, comparison, text-only sharing, and optional spoken output. Foundation Models can reword a validated comparison when available, with a deterministic fallback. Video is analyzed locally and is not saved. There is no treadmill mode, Watch app, account, or subscription.
 
-Long term, the same approach can correct movement in many disciplines (gym, home workouts, treadmill running).
+**Verified so far:** simulator UI tests and generated pose/video fixtures exercise the app, including hidden or covered body parts. These are repeatable engineering checks, not validation of coaching accuracy. Physical iPhone tests and qualified cue review remain open; [the results ledger](docs/validation/squat-v1-results.md) tracks that distinction. A debug demo must be identified as synthetic.
 
-Plumb is a fitness aid. It is not medical advice and does not guarantee safe technique.
+**Open the project:** clone the repository, open [Plumb.xcodeproj](Plumb/Plumb.xcodeproj) in Xcode, and run the `Plumb` scheme on an iPhone simulator or connected iPhone (iOS 27 target). [The replay guide](tools/replay/README.md) explains the generated fixtures.
 
-## Build
+## Project guides
 
-We are building the Plumb idea. Keep in mind:
+| Need | Start here |
+| --- | --- |
+| Product scope and build order | [Planning](planning.md) |
+| Brand, typography, color, and icon | [Design guide](Design/README.md) |
+| Physical-device validation and results | [Validation protocol](docs/validation/squat-v1-protocol.md) · [Results](docs/validation/squat-v1-results.md) |
+| Release and public claims | [Submission checklist](docs/release/app-store-submission.md) · [Privacy](docs/release/privacy-policy.md) |
+| Team collaboration | [Git guide](Plumb/GIT%20guide.md) |
 
-- **A really great product:** it solves a real problem in the best way, it is integrated across four Apple devices (iPhone, Apple Watch, iPhone Duo, Apple TV) plus widgets and Live Activities, and its value shows in the first second.
-- **Monetization and customer acquisition** designed into the product from day one.
-- **A really astonishing UX/UI:** Liquid Glass (not too much), smooth, fast.
-- **Smart technology underneath.**
-
-## Current state
-
-_Updated 13 October 2026._
-
-**In one sentence:** an iPhone-only app that analyzes one selected exercise at a time from the side, counts reps, and gives a bounded result after the set. It has not yet been tested on a real iPhone with real people.
-
-**What the app does**
-
-- Four exercises, filmed from the side: bodyweight squat, push-up, static lunge, stiff-leg deadlift.
-- Before the set: live camera view with the tracked skeleton and framing tips.
-- After the set: a rep count and at most one observation when the evidence supports it, a qualified note when measured range is consistent, no supported pattern, or an explanation of why to retake.
-- A relevant one-sentence cue from the last set stays beside the camera through framing and capture of the next set of the same exercise.
-- Compares two sets, keeps a local history, and shares a result as text.
-- Reads the observation aloud on tap, through the iPhone speaker or AirPods.
-- Optional: Apple Intelligence can reword the comparison. If it is unavailable or fails, a pre-written sentence is shown.
-- Video is analyzed on the iPhone and never saved.
-
-**How it avoids wrong answers**
-
-- Checks that the person is filmed from the side (Vision 3D). A slight angle gives a placement tip; facing the camera for several seconds refuses the set.
-- Checks that every detected joint lies on the person's silhouette, so a hidden ankle is not invented (new on 13 October).
-- Follows one athlete and ignores other people in view.
-- Optional: recognizes the exercise automatically and keeps the user's choice when unsure.
-
-**Not proven yet**
-
-- Tested only in the simulator, on generated videos, and on public videos. No run yet on a physical iPhone across lighting, clothing, and camera angles.
-- Nine generated test videos cover six clear squats, no movement, hidden legs or feet, lower light, two distances, slower tempo, and the opposite facing direction. The mirrored clip currently asks for a retake. These tests are reproducible but do not establish accuracy on real people.
-- No qualified trainer has reviewed the coaching observations.
-- The silhouette check has not yet been measured on the public videos.
-
-**Not built:** Apple Watch, Apple TV, AirPods head tracking, widgets, Live Activities, accounts, subscriptions.
-
-**Challenge goal:** a reliable iPhone loop and a build submitted through App Store Connect. Public release depends on validation and distribution access.
-
-_For developers:_ each exercise is defined in `ExerciseDefinition.swift` (rule versions `squat-side-v5` and `*-side-v4`). Generated test videos are in `tools/replay`.
-
-Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
-
-## Rules that always apply
-
-- **No medical claims.** Never claim injury prevention, diagnosis, or guaranteed safe technique.
-- **AI phrases, it never decides.** Language models may only reword facts measured by the analysis.
-- **Permissions in context.** Ask for camera access at camera setup, and for Health data only when a Health feature is used.
-- **Privacy.** Video stays on the device and is not saved. Changing that needs an explicit user choice and an updated privacy policy.
-- **Honest demos.** Label synthetic or recorded input. Never present it as live tracking.
-
-## Documents
-
-- `Design/README.md`: Plumb brand theme, colors, typography, icon, and live Figma guide
-- `docs/design/iphone-experience-review.md`: iPhone interface decisions tied to Apple guidance and Design Award examples
-- `planning.md`: experience, scoped MVP, technical approach, privacy, validation, and timeline
-- `docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`: task-by-task plan for the first real iPhone squat session
-- `docs/validation/squat-v1-protocol.md`: consent, physical-device test, annotation, and claim gates
-- `docs/validation/physical-iphone-run.md`: step-by-step device smoke run when the iPhone is available
-- `docs/validation/squat-v1-results.md`: actual results status; no real sets collected yet
-- `docs/validation/exercise-rules-v1.md`: push-up, lunge, and deadlift rules, the 3D camera-angle check, and what each still needs on a physical iPhone
-- `tools/replay/README.md`: generated simulator sets for every exercise, missing-joint refusal, and Mac replay of a saved video through Vision and the production analyzer
-- `tools/exercise-classifier/README.md`: clip format, labeling, Create ML training, and installing the exercise classifier
-- `docs/release/app-store-submission.md`: release checks and App Store Connect status
-- [Public support](https://james8464.github.io/hackathon-project/support.html) and [privacy policy](https://james8464.github.io/hackathon-project/privacy.html): live pages for the current iPhone candidate
-- `docs/release/app-privacy-answers.md`: source-backed draft of App Store privacy answers for the current iPhone build
-- `docs/product/brief.md`: supporting feature order and result-language boundaries; this README owns the product direction and current-state summary
-- `docs/README.md`: document map by purpose
-- `docs/product/rationale.md`: why a focused camera technique companion is worth testing
-- `docs/product/market-research.md`: primary-source alternatives and customer research plan
-- `docs/product/pitch.md`: three-minute story, demo path, and claim boundaries
-- `Plumb/GIT guide.md`: the team's current `main` branch workflow
-
-## Team
-
-- James
-- Klaus
-- Theophile
-- Guilhem
-
-## Open the iPhone project
-
-1. Clone the repository and switch to `main`.
-2. Open `Plumb/Plumb.xcodeproj` in Xcode.
-3. Choose an iPhone simulator or connected iPhone and build the `Plumb` scheme.
-
-The layered Icon Composer source is `Plumb/Plumb/AppIcon.icon`. Flat marks and a preview are in `Plumb/BrandArtwork`.
-
-The capture screen shows an elapsed clock while a set is active. For repeatable development testing, the Debug build has generated six-rep fixtures for all four exercises and a missing-wrist case. The fixtures test app behavior without doing a workout; they do not validate pose detection or coaching accuracy on real people. See the replay guide for simulator commands and saved-video analysis on a Mac.
+The layered Icon Composer source is [AppIcon.icon](Plumb/Plumb/AppIcon.icon). Brand artwork is in [Plumb/BrandArtwork](Plumb/BrandArtwork). The project is for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F. Team: James, Klaus, Théophile, and Guilhem.
