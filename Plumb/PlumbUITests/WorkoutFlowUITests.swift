@@ -467,9 +467,17 @@ final class WorkoutFlowUITests: XCTestCase {
 
     @MainActor
     private func auditLargeTextDemo(_ app: XCUIApplication) throws {
+        // Fails with the element of each issue, which the result bundle's summary otherwise reduces
+        // to "Text clipped".
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
-        ])
+        ]) { issue in
+            let element = issue.element.map {
+                "\($0.elementType.rawValue) '\($0.label)' id '\($0.identifier)' at \($0.frame)"
+            } ?? "no element"
+            XCTFail("large text: \(issue.compactDescription). \(issue.detailedDescription) Element: \(element)")
+            return true
+        }
     }
 
     @MainActor

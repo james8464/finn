@@ -110,6 +110,19 @@ final class DemoPoseSource: PoseStreaming {
                 .leftElbow: point(shoulderX, shoulderY + 0.12),
                 .leftWrist: point(shoulderX, shoulderY + 0.24),
             ]
+        case .pullUp, .muscleUp:
+            // Side view, hands on a bar at y 0.30, arm length 0.16 of the frame height.
+            let full = exercise == .pullUp ? 0.9 : 1.9
+            let rise = (setNumber == 1 && late ? full * 0.75 : full) * motion * 0.16
+            let shoulderY = 0.46 - rise
+            let distance = abs(shoulderY - 0.30)
+            let reach = sqrt(max(0, 0.08 * 0.08 - distance * distance / 4))
+            joints = [
+                .leftWrist: point(0.50, 0.30), .leftShoulder: point(0.49, shoulderY),
+                .leftElbow: point(0.495 + reach, (shoulderY + 0.30) / 2),
+                .leftHip: point(0.48, shoulderY + 0.20), .leftKnee: point(0.49, shoulderY + 0.37),
+                .leftAnkle: point(0.47, shoulderY + 0.52), .nose: point(0.53, shoulderY - 0.08),
+            ]
         }
         let visibleJoints = missingWrist && exercise == .pushUp
             ? joints.filter { $0.key != .leftWrist } : joints

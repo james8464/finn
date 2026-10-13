@@ -13,6 +13,8 @@ nonisolated enum BodyJoint: String, Codable, Hashable {
     case rightShoulder
     case rightElbow
     case rightWrist
+    /// Only used to check the chin against the hands on pull-ups.
+    case nose
 }
 
 nonisolated struct JointPoint: Codable, Equatable {
@@ -218,6 +220,7 @@ nonisolated enum CueKind: String, Codable, Sendable {
     case torsoTiltIncreased
     case hipDropIncreased
     case kneeBendIncreased
+    case swingIncreased
 }
 
 nonisolated struct Cue: Codable, Equatable {
@@ -234,6 +237,8 @@ nonisolated enum ExerciseKind: String, Codable, Equatable, CaseIterable {
     case pushUp
     case staticLunge
     case stiffLegDeadlift
+    case pullUp
+    case muscleUp
 }
 
 nonisolated enum CameraView: String, Codable, Equatable {

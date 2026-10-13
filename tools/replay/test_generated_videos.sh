@@ -22,11 +22,13 @@ result = json.load(sys.stdin)
 assert result["status"] == expected_status, (label, result)
 assert result["measuredReps"] == int(expected_reps), (label, result)
 assert result["frameCount"] > 0, (label, result)
-# The hands-free live count never says more reps than the result, and is at most one behind it
-# (the last rep can end after the final live analysis).
+# On a measured set, the hands-free live count never says more reps than the result and is at
+# most one behind it (the last rep can end after the final live analysis). On a refused set the
+# live count is provisional: it counts before the end-of-set evidence gate, so it can be ahead.
 live = result["liveReps"]
-assert live <= result["measuredReps"], ("live count above the result", label, result)
-assert live >= result["measuredReps"] - 1, ("live count behind the result", label, result)
+if result["status"] == "measured":
+    assert live <= result["measuredReps"], ("live count above the result", label, result)
+    assert live >= result["measuredReps"] - 1, ("live count behind the result", label, result)
 print("{}: {}, {} reps, {} frames; live {} reps, cues {}, hands-free start {}".format(
     label, result["status"], result["measuredReps"], result["frameCount"], live,
     result["liveCues"] or "none",
@@ -47,10 +49,10 @@ check_result "warm indoor color" "squat-warm-indoor.mp4" measured 6
 check_result "low resolution" "squat-low-resolution.mp4" measured 6
 check_result "off-center framing" "squat-off-center.mp4" measured 6
 check_result "tilted phone" "squat-angled-phone.mp4" measured 6
-# Three blended frames (about 0.1 s of blur at 30 fps): since squat-side-v7 searches the person
-# mask around each joint at 4% of body size, the blurred edge no longer hides the ankles and all
-# six squats are counted, as on the sharp clip.
-check_result "motion blur" "squat-motion-blur.mp4" measured 6
+# Nine blended frames plus a strong spatial blur (generate_video_variants.py): the hip is clear in
+# about a fifth of the frames, so the set is refused. A light three-frame blend was measured by
+# squat-side-v7, but this fixture is deliberately harder.
+check_result "motion blur" "squat-motion-blur.mp4" retake 0
 check_result "moving phone" "squat-phone-shake.mp4" retake 0
 
 # Mirroring the source currently reduces Vision's required-joint coverage from roughly 81% to

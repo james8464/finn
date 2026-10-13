@@ -132,6 +132,7 @@ nonisolated final class PoseFrameAnalyzer {
             (.rightHip, .rightHip), (.rightKnee, .rightKnee), (.rightAnkle, .rightAnkle),
             (.leftShoulder, .leftShoulder), (.leftElbow, .leftElbow), (.leftWrist, .leftWrist),
             (.rightShoulder, .rightShoulder), (.rightElbow, .rightElbow), (.rightWrist, .rightWrist),
+            (.nose, .nose),
         ]
         var joints: [BodyJoint: JointPoint] = [:]
         for (name, visionName) in mapping {

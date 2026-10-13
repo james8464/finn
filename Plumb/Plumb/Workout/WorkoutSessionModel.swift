@@ -126,6 +126,9 @@ final class WorkoutSessionModel {
     /// The deepest and shallowest reps of the latest measured set, drawn on the result. Pose
     /// points only, kept in memory and never saved.
     private(set) var repExtremes: RepExtremes?
+    /// Per-rep facts for the latest measured set (pull-ups: chin above the hands, straight arms,
+    /// swing). Empty for exercises without such checks.
+    private(set) var formNotes: [String] = []
     /// What the optional exercise classifier concluded for the latest set.
     private(set) var recognition: ExerciseRecognition = .notAttempted
     /// Whether Plumb recognizes the exercise after a set (joint-angle rules unless the trained
@@ -328,6 +331,7 @@ final class WorkoutSessionModel {
         repExtremes = nil
         repeatedPattern = nil
         setHeartRate = nil
+        formNotes = []
         lastStopToResultMilliseconds = nil
         captureStartedAt = nil
         stopTappedAt = nil
@@ -522,6 +526,7 @@ final class WorkoutSessionModel {
         // A comparison belongs to the set it was made for; the new set makes its own or none.
         comparison = nil
         comparisonRecap = nil
+        formNotes = []
         switch outcome {
         case .analyzed(let analysis):
             let explanation = diagnostics?.explanation(for: definition, counted: analysis.reps.count)
@@ -532,6 +537,7 @@ final class WorkoutSessionModel {
             }
             movementNote = explanation
             repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
+            formNotes = FormChecks.sentences(for: analysis, frames: setFrames, definition: definition)
             // A camera angle outside the supported side view can distort relative range.
             let cue = diagnostics?.angledView == nil
                 ? CueSelector.select(from: analysis, exercise: definition) : nil
@@ -578,7 +584,10 @@ final class WorkoutSessionModel {
         default: return nil
         }
         var best: (kind: ExerciseKind, reps: Int)?
-        for kind in ExerciseKind.allCases where kind != chosen {
+        // Only exercises of the same kind of setup: a bar exercise counts the shoulders' rise, which a
+        // squat or push-up also shows, so floor and bar exercises never suggest each other.
+        let hanging = chosen.definition.expectedView == .any
+        for kind in ExerciseKind.allCases where kind != chosen && (kind.definition.expectedView == .any) == hanging {
             let definition = kind.definition
             let window = SetWindow.active(frames, requirement: definition.evidence)
             guard case .analyzed(let analysis) = ExerciseAnalyzer.analyzeWithDiagnostics(
@@ -1087,6 +1096,7 @@ final class WorkoutSessionModel {
         movementNote = nil
         repExtremes = nil
         repeatedPattern = nil
+        formNotes = []
         lastStopToResultMilliseconds = nil
         stopTappedAt = nil
     }
