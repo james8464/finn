@@ -4,7 +4,7 @@
 >
 > - **This file is the source of truth. Keep it true.**
 > - **Idea:** a fitness coach on iPhone + Apple Watch that aims to check every rep and give appropriate, actionable advice on posture and execution. Track your progress and your workouts.
-> - **Today we have:** iPhone only, four side-view exercises with rep counting and limited, evidence-linked posture or range advice after a set; hands-free sets with the live rep count on screen and in your ears (AirPods or speaker); your most frequent pattern before each set.
+> - **Today we have:** iPhone only, four side-view exercises with rep counting and limited, evidence-linked posture or range advice after a set; hands-free sets with the live rep count on screen and in your ears (AirPods or speaker); your most frequent pattern before each set; optional saving of each finished session to Apple Health as a workout, so it shows in the Fitness app (written and unit-tested, not yet built in Xcode or tried on an iPhone).
 > - **Written, not yet in the build:** an Apple Watch companion that mirrors the iPhone's count (its Xcode target and icon are still to add).
 > - **Not built yet:** Apple Watch measurement (wrist motion, heart rate, workout session), Apple TV, AirPods head tracking, widgets, Live Activities.
 
@@ -54,6 +54,7 @@ _Updated 13 October 2026._
 - After the set: a rep count and at most one observation with a suggested next action when the evidence supports it. Alongside range consistency, it can flag a change in torso tilt (squat or lunge), hip alignment (push-up), or knee bend (stiff-leg deadlift) relative to the person's first reps. These are observations of change, not a verdict on ideal posture or safe technique. Otherwise, it says there is no clear pattern or explains why to retake, with advice matched to the reason. The deepest and shallowest reps are drawn from their pose points.
 - Your most frequent pattern (new on 13 October): each saved set lists what it showed (movements too shallow to count, too fast or slow, an unfinished last rep, a shorter range or a posture change at the end, reps faster than the first ones, an angled view). The pattern that comes back in your recent sets of an exercise is shown before the next one, and the result says when it returns.
 - Compares a set with the latest compatible earlier set of the same exercise, keeps a local history, and shares a result as text.
+- Apple Fitness (new on 13 October, off by default, switch in Options): when you tap **Done**, Plumb saves the session to Apple Health as one functional strength training workout, meant to appear in the Fitness app's workout history and in Health (not yet seen on a device). The workout runs from the first measured rep to the end of the last set (breaks over five minutes are paused) and carries the set count, measured reps and exercise names; never calories or heart rate, which Plumb does not measure. Plumb asks Health only for permission to save workouts, when you turn the option on, and reads nothing. Each session is saved once; a failed save can be retried from the first screen or History, which marks saved sessions. Demo and recorded input are never saved.
 - Reads the observation aloud on tap, through the iPhone speaker or AirPods.
 - Optional: Apple Intelligence can reword the comparison. If it is unavailable or fails, a pre-written sentence is shown.
 - Video is analyzed on the iPhone and never saved. The app ships a privacy manifest (no tracking, no collected data).
@@ -70,6 +71,7 @@ _Updated 13 October 2026._
 
 - Tested only in the simulator, on generated videos, on public videos (earlier versions), and, for the analysis logic, on synthetic walk-in, walk-out, occlusion and wobble traces in a Linux build of the same Swift files. No run yet on a physical iPhone across lighting, clothing, and camera angles: hands-free start and stop, spoken reps, landscape display and heat handling are untested on a device.
 - The changes of 13 October afternoon on branch `claude/adoring-wozniak-u81oz1` (hands-free, set window, silhouette search, frequent pattern, privacy manifest) have not yet been built in Xcode: the GitHub push from the cloud session was refused, so the iOS CI has not run them.
+- Apple Fitness (branch `claude/apple-fitness-impl`) is written against Apple's HealthKit documentation and its logic is unit-tested with a fake Health store in the Linux build, but the HealthKit code, the HealthKit capability and the new screens have not been built in Xcode or run on an iPhone. Unchecked: the permission sheet, the workout appearing in Fitness and Health, signing with the HealthKit entitlement, and the Activity ring credit Apple gives an iPhone workout for its duration.
 - Four baseline generated test videos cover six clear squats, no movement, hidden legs, and covered feet. Five variants probe light, distance, tempo, and facing direction; the mirrored clip asked for a retake before the silhouette change. The recorded pose fixtures predate it. These tests are reproducible but do not establish accuracy on real people.
 - No qualified trainer has reviewed the coaching observations.
 - Posture-change thresholds have only simulator and synthetic-pose coverage; their usefulness and false-cue rate need physical-iPhone and trainer review.
@@ -81,7 +83,7 @@ _Updated 13 October 2026._
 
 **Challenge goal:** a reliable iPhone loop and a build submitted through App Store Connect. Public release depends on validation and distribution access.
 
-_For developers:_ each exercise is defined in `ExerciseDefinition.swift` (rule versions `squat-side-v7` and `*-side-v6`, which combine main's posture readings with the set window and capture fixes); the set window is `SetWindow.swift`, hands-free and live reps `LiveSet.swift`, the frequent pattern `MistakeProfile.swift`, and what headphones and the Apple Watch add `Accessories.swift`. Generated test videos are in `tools/replay`.
+_For developers:_ each exercise is defined in `ExerciseDefinition.swift` (rule versions `squat-side-v7` and `*-side-v6`, which combine main's posture readings with the set window and capture fixes); the set window is `SetWindow.swift`, hands-free and live reps `LiveSet.swift`, the frequent pattern `MistakeProfile.swift`, what headphones and the Apple Watch add `Accessories.swift`, and the Apple Health workout `FitnessWorkout.swift` (logic) and `HealthKitWorkoutExporter.swift` (HealthKit calls; entitlements in `Plumb/Plumb.entitlements`). Generated test videos are in `tools/replay`.
 
 Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 

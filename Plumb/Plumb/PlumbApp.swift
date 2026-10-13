@@ -55,11 +55,12 @@ struct PlumbApp: App {
                             connectsAccessories: Self.mirrorsDemoOnWatch)
             } else {
                 ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer(),
-                            connectsAccessories: true)
+                            fitness: HealthKitWorkoutExporter(), connectsAccessories: true)
             }
             #else
+            // Only live camera sessions can reach Apple Health; demo and recorded input never do.
             ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer(),
-                        connectsAccessories: true)
+                        fitness: HealthKitWorkoutExporter(), connectsAccessories: true)
             #endif
         }
     }
