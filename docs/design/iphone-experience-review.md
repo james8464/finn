@@ -1,6 +1,23 @@
-# Plumb iPhone design direction — 12 October 2026
+# Plumb iPhone design direction — 12 October 2026, first screen revised 13 October
 
-## What changed
+## 13 October: a first screen that shows the set
+
+The 12 October first screen was correct but bare. People tapped the toolbar before anything else, the raised hand of Privacy first, and the main button said **Set up camera**, a chore rather than a workout. Six simulated first-time users (a beginner, a home-fitness subscriber, an experienced lifter, a Build Challenge juror, someone wary of being filmed, someone in a hurry) all read it as a settings page; four of the six touched the toolbar first, and they rated their wish to open the app again between 3 and 5 out of 10.
+
+What changed:
+
+- The screen opens on a dark card that stands for the camera view. A line drawing of the chosen exercise does slow reps inside the two open corners of the app icon, with a plumb line and its bob over the midfoot (the body line for a push-up, the bar for pull-ups and muscle-ups). It is an illustration, not tracking, and it holds still under Reduce Motion.
+- Chips above the card switch exercise in one tap; with six exercises the row scrolls, and the next chip peeks in. At accessibility text sizes they become a single menu.
+- One filled action, **Start a set**, sits at the bottom, with its arrow in a circle of its own. The line above it, "Analyzed on this iPhone. No video is saved.", opens Privacy.
+- History, Options and Privacy moved into one More menu at the top right. The title keeps the promise as a subtitle: "Find your line."
+- The first time someone starts a set, a sheet says what the camera does (counts reps, keeps no video, sends nothing) before iOS asks for it. **Not now** leaves the permission untouched.
+- After a session, a card shows the last session, its reps and the observation the person kept, and opens History.
+
+Colour stays black and white. The dark card gives the screen its weight in both appearances.
+
+Captures (iPhone 17 Pro simulator, iOS 27): [first screen](screenshots/2026-10-13-home-light.png), [Dark Mode](screenshots/2026-10-13-home-dark.png), [before the camera](screenshots/2026-10-13-camera-primer.png), [after a demo set](screenshots/2026-10-13-home-after-set-demo.png).
+
+## What changed on 12 October
 
 Plumb is a focused iPhone utility for reviewing a workout set. Its interface now uses a white canvas in Light Mode and black in Dark Mode, San Francisco system text styles, SF Symbols for interface actions, and semantic iOS colours. There is no green accent in the app. One filled action moves the workout forward; other actions use native navigation, text buttons, disclosures, lists, and sharing. The custom monochrome icon remains the brand mark. [The live Figma brand guide](https://www.figma.com/design/Y9asB4rM1J0tJcbr7Wim2q) and its [local project copy](../../Design/README.md) now express the same direction.
 
@@ -24,7 +41,7 @@ These are design principles from Apple's award descriptions, not copied screens.
 
 ## Screen rules
 
-- **Setup:** A native menu selects the exercise; two short rows change their placement and orientation guidance with that choice. The privacy sentence appears before camera permission. The bottom action is the only filled control. System navigation displays the app name without repeating its mark in content.
+- **Setup:** Chips select the exercise and the dark card redraws it with its placement line. The privacy line sits directly above **Start a set**, the only filled control. History, Options and Privacy are in the More menu, so nothing at the top competes with starting a set. Camera permission follows **Start a set**, after Plumb says what the camera does.
 - **Capture:** Camera pixels fill the screen and the live pose overlay follows the analyzed frames. White guidance and controls sit over a dark scrim that protects legibility over bright rooms. **Start set** and **Stop set** are native buttons; Stop is neutral because the app analyzes frames live and does not store video. Framing states use plain words as well as symbols. The current iPhone build shows framing and set status, without an in-set coaching prompt.
 - **Result:** A large system text heading reports the outcome, with a plain **Done** action at the top. Measured rep count is secondary. When supported, one observation is the strongest content text, followed by the reps that support it and one next-set instruction. Otherwise, the result gives no clear pattern or a retake reason. Optional speech, comparison, rep details, and Share Summary use standard controls. The bottom next-set action stays reachable. The native glass toolbar was avoided here because its Done label did not scale in the iOS 27 accessibility audit.
 - **History, Options, and Privacy:** History is an inset grouped list and the session detail uses the same observation hierarchy as a live result. Options uses native switches for exercise recognition and camera angle checking. Privacy uses headings and plain text, with the full policy link at a usable hit size. Destructive history actions use red values with sufficient contrast in both appearances, never brand colour.

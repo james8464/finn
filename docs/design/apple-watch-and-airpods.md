@@ -70,7 +70,7 @@ On simulators (no workout needed):
 
 1. In Xcode, run the `Plumb` scheme on an iPhone simulator that has a paired Apple Watch simulator, with launch arguments `-plumb-ui-demo -plumb-watch-demo`.
 2. Run the `PlumbWatch` scheme on the paired watch simulator and keep it open.
-3. On the iPhone: Set up camera. The watch shows "Get in position" and DEMO INPUT. Tap Start set on the watch, check the countdown, the rep count rising, the result line, and that Stop set ends the set. Choose Push-up and check that the watch hides the buttons.
+3. On the iPhone: Start a set. The watch shows "Get in position" and DEMO INPUT. Tap Start set on the watch, check the countdown, the rep count rising, the result line, and that Stop set ends the set. Choose Push-up and check that the watch hides the buttons.
 
 On devices:
 
