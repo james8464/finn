@@ -84,7 +84,7 @@ On devices:
 ## Not done
 
 - **No wrist-motion measurement.** The watch's accelerometer and gyroscope are not read; reps, tempo and range come only from the iPhone camera. Using wrist motion (for example a tempo check on push-ups) needs a measured rule and validation first.
-- **No HealthKit workout session.** No heart rate, calories, or Activity rings, and no Health permission is asked. A workout session would also keep the watch app running with the wrist down.
+- **No HealthKit workout session on the watch.** No heart rate, calories, or live Activity ring tracking on the wrist, and the watch asks no Health permission. A workout session would also keep the watch app running with the wrist down. (Since 13 October the iPhone can save a finished session to Apple Health as a workout, with its own opt-in in Options; the watch takes no part in it.)
 - **Screen and taps with the wrist down.** WatchKit plays haptics only while the watch app is active, and the iPhone sends live messages only while the watch app is reachable. `WKExtendedRuntimeSession` was not added: it needs a watch Info.plist background mode (`WKBackgroundModes`, physical therapy) that generated Info.plist settings do not cover, and its effect on reachability needs a device test. Until then, the latest state waits in the application context.
 - **No AirPods head tracking** (`CMHeadphoneMotionManager`); AirPods only play the spoken count.
 - **No watch app icon.** `AppIcon.icon` enables only the iOS/macOS square platforms. Enable watchOS in Icon Composer, then add the icon to the PlumbWatch target and set `ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon` for it. App Store upload needs this.
