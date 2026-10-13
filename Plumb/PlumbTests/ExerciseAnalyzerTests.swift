@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Plumb
 
-struct ExerciseAnalyzerTests {
+nonisolated struct ExerciseAnalyzerTests {
     // MARK: Squat stays identical
 
     /// squat-side-v6 keeps v4's looser evidence gate and rep ending (v2 refused every
@@ -325,7 +325,7 @@ enum TraceError: Error { case notMeasured }
 // MARK: - Synthetic side-view traces
 
 /// Side-view push-up: wrists planted, forearm vertical, the elbow angle closes by `bend` degrees.
-func pushUpTrace(reps: Int, startTime: Double = 0, bend: Double = 90, lateBend: Double? = nil,
+nonisolated func pushUpTrace(reps: Int, startTime: Double = 0, bend: Double = 90, lateBend: Double? = nil,
                  aspectRatio: Double = 1) -> [PoseFrame] {
     (0...(reps * 20)).map { index in
         let repIndex = index / 20
@@ -352,7 +352,7 @@ func pushUpTrace(reps: Int, startTime: Double = 0, bend: Double = 90, lateBend: 
 }
 
 /// Side-view static lunge: ankle planted, shin vertical, the knee angle closes by `bend` degrees.
-func lungeTrace(reps: Int, bend: Double = 75) -> [PoseFrame] {
+nonisolated func lungeTrace(reps: Int, bend: Double = 75) -> [PoseFrame] {
     (0...(reps * 20)).map { index in
         let phase = Double(index % 20) / 20
         let kneeAngle = (172 - bend * (1 - cos(2 * .pi * phase)) / 2) * .pi / 180
@@ -371,7 +371,7 @@ func lungeTrace(reps: Int, bend: Double = 75) -> [PoseFrame] {
 }
 
 /// Side-view stiff-leg deadlift: legs still, the shoulder-hip-knee angle closes by `bend` degrees.
-func hingeTrace(reps: Int, bend: Double = 80) -> [PoseFrame] {
+nonisolated func hingeTrace(reps: Int, bend: Double = 80) -> [PoseFrame] {
     (0...(reps * 25)).map { index in
         let phase = Double(index % 25) / 25
         let hipAngle = (175 - bend * (1 - cos(2 * .pi * phase)) / 2) * .pi / 180
@@ -391,7 +391,7 @@ func hingeTrace(reps: Int, bend: Double = 80) -> [PoseFrame] {
     }
 }
 
-func squatFrame(time: Double, hipY: Double, confidence: Double = 0.99, subjectCount: Int = 1,
+nonisolated func squatFrame(time: Double, hipY: Double, confidence: Double = 0.99, subjectCount: Int = 1,
                 ankleShift: Double = 0) -> PoseFrame {
     PoseFrame(time: time, subjectCount: subjectCount, joints: [
         .leftHip: JointPoint(x: 0.47, y: hipY, confidence: confidence),
@@ -405,7 +405,7 @@ func squatFrame(time: Double, hipY: Double, confidence: Double = 0.99, subjectCo
 
 /// Squat traces with varied depth, tempo, noise, dropped frames, low confidence, bystanders,
 /// tracking gaps, drift, and partial reps, so both measured and abstaining paths are compared.
-private func randomSquatTrace(using generator: inout SplitMix64) -> [PoseFrame] {
+nonisolated private func randomSquatTrace(using generator: inout SplitMix64) -> [PoseFrame] {
     let reps = Int.random(in: 0...8, using: &generator)
     let framesPerRep = Int.random(in: 8...40, using: &generator)
     let step = [0.0667, 0.1, 0.125].randomElement(using: &generator)!
@@ -447,7 +447,7 @@ private func randomSquatTrace(using generator: inout SplitMix64) -> [PoseFrame] 
     return frames
 }
 
-struct SplitMix64: RandomNumberGenerator {
+nonisolated struct SplitMix64: RandomNumberGenerator {
     private var state: UInt64
     init(seed: UInt64) { state = seed }
     mutating func next() -> UInt64 {

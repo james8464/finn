@@ -94,6 +94,14 @@ nonisolated struct LiveSetMonitorTests {
         #expect(stoppedAt > 15.5 && stoppedAt < 17.0)
     }
 
+    @Test func anUnclearAnkleAtTheSpotDoesNotEndTheSet() {
+        let reps = CaptureTraces.squats(reps: 3, from: 0, standing: 4).map { frame -> PoseFrame in
+            guard frame.time > 6.2 else { return frame }
+            return CaptureTraces.frame(time: frame.time, hipY: 0.42, ankleX: 0.51, legs: true, ankle: false)
+        }
+        #expect(run(reps).stoppedAt == nil)
+    }
+
     @Test func walkingInWithoutAnyRepNeverEndsTheSet() {
         let capture = CaptureTraces.walkIn() + CaptureTraces.walkOut(from: 2.0)
         #expect(run(capture).stoppedAt == nil)

@@ -97,16 +97,27 @@ nonisolated enum EvidenceGate {
             let joints = bestSide(frames, requirement: requirement).joints
             let gap = tooLongGap(frames, joints: joints)
                 ?? trackingGaps(frames, joints: joints).max { $0.duration < $1.duration }
-                ?? TrackingGap(start: frames.first?.time ?? 0, duration: 0, occluded: false)
+                ?? TrackingGap(start: frames.first?.time ?? 0, duration: 0, occluded: false, missing: [])
             let start = gap.start - (frames.first?.time ?? 0)
             if gap.occluded {
                 return String(format: "Someone else was in view and Plumb lost you for %.1f s, starting %.1f s "
                               + "into the set. Plumb ignores other people, but it has to see you: keep a clear "
                               + "line between you and the phone, then try again.", gap.duration, start)
             }
-            return String(format: "Tracking was lost during the set. Keep your whole body visible and try again. "
+            // Name only the joints that were lost, in the exercise's order.
+            let lostRoles = requirement.joints.filter { role in
+                gap.missing.contains(role.joint(on: .left)) || gap.missing.contains(role.joint(on: .right))
+            }
+            let lostNames = lostRoles.map(\.rawValue)
+            let lost = lostNames.isEmpty || lostNames.count == names.count ? jointList
+                : lostNames.count > 1 ? lostNames.dropLast().joined(separator: ", ") + " and " + (lostNames.last ?? "")
+                : lostNames[0]
+            let advice = lostNames.isEmpty || lostNames.count == names.count
+                ? "Keep your whole body visible and try again."
+                : "Keep your \(lost) in view and in good light, then try again."
+            return String(format: "Tracking was lost during the set. %@ "
                           + "Plumb lost your %@ for %.1f s, starting %.1f s into the set.",
-                          jointList, gap.duration, start)
+                          advice, lost, gap.duration, start)
         case .unstableFraming:
             let movement = anchorMovement(frames, requirement: requirement,
                                           side: bestSide(frames, requirement: requirement).side)
@@ -172,38 +183,67 @@ nonisolated enum EvidenceGate {
     private struct TrackingGap {
         let start: TimeInterval
         let duration: TimeInterval
-        /// Someone else was in view while the athlete was missing.
+        /// Someone else stood in front of the athlete while they were missing.
         let occluded: Bool
+        /// The required joints that were unclear during the gap.
+        let missing: Set<BodyJoint>
         var limit: TimeInterval {
             occluded ? EvidenceRubric.maximumOcclusionGap : EvidenceRubric.maximumTrackingGap
         }
     }
 
-    /// Stretches without the athlete's required joints, from the set's start to its end.
+    /// Stretches without the athlete's required joints, from the set's start to its end. A gap is
+    /// occluded only when another person stands where the athlete was last seen: someone at the far
+    /// side of the room does not excuse a long loss of the athlete.
     private static func trackingGaps(_ frames: [PoseFrame], joints: [BodyJoint]) -> [TrackingGap] {
         guard let first = frames.first, let last = frames.last else { return [] }
         var gaps: [TrackingGap] = []
         var lastTracked = first.time
         var occluded = false
+        var missing: Set<BodyJoint> = []
+        var athleteBox: (minX: Double, maxX: Double, minY: Double, maxY: Double)?
         for frame in frames {
-            let visible = frame.athleteVisible && joints.allSatisfy { joint in
-                (frame.joints[joint]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence
+            let unclear = joints.filter { joint in
+                (frame.joints[joint]?.confidence ?? 0) < EvidenceRubric.minimumJointConfidence
             }
-            if visible {
+            if frame.athleteVisible && unclear.isEmpty {
                 if frame.time > lastTracked {
                     gaps.append(TrackingGap(start: lastTracked, duration: frame.time - lastTracked,
-                                            occluded: occluded))
+                                            occluded: occluded, missing: missing))
                 }
                 lastTracked = frame.time
                 occluded = false
-            } else if frame.athleteTracking != nil, !(frame.bystanders ?? []).isEmpty {
-                occluded = true
+                missing = []
+                let points = joints.compactMap { frame.joints[$0] }
+                if let minX = points.map(\.x).min(), let maxX = points.map(\.x).max(),
+                   let minY = points.map(\.y).min(), let maxY = points.map(\.y).max() {
+                    athleteBox = (minX, maxX, minY, maxY)
+                }
+            } else {
+                missing.formUnion(frame.athleteVisible ? unclear : joints)
+                if frame.athleteTracking != nil, let box = athleteBox,
+                   (frame.bystanders ?? []).contains(where: { overlaps($0, box) }) {
+                    occluded = true
+                }
             }
         }
         if last.time > lastTracked {
-            gaps.append(TrackingGap(start: lastTracked, duration: last.time - lastTracked, occluded: occluded))
+            gaps.append(TrackingGap(start: lastTracked, duration: last.time - lastTracked,
+                                    occluded: occluded, missing: missing))
         }
         return gaps
+    }
+
+    /// Someone's clear joints fall inside the athlete's box, widened by a fifth on each side.
+    private static func overlaps(_ person: [BodyJoint: JointPoint],
+                                 _ box: (minX: Double, maxX: Double, minY: Double, maxY: Double)) -> Bool {
+        let marginX = 0.2 * max(box.maxX - box.minX, 0.05)
+        let marginY = 0.2 * max(box.maxY - box.minY, 0.05)
+        return person.values.contains { point in
+            point.confidence >= AthleteTracker.jointConfidence
+                && point.x >= box.minX - marginX && point.x <= box.maxX + marginX
+                && point.y >= box.minY - marginY && point.y <= box.maxY + marginY
+        }
     }
 
     private static func tooLongGap(_ frames: [PoseFrame], joints: [BodyJoint]) -> TrackingGap? {

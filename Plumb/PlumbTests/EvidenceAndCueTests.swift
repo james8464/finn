@@ -1,7 +1,7 @@
 import Testing
 @testable import Plumb
 
-struct EvidenceAndCueTests {
+nonisolated struct EvidenceAndCueTests {
     @Test func acceptsClearSinglePersonSideView() {
         #expect(EvidenceGate.assess(clearTrace()) == .usable(.left))
     }

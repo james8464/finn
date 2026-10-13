@@ -3,7 +3,7 @@ import Testing
 @testable import Plumb
 
 /// A standing person drawn as six joints, `height` tall (normalized), centred at `x`.
-private func person(x: Double, top: Double = 0.3, height: Double = 0.6,
+nonisolated private func person(x: Double, top: Double = 0.3, height: Double = 0.6,
                     confidence: Double = 0.9) -> [BodyJoint: JointPoint] {
     let hip = top + height * 0.5
     let knee = top + height * 0.75
@@ -18,7 +18,7 @@ private func person(x: Double, top: Double = 0.3, height: Double = 0.6,
     ]
 }
 
-struct AthleteTrackerTests {
+nonisolated struct AthleteTrackerTests {
     @Test func picksTheLargePersonNearTheCentre() {
         var tracker = AthleteTracker()
         let small = person(x: 0.15, top: 0.4, height: 0.3)
@@ -77,7 +77,7 @@ struct AthleteTrackerTests {
     }
 }
 
-struct TrackedSetEvidenceTests {
+nonisolated struct TrackedSetEvidenceTests {
     /// A tracked 10-rep squat with a bystander in every frame, and the athlete hidden by them
     /// between `hiddenFrom` and `hiddenTo` seconds.
     private func trackedSquat(hiddenFrom: Double = .infinity, hiddenTo: Double = .infinity,
@@ -88,8 +88,10 @@ struct TrackedSetEvidenceTests {
             let athlete = squatFrame(time: time, hipY: hipY)
             let others = bystanders ? [person(x: 0.15 + 0.03 * time.truncatingRemainder(dividingBy: 10))] : []
             if time >= hiddenFrom && time < hiddenTo {
-                return PoseFrame(time: time, subjectCount: others.count, joints: [:],
-                                 athleteTracking: .hidden, bystanders: others)
+                // Whoever hides the athlete stands in front of them, where the athlete was.
+                let inFront = bystanders ? [person(x: 0.52)] : []
+                return PoseFrame(time: time, subjectCount: inFront.count, joints: [:],
+                                 athleteTracking: .hidden, bystanders: inFront)
             }
             return PoseFrame(time: time, subjectCount: 1 + others.count, joints: athlete.joints,
                              athleteTracking: .tracked, bystanders: others)
@@ -122,6 +124,37 @@ struct TrackedSetEvidenceTests {
         }
         // Last seen at frame 119 (7.93 s), seen again at frame 180 (12.0 s).
         #expect(reason.hasPrefix("Someone else was in view and Plumb lost you for 4.1 s, starting 7.9 s into the set."))
+    }
+
+    /// Someone standing at the far side of the room does not excuse losing the athlete: only a
+    /// person in front of them does.
+    @Test func aDistantBystanderKeepsTheShortLimit() {
+        let frames = trackedSquat().map { frame -> PoseFrame in
+            guard frame.time >= 7.0 && frame.time < 9.8 else { return frame }
+            return PoseFrame(time: frame.time, subjectCount: 2, joints: [:], athleteTracking: .hidden,
+                             bystanders: [person(x: 0.9)])
+        }
+        guard case .insufficientView(let reason) = SquatAnalyzer.analyze(frames) else {
+            Issue.record("2.8 s without the athlete, with nobody in front of them, must be refused")
+            return
+        }
+        #expect(reason.hasPrefix("Tracking was lost during the set."))
+    }
+
+    @Test func aLostAnkleIsNamedAlone() {
+        let frames = trackedSquat(bystanders: false).map { frame -> PoseFrame in
+            guard frame.time >= 7.0 && frame.time < 9.0 else { return frame }
+            var joints = frame.joints
+            joints[.leftAnkle] = nil
+            joints[.rightAnkle] = nil
+            return PoseFrame(time: frame.time, subjectCount: 1, joints: joints, athleteTracking: .tracked)
+        }
+        guard case .insufficientView(let reason) = SquatAnalyzer.analyze(frames) else {
+            Issue.record("Two seconds without the ankle must be refused")
+            return
+        }
+        #expect(reason.contains("Plumb lost your ankle for"), "\(reason)")
+        #expect(reason.contains("Keep your ankle in view"), "\(reason)")
     }
 
     @Test func losingTheAthleteWithNobodyElseKeepsTheShortLimit() {

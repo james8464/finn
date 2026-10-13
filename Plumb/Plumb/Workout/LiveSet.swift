@@ -93,7 +93,7 @@ nonisolated struct LiveSetMonitor {
     static let shorterShare = 0.85
     /// The same cue is not repeated within this many reps.
     static let cueSpacing = 3
-    /// After at least one rep, out of position this long means the athlete walked away.
+    /// After at least one rep, away from the spot this long means the athlete walked away.
     static let leftAfter: TimeInterval = 2.0
     /// After at least one rep, no new rep for this long means the set is over.
     static let idleAfter: TimeInterval = 8.0
@@ -134,8 +134,9 @@ nonisolated struct LiveSetMonitor {
     func shouldStop(_ frames: [PoseFrame]) -> Bool {
         guard countedReps > 0, let last = frames.last else { return false }
         if let lastRep = reps.last, last.time - lastRep.endTime >= Self.idleAfter { return true }
-        guard let inPosition = SetWindow.positions(frames, requirement: definition.evidence) else { return false }
-        guard let lastIndex = inPosition.lastIndex(of: true) else { return true }
+        // Away from the spot, not merely with a joint unclear at it (`SetWindow.presence`).
+        guard let present = SetWindow.presence(frames, requirement: definition.evidence) else { return false }
+        guard let lastIndex = present.lastIndex(of: true) else { return true }
         return last.time - frames[lastIndex].time >= Self.leftAfter
     }
 

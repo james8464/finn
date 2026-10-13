@@ -66,6 +66,37 @@ nonisolated struct SetWindowTests {
         }
     }
 
+    /// The athlete stays at the spot, but the ankle is unclear for the last three of eight reps (a
+    /// bench, a partner's legs). Those reps are not walking away: the set must not be cut to five
+    /// reps and shown as measured.
+    @Test func repsAtTheSpotWithAnUnclearAnkleAreNotDropped() {
+        let reps = CaptureTraces.squats(reps: 8, from: 0).map { frame -> PoseFrame in
+            guard frame.time > 10.0 else { return frame }
+            return CaptureTraces.frame(time: frame.time, hipY: frame.joints[.leftHip]?.y ?? 0.42,
+                                       ankleX: 0.51, legs: true, ankle: false)
+        }
+        let capture = reps + CaptureTraces.walkOut(from: 16.0)
+        let window = SetWindow.active(capture, requirement: .squat)
+        #expect((window.last?.time ?? 0) >= 16.0)
+        guard case .insufficientView = ExerciseAnalyzer.analyze(capture, as: .squat) else {
+            Issue.record("Reps at the spot with the ankle unclear must keep refusing the set")
+            return
+        }
+    }
+
+    @Test func firstRepsWithAnUnclearAnkleAreNotDroppedEither() {
+        let reps = CaptureTraces.squats(reps: 8, from: 2.0).map { frame -> PoseFrame in
+            guard frame.time < 8.0 else { return frame }
+            return CaptureTraces.frame(time: frame.time, hipY: frame.joints[.leftHip]?.y ?? 0.42,
+                                       ankleX: 0.51, legs: true, ankle: false)
+        }
+        let capture = CaptureTraces.walkIn() + reps
+        guard case .insufficientView = ExerciseAnalyzer.analyze(capture, as: .squat) else {
+            Issue.record("Reps at the spot with the ankle unclear must keep refusing the set")
+            return
+        }
+    }
+
     @Test func pushUpGettingDownAndStandingUpIsTrimmed() {
         // Walk in standing (wrists by the hips), get down, six push-ups, stand up and leave.
         var capture: [PoseFrame] = []
@@ -148,7 +179,7 @@ nonisolated enum CaptureTraces {
         return frames
     }
 
-    static func frame(time: Double, hipY: Double, ankleX: Double, legs: Bool) -> PoseFrame {
+    static func frame(time: Double, hipY: Double, ankleX: Double, legs: Bool, ankle: Bool = true) -> PoseFrame {
         var joints: [BodyJoint: JointPoint] = [
             .leftHip: JointPoint(x: ankleX - 0.04, y: hipY, confidence: 0.6),
             .leftShoulder: JointPoint(x: ankleX - 0.05, y: hipY - 0.25, confidence: 0.6),
@@ -157,7 +188,7 @@ nonisolated enum CaptureTraces {
         ]
         if legs {
             joints[.leftKnee] = JointPoint(x: ankleX - 0.02, y: 0.70, confidence: 0.6)
-            joints[.leftAnkle] = JointPoint(x: ankleX, y: 0.90, confidence: 0.6)
+            if ankle { joints[.leftAnkle] = JointPoint(x: ankleX, y: 0.90, confidence: 0.6) }
             joints[.rightKnee] = JointPoint(x: ankleX + 0.04, y: 0.70, confidence: 0.2)
             joints[.rightAnkle] = JointPoint(x: ankleX + 0.06, y: 0.90, confidence: 0.2)
         }
