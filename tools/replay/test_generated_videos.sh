@@ -42,7 +42,10 @@ check_result "lower body hidden" "squat-lower-body-hidden.mp4" retake 0
 check_result "feet hidden" "squat-feet-hidden.mp4" retake 0
 check_result "dim light" "squat-dim.mp4" measured 6
 check_result "farther phone" "squat-far.mp4" measured 6
-check_result "too far" "squat-too-far.mp4" retake 0
+# The person at 30% of the original size was refused for unclear joints until the reliability pass of
+# 13 October asked Vision for the person mask only once an athlete is found; the mask no longer removes
+# the small figure's joints, and all six squats are counted, as many as the clip has.
+check_result "too far" "squat-too-far.mp4" measured 6
 check_result "slower tempo" "squat-slow.mp4" measured 6
 check_result "bright exposure" "squat-overexposed.mp4" measured 6
 check_result "warm indoor color" "squat-warm-indoor.mp4" measured 6
