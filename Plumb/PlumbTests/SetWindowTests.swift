@@ -97,6 +97,29 @@ nonisolated struct SetWindowTests {
         }
     }
 
+    /// The live count works out the set's frames and the athlete's place in each from one pass
+    /// (`layout`) every 0.4 s; it must give exactly what `activeRange` and `spots` give apart, on
+    /// every prefix of a capture as the live count sees it.
+    @Test func oneLayoutPassGivesTheSameWindowAndSpots() {
+        let legsHidden = (0..<60).map { index in
+            CaptureTraces.frame(time: Double(index) * CaptureTraces.step, hipY: 0.42, ankleX: 0.51, legs: false)
+        }
+        let captures = [
+            CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0),
+            CaptureTraces.walkIn() + CaptureTraces.walkOut(from: 2.0),
+            CaptureTraces.tiringSquats(),
+            legsHidden,
+        ]
+        for capture in captures {
+            for end in stride(from: 1, through: capture.count, by: 5) {
+                let frames = Array(capture.prefix(end))
+                let layout = SetWindow.layout(frames, requirement: .squat)
+                #expect(layout.range == SetWindow.activeRange(frames, requirement: .squat))
+                #expect(layout.spots == SetWindow.spots(frames, requirement: .squat))
+            }
+        }
+    }
+
     @Test func pushUpGettingDownAndStandingUpIsTrimmed() {
         // Walk in standing (wrists by the hips), get down, six push-ups, stand up and leave.
         var capture: [PoseFrame] = []

@@ -179,7 +179,12 @@ nonisolated struct LiveSetMonitor {
         lastAnalysisTime = last.time
         var events: [LiveSetEvent] = []
         analysisAccepted = false
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: definition, viewCheck: .ignore)
+        // One pass gives both the set's frames and where the athlete is in each, for the count and
+        // the stop; this runs over the whole set so far every 0.4 s.
+        let layout = SetWindow.layout(frames, requirement: definition.evidence)
+        let set = layout.range.map { Array(frames[$0]) } ?? frames
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(set, as: definition, viewCheck: .ignore,
+                                                                             trimsToSet: false)
         if case .analyzed(let analysis) = outcome {
             analysisAccepted = true
             midMovement = diagnostics?.unfinished ?? false
@@ -191,12 +196,17 @@ nonisolated struct LiveSetMonitor {
                 events.append(contentsOf: cues(forRep: countedReps))
             }
         }
-        isOver = shouldStop(frames)
+        isOver = shouldStop(frames, spots: layout.spots)
         return events
     }
 
     /// True when the set should end by itself.
     func shouldStop(_ frames: [PoseFrame]) -> Bool {
+        shouldStop(frames, spots: SetWindow.spots(frames, requirement: definition.evidence))
+    }
+
+    /// `spots` is `SetWindow.spots(frames, ...)`, worked out only when needed.
+    private func shouldStop(_ frames: [PoseFrame], spots makeSpots: @autoclosure () -> [SetWindow.Spot]?) -> Bool {
         guard let last = frames.last else { return false }
         // Idle only by a measurement that accepts the set and sees the person at the top, for longer
         // than the slowest rep may take: a refusal after a gap, or a slow rep under way, is not idleness.
@@ -206,7 +216,7 @@ nonisolated struct LiveSetMonitor {
             return true
         }
         // Away from the spot, not merely with a joint unclear at it (`SetWindow.spots`).
-        guard let spots = SetWindow.spots(frames, requirement: definition.evidence) else { return false }
+        guard let spots = makeSpots() else { return false }
         guard let lastIndex = spots.lastIndex(where: \.isAtSpot) else { return countedReps > 0 }
         let gone = last.time - frames[lastIndex].time
         // Seen walking off: two seconds. Only hidden (someone in front, Vision missing them): longer
