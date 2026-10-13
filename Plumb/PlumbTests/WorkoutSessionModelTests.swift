@@ -110,6 +110,38 @@ struct WorkoutSessionModelTests {
         #expect(announcer.phrases.last == "6 reps measured")
     }
 
+    /// Sets with movements too shallow to count: after two of them, the next set's setup names the
+    /// pattern, and a third set showing it again says so.
+    @Test func aRecurringPatternBecomesTheFocusAndIsRecognizedAgain() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: "PlumbFocusTests-\(UUID().uuidString)", directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = LocalSessionStore(url: directory.appending(path: "sessions.json"))
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+        // Six full reps with a shallow dip (0.06 of the frame, under the 0.15 leg-length bottom) after each.
+        let frames = (0...(6 * 30)).map { index -> PoseFrame in
+            let phase = Double(index % 30) / 30
+            let full = phase < 2.0 / 3 ? 0.20 * (1 - cos(2 * .pi * phase * 1.5)) / 2 : 0
+            let dip = phase >= 2.0 / 3 ? 0.06 * (1 - cos(2 * .pi * (phase - 2.0 / 3) * 3)) / 2 : 0
+            return frame(time: Double(index) * 0.1, hipY: 0.42 + full + dip)
+        }
+        for setNumber in 1...3 {
+            #expect((model.focus != nil) == (setNumber == 3))
+            await model.startPreview()
+            await model.beginSet(countdown: 0)
+            for frame in frames { source.emit(frame) }
+            await model.endSet()
+            guard case .measured = model.result else {
+                Issue.record("Expected a measured set \(setNumber), got \(String(describing: model.result))")
+                return
+            }
+            #expect((model.repeatedPattern != nil) == (setNumber == 3))
+        }
+        #expect(model.focus?.issue == .shallowMovements)
+        #expect(model.history.first?.sets.last?.issues?.contains(.shallowMovements) == true)
+    }
+
     @Test func handsFreeOffWaitsForTheStartButton() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)

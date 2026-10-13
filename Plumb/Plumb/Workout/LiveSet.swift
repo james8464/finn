@@ -122,6 +122,8 @@ nonisolated struct LiveSetMonitor {
     private(set) var countedReps = 0
     /// The set looks over (see `shouldStop`), as of the latest analysis.
     private(set) var isOver = false
+    /// A rep was clearly faster than the first reps at least once.
+    private(set) var sawFasterRep = false
     private var lastAnalysisTime = -Double.infinity
     private var lastFasterCue = Int.min / 2
     private var lastShorterCue = Int.min / 2
@@ -168,6 +170,7 @@ nonisolated struct LiveSetMonitor {
             if first > 0, rep.duration < Self.fasterShare * first {
                 events.append(.fasterThanFirstReps(rep: number))
                 lastFasterCue = number
+                sawFasterRep = true
             }
         }
         if number >= 3, number - lastShorterCue >= Self.cueSpacing {

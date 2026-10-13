@@ -246,10 +246,14 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
     var cueResponse: CueResponse
     let exercise: ExerciseKind
     let cameraView: CameraView
+    /// What this set showed (`SetIssue`), for the person's most frequent pattern. Nil in summaries
+    /// saved before 13 October 2026.
+    let issues: [SetIssue]?
 
     init(id: UUID, sessionID: UUID, capturedAt: Date, bodySide: BodySide,
          analysis: SetAnalysis, cue: Cue?, cueResponse: CueResponse,
-         exercise: ExerciseKind = .bodyweightSquat, cameraView: CameraView = .side) {
+         exercise: ExerciseKind = .bodyweightSquat, cameraView: CameraView = .side,
+         issues: [SetIssue]? = nil) {
         self.id = id
         self.sessionID = sessionID
         self.capturedAt = capturedAt
@@ -259,6 +263,7 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
         self.cueResponse = cueResponse
         self.exercise = exercise
         self.cameraView = cameraView
+        self.issues = issues
     }
 }
 

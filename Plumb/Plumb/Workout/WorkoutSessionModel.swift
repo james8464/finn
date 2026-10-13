@@ -179,6 +179,12 @@ final class WorkoutSessionModel {
     private(set) var liveCaption: String?
     /// The latest set was ended by Plumb (the athlete walked away or stopped), not by a tap.
     private(set) var endedHandsFree = false
+    /// The person's most frequent pattern in recent sets of the chosen exercise, shown before a set.
+    var focus: MistakeProfile? { MistakeProfile.make(history: history, exercise: selectedExercise) }
+    /// The same, for the exercise being captured.
+    var captureFocus: MistakeProfile? { MistakeProfile.make(history: history, exercise: captureExercise) }
+    /// The latest set showed the person's most frequent pattern again.
+    private(set) var repeatedPattern: MistakeProfile?
     /// Receives each live event of a running set, for a connected Apple Watch.
     @ObservationIgnored var onLiveEvent: ((LiveSetEvent, ExerciseKind) -> Void)?
 
@@ -219,6 +225,7 @@ final class WorkoutSessionModel {
         result = nil
         movementNote = nil
         repExtremes = nil
+        repeatedPattern = nil
         lastStopToResultMilliseconds = nil
         captureStartedAt = nil
         stopTappedAt = nil
@@ -376,6 +383,7 @@ final class WorkoutSessionModel {
             setFrames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore)
         movementNote = nil
         repExtremes = nil
+        repeatedPattern = nil
         switch outcome {
         case .analyzed(let analysis):
             let explanation = diagnostics?.explanation(for: definition, counted: analysis.reps.count)
@@ -387,8 +395,13 @@ final class WorkoutSessionModel {
             movementNote = explanation
             repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
             let cue = CueSelector.select(from: analysis, exercise: definition)
+            let issues = SetIssue.issues(diagnostics: diagnostics, cue: cue,
+                                         spedUp: liveMonitor?.sawFasterRep ?? false)
+            // Before saving, so "again" compares with the earlier sets only.
+            let earlier = MistakeProfile.make(history: history, exercise: exercise)
+            repeatedPattern = earlier.flatMap { issues.contains($0.issue) ? $0 : nil }
             result = .measured(analysis, cue)
-            record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames)
+            record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues)
         case .insufficientView(let reason):
             result = .insufficientView(reason)
         case .failed(let reason):
@@ -554,14 +567,15 @@ final class WorkoutSessionModel {
         } catch { historyIssue = Self.issue(for: error) }
     }
 
-    private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind, frames: [PoseFrame]) {
+    private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind, frames: [PoseFrame],
+                        issues: [SetIssue]) {
         guard case .usable(let side) = EvidenceGate.assess(
             frames, requirement: exercise.definition.evidence) else { return }
         var session = currentSession ?? WorkoutSessionSummary(id: UUID(), startedAt: .now, sets: [])
         let newSet = SetSummary(
             id: UUID(), sessionID: session.id, capturedAt: .now,
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,
-            exercise: exercise
+            exercise: exercise, issues: issues
         )
         let previousSameExercise = session.sets.last { $0.exercise == exercise }
         session.sets.append(newSet)
@@ -624,6 +638,7 @@ final class WorkoutSessionModel {
         result = nil
         movementNote = nil
         repExtremes = nil
+        repeatedPattern = nil
         lastStopToResultMilliseconds = nil
         stopTappedAt = nil
     }

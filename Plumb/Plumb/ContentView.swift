@@ -125,6 +125,22 @@ struct ContentView: View {
                         .foregroundStyle(PlumbStyle.supportingText)
                         .padding(.top, 8)
                 }
+                if let focus = model.focus {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("YOUR FOCUS")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(PlumbStyle.supportingText)
+                        Text(focus.focus)
+                            .font(.body.weight(.semibold))
+                        Text(focus.summary)
+                            .font(.subheadline)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 28)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("setup.focus")
+                }
                 Text("SET UP")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(PlumbStyle.supportingText)
@@ -408,6 +424,15 @@ struct ContentView: View {
                     Text("\u{00A0}\(captureCopy.framingPrompt)\u{00A0}")
                         .multilineTextAlignment(.center)
                         .accessibilityLabel(captureCopy.framingPrompt)
+                    if let focus = model.captureFocus {
+                        Text("Focus: \(focus.focus)")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+                            .accessibilityIdentifier("capture.focus")
+                    }
                     if model.handsFree {
                         handsFreeHint
                     }
@@ -576,6 +601,19 @@ struct ContentView: View {
                             Text(note)
                                 .font(.subheadline)
                                 .accessibilityIdentifier("result.movementNote")
+                        }
+                        if let pattern = model.repeatedPattern {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Your most frequent pattern came back")
+                                    .font(.subheadline.weight(.semibold))
+                                Text(pattern.summary)
+                                    .font(.subheadline)
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                                Text(pattern.focus)
+                                    .font(.subheadline)
+                            }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityIdentifier("result.repeatedPattern")
                         }
                         if model.historyIssue != nil {
                             Text("Couldn’t confirm this set was saved.")
