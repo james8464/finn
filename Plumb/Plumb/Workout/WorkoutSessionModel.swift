@@ -415,7 +415,7 @@ final class WorkoutSessionModel {
     /// Starts the countdown once the athlete has held still in position (`StartReadiness`).
     private func updateHandsFreeStart(with frame: PoseFrame) {
         guard handsFree, handsFreeTask == nil else { return }
-        let progress = startReadiness.update(with: frame, requirement: captureExercise.definition.evidence)
+        let progress = startReadiness.update(with: frame, definition: captureExercise.definition)
         let placed = framingStatus == .landmarksVisible
         handsFreeProgress = placed ? progress : 0
         guard placed, startReadiness.isReady else { return }

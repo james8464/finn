@@ -8,20 +8,45 @@ nonisolated struct StartReadinessTests {
         var time = 0.0
         while time < StartReadiness.hold - 0.1 {
             readiness.update(with: CaptureTraces.frame(time: time, hipY: 0.42, ankleX: 0.51, legs: true),
-                             requirement: .squat)
+                             definition: .squat)
             time += CaptureTraces.step
         }
         #expect(!readiness.isReady)
         #expect(readiness.progress > 0.8)
         readiness.update(with: CaptureTraces.frame(time: StartReadiness.hold + 0.01, hipY: 0.42, ankleX: 0.51,
-                                                   legs: true), requirement: .squat)
+                                                   legs: true), definition: .squat)
+        #expect(readiness.isReady)
+    }
+
+    @Test func aPushUpStartsFromAPlankNotFromStanding() {
+        // Standing with the arms down: shoulder, elbow and wrist clear and still.
+        var readiness = StartReadiness()
+        var time = 0.0
+        while time < 2.5 {
+            readiness.update(with: PoseFrame(time: time, subjectCount: 1, joints: [
+                .leftShoulder: JointPoint(x: 0.50, y: 0.30, confidence: 0.6),
+                .leftElbow: JointPoint(x: 0.50, y: 0.42, confidence: 0.6),
+                .leftWrist: JointPoint(x: 0.51, y: 0.54, confidence: 0.6),
+                .leftHip: JointPoint(x: 0.50, y: 0.55, confidence: 0.6),
+            ], athleteTracking: .tracked), definition: .pushUp)
+            time += CaptureTraces.step
+        }
+        #expect(!readiness.isReady)
+        // In a plank, the same hold starts the set.
+        readiness.reset()
+        time = 0
+        while time < 2.0 {
+            readiness.update(with: CaptureTraces.pushUpFrame(time: time, elbowBend: 0, wristX: 0.62, wristY: 0.86),
+                             definition: .pushUp)
+            time += CaptureTraces.step
+        }
         #expect(readiness.isReady)
     }
 
     @Test func walkingIntoPlaceDoesNotStart() {
         var readiness = StartReadiness()
         for frame in CaptureTraces.walkIn() {
-            readiness.update(with: frame, requirement: .squat)
+            readiness.update(with: frame, definition: .squat)
             #expect(!readiness.isReady)
         }
     }
@@ -31,7 +56,7 @@ nonisolated struct StartReadinessTests {
         var time = 0.0
         func step(legs: Bool, ankleX: Double = 0.51) {
             readiness.update(with: CaptureTraces.frame(time: time, hipY: 0.42, ankleX: ankleX, legs: legs),
-                             requirement: .squat)
+                             definition: .squat)
             time += CaptureTraces.step
         }
         for _ in 0..<10 { step(legs: true) }

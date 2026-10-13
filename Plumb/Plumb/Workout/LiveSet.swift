@@ -24,9 +24,11 @@ nonisolated struct StartReadiness: Equatable {
 
     /// Takes the next framing frame and returns the updated progress.
     @discardableResult
-    mutating func update(with frame: PoseFrame, requirement: EvidenceRequirement) -> Double {
+    mutating func update(with frame: PoseFrame, definition: ExerciseDefinition) -> Double {
+        let requirement = definition.evidence
         let sides: [BodySide] = side.map { $0 == .left ? [.left, .right] : [.right, .left] } ?? [.left, .right]
         guard let visibleSide = sides.first(where: { SetWindow.visible(frame, requirement: requirement, side: $0) }),
+              Self.isStartingPosture(frame, definition: definition, side: visibleSide),
               let anchor = frame.joints[requirement.anchor.joint(on: visibleSide)] else {
             misses += 1
             if misses > Self.toleratedMisses {
@@ -48,6 +50,23 @@ nonisolated struct StartReadiness: Equatable {
             progress = 0
         }
         return progress
+    }
+
+    /// The exercise's starting position. Standing for the squat, lunge and deadlift. For the
+    /// push-up, a plank: the torso closer to horizontal than vertical and the hands below the
+    /// shoulders. A person standing with their arms down shows the same shoulder, elbow and wrist,
+    /// and must not start a push-up set.
+    static func isStartingPosture(_ frame: PoseFrame, definition: ExerciseDefinition, side: BodySide) -> Bool {
+        guard definition.kind == .pushUp else { return true }
+        func clear(_ role: JointRole) -> JointPoint? {
+            guard let point = frame.joints[role.joint(on: side)],
+                  point.confidence >= EvidenceRubric.minimumJointConfidence else { return nil }
+            return point
+        }
+        guard let shoulder = clear(.shoulder), let hip = clear(.hip), let wrist = clear(.wrist) else { return false }
+        let horizontal = abs(shoulder.x - hip.x)
+        let vertical = abs(shoulder.y - hip.y) * frame.aspectRatio
+        return horizontal > vertical && wrist.y > shoulder.y
     }
 }
 
