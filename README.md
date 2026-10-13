@@ -4,8 +4,8 @@
 >
 > - **This file is the source of truth. Keep it true.**
 > - **Idea:** a fitness coach on iPhone + Apple Watch that aims to check every rep and give a timely correction. Track your progress and your workouts.
-> - **Today we have:** iPhone only, four side-view exercises.
-> - **Not built yet:** the full iPhone technology, the full app, the Apple Watch technology (and Apple TV, AirPods head tracking, widgets, Live Activities).
+> - **Today we have:** iPhone, four side-view exercises, and a first Apple Watch companion that shows the iPhone's live rep count and taps the wrist (not yet run on a real watch).
+> - **Not built yet:** the full iPhone technology, the full app, Apple Watch measurement: wrist motion, heart rate, workout session (and Apple TV, AirPods head tracking, widgets, Live Activities).
 
 ## Rules for AI agents and contributors
 
@@ -15,7 +15,7 @@
 
 ## Plumb idea
 
-The intended Plumb experience is a fitness coach on iPhone and Apple Watch. Prop your phone up once per exercise: the camera checks your posture and execution on every rep, while the Watch tracks reps, tempo, and effort, can tap your wrist when a validated issue appears, and can display real-time advice. iPhone and Apple Watch are the core of this vision. The goal is to deliver a correction as early as the evidence allows, then keep the workout's data in the app so you can track progress. These Watch and live-coaching features are planned, not in the current build.
+The intended Plumb experience is a fitness coach on iPhone and Apple Watch. Prop your phone up once per exercise: the camera checks your posture and execution on every rep, while the Watch tracks reps, tempo, and effort, can tap your wrist when a validated issue appears, and can display real-time advice. iPhone and Apple Watch are the core of this vision. The goal is to deliver a correction as early as the evidence allows, then keep the workout's data in the app so you can track progress. A first Watch companion that mirrors the iPhone's count is built (see [Current state](#current-state)); Watch tracking of reps, tempo, and effort is planned.
 
 Apple Foundation Models may help phrase validated observations on eligible devices; the coaching facts come from camera pose analysis and exercise-specific rules, with a non-generative fallback. The product is designed to say when the view is too weak to support a cue.
 
@@ -42,7 +42,7 @@ We are building the Plumb idea. Keep in mind:
 
 _Updated 13 October 2026._
 
-**In one sentence:** an iPhone-only app that analyzes one selected exercise at a time from the side, counts reps, and gives at most one supported observation after the set. It has not yet been tested on a real iPhone with real people.
+**In one sentence:** an iPhone app that analyzes one selected exercise at a time from the side, counts reps, and gives at most one supported observation after the set, with a first Apple Watch companion that shows the count. It has not yet been tested on a real iPhone or Apple Watch with real people.
 
 **What the app does**
 
@@ -51,6 +51,8 @@ _Updated 13 October 2026._
 - After the set: a rep count and at most one observation when the evidence supports it. Otherwise, it says there is no clear pattern or explains why to retake.
 - Compares two sets, keeps a local history, and shares a result as text.
 - Reads the observation aloud on tap, through the iPhone speaker or AirPods.
+- During a set, says the countdown, each rep, and live observations through AirPods or other headphones when connected. The setup screen says when headphones or a paired Apple Watch are around and what each adds to the chosen exercise. Neither is required.
+- Apple Watch companion (new on 13 October): when Plumb is open on a paired watch, it shows the exercise, the stage, a large live rep count, and live observations; taps the wrist on each rep, with a distinct tap for an observation; and starts or stops the set from the wrist (not for push-ups, where the hands stay on the floor). The watch measures nothing: every number comes from the iPhone camera. Only the count and short texts go to the watch, never video.
 - Optional: Apple Intelligence can reword the comparison. If it is unavailable or fails, a pre-written sentence is shown.
 - Video is analyzed on the iPhone and never saved.
 
@@ -67,12 +69,13 @@ _Updated 13 October 2026._
 - Four baseline generated test videos cover six clear squats, no movement, hidden legs, and covered feet. Five variants probe light, distance, tempo, and facing direction; the mirrored clip currently asks for a retake. These tests are reproducible but do not establish accuracy on real people.
 - No qualified trainer has reviewed the coaching observations.
 - The silhouette check has not yet been measured on the public videos.
+- Apple Watch companion: its messages and set mirroring are unit-tested, but it has not yet been compiled in Xcode or run on a physical Apple Watch. Taps with the wrist lowered are untested.
 
-**Not built:** Apple Watch, Apple TV, AirPods head tracking, widgets, Live Activities, accounts, subscriptions.
+**Not built:** Apple Watch measurement (wrist motion, heart rate, HealthKit workout session), a watch app icon, Apple TV, AirPods head tracking, widgets, Live Activities, accounts, subscriptions.
 
 **Challenge goal:** a reliable iPhone loop and a build submitted through App Store Connect. Public release depends on validation and distribution access.
 
-_For developers:_ each exercise is defined in `ExerciseDefinition.swift` (rule versions `squat-side-v5` and `*-side-v4`). Generated test videos are in `tools/replay`.
+_For developers:_ each exercise is defined in `ExerciseDefinition.swift` (rule versions `squat-side-v5` and `*-side-v4`), and what headphones and the Apple Watch add to it in `Accessories.swift`. The watch app is in `Plumb/PlumbWatch`. Generated test videos are in `tools/replay`.
 
 Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 
@@ -88,6 +91,7 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 
 - `Design/README.md`: Plumb brand theme, colors, typography, icon, and live Figma guide
 - `docs/design/iphone-experience-review.md`: iPhone interface decisions tied to Apple guidance and Design Award examples
+- `docs/design/apple-watch-and-airpods.md`: what the Apple Watch and AirPods add per exercise, the iPhone-watch messages, how to test on devices, and what is not done
 - `planning.md`: experience, scoped MVP, technical approach, privacy, validation, and timeline
 - `docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`: task-by-task plan for the first real iPhone squat session
 - `docs/validation/squat-v1-protocol.md`: consent, physical-device test, annotation, and claim gates

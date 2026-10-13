@@ -9,6 +9,12 @@ struct PlumbApp: App {
         return arguments[index + 1]
     }
 
+    /// Demo and video input stay off the watch unless this flag asks for it, to try the watch app in
+    /// a paired simulator. The watch then shows DEMO INPUT.
+    private static var mirrorsDemoOnWatch: Bool {
+        ProcessInfo.processInfo.arguments.contains("-plumb-watch-demo")
+    }
+
     private static func recordedPoses() -> [PoseFrame]? {
         guard let path = argument(after: "-plumb-video-poses"),
               let data = FileManager.default.contents(atPath: path) else { return nil }
@@ -38,18 +44,22 @@ struct PlumbApp: App {
                                 handsFreeByDefault: ProcessInfo.processInfo.arguments
                                     .contains("-plumb-ui-hands-free")),
                             announcer: ProcessInfo.processInfo.arguments
-                                .contains("-plumb-ui-hands-free") ? LiveAnnouncer() : nil)
+                                .contains("-plumb-ui-hands-free") ? LiveAnnouncer() : nil,
+                            connectsAccessories: Self.mirrorsDemoOnWatch)
             } else if let path = Self.argument(after: "-plumb-video-file") {
                 ContentView(source: VideoFilePoseSource(url: URL(fileURLWithPath: path),
                                                         recordedPoses: Self.recordedPoses()),
                             store: LocalSessionStore(url: FileManager.default.temporaryDirectory
                                 .appending(path: "PlumbVideo-\(UUID().uuidString)", directoryHint: .isDirectory)
-                                .appending(path: "sessions.json")))
+                                .appending(path: "sessions.json")),
+                            connectsAccessories: Self.mirrorsDemoOnWatch)
             } else {
-                ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer())
+                ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer(),
+                            connectsAccessories: true)
             }
             #else
-            ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer())
+            ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer(),
+                        connectsAccessories: true)
             #endif
         }
     }

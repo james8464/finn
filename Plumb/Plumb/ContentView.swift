@@ -13,6 +13,10 @@ struct ContentView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var model: WorkoutSessionModel
     @State private var observationSpeaker = ObservationSpeaker()
+    /// Headphones and a paired Apple Watch; idle unless `connectsAccessories`.
+    @State private var accessories = AccessoryMonitor()
+    /// True for the live camera, and for demo input only behind `-plumb-watch-demo`.
+    private let connectsAccessories: Bool
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
     /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
@@ -47,12 +51,23 @@ struct ContentView: View {
                     narrator: ComparisonNarrator? = nil,
                     exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
                     preferences: PlumbPreferences = .standard,
-                    announcer: (any LiveAnnouncing)? = nil) {
+                    announcer: (any LiveAnnouncing)? = nil,
+                    connectsAccessories: Bool = false) {
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
                                                          narrator: narrator,
                                                          exerciseClassifier: exerciseClassifier,
                                                          preferences: preferences,
                                                          announcer: announcer))
+        self.connectsAccessories = connectsAccessories
+    }
+
+    /// Demo or recorded input, marked as such on the watch too.
+    private var usesSyntheticInput: Bool {
+        #if DEBUG
+        return isDemo || isVideoFileInput
+        #else
+        return false
+        #endif
     }
 
     var body: some View {
@@ -86,7 +101,12 @@ struct ContentView: View {
         #if DEBUG
         .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
         #endif
+        .task {
+            guard connectsAccessories else { return }
+            accessories.start(model: model, demoInput: usesSyntheticInput)
+        }
         .onChange(of: scenePhase) { _, phase in
+            if phase == .active && connectsAccessories { accessories.refreshHeadphones() }
             if phase != .active { observationSpeaker.stop() }
             if phase == .background { Task { await model.backgrounded() } }
             if phase == .active && model.historyIssue == .unavailable {
@@ -135,6 +155,7 @@ struct ContentView: View {
                 Divider().padding(.leading, 44)
                 setupStep(selectedCopy.stanceTitle, detail: selectedCopy.stanceDetail,
                           symbol: "figure.stand")
+                accessoryNotes
 
                 Text("Analysis stays on this iPhone. No video is saved.")
                     .font(.footnote)
@@ -177,6 +198,24 @@ struct ContentView: View {
                     Label("Privacy", systemImage: "hand.raised")
                 }
             }
+        }
+    }
+
+    /// What connected headphones or a paired Apple Watch add to the chosen exercise, one line each.
+    @ViewBuilder private var accessoryNotes: some View {
+        let lines = AccessoryGuide.setupLines(for: model.selectedExercise, status: accessories.status,
+                                              speaksLive: model.speaksLive)
+        if !lines.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(lines, id: \.accessory) { line in
+                    Label(line.text, systemImage: line.accessory == .appleWatch ? "applewatch" : "headphones")
+                }
+            }
+            .font(.footnote)
+            .foregroundStyle(PlumbStyle.supportingText)
+            .padding(.top, 20)
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("setup.accessories")
         }
     }
 
@@ -257,6 +296,11 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Optional audio").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone.")
+                }
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Apple Watch").font(.headline).accessibilityAddTraits(.isHeader)
+                    Text("When Plumb is open on your paired Apple Watch, this iPhone sends it the exercise name, the set’s progress, the rep count, live observations, and the result line. Video and pose points stay on this iPhone. The watch does not measure your movement.")
                 }
                 Divider()
                 if model.recognitionMethod != .unavailable {
@@ -392,6 +436,14 @@ struct ContentView: View {
                 }
                 #endif
                 status
+                if accessories.status.isConnected(.appleWatch) {
+                    Label("Apple Watch connected", systemImage: "applewatch")
+                        .font(.footnote.weight(.semibold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(.black.opacity(0.68), in: Capsule())
+                        .accessibilityIdentifier("capture.watch")
+                }
                 #if DEBUG
                 if isValidationMode && model.stage == .framing {
                     Text(model.previewDeviations.isEmpty ? "3D view: no estimate"
