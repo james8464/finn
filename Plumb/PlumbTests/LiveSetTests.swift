@@ -215,6 +215,24 @@ nonisolated struct LiveSetMonitorTests {
         #expect(LiveSetEvent.shorterThanFirstReps(rep: 3).spoken(for: .pushUp) == "Elbow bend is smaller")
     }
 
+    /// Tired late in a set, a rep can be both quicker and shallower than the first ones. It gets one
+    /// observation, so the count and that observation can be said together without cutting each
+    /// other off; the quicker reps are still noted for the frequent pattern.
+    @Test func aRepBothFasterAndShorterGetsOneCue() {
+        let result = run(CaptureTraces.tiringSquats())
+        var cuesPerRep: [Int: Int] = [:]
+        for event in result.events {
+            switch event {
+            case .fasterThanFirstReps(let rep), .shorterThanFirstReps(let rep): cuesPerRep[rep, default: 0] += 1
+            case .repCounted: break
+            }
+        }
+        #expect(result.monitor.countedReps == 6)
+        #expect(!cuesPerRep.isEmpty)
+        #expect(cuesPerRep.values.allSatisfy { $0 == 1 }, "\(cuesPerRep)")
+        #expect(result.monitor.sawFasterRep)
+    }
+
     @Test func steadyRepsSayOnlyTheCount() {
         let events = run(CaptureTraces.squats(reps: 6, from: 0)).events
         #expect(events.allSatisfy { if case .repCounted = $0 { return true } else { return false } })

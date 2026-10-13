@@ -171,6 +171,27 @@ struct WorkoutSessionModelTests {
         #expect(announcer.phrases.isEmpty)
     }
 
+    /// Each live update is said as one phrase, the count first. Said one by one, a count and two
+    /// observations queued at once made the speech synthesizer drop its backlog, count included:
+    /// a tired person heard "3", "Range is shorter", "5".
+    @Test func eachLiveUpdateIsSaidAsOnePhraseWithTheCountFirst() async throws {
+        let source = TestPoseSource()
+        let announcer = RecordingAnnouncer()
+        let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbSpoken-\(UUID())")!)
+        let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        let frames = CaptureTraces.tiringSquats()
+        for frame in frames { source.emit(frame) }
+        try await waitUntil { model.frameCount == frames.count }
+        let phrases = announcer.phrases
+        let counts = phrases.compactMap { Int($0.split(separator: ".").first ?? "") }
+        #expect(counts == [1, 2, 3, 4, 5, 6])
+        #expect(phrases.count == counts.count, "\(phrases)")
+        #expect(phrases.contains { $0.hasPrefix("4. ") }, "\(phrases)")
+        await model.cancel()
+    }
+
     /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
     /// simulator, with many main-actor tests running at once, the live analysis of a whole set can
     /// take several seconds.

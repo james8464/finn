@@ -633,9 +633,9 @@ final class WorkoutSessionModel {
             } else {
                 liveCaption = event.caption(for: definition)
             }
-            say(event.spoken(for: definition))
             onLiveEvent?(event, definition.kind)
         }
+        if let phrase = LiveSetEvent.phrase(for: events, definition: definition) { say(phrase) }
         guard handsFree, handsFreeTask == nil, monitor.isOver else { return }
         endedHandsFree = true
         handsFreeTask = Task { @MainActor [weak self] in

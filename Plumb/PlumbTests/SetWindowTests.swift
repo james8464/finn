@@ -164,6 +164,24 @@ nonisolated enum CaptureTraces {
         return frames
     }
 
+    /// A tiring set: three 2 s reps with the hips 0.20 down, three quicker (1.2 s) and shallower
+    /// (0.14) ones, then 2 s standing.
+    static func tiringSquats() -> [PoseFrame] {
+        var frames: [PoseFrame] = []
+        var time = 0.0
+        for (duration, amplitude) in Array(repeating: (2.0, 0.20), count: 3) + Array(repeating: (1.2, 0.14), count: 3)
+            + [(2.0, 0.0)] {
+            let start = time
+            while time < start + duration - 1e-9 {
+                let phase = (time - start) / duration
+                let hipY = 0.42 + amplitude * (1 - cos(2 * .pi * phase)) / 2
+                frames.append(frame(time: time, hipY: hipY, ankleX: 0.51, legs: true))
+                time += step
+            }
+        }
+        return frames
+    }
+
     /// Walking back toward the phone: the feet slide across the frame, then the legs leave the picture.
     static func walkOut(from start: Double, duration: Double = 2.5) -> [PoseFrame] {
         var frames: [PoseFrame] = []

@@ -89,6 +89,23 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
         }
     }
 
+    /// What to say for one live update: the latest count, then any observation, as one phrase
+    /// ("4. Range is shorter"). Queued as separate phrases, a count and two observations made the
+    /// announcer drop its backlog when it fell behind, count included.
+    static func phrase(for events: [LiveSetEvent], definition: ExerciseDefinition) -> String? {
+        var count: String?
+        var observations: [String] = []
+        for event in events {
+            if case .repCounted = event {
+                count = event.spoken(for: definition)
+            } else {
+                observations.append(event.spoken(for: definition))
+            }
+        }
+        let parts = (count.map { [$0] } ?? []) + observations
+        return parts.isEmpty ? nil : parts.joined(separator: ". ")
+    }
+
     /// The line shown on the camera screen.
     func caption(for definition: ExerciseDefinition) -> String? {
         switch self {
@@ -183,26 +200,30 @@ nonisolated struct LiveSetMonitor {
         return gone >= (seenLeaving ? Self.leftAfter : Self.hiddenAfter)
     }
 
+    /// At most one observation per rep, said with its count. A shorter range comes first, the same
+    /// reading as the end-of-set observation; a quicker rep not pointed out then is pointed out on
+    /// the next one if it is still quicker.
     private mutating func cues(forRep number: Int) -> [LiveSetEvent] {
         guard reps.indices.contains(number - 1) else { return [] }
         let rep = reps[number - 1]
-        var events: [LiveSetEvent] = []
-        if number >= 4, number - lastFasterCue >= Self.cueSpacing {
+        var faster = false
+        if number >= 4 {
             let first = reps.prefix(3).map(\.duration).sorted()[1]
-            if first > 0, rep.duration < Self.fasterShare * first {
-                events.append(.fasterThanFirstReps(rep: number))
-                lastFasterCue = number
-                sawFasterRep = true
-            }
+            faster = first > 0 && rep.duration < Self.fasterShare * first
         }
+        if faster { sawFasterRep = true }
         if number >= 3, number - lastShorterCue >= Self.cueSpacing {
             let first = (reps[0].relativeRange + reps[1].relativeRange) / 2
             if first > 0, rep.relativeRange <= Self.shorterShare * first {
-                events.append(.shorterThanFirstReps(rep: number))
                 lastShorterCue = number
+                return [.shorterThanFirstReps(rep: number)]
             }
         }
-        return events
+        if faster, number - lastFasterCue >= Self.cueSpacing {
+            lastFasterCue = number
+            return [.fasterThanFirstReps(rep: number)]
+        }
+        return []
     }
 }
 
