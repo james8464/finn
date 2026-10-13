@@ -18,6 +18,16 @@ nonisolated private func person(x: Double, top: Double = 0.3, height: Double = 0
     ]
 }
 
+/// A side-view plank under where `person(x: 0.5)` stands.
+nonisolated private let plank: [BodyJoint: JointPoint] = [
+    .leftShoulder: JointPoint(x: 0.30, y: 0.72, confidence: 0.8),
+    .leftElbow: JointPoint(x: 0.31, y: 0.80, confidence: 0.8),
+    .leftWrist: JointPoint(x: 0.31, y: 0.88, confidence: 0.8),
+    .leftHip: JointPoint(x: 0.55, y: 0.76, confidence: 0.8),
+    .leftKnee: JointPoint(x: 0.68, y: 0.80, confidence: 0.8),
+    .leftAnkle: JointPoint(x: 0.80, y: 0.86, confidence: 0.8),
+]
+
 nonisolated struct AthleteTrackerTests {
     @Test func picksTheLargePersonNearTheCentre() {
         var tracker = AthleteTracker()
@@ -53,6 +63,36 @@ nonisolated struct AthleteTrackerTests {
             #expect(tracker.select([person(x: 0.15)], aspectRatio: 1, time: Double(tenth) / 10) == nil)
         }
         #expect(tracker.select([person(x: 0.15), person(x: 0.51)], aspectRatio: 1, time: 5.1) == 1)
+    }
+
+    /// Getting down into a push-up: Vision misses the athlete for 0.6 s and finds them again in a
+    /// plank, far from where they stood. Alone in view and where they were, they are the athlete.
+    @Test func lockedTrackerPicksUpTheAthleteAfterAPoseChange() {
+        var tracker = AthleteTracker()
+        let standing = person(x: 0.5, top: 0.3, height: 0.6)
+        _ = tracker.select([standing], aspectRatio: 1, time: 0)
+        tracker.lock()
+        #expect(tracker.select([], aspectRatio: 1, time: 0.3) == nil)
+        // Back in view but far from the remembered joints: not yet.
+        #expect(tracker.select([plank], aspectRatio: 1, time: 0.6) == nil)
+        // After `reacquireAfter` without a match, the lone person at the athlete's spot is the athlete.
+        #expect(tracker.select([plank], aspectRatio: 1, time: 1.2) == 0)
+        #expect(tracker.isLocked)
+        // And then followed as usual.
+        #expect(tracker.select([plank], aspectRatio: 1, time: 1.3) == 0)
+    }
+
+    @Test func lockedTrackerDoesNotPickUpAnyoneWhenSeveralPeopleAreInView() {
+        var tracker = AthleteTracker()
+        _ = tracker.select([person(x: 0.5)], aspectRatio: 1, time: 0)
+        tracker.lock()
+        // Someone in a plank where the athlete was, and someone else across the room: Plumb cannot tell
+        // which one is the athlete, so it waits.
+        for tenth in 1...30 {
+            #expect(tracker.select([plank, person(x: 0.15)], aspectRatio: 1, time: Double(tenth) / 10) == nil)
+        }
+        // Alone, that person is picked up.
+        #expect(tracker.select([plank], aspectRatio: 1, time: 3.1) == 0)
     }
 
     @Test func beforeASetAClearlyMoreProminentPersonTakesOver() {

@@ -30,13 +30,20 @@ final class PreviewFeed {
     /// Called with the rotation coordinator's angles whenever the phone turns.
     func rotationChanged(capture: Double, preview: Double) {
         onCaptureRotation?(capture)
-        displayRotationDegrees = Self.displayRotation(capture: capture, preview: preview)
+        displayRotationDegrees = Self.displayRotation(capture: capture, preview: preview, mirrored: isMirrored)
     }
 
     /// The rotation still needed on screen for a frame already rotated by `capture` degrees,
     /// rounded to a quarter turn and kept in 0..<360.
-    nonisolated static func displayRotation(capture: Double, preview: Double) -> Double {
-        let quarterTurns = Int(((preview - capture) / 90).rounded())
+    ///
+    /// The coordinator's preview angle is meant for a capture preview layer, which mirrors the front
+    /// camera after turning it. This screen mirrors the upright frame first and turns it after, so a
+    /// mirrored feed turns the other way. Both cameras then get the same turn for the same phone
+    /// position, as they should for an upright frame; before, the front camera was drawn upside
+    /// down whenever the phone stood on its side.
+    nonisolated static func displayRotation(capture: Double, preview: Double, mirrored: Bool = false) -> Double {
+        let turn = mirrored ? capture - preview : preview - capture
+        let quarterTurns = Int((turn / 90).rounded())
         return Double(((quarterTurns % 4) + 4) % 4 * 90)
     }
 }

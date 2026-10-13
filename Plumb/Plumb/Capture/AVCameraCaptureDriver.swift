@@ -12,6 +12,12 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
     private let processor: PoseFrameProcessor
     private var configured = false
     private var interruptionObserver: NSObjectProtocol?
+    private var runtimeErrorObserver: NSObjectProtocol?
+    private var pressureObservation: NSKeyValueObservation?
+    /// The rotation that makes frames upright; used when the session is configured. Capture queue only.
+    private var captureRotation = 90.0
+    /// Capture runs at 15 frames per second because of system pressure. Capture queue only.
+    private var lowersFrameRate = false
     nonisolated let previewSink: PreviewFrameSink? = PreviewFrameSink()
     nonisolated let cameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
 
@@ -49,6 +55,20 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
         ) { [processor] _ in
             processor.finish()
         }
+        // A media-services reset or another runtime error stops the frames: end the stream so the
+        // screen says the camera stopped instead of freezing.
+        runtimeErrorObserver = NotificationCenter.default.addObserver(
+            forName: AVCaptureSession.runtimeErrorNotification,
+            object: session,
+            queue: nil
+        ) { [processor] _ in
+            processor.finish()
+        }
+        // A hot phone: lighten the work before the system has to stop the camera mid-set.
+        pressureObservation = cameraDevice?.observe(\.systemPressureState, options: [.new]) {
+            [weak self] device, _ in
+            self?.adapt(to: device.systemPressureState.level)
+        }
         return stream
     }
 
@@ -61,8 +81,10 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
     }
 
     /// Turns the frames so the person stands upright in them, whatever the phone's orientation.
+    /// Before the session starts, the angle is kept for its first frames.
     func setCaptureRotation(_ degrees: Double) {
         queue.async {
+            self.captureRotation = degrees
             guard let connection = self.session.outputs.first?.connection(with: .video),
                   connection.isVideoRotationAngleSupported(degrees),
                   connection.videoRotationAngle != degrees else { return }
@@ -76,11 +98,35 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
             NotificationCenter.default.removeObserver(interruptionObserver)
             self.interruptionObserver = nil
         }
+        if let runtimeErrorObserver {
+            NotificationCenter.default.removeObserver(runtimeErrorObserver)
+            self.runtimeErrorObserver = nil
+        }
+        pressureObservation?.invalidate()
+        pressureObservation = nil
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             queue.async {
                 if self.session.isRunning { self.session.stopRunning() }
                 continuation.resume()
             }
+        }
+    }
+
+    /// Under serious system pressure (heat), capture at the analysis rate (15 frames per second)
+    /// and skip the optional 3D angle estimate; back to normal once the pressure drops.
+    private func adapt(to level: AVCaptureDevice.SystemPressureState.Level) {
+        let strained = level == .serious || level == .critical
+        processor.setUnderPressure(strained)
+        queue.async {
+            guard strained != self.lowersFrameRate, let camera = self.cameraDevice else { return }
+            // Only a rate the current format supports; anything else would raise an exception.
+            let supportsAnalysisRate = camera.activeFormat.videoSupportedFrameRateRanges.contains {
+                $0.minFrameRate <= 15 && $0.maxFrameRate >= 15
+            }
+            guard supportsAnalysisRate, (try? camera.lockForConfiguration()) != nil else { return }
+            camera.activeVideoMinFrameDuration = strained ? CMTime(value: 1, timescale: 15) : .invalid
+            camera.unlockForConfiguration()
+            self.lowersFrameRate = strained
         }
     }
 
@@ -103,8 +149,14 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
         session.addOutput(output)
         output.setSampleBufferDelegate(processor, queue: queue)
         if let connection = output.connection(with: .video) {
-            // Portrait until the screen's rotation coordinator reports the phone's orientation.
-            if connection.isVideoRotationAngleSupported(90) { connection.videoRotationAngle = 90 }
+            // Upright from the first frame: the angle the camera source read from a rotation
+            // coordinator (the iPhone 17 front sensor is mounted in portrait, so not always 90°).
+            // The camera screen keeps it updated when the phone turns.
+            if connection.isVideoRotationAngleSupported(captureRotation) {
+                connection.videoRotationAngle = captureRotation
+            } else if connection.isVideoRotationAngleSupported(90) {
+                connection.videoRotationAngle = 90
+            }
             // Vision reads unmirrored frames; only the on-screen picture is mirrored.
             if connection.isVideoMirroringSupported {
                 connection.automaticallyAdjustsVideoMirroring = false
@@ -120,6 +172,8 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var lastSampleTime: Double = -.infinity
     private var estimatesCameraAngle = true
+    /// The phone is hot: the 3D angle estimate is skipped until it cools down.
+    private var underPressure = false
     private var athleteRequest: Bool?
     private let previewSink: PreviewFrameSink?
     // Used only on the capture queue.
@@ -133,6 +187,12 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
     func setCameraAngleEstimation(_ enabled: Bool) {
         lock.lock()
         estimatesCameraAngle = enabled
+        lock.unlock()
+    }
+
+    func setUnderPressure(_ strained: Bool) {
+        lock.lock()
+        underPressure = strained
         lock.unlock()
     }
 
@@ -175,7 +235,7 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
         // Every frame goes on screen; the analysis keeps 15 per second.
         let analyze = time - lastSampleTime >= PoseFrameAnalyzer.minimumInterval
         if analyze { lastSampleTime = time }
-        let estimateAngle = estimatesCameraAngle
+        let estimateAngle = estimatesCameraAngle && !underPressure
         let request = analyze ? athleteRequest : nil
         if request != nil { athleteRequest = nil }
         lock.unlock()
