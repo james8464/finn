@@ -1,6 +1,6 @@
 # Why Plumb
 
-**Updated 13 October 2026 — product rationale, not a claim of proven demand.** Plumb is an iPhone-first movement-feedback companion. Four side-view strength flows and local comparison exist; treadmill running is an intended expansion. Real-camera and expert validation are still pending.
+**Updated 13 October 2026 — product rationale, not a claim of proven demand.** The [README](../../README.md) defines Plumb's intended iPhone + Apple Watch coaching experience. The current iPhone-only build has four side-view strength flows and local comparison; timely live correction, Watch integration, and treadmill running remain future work. Real-camera and expert validation are still pending.
 
 ## 1. The problem worth solving
 
@@ -17,12 +17,13 @@ The product loop is designed for behavior change: **see a signal → receive one
 ## 3. Why the Apple ecosystem fits
 
 - **iPhone** supplies the required camera and a private, portable analysis device.
-- **Apple Watch** can add an optional workout session, heart-rate context, elapsed time, and discreet controls. These metrics describe effort, not technique.
-- **AirPods** can make a cue audible when the screen is several metres away. Compatible AirPods Pro 3 can also provide heart-rate data in supported workout apps with Health permissions; this is optional context, not form detection.
+- **Apple Watch** is the planned core companion for workout timing, effort context, rep signals, and discreet controls and haptics. These metrics alone do not establish technique quality.
+- **AirPods** can make a cue audible when the screen is several metres away. Head-motion-assisted feedback is a future hypothesis requiring device and expert validation. Compatible AirPods Pro 3 can also provide heart-rate data in supported workout apps with Health permissions; this is optional context, not form detection.
+- **iPhone Duo and Apple TV** suggest a self-standing camera position and a living-room display. Both need a tested use case and privacy design before becoming product claims.
 - **HealthKit** gives the person control over permitted workout data. It should be requested only when a Health feature is used.
 - **Foundation Models** offer optional on-device language generation on eligible devices. Model availability varies, so the core feature cannot depend on it.
 
-This ecosystem story is credible only if the first iPhone-only loop works. Plumb must remain useful to someone with no Watch, no AirPods, and no Apple Intelligence support.
+This ecosystem story is credible only if the first iPhone-only loop works. The current prototype must remain useful without accessories; the intended full product centers on the iPhone + Watch pair.
 
 ## 4. What makes Plumb distinct enough to test
 
@@ -44,7 +45,7 @@ The business should be judged by whether people complete a second set after seei
 
 ## 7. Why this is an appropriate challenge project
 
-The first prototype can show the integration of iPhone camera capture, pose observations, deterministic movement logic, privacy-conscious data handling, and a native SwiftUI experience. Optional Watch and spoken output tell a broader Apple ecosystem story without being necessary for the demo. A single reliable squat loop is a stronger proof than a polished mockup claiming universal AI coaching.
+The first prototype can show the integration of iPhone camera capture, pose observations, deterministic movement logic, privacy-conscious data handling, and a native SwiftUI experience. The intended Watch role and current optional spoken output tell the broader Apple ecosystem story without implying that Watch technology is in the demo. A single reliable squat loop is a stronger proof than a polished mockup claiming universal AI coaching.
 
 The technical and product risks are visible: camera placement, pose occlusion, validating cues, on-device speed, and safety language. The [plan](../../planning.md) narrows the challenge build, defines test gates, and makes the unimplemented features explicit.
 

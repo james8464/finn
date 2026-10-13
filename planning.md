@@ -1,10 +1,10 @@
 # Plumb — product and build plan
 
-**Working plan, updated 13 October 2026.** Plumb is an iPhone-first movement-feedback companion in development. Strength sets are the first implementation; treadmill running is a planned, separate use case. The app has a camera, setup, set, and result loop for four side-view exercises, with a shared rep analyzer, athlete tracking, an evidence gate, local history and comparison, optional spoken feedback, and guarded Foundation Models wording. A sustained clearly frontal view can be refused; other angled views receive a placement tip. The latest capture revision checks sampled joints against a person mask and refuses the generated covered-feet test. Simulator and generated-video checks pass, but physical-device reliability, coaching quality, audio routing, and model wording still need validation. Apple Watch integration, treadmill running, and subscriptions are not implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
+**Working plan, updated 13 October 2026.** The [README](README.md) owns the product direction and current state: an intended iPhone + Apple Watch coach with timely, validated corrections, beginning with an iPhone-only strength-set prototype. Treadmill running is a planned, separate use case. The app has a camera, setup, set, and result loop for four side-view exercises, with a shared rep analyzer, athlete tracking, an evidence gate, local history and comparison, optional spoken feedback, and guarded Foundation Models wording. A sustained clearly frontal view can be refused; other angled views receive a placement tip. The latest capture revision checks sampled joints against a person mask and refuses the generated covered-feet test. Simulator and generated-video checks pass, but physical-device reliability, coaching quality, audio routing, and model wording still need validation. Apple Watch integration, live corrections, treadmill running, and subscriptions are not implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
 
 The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md). It scopes the first complete iPhone squat loop and its validation gate; later integrations remain in this broader product plan.
 
-The [product brief](docs/product/brief.md) is the concise source for the product promise, feature order, and result language. This plan retains the detailed implementation choices, validation gates, and timeline.
+The [product brief](docs/product/brief.md) expands the README's feature order and result boundaries. This plan retains the detailed implementation choices, validation gates, and timeline.
 
 ## 1. Product thesis
 
@@ -24,7 +24,7 @@ The [product brief](docs/product/brief.md) is the concise source for the product
 2. **One useful cue.** Prioritize one actionable change per set, not a stream of criticism.
 3. **Personal progression.** Compare repeatable movement patterns with the person's own earlier sets; avoid a universal “perfect form” score.
 4. **Private by default.** Process video on device where practical; do not retain raw footage unless the person explicitly saves it.
-5. **Works without accessories.** iPhone camera and an on-device rules fallback form the base experience. Watch, AirPods, and Foundation Models are optional enhancements.
+5. **Start on iPhone; build the paired experience.** The current camera and on-device rules work without accessories. Apple Watch is core to the intended full product; AirPods, Apple TV, iPhone Duo placement, and Foundation Models have specific optional roles.
 6. **Respect physical limits.** Do not diagnose pain or prescribe load. Encourage stopping if an exercise causes pain and seeking qualified advice when appropriate.
 7. **Quiet, native presentation.** One primary action per stage, plain evidence, system typography and controls, and no decorative AI interface. See the [iPhone experience review](docs/design/iphone-experience-review.md) for Apple HIG and award-winning app references.
 
@@ -37,7 +37,7 @@ The [product brief](docs/product/brief.md) is the concise source for the product
 3. Tap or use a short countdown to start. The first build analyses a live frame stream on the iPhone without saving a video. Optional clip saving is a later feature requiring a separate, explicit choice.
 4. After the set, Plumb displays measured rep count, one prioritized observation, or a narrow positive note when measured rep range is consistent, plus supporting rep details. This is not a judgment of perfect overall form. A richer timeline, opt-in clip, or temporary pose overlay may follow once its usefulness, privacy, and accuracy have been tested.
 5. The person chooses **Try this next set**, **Not relevant**, or **Retake**. If the previous cue remains relevant and the next set is for the same exercise, a one-sentence reminder stays beside the camera through framing and capture. A follow-up set shows whether the observed pattern changed.
-6. Optional Apple Watch records workout context such as elapsed time and heart rate. Optional spoken cues play through the current audio output, including paired AirPods.
+6. In the intended paired experience, Apple Watch contributes rep timing, effort context, controls, and discreet haptics; live cues need validation before release. The current iPhone build can speak post-set observations through the system audio output, including paired AirPods.
 
 ### Example: bodyweight squat
 
@@ -48,11 +48,13 @@ A side-view capture detects six reps. The last two have a shorter camera-observe
 | Device | Intended role | Dependency |
 | --- | --- | --- |
 | iPhone | Camera capture, pose estimation, set review, history | Required |
-| Apple Watch | Optional workout session, heart-rate/elapsed-time context, discreet start/stop or cue haptic | Separate watchOS target and HealthKit permission; not required for form analysis |
-| AirPods | Optional spoken cue through normal system audio routing | No AirPods-only API or pairing requirement |
+| Apple Watch | Core future companion for workout context, rep timing, tempo, effort, and discreet cue haptics | Separate watchOS target, HealthKit permission, paired-device testing; absent from current build |
+| AirPods | Current optional spoken result through normal audio routing; proposed future head-motion signal | Motion-capable device, availability and permission checks, paired tests for any head-motion feature |
+| iPhone Duo | Proposed self-standing camera placement | Test framing and stability on the device; no special support in current build |
+| Apple TV | Proposed living-room display for iPhone-observed workouts | Separate display and privacy design; no current app |
 | Apple Intelligence-capable device | Optional Foundation Models wording of structured observations | Availability check and deterministic text fallback |
 
-The Watch's heart rate describes effort context; it cannot prove whether a rep has good form. A later watchOS prototype could use timestamped accelerometer motion to test whether rep boundaries and tempo improve when camera evidence is weak. That requires synchronization, paired-device tests, and a measured advantage over iPhone-only analysis before it becomes a product claim. AirPods carry a cue; they do not measure pose. This distinction must remain clear in product copy.
+The Watch's heart rate describes effort context; it cannot prove whether a rep has good form. A watchOS prototype can use timestamped accelerometer motion to test whether rep boundaries and tempo improve when camera evidence is weak. That requires synchronization, paired-device tests, and a measured advantage over iPhone-only analysis before it becomes a product claim. AirPods currently carry a cue; a future head-motion check must prove that it detects a useful exercise-specific pattern before Plumb interprets it as compensatory movement. This distinction must remain clear in product copy.
 
 ## 3. Scope and priorities
 
@@ -60,9 +62,9 @@ The Watch's heart rate describes effort context; it cannot prove whether a rep h
 
 1. **Make value clear immediately on iPhone.** The first screen names the set-review purpose, lets someone choose an exercise, and puts camera setup one tap away. Capture should lead to one measured observation or a plain retake reason within the latency gate, without a decorative score or mandatory sign-in.
 2. **Validate the iPhone loop before adding a second sensor.** Run the camera, occlusion, camera-angle, performance, and expert-cue protocol on a physical iPhone. The person-mask check must be tested for both missed occlusions and false refusals on real clothing and backgrounds.
-3. **Prototype Apple Watch as the next device.** Start with a watchOS workout session, elapsed time, and discreet start/stop or haptic feedback, while the iPhone remains the form sensor and source of truth. Add accelerometer fusion only after synchronized sets show a measurable improvement in rep boundaries or tempo over camera-only analysis. Do not make the Watch a condition for use.
+3. **Prototype Apple Watch as the next core device.** Start with a watchOS workout session, elapsed time, and discreet start/stop or haptic feedback, while the iPhone remains the form sensor and source of truth. Add accelerometer fusion only after synchronized sets show a measurable improvement in rep boundaries or tempo over camera-only analysis. Keep the current iPhone-only prototype usable while building the paired experience.
 4. **Explore treadmill running as a separate movement mode.** A treadmill session is continuous rather than a series of strength reps. First identify a safe, stable phone position and a useful camera view; then define a small set of observable gait signals with an expert. Test treadmill motion, camera vibration, partial visibility, pace changes, and bystanders. Keep the first candidate result post-run, evidence-linked, and able to abstain. Do not extend squat thresholds or promise injury prevention.
-5. **Add platform reach only when it serves this loop.** A widget or Live Activity could show an active session and return to the iPhone workout. Apple TV viewing and a second iPhone camera are stretch experiments requiring a clear viewing or measurement benefit, privacy review, and paired-device tests; they are not part of the submission claim.
+5. **Add the other proposed surfaces only when their roles work.** A widget or Live Activity could show an active session and return to the iPhone workout. Test iPhone Duo as a self-standing camera placement and Apple TV as a living-room display. Each needs a clear benefit, privacy review, and device testing; none is part of the current submission claim.
 
 The movement-analysis interface may later be replaced or augmented by a team-provided engine. Keep the contract explicit: timestamped poses or movement events, per-joint confidence, recognized exercise, and a versioned evidence result. Benchmark the proposed engine against the same replay fixtures and consented holdout before displaying its coaching claims. No SDK, repository, or sample output has been provided yet, so the current on-device analyzer remains the working implementation.
 
@@ -84,14 +86,14 @@ The repository and its support/privacy pages are public, but the root [LICENSE](
 
 - Push-up from a side view, with a separately validated rubric such as body-line consistency and tempo.
 - Tap-to-speak post-set cue with a Stop control; output uses the system audio route and may reach paired AirPods. It is never automatic and does not request microphone access.
-- Optional Apple Watch companion and a real HealthKit workout session with user-controlled saving.
+- Apple Watch companion, beginning with a real HealthKit workout session and user-controlled saving.
 - Foundation Models to turn **structured, validated** observations into concise, supportive language. The model cannot invent a new biomechanical finding or make a medical claim.
 - Saved clips, explicit retention controls, and side-by-side comparison.
 
 ### Later product
 
 - More movements and camera angles only after expert review and device testing.
-- Carefully gated live cues when pose confidence, latency, and cue usefulness meet thresholds. One short cue at most per relevant event, with a quiet mode.
+- Carefully gated live cues, central to the full product vision, when pose confidence, latency, and cue usefulness meet thresholds. One short cue at most per relevant event, with a quiet mode and discreet Watch or AirPods delivery where supported.
 - Trainer review, optional shared clips, tailored programs, and a coach account.
 - Progress trends built around consistency and user goals rather than a universal form score.
 - Optional cross-device history or trainer sharing with a real account and clear deletion controls. Offer Sign in with Apple only when one of these benefits exists, after someone has tried a set; never require an account for local capture. Current local history has no account or sync service.
@@ -188,7 +190,7 @@ Filming in a shared gym is a social constraint as well as a technical one. The c
 
 The first acquisition wedge is a useful shareable *result*, not a social feed: a person can share a privacy-safe summary of what changed between two sets. Trainers may later use Plumb to review client clips, with opt-in sharing and a separate plan. Do not build a coach marketplace for the challenge.
 
-**Differentiation to test:** iPhone-only entry, evidence-linked cues, personal set-to-set comparisons, local processing, and optional Watch/AirPods continuity. Competitors already offer form feedback or video review; the claim is a focused combination and user experience, not that Plumb invented camera coaching.
+**Differentiation to test:** iPhone-only entry, evidence-linked cues, personal set-to-set comparisons, local processing, and an eventual iPhone + Watch loop with timely corrections. AirPods audio is an optional delivery route. Competitors already offer form feedback or video review; the claim is a focused combination and user experience, not that Plumb invented camera coaching.
 
 ## 6. Validation and success measures
 
@@ -228,7 +230,7 @@ For the next-set loop, measure whether the user understands the evidence, whethe
 2. Capture a short squat set on a physical iPhone, or clearly introduce a recorded fallback.
 3. Show detected reps, evidence for one cue, and why it was chosen.
 4. Repeat a set and show a change in the observed metric.
-5. Explain optional Watch context, AirPods speech, and Foundation Models wording as implemented or planned, accurately labeled.
+5. Explain the intended Watch role, current optional AirPods speech, and Foundation Models wording as implemented or planned, accurately labeled.
 
 ### Honest status rule
 
@@ -250,10 +252,11 @@ The repository now includes a simulator-tested camera-to-result flow, local set 
 
 ## 9. Decision log
 
-- **10 October 2026:** The team selected Plumb's workout-technique concept. The iPhone camera is the required sensor; Watch and AirPods are optional. Post-set feedback is the first dependable product experience, with live coaching reserved for validation.
+- **10 October 2026:** The team selected Plumb's workout-technique concept. The iPhone camera is the required sensor; Watch and AirPods were scoped as optional for the first prototype. Post-set feedback is the first dependable product experience, with live coaching reserved for validation.
 - **11 October 2026:** The monochrome icon adopted a custom rounded P within open camera corners. The mark suggests alignment and camera feedback without prescribing a particular exercise pose.
 - **11 October 2026:** For the first camera-to-cue build, keep the Xcode project's iOS 27.0 deployment target and support iPhone first. An iPad experience requires its own design and validation before the target includes iPad.
 - **13 October 2026:** Team feedback makes the first useful iPhone result and a quiet native interface the immediate priority. Apple Watch is the next device prototype; Apple TV, a second iPhone, widgets, and Live Activities need a demonstrated benefit before implementation. Treadmill running joins the intended product scope but requires a separate, expert-reviewed gait rubric. Keep the working name until the team agrees on another. Favor Apple's on-device pose capabilities and replayable validation over training a new model without a labeled dataset. An external movement engine can be evaluated when an actual interface and sample output arrive.
+- **13 October 2026, README refinement:** The full product vision makes iPhone and Apple Watch the core pair and timely validated correction the intended experience. iPhone Duo placement, AirPods audio and possible head motion, and Apple TV display have distinct proposed roles. None of these new device features is in the current iPhone build; validate the existing camera loop first.
 
 ## 10. Primary platform references
 

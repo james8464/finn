@@ -1,12 +1,12 @@
 # Plumb · product brief
 
-**Working product definition · 13 October 2026.** This page is the source of truth for what Plumb is, what each result can claim, and the order of product work. [planning.md](../../planning.md) owns technical and validation detail; [the README](../../README.md) is the quick project entry point. Revise this brief when the product promise changes, then align release copy with the *shipped* build.
+**Supporting product brief · 13 October 2026.** [The README](../../README.md) is the source of truth for the product direction and current state. This page expands its result boundaries and feature order; [planning.md](../../planning.md) owns technical and validation detail. Align public release copy with the *shipped* build.
 
 ## Purpose and audience
 
 People training alone often cannot see how their own movement changes through a set. Reviewing a video takes time and still leaves the interpretation to them. Plumb turns a short, camera-visible movement into one bounded observation they can check in the next set.
 
-The first audience is a self-directed iPhone user doing basic strength work at home or in a gym. The intended expansion includes treadmill runners, whose continuous movement needs a different session and analysis design. A trainer may later review a person's shared result or opted-in clip, but trainer accounts are not needed for the first experience.
+The first audience is a self-directed iPhone user doing basic strength work at home or in a gym. The intended full experience pairs iPhone camera analysis with Apple Watch rep timing, effort context, discreet haptics, and timely, validated advice. The expansion includes treadmill runners, whose continuous movement needs a different session and analysis design. A trainer may later review a person's shared result or opted-in clip, but trainer accounts are not needed for the first experience.
 
 **Product loop:** choose an exercise → place the iPhone → analyze live without saving video → review one supported finding or a retake reason → try another set with a short reminder → compare the same measured signal. No account or accessory is required for this loop.
 
@@ -30,16 +30,18 @@ A consistent range is **one positive measurement**, not proof of “perfect form
 | Now | One-sentence next-set reminder | Show the last relevant cue during framing and capture for the same exercise; clear it after a new result, dismissal, exercise change, or session end. |
 | Now | Restrained positive feedback | Report consistent *measured range* only when evidence and rep-to-rep agreement support it. Never label form perfect. |
 | Before release | Physical iPhone validation, cue review, accessibility, privacy and signing checks | Test consented sets across people, views, clothing, light, and occlusion. Suppress claims that miss the [validation gates](../../planning.md#6-validation-and-success-measures). |
-| Next device | Apple Watch workout session, elapsed time, and discreet controls | Prototype after the iPhone loop is dependable. Compare any accelerometer-assisted rep timing with camera-only analysis before claiming an improvement. |
+| Core product expansion | Apple Watch workout session, rep timing, tempo, effort context, and discreet haptics | Watch is central to the intended iPhone + Watch experience, but absent from this build. Prototype after the iPhone loop is dependable; compare sensor-assisted timing with camera-only analysis before claiming an improvement. |
 | Next movement | Treadmill running | Research safe camera placement and a running-specific, expert-reviewed gait signal. Begin with post-run feedback; do not reuse strength rep thresholds. |
-| Later | Live cues, trainer workflow, saved clips, CloudKit or Sign in with Apple, paid tier | Each needs a clear user benefit, privacy choice, and validation. Apple TV, a second iPhone, widgets, and Live Activities are experiments, not submission claims. |
+| Full product | Timely live cues, including Watch haptics and optional AirPods audio | Central to the vision; release only when tracking confidence, latency, coach review, and distraction testing support the particular cue. |
+| Later surfaces and business | iPhone Duo placement, Apple TV display, widgets, Live Activities, trainer workflow, saved clips, CloudKit or Sign in with Apple, paid tier | Investigate a useful role and privacy choice for each. None is a current build or submission claim. |
 
 ## Apple platform choices
 
 - **Vision + AVFoundation:** on-device pose from a live frame sequence; confidence, occlusion, viewpoint, and the full movement matter more than a single image. [Vision reports joint positions and confidence](https://developer.apple.com/documentation/vision/detecting-human-body-poses-in-images), rather than an overall technique verdict.
 - **Foundation Models:** optional language for a structured, already validated comparison, with reviewed deterministic wording whenever generation is unavailable or invalid. It never decides whether a rep is safe.
-- **AirPods:** optional audio output for a user-requested observation. They are not a required form sensor.
-- **Apple Watch:** future workout context and controls; any camera/watch sensor fusion needs synchronized, paired-device tests.
+- **AirPods:** audio output for a user-requested observation works today through the system route. Head-motion-assisted movement checks are planned and need availability, permission, timing, and coaching validation; headphones do not currently measure form for Plumb.
+- **Apple Watch:** core to the intended paired experience, currently unbuilt. Workout context, timing, and haptics come first; any camera/watch sensor fusion needs synchronized, paired-device tests.
+- **iPhone Duo and Apple TV:** proposed placement and living-room display surfaces, respectively; neither is implemented or validated.
 - **Native UI:** system typography, controls, accessibility, and quiet black/white branding from the [brand guide](../../Design/README.md). The measured fact and next action should remain the focus. Apple's [feedback guidance](https://developer.apple.com/design/human-interface-guidelines/feedback) favors passive status for information a person can glance at, and its [workout guidance](https://developer.apple.com/design/human-interface-guidelines/workouts) cautions against distracting information during activity; the next-set reminder is one short line, not a live stream of corrections.
 
 ## How we decide whether it works

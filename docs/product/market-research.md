@@ -66,7 +66,7 @@ This is a proposed wedge, not a statement that competitors lack evidence, privac
 3. The evidence points to a specific rep, which makes a suggestion checkable.
 4. A second set shows a visible change rather than an abstract score.
 5. Local processing and opt-in clip saving address a sensitive filming context.
-6. Watch and AirPods enrich the experience without gating the core benefit.
+6. The current iPhone loop needs no accessory; a later iPhone + Watch experience could make timely, discreet feedback more useful if paired-device tests support it. AirPods are an optional audio route.
 
 ### Reasons someone may reject it
 

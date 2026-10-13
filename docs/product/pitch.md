@@ -12,7 +12,7 @@ Plumb turns an iPhone camera into a private technique mirror: after a supported 
 
 **The product (0:35–1:25).** Put your iPhone where it can see your full body from the side and do a bodyweight squat set. Plumb tracks visible joint motion on device. It identifies the reps, shows the evidence, and offers one short cue when the view supports it. The next set becomes a small experiment: did that observable pattern change? It uses plain language and tells you when the camera view is too weak to judge.
 
-**The Apple ecosystem (1:25–1:55).** The iPhone camera is the core sensor. Vision estimates pose and corroborates sampled joints against a person mask on device. On eligible iPhones, Foundation Models can reword a measured set-to-set comparison, with a deterministic fallback; the model does not invent the measurement. The current app can speak a post-set observation through the system audio route, including paired AirPods. A Watch companion is the next prototype for workout context and discreet controls; it is not in this build.
+**The Apple ecosystem (1:25–1:55).** The iPhone camera is the core sensor. Vision estimates pose and corroborates sampled joints against a person mask on device. On eligible iPhones, Foundation Models can reword a measured set-to-set comparison, with a deterministic fallback; the model does not invent the measurement. The current app can speak a post-set observation through the system audio route, including paired AirPods. The intended product pairs iPhone with Apple Watch for rep timing, effort, and discreet, timely cues; that Watch technology is not in this build. iPhone Duo placement and Apple TV display are proposed extensions, not demo features.
 
 **Why Plumb (1:55–2:25).** Existing products offer classes, hardware-based form feedback, running analysis, or coach video review. Plumb's proposed wedge is a focused iPhone loop for self-directed strength training: evidence, one cue, another set, and visible progress. Privacy and uncertainty are part of that loop. Let a new user see value before any account or paywall; then test return visits, trainer referrals through deliberate text sharing, and willingness to pay for deeper comparisons. These are acquisition and revenue hypotheses, not measured results. Treadmill running is a possible next use case, requiring separate camera setup, measurement, and expert validation; it is not in this demo.
 
@@ -32,9 +32,9 @@ Plumb turns an iPhone camera into a private technique mirror: after a supported 
 
 **Does the AI watch raw video and decide what good form is?** No. Vision extracts pose points and a deterministic squat rule produces the measurement. Foundation Models may reword a measured comparison; if unavailable, reviewed templates work offline.
 
-**Can it coach live?** Post-set feedback is the first target. Live prompts are a later feature gated by tracking confidence, latency, and user testing so cues do not distract or mislead.
+**Can it coach live?** The full product aims to correct a validated issue as early as possible. The current build gives post-set feedback and a next-set reminder. In-set prompts and Watch haptics are future features gated by tracking confidence, latency, and user testing so cues do not distract or mislead.
 
-**Do I need a Watch or AirPods?** No. The iPhone is enough for the core experience. Accessories add context or audio delivery, not the underlying pose measurement.
+**Do I need a Watch or AirPods?** No for the current iPhone build. Apple Watch is central to the intended paired experience; AirPods are an optional audio route today. Neither currently contributes a form measurement to Plumb.
 
 **Why is a single-camera result trustworthy?** Its accuracy has not yet been established on a physical iPhone. Plumb links each provisional cue to named reps and withholds feedback when important joints are obscured. The team must measure agreement with annotated sets and expert review before broader claims.
 

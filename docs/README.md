@@ -1,6 +1,6 @@
 # Project documents
 
-Start with the [product brief](product/brief.md) for the agreed product, feature order, and claim boundaries. The root [README](../README.md) gives the current build snapshot; [planning.md](../planning.md) holds implementation and validation detail.
+Start with the root [README](../README.md) for the product direction and current build. The [product brief](product/brief.md) expands its feature order and claim boundaries; [planning.md](../planning.md) holds implementation and validation detail.
 
 | Area | Documents | Purpose |
 | --- | --- | --- |
@@ -10,4 +10,4 @@ Start with the [product brief](product/brief.md) for the agreed product, feature
 | Release | [Submission checklist](release/app-store-submission.md) · [Listing copy](release/listing-copy.md) · [Privacy answers](release/app-privacy-answers.md) | Final build claims and App Store work. |
 | Engineering history | [Specifications and completed plans](superpowers/) | Earlier decisions; current product status belongs in the brief and README. |
 
-**Editing rule:** distinguish implemented behavior, synthetic test evidence, physical-device validation, and future ideas. Change the product brief first when scope changes; update public release pages only when the signed candidate contains the behavior.
+**Editing rule:** distinguish implemented behavior, synthetic test evidence, physical-device validation, and future ideas. Update the README first when scope or build state changes, then align supporting documents. Update public release pages only when the signed candidate contains the behavior.
