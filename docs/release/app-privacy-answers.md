@@ -1,6 +1,6 @@
 # Plumb 1.0 App Privacy answers — source-backed draft
 
-**Audited against the 12 October 2026 iPhone source; final signed archive pending. Not entered or published in App Store Connect.** Recheck the exact signed upload before the Account Holder, Admin, or App Manager saves and publishes these answers.
+**Re-audited against the 13 October 2026 iPhone source and development-signed Release archive; App Store distribution export pending. Not entered or published in App Store Connect.** Recheck the exact uploaded build before the Account Holder, Admin, or App Manager saves and publishes these answers.
 
 ## Proposed App Store Connect selection
 
@@ -17,7 +17,7 @@ Choose **“No, we do not collect data from this app”** for the current Plumb 
 | Measured patterns per set | A list of measured patterns (for example "shallowMovements") inside each local set summary, used for the most-frequent-pattern focus | None through the app |
 | Validation timing | A local result-screen readout only when Xcode launches with `-plumb-validation`; not saved or uploaded | None through the app |
 
-The app currently has no account, analytics, advertising, support form, cloud sync, HealthKit, microphone capture, or third-party SDK. A source search found no `URLSession`, `URLRequest`, Network framework connection, web view, or upload path. The Xcode project has no package dependency or data-sharing entitlement. The unsigned archive contains the app binary and Apple asset catalog without a bundled data-collection SDK.
+The app currently has no account, analytics, advertising, support form, cloud sync, HealthKit, microphone capture, or third-party SDK. A 13 October source search found no `URLSession`, `URLRequest`, Network framework connection, web view, or upload path. The Xcode project has no package dependency or data-sharing entitlement. The new development-signed Release archive passed `verify-archive.sh`: it excludes the Debug-only demo, video-file input, and validation paths. This source and binary check cannot establish what a future App Store upload will contain.
 
 Local Application Support data may enter an iPhone backup if the person enables backup. Plumb neither operates nor accesses that backup; the [privacy policy draft](privacy-policy.md) explains this. Apple's App Privacy guidance says developers are not responsible for disclosing data collected by Apple itself. Confirm this treatment against the final Apple account configuration before publishing the label.
 

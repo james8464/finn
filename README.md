@@ -69,8 +69,8 @@ _Updated 13 October 2026._
 **Not proven yet**
 
 - Tested only in the simulator, on generated videos, on public videos (earlier versions), and, for the analysis logic, on synthetic walk-in, walk-out, occlusion and wobble traces in a Linux build of the same Swift files. No run yet on a physical iPhone across lighting, clothing, and camera angles: hands-free start and stop, spoken reps, landscape display and heat handling are untested on a device.
-- The changes of 13 October afternoon on branch `claude/adoring-wozniak-u81oz1` (hands-free, set window, silhouette search, frequent pattern, privacy manifest) have not yet been built in Xcode: the GitHub push from the cloud session was refused, so the iOS CI has not run them.
-- Four baseline generated test videos cover six clear squats, no movement, hidden legs, and covered feet. Five variants probe light, distance, tempo, and facing direction; the mirrored clip asked for a retake before the silhouette change. The recorded pose fixtures predate it. These tests are reproducible but do not establish accuracy on real people.
+- The changes of 13 October afternoon on branch `claude/adoring-wozniak-u81oz1` (hands-free, set window, silhouette search, frequent pattern, privacy manifest) have not yet passed an Xcode build or the iOS CI.
+- Sixteen generated test videos cover a clear squat, no movement, hidden legs or feet, and twelve variants of light, size, framing, resolution, blur, apparent phone movement, tempo, and facing direction. With the code before the silhouette search and set window, blur, phone shake, a very small subject, and the mirrored clip asked for a retake; they have not been replayed since. All variants reuse one source person and motion; they do not establish accuracy across real people.
 - No qualified trainer has reviewed the coaching observations.
 - Posture-change thresholds have only simulator and synthetic-pose coverage; their usefulness and false-cue rate need physical-iPhone and trainer review.
 - The silhouette check has not yet been measured on the public videos.

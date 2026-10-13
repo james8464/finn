@@ -18,6 +18,13 @@ VARIANTS = {
     "squat-far.mp4": "scale=432:576,pad=720:960:144:192:color=0xbcbec1",
     "squat-too-far.mp4": "scale=216:288,pad=720:960:252:336:color=0xbcbec1",
     "squat-slow.mp4": "setpts=1.5*PTS",
+    "squat-overexposed.mp4": "eq=brightness=0.22:contrast=0.75:saturation=0.8",
+    "squat-warm-indoor.mp4": "colorbalance=rs=0.10:gs=0.02:bs=-0.08",
+    "squat-low-resolution.mp4": "scale=180:240:flags=bilinear,scale=720:960:flags=neighbor",
+    "squat-off-center.mp4": "crop=576:960:144:0,pad=720:960:0:0:color=0xbcbec1",
+    "squat-angled-phone.mp4": "rotate=0.12:fillcolor=0xbcbec1:ow=iw:oh=ih",
+    "squat-motion-blur.mp4": "tmix=frames=3:weights=1 1 1",
+    "squat-phone-shake.mp4": "crop=600:960:x='60+50*sin(n/8)':y=0,pad=720:960:60:0:color=0xbcbec1",
 }
 
 

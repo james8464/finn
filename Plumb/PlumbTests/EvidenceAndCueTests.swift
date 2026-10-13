@@ -23,6 +23,15 @@ nonisolated struct EvidenceAndCueTests {
         #expect(EvidenceGate.assess(frames) == .reject(.lowConfidence))
     }
 
+    @Test func rejectedCoverageDoesNotDisplayThePassingThreshold() {
+        let frames = clearTrace(sampleCount: 201).enumerated().map { index, frame in
+            index < 160 ? frame : PoseFrame(time: frame.time, subjectCount: 1, joints: [:])
+        }
+        #expect(EvidenceGate.assess(frames) == .reject(.missingJoints))
+        let explanation = EvidenceGate.explanation(for: .missingJoints, frames: frames)
+        #expect(explanation.contains("79% of the set and needs 80%"))
+    }
+
     @Test func rejectsProminentBystander() {
         let frames = clearTrace(subjectCount: 2)
         #expect(EvidenceGate.assess(frames) == .reject(.multiplePeople))

@@ -88,7 +88,8 @@ nonisolated enum EvidenceGate {
             return "Another person was in view. Keep only yourself in frame and try again."
         case .missingJoints, .lowConfidence:
             let best = bestSide(frames, requirement: requirement)
-            let share = Int((100 * Double(reason == .missingJoints ? best.complete : best.confident) / Double(total)).rounded())
+            // Round down so a rejected 79.8% set never appears to meet the 80% minimum.
+            let share = 100 * (reason == .missingJoints ? best.complete : best.confident) / total
             let weakest = weakestJoint(frames, requirement: requirement, side: best.side)
             return "Plumb saw your \(jointList) clearly in \(share)% of the set and needs \(Int(EvidenceRubric.minimumCoverage * 100))%. "
                 + "Your \(weakest.role.rawValue) was hardest to see (\(weakest.share)% of frames). "

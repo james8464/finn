@@ -33,6 +33,13 @@ check_result "dim light" "squat-dim.mp4" measured 6
 check_result "farther phone" "squat-far.mp4" measured 6
 check_result "too far" "squat-too-far.mp4" retake 0
 check_result "slower tempo" "squat-slow.mp4" measured 6
+check_result "bright exposure" "squat-overexposed.mp4" measured 6
+check_result "warm indoor color" "squat-warm-indoor.mp4" measured 6
+check_result "low resolution" "squat-low-resolution.mp4" measured 6
+check_result "off-center framing" "squat-off-center.mp4" measured 6
+check_result "tilted phone" "squat-angled-phone.mp4" measured 6
+check_result "motion blur" "squat-motion-blur.mp4" retake 0
+check_result "moving phone" "squat-phone-shake.mp4" retake 0
 
 # Mirroring the source currently reduces Vision's required-joint coverage from roughly 81% to
 # 71%; the gate safely asks for a retake. Report it as a known camera-direction limitation rather
