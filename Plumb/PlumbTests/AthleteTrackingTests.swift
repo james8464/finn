@@ -82,6 +82,23 @@ nonisolated struct AthleteTrackerTests {
         #expect(tracker.select([plank], aspectRatio: 1, time: 1.3) == 0)
     }
 
+    /// A coach stands beyond the head of an athlete in a plank; Vision loses the athlete for a
+    /// moment. The coach, already known as someone else, is never taken for the athlete.
+    @Test func lockedTrackerDoesNotTakeTheCoachBesideALostAthlete() {
+        var tracker = AthleteTracker()
+        let coach = person(x: 0.22, top: 0.35, height: 0.45)
+        for tenth in 0...10 {
+            #expect(tracker.select([plank, coach], aspectRatio: 1, time: Double(tenth) / 10) == 0)
+            if tenth == 0 { tracker.lock() }
+        }
+        // The athlete is not detected; only the coach is.
+        for tenth in 11...40 {
+            #expect(tracker.select([coach], aspectRatio: 1, time: Double(tenth) / 10) == nil)
+        }
+        // The athlete is back, and the tracker follows them, not the coach.
+        #expect(tracker.select([coach, plank], aspectRatio: 1, time: 4.1) == 1)
+    }
+
     @Test func lockedTrackerDoesNotPickUpAnyoneWhenSeveralPeopleAreInView() {
         var tracker = AthleteTracker()
         _ = tracker.select([person(x: 0.5)], aspectRatio: 1, time: 0)
@@ -179,6 +196,19 @@ nonisolated struct TrackedSetEvidenceTests {
             return
         }
         #expect(reason.hasPrefix("Tracking was lost during the set."))
+    }
+
+    /// Someone in front of the athlete but a few centimetres off the line of their leg still hides them.
+    @Test func someoneInFrontSlightlyOffTheLegStillCountsAsHidingTheAthlete() {
+        let frames = trackedSquat().map { frame -> PoseFrame in
+            guard frame.time >= 4.5 && frame.time < 6.5 else { return frame }
+            return PoseFrame(time: frame.time, subjectCount: 1, joints: [:], athleteTracking: .hidden,
+                             bystanders: [person(x: 0.58)])
+        }
+        guard case .analyzed = SquatAnalyzer.analyze(frames) else {
+            Issue.record("A two-second occlusion by someone in front must not cancel the set")
+            return
+        }
     }
 
     @Test func aLostAnkleIsNamedAlone() {

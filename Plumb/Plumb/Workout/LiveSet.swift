@@ -116,7 +116,8 @@ nonisolated struct LiveSetMonitor {
     static let leftAfter: TimeInterval = 2.0
     /// After at least one rep, unseen this long (without being seen walking off) means the athlete left.
     static let hiddenAfter = EvidenceRubric.maximumOcclusionGap + 1
-    /// After at least one rep, no new rep for this long means the set is over.
+    /// After at least one rep, no new rep for this long (or the exercise's longest rep plus 2 s, if
+    /// longer) while the person is at the top means the set is over.
     static let idleAfter: TimeInterval = 8.0
 
     let definition: ExerciseDefinition
@@ -129,6 +130,8 @@ nonisolated struct LiveSetMonitor {
     /// The latest analysis measured the set so far. Right after a gap it may refuse it for a while
     /// (coverage under 80%); reps done then are counted once it measures again.
     private var analysisAccepted = false
+    /// The latest analysis ended partway through a movement: a slow rep is under way, not idleness.
+    private var midMovement = false
     private var lastAnalysisTime = -Double.infinity
     private var lastFasterCue = Int.min / 2
     private var lastShorterCue = Int.min / 2
@@ -144,8 +147,10 @@ nonisolated struct LiveSetMonitor {
         lastAnalysisTime = last.time
         var events: [LiveSetEvent] = []
         analysisAccepted = false
-        if case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: definition, viewCheck: .ignore) {
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: definition, viewCheck: .ignore)
+        if case .analyzed(let analysis) = outcome {
             analysisAccepted = true
+            midMovement = diagnostics?.unfinished ?? false
             reps = analysis.reps
             // A later analysis can merge or split a rep at the set's edge; the count never goes back.
             while countedReps < reps.count {
@@ -161,8 +166,12 @@ nonisolated struct LiveSetMonitor {
     /// True when the set should end by itself.
     func shouldStop(_ frames: [PoseFrame]) -> Bool {
         guard countedReps > 0, let last = frames.last else { return false }
-        // Idle only by a measurement that accepts the set; a refusal after a gap is not idleness.
-        if analysisAccepted, let lastRep = reps.last, last.time - lastRep.endTime >= Self.idleAfter { return true }
+        // Idle only by a measurement that accepts the set and sees the person at the top, for longer
+        // than the slowest rep may take: a refusal after a gap, or a slow rep under way, is not idleness.
+        let idleLimit = max(Self.idleAfter, definition.phases.maximumDuration + 2)
+        if analysisAccepted, !midMovement, let lastRep = reps.last, last.time - lastRep.endTime >= idleLimit {
+            return true
+        }
         // Away from the spot, not merely with a joint unclear at it (`SetWindow.spots`).
         guard let spots = SetWindow.spots(frames, requirement: definition.evidence) else { return false }
         guard let lastIndex = spots.lastIndex(where: \.isAtSpot) else { return true }

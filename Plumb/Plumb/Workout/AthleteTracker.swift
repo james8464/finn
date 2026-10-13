@@ -62,6 +62,8 @@ nonisolated struct AthleteTracker {
     private var size = 0.0
     /// Where the athlete's box was when last matched.
     private var lastBox: Box?
+    /// Where everyone else was then: a coach or partner beside the athlete is never taken for them.
+    private var lastOthers: [Box] = []
     private(set) var isLocked = false
     private var lastMatchTime = -Double.infinity
 
@@ -101,6 +103,7 @@ nonisolated struct AthleteTracker {
                     chosen = leader
                 }
                 remember(people[chosen], box: boxes[chosen], aspectRatio: aspectRatio, time: time)
+                lastOthers = boxes.indices.filter { $0 != chosen }.compactMap { boxes[$0] }
                 return chosen
             }
             if time - lastMatchTime < Self.reacquireAfter { return nil }
@@ -112,7 +115,9 @@ nonisolated struct AthleteTracker {
                 let candidates = boxes.indices.filter { boxes[$0] != nil }
                 guard candidates.count == 1, let box = boxes[candidates[0]], size > 0,
                       Self.reacquireSizeRange.contains(box.size / size),
-                      let lastBox, box.overlaps(lastBox, margin: Self.reacquireMargin) else { return nil }
+                      let lastBox, box.overlaps(lastBox, margin: Self.reacquireMargin),
+                      !lastOthers.contains(where: { hypot($0.x - box.x, $0.y - box.y) <= Self.reacquireMargin * size })
+                else { return nil }
                 forget()
                 remember(people[candidates[0]], box: box, aspectRatio: aspectRatio, time: time)
                 return candidates[0]
@@ -121,6 +126,7 @@ nonisolated struct AthleteTracker {
         }
         guard let pick = Self.mostProminent(boxes, aspectRatio: aspectRatio) else { return nil }
         remember(people[pick], box: boxes[pick], aspectRatio: aspectRatio, time: time)
+        lastOthers = boxes.indices.filter { $0 != pick }.compactMap { boxes[$0] }
         return pick
     }
 
@@ -128,6 +134,7 @@ nonisolated struct AthleteTracker {
         memory = [:]
         size = 0
         lastBox = nil
+        lastOthers = []
         lastMatchTime = -.infinity
     }
 

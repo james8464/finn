@@ -214,7 +214,9 @@ nonisolated enum EvidenceGate {
                 lastTracked = frame.time
                 occluded = false
                 missing = []
-                let points = joints.compactMap { frame.joints[$0] }
+                // The whole body, not only the measured side's joints: a person in front covers more
+                // than the line of the leg.
+                let points = frame.joints.values.filter { $0.confidence >= AthleteTracker.jointConfidence }
                 if let minX = points.map(\.x).min(), let maxX = points.map(\.x).max(),
                    let minY = points.map(\.y).min(), let maxY = points.map(\.y).max() {
                     athleteBox = (minX, maxX, minY, maxY)
@@ -234,11 +236,13 @@ nonisolated enum EvidenceGate {
         return gaps
     }
 
-    /// Someone's clear joints fall inside the athlete's box, widened by a fifth on each side.
+    /// Someone's clear joints fall inside the athlete's box, widened on each side by a quarter of the
+    /// athlete's size (a side-view body is a thin strip; a person in front is not centred on it).
     private static func overlaps(_ person: [BodyJoint: JointPoint],
                                  _ box: (minX: Double, maxX: Double, minY: Double, maxY: Double)) -> Bool {
-        let marginX = 0.2 * max(box.maxX - box.minX, 0.05)
-        let marginY = 0.2 * max(box.maxY - box.minY, 0.05)
+        let margin = 0.25 * max(hypot(box.maxX - box.minX, box.maxY - box.minY), 0.05)
+        let marginX = margin
+        let marginY = margin
         return person.values.contains { point in
             point.confidence >= AthleteTracker.jointConfidence
                 && point.x >= box.minX - marginX && point.x <= box.maxX + marginX

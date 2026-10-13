@@ -145,6 +145,23 @@ nonisolated struct LiveSetMonitorTests {
         }
     }
 
+    /// Slow reps with a pause at the top: the idle stop must not cut the set during the next rep.
+    @Test func slowRepsWithPausesAreNotIdleness() {
+        var frames: [PoseFrame] = []
+        var time = 0.0
+        while time <= 34.0 {
+            // An 8.5 s cycle: 6.5 s down and up, 2 s standing.
+            let cycle = time.truncatingRemainder(dividingBy: 8.5)
+            let phase = cycle < 6.5 ? cycle / 6.5 : 0
+            let hipY = 0.42 + 0.20 * (1 - cos(2 * .pi * phase)) / 2
+            frames.append(CaptureTraces.frame(time: time, hipY: hipY, ankleX: 0.51, legs: true))
+            time += CaptureTraces.step
+        }
+        let result = run(frames)
+        #expect(result.stoppedAt == nil)
+        #expect(result.monitor.countedReps == 4)
+    }
+
     @Test func walkingInWithoutAnyRepNeverEndsTheSet() {
         let capture = CaptureTraces.walkIn() + CaptureTraces.walkOut(from: 2.0)
         #expect(run(capture).stoppedAt == nil)
