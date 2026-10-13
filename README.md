@@ -65,7 +65,7 @@ _Updated 13 October 2026._
 **Not proven yet**
 
 - Tested only in the simulator, on generated videos, and on public videos. No run yet on a physical iPhone across lighting, clothing, and camera angles.
-- Four baseline generated test videos cover six clear squats, no movement, hidden legs, and covered feet. Five variants probe light, distance, tempo, and facing direction; the mirrored clip currently asks for a retake. These tests are reproducible but do not establish accuracy on real people.
+- Sixteen generated test videos cover a clear squat, no movement, hidden legs or feet, and twelve variants of light, size, framing, resolution, blur, apparent phone movement, tempo, and facing direction. Blur, phone shake, a very small subject, and the mirrored clip ask for a retake. All variants reuse one source person and motion; they do not establish accuracy across real people.
 - No qualified trainer has reviewed the coaching observations.
 - Posture-change thresholds have only simulator and synthetic-pose coverage; their usefulness and false-cue rate need physical-iPhone and trainer review.
 - The silhouette check has not yet been measured on the public videos.
