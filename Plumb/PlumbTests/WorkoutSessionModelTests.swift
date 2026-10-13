@@ -285,6 +285,62 @@ struct WorkoutSessionModelTests {
         #expect(model.isRecording == false)
     }
 
+    @Test func aCameraStopAfterSeveralRepsKeepsWhatWasCaptured() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        let frames = trace(reps: 6)
+        for frame in frames { source.emit(frame) }
+        try await waitUntil { model.frameCount == frames.count }
+        source.finishUnexpectedly()
+        try await waitUntil { model.stage == .result }
+        guard case .measured(let analysis, _) = model.result else {
+            Issue.record("The captured reps should be reviewed, got \(String(describing: model.result))")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+        #expect(model.endedEarly)
+    }
+
+    @Test func comparisonGapSaysWhenAnEarlierSetHadTooFewReps() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        for reps in [3, 6] {
+            await model.startPreview()
+            await model.beginSet(countdown: 0)
+            for frame in trace(reps: reps) { source.emit(frame) }
+            await model.endSet()
+        }
+        #expect(model.comparison == nil)
+        #expect(model.comparisonGap == .tooFewReps)
+    }
+
+    @Test func retakeAdviceMatchesTheReason() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        // Legs never in view: the general advice about keeping the joints visible applies.
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for index in 0...40 {
+            source.emit(PoseFrame(time: Double(index) * 0.1, subjectCount: 1, joints: [
+                .leftHip: JointPoint(x: 0.47, y: 0.42, confidence: 0.99),
+            ]))
+        }
+        await model.endSet()
+        #expect(model.retakeHint == ExerciseDefinition.squat.copy.retakeHint)
+        // Too short: the reason already says what to do.
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for index in 0...5 { source.emit(frame(time: Double(index) * 0.1, hipY: 0.42)) }
+        await model.endSet()
+        guard case .insufficientView = model.result else {
+            Issue.record("A short set must be refused")
+            return
+        }
+        #expect(model.retakeHint == nil)
+    }
+
     @Test func stableSetHasNoCue() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
