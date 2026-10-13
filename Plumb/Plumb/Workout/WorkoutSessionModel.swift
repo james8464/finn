@@ -680,6 +680,19 @@ final class WorkoutSessionModel {
         await saveToFitness(session)
     }
 
+    /// Whether deleting this session in Plumb leaves a workout in Apple Health: it was saved there,
+    /// or a save is still running. Plumb never deletes Health data; the delete dialog says so.
+    func leavesHealthWorkout(forSession id: UUID) -> Bool {
+        fitnessRecord(forSession: id) != nil || fitnessSavesInFlight.contains(id)
+    }
+
+    /// Whether deleting all local data leaves workouts in Apple Health, for the same reasons.
+    var leavesHealthWorkouts: Bool {
+        !fitnessSavesInFlight.isEmpty
+            || history.contains { leavesHealthWorkout(forSession: $0.id) }
+            || pendingSessions.keys.contains { leavesHealthWorkout(forSession: $0) }
+    }
+
     private func saveToFitness(_ session: WorkoutSessionSummary) async {
         let id = session.id
         guard let fitness, savesToFitness,

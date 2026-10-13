@@ -132,14 +132,25 @@ struct ContentView: View {
                 deleteCandidate = nil
             }
         } message: {
-            Text("Its measured set summaries will be removed from this iPhone.")
+            // Plumb never deletes Health data: say so where the person decides.
+            Text(deleteCandidateLeavesHealthWorkout
+                 ? "Its measured set summaries will be removed from this iPhone. The workout saved to Apple Health stays there; you can delete it in the Health app."
+                 : "Its measured set summaries will be removed from this iPhone.")
         }
         .alert("Delete all local data?", isPresented: $deleteAllRequested) {
             Button("Delete all data", role: .destructive) { model.deleteAllData() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This removes saved sessions and any recovered history backups from this iPhone.")
+            Text(model.leavesHealthWorkouts
+                 ? "This removes saved sessions and any recovered history backups from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
+                 : "This removes saved sessions and any recovered history backups from this iPhone.")
         }
+    }
+
+    /// Whether the session about to be deleted has a workout in Apple Health, which stays there.
+    private var deleteCandidateLeavesHealthWorkout: Bool {
+        guard let id = deleteCandidate else { return false }
+        return model.leavesHealthWorkout(forSession: id)
     }
 
     private var setup: some View {

@@ -275,6 +275,59 @@ struct FitnessSessionTests {
         #expect(setup.fitness.saved.last?.setCount == 1)
     }
 
+    /// Plumb never deletes Health data, so the delete dialogs say a saved workout stays in Health:
+    /// only for a session saved there (also after reopening), never for one that is not.
+    @Test func deletingSaysASavedWorkoutStaysInHealth() async throws {
+        let setup = try Setup(savesToFitness: true)
+        setup.fitness.failures = [CocoaError(.fileWriteUnknown)]
+        try await setup.measureASet()
+        let unsaved = try #require(setup.model.currentSession?.id)
+        await setup.model.finishSession()
+        #expect(setup.model.fitnessSave?.status == .failed)
+        #expect(!setup.model.leavesHealthWorkout(forSession: unsaved))
+        #expect(!setup.model.leavesHealthWorkouts)
+
+        setup.clock.advance(by: 60)
+        try await setup.measureASet()
+        let saved = try #require(setup.model.currentSession?.id)
+        await setup.model.finishSession()
+        #expect(setup.model.leavesHealthWorkout(forSession: saved))
+        #expect(!setup.model.leavesHealthWorkout(forSession: unsaved))
+        #expect(setup.model.leavesHealthWorkouts)
+
+        let reopened = WorkoutSessionModel(source: TestSource(), store: setup.store,
+                                           preferences: setup.preferences, fitness: setup.fitness)
+        #expect(reopened.leavesHealthWorkout(forSession: saved))
+        #expect(!reopened.leavesHealthWorkout(forSession: unsaved))
+        #expect(reopened.leavesHealthWorkouts)
+
+        // Once the saved session is deleted, deleting the rest leaves nothing more in Health.
+        setup.model.deleteHistory(id: saved)
+        #expect(!setup.model.leavesHealthWorkouts)
+        #expect(setup.model.history.map(\.id) == [unsaved])
+        #expect(setup.fitness.saved.map(\.sessionID) == [saved])
+    }
+
+    /// A save still running when the session is deleted finishes in Health: the dialog says so,
+    /// and the deleted session is not written back to history.
+    @Test func aSaveStillRunningCountsAsAWorkoutThatStays() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let id = try #require(setup.model.currentSession?.id)
+        setup.fitness.holdsSaves = true
+        let done = Task { await setup.model.finishSession() }
+        try await waitUntil { setup.fitness.saveAttempts == 1 }
+        #expect(setup.model.leavesHealthWorkout(forSession: id))
+        #expect(setup.model.leavesHealthWorkouts)
+
+        setup.model.deleteHistory(id: id)
+        setup.fitness.releaseSaves()
+        await done.value
+        #expect(setup.fitness.saved.map(\.sessionID) == [id])
+        #expect(try setup.store.load().isEmpty)
+        #expect(setup.model.history.isEmpty)
+    }
+
     @Test func aSessionContinuesUpToTheLongestBreak() {
         let start = Date(timeIntervalSince1970: 1_800_000_000)
         let empty = WorkoutSessionSummary(id: UUID(), startedAt: start, sets: [])
