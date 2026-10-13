@@ -3,15 +3,15 @@
 **Published URL:** https://james8464.github.io/hackathon-project/support.html
 
 - **Public contact:** jamesdurup@icloud.com
-**Supported release:** iPhone, iOS 27 or later, bodyweight squat from a side view.
+- **Current iPhone build:** iOS 27 or later; side-view bodyweight squat, push-up, static lunge, and stiff-leg deadlift. Physical-device and expert validation remain open. Treadmill running is planned, not available.
 
-## Set up a squat review
+## Set up an exercise review
 
-Place the iPhone upright at about hip height, a few steps away. Keep your head and feet visible, turn sideways, and use even lighting. Tap **Set up camera**, allow camera access, then **Start set**. Tap **Stop set** after your bodyweight squats. If Plumb cannot see enough of the movement, move the phone back and retake the set.
+Place the iPhone upright at about hip height, a few steps away. Keep your head and feet visible, turn sideways, and use even lighting. Tap **Set up camera**, allow camera access, then **Start set**. Tap **Stop set** after the set. If Plumb cannot see enough of the movement, move the phone back and retake the set.
 
 ## What the result means
 
-The rep count and relative range are camera-based estimates from one view. A cue is shown only when Plumb's current evidence rules support it. Plumb does not yet verify the camera angle automatically, so follow the side-view setup even if the app shows a measured result. A shorter or longer camera-measured range does not by itself mean a set was safer, better, or worse. Stop exercising if you feel pain and seek qualified advice where appropriate.
+The rep count and relative range are camera-based estimates from one view. A cue is shown only when Plumb's current evidence rules support it. Plumb may suggest turning the phone or refuse a clearly frontal view, but that check is not a guarantee that every measured view is suitable. Follow the side-view setup. A shorter or longer camera-measured range does not by itself mean a set was safer, better, or worse. Stop exercising if you feel pain and seek qualified advice where appropriate.
 
 Plumb needs at least four measured reps before it can show an observation. A measured set may still have no cue when there is no clear, camera-supported pattern.
 
@@ -25,7 +25,7 @@ Plumb does not save a workout movie. Set summaries are saved in the app's local 
 
 - **Camera denied:** open iOS Settings for Plumb and allow Camera.
 - **Camera unavailable:** close another app using the camera and try again.
-- **No measured result:** improve lighting, keep only one person in view, and keep hip, knee, and ankle visible.
+- **No measured result:** improve lighting, keep only one person in view, and keep the joints needed for your chosen exercise visible.
 - **History temporarily unavailable or deletion unfinished:** unlock your iPhone and tap **Try again**. If a result says it could not confirm saving, keep Plumb open until retry succeeds; unsaved work and pending deletion retries are lost if the app terminates. **Recover history** appears only for a confirmed damaged file and moves that file to a local backup.
 - **Apple Intelligence note unavailable:** the app shows a reviewed comparison note on unsupported or unready devices.
 

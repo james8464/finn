@@ -2,18 +2,18 @@
 
 **Published URL:** https://james8464.github.io/hackathon-project/privacy.html
 
-**Effective date:** 12 October 2026. This policy describes the current iPhone release candidate; recheck the final signed upload before App Store submission.
+**Effective date:** 13 October 2026. This policy describes the current iPhone release candidate; recheck the final signed upload before App Store submission.
 
 - **Publisher:** James Durup
 - **Contact:** jamesdurup@icloud.com
 
-Plumb is an iPhone workout companion for reviewing a bodyweight squat from a side view. It works without an account.
+Plumb is an iPhone workout companion for reviewing supported exercises from a side view. It works without an account.
 
 ## Camera and workout data
 
 With your permission, Plumb uses the iPhone camera during a set to estimate body position and count camera-visible repetitions. Camera frames are processed on your device. Plumb does not record a movie, save camera frames, or upload them to a Plumb server. The temporary pose trace is held in memory for the current result and cleared when you finish the session or start a new capture.
 
-Plumb saves derived set summaries on your iPhone: session and set identifiers, date, squat rubric version, camera side, rep timing and relative range, analysis confidence, a selected observation if any, and your response to that observation. These summaries are stored in the app's local Application Support area. They are not automatically sent to us or shared with other users. If you tap **Share summary** after a measured set, the iOS Share Sheet lets you choose where to send a text summary of the rep count and any observation you have not marked irrelevant. When Plumb can compare two compatible sets, the text also states the direction of the camera-measured range change. It contains no video or camera frames.
+Plumb saves derived set summaries on your iPhone: session and set identifiers, date, exercise and rubric version, camera side, rep timing and relative range, analysis confidence, a selected observation if any, and your response to that observation. These summaries are stored in the app's local Application Support area. They are not automatically sent to us or shared with other users. If you tap **Share summary** after a measured set, the iOS Share Sheet lets you choose where to send a text summary of the rep count and any observation you have not marked irrelevant. When Plumb can compare two compatible sets, the text also states the direction of the camera-measured range change. It contains no video or camera frames.
 
 iOS may include local Application Support data in your device backup, including iCloud Backup if you enable it. Plumb does not operate or access that backup. See Apple's [file-system guidance](https://developer.apple.com/documentation/foundation/using-the-file-system-effectively).
 

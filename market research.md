@@ -1,6 +1,6 @@
 # Plumb — market and competitor research
 
-**Research snapshot: 10 October 2026.** This is a source-backed map of alternatives and a validation plan, not a proven market-size estimate. Product claims below are based on official product or support pages as viewed for this reset; features and prices can change. The new Plumb concept has not yet been tested with customers.
+**Research snapshot: 10 October 2026; product scope updated 13 October.** This is a source-backed map of alternatives and a validation plan, not a proven market-size estimate. Product claims below are based on official product or support pages as viewed for this reset; features and prices can change. The new Plumb concept has not yet been tested with customers.
 
 ## 1. The job to be done
 
@@ -47,15 +47,17 @@ Human coaching can consider pain, goals, equipment, fatigue, prior history, and 
 
 ## 4. Positioning hypothesis
 
-**Category:** technique companion for independent strength training.
+**Category:** movement-feedback companion, starting with independent strength training.
 
-**For:** people who practice strength exercises alone and want a useful observation from their own set.
+**For:** first, people who practice strength exercises alone and want a useful observation from their own set. Treadmill runners are a separate prospective segment to research, with a continuous-session job rather than a rep-by-rep set.
 
 **Plumb provides:** a camera-based, evidence-linked cue and a way to compare the next set.
 
 **Unlike:** a tutorial library, a raw video recorder, or a generic AI chat response, Plumb begins with measured motion from the user's actual set and can decline to comment when the camera cannot support a claim.
 
 This is a proposed wedge, not a statement that competitors lack evidence, privacy, or technique features. The best position may change after interviewing users and trainers.
+
+**Running expansion test:** Interview treadmill runners about phone placement, filming comfort, and what they already get from a watch or gait app. Observe whether a side or rear phone view is safe and consistent in real gyms. Compare any proposed observation with a qualified coach's judgment and the actual camera evidence before describing Plumb as a running coach. Ochy remains a relevant alternative; Plumb has no running analysis today.
 
 ### Reasons someone might choose Plumb
 

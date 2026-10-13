@@ -1,16 +1,16 @@
 # Why Plumb
 
-**Updated 11 October 2026 — product rationale, not a claim of proven demand.** Plumb is an iPhone-first workout-technique companion. An initial squat flow and local comparison now exist, but real-camera and expert validation are still pending.
+**Updated 13 October 2026 — product rationale, not a claim of proven demand.** Plumb is an iPhone-first movement-feedback companion. Four side-view strength flows and local comparison exist; treadmill running is an intended expansion. Real-camera and expert validation are still pending.
 
 ## 1. The problem worth solving
 
 Independent strength training has a feedback gap. People can follow an exercise video, count their sets, and log weight, but they often cannot tell whether their own movement changed during the set. A phone recording contains the evidence, yet the person must frame it, replay it, interpret it, and decide what to try next. A human trainer can provide richer feedback but is not present at every session.
 
-The narrow job for Plumb is therefore **turn a recorded set into one useful next-set experiment**. Its first value is clarity and continuity, not a claim to know the single correct technique for every body.
+The narrow first job for Plumb is therefore **turn a live-analyzed set into one useful next-set experiment**. The app does not save that video. Its first value is clarity and continuity, not a claim to know the single correct technique for every body.
 
 ## 2. Why this approach
 
-An iPhone camera can observe a person's visible movement without special gym hardware. Apple Vision provides body joint locations and confidence values; AVFoundation supplies frames. A constrained exercise engine can count reps and compare patterns within a set. This is more defensible than asking a language model to judge a raw video and invent coaching advice. Apple Foundation Models can later translate a validated observation into supportive wording, while a reviewed template works when the model is unavailable.
+An iPhone camera can observe a person's visible movement without special gym hardware. Apple Vision provides body joint locations and confidence values; AVFoundation supplies frames. A constrained exercise engine can count reps and compare patterns within a set. This is more defensible than asking a language model to judge a raw video and invent coaching advice. The current app can ask Apple Foundation Models to reword a validated comparison on eligible devices, while a reviewed template works when the model is unavailable.
 
 The product loop is designed for behavior change: **see a signal → receive one cue → try another set → compare**. A list of ten flaws is easy to ignore; one cue with linked evidence can be tested immediately. The user's ability to dismiss a cue also helps distinguish a relevant suggestion from a noisy model output.
 
@@ -26,7 +26,7 @@ This ecosystem story is credible only if the first iPhone-only loop works. Plumb
 
 ## 4. What makes Plumb distinct enough to test
 
-The market already has strength classes, rep tracking, specialist camera feedback, running gait analysis, and coach video review. Plumb's proposed position is **personal, evidence-linked technique feedback for short strength sets, available from an iPhone without new hardware**. Its restraint is part of the product: exercise-specific support, one cue, low-confidence abstention, and visible comparison with the next set.
+The market already has strength classes, rep tracking, specialist camera feedback, running gait analysis, and coach video review. Plumb's first position to test is **personal, evidence-linked movement feedback for short strength sets, available from an iPhone without new hardware**. Treadmill running could extend that idea to a continuous session, but needs its own gait rubric, safe setup, and expert validation. Its restraint is part of the product: exercise-specific support, one cue, low-confidence abstention, and visible comparison with the next set.
 
 This is a positioning hypothesis, not an uncontested category. Competitor features change; [market research](market%20research.md) records current primary-source comparisons and questions that need user interviews.
 

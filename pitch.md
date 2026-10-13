@@ -14,7 +14,7 @@ Plumb turns an iPhone camera into a private technique mirror: after a supported 
 
 **The Apple ecosystem (1:25–1:55).** The iPhone camera is the core sensor. Vision estimates pose and corroborates sampled joints against a person mask on device. On eligible iPhones, Foundation Models can reword a measured set-to-set comparison, with a deterministic fallback; the model does not invent the measurement. The current app can speak a post-set observation through the system audio route, including paired AirPods. A Watch companion is the next prototype for workout context and discreet controls; it is not in this build.
 
-**Why Plumb (1:55–2:25).** Existing products offer classes, hardware-based form feedback, running analysis, or coach video review. Plumb's proposed wedge is a focused iPhone loop for self-directed strength training: evidence, one cue, another set, and visible progress. Privacy and uncertainty are part of that loop. Let a new user see value before any account or paywall; then test return visits, trainer referrals through deliberate text sharing, and willingness to pay for deeper comparisons. These are acquisition and revenue hypotheses, not measured results.
+**Why Plumb (1:55–2:25).** Existing products offer classes, hardware-based form feedback, running analysis, or coach video review. Plumb's proposed wedge is a focused iPhone loop for self-directed strength training: evidence, one cue, another set, and visible progress. Privacy and uncertainty are part of that loop. Let a new user see value before any account or paywall; then test return visits, trainer referrals through deliberate text sharing, and willingness to pay for deeper comparisons. These are acquisition and revenue hypotheses, not measured results. Treadmill running is a possible next use case, requiring separate camera setup, measurement, and expert validation; it is not in this demo.
 
 **The close (2:25–3:00).** Better form is not a single score. It is noticing one thing, changing it, and seeing the result. Plumb helps you find your line, one set at a time.
 
@@ -45,7 +45,7 @@ Plumb turns an iPhone camera into a private technique mirror: after a supported 
 ## Claims to avoid until proven
 
 - “Prevents injuries” or “guarantees correct form”
-- “Works for any exercise” or “any angle”: the app has four side-view rubrics (squat, push-up, static lunge, stiff-leg deadlift), none measured on real sets yet, and automatic exercise recognition needs a model the team has not trained
+- “Works for any exercise,” “running now,” or “any angle”: the app has four side-view rubrics (squat, push-up, static lunge, stiff-leg deadlift), none measured on real sets yet, and automatic exercise recognition needs a model the team has not trained
 - “Apple Watch or AirPods can see your form”
 - “AI personal trainer” without explaining the limited, evidence-based scope
 - “Private” if raw footage is uploaded or retained without explicit consent
