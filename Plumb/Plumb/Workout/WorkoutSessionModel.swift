@@ -81,6 +81,11 @@ final class WorkoutSessionModel {
     @ObservationIgnored private var pendingDeleteIDs: Set<UUID> = []
     @ObservationIgnored private var pendingDeleteAll = false
     @ObservationIgnored private var stopTappedAt: ContinuousClock.Instant?
+    @ObservationIgnored private let announcer: (any LiveAnnouncing)?
+    @ObservationIgnored private var startReadiness = StartReadiness()
+    @ObservationIgnored private var liveMonitor: LiveSetMonitor?
+    /// A hands-free start or stop on its way; at most one at a time.
+    @ObservationIgnored private var handsFreeTask: Task<Void, Never>?
 
     private(set) var stage: WorkoutStage = .ready
     /// The exercise chosen on the setup screen. A capture keeps the exercise it started with.
@@ -148,13 +153,42 @@ final class WorkoutSessionModel {
     var previewFeed: PreviewFeed? { source.previewFeed }
     /// The newest pose while the camera screen is open, for the live skeleton.
     private(set) var livePose: PoseFrame?
+    /// Whether the set starts by itself once the athlete holds still in position, and ends when they
+    /// walk away or stop moving after their reps. The Start and Stop buttons keep working.
+    var handsFree: Bool {
+        didSet {
+            preferences.handsFree = handsFree
+            if !handsFree {
+                startReadiness.reset()
+                handsFreeProgress = 0
+            }
+        }
+    }
+    /// Whether the countdown, each rep, and live observations are said aloud (through AirPods or
+    /// other headphones when connected).
+    var speaksLive: Bool {
+        didSet { preferences.speaksLive = speaksLive }
+    }
+    /// Countdown of a set started hands-free, in seconds.
+    @ObservationIgnored var handsFreeCountdown = 3
+    /// While framing hands-free: how far the athlete is through holding position, 0 to 1.
+    private(set) var handsFreeProgress = 0.0
+    /// Reps counted so far in the running set.
+    private(set) var liveRepCount = 0
+    /// The latest live observation of the running set, such as a rep faster than the first ones.
+    private(set) var liveCaption: String?
+    /// The latest set was ended by Plumb (the athlete walked away or stopped), not by a tap.
+    private(set) var endedHandsFree = false
+    /// Receives each live event of a running set, for a connected Apple Watch.
+    @ObservationIgnored var onLiveEvent: ((LiveSetEvent, ExerciseKind) -> Void)?
 
     init(source: any PoseStreaming, store: (any SessionStoring)? = nil,
          narrator: ComparisonNarrator? = nil,
          exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
          angleClassifier: (any AngleWindowClassifying)? = CoreMLAngleClassifier.bundled(),
          ruleClassifier: (any AngleWindowClassifying)? = AngleRuleClassifier(),
-         preferences: PlumbPreferences = .standard) {
+         preferences: PlumbPreferences = .standard,
+         announcer: (any LiveAnnouncing)? = nil) {
         self.source = source
         self.store = store
         self.narrator = narrator ?? ComparisonNarrator()
@@ -162,6 +196,9 @@ final class WorkoutSessionModel {
         self.angleClassifier = angleClassifier
         self.ruleClassifier = ruleClassifier
         self.preferences = preferences
+        self.announcer = announcer
+        self.handsFree = preferences.handsFree
+        self.speaksLive = preferences.speaksLive
         self.recognizesExercise = preferences.recognizesExercise
         self.usesTrainedModel = preferences.usesTrainedModel
         self.checksCameraAngle = preferences.checksCameraAngle
@@ -196,6 +233,7 @@ final class WorkoutSessionModel {
         framingStatus = .checking
         framingWatchdog?.cancel()
         framingWatchdog = nil
+        resetLiveSet()
         source.setCameraAngleEstimation(checksCameraAngle)
         source.configure(for: captureExercise)
         do {
@@ -230,11 +268,13 @@ final class WorkoutSessionModel {
                         if self.previewFrames.count > 5 { self.previewFrames.removeFirst() }
                         self.lastPreviewFrameAt = .now
                         self.updateFramingStatus(with: frame)
+                        self.updateHandsFreeStart(with: frame)
                     }
                     if (self.stage == .capturing || (self.stage == .analyzing && self.isStopping)) &&
                         self.frames.count < 1_800 {
                         self.frames.append(frame)
                         self.frameCount = self.frames.count
+                        if self.stage == .capturing { self.followLiveSet() }
                     }
                 }
                 self.livePose = nil
@@ -244,6 +284,7 @@ final class WorkoutSessionModel {
                 if self.stage == .capturing && self.source.endedAtLimit {
                     self.stage = .analyzing
                     self.completeAnalysis()
+                    self.announceResult()
                 } else if self.stage == .capturing {
                     self.result = .interrupted
                     self.stage = .result
@@ -269,14 +310,20 @@ final class WorkoutSessionModel {
         frameCount = 0
         for remaining in stride(from: max(0, countdown), through: 1, by: -1) {
             stage = .countdown(remaining)
+            say("\(remaining)")
             do { try await Task.sleep(for: .seconds(1)) } catch { return }
             guard stage == .countdown(remaining) else { return }
         }
         guard stage == .framing || stage == .countdown(1) else { return }
         await source.prepareForSet()
         guard stage == .framing || stage == .countdown(1) else { return }
+        liveMonitor = LiveSetMonitor(definition: captureExercise.definition)
+        liveRepCount = 0
+        liveCaption = nil
+        endedHandsFree = false
         captureStartedAt = .now
         stage = .capturing
+        if countdown > 0 { say("Go") }
     }
 
     func endSet(tappedAt: ContinuousClock.Instant = ContinuousClock.now) async {
@@ -289,6 +336,7 @@ final class WorkoutSessionModel {
         collectionTask = nil
         guard stage == .analyzing else { return }
         completeAnalysis()
+        announceResult()
     }
 
     func dismissCue() {
@@ -362,6 +410,74 @@ final class WorkoutSessionModel {
         }
         unclearJoint = framingStatus == .adjustPosition
             ? EvidenceGate.unclearJoint(previewFrames, requirement: definition.evidence) : nil
+    }
+
+    /// Starts the countdown once the athlete has held still in position (`StartReadiness`).
+    private func updateHandsFreeStart(with frame: PoseFrame) {
+        guard handsFree, handsFreeTask == nil else { return }
+        let progress = startReadiness.update(with: frame, requirement: captureExercise.definition.evidence)
+        let placed = framingStatus == .landmarksVisible
+        handsFreeProgress = placed ? progress : 0
+        guard placed, startReadiness.isReady else { return }
+        startReadiness.reset()
+        handsFreeTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            await self.beginSet(countdown: self.handsFreeCountdown)
+            self.handsFreeTask = nil
+            self.handsFreeProgress = 0
+        }
+    }
+
+    /// Counts reps while the set runs, says them and any live observation, and ends a hands-free
+    /// set once the athlete walks away or stops moving after their reps.
+    private func followLiveSet() {
+        guard var monitor = liveMonitor else { return }
+        let events = monitor.update(with: frames)
+        liveMonitor = monitor
+        let definition = monitor.definition
+        for event in events {
+            if case .repCounted(let count) = event {
+                liveRepCount = count
+            } else {
+                liveCaption = event.caption(for: definition)
+            }
+            say(event.spoken(for: definition))
+            onLiveEvent?(event, definition.kind)
+        }
+        guard handsFree, handsFreeTask == nil, monitor.isOver else { return }
+        endedHandsFree = true
+        handsFreeTask = Task { @MainActor [weak self] in
+            await self?.endSet()
+            self?.handsFreeTask = nil
+        }
+    }
+
+    /// After a set ends, says its outcome: the person may be several steps from the screen.
+    private func announceResult() {
+        switch result {
+        case .measured(let analysis, _):
+            say(analysis.reps.count == 1 ? "1 rep measured" : "\(analysis.reps.count) reps measured")
+        case .insufficientView, .failed:
+            say("Plumb couldn’t measure this set. The reason is on screen.")
+        case .interrupted, nil:
+            break
+        }
+    }
+
+    private func say(_ text: String) {
+        guard speaksLive else { return }
+        announcer?.announce(text)
+    }
+
+    private func resetLiveSet() {
+        handsFreeTask?.cancel()
+        handsFreeTask = nil
+        startReadiness.reset()
+        handsFreeProgress = 0
+        liveMonitor = nil
+        liveRepCount = 0
+        liveCaption = nil
+        endedHandsFree = false
     }
 
     private func recognizeExercise(in frames: [PoseFrame]) -> ExerciseRecognition {
@@ -493,6 +609,7 @@ final class WorkoutSessionModel {
         stage = .ready
         framingWatchdog?.cancel()
         framingWatchdog = nil
+        resetLiveSet()
         await source.stop()
         await collectionTask?.value
         collectionTask = nil

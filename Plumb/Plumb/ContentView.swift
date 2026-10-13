@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var observationSpeaker = ObservationSpeaker()
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
+    /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
+    @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 88
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -44,11 +46,13 @@ struct ContentView: View {
     @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore(),
                     narrator: ComparisonNarrator? = nil,
                     exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
-                    preferences: PlumbPreferences = .standard) {
+                    preferences: PlumbPreferences = .standard,
+                    announcer: (any LiveAnnouncing)? = nil) {
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
                                                          narrator: narrator,
                                                          exerciseClassifier: exerciseClassifier,
-                                                         preferences: preferences))
+                                                         preferences: preferences,
+                                                         announcer: announcer))
     }
 
     var body: some View {
@@ -321,6 +325,24 @@ struct ContentView: View {
                     .accessibilityIdentifier("options.checkCameraAngle")
                     Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. It only refuses a set when you clearly face the camera, or face away, for several seconds. If it asks you to turn while your side already faces the camera, switch this off.")
                 }
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Hands-free").font(.headline).accessibilityAddTraits(.isHeader)
+                    Toggle("Start and stop sets for me", isOn: Binding(
+                        get: { model.handsFree },
+                        set: { model.handsFree = $0 }
+                    ))
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.handsFree")
+                    Text("Once you hold still in position for a moment, Plumb counts down and starts the set. It ends the set when you walk back to your iPhone, or when you stop moving after your reps. Start set and Stop set still work.")
+                    Toggle("Say reps aloud", isOn: Binding(
+                        get: { model.speaksLive },
+                        set: { model.speaksLive = $0 }
+                    ))
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.speaksLive")
+                    Text("Plumb says the countdown, each counted rep, and when a rep is clearly faster or shorter than your first reps of the set. It uses your AirPods or other headphones when they are connected, otherwise the iPhone speaker.")
+                }
             }
             .font(.body)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -386,6 +408,9 @@ struct ContentView: View {
                     Text("\u{00A0}\(captureCopy.framingPrompt)\u{00A0}")
                         .multilineTextAlignment(.center)
                         .accessibilityLabel(captureCopy.framingPrompt)
+                    if model.handsFree {
+                        handsFreeHint
+                    }
                     Button { Task { await model.beginSet() } } label: {
                         Text("Start set").foregroundStyle(.black)
                     }
@@ -393,6 +418,16 @@ struct ContentView: View {
                         .controlSize(.large)
                         .tint(.white)
                 } else if model.stage == .capturing {
+                    liveCount
+                    if let caption = model.liveCaption {
+                        Text(caption)
+                            .font(.subheadline.weight(.semibold))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(.black.opacity(0.68), in: Capsule())
+                            .accessibilityIdentifier("capture.liveCaption")
+                    }
                     if let startedAt = model.captureStartedAt {
                         TimelineView(.periodic(from: startedAt, by: 1)) { timeline in
                             let seconds = max(0, Int(timeline.date.timeIntervalSince(startedAt)))
@@ -434,6 +469,41 @@ struct ContentView: View {
             .padding(24)
         }
         .toolbar(.hidden, for: .navigationBar)
+    }
+
+    /// While framing hands-free: what to do, and how long until the set starts by itself.
+    private var handsFreeHint: some View {
+        let holding = model.framingStatus == .landmarksVisible && model.handsFreeProgress > 0
+        return VStack(spacing: 8) {
+            Text(holding ? "Hold still. The set starts by itself."
+                         : "Go to your spot. The set starts once you hold still.")
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+            ProgressView(value: model.handsFreeProgress)
+                .tint(.white)
+                .frame(maxWidth: 180)
+                .accessibilityHidden(true)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("capture.handsFree")
+    }
+
+    /// The reps counted so far, readable from where the person stands.
+    private var liveCount: some View {
+        VStack(spacing: 0) {
+            Text("\(model.liveRepCount)")
+                .font(.system(size: liveCountSize, weight: .semibold, design: .rounded))
+                .monospacedDigit()
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .contentTransition(.numericText())
+            Text(model.liveRepCount == 1 ? "rep" : "reps")
+                .font(.headline)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Reps counted")
+        .accessibilityValue("\(model.liveRepCount)")
+        .accessibilityIdentifier("capture.liveReps")
     }
 
     private var status: some View {
@@ -488,6 +558,12 @@ struct ContentView: View {
                 }
                 Text(resultTitle)
                     .font(.largeTitle.bold())
+                if model.endedHandsFree {
+                    Text("Plumb ended the set when you walked away or stopped moving.")
+                        .font(.footnote)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                        .accessibilityIdentifier("result.endedHandsFree")
+                }
                 if let result = model.result {
                     switch result {
                     case .measured(let analysis, let cue):

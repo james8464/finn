@@ -34,7 +34,11 @@ struct PlumbApp: App {
                             exerciseClassifier: ProcessInfo.processInfo.arguments
                                 .contains("-plumb-ui-demo-recognition") ? DemoExerciseClassifier() : nil,
                             preferences: PlumbPreferences(defaults: UserDefaults(
-                                suiteName: "PlumbDemo-\(UUID().uuidString)") ?? .standard))
+                                suiteName: "PlumbDemo-\(UUID().uuidString)") ?? .standard,
+                                handsFreeByDefault: ProcessInfo.processInfo.arguments
+                                    .contains("-plumb-ui-hands-free")),
+                            announcer: ProcessInfo.processInfo.arguments
+                                .contains("-plumb-ui-hands-free") ? LiveAnnouncer() : nil)
             } else if let path = Self.argument(after: "-plumb-video-file") {
                 ContentView(source: VideoFilePoseSource(url: URL(fileURLWithPath: path),
                                                         recordedPoses: Self.recordedPoses()),
@@ -42,10 +46,10 @@ struct PlumbApp: App {
                                 .appending(path: "PlumbVideo-\(UUID().uuidString)", directoryHint: .isDirectory)
                                 .appending(path: "sessions.json")))
             } else {
-                ContentView(source: CameraPoseSource.live())
+                ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer())
             }
             #else
-            ContentView(source: CameraPoseSource.live())
+            ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer())
             #endif
         }
     }

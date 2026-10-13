@@ -80,6 +80,76 @@ struct WorkoutSessionModelTests {
         #expect(model.history.first?.sets.count == 1)
     }
 
+    /// The phone stands a few steps away: the set starts once the athlete holds still in position
+    /// and ends once they walk back, and every rep is said aloud.
+    @Test func handsFreeSetStartsInPositionAndEndsWhenTheAthleteWalksAway() async throws {
+        let source = TestPoseSource()
+        let announcer = RecordingAnnouncer()
+        let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbHandsFree-\(UUID())")!,
+                                           handsFreeByDefault: true)
+        let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+        model.handsFreeCountdown = 0
+        #expect(model.handsFree)
+        await model.startPreview()
+        for frame in CaptureTraces.squats(reps: 0, from: 0, standing: 2.0) { source.emit(frame) }
+        try await waitUntil { model.stage == .capturing }
+
+        // The camera keeps sending frames after the athlete leaves; the set ends about 2 s later.
+        for frame in CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0, duration: 4.0) {
+            source.emit(frame)
+        }
+        try await waitUntil { model.stage == .result }
+        guard case .measured(let analysis, _) = model.result else {
+            Issue.record("Expected a measured hands-free set, got \(String(describing: model.result))")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+        #expect(model.endedHandsFree)
+        #expect(model.liveRepCount == 6)
+        #expect(announcer.phrases.filter { Int($0) != nil } == ["1", "2", "3", "4", "5", "6"])
+        #expect(announcer.phrases.last == "6 reps measured")
+    }
+
+    @Test func handsFreeOffWaitsForTheStartButton() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        #expect(!model.handsFree)
+        await model.startPreview()
+        for frame in CaptureTraces.squats(reps: 0, from: 0, standing: 3.0) { source.emit(frame) }
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(model.stage == .framing)
+        #expect(model.handsFreeProgress == 0)
+        await model.cancel()
+    }
+
+    @Test func liveCountIsSaidOnlyWhenSpeechIsOn() async throws {
+        let source = TestPoseSource()
+        let announcer = RecordingAnnouncer()
+        let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbQuiet-\(UUID())")!)
+        preferences.speaksLive = false
+        let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        let frames = trace(reps: 6)
+        for frame in frames { source.emit(frame) }
+        try await waitUntil { model.frameCount == frames.count }
+        await model.endSet()
+        // The live count may still be one rep behind when Stop is tapped right after the last rep.
+        #expect((5...6).contains(model.liveRepCount))
+        #expect(announcer.phrases.isEmpty)
+    }
+
+    private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(5)) async throws {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while !condition() {
+            guard ContinuousClock.now < deadline else {
+                Issue.record("Timed out waiting for the session")
+                return
+            }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
     @Test func stopTimingUsesTapInstantAndClearsForNextSet() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
@@ -467,4 +537,10 @@ private final class TestPoseSource: PoseStreaming {
         continuation?.finish()
         continuation = nil
     }
+}
+
+@MainActor
+private final class RecordingAnnouncer: LiveAnnouncing {
+    private(set) var phrases: [String] = []
+    func announce(_ text: String) { phrases.append(text) }
 }

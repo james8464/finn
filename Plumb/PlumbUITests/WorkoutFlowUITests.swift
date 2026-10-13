@@ -22,6 +22,24 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertGreaterThan(nextSet.frame.midY, app.frame.height * 0.7)
     }
 
+    /// Hands-free capture explains how the set starts and shows the reps counted so far.
+    @MainActor
+    func testHandsFreeShowsHintAndCountsRepsLive() {
+        let app = XCUIApplication()
+        app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-hands-free"]
+        app.launch()
+        app.buttons["Set up camera"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["capture.handsFree"].waitForExistence(timeout: 5))
+        app.buttons["Start set"].tap()
+        let reps = app.descendants(matching: .any)["capture.liveReps"]
+        XCTAssertTrue(reps.waitForExistence(timeout: 6))
+        let counted = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value != %@", "0"), object: reps)
+        XCTAssertEqual(XCTWaiter().wait(for: [counted], timeout: 8), .completed)
+        capture(app, name: "Live rep count")
+        app.buttons["Stop set"].tap()
+        XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+    }
+
     @MainActor
     func testCaptureShowsElapsedTimeAndResetsForNextSet() {
         let app = XCUIApplication()

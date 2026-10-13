@@ -97,6 +97,12 @@ nonisolated struct ExerciseCopy: Equatable, Sendable {
     let rangeExplanation: String
     /// Rep accessibility description of the range value.
     let rangeAccessibilityName: String
+
+    /// Said during a set when a rep's range is clearly shorter than the first reps, such as
+    /// "Range is shorter" or "Elbow bend is smaller".
+    var liveShorterCue: String {
+        rangeNoun.prefix(1).uppercased() + rangeNoun.dropFirst() + " is \(lessRange)"
+    }
 }
 
 /// One exercise rubric as data: what to track, how a rep moves, which view it needs, and what to say.

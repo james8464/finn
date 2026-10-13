@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Plumb
 
-struct SilhouetteCheckTests {
+nonisolated struct SilhouetteCheckTests {
     /// A side-view standing person, normalized coordinates (top-left origin).
     private let joints: [BodyJoint: JointPoint] = [
         .leftShoulder: JointPoint(x: 0.50, y: 0.30, confidence: 0.6),

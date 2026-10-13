@@ -27,20 +27,7 @@ nonisolated enum SetWindow {
 
     /// Indices of the set within the capture; nil when nothing needs trimming or no set was found.
     static func activeRange(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> ClosedRange<Int>? {
-        guard frames.count >= 2 else { return nil }
-        let side = trackedSide(frames, requirement: requirement)
-        let anchor = requirement.anchor.joint(on: side)
-        let anchors = frames.filter { visible($0, requirement: requirement, side: side) }
-            .compactMap { $0.joints[anchor] }
-        guard anchors.count >= 3 else { return nil }
-        let homeX = median(anchors.map(\.x))
-        let homeY = median(anchors.map(\.y))
-        let inPosition = frames.map { frame -> Bool in
-            guard visible(frame, requirement: requirement, side: side),
-                  let point = frame.joints[anchor] else { return false }
-            return abs(point.x - homeX) <= anchorRadius && abs(point.y - homeY) <= anchorRadius
-        }
-
+        guard frames.count >= 2, let inPosition = positions(frames, requirement: requirement) else { return nil }
         guard let start = frames.indices.first(where: { index in
             inPosition[index] && settled(frames, inPosition, from: index, forward: true)
         }), let end = frames.indices.last(where: { index in
@@ -49,6 +36,24 @@ nonisolated enum SetWindow {
               frames[end].time - frames[start].time >= EvidenceRubric.minimumSetDuration else { return nil }
         guard start > 0 || end < frames.count - 1 else { return nil }
         return start...end
+    }
+
+    /// For each frame, whether the athlete is in position: the exercise's joints clear on the side
+    /// seen best over these frames, and its planted joint within `anchorRadius` of its usual place
+    /// (the median of where it was seen). Nil when the planted joint was seen fewer than three times.
+    static func positions(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> [Bool]? {
+        let side = trackedSide(frames, requirement: requirement)
+        let anchor = requirement.anchor.joint(on: side)
+        let anchors = frames.filter { visible($0, requirement: requirement, side: side) }
+            .compactMap { $0.joints[anchor] }
+        guard anchors.count >= 3 else { return nil }
+        let homeX = median(anchors.map(\.x))
+        let homeY = median(anchors.map(\.y))
+        return frames.map { frame -> Bool in
+            guard visible(frame, requirement: requirement, side: side),
+                  let point = frame.joints[anchor] else { return false }
+            return abs(point.x - homeX) <= anchorRadius && abs(point.y - homeY) <= anchorRadius
+        }
     }
 
     /// At least `settleShare` of the frames within `settleDuration` after (or before) `index`
@@ -71,7 +76,7 @@ nonisolated enum SetWindow {
             && Double(held) >= settleShare * Double(total)
     }
 
-    private static func visible(_ frame: PoseFrame, requirement: EvidenceRequirement, side: BodySide) -> Bool {
+    static func visible(_ frame: PoseFrame, requirement: EvidenceRequirement, side: BodySide) -> Bool {
         frame.athleteVisible && requirement.joints(on: side).allSatisfy { joint in
             (frame.joints[joint]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence
         }

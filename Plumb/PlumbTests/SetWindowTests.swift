@@ -3,7 +3,7 @@ import Testing
 @testable import Plumb
 
 /// A capture on a real phone: walk from the phone to the spot, do the set, walk back to stop.
-struct SetWindowTests {
+nonisolated struct SetWindowTests {
     @Test func walkingInAndOutNoLongerRefusesTheSet() {
         let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0)
         // Before the set window, these frames were refused: the legs were out of view for over a second.
@@ -134,10 +134,10 @@ nonisolated enum CaptureTraces {
     }
 
     /// Walking back toward the phone: the feet slide across the frame, then the legs leave the picture.
-    static func walkOut(from start: Double) -> [PoseFrame] {
+    static func walkOut(from start: Double, duration: Double = 2.5) -> [PoseFrame] {
         var frames: [PoseFrame] = []
         var time = step
-        while time < 2.5 {
+        while time < duration {
             if time < 1.0 {
                 frames.append(frame(time: start + time, hipY: 0.42, ankleX: 0.51 + 0.3 * time, legs: true))
             } else {
