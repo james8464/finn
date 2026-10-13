@@ -51,6 +51,58 @@ nonisolated struct StartReadinessTests {
         }
     }
 
+    /// A plank with the right side to the camera: the far (left) arm is clear enough but the far hip
+    /// is not. The near side is in a plank, so the set starts; before, the far side was tried first
+    /// and every frame counted as a miss.
+    @Test func aPlankSeenFromTheRightStartsLikeOneSeenFromTheLeft() {
+        func plank(time: Double) -> PoseFrame {
+            PoseFrame(time: time, subjectCount: 1, joints: [
+                .rightShoulder: JointPoint(x: 0.30, y: 0.70, confidence: 0.85),
+                .rightElbow: JointPoint(x: 0.30, y: 0.78, confidence: 0.85),
+                .rightWrist: JointPoint(x: 0.30, y: 0.86, confidence: 0.85),
+                .rightHip: JointPoint(x: 0.62, y: 0.74, confidence: 0.7),
+                .leftShoulder: JointPoint(x: 0.31, y: 0.70, confidence: 0.5),
+                .leftElbow: JointPoint(x: 0.31, y: 0.78, confidence: 0.5),
+                .leftWrist: JointPoint(x: 0.31, y: 0.86, confidence: 0.5),
+                .leftHip: JointPoint(x: 0.62, y: 0.74, confidence: 0.25),
+            ], aspectRatio: 1280.0 / 720.0, athleteTracking: .tracked)
+        }
+        var readiness = StartReadiness()
+        var time = 0.0
+        while time < StartReadiness.hold + 0.2 {
+            readiness.update(with: plank(time: time), definition: .pushUp)
+            time += CaptureTraces.step
+        }
+        #expect(readiness.isReady)
+    }
+
+    /// Standing with the right side to the camera; the far side hovers around the confidence floor
+    /// and the near knee is unclear now and then. The side seen best is followed, and its odd
+    /// unclear frame is a miss, not a switch to the far side that restarted the hold.
+    @Test func aFarSideAroundTheConfidenceFloorDoesNotRestartTheHold() {
+        func standing(frame index: Int) -> PoseFrame {
+            let far = index % 3 == 2 ? 0.25 : 0.35
+            let nearKnee = index % 7 == 6 ? 0.25 : 0.6
+            return PoseFrame(time: Double(index) * CaptureTraces.step, subjectCount: 1, joints: [
+                .rightShoulder: JointPoint(x: 0.46, y: 0.17, confidence: 0.6),
+                .rightHip: JointPoint(x: 0.47, y: 0.42, confidence: 0.6),
+                .rightKnee: JointPoint(x: 0.49, y: 0.70, confidence: nearKnee),
+                .rightAnkle: JointPoint(x: 0.51, y: 0.90, confidence: 0.6),
+                .leftShoulder: JointPoint(x: 0.52, y: 0.17, confidence: far),
+                .leftHip: JointPoint(x: 0.53, y: 0.42, confidence: far),
+                .leftKnee: JointPoint(x: 0.55, y: 0.70, confidence: far),
+                .leftAnkle: JointPoint(x: 0.57, y: 0.90, confidence: far),
+            ], athleteTracking: .tracked)
+        }
+        var readiness = StartReadiness()
+        var index = 0
+        while Double(index) * CaptureTraces.step < StartReadiness.hold + 0.3 {
+            readiness.update(with: standing(frame: index), definition: .squat)
+            index += 1
+        }
+        #expect(readiness.isReady)
+    }
+
     @Test func aFewMissedFramesKeepTheHoldButLeavingRestartsIt() {
         var readiness = StartReadiness()
         var time = 0.0
@@ -160,6 +212,30 @@ nonisolated struct LiveSetMonitorTests {
         let result = run(frames)
         #expect(result.stoppedAt == nil)
         #expect(result.monitor.countedReps == 4)
+    }
+
+    /// The hands-free countdown started but no rep counted (every movement too shallow, or the person
+    /// changed their mind), then the athlete walks back to the phone. The set ends as it does after
+    /// reps, instead of keeping the camera and the screen on until the 2-minute limit.
+    @Test func walkingAwayFromTheSpotWithoutAnyRepEndsTheSet() {
+        let capture = CaptureTraces.squats(reps: 0, from: 0, standing: 4) + CaptureTraces.walkOut(from: 4.0, duration: 4.0)
+        let result = run(capture)
+        #expect(result.monitor.countedReps == 0)
+        guard let stoppedAt = result.stoppedAt else {
+            Issue.record("Expected the set to end once the athlete walked away")
+            return
+        }
+        #expect(stoppedAt > 5.5 && stoppedAt < 7.0)
+    }
+
+    /// Without a rep, being unseen at the spot does not end the set: getting down into a push-up can
+    /// hide the athlete from Vision for a moment.
+    @Test func beingUnseenWithoutAnyRepDoesNotEndTheSet() {
+        let standing = CaptureTraces.squats(reps: 0, from: 0, standing: 3)
+        let unseen = (1...90).map { index in
+            PoseFrame(time: 3.0 + Double(index) * CaptureTraces.step, subjectCount: 0, joints: [:], athleteTracking: .hidden)
+        }
+        #expect(run(standing + unseen).stoppedAt == nil)
     }
 
     @Test func walkingInWithoutAnyRepNeverEndsTheSet() {
