@@ -120,6 +120,59 @@ nonisolated struct AthleteTrackerTests {
         #expect(tracker.select([early, person(x: 0.5, top: 0.2, height: 0.7)], aspectRatio: 1, time: 0.1) == 1)
     }
 
+    /// While framing, the athlete at their spot is followed; a partner much closer to the phone,
+    /// legs out of the picture, comes into view. A person only partly in view never takes over:
+    /// before, the athlete lost the track on the first frame and the set could not start.
+    @Test func beforeASetSomeonePartlyInViewDoesNotTakeOver() {
+        var tracker = AthleteTracker()
+        let athlete = person(x: 0.5, top: 0.45, height: 0.35)
+        // Shoulders to hips, about a metre from the phone: twice as prominent, no legs in view.
+        let partner: [BodyJoint: JointPoint] = [
+            .leftShoulder: JointPoint(x: 0.18, y: 0.10, confidence: 0.9),
+            .rightShoulder: JointPoint(x: 0.38, y: 0.10, confidence: 0.9),
+            .leftElbow: JointPoint(x: 0.15, y: 0.45, confidence: 0.9),
+            .rightElbow: JointPoint(x: 0.40, y: 0.45, confidence: 0.9),
+            .leftHip: JointPoint(x: 0.20, y: 0.95, confidence: 0.9),
+            .rightHip: JointPoint(x: 0.36, y: 0.95, confidence: 0.9),
+        ]
+        for tenth in 0...20 {
+            #expect(tracker.select([athlete], aspectRatio: 1, time: Double(tenth) / 10) == 0)
+        }
+        for tenth in 21...60 {
+            #expect(tracker.select([partner, athlete], aspectRatio: 1, time: Double(tenth) / 10) == 1, "at \(tenth)")
+        }
+    }
+
+    /// Someone in full view walks past close to the phone for half a second: the athlete keeps the track.
+    @Test func beforeASetSomeoneBrieflyMoreProminentDoesNotTakeOver() {
+        var tracker = AthleteTracker()
+        let athlete = person(x: 0.5, top: 0.45, height: 0.35)
+        for tenth in 0...20 {
+            #expect(tracker.select([athlete], aspectRatio: 1, time: Double(tenth) / 10) == 0)
+        }
+        for tenth in 21...25 {
+            let passerBy = person(x: 0.2 + 0.05 * Double(tenth - 21), top: 0.1, height: 0.85)
+            #expect(tracker.select([passerBy, athlete], aspectRatio: 1, time: Double(tenth) / 10) == 1, "at \(tenth)")
+        }
+        #expect(tracker.select([athlete], aspectRatio: 1, time: 2.6) == 0)
+    }
+
+    /// Someone else was followed before the athlete came into view. Once the athlete, in full view,
+    /// has been clearly more prominent for a second, they take over.
+    @Test func beforeASetSomeoneInFullViewAndClearlyMoreProminentTakesOverAfterASecond() {
+        var tracker = AthleteTracker()
+        let early = person(x: 0.25, top: 0.45, height: 0.3)
+        for tenth in 0...20 {
+            #expect(tracker.select([early], aspectRatio: 1, time: Double(tenth) / 10) == 0)
+        }
+        let athlete = person(x: 0.5, top: 0.2, height: 0.7)
+        for tenth in 21...30 {
+            #expect(tracker.select([early, athlete], aspectRatio: 1, time: Double(tenth) / 10) == 0, "at \(tenth)")
+        }
+        #expect(tracker.select([early, athlete], aspectRatio: 1, time: 3.2) == 1)
+        #expect(tracker.select([early, athlete], aspectRatio: 1, time: 3.3) == 1)
+    }
+
     @Test func twoPeopleInTheSameSpotGiveNoAnswer() {
         var tracker = AthleteTracker()
         _ = tracker.select([person(x: 0.5)], aspectRatio: 1, time: 0)

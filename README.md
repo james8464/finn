@@ -64,7 +64,7 @@ _Updated 13 October 2026._
 
 - Checks that the person is filmed from the side (Vision 3D). A slight angle gives a placement tip; facing the camera for several seconds refuses the set.
 - Checks that every detected joint lies on the person's silhouette, so a hidden ankle is not invented. Since 13 October the check searches in proportion to the body and ignores an empty mask; the first version also rejected visible ankles and wrists.
-- Follows one athlete and ignores other people in view. Only someone standing in front of the athlete excuses a gap of up to 3 s; a lone athlete lost for a moment (getting into a push-up) is picked up again.
+- Follows one athlete and ignores other people in view. Only someone standing in front of the athlete excuses a gap of up to 3 s; a lone athlete lost for a moment (getting into a push-up) is picked up again. While framing, someone else takes over only when in full view and clearly more prominent for a second, so a person passing close to the phone or a partner with their legs out of the picture does not; a still stranger in full view who stays much more prominent than the athlete still can.
 - Optional: recognizes the exercise automatically and keeps the user's choice when unsure.
 - Coaching cues require a sufficiently side-on view when 3D angle is available. At a diagonal view, the app can retain the rep count and camera-turn tip while withholding posture and range cues that might be distorted. Posture advice also requires clear supporting joints and comparable rep range.
 
