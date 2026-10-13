@@ -5,7 +5,7 @@
 > - **This file is the source of truth. Keep it true.**
 > - **Idea:** a fitness coach on iPhone + Apple Watch that aims to check every rep and give appropriate, actionable advice on posture and execution. Track your progress and your workouts.
 > - **Today we have:** iPhone only, four side-view exercises with rep counting and limited, evidence-linked posture or range advice after a set; hands-free sets with the live rep count on screen and in your ears (AirPods or speaker); your most frequent pattern before each set; optional saving of each finished session to Apple Health as a workout, so it shows in the Fitness app (written and unit-tested, not yet built in Xcode or tried on an iPhone).
-> - **Written, not yet in the build:** an Apple Watch companion that mirrors the iPhone's count (its Xcode target and icon are still to add).
+> - **In the build, not yet tried on a watch:** an Apple Watch companion that mirrors the iPhone's count and taps the wrist on each rep (target `PlumbWatch`, embedded in the iPhone app since 13 October).
 > - **Not built yet:** Apple Watch measurement (wrist motion, heart rate, workout session), Apple TV, AirPods head tracking, widgets, Live Activities.
 
 ## Rules for AI agents and contributors
@@ -77,7 +77,7 @@ _Updated 13 October 2026._
 - Posture-change thresholds have only simulator and synthetic-pose coverage; their usefulness and false-cue rate need physical-iPhone and trainer review.
 - A spot check of the current capture path on eleven selected public gym clips covered several people and side, diagonal, and front views. Four of nine squat clips and both push-up clips measured; the three front-view squat clips refused. There is no independent human count or cue review, and this selected sample cannot establish accuracy. [Replay details](docs/validation/exercise-rules-v1.md#current-capture-path-spot-check--13-october-2026).
 
-**Written, not in the build yet:** an Apple Watch companion (`Plumb/PlumbWatch`, `Accessories.swift`, `WatchBridge.swift`). It would show the exercise, stage, live rep count and observations, tap the wrist on each rep, and start or stop the set from the wrist. Its messages and set mirroring are unit-tested. The Xcode target is a separate commit (`adcbd89`, branch `worktree-agent-a5251f6fe2375b37d`) because it needs the watchOS 27 platform and a watch app icon; until it is added, the iPhone app does not talk to a watch. See `docs/design/apple-watch-and-airpods.md`.
+**In the build, not yet run on a physical watch:** an Apple Watch companion (`Plumb/PlumbWatch`, `Accessories.swift`, `WatchBridge.swift`). It shows the exercise, stage, live rep count and observations, taps the wrist on each rep, and starts or stops the set from the wrist. The `PlumbWatch` target (watchOS 10 or later, bundle `com.james8464.Plumb.watchkitapp`) is embedded in the iPhone app, so installing Plumb from Xcode on an iPhone paired with a watch installs it on the watch too. Its messages and set mirroring are unit-tested; both targets compile for the simulators. See `docs/design/apple-watch-and-airpods.md`.
 
 **Not built:** Apple Watch measurement (wrist motion, heart rate, HealthKit workout session), Apple TV, AirPods head tracking, widgets, Live Activities, accounts, subscriptions, running analysis (see `docs/product/running-stride.md`).
 
