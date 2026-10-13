@@ -181,6 +181,108 @@ struct FitnessSessionTests {
         #expect(!model.canSaveToFitness(try #require(model.history.first)))
     }
 
+    /// Cancel on the camera screen comes back to the first screen without Done: the session stays
+    /// open there, and finishing it saves it to Apple Health once.
+    @Test func aSessionLeftWithCancelIsFinishedAndSavedFromTheFirstScreen() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let sessionID = try #require(setup.model.currentSession?.id)
+        await setup.model.startPreview()
+        #expect(setup.model.stage == .framing)
+        #expect(setup.model.unfinishedSession == nil)
+        await setup.model.cancel()
+        #expect(setup.model.stage == .ready)
+        #expect(setup.model.unfinishedSession?.id == sessionID)
+        #expect(setup.fitness.saveAttempts == 0)
+
+        await setup.model.finishSession()
+        #expect(setup.model.unfinishedSession == nil)
+        #expect(setup.model.currentSession == nil)
+        #expect(setup.fitness.saved.map(\.sessionID) == [sessionID])
+        #expect(setup.model.fitnessSave == FitnessSaveReport(sessionID: sessionID, status: .saved))
+        #expect(try setup.store.load().first?.fitnessWorkout != nil)
+    }
+
+    /// Going to the background during a set also comes back to the first screen without Done:
+    /// History can save that open session, which finishes it, so the next set starts a new one.
+    @Test func aSessionLeftInTheBackgroundCanBeSavedFromHistory() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let session = try #require(setup.model.history.first)
+        await setup.model.startPreview()
+        // During a capture, the session in progress is saved at Done only.
+        #expect(!setup.model.canSaveToFitness(session))
+        await setup.model.saveToFitness(sessionID: session.id)
+        #expect(setup.fitness.saveAttempts == 0)
+        #expect(setup.model.currentSession?.id == session.id)
+
+        await setup.model.backgrounded()
+        #expect(setup.model.stage == .ready)
+        #expect(setup.model.unfinishedSession?.id == session.id)
+        #expect(setup.model.canSaveToFitness(session))
+        await setup.model.saveToFitness(sessionID: session.id)
+        #expect(setup.model.currentSession == nil)
+        #expect(setup.fitness.saved.map(\.sessionID) == [session.id])
+        #expect(!setup.model.canSaveToFitness(try #require(setup.model.history.first)))
+
+        setup.clock.advance(by: 60)
+        try await setup.measureASet()
+        #expect(setup.model.currentSession?.id != session.id)
+        #expect(setup.fitness.saveAttempts == 1)
+    }
+
+    /// With the option off, the open session is not ended by a History save, and Health is untouched.
+    @Test func anOpenSessionIsNotFinishedFromHistoryWhenTheOptionIsOff() async throws {
+        let setup = try Setup(savesToFitness: false)
+        try await setup.measureASet()
+        let session = try #require(setup.model.history.first)
+        await setup.model.startPreview()
+        await setup.model.cancel()
+        #expect(!setup.model.canSaveToFitness(session))
+        await setup.model.saveToFitness(sessionID: session.id)
+        #expect(setup.model.unfinishedSession?.id == session.id)
+        #expect(setup.fitness.authorizationReads == 0)
+    }
+
+    /// A set long after the previous one starts a new session, so a workout never spans a day; the
+    /// earlier session is saved to Apple Health then, as at Done.
+    @Test func aSetAfterALongBreakStartsANewSessionAndSavesTheEarlierOne() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let first = try #require(setup.model.currentSession?.id)
+        await setup.model.startPreview()
+        await setup.model.cancel()
+
+        setup.clock.advance(by: 10 * 60)
+        try await setup.measureASet(setsInSession: 2)
+        #expect(setup.model.currentSession?.id == first)
+        #expect(setup.fitness.saveAttempts == 0)
+
+        setup.clock.advance(by: WorkoutSessionSummary.longestBreak + 60)
+        try await setup.measureASet()
+        let second = try #require(setup.model.currentSession?.id)
+        #expect(second != first)
+        #expect(setup.model.comparison == nil)
+        try await waitUntil { setup.model.fitnessRecord(forSession: first) != nil }
+        let workout = try #require(setup.fitness.saved.first)
+        #expect(workout.sessionID == first)
+        #expect(workout.setCount == 2)
+        #expect(workout.end < setup.clock.date.addingTimeInterval(-WorkoutSessionSummary.longestBreak))
+        #expect(try setup.store.load().first(where: { $0.id == first })?.fitnessWorkout != nil)
+
+        await setup.model.finishSession()
+        #expect(setup.fitness.saved.map(\.sessionID) == [first, second])
+        #expect(setup.fitness.saved.last?.setCount == 1)
+    }
+
+    @Test func aSessionContinuesUpToTheLongestBreak() {
+        let start = Date(timeIntervalSince1970: 1_800_000_000)
+        let empty = WorkoutSessionSummary(id: UUID(), startedAt: start, sets: [])
+        #expect(empty.continues(at: start.addingTimeInterval(WorkoutSessionSummary.longestBreak)))
+        #expect(!empty.continues(at: start.addingTimeInterval(WorkoutSessionSummary.longestBreak + 1)))
+        #expect(empty.continues(at: start.addingTimeInterval(-60)))
+    }
+
     private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(5)) async throws {
         let deadline = ContinuousClock.now.advanced(by: timeout)
         while !condition() {
@@ -201,6 +303,7 @@ private final class Setup {
     let preferences: PlumbPreferences
     let fitness: FakeFitnessExporter
     let source = TestSource()
+    let clock = TestClock()
     let model: WorkoutSessionModel
 
     init(savesToFitness: Bool, access: FitnessAuthorization = .authorized) throws {
@@ -211,13 +314,15 @@ private final class Setup {
         preferences = PlumbPreferences(defaults: defaults)
         preferences.savesToFitness = savesToFitness
         fitness = FakeFitnessExporter(access: access)
-        model = WorkoutSessionModel(source: source, store: store, preferences: preferences, fitness: fitness)
+        let clock = clock
+        model = WorkoutSessionModel(source: source, store: store, preferences: preferences, fitness: fitness,
+                                    currentDate: { clock.date })
     }
 
     deinit { try? FileManager.default.removeItem(at: directory) }
 
-    /// One measured six-rep squat set, saved to history.
-    func measureASet() async throws {
+    /// One measured six-rep squat set, saved to history in the current session.
+    func measureASet(setsInSession: Int = 1) async throws {
         await model.startPreview()
         await model.beginSet(countdown: 0)
         for frame in CaptureTraces.squats(reps: 6, from: 0) { source.emit(frame) }
@@ -226,8 +331,17 @@ private final class Setup {
             Issue.record("Expected six measured reps, got \(String(describing: model.result))")
             return
         }
-        #expect(model.history.first?.sets.count == 1)
+        let session = try #require(model.currentSession)
+        #expect(session.sets.count == setsInSession)
+        #expect(model.history.first(where: { $0.id == session.id })?.sets.count == setsInSession)
     }
+}
+
+/// The date of each measured set, moved forward by the tests.
+@MainActor
+private final class TestClock {
+    var date = Date(timeIntervalSince1970: 1_800_000_000)
+    func advance(by interval: TimeInterval) { date = date.addingTimeInterval(interval) }
 }
 
 @MainActor

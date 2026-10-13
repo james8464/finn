@@ -97,6 +97,8 @@ final class WorkoutSessionModel {
     @ObservationIgnored private var fitnessSavesInFlight: Set<UUID> = []
     /// Sessions saved to Apple Health in this run, kept even if writing history fails.
     @ObservationIgnored private var fitnessRecords: [UUID: FitnessWorkoutRecord] = [:]
+    /// The date of a measured set, for the session it joins. Tests replace it.
+    @ObservationIgnored private let currentDate: () -> Date
 
     private(set) var stage: WorkoutStage = .ready
     /// The exercise chosen on the setup screen. A capture keeps the exercise it started with.
@@ -221,6 +223,9 @@ final class WorkoutSessionModel {
     private(set) var fitnessSave: FitnessSaveReport?
     /// False for demo and recorded input: those sessions are never saved to Apple Health.
     var offersFitness: Bool { fitness != nil }
+    /// A session still open on the first screen: Cancel, or the app going to the background during
+    /// a set, comes back there without Done. The first screen offers to finish it (`finishSession`).
+    var unfinishedSession: WorkoutSessionSummary? { stage == .ready ? currentSession : nil }
 
     init(source: any PoseStreaming, store: (any SessionStoring)? = nil,
          narrator: ComparisonNarrator? = nil,
@@ -229,7 +234,8 @@ final class WorkoutSessionModel {
          ruleClassifier: (any AngleWindowClassifying)? = AngleRuleClassifier(),
          preferences: PlumbPreferences = .standard,
          announcer: (any LiveAnnouncing)? = nil,
-         fitness: (any FitnessWorkoutSaving)? = nil) {
+         fitness: (any FitnessWorkoutSaving)? = nil,
+         currentDate: @escaping () -> Date = { Date() }) {
         self.source = source
         self.store = store
         self.narrator = narrator ?? ComparisonNarrator()
@@ -239,6 +245,7 @@ final class WorkoutSessionModel {
         self.preferences = preferences
         self.announcer = announcer
         self.fitness = fitness
+        self.currentDate = currentDate
         self.handsFree = preferences.handsFree
         self.speaksLive = preferences.speaksLive
         self.recognizesExercise = preferences.recognizesExercise
@@ -615,7 +622,8 @@ final class WorkoutSessionModel {
         return .notAttempted
     }
 
-    /// Done: ends the session and, when the person turned it on, saves it to Apple Health once.
+    /// Done on the result, or Finish session on the first screen: ends the session and, when the
+    /// person turned it on, saves it to Apple Health once.
     func finishSession() async {
         let finished = currentSession
         await cancel()
@@ -649,20 +657,26 @@ final class WorkoutSessionModel {
             ?? (currentSession?.id == id ? currentSession?.fitnessWorkout : nil)
     }
 
-    /// Whether History may offer to save a finished session to Apple Health: the option is on, the
-    /// session has a measured set and is not saved yet. The session in progress is saved at Done.
+    /// Whether History may offer to save a session to Apple Health: the option is on, the session
+    /// has a measured set and is not saved yet. A session left open on the first screen can be saved,
+    /// which finishes it; during a capture the session in progress is saved at Done.
     func canSaveToFitness(_ session: WorkoutSessionSummary) -> Bool {
-        offersFitness && savesToFitness && currentSession?.id != session.id
+        offersFitness && savesToFitness && (currentSession?.id != session.id || stage == .ready)
             && fitnessRecord(forSession: session.id) == nil
             && !fitnessSavesInFlight.contains(session.id)
             && FitnessWorkout.make(from: session) != nil
     }
 
-    /// Saves a finished session again, from History or after a failed save. Never duplicates a
-    /// workout: a saved or saving session is left alone.
+    /// Saves a session from History or after a failed save. Never duplicates a workout: a saved or
+    /// saving session is left alone. The session left open on the first screen is finished first, so
+    /// no later set is left out of its workout.
     func saveToFitness(sessionID id: UUID) async {
-        guard currentSession?.id != id,
-              let session = pendingSessions[id] ?? history.first(where: { $0.id == id }) else { return }
+        if currentSession?.id == id {
+            guard stage == .ready, fitness != nil, savesToFitness else { return }
+            await finishSession()
+            return
+        }
+        guard let session = pendingSessions[id] ?? history.first(where: { $0.id == id }) else { return }
         await saveToFitness(session)
     }
 
@@ -771,9 +785,15 @@ final class WorkoutSessionModel {
                         issues: [SetIssue]) {
         guard case .usable(let side) = EvidenceGate.assess(
             frames, requirement: exercise.definition.evidence) else { return }
-        var session = currentSession ?? WorkoutSessionSummary(id: UUID(), startedAt: .now, sets: [])
+        let now = currentDate()
+        // A set long after the previous one starts a new session; the earlier one ends as at Done.
+        if let open = currentSession, !open.continues(at: now) {
+            currentSession = nil
+            Task { await self.saveToFitness(open) }
+        }
+        var session = currentSession ?? WorkoutSessionSummary(id: UUID(), startedAt: now, sets: [])
         let newSet = SetSummary(
-            id: UUID(), sessionID: session.id, capturedAt: .now,
+            id: UUID(), sessionID: session.id, capturedAt: now,
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,
             exercise: exercise, issues: issues
         )

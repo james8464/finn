@@ -153,6 +153,11 @@ struct ContentView: View {
                     fitnessStatus(save)
                         .padding(.bottom, 20)
                 }
+                // Cancel, or the app going to the background during a set, comes back here without Done.
+                if let open = model.unfinishedSession {
+                    unfinishedSessionLine(open)
+                        .padding(.bottom, 20)
+                }
                 exercisePicker
                 if model.usesExerciseRecognition {
                     Text("After the set, Plumb also checks which exercise you did. If it isn’t sure, it keeps your choice.")
@@ -249,6 +254,26 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// The session still open on the first screen, with a way to end it as Done does.
+    private func unfinishedSessionLine(_ session: WorkoutSessionSummary) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(session.sets.count == 1 ? "Session in progress · 1 measured set"
+                 : "Session in progress · \(session.sets.count) measured sets")
+                .font(.subheadline)
+            if model.offersFitness && model.savesToFitness {
+                Text("Finish it to save it to Apple Fitness.")
+                    .font(.footnote)
+                    .foregroundStyle(PlumbStyle.supportingText)
+            }
+            Button("Finish session") { Task { await model.finishSession() } }
+                .font(.subheadline)
+                .frame(minHeight: 44, alignment: .leading)
+                .contentShape(Rectangle())
+                .accessibilityIdentifier("setup.finishSession")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private static func fitnessSymbol(_ status: FitnessSaveStatus) -> String {
         switch status {
         case .saving: "arrow.triangle.2.circlepath"
@@ -285,7 +310,9 @@ struct ContentView: View {
                         .font(.subheadline)
                 }
                 if model.canSaveToFitness(session) {
-                    Button("Save to Fitness") { Task { await model.saveToFitness(sessionID: session.id) } }
+                    // Saving the session still open on the first screen finishes it.
+                    Button(model.unfinishedSession?.id == session.id ? "Finish session and save to Fitness"
+                           : "Save to Fitness") { Task { await model.saveToFitness(sessionID: session.id) } }
                         .frame(minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                         .accessibilityIdentifier("history.saveToFitness")
@@ -511,7 +538,7 @@ struct ContentView: View {
                     .frame(minHeight: 44)
                     .disabled(!model.offersFitness)
                     .accessibilityIdentifier("options.savesToFitness")
-                    Text("When you tap Done, Plumb saves the session to Apple Health as a strength training workout with its time and measured reps, never calories or heart rate, so it shows in the Fitness app.")
+                    Text("When you finish a session (Done, or Finish session on the first screen), Plumb saves it to Apple Health as a strength training workout with its time and measured reps, never calories or heart rate, so it shows in the Fitness app.")
                     if let note = fitnessOptionNote {
                         Text(note)
                             .foregroundStyle(PlumbStyle.supportingText)
