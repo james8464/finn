@@ -22,6 +22,8 @@ tools/replay/replay.sh --exercise pushUp --poses /tmp/plumb-pushup-poses.json
 
 The command prints JSON with `status` (`measured`, `retake`, or `failed`), `frameCount`, `measuredReps`, and a `reason` or `rubricVersion` when available. `--poses-output` is optional. Supported exercise values are `bodyweightSquat`, `pushUp`, `staticLunge`, and `stiffLegDeadlift`. The pose JSON can also be supplied to the app's Debug video-file path on the simulator with `-plumb-video-file <video> -plumb-video-poses <json>`; Xcode must make those files readable to the simulator process.
 
+The Debug file source buffers a complete short fixture while UI tests take screenshots. This avoids dropping just enough clear pose frames to move the original clip from 81% joint coverage below the app's 80% evidence gate on a slow simulator. The live camera keeps its real-time capture behavior; simulator playback is an integration check, not a performance or accuracy benchmark for an iPhone camera.
+
 ## Generated video checks
 
 `fixtures/` contains synthetic videos only. The original four cover a six-rep side-view squat, a held standing pose, hidden legs, and covered feet. Twelve reproducible variants of the six-rep squat change light and color, subject size, framing, blur, apparent phone movement, or tempo. All variants derive from the same source person and motion; they are not new participants. Run them through the macOS Vision extractor and the same exercise analyzer as the app:

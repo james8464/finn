@@ -29,7 +29,8 @@ final class VideoFilePoseSource: PoseStreaming {
         guard FileManager.default.isReadableFile(atPath: url.path) else {
             throw CameraSourceError.unavailable
         }
-        let stream = AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(3)) { continuation in
+        // Keep the finite fixture intact if a simulator pauses the UI test while taking screenshots.
+        let stream = AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(256)) { continuation in
             self.continuation = continuation
         }
         play(looping: true)
