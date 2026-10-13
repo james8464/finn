@@ -7,7 +7,7 @@
 
 ## Set up an exercise review
 
-Place the iPhone upright at about hip height, a few steps away. Keep your head and feet visible, turn sideways, and use even lighting. Tap **Set up camera**, allow camera access, then **Start set**. Tap **Stop set** after the set. If Plumb cannot see enough of the movement, move the phone back and retake the set.
+Place the iPhone upright at about hip height, a few steps away. Keep your head and feet visible, turn sideways, and use even lighting. Pick the exercise, tap **Start a set**, allow camera access, then **Start set**. Tap **Stop set** after the set. If Plumb cannot see enough of the movement, move the phone back and retake the set.
 
 ## What the result means
 

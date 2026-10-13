@@ -8,7 +8,7 @@ final class CameraAngleUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-front-view"]
         app.launch()
-        app.buttons["Set up camera"].tap()
+        app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
         XCTAssertTrue(stop.waitForExistence(timeout: 6))
@@ -22,7 +22,7 @@ final class CameraAngleUITests: XCTestCase {
         ])
 
         app.buttons["Done"].tap()
-        app.buttons["Options"].tap()
+        app.openFromHome("Options")
         let toggle = app.switches["options.checkCameraAngle"]
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         XCTAssertEqual(toggle.value as? String, "1")
@@ -33,7 +33,7 @@ final class CameraAngleUITests: XCTestCase {
         ])
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
-        app.buttons["Set up camera"].tap()
+        app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         XCTAssertTrue(stop.waitForExistence(timeout: 6))
         Thread.sleep(forTimeInterval: 4)
@@ -46,7 +46,7 @@ final class CameraAngleUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-front-view", "-plumb-validation"]
         app.launch()
-        app.buttons["Set up camera"].tap()
+        app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
         XCTAssertTrue(stop.waitForExistence(timeout: 6))

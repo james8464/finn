@@ -19,6 +19,10 @@ struct ContentView: View {
     private let connectsAccessories: Bool
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
+    /// History, Options or Privacy, opened from the first screen.
+    @State private var route: HomeRoute?
+    /// What the camera does, shown once before iOS asks for it.
+    @State private var showsCameraPrimer = false
     /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
     @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 88
     private var destructiveLabelColor: Color {
@@ -86,7 +90,7 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Plumb")
-            .navigationBarTitleDisplayMode(.large)
+            .toolbarTitleDisplayMode(.inlineLarge)
         }
         .overlay(alignment: .top) {
             #if DEBUG
@@ -168,104 +172,185 @@ struct ContentView: View {
         return model.leavesHealthWorkout(forSession: id)
     }
 
+    /// The first screen: the chosen exercise drawn as the camera sees it, chips to change it, and
+    /// one action to start a set. History, options and privacy stay one tap away, out of the way.
     private var setup: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Review your movement after each set.")
-                    .foregroundStyle(PlumbStyle.supportingText)
-                    .padding(.bottom, 28)
-                // After Done: whether the session reached Apple Fitness.
-                if let save = model.fitnessSave {
-                    fitnessStatus(save)
-                        .padding(.bottom, 20)
-                }
-                // Cancel, or the app going to the background during a set, comes back here without Done.
-                if let open = model.unfinishedSession {
-                    unfinishedSessionLine(open)
-                        .padding(.bottom, 20)
-                }
-                exercisePicker
-                if model.usesExerciseRecognition {
-                    Text("After the set, Plumb also checks which exercise you did. If it isn’t sure, it keeps your choice.")
-                        .font(.footnote)
-                        .foregroundStyle(PlumbStyle.supportingText)
-                        .padding(.top, 8)
-                }
-                if let focus = model.focus {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("YOUR FOCUS")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(PlumbStyle.supportingText)
-                        Text(focus.focus)
-                            .font(.body.weight(.semibold))
-                        Text(focus.summary)
-                            .font(.subheadline)
-                            .foregroundStyle(PlumbStyle.supportingText)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    // After Done: whether the session reached Apple Fitness.
+                    if let save = model.fitnessSave {
+                        HomeCard { fitnessStatus(save) }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 28)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityIdentifier("setup.focus")
+                    // Cancel, or the app going to the background during a set, comes back here without Done.
+                    if let open = model.unfinishedSession {
+                        HomeCard { unfinishedSessionLine(open) }
+                    }
+                    ExerciseChips(selection: Binding(
+                        get: { model.selectedExercise },
+                        set: { model.selectedExercise = $0 }
+                    ))
+                    .padding(.horizontal, -20)
+                    .contentMargins(.horizontal, 20, for: .scrollContent)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Exercise")
+                    .accessibilityIdentifier("setup.exercise")
+                    ExerciseHeroCard(kind: model.selectedExercise, compact: !model.history.isEmpty)
+                    accessoryNotes
+                    // Personalize with Health: a line adapted to the person, with the data it rests on.
+                    if let note = model.readinessNote {
+                        HomeCard { healthNote(note) }
+                            .accessibilityIdentifier("setup.healthReadiness")
+                    }
+                    if let focus = model.focus {
+                        HomeCard {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Label("Your focus", systemImage: "scope")
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundStyle(HomeStyle.supportingText)
+                                Text(focus.focus)
+                                    .font(.body.weight(.semibold))
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Text(focus.summary)
+                                    .font(.subheadline)
+                                    .foregroundStyle(HomeStyle.supportingText)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityIdentifier("setup.focus")
+                    }
+                    if let last = model.history.first {
+                        lastSessionCard(last)
+                    }
                 }
-                Text("SET UP")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(PlumbStyle.supportingText)
-                    .padding(.top, 40)
-                    .padding(.bottom, 12)
-                setupStep(selectedCopy.placementTitle, detail: selectedCopy.placementDetail,
-                          symbol: "iphone.gen3")
-                Divider().padding(.leading, 44)
-                setupStep(selectedCopy.stanceTitle, detail: selectedCopy.stanceDetail,
-                          symbol: "figure.stand")
-                accessoryNotes
-                if let note = model.readinessNote {
-                    healthNote(note)
-                        .padding(.top, 20)
-                        .accessibilityIdentifier("setup.healthReadiness")
-                }
-
-                Text("Analysis stays on this iPhone. No video is saved.")
-                    .font(.footnote)
-                    .foregroundStyle(PlumbStyle.supportingText)
-                    .padding(.top, 32)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.top, 28)
-            .padding(.bottom, 24)
-        }
-        .scrollIndicators(.hidden)
-        .safeAreaInset(edge: .bottom) {
-            Button {
-                Task { await model.startPreview() }
-            } label: {
-                Text("Set up camera")
-                    .foregroundStyle(PlumbStyle.primaryButtonText)
-                    .frame(maxWidth: .infinity)
-            }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(.bar)
+                .padding(.top, 4)
+                .padding(.bottom, 24)
+            }
+            .scrollIndicators(.hidden)
+            // The action sits below the scroll view, never over its text.
+            VStack(spacing: 4) {
+                // Said where the decision is made: before the camera opens.
+                Button { route = .privacy } label: {
+                    Label("Analyzed on this iPhone. No video is saved.", systemImage: "lock.fill")
+                        .font(.footnote)
+                        .foregroundStyle(HomeStyle.supportingText)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Shows what Plumb keeps and what it never records")
+                .accessibilityIdentifier("home.privacy")
+                Button {
+                    if !usesSyntheticInput && CameraPermission.notAskedYet {
+                        showsCameraPrimer = true
+                    } else {
+                        Task { await model.startPreview() }
+                    }
+                } label: {
+                    PrimaryActionLabel(title: "Start a set")
+                }
+                .buttonStyle(PressableStyle())
+                .accessibilityIdentifier("home.start")
+                .accessibilityHint("Opens the camera for \(selectedCopy.name.lowercased())")
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 8)
         }
+        .background(HomeStyle.background.ignoresSafeArea())
+        .navigationSubtitle("Find your line.")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink { historyPage } label: {
-                    Label("History", systemImage: "clock.arrow.circlepath")
+                Menu {
+                    Button { route = .history } label: {
+                        Label("History", systemImage: "clock.arrow.circlepath")
+                    }
+                    Button { route = .options } label: {
+                        Label("Options", systemImage: "slider.horizontal.3")
+                    }
+                    Button { route = .privacy } label: {
+                        Label("Privacy", systemImage: "lock")
+                    }
+                } label: {
+                    Label("More", systemImage: "ellipsis")
                 }
+                .accessibilityIdentifier("home.more")
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink { optionsPage } label: {
-                    Label("Options", systemImage: "slider.horizontal.3")
-                }
+        }
+        .navigationDestination(item: $route) { route in
+            switch route {
+            case .history: historyPage
+            case .options: optionsPage
+            case .privacy: privacyPage
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink { privacyPage } label: {
-                    Label("Privacy", systemImage: "hand.raised")
+        }
+        .sheet(isPresented: $showsCameraPrimer) {
+            CameraPrimer(onContinue: {
+                showsCameraPrimer = false
+                Task { await model.startPreview() }
+            }, onPrivacy: {
+                showsCameraPrimer = false
+                route = .privacy
+            })
+            .presentationDetents([.fraction(0.62), .large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color(uiColor: .systemBackground))
+        }
+    }
+
+    /// The latest saved session, with what Plumb noticed in it, opening History.
+    private func lastSessionCard(_ session: WorkoutSessionSummary) -> some View {
+        let reps = session.sets.reduce(0) { $0 + $1.analysis.reps.count }
+        var names: [String] = []
+        for set in session.sets where !names.contains(set.exercise.definition.copy.name) {
+            names.append(set.exercise.definition.copy.name)
+        }
+        let sets = session.sets.count == 1 ? "1 set" : "\(session.sets.count) sets"
+        let when: String = {
+            let time = session.startedAt.formatted(date: .omitted, time: .shortened)
+            if Calendar.current.isDateInToday(session.startedAt) { return "Today, \(time)" }
+            if Calendar.current.isDateInYesterday(session.startedAt) { return "Yesterday, \(time)" }
+            return session.startedAt.formatted(.dateTime.day().month(.abbreviated).hour().minute())
+        }()
+        // The latest observation the person kept, word for word.
+        let note = session.sets.last(where: { $0.cue != nil && $0.cueResponse != .notRelevant })?.cue?.observation
+        return Button { route = .history } label: {
+            HomeCard {
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Last session")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(HomeStyle.supportingText)
+                        Text("\(names.joined(separator: ", ")) · \(reps) reps")
+                            .font(.headline)
+                            .monospacedDigit()
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text("\(when) · \(sets)")
+                            .font(.subheadline)
+                            .foregroundStyle(HomeStyle.supportingText)
+                        if let note {
+                            Label(note, systemImage: "text.quote")
+                                .font(.subheadline)
+                                .padding(.top, 6)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(HomeStyle.supportingText)
+                        .padding(.top, 2)
+                        .accessibilityHidden(true)
                 }
             }
         }
+        .buttonStyle(PressableStyle())
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Opens your history")
+        .accessibilityIdentifier("home.lastSession")
     }
 
     /// One short line about the latest save to Apple Health, with Try again when it can help.
@@ -393,60 +478,6 @@ struct ContentView: View {
 
     private var selectedCopy: ExerciseCopy { model.selectedExercise.definition.copy }
     private var captureCopy: ExerciseCopy { model.captureExercise.definition.copy }
-
-    private var exercisePicker: some View {
-        Menu {
-            Picker("Exercise", selection: Binding(
-                get: { model.selectedExercise },
-                set: { model.selectedExercise = $0 }
-            )) {
-                ForEach(ExerciseKind.allCases, id: \.self) { kind in
-                    Text(kind.definition.copy.name).tag(kind)
-                }
-            }
-        } label: {
-            let layout = dynamicTypeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-                : AnyLayout(HStackLayout(spacing: 12))
-            layout {
-                Text("Exercise")
-                    .font(.body)
-                    .foregroundStyle(.primary)
-                if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                HStack(spacing: 8) {
-                    Text(selectedCopy.name)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(.primary)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.primary)
-                        .accessibilityHidden(true)
-                }
-            }
-            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
-            .contentShape(Rectangle())
-        }
-        .accessibilityIdentifier("setup.exercise")
-        .accessibilityLabel("Exercise: \(selectedCopy.name)")
-        .accessibilityHint("Choose the exercise to check")
-    }
-
-    private func setupStep(_ title: String, detail: String, symbol: String) -> some View {
-        HStack(alignment: .top, spacing: 16) {
-            Image(systemName: symbol)
-                .font(.title3)
-                .frame(width: 28, height: 28)
-                .foregroundStyle(.primary)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.body)
-                Text(detail).font(.body).foregroundStyle(PlumbStyle.supportingText)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.vertical, 12)
-        .accessibilityElement(children: .combine)
-    }
 
     private var privacyPage: some View {
         ScrollView {
