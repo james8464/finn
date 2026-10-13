@@ -185,6 +185,29 @@ struct WorkoutSessionModelTests {
         }
     }
 
+    /// The camera source picks a frame's clock when it forwards it; the set starts when the model
+    /// reads it. A frame stamped with the preview clock (20 s of framing) can therefore arrive just
+    /// after the countdown, ahead of the set's frames from 0 s. It must not become the set's first
+    /// frame: the live count stayed silent for 20 s and a short set was refused as lasting -8 s.
+    @Test func aFrameStampedBeforeTheSetDoesNotJoinIt() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        source.emit(frame(time: 20.0, hipY: 0.42))
+        let frames = trace(reps: 6)
+        for frame in frames { source.emit(frame) }
+        try await waitUntil { model.livePose?.time == frames.last?.time }
+        #expect(model.frameCount == frames.count)
+        #expect((5...6).contains(model.liveRepCount))
+        await model.endSet()
+        guard case .measured(let analysis, _) = model.result else {
+            Issue.record("Expected the set's own frames to be measured, got \(String(describing: model.result))")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+    }
+
     @Test func stopTimingUsesTapInstantAndClearsForNextSet() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)

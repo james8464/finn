@@ -352,6 +352,14 @@ final class WorkoutSessionModel {
                     }
                     if (self.stage == .capturing || (self.stage == .analyzing && self.isStopping)) &&
                         self.frames.count < 1_800 {
+                        // The source picks a frame's clock when it forwards it, and the set starts
+                        // here when the frame is read: a frame stamped with the preview clock just
+                        // before the countdown ended can arrive first. Set frames count from 0, so
+                        // a clock going back means the frames so far were not the set's.
+                        if let previous = self.frames.last, frame.time < previous.time {
+                            self.frames = []
+                            self.liveMonitor = self.liveMonitor.map { LiveSetMonitor(definition: $0.definition) }
+                        }
                         self.frames.append(frame)
                         self.frameCount = self.frames.count
                         if self.stage == .capturing { self.followLiveSet() }
