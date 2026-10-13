@@ -264,11 +264,14 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
     /// What this set showed (`SetIssue`), for the person's most frequent pattern. Nil in summaries
     /// saved before 13 October 2026.
     let issues: [SetIssue]?
+    /// True when the joints were clear in only 65 to 80% of the set: its clear reps were counted,
+    /// without advice or comparison. Nil for a fully visible set and in older summaries.
+    let partlyVisible: Bool?
 
     init(id: UUID, sessionID: UUID, capturedAt: Date, bodySide: BodySide,
          analysis: SetAnalysis, cue: Cue?, cueResponse: CueResponse,
          exercise: ExerciseKind = .bodyweightSquat, cameraView: CameraView = .side,
-         issues: [SetIssue]? = nil) {
+         issues: [SetIssue]? = nil, partlyVisible: Bool? = nil) {
         self.id = id
         self.sessionID = sessionID
         self.capturedAt = capturedAt
@@ -279,6 +282,7 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
         self.exercise = exercise
         self.cameraView = cameraView
         self.issues = issues
+        self.partlyVisible = partlyVisible
     }
 }
 

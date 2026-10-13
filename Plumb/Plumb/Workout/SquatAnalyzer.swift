@@ -81,11 +81,19 @@ nonisolated enum ExerciseAnalyzer {
         // Walking to the spot and back to the phone is not part of the set.
         let frames = trimsToSet ? SetWindow.active(frames, requirement: definition.evidence) : frames
         let side: BodySide
+        // A set whose joints were clear in 65 to 80% of it is measured from its clear reps only.
+        var partial: PartialVisibility?
         switch EvidenceGate.assess(frames, requirement: definition.evidence) {
         case .usable(let acceptedSide): side = acceptedSide
         case .reject(let reason):
-            return (.insufficientView(EvidenceGate.explanation(for: reason, frames: frames,
-                                                               requirement: definition.evidence)), nil)
+            let refusal = EvidenceGate.explanation(for: reason, frames: frames, requirement: definition.evidence)
+            guard let visibility = EvidenceGate.partialVisibility(frames, requirement: definition.evidence),
+                  case .usable(let partlySeenSide) = EvidenceGate.assess(
+                    frames, requirement: definition.evidence, allowsPartial: true) else {
+                return (.insufficientView(refusal), nil)
+            }
+            side = partlySeenSide
+            partial = visibility
         }
         // Without 3D estimates (simulator, older devices, switched off) this check does not run.
         // Only a clearly frontal view held for several seconds refuses the set; an angled one is
@@ -218,6 +226,24 @@ nonisolated enum ExerciseAnalyzer {
         }
         if case .top = phase {} else { diagnostics.unfinished = true }
 
+        if let partial {
+            // Only reps whose own frames show the joints often enough count; they are numbered again.
+            let clear = reps.filter {
+                EvidenceGate.isClear(frames, requirement: definition.evidence, side: side,
+                                     from: $0.startTime, to: $0.endTime)
+            }
+            guard !clear.isEmpty else {
+                return (.insufficientView(EvidenceGate.explanation(
+                    for: .missingJoints, frames: frames, requirement: definition.evidence)), nil)
+            }
+            diagnostics.partialVisibility = partial
+            diagnostics.unclearReps = reps.count - clear.count
+            reps = clear.enumerated().map { index, rep in
+                RepMetric(number: index + 1, startTime: rep.startTime, endTime: rep.endTime,
+                          relativeRange: rep.relativeRange, postureValue: rep.postureValue)
+            }
+        }
+
         let confidence = samples.map(\.confidence).reduce(0, +) / Double(samples.count)
         return (.analyzed(SetAnalysis(reps: reps, confidence: confidence,
                                       rubricVersion: definition.rubricVersion)), diagnostics)
@@ -226,7 +252,8 @@ nonisolated enum ExerciseAnalyzer {
     /// The frame where a rep went deepest (hips lowest, or the joint most bent), to draw it.
     static func deepestFrame(of rep: RepMetric, in frames: [PoseFrame],
                              as definition: ExerciseDefinition) -> PoseFrame? {
-        guard case .usable(let side) = EvidenceGate.assess(frames, requirement: definition.evidence) else {
+        guard case .usable(let side) = EvidenceGate.assess(frames, requirement: definition.evidence,
+                                                            allowsPartial: true) else {
             return nil
         }
         let candidates = frames.filter { $0.time >= rep.startTime && $0.time <= rep.endTime }
@@ -351,6 +378,10 @@ nonisolated struct MovementDiagnostics: Equatable, Sendable {
     /// Median 3D deviation from side-on when it was above the side-view limit but the set was
     /// still measured.
     var angledView: Double?
+    /// The set's joints were clear in less than the 80% advice needs: only clear reps counted.
+    var partialVisibility: PartialVisibility?
+    /// Reps of a partly visible set left out because their own frames were not clear enough.
+    var unclearReps = 0
 
     /// Sentences for the result screen, or nil when every movement counted.
     func explanation(for definition: ExerciseDefinition, counted: Int) -> String? {
@@ -370,6 +401,11 @@ nonisolated struct MovementDiagnostics: Equatable, Sendable {
         }
         if let angledView {
             parts.append("Plumb saw you about \(Int(angledView.rounded()))° from side-on. Turn a little more side-on next time; counts are most reliable from the side.")
+        }
+        if let partialVisibility {
+            let left = unclearReps == 0 ? ""
+                : " \(unclearReps) \(unclearReps == 1 ? "rep was" : "reps were") left out because Plumb could not see \(unclearReps == 1 ? "it" : "them") clearly."
+            parts.append("Plumb couldn’t see your \(partialVisibility.weakest.rawValue) in \(100 - partialVisibility.weakestShare)% of the set, so it counted only the reps it saw clearly and gives no posture advice.\(left) Keep your whole body in view for advice next time.")
         }
         return parts.isEmpty ? nil : parts.joined(separator: " ")
     }

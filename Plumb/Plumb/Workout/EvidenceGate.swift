@@ -13,6 +13,9 @@ nonisolated enum EvidenceRubric {
     /// Only for frames that do not follow one athlete (`PoseFrame.athleteTracking == nil`).
     static let maximumBystanderDuration = 0.35
     static let minimumCoverage = 0.8
+    /// Between this and `minimumCoverage`, a set is partly visible: Plumb counts the reps whose own
+    /// frames show the joints clearly, and gives no advice (13 October: a 79% set lost all its reps).
+    static let partialCoverage = 0.65
     /// Spread between the 10th and 90th percentile of the still joint's position, so one
     /// misplaced detection does not count as the phone moving.
     static let maximumAnchorMovement = 0.10
@@ -34,8 +37,11 @@ nonisolated enum EvidenceGate {
         return visible ? .landmarksVisible : .adjustPosition
     }
 
+    /// `allowsPartial` lowers the joint coverage needed from `minimumCoverage` to `partialCoverage`;
+    /// every other rule stays.
     static func assess(_ frames: [PoseFrame],
-                       requirement: EvidenceRequirement = .squat) -> EvidenceAssessment {
+                       requirement: EvidenceRequirement = .squat,
+                       allowsPartial: Bool = false) -> EvidenceAssessment {
         guard let first = frames.first, let last = frames.last,
               last.time - first.time >= EvidenceRubric.minimumSetDuration else {
             return .reject(.tooShort)
@@ -55,10 +61,11 @@ nonisolated enum EvidenceGate {
 
         let best = bestSide(frames, requirement: requirement)
         let total = Double(frames.count)
-        guard Double(best.complete) / total >= EvidenceRubric.minimumCoverage else {
+        let coverage = allowsPartial ? EvidenceRubric.partialCoverage : EvidenceRubric.minimumCoverage
+        guard Double(best.complete) / total >= coverage else {
             return .reject(.missingJoints)
         }
-        guard Double(best.confident) / total >= EvidenceRubric.minimumCoverage else {
+        guard Double(best.confident) / total >= coverage else {
             return .reject(.lowConfidence)
         }
         if tooLongGap(frames, joints: best.joints) != nil {
@@ -69,6 +76,37 @@ nonisolated enum EvidenceGate {
             return .reject(.unstableFraming)
         }
         return .usable(best.side)
+    }
+
+    /// How visible a set refused only for joint coverage was, when it reached `partialCoverage` and
+    /// passes every other rule. Nil for a fully visible set or one refused anyway.
+    static func partialVisibility(_ frames: [PoseFrame],
+                                  requirement: EvidenceRequirement = .squat) -> PartialVisibility? {
+        guard case .reject(let reason) = assess(frames, requirement: requirement),
+              reason == .missingJoints || reason == .lowConfidence,
+              case .usable(let side) = assess(frames, requirement: requirement, allowsPartial: true) else {
+            return nil
+        }
+        let best = bestSide(frames, requirement: requirement)
+        let weakest = weakestJoint(frames, requirement: requirement, side: side)
+        // Rounded down, like the refusal message, so 79.8% never reads as the 80% needed.
+        return PartialVisibility(coverage: 100 * min(best.complete, best.confident) / max(1, frames.count),
+                                 weakest: weakest.role, weakestShare: weakest.share)
+    }
+
+    /// Whether the required joints were clear in at least `partialCoverage` of the frames between
+    /// `start` and `end`: the test for keeping one rep of a partly visible set. Vision usually loses
+    /// a joint in scattered frames all through a set, so a rep needs the set's floor, not the 80%
+    /// that advice needs; a rep hidden for most of its frames is left out.
+    static func isClear(_ frames: [PoseFrame], requirement: EvidenceRequirement, side: BodySide,
+                        from start: TimeInterval, to end: TimeInterval) -> Bool {
+        let span = frames.filter { $0.time >= start && $0.time <= end }
+        guard !span.isEmpty else { return false }
+        let joints = requirement.joints(on: side)
+        let clear = span.filter { frame in
+            joints.allSatisfy { (frame.joints[$0]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence }
+        }.count
+        return Double(clear) / Double(span.count) >= EvidenceRubric.partialCoverage
     }
 
     /// A sentence with numbers saying why `assess` refused the set, so the app never stays silent.
@@ -280,4 +318,13 @@ nonisolated enum EvidenceGate {
         let sorted = values.sorted()
         return sorted[Int(Double(sorted.count - 1) * 0.9)] - sorted[Int(Double(sorted.count - 1) * 0.1)]
     }
+}
+
+/// A set whose required joints were clear in `partialCoverage` to `minimumCoverage` of its frames.
+nonisolated struct PartialVisibility: Equatable, Sendable {
+    /// Percent of the set's frames with every required joint clear, rounded down.
+    let coverage: Int
+    /// The joint least often clear, and the percent of frames where it was.
+    let weakest: JointRole
+    let weakestShare: Int
 }

@@ -54,6 +54,8 @@ nonisolated enum ComparisonGap: Equatable {
     case differentSide
     /// The earlier sets differ in camera view or measurement version.
     case incompatibleSets
+    /// This set was only partly visible, so its ranges are not compared.
+    case partlyVisible
 }
 
 nonisolated enum WorkoutResult {
@@ -539,7 +541,9 @@ final class WorkoutSessionModel {
             repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
             formNotes = FormChecks.sentences(for: analysis, frames: setFrames, definition: definition)
             // A camera angle outside the supported side view can distort relative range.
-            let cue = diagnostics?.angledView == nil
+            // A camera angle outside the supported side view can distort relative range, and a partly
+            // visible set is counted but not advised on.
+            let cue = diagnostics?.angledView == nil && diagnostics?.partialVisibility == nil
                 ? CueSelector.select(from: analysis, exercise: definition) : nil
             let issues = SetIssue.issues(diagnostics: diagnostics, cue: cue,
                                          spedUp: liveMonitor?.sawFasterRep ?? false)
@@ -548,7 +552,8 @@ final class WorkoutSessionModel {
             repeatedPattern = earlier.flatMap { issues.contains($0.issue) ? $0 : nil }
             result = .measured(analysis, cue)
             setHeartRate = SetHeartRate.make(setHeartRateReadings)
-            record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues)
+            record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues,
+                   partlyVisible: diagnostics?.partialVisibility != nil)
             offerPersonalizationIfDue()
         case .insufficientView(let reason):
             result = .insufficientView(reason)
@@ -993,9 +998,9 @@ final class WorkoutSessionModel {
     }
 
     private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind, frames: [PoseFrame],
-                        issues: [SetIssue]) {
+                        issues: [SetIssue], partlyVisible: Bool = false) {
         guard case .usable(let side) = EvidenceGate.assess(
-            frames, requirement: exercise.definition.evidence) else { return }
+            frames, requirement: exercise.definition.evidence, allowsPartial: partlyVisible) else { return }
         let now = currentDate()
         // A set long after the previous one starts a new session; the earlier one ends as at Done.
         if var open = currentSession, !open.continues(at: now) {
@@ -1009,14 +1014,16 @@ final class WorkoutSessionModel {
         let newSet = SetSummary(
             id: UUID(), sessionID: session.id, capturedAt: now,
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,
-            exercise: exercise, issues: issues
+            exercise: exercise, issues: issues, partlyVisible: partlyVisible ? true : nil
         )
         // The latest earlier set of the exercise that can be compared (not only the very last one).
         let earlier = session.sets.filter { $0.exercise == exercise }.reversed()
         session.sets.append(newSet)
         currentSession = session
         comparisonRecap = nil
-        comparison = earlier.lazy.compactMap { SetComparison.compare($0, newSet) }.first
+        // A partly visible set has reps but too few clear frames to compare ranges with.
+        comparison = partlyVisible ? nil
+            : earlier.lazy.filter { $0.partlyVisible != true }.compactMap { SetComparison.compare($0, newSet) }.first
         save(session)
     }
 
@@ -1026,6 +1033,7 @@ final class WorkoutSessionModel {
               let latest = session.sets.last else { return nil }
         let earlier = session.sets.dropLast().filter { $0.exercise == latest.exercise }
         guard !earlier.isEmpty else { return .differentExercise }
+        if latest.partlyVisible == true { return .partlyVisible }
         if latest.analysis.reps.count < SetComparison.minimumReps
             || earlier.allSatisfy({ $0.analysis.reps.count < SetComparison.minimumReps }) {
             return .tooFewReps
