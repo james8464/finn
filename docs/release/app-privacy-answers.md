@@ -13,7 +13,8 @@ Choose **“No, we do not collect data from this app”** for the current Plumb 
 | Set summaries and feedback | JSON in the app's local Application Support directory; removable in History | None through the app |
 | User-initiated summary export | A text summary of the latest measured set and, when available, its compatible two-set range change opens in the system Share Sheet only after the person taps **Share summary**; the person chooses the destination | None through the app |
 | Optional recap | Apple's Foundation Models receives structured comparison facts on eligible devices; no Plumb server or third-party model endpoint | None through the app |
-| Optional spoken observation | AVSpeechSynthesizer reads the on-screen measured cue through the system audio route after a tap; no microphone input or audio file | None through the app |
+| Spoken reps and observation | AVSpeechSynthesizer says the countdown, live rep counts and observations (on by default, Options switch) and reads the on-screen measured cue after a tap, through the system audio route; no microphone input or audio file | None through the app |
+| Measured patterns per set | A list of measured patterns (for example "shallowMovements") inside each local set summary, used for the most-frequent-pattern focus | None through the app |
 | Validation timing | A local result-screen readout only when Xcode launches with `-plumb-validation`; not saved or uploaded | None through the app |
 
 The app currently has no account, analytics, advertising, support form, cloud sync, HealthKit, microphone capture, or third-party SDK. A source search found no `URLSession`, `URLRequest`, Network framework connection, web view, or upload path. The Xcode project has no package dependency or data-sharing entitlement. The unsigned archive contains the app binary and Apple asset catalog without a bundled data-collection SDK.

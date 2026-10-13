@@ -278,14 +278,14 @@ struct ContentView: View {
                 Divider()
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Saved results").font(.headline).accessibilityAddTraits(.isHeader)
-                    Text("Measured set summaries are saved on this iPhone so you can review previous sets.")
+                    Text("Measured set summaries are saved on this iPhone so you can review previous sets. They include which measured patterns each set showed, so Plumb can point out your most frequent one.")
                     Text("Saved summaries may be included in your device backup.")
                     Text("Delete saved sessions in History.")
                 }
                 Divider()
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Optional audio").font(.headline).accessibilityAddTraits(.isHeader)
-                    Text("Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone.")
+                    Text("Plumb says the countdown, each rep, and short live observations, and you can tap to hear an observation, through your iPhone or headphones. Turn spoken reps off in Options. Plumb does not record sound or use the microphone.")
                 }
                 Divider()
                 if model.recognitionMethod != .unavailable {
