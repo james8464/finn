@@ -1033,16 +1033,28 @@ struct ContentView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 24)
             }
-            Button {
-                observationSpeaker.stop()
-                Task { await model.startPreview() }
-            } label: {
-                Text(retakeLabel)
-                    .foregroundStyle(PlumbStyle.primaryButtonText)
-                    .frame(maxWidth: .infinity)
+            VStack(spacing: 4) {
+                Button {
+                    observationSpeaker.stop()
+                    Task { await model.startPreview() }
+                } label: {
+                    Text(retakeLabel)
+                        .foregroundStyle(PlumbStyle.primaryButtonText)
+                        .frame(maxWidth: .infinity)
+                }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                // Back to the first screen without ending the session (Done does that): the exercise
+                // picker, Options and History are there, and the next set still joins this session.
+                Button("Change exercise or options") {
+                    observationSpeaker.stop()
+                    Task { await model.cancel() }
+                }
+                    .buttonStyle(.plain)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                    .accessibilityIdentifier("result.back")
             }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
                 .background(.bar)
@@ -1389,6 +1401,15 @@ struct ContentView: View {
                     }
                     .buttonStyle(.borderedProminent)
                 }
+                // The first screen, with History, Options, Privacy and an open session's Finish
+                // session, stays reachable while the camera cannot be used.
+                Button("Back") {
+                    Task { await model.cancel() }
+                }
+                .buttonStyle(.plain)
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+                .accessibilityIdentifier("failure.back")
             }
             .controlSize(.large)
             .padding(.horizontal, 24)

@@ -403,6 +403,33 @@ struct FitnessSessionTests {
         #expect(setup.model.fitnessSave == nil)
     }
 
+    /// The Back buttons on the result and on a camera error go to the first screen through
+    /// `cancel()`, not Done: the session stays open (Finish session is offered), nothing is saved to
+    /// Health yet, and the next set joins the session and is compared.
+    @Test func goingBackFromAResultOrACameraErrorKeepsTheSession() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let id = try #require(setup.model.currentSession?.id)
+        #expect(setup.model.stage == .result)
+        await setup.model.cancel()
+        #expect(setup.model.stage == .ready)
+        #expect(setup.model.unfinishedSession?.id == id)
+
+        setup.source.startError = .denied
+        await setup.model.startPreview()
+        #expect(setup.model.stage == .error(.permissionDenied))
+        await setup.model.cancel()
+        #expect(setup.model.stage == .ready)
+        #expect(setup.model.unfinishedSession?.id == id)
+        #expect(setup.fitness.saveAttempts == 0)
+
+        setup.source.startError = nil
+        setup.clock.advance(by: 60)
+        try await setup.measureASet(setsInSession: 2)
+        #expect(setup.model.currentSession?.id == id)
+        #expect(setup.model.comparison != nil)
+    }
+
     @Test func aSessionContinuesUpToTheLongestBreak() {
         let start = Date(timeIntervalSince1970: 1_800_000_000)
         let empty = WorkoutSessionSummary(id: UUID(), startedAt: start, sets: [])
@@ -526,10 +553,12 @@ private final class FakeFitnessExporter: FitnessWorkoutSaving {
 @MainActor
 private final class TestSource: PoseStreaming {
     let previewSession = AVCaptureSession()
+    var startError: CameraSourceError?
     private var continuation: AsyncStream<PoseFrame>.Continuation?
 
     func start() async throws -> AsyncStream<PoseFrame> {
-        AsyncStream { continuation in self.continuation = continuation }
+        if let startError { throw startError }
+        return AsyncStream { continuation in self.continuation = continuation }
     }
 
     func stop() async {
