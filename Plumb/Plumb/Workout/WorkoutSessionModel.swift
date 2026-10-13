@@ -205,6 +205,8 @@ final class WorkoutSessionModel {
     /// The camera stopped during the set (another app took it, an interruption); the part captured
     /// before was reviewed.
     private(set) var endedEarly = false
+    /// The latest set reached Plumb's 2-minute limit and was stopped there.
+    private(set) var endedAtLimit = false
     /// What to change for the next try, matched to why the set was refused; nil when the reason
     /// already says it.
     private(set) var retakeHint: String?
@@ -380,6 +382,7 @@ final class WorkoutSessionModel {
                 self.framingWatchdog?.cancel()
                 self.framingWatchdog = nil
                 if self.stage == .capturing && self.source.endedAtLimit {
+                    self.endedAtLimit = true
                     self.stage = .analyzing
                     self.completeAnalysis()
                     self.announceResult()
@@ -481,8 +484,12 @@ final class WorkoutSessionModel {
         resultExercise = exercise
         lastViewVerdict = ViewCheck.assess(setFrames, expected: definition.expectedView)
         // Already trimmed to the set: analyze exactly these frames, so the saved set is gated the same.
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(
+        let (outcome, measured) = ExerciseAnalyzer.analyzeWithDiagnostics(
             setFrames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore, trimsToSet: false)
+        var diagnostics = measured
+        // Plumb ended the capture (its time limit, or the camera stopping), not the athlete: a
+        // movement cut off then is not one they left unfinished, to note or to count in their pattern.
+        if endedAtLimit || endedEarly { diagnostics?.unfinished = false }
         movementNote = nil
         repExtremes = nil
         repeatedPattern = nil
@@ -656,7 +663,9 @@ final class WorkoutSessionModel {
     private func announceResult() {
         switch result {
         case .measured(let analysis, _):
-            say(analysis.reps.count == 1 ? "1 rep measured" : "\(analysis.reps.count) reps measured")
+            let count = analysis.reps.count == 1 ? "1 rep measured" : "\(analysis.reps.count) reps measured"
+            // One phrase: the person may still be exercising and should know why the set ended.
+            say(endedAtLimit ? "2-minute limit reached. \(count)" : count)
         case .insufficientView, .failed:
             say("Plumb couldn’t measure this set. The reason is on screen.")
         case .interrupted, nil:
@@ -679,6 +688,7 @@ final class WorkoutSessionModel {
         liveCaption = nil
         endedHandsFree = false
         endedEarly = false
+        endedAtLimit = false
         notReadySince = nil
         lastFramingSpeech = -Double.infinity
         previewLandmarksVisible = false

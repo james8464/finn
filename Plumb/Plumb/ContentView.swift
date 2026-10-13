@@ -870,6 +870,12 @@ struct ContentView: View {
                             .foregroundStyle(PlumbStyle.supportingText)
                             .accessibilityIdentifier("result.endedEarly")
                     }
+                if model.endedAtLimit {
+                    Text("Plumb ends a set after 2 minutes. It reviewed the reps before that.")
+                        .font(.footnote)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                        .accessibilityIdentifier("result.endedAtLimit")
+                }
                     if model.endedHandsFree {
                         Text("Plumb ended the set when you walked away or stopped moving.")
                             .font(.footnote)

@@ -304,6 +304,38 @@ struct WorkoutSessionModelTests {
         #expect(model.lastStopToResultMilliseconds == nil)
     }
 
+    /// The 2-minute limit, or the camera stopping, cuts the set halfway down a rep. That cut is
+    /// Plumb's, not a movement the athlete left unfinished: it is not noted or saved as one, and
+    /// the limit is said with the result.
+    @Test func aCutMidRepIsNotTheAthletesUnfinishedRep() async throws {
+        for atLimit in [true, false] {
+            let source = TestPoseSource()
+            let announcer = RecordingAnnouncer()
+            let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbCut-\(UUID())")!)
+            let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+            await model.startPreview()
+            await model.beginSet(countdown: 0)
+            // Six 2 s reps, cut at the bottom of the sixth.
+            let frames = CaptureTraces.squats(reps: 6, from: 0).filter { $0.time <= 11.0 }
+            for frame in frames { source.emit(frame) }
+            try await waitUntil { model.frameCount == frames.count }
+            if atLimit { source.finishAtLimit() } else { source.finishUnexpectedly() }
+            try await waitUntil { model.stage == .result }
+            guard case .measured(let analysis, _) = model.result else {
+                Issue.record("Expected the reps before the cut to be measured, got \(String(describing: model.result))")
+                return
+            }
+            #expect(analysis.reps.count == 5)
+            #expect(model.currentSession?.sets.last?.issues?.contains(.unfinishedLastRep) == false, "at limit: \(atLimit)")
+            #expect(model.movementNote == nil, "at limit: \(atLimit)")
+            #expect(model.endedAtLimit == atLimit)
+            #expect(model.endedEarly == !atLimit)
+            if atLimit {
+                #expect(announcer.phrases.last == "2-minute limit reached. 5 reps measured", "\(announcer.phrases)")
+            }
+        }
+    }
+
     @Test func cancellingCountdownNeverRecords() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
