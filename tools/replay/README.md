@@ -44,10 +44,12 @@ Expected results on the current macOS Vision path: six measured reps for the ori
 | [Low resolution](fixtures/squat-low-resolution.mp4) | Coarse source detail restored to the original frame size | 6 measured reps |
 | [Off center](fixtures/squat-off-center.mp4) | Athlete nearer one edge | 6 measured reps |
 | [Tilted phone](fixtures/squat-angled-phone.mp4) | Image plane rotated about 7° | 6 measured reps |
-| [Motion blur](fixtures/squat-motion-blur.mp4) | Three-frame temporal blend | Retake: required joints are not clear often enough |
+| [Motion blur](fixtures/squat-motion-blur.mp4) | Nine-frame temporal blend with strong spatial blur | Retake: required joints are not clear often enough |
 | [Moving phone](fixtures/squat-phone-shake.mp4) | Frame shifts during the set | Retake: required joints are not clear often enough |
 
 Rebuild the variants with `python3 tools/replay/generate_video_variants.py`. It uses `ffmpeg` on PATH or the local `imageio-ffmpeg` package; the checked-in MP4s let teammates run replay without generating them. These transformations reuse the same synthetic person and poses, so they are correlated tests rather than twelve new participants or independent technique examples. The tilted-phone video rotates a 2D frame; it does **not** test a real three-quarter camera viewpoint or the Vision 3D angle check.
+
+The earlier mild three-frame blur could still produce six measured reps on a hosted Vision runtime. The current deliberately severe blur is meant to test the low-visibility retake path consistently; it does not define how much ordinary motion blur is acceptable in a real workout.
 
 `fixtures/squat-feet-hidden.mp4` covers only the feet. Before the 13 October capture change, Vision inferred ankles behind the obstruction and the app counted six reps. The new path uses [Vision person segmentation](https://developer.apple.com/documentation/vision/vngeneratepersonsegmentationrequest) on every third analyzed frame; those ankles no longer pass the evidence gate. A person mask can still fail on real clothing, lighting, and overlaps with other people. The video is a regression for this one obstruction, not proof of reliable occlusion handling in general.
 

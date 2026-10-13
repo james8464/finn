@@ -23,7 +23,7 @@ VARIANTS = {
     "squat-low-resolution.mp4": "scale=180:240:flags=bilinear,scale=720:960:flags=neighbor",
     "squat-off-center.mp4": "crop=576:960:144:0,pad=720:960:0:0:color=0xbcbec1",
     "squat-angled-phone.mp4": "rotate=0.12:fillcolor=0xbcbec1:ow=iw:oh=ih",
-    "squat-motion-blur.mp4": "tmix=frames=3:weights=1 1 1",
+    "squat-motion-blur.mp4": "tmix=frames=9,gblur=sigma=12",
     "squat-phone-shake.mp4": "crop=600:960:x='60+50*sin(n/8)':y=0,pad=720:960:60:0:color=0xbcbec1",
 }
 

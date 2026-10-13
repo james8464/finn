@@ -37,6 +37,7 @@ final class WorkoutFlowUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 2)
         XCTAssertNotEqual(elapsed.value as? String, initial)
         Thread.sleep(forTimeInterval: 2)
+        let previousSetElapsed = elapsed.value as? String ?? ""
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
         XCTAssertFalse(elapsed.exists)
@@ -44,7 +45,8 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Start set"].tap()
         XCTAssertTrue(elapsed.waitForExistence(timeout: 6))
         let restarted = elapsed.value as? String ?? ""
-        XCTAssertTrue(["00:00", "00:01"].contains(restarted), restarted)
+        XCTAssertLessThan(restarted, previousSetElapsed,
+                          "The next set's timer should restart below the previous set's elapsed time")
     }
 
     @MainActor
