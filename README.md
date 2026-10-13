@@ -116,6 +116,7 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 - `docs/README.md`: document map by purpose
 - `docs/product/rationale.md`: why a focused camera technique companion is worth testing
 - `docs/product/market-research.md`: primary-source alternatives and customer research plan
+- `docs/product/user-needs.md`: what people need from Plumb, ranked with sources (13 October research), and what came of it
 - `docs/product/pitch.md`: three-minute story, demo path, and claim boundaries
 - `Plumb/GIT guide.md`: the team's current `main` branch workflow
 
