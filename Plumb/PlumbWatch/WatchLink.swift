@@ -13,11 +13,20 @@ final class WatchLink: NSObject, WCSessionDelegate {
     private(set) var isPhoneReachable = false
     /// Shown when a command did not reach the iPhone.
     private(set) var notice: String?
+    /// Heart rate while the iPhone camera is open, when the person turned on Personalize with Health.
+    let heart = HeartRateSession()
     @ObservationIgnored private var isStarted = false
 
     func start() {
         guard !isStarted, WCSession.isSupported() else { return }
         isStarted = true
+        heart.onHeartRate = { beatsPerMinute, date in
+            let reading = WatchHeartRate(beatsPerMinute: beatsPerMinute, measuredAt: date.timeIntervalSince1970)
+            let session = WCSession.default
+            guard session.activationState == .activated, session.isReachable else { return }
+            // A lost reading is replaced by the next one a few seconds later.
+            session.sendMessage(reading.message(), replyHandler: nil, errorHandler: nil)
+        }
         let session = WCSession.default
         session.delegate = self
         session.activate()
@@ -37,8 +46,18 @@ final class WatchLink: NSObject, WCSessionDelegate {
         guard incoming.isNewer(than: state) else { return }
         state = incoming
         notice = nil
+        followHeartRate(incoming)
         // A saved application context is read later, maybe long after: only live states tap.
         if live { Self.play(incoming.haptic) }
+    }
+
+    /// Runs the workout session from the moment the camera opens until it closes.
+    private func followHeartRate(_ state: WatchState) {
+        if state.measuresHeartRate && state.stage != .ready {
+            Task { await heart.start() }
+        } else {
+            heart.stop()
+        }
     }
 
     private func commandFailed() {

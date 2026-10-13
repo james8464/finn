@@ -17,6 +17,17 @@ struct WatchSetView: View {
                     Text("Open Plumb on your iPhone to start a set.")
                         .multilineTextAlignment(.center)
                 }
+                if let beats = link.heart.beatsPerMinute {
+                    Label("\(beats) bpm", systemImage: "heart.fill")
+                        .font(.footnote.monospacedDigit())
+                        .foregroundStyle(.red)
+                        .accessibilityLabel("Heart rate \(beats) beats per minute")
+                } else if let problem = link.heart.problem {
+                    Text(problem)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
                 if let notice = link.notice {
                     Text(notice)
                         .font(.footnote)
