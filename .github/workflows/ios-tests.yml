@@ -49,6 +49,19 @@ jobs:
             -maximum-parallel-testing-workers 1 \
             -collect-test-diagnostics never \
             CODE_SIGNING_ALLOWED=NO
+      - name: Show failed test messages
+        if: failure()
+        run: |
+          # The xcodebuild summary names failing tests without saying why; the result bundle does.
+          xcrun xcresulttool get test-results summary --path "$RUNNER_TEMP/Plumb.xcresult" > "$RUNNER_TEMP/summary.json" || exit 0
+          python3 - "$RUNNER_TEMP/summary.json" <<'PY'
+          import json, sys
+          summary = json.load(open(sys.argv[1]))
+          for failure in summary.get("testFailures", []):
+              name = failure.get("testIdentifierString") or failure.get("testName")
+              print("::error title={}::{}".format(name, failure.get("failureText", "").replace("\n", " ")))
+              print(json.dumps(failure, indent=2))
+          PY
       - name: Replay generated workout videos through Vision
         if: always()
         run: tools/replay/test_generated_videos.sh

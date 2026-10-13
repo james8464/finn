@@ -30,7 +30,7 @@ The command prints JSON with `status` (`measured`, `retake`, or `failed`), `fram
 tools/replay/test_generated_videos.sh
 ```
 
-Expected results on the current macOS Vision path: six measured reps for the original and the clear lighting, size, position, tilt, resolution, and tempo variants; a retake for no movement, hidden legs, covered feet, a person made too small, motion blur, or phone shake. The mirrored clip is diagnostic: this generated pose falls below the current joint-coverage gate and asks for a retake. We do not loosen the gate to force a positive result. The iOS simulator tests play the clear and covered-feet clips on the workout screen with matching pose JSON captured from Vision. The GitHub iOS workflow runs these checks automatically. Source poses change in hard steps, so this tests the video reader, Vision integration, person-mask gate, and rep counter; it is not a realistic biomechanics benchmark.
+Expected results on the current macOS Vision path: six measured reps for the original and the clear lighting, size, position, tilt, resolution, and tempo variants; a retake for no movement, hidden legs, covered feet, a person made too small, or phone shake. Motion blur asked for a retake until `squat-side-v7`; with the wider person-mask search it measures the six reps (CI run of 13 October). The mirrored clip is diagnostic: this generated pose falls below the current joint-coverage gate and asks for a retake. We do not loosen the gate to force a positive result. The iOS simulator tests play the clear and covered-feet clips on the workout screen with matching pose JSON captured from Vision. The GitHub iOS workflow runs these checks automatically. Source poses change in hard steps, so this tests the video reader, Vision integration, person-mask gate, and rep counter; it is not a realistic biomechanics benchmark.
 
 | Variant | What it probes | Current replay |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ Expected results on the current macOS Vision path: six measured reps for the ori
 | [Low resolution](fixtures/squat-low-resolution.mp4) | Coarse source detail restored to the original frame size | 6 measured reps |
 | [Off center](fixtures/squat-off-center.mp4) | Athlete nearer one edge | 6 measured reps |
 | [Tilted phone](fixtures/squat-angled-phone.mp4) | Image plane rotated about 7° | 6 measured reps |
-| [Motion blur](fixtures/squat-motion-blur.mp4) | Three-frame temporal blend | Retake: required joints are not clear often enough |
+| [Motion blur](fixtures/squat-motion-blur.mp4) | Three-frame temporal blend | Six measured reps since `squat-side-v7` (a retake before: the blurred mask edge hid the ankles) |
 | [Moving phone](fixtures/squat-phone-shake.mp4) | Frame shifts during the set | Retake: required joints are not clear often enough |
 
 Rebuild the variants with `python3 tools/replay/generate_video_variants.py`. It uses `ffmpeg` on PATH or the local `imageio-ffmpeg` package; the checked-in MP4s let teammates run replay without generating them. These transformations reuse the same synthetic person and poses, so they are correlated tests rather than twelve new participants or independent technique examples. The tilted-phone video rotates a 2D frame; it does **not** test a real three-quarter camera viewpoint or the Vision 3D angle check.

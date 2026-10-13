@@ -716,6 +716,9 @@ struct ContentView: View {
                 .frame(maxWidth: 180)
                 .accessibilityHidden(true)
         }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("capture.handsFree")
     }
@@ -733,6 +736,11 @@ struct ContentView: View {
             Text(model.liveRepCount == 1 ? "rep" : "reps")
                 .font(.headline)
         }
+        // A dark backing keeps the white count readable over a bright camera image, like the other
+        // labels drawn over the feed (the full accessibility audit checks this contrast).
+        .padding(.horizontal, 24)
+        .padding(.vertical, 8)
+        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 20))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Reps counted")
         .accessibilityValue("\(model.liveRepCount)")
