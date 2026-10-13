@@ -7,6 +7,7 @@ nonisolated struct PlumbPreferences: @unchecked Sendable {
     static let checksCameraAngleKey = "plumb.checksCameraAngle"
     static let handsFreeKey = "plumb.handsFree"
     static let speaksLiveKey = "plumb.speaksLive"
+    static let savesToFitnessKey = "plumb.savesToFitness"
 
     let defaults: UserDefaults
     /// Hands-free capture until the person changes it. On in the app, where the phone stands a
@@ -52,5 +53,12 @@ nonisolated struct PlumbPreferences: @unchecked Sendable {
     var speaksLive: Bool {
         get { defaults.object(forKey: Self.speaksLiveKey) as? Bool ?? true }
         nonmutating set { defaults.set(newValue, forKey: Self.speaksLiveKey) }
+    }
+
+    /// Off by default: a finished session is saved to Apple Health as a workout, so it appears in
+    /// the Fitness app, only once the person turns this on and allows it in Health.
+    var savesToFitness: Bool {
+        get { defaults.bool(forKey: Self.savesToFitnessKey) }
+        nonmutating set { defaults.set(newValue, forKey: Self.savesToFitnessKey) }
     }
 }

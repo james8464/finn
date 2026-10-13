@@ -52,12 +52,14 @@ struct ContentView: View {
                     exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
                     preferences: PlumbPreferences = .standard,
                     announcer: (any LiveAnnouncing)? = nil,
+                    fitness: (any FitnessWorkoutSaving)? = nil,
                     connectsAccessories: Bool = false) {
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
                                                          narrator: narrator,
                                                          exerciseClassifier: exerciseClassifier,
                                                          preferences: preferences,
-                                                         announcer: announcer))
+                                                         announcer: announcer,
+                                                         fitness: fitness))
         self.connectsAccessories = connectsAccessories
     }
 
@@ -118,6 +120,8 @@ struct ContentView: View {
             if phase == .active && model.historyIssue == .unavailable {
                 model.retryHistory()
             }
+            // The person may have allowed or turned off Plumb in Health settings meanwhile.
+            if phase == .active { model.refreshFitnessAccess() }
         }
         .confirmationDialog("Delete this session?", isPresented: Binding(
             get: { deleteCandidate != nil },
@@ -128,14 +132,25 @@ struct ContentView: View {
                 deleteCandidate = nil
             }
         } message: {
-            Text("Its measured set summaries will be removed from this iPhone.")
+            // Plumb never deletes Health data: say so where the person decides.
+            Text(deleteCandidateLeavesHealthWorkout
+                 ? "Its measured set summaries will be removed from this iPhone. The workout saved to Apple Health stays there; you can delete it in the Health app."
+                 : "Its measured set summaries will be removed from this iPhone.")
         }
         .alert("Delete all local data?", isPresented: $deleteAllRequested) {
             Button("Delete all data", role: .destructive) { model.deleteAllData() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This removes saved sessions and any recovered history backups from this iPhone.")
+            Text(model.leavesHealthWorkouts
+                 ? "This removes saved sessions and any recovered history backups from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
+                 : "This removes saved sessions and any recovered history backups from this iPhone.")
         }
+    }
+
+    /// Whether the session about to be deleted has a workout in Apple Health, which stays there.
+    private var deleteCandidateLeavesHealthWorkout: Bool {
+        guard let id = deleteCandidate else { return false }
+        return model.leavesHealthWorkout(forSession: id)
     }
 
     private var setup: some View {
@@ -144,6 +159,16 @@ struct ContentView: View {
                 Text("Review your movement after each set.")
                     .foregroundStyle(PlumbStyle.supportingText)
                     .padding(.bottom, 28)
+                // After Done: whether the session reached Apple Fitness.
+                if let save = model.fitnessSave {
+                    fitnessStatus(save)
+                        .padding(.bottom, 20)
+                }
+                // Cancel, or the app going to the background during a set, comes back here without Done.
+                if let open = model.unfinishedSession {
+                    unfinishedSessionLine(open)
+                        .padding(.bottom, 20)
+                }
                 exercisePicker
                 if model.usesExerciseRecognition {
                     Text("After the set, Plumb also checks which exercise you did. If it isn’t sure, it keeps your choice.")
@@ -220,6 +245,91 @@ struct ContentView: View {
                     Label("Privacy", systemImage: "hand.raised")
                 }
             }
+        }
+    }
+
+    /// One short line about the latest save to Apple Health, with Try again when it can help.
+    private func fitnessStatus(_ save: FitnessSaveReport) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label(save.status.text, systemImage: Self.fitnessSymbol(save.status))
+                .font(.subheadline)
+                .accessibilityIdentifier("fitness.status")
+            if save.status.offersRetry && model.savesToFitness {
+                Button("Try again") { Task { await model.saveToFitness(sessionID: save.sessionID) } }
+                    .font(.subheadline)
+                    .frame(minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .accessibilityIdentifier("fitness.retry")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// The session still open on the first screen, with a way to end it as Done does.
+    private func unfinishedSessionLine(_ session: WorkoutSessionSummary) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(session.sets.count == 1 ? "Session in progress · 1 measured set"
+                 : "Session in progress · \(session.sets.count) measured sets")
+                .font(.subheadline)
+            if model.offersFitness && model.savesToFitness {
+                Text("Finish it to save it to Apple Fitness.")
+                    .font(.footnote)
+                    .foregroundStyle(PlumbStyle.supportingText)
+            }
+            Button("Finish session") { Task { await model.finishSession() } }
+                .font(.subheadline)
+                .frame(minHeight: 44, alignment: .leading)
+                .contentShape(Rectangle())
+                .accessibilityIdentifier("setup.finishSession")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private static func fitnessSymbol(_ status: FitnessSaveStatus) -> String {
+        switch status {
+        case .saving: "arrow.triangle.2.circlepath"
+        case .saved: "checkmark.circle"
+        case .failed: "exclamationmark.circle"
+        case .needsPermission: "hand.raised"
+        case .unavailable: "heart.slash"
+        }
+    }
+
+    /// Under the Apple Fitness switch: why it is off for demo input, or what Health allows.
+    private var fitnessOptionNote: String? {
+        guard model.offersFitness else { return "Demo and recorded input are never saved to Apple Health." }
+        guard model.savesToFitness else { return nil }
+        switch model.fitnessAccess {
+        case .denied: return "Health doesn’t let Plumb save workouts. \(FitnessSaveStatus.needsPermission.text)."
+        case .unavailable: return "\(FitnessSaveStatus.unavailable.text)."
+        case .authorized, .notDetermined: return nil
+        }
+    }
+
+    /// In a saved session: saved to Fitness, or a way to save it when the option is on.
+    @ViewBuilder private func fitnessHistoryLine(_ session: WorkoutSessionSummary) -> some View {
+        if let record = model.fitnessRecord(forSession: session.id) {
+            Label("Saved to Fitness on \(record.savedAt.formatted(date: .abbreviated, time: .shortened))",
+                  systemImage: "checkmark.circle")
+                .font(.subheadline)
+                .padding(.top, 32)
+                .accessibilityIdentifier("history.savedToFitness")
+        } else if model.offersFitness && model.savesToFitness {
+            VStack(alignment: .leading, spacing: 4) {
+                if let save = model.fitnessSave, save.sessionID == session.id {
+                    Label(save.status.text, systemImage: Self.fitnessSymbol(save.status))
+                        .font(.subheadline)
+                }
+                if model.canSaveToFitness(session) {
+                    // Saving the session still open on the first screen finishes it.
+                    Button(model.unfinishedSession?.id == session.id ? "Finish session and save to Fitness"
+                           : "Save to Fitness") { Task { await model.saveToFitness(sessionID: session.id) } }
+                        .frame(minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .accessibilityIdentifier("history.saveToFitness")
+                }
+            }
+            .padding(.top, 32)
         }
     }
 
@@ -323,6 +433,13 @@ struct ContentView: View {
                 }
                 Divider()
                 VStack(alignment: .leading, spacing: 12) {
+                    Text("Apple Health").font(.headline).accessibilityAddTraits(.isHeader)
+                    Text("If you turn on Save workouts to Apple Fitness, Plumb writes each finished session to Health as a workout, with your permission: its time, sets, measured reps, and exercise names.")
+                    Text("Plumb reads nothing from Health and never adds calories or heart rate. Nothing leaves this iPhone through Plumb.")
+                    Text("Health keeps these workouts under your Health settings. Deleting history in Plumb doesn’t remove them; delete them in the Health app.")
+                }
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
                     Text("Optional audio").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Plumb says the countdown, each rep, and short live observations, and you can tap to hear an observation, through your iPhone or headphones. Turn spoken reps off in Options. Plumb does not record sound or use the microphone.")
                 }
@@ -417,6 +534,27 @@ struct ContentView: View {
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.speaksLive")
                     Text("Plumb says the countdown, each counted rep, and when a rep is clearly faster or shorter than your first reps of the set. It uses your AirPods or other headphones when they are connected, otherwise the iPhone speaker.")
+                }
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Apple Fitness").font(.headline).accessibilityAddTraits(.isHeader)
+                    Toggle("Save workouts to Apple Fitness", isOn: Binding(
+                        get: { model.savesToFitness },
+                        set: { isOn in
+                            model.savesToFitness = isOn
+                            // Permission in context: Health asks when the person turns this on.
+                            if isOn { Task { await model.requestFitnessAccess() } }
+                        }
+                    ))
+                    .frame(minHeight: 44)
+                    .disabled(!model.offersFitness)
+                    .accessibilityIdentifier("options.savesToFitness")
+                    Text("When you finish a session (Done, or Finish session on the first screen), Plumb saves it to Apple Health as a strength training workout with its time and measured reps, never calories or heart rate, so it shows in the Fitness app.")
+                    if let note = fitnessOptionNote {
+                        Text(note)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityIdentifier("options.fitnessNote")
+                    }
                 }
             }
             .font(.body)
@@ -963,7 +1101,9 @@ struct ContentView: View {
                             NavigationLink { historyDetail(session) } label: {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(session.startedAt.formatted(date: .abbreviated, time: .shortened))
-                                    Text("\(session.sets.count) measured sets")
+                                    Text(model.fitnessRecord(forSession: session.id) == nil
+                                         ? "\(session.sets.count) measured sets"
+                                         : "\(session.sets.count) measured sets · Saved to Fitness")
                                         .font(.subheadline)
                                         .foregroundStyle(PlumbStyle.supportingText)
                                 }
@@ -1033,6 +1173,7 @@ struct ContentView: View {
                         Divider().padding(.vertical, 28)
                     }
                 }
+                fitnessHistoryLine(session)
                 Text("These are camera measurements from one view, not a full technique assessment.")
                     .font(.footnote)
                     .foregroundStyle(PlumbStyle.supportingText)

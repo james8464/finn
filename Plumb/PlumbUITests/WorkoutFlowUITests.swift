@@ -101,6 +101,9 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Privacy"].exists)
         XCTAssertTrue(app.staticTexts["Camera"].exists)
         XCTAssertTrue(app.staticTexts["Saved results"].exists)
+        XCTAssertTrue(app.staticTexts["Apple Health"].exists)
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
+            format: "label BEGINSWITH %@", "Plumb reads nothing from Health and never adds calories or heart rate.")).firstMatch.exists)
         XCTAssertTrue(app.staticTexts["Optional audio"].exists)
         // XCTest refuses identifier queries longer than 128 characters, so match the start.
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(
@@ -143,6 +146,10 @@ final class WorkoutFlowUITests: XCTestCase {
             "Measured set summaries are saved on this iPhone so you can review previous sets.",
             "Saved summaries may be included in your device backup.",
             "Delete saved sessions in History.",
+            "Apple Health",
+            "If you turn on Save workouts to Apple Fitness, Plumb writes each finished session to Health as a workout",
+            "Plumb reads nothing from Health and never adds calories or heart rate.",
+            "Health keeps these workouts under your Health settings.",
             "Optional audio",
             "Plumb says the countdown, each rep, and short live observations",
             "Optional explanation",
@@ -155,7 +162,7 @@ final class WorkoutFlowUITests: XCTestCase {
         }
         let policyLink = app.links["Full privacy policy"]
         XCTAssertTrue(policyLink.exists)
-        for _ in 0..<3 where !policyLink.isHittable { app.swipeUp() }
+        for _ in 0..<4 where !policyLink.isHittable { app.swipeUp() }
         XCTAssertTrue(policyLink.isHittable)
         XCTAssertGreaterThanOrEqual(policyLink.frame.height, 44)
         // iOS 27's image-based checks have flagged visible, accessible black-on-white copy here.
