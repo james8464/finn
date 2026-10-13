@@ -22,8 +22,6 @@ tools/replay/replay.sh --exercise pushUp --poses /tmp/plumb-pushup-poses.json
 
 The command prints JSON with `status` (`measured`, `retake`, or `failed`), `frameCount`, `measuredReps`, and a `reason` or `rubricVersion` when available. `--poses-output` is optional. Supported exercise values are `bodyweightSquat`, `pushUp`, `staticLunge`, and `stiffLegDeadlift`. The pose JSON can also be supplied to the app's Debug video-file path on the simulator with `-plumb-video-file <video> -plumb-video-poses <json>`; Xcode must make those files readable to the simulator process.
 
-The Debug file source buffers a complete short fixture while UI tests take screenshots. This avoids dropping just enough clear pose frames to move the original clip from 81% joint coverage below the app's 80% evidence gate on a slow simulator. The live camera keeps its real-time capture behavior; simulator playback is an integration check, not a performance or accuracy benchmark for an iPhone camera.
-
 ## Generated video checks
 
 `fixtures/` contains synthetic videos only. The original four cover a six-rep side-view squat, a held standing pose, hidden legs, and covered feet. Twelve reproducible variants of the six-rep squat change light and color, subject size, framing, blur, apparent phone movement, or tempo. All variants derive from the same source person and motion; they are not new participants. Run them through the macOS Vision extractor and the same exercise analyzer as the app:
@@ -32,11 +30,11 @@ The Debug file source buffers a complete short fixture while UI tests take scree
 tools/replay/test_generated_videos.sh
 ```
 
-Expected results on the current macOS Vision path: six measured reps for the original and the clear lighting, size, position, tilt, resolution, and tempo variants; a retake for no movement, hidden legs, covered feet, a person made too small, motion blur, or phone shake. The mirrored clip is diagnostic: this generated pose falls below the current joint-coverage gate and asks for a retake. We do not loosen the gate to force a positive result. The iOS simulator tests play the clear and covered-feet clips on the workout screen with matching pose JSON captured from Vision. The GitHub iOS workflow runs these checks automatically. Source poses change in hard steps, so this tests the video reader, Vision integration, person-mask gate, and rep counter; it is not a realistic biomechanics benchmark.
+Expected results on the current macOS Vision path: six measured reps for the original and the clear lighting, size, position, tilt, resolution, and tempo variants; a retake for no movement, hidden legs, covered feet, a person made too small, or phone shake. Motion blur and the mirrored clip asked for a retake until `squat-side-v7`; with the wider person-mask search and the set window, both measure the six reps (CI run of 13 October). The mirrored clip stays diagnostic: the script accepts either result for it. Each clip also runs the hands-free path frame by frame, as the camera feeds it (`LiveSetMonitor`, `StartReadiness`): the live count may never exceed the result and may be at most one rep behind it, and the script prints the live cues and when a hands-free start would trigger. On the recorded six-rep poses the live count is 6 with no cue and the start triggers after 1.5 s of standing; on the covered-feet poses it stays at 0 and never starts. We do not loosen the gate to force a positive result. The iOS simulator tests play the clear and covered-feet clips on the workout screen with matching pose JSON captured from Vision. The GitHub iOS workflow runs these checks automatically. Source poses change in hard steps, so this tests the video reader, Vision integration, person-mask gate, and rep counter; it is not a realistic biomechanics benchmark.
 
 | Variant | What it probes | Current replay |
 | --- | --- | --- |
-| [Mirrored](fixtures/squat-mirrored.mp4) | Opposite facing direction | Retake: required joints clear in about 71% of frames, below the 80% gate |
+| [Mirrored](fixtures/squat-mirrored.mp4) | Opposite facing direction | Six measured reps since `squat-side-v7`; before, a retake with required joints clear in about 71% of frames, below the 80% gate |
 | [Dim](fixtures/squat-dim.mp4) | Lower light and saturation | 6 measured reps |
 | [Farther](fixtures/squat-far.mp4) | Person at 60% of original size | 6 measured reps |
 | [Too far](fixtures/squat-too-far.mp4) | Person at 30% of original size | Retake |
@@ -46,12 +44,10 @@ Expected results on the current macOS Vision path: six measured reps for the ori
 | [Low resolution](fixtures/squat-low-resolution.mp4) | Coarse source detail restored to the original frame size | 6 measured reps |
 | [Off center](fixtures/squat-off-center.mp4) | Athlete nearer one edge | 6 measured reps |
 | [Tilted phone](fixtures/squat-angled-phone.mp4) | Image plane rotated about 7° | 6 measured reps |
-| [Motion blur](fixtures/squat-motion-blur.mp4) | Nine-frame temporal blend with strong spatial blur | Retake: required joints are not clear often enough |
+| [Motion blur](fixtures/squat-motion-blur.mp4) | Three-frame temporal blend | Six measured reps since `squat-side-v7` (a retake before: the blurred mask edge hid the ankles) |
 | [Moving phone](fixtures/squat-phone-shake.mp4) | Frame shifts during the set | Retake: required joints are not clear often enough |
 
 Rebuild the variants with `python3 tools/replay/generate_video_variants.py`. It uses `ffmpeg` on PATH or the local `imageio-ffmpeg` package; the checked-in MP4s let teammates run replay without generating them. These transformations reuse the same synthetic person and poses, so they are correlated tests rather than twelve new participants or independent technique examples. The tilted-phone video rotates a 2D frame; it does **not** test a real three-quarter camera viewpoint or the Vision 3D angle check.
-
-The earlier mild three-frame blur could still produce six measured reps on a hosted Vision runtime. The current deliberately severe blur is meant to test the low-visibility retake path consistently; it does not define how much ordinary motion blur is acceptable in a real workout.
 
 `fixtures/squat-feet-hidden.mp4` covers only the feet. Before the 13 October capture change, Vision inferred ankles behind the obstruction and the app counted six reps. The new path uses [Vision person segmentation](https://developer.apple.com/documentation/vision/vngeneratepersonsegmentationrequest) on every third analyzed frame; those ankles no longer pass the evidence gate. A person mask can still fail on real clothing, lighting, and overlaps with other people. The video is a regression for this one obstruction, not proof of reliable occlusion handling in general.
 

@@ -99,7 +99,7 @@ final class SkeletonOverlayUITests: XCTestCase {
         app.launch()
         app.buttons["Set up camera"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["camera.skeleton"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["Show hip, knee and ankle"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["Ankle not clear: step back or add light"].waitForExistence(timeout: 4))
         XCTAssertFalse(app.staticTexts["Hip, knee and ankle visible"].exists)
         app.buttons["Start set"].tap()
         Thread.sleep(forTimeInterval: 12)

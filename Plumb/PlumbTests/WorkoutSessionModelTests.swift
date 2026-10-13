@@ -58,6 +58,133 @@ struct WorkoutSessionModelTests {
         #expect(analysis.reps.count == 6)
     }
 
+    /// Start at the phone, walk to the spot, squat, walk back to stop: measured and saved.
+    @Test func walkingToTheSpotAndBackIsMeasuredAndSaved() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: "PlumbWalkTests-\(UUID().uuidString)", directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = LocalSessionStore(url: directory.appending(path: "sessions.json"))
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0)
+            + CaptureTraces.walkOut(from: 14.0)
+        for frame in capture { source.emit(frame) }
+        await model.endSet()
+        guard case .measured(let analysis, _) = model.result else {
+            Issue.record("Expected the set between walking in and out to be measured, got \(String(describing: model.result))")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+        #expect(model.history.first?.sets.count == 1)
+    }
+
+    /// The phone stands a few steps away: the set starts once the athlete holds still in position
+    /// and ends once they walk back, and every rep is said aloud.
+    @Test func handsFreeSetStartsInPositionAndEndsWhenTheAthleteWalksAway() async throws {
+        let source = TestPoseSource()
+        let announcer = RecordingAnnouncer()
+        let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbHandsFree-\(UUID())")!,
+                                           handsFreeByDefault: true)
+        let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+        model.handsFreeCountdown = 0
+        #expect(model.handsFree)
+        await model.startPreview()
+        for frame in CaptureTraces.squats(reps: 0, from: 0, standing: 2.0) { source.emit(frame) }
+        try await waitUntil { model.stage == .capturing }
+
+        // The camera keeps sending frames after the athlete leaves; the set ends about 2 s later.
+        for frame in CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0, duration: 4.0) {
+            source.emit(frame)
+        }
+        try await waitUntil { model.stage == .result }
+        guard case .measured(let analysis, _) = model.result else {
+            Issue.record("Expected a measured hands-free set, got \(String(describing: model.result))")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+        #expect(model.endedHandsFree)
+        #expect(model.liveRepCount == 6)
+        #expect(announcer.phrases.filter { Int($0) != nil } == ["1", "2", "3", "4", "5", "6"])
+        #expect(announcer.phrases.last == "6 reps measured")
+    }
+
+    /// Sets with movements too shallow to count: after two of them, the next set's setup names the
+    /// pattern, and a third set showing it again says so.
+    @Test func aRecurringPatternBecomesTheFocusAndIsRecognizedAgain() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: "PlumbFocusTests-\(UUID().uuidString)", directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = LocalSessionStore(url: directory.appending(path: "sessions.json"))
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+        // Six full reps with a shallow dip (0.06 of the frame, under the 0.15 leg-length bottom) after each.
+        let frames = (0...(6 * 30)).map { index -> PoseFrame in
+            let phase = Double(index % 30) / 30
+            let full = phase < 2.0 / 3 ? 0.20 * (1 - cos(2 * .pi * phase * 1.5)) / 2 : 0
+            let dip = phase >= 2.0 / 3 ? 0.06 * (1 - cos(2 * .pi * (phase - 2.0 / 3) * 3)) / 2 : 0
+            return frame(time: Double(index) * 0.1, hipY: 0.42 + full + dip)
+        }
+        for setNumber in 1...3 {
+            #expect((model.focus != nil) == (setNumber == 3))
+            await model.startPreview()
+            await model.beginSet(countdown: 0)
+            for frame in frames { source.emit(frame) }
+            await model.endSet()
+            guard case .measured = model.result else {
+                Issue.record("Expected a measured set \(setNumber), got \(String(describing: model.result))")
+                return
+            }
+            #expect((model.repeatedPattern != nil) == (setNumber == 3))
+        }
+        #expect(model.focus?.issue == .shallowMovements)
+        #expect(model.history.first?.sets.last?.issues?.contains(.shallowMovements) == true)
+    }
+
+    @Test func handsFreeOffWaitsForTheStartButton() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        #expect(!model.handsFree)
+        await model.startPreview()
+        for frame in CaptureTraces.squats(reps: 0, from: 0, standing: 3.0) { source.emit(frame) }
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(model.stage == .framing)
+        #expect(model.handsFreeProgress == 0)
+        await model.cancel()
+    }
+
+    @Test func liveCountIsSaidOnlyWhenSpeechIsOn() async throws {
+        let source = TestPoseSource()
+        let announcer = RecordingAnnouncer()
+        let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbQuiet-\(UUID())")!)
+        preferences.speaksLive = false
+        let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        let frames = trace(reps: 6)
+        for frame in frames { source.emit(frame) }
+        try await waitUntil { model.frameCount == frames.count }
+        await model.endSet()
+        // The live count may still be one rep behind when Stop is tapped right after the last rep.
+        #expect((5...6).contains(model.liveRepCount))
+        #expect(announcer.phrases.isEmpty)
+    }
+
+    /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
+    /// simulator, with many main-actor tests running at once, the live analysis of a whole set can
+    /// take several seconds.
+    private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(30)) async throws {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while !condition() {
+            guard ContinuousClock.now < deadline else {
+                Issue.record("Timed out waiting for the session")
+                return
+            }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
     @Test func stopTimingUsesTapInstantAndClearsForNextSet() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
@@ -159,6 +286,62 @@ struct WorkoutSessionModelTests {
             return
         }
         #expect(model.isRecording == false)
+    }
+
+    @Test func aCameraStopAfterSeveralRepsKeepsWhatWasCaptured() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        let frames = trace(reps: 6)
+        for frame in frames { source.emit(frame) }
+        try await waitUntil { model.frameCount == frames.count }
+        source.finishUnexpectedly()
+        try await waitUntil { model.stage == .result }
+        guard case .measured(let analysis, _) = model.result else {
+            Issue.record("The captured reps should be reviewed, got \(String(describing: model.result))")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+        #expect(model.endedEarly)
+    }
+
+    @Test func comparisonGapSaysWhenAnEarlierSetHadTooFewReps() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        for reps in [3, 6] {
+            await model.startPreview()
+            await model.beginSet(countdown: 0)
+            for frame in trace(reps: reps) { source.emit(frame) }
+            await model.endSet()
+        }
+        #expect(model.comparison == nil)
+        #expect(model.comparisonGap == .tooFewReps)
+    }
+
+    @Test func retakeAdviceMatchesTheReason() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        // Legs never in view: the general advice about keeping the joints visible applies.
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for index in 0...40 {
+            source.emit(PoseFrame(time: Double(index) * 0.1, subjectCount: 1, joints: [
+                .leftHip: JointPoint(x: 0.47, y: 0.42, confidence: 0.99),
+            ]))
+        }
+        await model.endSet()
+        #expect(model.retakeHint == ExerciseDefinition.squat.copy.retakeHint)
+        // Too short: the reason already says what to do.
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for index in 0...5 { source.emit(frame(time: Double(index) * 0.1, hipY: 0.42)) }
+        await model.endSet()
+        guard case .insufficientView = model.result else {
+            Issue.record("A short set must be refused")
+            return
+        }
+        #expect(model.retakeHint == nil)
     }
 
     @Test func stableSetHasNoCue() async throws {
@@ -482,4 +665,10 @@ private final class TestPoseSource: PoseStreaming {
         continuation?.finish()
         continuation = nil
     }
+}
+
+@MainActor
+private final class RecordingAnnouncer: LiveAnnouncing {
+    private(set) var phrases: [String] = []
+    func announce(_ text: String) { phrases.append(text) }
 }

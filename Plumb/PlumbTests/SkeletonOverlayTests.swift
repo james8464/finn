@@ -94,4 +94,15 @@ struct SkeletonOverlayTests {
         // Small sensor jitter rounds to the nearest quarter turn.
         #expect(PreviewFeed.displayRotation(capture: 88, preview: 91) == 0)
     }
+
+    @Test func theMirroredFrontCameraTurnsLikeTheBackCameraForTheSamePhonePosition() {
+        // Portrait is unchanged.
+        #expect(PreviewFeed.displayRotation(capture: 90, preview: 90, mirrored: true) == 0)
+        // Phone on its side, interface portrait: the front camera's upright frame needs the same turn
+        // as the back camera's (capture 0, preview 90 gives 90), not the opposite one.
+        #expect(PreviewFeed.displayRotation(capture: 180, preview: 90, mirrored: true) == 90)
+        #expect(PreviewFeed.displayRotation(capture: 0, preview: 90, mirrored: true) == 270)
+        // A portrait-mounted front sensor (preview 0) on its side.
+        #expect(PreviewFeed.displayRotation(capture: 90, preview: 0, mirrored: true) == 90)
+    }
 }

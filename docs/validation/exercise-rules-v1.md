@@ -1,6 +1,6 @@
 # Exercise rules v1 and the 3D camera-angle check
 
-**Status on 13 October 2026: implemented and tested on the iOS 27 simulator with synthetic pose traces and generated-video replays.** The current person-mask capture path was also spot-checked on eleven selected public gym videos (see "Current capture-path spot check" below). No expert review or physical-iPhone run exists yet for anything on this page. The squat keeps its own protocol in [`squat-v1-protocol.md`](squat-v1-protocol.md).
+**Status on 13 October 2026: implemented and tested on the iOS 27 simulator with synthetic pose traces and generated-video replays, and the analysis logic with walk-in, walk-out, occlusion and wobble traces in a Linux build of the same Swift files.** Earlier capture versions were replayed on Vision poses from public side-view videos (see "Replay on real videos" below); the current revision (`squat-side-v7`, `*-side-v6`) has not. No expert review or physical-iPhone run exists yet for anything on this page. The squat keeps its own protocol in [`squat-v1-protocol.md`](squat-v1-protocol.md).
 
 ## How a rule is written
 
@@ -10,10 +10,12 @@ The starting value comes from the whole set, not its first frames: the 10th perc
 
 | Exercise | Rubric | Signal on the camera-facing side | Must stay visible | Still joint | Leave top / reach bottom / back at top / return margin | Rep duration |
 | --- | --- | --- | --- | --- | --- | --- |
-| Bodyweight squat | `squat-side-v6` | Hip drop divided by standing hip-to-ankle height | hip, knee, ankle | ankle | 0.10 / 0.15 / 0.05 / 0.04 | 0.5 to 8 s |
-| Push-up | `push-up-side-v5` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.4 to 8 s |
-| Static lunge | `static-lunge-side-v5` | Knee angle closing (hip, knee, ankle), degrees | hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.5 to 8 s |
-| Stiff-leg deadlift | `stiff-leg-deadlift-side-v5` | Hip angle closing (shoulder, hip, knee), degrees | shoulder, hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.6 to 10 s |
+| Bodyweight squat | `squat-side-v7` | Hip drop divided by standing hip-to-ankle height | hip, knee, ankle | ankle | 0.10 / 0.15 / 0.05 / 0.04 | 0.5 to 8 s |
+| Push-up | `push-up-side-v6` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.4 to 8 s |
+| Static lunge | `static-lunge-side-v6` | Knee angle closing (hip, knee, ankle), degrees | hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.5 to 8 s |
+| Stiff-leg deadlift | `stiff-leg-deadlift-side-v6` | Hip angle closing (shoulder, hip, knee), degrees | shoulder, hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.6 to 10 s |
+
+A pause or wobble on the way down no longer fixes a rep's depth: the deepest point until the rep ends is its range. A set that opens partway down its first rep (it started during the countdown) measures that rep from the set's top.
 
 The rep durations are shorter than in the first versions because a rep now ends 65% of the way back up instead of at the very top; at the old minimums, one-second squats on real video were dropped as too fast.
 
@@ -21,9 +23,23 @@ Angles are computed in pixel proportions: the y distance is scaled by the image 
 
 All four use the squat's evidence rules: joint confidence at least 0.3, the required joints present and confident in 80% of frames, no tracking gap over 0.75 s (3 s while someone else is in view, see "Other people in view" below), the still joint staying within 10% of the frame (spread between its 10th and 90th percentile positions, so one misplaced detection does not count as the phone moving), and a set of at least 2 seconds. A refusal names what was missing, with numbers: the share of frames where the joints were seen and the hardest joint to see, the length and start of the tracking gap, or how far the still joint moved. They also share the observation rule: when the last two reps' range is 85% or less of the first two, the result names those reps ("Your elbow bend became smaller in the last two reps.") and gives an exercise-specific next action tied to that range. Comparisons only pair sets of the same exercise in one session.
 
+Since the 13 October camera-capture revision (`squat-side-v5`, `*-side-v4`), every third analyzed frame also asks Vision for a fast person mask. A joint inside the skeleton but outside the person mask is removed before the evidence gate sees it. Since `squat-side-v7` (`*-side-v6`), the search around each joint is 4% of the athlete's body size (at least two mask pixels) instead of two mask pixels, because the fast mask is thin at the hands and feet and refused visible ankles on the silhouette's edge; a missing or empty mask counts as no check instead of hiding every joint; and only the joints a check refuted stay out of the two frames until the next check. The generated covered-feet clip's cover stops about 6% of the frame above the ankle, outside the search. This guards against a confident ankle inferred behind an obstruction. With the v6 code and its two-pixel search, sixteen generated video fixtures measured six clear squats in the original and clear light, color, size, framing, resolution, tilt, and tempo variants, and refused no motion, hidden legs or feet, a too-small subject, motion blur, and apparent phone shake; the mirrored diagnostic was refused because its joint coverage is below the gate. With the wider v7 search and the set window (CI replay of 13 October), every clip gives the same result except two that now measure six reps instead of asking for a retake: the blurred clip and the mirrored diagnostic. Phone shake, a too-small subject, hidden legs or feet and no motion are still refused. Their abrupt pose changes and shared synthetic source do not establish sensitivity or specificity on real people. Person segmentation covers bystanders too, so the physical-device holdout must include partial occlusions, overlapping people, and false-refusal measurement.
+
+## The set itself, not the walk
+
+Since `squat-side-v7` (`*-side-v6`), a capture is trimmed to the set (`SetWindow`). On a real phone the person starts the capture at the phone and walks to their spot, then walks back to stop it; the legs leave the picture as they come close and the planted foot slides across the frame. Measured as part of the set, those frames were refused as a tracking gap or a moving phone. The set runs from the first moment the athlete is in position (the exercise's joints clear on one side and the still joint within 8% of the frame of its usual place, held 0.6 s) to the last one, widened over frames where the athlete is still at the spot with a joint unclear: the hip (the shoulder for push-ups) within 12% of the frame of its place and the shoulder-to-hip length within 25% of its usual size. Walking toward the phone makes the torso grow well past that before the legs leave the picture. Reps done at the spot with an ankle hidden therefore stay in the set and are judged by the gate; only walking in and out is trimmed. When no in-position stretch lasts 2 s, nothing is trimmed and the refusal describes the whole capture.
+
+## Hands-free capture
+
+With hands-free on (the default in the app), the countdown starts once the athlete has held still in position for 1.5 s (the still joint within 4% of the frame) in the exercise's starting posture: standing, or for the push-up a plank (torso closer to horizontal than vertical, hands below the shoulders). A slight angle seen by the 3D check does not hold the start; a clear front view does. During the set, the same analysis runs every 0.4 s of frames to show and say the reps counted so far; a rep clearly faster (under 70% of the first three reps' median time) or shorter (85% or less of the first two reps' range) than the person's own first reps is shown and said once, then not again for three reps. After at least one rep, the set ends when the athlete is seen walking off their spot for 2 s, is unseen for 4 s (longer than the gate's 3 s allowance for someone passing in front), or adds no rep for 8 s (the exercise's longest rep plus 2 s, if longer) while the analysis accepts the set and sees the athlete at the top, not partway through a slow rep.
+
+## Most frequent pattern
+
+Each measured set saves what it showed: movements too shallow to count, too fast or slow to count, an unfinished last movement, the end-of-set range or posture observation, a rep faster than the first ones, an angled view. The pattern seen in at least 2, and at least 30%, of the person's last 10 sets of an exercise becomes the focus shown before the next set and named again when it comes back. Thresholds do not change; only the emphasis does.
+
 ## Posture advice (new on 13 October)
 
-At the deepest phase of each completed rep, the analyzer takes the median posture reading from nearby frames. Supporting joints must have confidence of at least 0.5. The first two and last two reps must all have readings, and their movement ranges must be within 10%. Both final readings must rise beyond the first pair's average by the threshold below. An angled view above 30° suppresses coaching cues, including the fallback range observation, when 3D angle estimates are available; the app keeps the count and offers a side-on camera tip. Missing supporting joints suppress posture advice without losing otherwise valid rep counts. The result still shows at most one cue.
+At the deepest phase of each completed rep, the analyzer takes the median posture reading from nearby frames. Supporting joints must have confidence of at least 0.5. The first two and last two reps must all have readings, and their movement ranges must be within 10%. Both final readings must rise beyond the first pair's average by the threshold below. An angled view above 30° suppresses posture advice when 3D angle estimates are available; missing supporting joints suppress it without losing otherwise valid rep counts. The result still shows at most one cue and falls back to the existing range observation when appropriate.
 
 | Exercise | Camera-visible change | Minimum rise | Suggested focus |
 | --- | --- | --- | --- |
@@ -34,15 +50,13 @@ At the deepest phase of each completed rep, the analyzer takes the median postur
 
 These thresholds are hypotheses for detecting change within one person's set. They are not target angles, proof of poor form, or a complete technique assessment. A qualified trainer and physical-iPhone sessions must review false cues and the wording before claiming coaching accuracy.
 
-Since the 13 October camera-capture revision (`squat-side-v5`, `*-side-v4`), every third analyzed frame also asks Vision for a fast person mask. A joint inside the skeleton but outside the person mask is removed before the evidence gate sees it; the mask verdict carries across the two intervening frames so framing guidance stays consistent. Repeated mask failures cause a retake. This guards against a confident ankle inferred behind an obstruction. Sixteen generated video fixtures measure six clear squats in the original and clear light, color, size, framing, resolution, tilt, and tempo variants; they refuse no motion, hidden legs or feet, a too-small subject, motion blur, and apparent phone shake. The mirrored diagnostic is refused because its joint coverage is below the gate. Their abrupt pose changes and shared synthetic source do not establish sensitivity or specificity on real people. Person segmentation covers bystanders too, so the physical-device holdout must include partial occlusions, overlapping people, and false-refusal measurement.
-
 A test replays 600 synthetic squat traces through a frozen copy of `squat-side-v2`. The current version must measure every set version 2 measured, give the same count on more than half of them, count fewer reps on at most one set in twenty, and never more than one rep fewer. On the current code: 281 sets measured by both, 177 with the same count, 1 with one rep fewer, none lost.
 
 ## Other people in view
 
 Since `squat-side-v4` (and `*-side-v3` for the other exercises), Plumb follows one athlete instead of refusing a set when someone else is in view. `AthleteTracker` picks the most prominent person while framing (large and near the centre) and moves to someone else only if they are clearly more prominent. When the set starts it locks onto that person. In every frame it takes the person whose clear joints are closest to where the athlete's same joints were last seen; the median distance must stay under 12% of the athlete's size between frames, up to a third after a gap. Comparing joint by joint keeps the track when Vision drops the legs for a frame. When two people fit almost equally well, the frame has no athlete rather than risk a swap. Other people are drawn thin and grey on the camera screen and never analyzed. The 3D view check only uses an estimate whose root falls on the athlete.
 
-A frame without the athlete is a gap. A gap while someone else is in view (usually walking between the athlete and the phone) may last 3 s; a gap with nobody in view keeps the 0.75 s limit. A longer occlusion is refused with "Someone else was in view and Plumb lost you for 4.1 s, starting 7.9 s into the set...". Frames from a source that does not follow one person keep the old rule: another person for 0.35 s or in over 20% of frames refuses the set.
+A frame without the athlete is a gap. A gap while someone else stands where the athlete was last seen (any of their clear joints within a quarter of the athlete's size of the athlete's last box; usually walking between the athlete and the phone) may last 3 s; any other gap keeps the 0.75 s limit, including one with someone standing elsewhere in the room (until 13 October, anyone anywhere in view allowed 3 s). A tracking-gap refusal names only the joints that were lost. During a set, the tracker picks the athlete up again after 1 s without a match when exactly one person is in view, at 0.5 to 2 times the athlete's size, overlapping where they were last seen, and not where someone else stood when the athlete was last matched (a coach beside them is never taken for them; getting down into a push-up can make Vision miss the athlete for a moment). A longer occlusion is refused with "Someone else was in view and Plumb lost you for 4.1 s, starting 7.9 s into the set...". Frames from a source that does not follow one person keep the old rule: another person for 0.35 s or in over 20% of frames refuses the set.
 
 The same 50 Mendeley squat videos were run through the app's own capture analysis on a Mac (Vision, then the tracker, then the squat rubric). Other people are in view in most of them: in 45 of 50 for at least a fifth of the frames.
 
@@ -55,19 +69,6 @@ The same 50 Mendeley squat videos were run through the app's own capture analysi
 The one count off by more than a rep is a "bad form" set (9 against 13 dips). Videos with someone walking right in front of the athlete are rare in this set, so the 3 s occlusion limit is a starting value.
 
 ## Replay on real videos
-
-### Current capture-path spot check · 13 October 2026
-
-Eleven selected clips from the [Mendeley Data exercise video dataset, version 2](https://data.mendeley.com/datasets/kgbb3yn47p/2) (CC BY 4.0) were run through the current Mac replay of the app's Vision 2D/3D requests, sampled person mask, athlete tracking, view check, and exercise analyzer. HEVC clips were rewrapped for AVFoundation; the video data and extracted poses were kept outside the repository. This is a **convenience sample** across different people and camera views, not a holdout or a participant study. The dataset's good/bad labels do not verify a particular posture cue, and no independent human rep counts were made.
-
-| Exercise and view | Selected clips | Measured | Retake / reason |
-| --- | --- | --- | --- |
-| Squat, side | Good-form subjects 001, 002, 003 | 001: 18 reps; 002: 14 reps | 003: required joints visible with adequate confidence in only 34% of frames |
-| Squat, front | Good-form subjects 001, 004, 006 | None | 001: sustained front-view estimate about 87°; 004 and 006: required-joint coverage 74% and 72% |
-| Squat, diagonal | Good-form subjects 002, 005, 007 | 002: 14 reps; 005: 13 reps, with a camera-turn tip | 007: movement too shallow for the current rep rule |
-| Push-up, side | Bad-form subjects 001, 002 | 001: 6 reps; 002: 13 reps | None |
-
-The measured diagonal squat from subject 002 had a median 3D view deviation of about 62°. At that angle, 2D projected range and posture may be distorted; the app now withholds coaching cues while retaining the count and camera-turn tip. The selected clips show a capture path that works on some different people and refuses some unsuitable views. They cannot establish count accuracy, false-refusal rate, cue quality, or performance on a physical iPhone. The eleven files were chosen for quick coverage, not sampled randomly; the previously reported 50-video results below refer to older rubric/capture versions.
 
 Version 2 counted no squat on Guilhem's iPhone. To reproduce it without filming anyone, the app's own Vision request was run over 50 side-view squat videos and 48 push-up videos from the Mendeley dataset used for exercise recognition (CC BY 4.0, see `tools/exercise-classifier/angle-model/README.md`; the videos and poses stay outside the repository), and the analyzer was replayed on those poses with the 3D check off.
 
@@ -96,7 +97,7 @@ A 10° phone tilt changes neither count: the squat signal is a ratio of vertical
 **What it does.** About four times per second (every fourth processed frame at 15 fps), the capture code runs `VNDetectHumanBodyPose3DRequest` on the same camera frame as the 2D pose. It moves the hips and shoulders into the camera's frame with `cameraOriginMatrix` and computes the angle between the body's left-right axis and the line from the camera to the hips: 0° is a true side view, 90° faces the camera or turns away from it.
 
 - Median of the set's estimates at 30° or less: nothing to say.
-- Above 30°: the set is measured without a coaching cue, and the result adds "Plumb saw you about N° from side-on. Turn a little more side-on next time; counts are most reliable from the side." While framing, three of the last five estimates above 30° show "Turn a little: side to the camera". Neither stops the set.
+- Above 30°: the set is measured, and the result adds "Plumb saw you about N° from side-on. Turn a little more side-on next time; counts are most reliable from the side." While framing, three of the last five estimates above 30° show "Turn a little: side to the camera". Neither stops the set.
 - At 75° or more, with estimates spanning at least 3 s: the set is refused with "This exercise needs a side view. Turn so your side faces the camera, then try again. Plumb measured about N° away from the view it needs."
 - Fewer than four estimates: no decision, and the 2D rules apply alone, as on the simulator.
 
