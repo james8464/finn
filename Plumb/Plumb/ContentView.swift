@@ -86,6 +86,12 @@ struct ContentView: View {
         #if DEBUG
         .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
         #endif
+        // The phone stands a few steps away and nobody touches it: keep the screen on while the
+        // camera is open, or Auto-Lock interrupts framing and throws the set away.
+        .onChange(of: model.stage, initial: true) { _, stage in
+            UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(stage)
+        }
+        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { observationSpeaker.stop() }
             if phase == .background { Task { await model.backgrounded() } }
@@ -193,6 +199,13 @@ struct ContentView: View {
                     Label("Privacy", systemImage: "hand.raised")
                 }
             }
+        }
+    }
+
+    private static func keepsScreenOn(_ stage: WorkoutStage) -> Bool {
+        switch stage {
+        case .openingCamera, .framing, .countdown, .capturing, .analyzing: true
+        case .ready, .result, .error: false
         }
     }
 
@@ -498,10 +511,12 @@ struct ContentView: View {
 
     /// While framing hands-free: what to do, and how long until the set starts by itself.
     private var handsFreeHint: some View {
-        let holding = model.framingStatus == .landmarksVisible && model.handsFreeProgress > 0
+        let holding = model.handsFreeProgress > 0
+        let seen = !(model.livePose?.joints.isEmpty ?? true)
         return VStack(spacing: 8) {
             Text(holding ? "Hold still. The set starts by itself."
-                         : "Go to your spot. The set starts once you hold still.")
+                 : seen ? "Plumb starts the set once it sees you clearly and you hold still."
+                 : "Go to your spot. The set starts once you hold still.")
                 .font(.subheadline)
                 .multilineTextAlignment(.center)
             ProgressView(value: model.handsFreeProgress)
@@ -561,7 +576,8 @@ struct ContentView: View {
                 Text("Get ready")
             }
         }
-        .font(.subheadline.weight(.semibold))
+        // Hands-free, the person reads it from their spot a few steps away.
+        .font(model.handsFree ? .title3.weight(.semibold) : .subheadline.weight(.semibold))
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(.black.opacity(0.68), in: Capsule())
@@ -583,6 +599,12 @@ struct ContentView: View {
                 }
                 Text(resultTitle)
                     .font(.largeTitle.bold())
+                if model.endedEarly {
+                    Text("The camera stopped during the set. Plumb reviewed the part it captured.")
+                        .font(.footnote)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                        .accessibilityIdentifier("result.endedEarly")
+                }
                 if model.endedHandsFree {
                     Text("Plumb ended the set when you walked away or stopped moving.")
                         .font(.footnote)
@@ -680,9 +702,7 @@ struct ContentView: View {
                         if let comparison = model.comparison {
                             comparisonView(comparison)
                         } else if let gap = model.comparisonGap {
-                            Text(gap == .differentExercise
-                                 ? "Plumb compares sets of the same exercise. Do another set of this exercise to compare."
-                                 : "These sets used different camera views, so Plumb can’t compare them reliably.")
+                            Text(comparisonGapText(gap))
                                 .foregroundStyle(PlumbStyle.supportingText)
                         }
                         if let extremes = model.repExtremes {
@@ -705,8 +725,14 @@ struct ContentView: View {
                     case .insufficientView(let reason):
                         recognitionNote
                         Text(reason)
-                        Text(model.resultExercise.definition.copy.retakeHint)
-                            .foregroundStyle(PlumbStyle.supportingText)
+                        if let hint = model.retakeHint {
+                            Text(hint)
+                                .foregroundStyle(PlumbStyle.supportingText)
+                        }
+                        // Changing an option here keeps the session, so the next set still compares.
+                        NavigationLink("Options") { optionsPage }
+                            .frame(minHeight: 44, alignment: .leading)
+                            .accessibilityIdentifier("result.options")
                     case .failed(let reason):
                         Text(reason)
                     case .interrupted:
@@ -811,6 +837,19 @@ struct ContentView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(title) rep, rep \(snapshot.number), \(definition.formattedDepth(snapshot.range))"
                             + (angleText.map { ", \($0)" } ?? ""))
+    }
+
+    private func comparisonGapText(_ gap: ComparisonGap) -> String {
+        switch gap {
+        case .differentExercise:
+            "Plumb compares sets of the same exercise. Do another set of this exercise to compare."
+        case .tooFewReps:
+            "Plumb compares sets with at least \(SetComparison.minimumReps) measured reps each."
+        case .differentSide:
+            "Your earlier sets were filmed from your other side, so Plumb can’t compare them."
+        case .incompatibleSets:
+            "These sets used different camera views, so Plumb can’t compare them reliably."
+        }
     }
 
     private var resultTitle: String {

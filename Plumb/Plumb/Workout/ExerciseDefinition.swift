@@ -203,7 +203,7 @@ nonisolated extension ExerciseDefinition {
             showJoints: "Show hip, knee and ankle",
             jointsVisible: "Hip, knee and ankle visible",
             keepJointsVisible: "Keep your hip and ankle visible for the whole set.",
-            bodyTooSmall: "Move the phone back so your full body is visible.",
+            bodyTooSmall: "Your legs look too small to measure. Move the phone closer, keeping your whole body in view.",
             retakeHint: "Move the phone farther back and keep your hip, knee, and ankle visible.",
             noCompleteReps: "No complete squat repetitions were measured. Try another set with your full body in view.",
             rangeNoun: "range",

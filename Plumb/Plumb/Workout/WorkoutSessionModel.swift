@@ -48,7 +48,11 @@ nonisolated enum CameraIssue: Equatable {
 nonisolated enum ComparisonGap: Equatable {
     /// No earlier set of the same exercise in this session.
     case differentExercise
-    /// An earlier set of the same exercise exists but differs in side, rubric, or has too few reps.
+    /// This set or every earlier one of the exercise has fewer than four measured reps.
+    case tooFewReps
+    /// The earlier sets were filmed from the other side of the body.
+    case differentSide
+    /// The earlier sets differ in camera view or measurement version.
     case incompatibleSets
 }
 
@@ -179,6 +183,18 @@ final class WorkoutSessionModel {
     private(set) var liveCaption: String?
     /// The latest set was ended by Plumb (the athlete walked away or stopped), not by a tap.
     private(set) var endedHandsFree = false
+    /// The camera stopped during the set (another app took it, an interruption); the part captured
+    /// before was reviewed.
+    private(set) var endedEarly = false
+    /// What to change for the next try, matched to why the set was refused; nil when the reason
+    /// already says it.
+    private(set) var retakeHint: String?
+    /// While framing: whether the exercise's joints are clear, whatever the 3D turn tip says.
+    @ObservationIgnored private var previewLandmarksVisible = false
+    /// While framing hands-free: since when (frame time) the tracked athlete has not been ready,
+    /// and when Plumb last said why.
+    @ObservationIgnored private var notReadySince: TimeInterval?
+    @ObservationIgnored private var lastFramingSpeech = -Double.infinity
     /// The person's most frequent pattern in recent sets of the chosen exercise, shown before a set.
     var focus: MistakeProfile? { MistakeProfile.make(history: history, exercise: selectedExercise) }
     /// The same, for the exercise being captured.
@@ -292,6 +308,14 @@ final class WorkoutSessionModel {
                     self.stage = .analyzing
                     self.completeAnalysis()
                     self.announceResult()
+                } else if self.stage == .capturing,
+                          let first = self.frames.first, let last = self.frames.last,
+                          last.time - first.time >= EvidenceRubric.minimumSetDuration {
+                    // The camera stopped mid-set: review what was captured rather than lose it.
+                    self.endedEarly = true
+                    self.stage = .analyzing
+                    self.completeAnalysis()
+                    self.announceResult()
                 } else if self.stage == .capturing {
                     self.result = .interrupted
                     self.stage = .result
@@ -379,11 +403,16 @@ final class WorkoutSessionModel {
             ? captured : SetWindow.active(frames, requirement: definition.evidence)
         resultExercise = exercise
         lastViewVerdict = ViewCheck.assess(setFrames, expected: definition.expectedView)
+        // Already trimmed to the set: analyze exactly these frames, so the saved set is gated the same.
         let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(
-            setFrames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore)
+            setFrames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore, trimsToSet: false)
         movementNote = nil
         repExtremes = nil
         repeatedPattern = nil
+        retakeHint = nil
+        // A comparison belongs to the set it was made for; the new set makes its own or none.
+        comparison = nil
+        comparisonRecap = nil
         switch outcome {
         case .analyzed(let analysis):
             let explanation = diagnostics?.explanation(for: definition, counted: analysis.reps.count)
@@ -404,8 +433,23 @@ final class WorkoutSessionModel {
             record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues)
         case .insufficientView(let reason):
             result = .insufficientView(reason)
+            retakeHint = Self.retakeHint(for: setFrames, definition: definition,
+                                         viewRefused: lastViewVerdict.isMismatch && checksCameraAngle)
         case .failed(let reason):
             result = .failed(reason)
+        }
+    }
+
+    /// The general retake advice fits a refusal for joints Plumb could not see; other refusals
+    /// already say what to change, and a 3D view refusal points to its switch.
+    private static func retakeHint(for frames: [PoseFrame], definition: ExerciseDefinition,
+                                   viewRefused: Bool) -> String? {
+        if viewRefused {
+            return "If your side already faces the camera, turn off Check the camera angle in Options."
+        }
+        switch EvidenceGate.assess(frames, requirement: definition.evidence) {
+        case .reject(.missingJoints), .reject(.lowConfidence): return definition.copy.retakeHint
+        default: return nil
         }
     }
 
@@ -421,6 +465,9 @@ final class WorkoutSessionModel {
         } else {
             framingStatus = EvidenceGate.previewStatus(previewFrames, requirement: definition.evidence)
         }
+        previewLandmarksVisible = framingStatus == .landmarksVisible
+            || (framingStatus == .turnToExpectedView
+                && EvidenceGate.previewStatus(previewFrames, requirement: definition.evidence) == .landmarksVisible)
         unclearJoint = framingStatus == .adjustPosition
             ? EvidenceGate.unclearJoint(previewFrames, requirement: definition.evidence) : nil
     }
@@ -429,8 +476,12 @@ final class WorkoutSessionModel {
     private func updateHandsFreeStart(with frame: PoseFrame) {
         guard handsFree, handsFreeTask == nil else { return }
         let progress = startReadiness.update(with: frame, definition: captureExercise.definition)
-        let placed = framingStatus == .landmarksVisible
+        // A slight angle only earns a tip, as for a set started by hand; a clear front view does not start.
+        let clearlyFront = previewDeviations.count >= ViewCheck.minimumPreviewEstimates
+            && previewDeviations.sorted()[previewDeviations.count / 2] >= ViewCheck.clearlyFrontDegrees
+        let placed = previewLandmarksVisible && !(checksCameraAngle && clearlyFront)
         handsFreeProgress = placed ? progress : 0
+        sayWhyNotReady(frame, placed: placed)
         guard placed, startReadiness.isReady else { return }
         startReadiness.reset()
         handsFreeTask = Task { @MainActor [weak self] in
@@ -440,6 +491,34 @@ final class WorkoutSessionModel {
             self.handsFreeProgress = 0
         }
     }
+
+    /// Hands-free, the person is several steps from the screen: when they have stood in view for
+    /// `notReadyDelay` seconds without Plumb seeing what it needs, say why, at most every
+    /// `framingSpeechInterval` seconds.
+    private func sayWhyNotReady(_ frame: PoseFrame, placed: Bool) {
+        let tracked = frame.athleteTracking == .tracked && !frame.joints.isEmpty
+        guard tracked, !placed || framingStatus == .turnToExpectedView else {
+            notReadySince = nil
+            return
+        }
+        let since = notReadySince ?? frame.time
+        notReadySince = since
+        guard frame.time - since >= Self.notReadyDelay,
+              frame.time - lastFramingSpeech >= Self.framingSpeechInterval else { return }
+        let phrase: String
+        if framingStatus == .turnToExpectedView {
+            phrase = "Turn your side to the camera"
+        } else if let joint = unclearJoint {
+            phrase = "\(joint.rawValue.capitalized) not clear. Step back or add light"
+        } else {
+            phrase = "Show your whole body"
+        }
+        lastFramingSpeech = frame.time
+        say(phrase)
+    }
+
+    static let notReadyDelay: TimeInterval = 3
+    static let framingSpeechInterval: TimeInterval = 8
 
     /// Counts reps while the set runs, says them and any live observation, and ends a hands-free
     /// set once the athlete walks away or stops moving after their reps.
@@ -491,6 +570,10 @@ final class WorkoutSessionModel {
         liveRepCount = 0
         liveCaption = nil
         endedHandsFree = false
+        endedEarly = false
+        notReadySince = nil
+        lastFramingSpeech = -Double.infinity
+        previewLandmarksVisible = false
     }
 
     private func recognizeExercise(in frames: [PoseFrame]) -> ExerciseRecognition {
@@ -577,15 +660,12 @@ final class WorkoutSessionModel {
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,
             exercise: exercise, issues: issues
         )
-        let previousSameExercise = session.sets.last { $0.exercise == exercise }
+        // The latest earlier set of the exercise that can be compared (not only the very last one).
+        let earlier = session.sets.filter { $0.exercise == exercise }.reversed()
         session.sets.append(newSet)
         currentSession = session
         comparisonRecap = nil
-        if let previousSameExercise {
-            comparison = SetComparison.compare(previousSameExercise, newSet)
-        } else {
-            comparison = nil
-        }
+        comparison = earlier.lazy.compactMap { SetComparison.compare($0, newSet) }.first
         save(session)
     }
 
@@ -593,8 +673,14 @@ final class WorkoutSessionModel {
     var comparisonGap: ComparisonGap? {
         guard comparison == nil, let session = currentSession, session.sets.count >= 2,
               let latest = session.sets.last else { return nil }
-        let earlier = session.sets.dropLast()
-        return earlier.contains { $0.exercise == latest.exercise } ? .incompatibleSets : .differentExercise
+        let earlier = session.sets.dropLast().filter { $0.exercise == latest.exercise }
+        guard !earlier.isEmpty else { return .differentExercise }
+        if latest.analysis.reps.count < SetComparison.minimumReps
+            || earlier.allSatisfy({ $0.analysis.reps.count < SetComparison.minimumReps }) {
+            return .tooFewReps
+        }
+        if earlier.allSatisfy({ $0.bodySide != latest.bodySide }) { return .differentSide }
+        return .incompatibleSets
     }
 
     func explainComparison() async {

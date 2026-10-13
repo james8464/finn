@@ -27,6 +27,11 @@ nonisolated enum ViewCheck {
         /// Clearly frontal for at least `minimumFrontDuration`: the set is refused.
         case mismatch(medianDeviation: Double, estimates: Int)
         case unavailable
+
+        var isMismatch: Bool {
+            if case .mismatch = self { return true }
+            return false
+        }
     }
 
     /// Degrees between the body's left-right axis and the camera's line of sight to the hips.

@@ -127,6 +127,24 @@ nonisolated struct LiveSetMonitorTests {
         #expect(run(reps).stoppedAt == nil)
     }
 
+    /// Someone walks between the phone and the athlete for 2.5 s mid-set: the evidence gate allows
+    /// that gap, so hands-free must not end the set.
+    @Test func aPasserByHidingTheAthleteDoesNotEndTheSet() {
+        // Eight reps, so 2.5 s hidden keeps the 80% coverage the gate needs.
+        let frames = CaptureTraces.squats(reps: 8, from: 0).map { frame -> PoseFrame in
+            guard frame.time > 5.0 && frame.time < 7.5 else { return frame }
+            // The passer-by stands where the athlete is.
+            let passerBy = CaptureTraces.frame(time: frame.time, hipY: 0.42, ankleX: 0.53, legs: true).joints
+            return PoseFrame(time: frame.time, subjectCount: 1, joints: [:], athleteTracking: .hidden,
+                             bystanders: [passerBy])
+        }
+        #expect(run(frames).stoppedAt == nil)
+        guard case .analyzed = ExerciseAnalyzer.analyze(frames, as: .squat) else {
+            Issue.record("The gate allows a 2.5 s occlusion by someone in front")
+            return
+        }
+    }
+
     @Test func walkingInWithoutAnyRepNeverEndsTheSet() {
         let capture = CaptureTraces.walkIn() + CaptureTraces.walkOut(from: 2.0)
         #expect(run(capture).stoppedAt == nil)

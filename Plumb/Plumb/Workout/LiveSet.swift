@@ -114,6 +114,8 @@ nonisolated struct LiveSetMonitor {
     static let cueSpacing = 3
     /// After at least one rep, away from the spot this long means the athlete walked away.
     static let leftAfter: TimeInterval = 2.0
+    /// After at least one rep, unseen this long (without being seen walking off) means the athlete left.
+    static let hiddenAfter = EvidenceRubric.maximumOcclusionGap + 1
     /// After at least one rep, no new rep for this long means the set is over.
     static let idleAfter: TimeInterval = 8.0
 
@@ -124,6 +126,9 @@ nonisolated struct LiveSetMonitor {
     private(set) var isOver = false
     /// A rep was clearly faster than the first reps at least once.
     private(set) var sawFasterRep = false
+    /// The latest analysis measured the set so far. Right after a gap it may refuse it for a while
+    /// (coverage under 80%); reps done then are counted once it measures again.
+    private var analysisAccepted = false
     private var lastAnalysisTime = -Double.infinity
     private var lastFasterCue = Int.min / 2
     private var lastShorterCue = Int.min / 2
@@ -138,7 +143,9 @@ nonisolated struct LiveSetMonitor {
         guard let last = frames.last, last.time - lastAnalysisTime >= Self.analysisInterval else { return [] }
         lastAnalysisTime = last.time
         var events: [LiveSetEvent] = []
+        analysisAccepted = false
         if case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: definition, viewCheck: .ignore) {
+            analysisAccepted = true
             reps = analysis.reps
             // A later analysis can merge or split a rep at the set's edge; the count never goes back.
             while countedReps < reps.count {
@@ -154,11 +161,17 @@ nonisolated struct LiveSetMonitor {
     /// True when the set should end by itself.
     func shouldStop(_ frames: [PoseFrame]) -> Bool {
         guard countedReps > 0, let last = frames.last else { return false }
-        if let lastRep = reps.last, last.time - lastRep.endTime >= Self.idleAfter { return true }
-        // Away from the spot, not merely with a joint unclear at it (`SetWindow.presence`).
-        guard let present = SetWindow.presence(frames, requirement: definition.evidence) else { return false }
-        guard let lastIndex = present.lastIndex(of: true) else { return true }
-        return last.time - frames[lastIndex].time >= Self.leftAfter
+        // Idle only by a measurement that accepts the set; a refusal after a gap is not idleness.
+        if analysisAccepted, let lastRep = reps.last, last.time - lastRep.endTime >= Self.idleAfter { return true }
+        // Away from the spot, not merely with a joint unclear at it (`SetWindow.spots`).
+        guard let spots = SetWindow.spots(frames, requirement: definition.evidence) else { return false }
+        guard let lastIndex = spots.lastIndex(where: \.isAtSpot) else { return true }
+        let gone = last.time - frames[lastIndex].time
+        // Seen walking off: two seconds. Only hidden (someone in front, Vision missing them): longer
+        // than the gap the evidence gate allows for a person passing in front, so it does not end a
+        // set the gate would measure.
+        let seenLeaving = spots[(lastIndex + 1)...].contains(.away)
+        return gone >= (seenLeaving ? Self.leftAfter : Self.hiddenAfter)
     }
 
     private mutating func cues(forRep number: Int) -> [LiveSetEvent] {

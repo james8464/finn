@@ -36,8 +36,8 @@ nonisolated enum SetWindow {
 
     /// Indices of the set within the capture; nil when nothing needs trimming or no set was found.
     static func activeRange(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> ClosedRange<Int>? {
-        guard frames.count >= 2, let inPosition = positions(frames, requirement: requirement),
-              let present = presence(frames, requirement: requirement, inPosition: inPosition) else { return nil }
+        guard frames.count >= 2, let inPosition = positions(frames, requirement: requirement) else { return nil }
+        let present = presence(frames, requirement: requirement, inPosition: inPosition)
         guard var start = frames.indices.first(where: { index in
             inPosition[index] && settled(frames, inPosition, from: index, forward: true)
         }), var end = frames.indices.last(where: { index in
@@ -56,28 +56,50 @@ nonisolated enum SetWindow {
     /// exercise joint is unclear (an ankle behind a bench). Walking in or back to the phone moves
     /// the reference joint across the frame or makes the torso grow, so those frames are not.
     static func presence(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> [Bool]? {
+        spots(frames, requirement: requirement)?.map(\.isAtSpot)
+    }
+
+    /// Where the athlete is in each frame, relative to their spot during the set.
+    enum Spot: Equatable {
+        /// In position (see `positions`).
+        case inPosition
+        /// At the spot with an exercise joint unclear.
+        case atSpot
+        /// Seen away from the spot: the reference joint elsewhere, or the torso a different size.
+        case away
+        /// Not seen well enough to tell (hidden behind someone, out of view, joints unclear).
+        case unseen
+
+        var isAtSpot: Bool { self == .inPosition || self == .atSpot }
+    }
+
+    static func spots(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> [Spot]? {
         guard let inPosition = positions(frames, requirement: requirement) else { return nil }
-        return presence(frames, requirement: requirement, inPosition: inPosition)
+        return spots(frames, requirement: requirement, inPosition: inPosition)
     }
 
     private static func presence(_ frames: [PoseFrame], requirement: EvidenceRequirement,
-                                 inPosition: [Bool]) -> [Bool]? {
+                                 inPosition: [Bool]) -> [Bool] {
+        spots(frames, requirement: requirement, inPosition: inPosition).map(\.isAtSpot)
+    }
+
+    private static func spots(_ frames: [PoseFrame], requirement: EvidenceRequirement,
+                              inPosition: [Bool]) -> [Spot] {
         let side = trackedSide(frames, requirement: requirement)
         let reference: JointRole = requirement.joints.contains(.hip) ? .hip : .shoulder
         let atSpot = frames.indices.filter { inPosition[$0] }
         let places = atSpot.compactMap { clear(frames[$0], reference, side)?.x }
         let torsos = atSpot.compactMap { torso(frames[$0], side: side) }
-        guard !places.isEmpty, !torsos.isEmpty else { return inPosition }
-        let placeX = median(places)
-        let placeTorso = median(torsos)
-        guard placeTorso > 0 else { return inPosition }
-        return frames.indices.map { index in
-            if inPosition[index] { return true }
+        let placeX = places.isEmpty ? nil : median(places)
+        let placeTorso = torsos.isEmpty ? nil : median(torsos)
+        return frames.indices.map { index -> Spot in
+            if inPosition[index] { return .inPosition }
             let frame = frames[index]
-            guard frame.athleteVisible, let point = clear(frame, reference, side),
-                  abs(point.x - placeX) <= spotRadius,
-                  let length = torso(frame, side: side) else { return false }
-            return abs(length / placeTorso - 1) <= torsoTolerance
+            guard frame.athleteVisible, let placeX, let placeTorso, placeTorso > 0,
+                  let point = clear(frame, reference, side) else { return .unseen }
+            if abs(point.x - placeX) > spotRadius { return .away }
+            guard let length = torso(frame, side: side) else { return .unseen }
+            return abs(length / placeTorso - 1) <= torsoTolerance ? .atSpot : .away
         }
     }
 

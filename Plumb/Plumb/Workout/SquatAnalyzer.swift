@@ -71,11 +71,12 @@ nonisolated enum ExerciseAnalyzer {
 
     /// The analysis plus what the movement looked like, so the result can say why a movement
     /// did not count instead of staying silent.
+    /// `trimsToSet` keeps only the set itself (`SetWindow`); pass false for frames already trimmed.
     static func analyzeWithDiagnostics(_ frames: [PoseFrame], as definition: ExerciseDefinition,
-                                       viewCheck: ViewCheckPolicy = .enforce)
+                                       viewCheck: ViewCheckPolicy = .enforce, trimsToSet: Bool = true)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
         // Walking to the spot and back to the phone is not part of the set.
-        let frames = SetWindow.active(frames, requirement: definition.evidence)
+        let frames = trimsToSet ? SetWindow.active(frames, requirement: definition.evidence) : frames
         let side: BodySide
         switch EvidenceGate.assess(frames, requirement: definition.evidence) {
         case .usable(let acceptedSide): side = acceptedSide
