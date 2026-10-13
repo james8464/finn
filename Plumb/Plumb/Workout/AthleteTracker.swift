@@ -12,7 +12,12 @@ import Foundation
 /// almost equally well, the frame has no athlete.
 ///
 /// While framing, it moves to someone else only if they are clearly more prominent
-/// (`switchFactor`) or the current person has been gone for `reacquireAfter`. Once a set starts,
+/// (`switchFactor`) or the current person has been gone for `reacquireAfter`. In the first
+/// `switchAfter` of following someone the move is immediate (the athlete stepping in just after the
+/// camera picked up someone else). After that, the other person must be in full view
+/// (`showsWholeSide`) and stay clearly more prominent for `switchAfter`: a passer-by close to the
+/// phone, or a partner whose legs are out of the picture, no longer takes the track from the
+/// athlete at their spot. Once a set starts,
 /// `lock()` keeps it on the same person for the whole set: if they are hidden, frames have no
 /// athlete until they reappear, and the evidence gate decides whether the gap was too long. After
 /// `reacquireAfter` without a match, a lone person of about the athlete's size is taken as the
@@ -49,6 +54,9 @@ nonisolated struct AthleteTracker {
     static let jointMemory: TimeInterval = 2.0
     static let reacquireAfter: TimeInterval = 1.0
     static let switchFactor = 1.5
+    /// While framing: how long someone is followed before a more prominent person no longer takes
+    /// over at once, and how long that person must then lead.
+    static let switchAfter: TimeInterval = 1.0
     /// During a set, a lone person this much smaller or larger than the athlete is not picked up as
     /// them after a loss.
     static let reacquireSizeRange = 0.5...2.0
@@ -66,6 +74,10 @@ nonisolated struct AthleteTracker {
     private var lastOthers: [Box] = []
     private(set) var isLocked = false
     private var lastMatchTime = -Double.infinity
+    /// When the current person was first followed.
+    private var followedSince = -Double.infinity
+    /// Since when someone else has been clearly more prominent than the current person.
+    private var challengedSince: TimeInterval?
 
     var isTracking: Bool { !memory.isEmpty }
 
@@ -99,8 +111,15 @@ nonisolated struct AthleteTracker {
                    let leaderBox = boxes[leader], let chosenBox = boxes[chosen],
                    Self.prominence(leaderBox, aspectRatio: aspectRatio)
                     > Self.switchFactor * Self.prominence(chosenBox, aspectRatio: aspectRatio) {
-                    forget()
-                    chosen = leader
+                    let since = challengedSince ?? time
+                    challengedSince = since
+                    if time - followedSince < Self.switchAfter
+                        || (time - since >= Self.switchAfter && Self.showsWholeSide(people[leader])) {
+                        forget()
+                        chosen = leader
+                    }
+                } else {
+                    challengedSince = nil
                 }
                 remember(people[chosen], box: boxes[chosen], aspectRatio: aspectRatio, time: time)
                 lastOthers = boxes.indices.filter { $0 != chosen }.compactMap { boxes[$0] }
@@ -136,6 +155,7 @@ nonisolated struct AthleteTracker {
         lastBox = nil
         lastOthers = []
         lastMatchTime = -.infinity
+        challengedSince = nil
     }
 
     /// Median distance, in person sizes, between a candidate's clear joints and where the
@@ -159,6 +179,7 @@ nonisolated struct AthleteTracker {
 
     private mutating func remember(_ joints: [BodyJoint: JointPoint], box: Box?, aspectRatio: Double,
                                    time: TimeInterval) {
+        if memory.isEmpty { followedSince = time }
         for (joint, point) in joints where point.confidence >= Self.jointConfidence {
             memory[joint] = Seen(x: point.x, y: point.y * aspectRatio, time: time)
         }
@@ -190,6 +211,17 @@ nonisolated struct AthleteTracker {
     static func prominence(_ box: Box, aspectRatio: Double) -> Double {
         let offCentre = hypot(box.x - 0.5, box.y - 0.5 * aspectRatio) / hypot(0.5, 0.5 * aspectRatio)
         return box.size * (1 - 0.5 * min(1, offCentre))
+    }
+
+    /// Shoulder, hip, knee and ankle clear on one side: the whole body is in the picture, as when
+    /// someone stands at their spot to be filmed, not a person close to the phone with their legs
+    /// out of view.
+    static func showsWholeSide(_ joints: [BodyJoint: JointPoint]) -> Bool {
+        [BodySide.left, .right].contains { side in
+            [JointRole.shoulder, .hip, .knee, .ankle].allSatisfy { role in
+                (joints[role.joint(on: side)]?.confidence ?? 0) >= jointConfidence
+            }
+        }
     }
 
     static func box(of joints: [BodyJoint: JointPoint], aspectRatio: Double) -> Box? {

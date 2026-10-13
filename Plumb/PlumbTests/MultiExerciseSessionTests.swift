@@ -46,6 +46,34 @@ struct MultiExerciseSessionTests {
         #expect(analysis.reps.count == 5)
     }
 
+    /// Squat is still selected (the default) and the person does push-ups. Recognition measures
+    /// them as push-ups; the next set is then framed, counted live and stopped hands-free as a
+    /// push-up, instead of as a squat again with a live count stuck at 0.
+    @Test func aRecognizedExerciseBecomesTheChoiceForTheNextSet() async throws {
+        let source = StubPoseSource()
+        let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbCarryOver-\(UUID())")!)
+        let model = WorkoutSessionModel(source: source, exerciseClassifier: nil, angleClassifier: nil,
+                                        preferences: preferences)
+        #expect(model.usesExerciseRecognition)
+        #expect(model.selectedExercise == .bodyweightSquat)
+        var rng = SyntheticRandom(seed: 505)
+        let frames = SyntheticExerciseMotion.sequence(
+            label: "push_up", settings: .init(duration: 20...20, maximumYawDegrees: 5, dropRate: 0...0), using: &rng)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for frame in frames { source.emit(frame) }
+        await model.endSet()
+        guard case .recognized(.pushUp, _) = model.recognition else {
+            Issue.record("Expected the push-ups to be recognized, got \(model.recognition)")
+            return
+        }
+        #expect(model.resultExercise == .pushUp)
+        #expect(model.selectedExercise == .pushUp)
+        await model.startPreview()
+        #expect(model.captureExercise == .pushUp)
+        await model.cancel()
+    }
+
     @Test func comparisonUsesThePreviousSetOfTheSameExercise() async throws {
         let source = StubPoseSource()
         let model = WorkoutSessionModel(source: source)

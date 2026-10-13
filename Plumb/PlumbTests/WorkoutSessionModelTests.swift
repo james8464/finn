@@ -1,4 +1,5 @@
 import AVFoundation
+import Observation
 import Testing
 @testable import Plumb
 
@@ -171,6 +172,27 @@ struct WorkoutSessionModelTests {
         #expect(announcer.phrases.isEmpty)
     }
 
+    /// Each live update is said as one phrase, the count first. Said one by one, a count and two
+    /// observations queued at once made the speech synthesizer drop its backlog, count included:
+    /// a tired person heard "3", "Range is shorter", "5".
+    @Test func eachLiveUpdateIsSaidAsOnePhraseWithTheCountFirst() async throws {
+        let source = TestPoseSource()
+        let announcer = RecordingAnnouncer()
+        let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbSpoken-\(UUID())")!)
+        let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        let frames = CaptureTraces.tiringSquats()
+        for frame in frames { source.emit(frame) }
+        try await waitUntil { model.frameCount == frames.count }
+        let phrases = announcer.phrases
+        let counts = phrases.compactMap { Int($0.split(separator: ".").first ?? "") }
+        #expect(counts == [1, 2, 3, 4, 5, 6])
+        #expect(phrases.count == counts.count, "\(phrases)")
+        #expect(phrases.contains { $0.hasPrefix("4. ") }, "\(phrases)")
+        await model.cancel()
+    }
+
     /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
     /// simulator, with many main-actor tests running at once, the live analysis of a whole set can
     /// take several seconds.
@@ -183,6 +205,125 @@ struct WorkoutSessionModelTests {
             }
             try await Task.sleep(for: .milliseconds(10))
         }
+    }
+
+    /// The camera source picks a frame's clock when it forwards it; the set starts when the model
+    /// reads it. A frame stamped with the preview clock (20 s of framing) can therefore arrive just
+    /// after the countdown, ahead of the set's frames from 0 s. It must not become the set's first
+    /// frame: the live count stayed silent for 20 s and a short set was refused as lasting -8 s.
+    @Test func aFrameStampedBeforeTheSetDoesNotJoinIt() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        source.emit(frame(time: 20.0, hipY: 0.42))
+        let frames = trace(reps: 6)
+        for frame in frames { source.emit(frame) }
+        try await waitUntil { model.livePose?.time == frames.last?.time }
+        #expect(model.frameCount == frames.count)
+        #expect((5...6).contains(model.liveRepCount))
+        await model.endSet()
+        guard case .measured(let analysis, _) = model.result else {
+            Issue.record("Expected the set's own frames to be measured, got \(String(describing: model.result))")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+    }
+
+    /// Hands-free in a dim room, or standing just outside the picture: Vision finds nobody. Plumb
+    /// says so to the person a few steps away, and after a minute with nobody in view it closes the
+    /// camera, so the screen can lock and the camera and Vision stop.
+    @Test func framingWithNobodyInViewSaysSoAndClosesTheCamera() async throws {
+        let source = TestPoseSource()
+        let announcer = RecordingAnnouncer()
+        let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbNobody-\(UUID())")!,
+                                           handsFreeByDefault: true)
+        let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+        await model.startPreview()
+        var time = 0.0
+        while time < 70 {
+            source.emit(PoseFrame(time: time, subjectCount: 0, joints: [:], athleteTracking: .hidden))
+            time += CaptureTraces.step
+        }
+        try await waitUntil { model.stage == .ready }
+        #expect(model.stage == .ready)
+        #expect(source.stopCount >= 1)
+        let help = announcer.phrases.filter { $0 == "Plumb can’t see you. Step into view or add light" }
+        #expect((5...8).contains(help.count), "\(announcer.phrases)")
+        #expect(model.framingClosedNote == "Plumb closed the camera after a minute without seeing anyone.")
+        await model.startPreview()
+        #expect(model.framingClosedNote == nil)
+        await model.cancel()
+    }
+
+    /// The phone left on the camera screen with a person in view but no set started (an ankle
+    /// behind furniture, or they gave up): framing closes by itself after three minutes.
+    @Test func framingWithoutASetClosesAfterThreeMinutes() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        var time = 0.0
+        while time < 175 {
+            source.emit(CaptureTraces.frame(time: time, hipY: 0.42, ankleX: 0.51, legs: true))
+            time += CaptureTraces.step
+        }
+        try await waitUntil { model.livePose.map { $0.time >= 174.9 } ?? false }
+        #expect(model.stage == .framing)
+        while time < 185 {
+            source.emit(CaptureTraces.frame(time: time, hipY: 0.42, ankleX: 0.51, legs: true))
+            time += CaptureTraces.step
+        }
+        try await waitUntil { model.stage == .ready }
+        #expect(model.stage == .ready)
+        #expect(source.stopCount >= 1)
+        #expect(model.framingClosedNote == "Plumb closed the camera after 3 minutes without a set.")
+    }
+
+    /// After every set the model read the whole history three times (two of them itself) and
+    /// rewrote it on the main actor before the result appeared, more slowly as history grew. A set
+    /// now writes its session once and updates the list in memory.
+    @Test func aMeasuredSetDoesNotReadTheHistoryAgain() async throws {
+        let store = CountingSessionStore()
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+        #expect(store.loads == 1)
+        for _ in 0..<2 {
+            await model.startPreview()
+            await model.beginSet(countdown: 0)
+            for frame in trace(reps: 6) { source.emit(frame) }
+            await model.endSet()
+        }
+        #expect(store.loads == 1)
+        #expect(store.saves == 2)
+        #expect(model.history == store.sessions)
+        #expect(model.history.first?.sets.count == 2)
+    }
+
+    /// While framing, the camera screen's hint and focus line read the model on every redraw. They
+    /// read `livePose`, new on every frame, so the whole screen was rebuilt 15 times a second and
+    /// the focus recomputed over the full history. What they read now changes only when its value does.
+    @Test func framingTextIsNotInvalidatedByEveryFrame() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        source.emit(CaptureTraces.frame(time: 0, hipY: 0.42, ankleX: 0.51, legs: true))
+        try await waitUntil { model.athleteInView }
+        let changes = ChangeCounter()
+        withObservationTracking {
+            _ = model.athleteInView
+            _ = model.captureFocus
+        } onChange: {
+            changes.count += 1
+        }
+        for index in 1...10 {
+            source.emit(CaptureTraces.frame(time: Double(index) * CaptureTraces.step, hipY: 0.42, ankleX: 0.51, legs: true))
+        }
+        try await waitUntil { model.livePose?.time == 10 * CaptureTraces.step }
+        #expect(changes.count == 0)
+        source.emit(PoseFrame(time: 1, subjectCount: 0, joints: [:], athleteTracking: .hidden))
+        try await waitUntil { !model.athleteInView }
+        #expect(changes.count == 1)
+        await model.cancel()
     }
 
     @Test func stopTimingUsesTapInstantAndClearsForNextSet() async throws {
@@ -258,6 +399,38 @@ struct WorkoutSessionModelTests {
         }
         #expect(analysis.reps.count == 6)
         #expect(model.lastStopToResultMilliseconds == nil)
+    }
+
+    /// The 2-minute limit, or the camera stopping, cuts the set halfway down a rep. That cut is
+    /// Plumb's, not a movement the athlete left unfinished: it is not noted or saved as one, and
+    /// the limit is said with the result.
+    @Test func aCutMidRepIsNotTheAthletesUnfinishedRep() async throws {
+        for atLimit in [true, false] {
+            let source = TestPoseSource()
+            let announcer = RecordingAnnouncer()
+            let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbCut-\(UUID())")!)
+            let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+            await model.startPreview()
+            await model.beginSet(countdown: 0)
+            // Six 2 s reps, cut at the bottom of the sixth.
+            let frames = CaptureTraces.squats(reps: 6, from: 0).filter { $0.time <= 11.0 }
+            for frame in frames { source.emit(frame) }
+            try await waitUntil { model.frameCount == frames.count }
+            if atLimit { source.finishAtLimit() } else { source.finishUnexpectedly() }
+            try await waitUntil { model.stage == .result }
+            guard case .measured(let analysis, _) = model.result else {
+                Issue.record("Expected the reps before the cut to be measured, got \(String(describing: model.result))")
+                return
+            }
+            #expect(analysis.reps.count == 5)
+            #expect(model.currentSession?.sets.last?.issues?.contains(.unfinishedLastRep) == false, "at limit: \(atLimit)")
+            #expect(model.movementNote == nil, "at limit: \(atLimit)")
+            #expect(model.endedAtLimit == atLimit)
+            #expect(model.endedEarly == !atLimit)
+            if atLimit {
+                #expect(announcer.phrases.last == "2-minute limit reached. 5 reps measured", "\(announcer.phrases)")
+            }
+        }
     }
 
     @Test func cancellingCountdownNeverRecords() async throws {
@@ -594,6 +767,36 @@ struct WorkoutSessionModelTests {
             .rightAnkle: JointPoint(x: 0.57, y: 0.90, confidence: 0.99),
         ])
     }
+}
+
+/// Counts Observation change notifications.
+nonisolated private final class ChangeCounter: @unchecked Sendable {
+    var count = 0
+}
+
+/// History in memory, counting how often the model reads and writes it.
+nonisolated private final class CountingSessionStore: SessionStoring, @unchecked Sendable {
+    private(set) var sessions: [WorkoutSessionSummary] = []
+    private(set) var loads = 0
+    private(set) var saves = 0
+
+    func load() throws -> [WorkoutSessionSummary] {
+        loads += 1
+        return sessions
+    }
+
+    func save(_ session: WorkoutSessionSummary) throws {
+        saves += 1
+        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
+            sessions[index] = session
+        } else {
+            sessions.append(session)
+        }
+    }
+
+    func delete(id: UUID) throws { sessions.removeAll { $0.id == id } }
+    func deleteAll() throws { sessions = [] }
+    func recoverCorruptStore() throws -> URL { throw SessionStoreError.notCorrupted }
 }
 
 nonisolated private final class ToggleSessionStore: SessionStoring, @unchecked Sendable {

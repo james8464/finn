@@ -41,15 +41,8 @@ nonisolated final class PoseFrameAnalyzer {
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
         analyzedFrames += 1
         let verifySilhouette = analyzedFrames % Self.silhouetteInterval == 0
-        // Use a fresh request for each sample. Reusing one lagged behind the next pose in video
-        // replay, causing clear joints to be rejected after a movement transition.
-        let maskRequest: VNGeneratePersonSegmentationRequest? = verifySilhouette
-            ? VNGeneratePersonSegmentationRequest() : nil
-        maskRequest?.qualityLevel = .fast
-        maskRequest?.outputPixelFormat = kCVPixelFormatType_OneComponent8
         do {
-            let requests: [VNRequest] = maskRequest.map { [request, $0] } ?? [request]
-            try handler.perform(requests)
+            try handler.perform([request])
         } catch {
             return PoseFrame(time: time, subjectCount: 0, joints: [:], aspectRatio: aspectRatio,
                              athleteTracking: .hidden)
@@ -68,7 +61,7 @@ nonisolated final class PoseFrameAnalyzer {
             }
             joints = people[athlete]
             if verifySilhouette {
-                let mask = Self.personMask(maskRequest?.results?.first?.pixelBuffer)
+                let mask = Self.personMask(Self.segmentation(of: handler))
                 switch SilhouetteCheck.verdict(for: joints, mask: mask) {
                 case .checked(let supported):
                     lastRefutedJoints = Set(joints.keys).subtracting(supported)
@@ -95,6 +88,20 @@ nonisolated final class PoseFrameAnalyzer {
                          profileDeviationDegrees: profileDeviation,
                          athleteTracking: athlete == nil ? .hidden : .tracked,
                          bystanders: bystanders)
+    }
+
+    /// Vision's fast person mask for the image the handler holds, nil when the request fails (the
+    /// joints then keep their 2D evidence, as with no mask). Asked only once an athlete is found:
+    /// performed with every body-pose request, it was made and thrown away in an empty room and
+    /// while the athlete was hidden.
+    private static func segmentation(of handler: VNImageRequestHandler) -> CVPixelBuffer? {
+        // Use a fresh request for each sample. Reusing one lagged behind the next pose in video
+        // replay, causing clear joints to be rejected after a movement transition.
+        let request = VNGeneratePersonSegmentationRequest()
+        request.qualityLevel = .fast
+        request.outputPixelFormat = kCVPixelFormatType_OneComponent8
+        do { try handler.perform([request]) } catch { return nil }
+        return request.results?.first?.pixelBuffer
     }
 
     /// Copies Vision's one-byte person mask; nil when there is none or it has another format.

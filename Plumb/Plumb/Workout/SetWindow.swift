@@ -36,7 +36,30 @@ nonisolated enum SetWindow {
 
     /// Indices of the set within the capture; nil when nothing needs trimming or no set was found.
     static func activeRange(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> ClosedRange<Int>? {
-        guard frames.count >= 2, let inPosition = positions(frames, requirement: requirement) else { return nil }
+        guard frames.count >= 2 else { return nil }
+        let side = trackedSide(frames, requirement: requirement)
+        guard let inPosition = positions(frames, requirement: requirement, side: side) else { return nil }
+        return activeRange(frames, inPosition: inPosition) {
+            spots(frames, requirement: requirement, inPosition: inPosition, side: side)
+        }
+    }
+
+
+    /// The set's indices (as `activeRange`) and where the athlete is in each frame (as `spots`),
+    /// from one pass over the frames. The live count needs both every 0.4 s; worked out apart,
+    /// they went over the whole set four times.
+    static func layout(_ frames: [PoseFrame], requirement: EvidenceRequirement)
+        -> (range: ClosedRange<Int>?, spots: [Spot]?) {
+        let side = trackedSide(frames, requirement: requirement)
+        guard let inPosition = positions(frames, requirement: requirement, side: side) else { return (nil, nil) }
+        let places = spots(frames, requirement: requirement, inPosition: inPosition, side: side)
+        let range = frames.count >= 2 ? activeRange(frames, inPosition: inPosition) { places } : nil
+        return (range, places)
+    }
+
+    /// `makeSpots` is called only once a set was found.
+    private static func activeRange(_ frames: [PoseFrame], inPosition: [Bool],
+                                    makeSpots: () -> [Spot]) -> ClosedRange<Int>? {
         guard var start = frames.indices.first(where: { index in
             inPosition[index] && settled(frames, inPosition, from: index, forward: true)
         }), var end = frames.indices.last(where: { index in
@@ -46,9 +69,9 @@ nonisolated enum SetWindow {
         // Reps at the spot with a joint unclear, or with Vision missing the athlete for a moment,
         // stay in the set, so the gate judges them. A dropout of a few frames right after the last
         // rep used to end the set at that rep's top and drop it.
-        let spots = spots(frames, requirement: requirement, inPosition: inPosition)
-        start = extended(from: start, by: -1, spots: spots, frames: frames)
-        end = extended(from: end, by: 1, spots: spots, frames: frames)
+        let places = makeSpots()
+        start = extended(from: start, by: -1, spots: places, frames: frames)
+        end = extended(from: end, by: 1, spots: places, frames: frames)
         guard start > 0 || end < frames.count - 1 else { return nil }
         return start...end
     }
@@ -97,13 +120,14 @@ nonisolated enum SetWindow {
     }
 
     static func spots(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> [Spot]? {
-        guard let inPosition = positions(frames, requirement: requirement) else { return nil }
-        return spots(frames, requirement: requirement, inPosition: inPosition)
+        let side = trackedSide(frames, requirement: requirement)
+        guard let inPosition = positions(frames, requirement: requirement, side: side) else { return nil }
+        return spots(frames, requirement: requirement, inPosition: inPosition, side: side)
     }
 
+    /// `side` is `trackedSide` of these frames.
     private static func spots(_ frames: [PoseFrame], requirement: EvidenceRequirement,
-                              inPosition: [Bool]) -> [Spot] {
-        let side = trackedSide(frames, requirement: requirement)
+                              inPosition: [Bool], side: BodySide) -> [Spot] {
         let reference: JointRole = requirement.joints.contains(.hip) ? .hip : .shoulder
         let atSpot = frames.indices.filter { inPosition[$0] }
         let places = atSpot.compactMap { clear(frames[$0], reference, side)?.x }
@@ -137,7 +161,12 @@ nonisolated enum SetWindow {
     /// seen best over these frames, and its planted joint within `anchorRadius` of its usual place
     /// (the median of where it was seen). Nil when the planted joint was seen fewer than three times.
     static func positions(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> [Bool]? {
-        let side = trackedSide(frames, requirement: requirement)
+        positions(frames, requirement: requirement, side: trackedSide(frames, requirement: requirement))
+    }
+
+    /// `side` is `trackedSide` of these frames.
+    private static func positions(_ frames: [PoseFrame], requirement: EvidenceRequirement,
+                                  side: BodySide) -> [Bool]? {
         let anchor = requirement.anchor.joint(on: side)
         let anchors = frames.filter { visible($0, requirement: requirement, side: side) }
             .compactMap { $0.joints[anchor] }

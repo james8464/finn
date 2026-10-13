@@ -328,6 +328,108 @@ struct FitnessSessionTests {
         #expect(setup.model.history.isEmpty)
     }
 
+    /// No Done after the last set, then iOS terminates Plumb (swiped away, or reclaimed in the
+    /// background). On the next launch the first screen still offers to finish the session, a set a
+    /// few minutes later joins it, and Done saves it to Apple Health once.
+    @Test func anOpenSessionSurvivesARelaunch() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let id = try #require(setup.model.currentSession?.id)
+
+        let clock = setup.clock
+        let source = TestSource()
+        let relaunched = WorkoutSessionModel(source: source, store: setup.store, preferences: setup.preferences,
+                                             fitness: setup.fitness, currentDate: { clock.date })
+        #expect(relaunched.unfinishedSession?.id == id)
+
+        clock.advance(by: 5 * 60)
+        await relaunched.startPreview()
+        await relaunched.beginSet(countdown: 0)
+        for frame in CaptureTraces.squats(reps: 6, from: 0) { source.emit(frame) }
+        await relaunched.endSet()
+        #expect(relaunched.currentSession?.id == id)
+        #expect(relaunched.currentSession?.sets.count == 2)
+        #expect(relaunched.comparison != nil)
+
+        await relaunched.finishSession()
+        #expect(setup.fitness.saved.map(\.sessionID) == [id])
+        let again = WorkoutSessionModel(source: TestSource(), store: setup.store, preferences: setup.preferences,
+                                        fitness: setup.fitness, currentDate: { clock.date })
+        #expect(again.unfinishedSession == nil)
+    }
+
+    /// Sessions saved before Plumb marked open ones are treated as finished: a relaunch does not
+    /// offer to finish every old session.
+    @Test func anOlderSessionWithoutTheOpenMarkIsNotReopened() throws {
+        let setup = try Setup(savesToFitness: true)
+        let old = WorkoutSessionSummary(id: UUID(), startedAt: setup.clock.date, sets: [])
+        try setup.store.save(old)
+        let relaunched = WorkoutSessionModel(source: TestSource(), store: setup.store, preferences: setup.preferences,
+                                             fitness: setup.fitness)
+        #expect(relaunched.history.map(\.id) == [old.id])
+        #expect(relaunched.unfinishedSession == nil)
+    }
+
+    /// Done failed to save to Health, then the person deletes that session, or all data. The first
+    /// screen no longer offers "Couldn't save to Fitness · Try again" for a session that is gone,
+    /// where Try again did nothing.
+    @Test func deletingASessionClearsItsFailedSave() async throws {
+        for deletesAll in [false, true] {
+            let setup = try Setup(savesToFitness: true)
+            setup.fitness.failures = [CocoaError(.fileWriteUnknown)]
+            try await setup.measureASet()
+            let id = try #require(setup.model.currentSession?.id)
+            await setup.model.finishSession()
+            #expect(setup.model.fitnessSave == FitnessSaveReport(sessionID: id, status: .failed))
+            if deletesAll { setup.model.deleteAllData() } else { setup.model.deleteHistory(id: id) }
+            #expect(setup.model.fitnessSave == nil, "delete all: \(deletesAll)")
+        }
+    }
+
+    /// A save still running when its session is deleted, which then fails: there was never a
+    /// workout in Health, and nothing is left to retry.
+    @Test func aSaveFailingAfterItsSessionWasDeletedLeavesNoRetry() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let id = try #require(setup.model.currentSession?.id)
+        setup.fitness.holdsSaves = true
+        setup.fitness.failures = [CocoaError(.fileWriteUnknown)]
+        let done = Task { await setup.model.finishSession() }
+        try await waitUntil { setup.fitness.saveAttempts == 1 }
+        setup.model.deleteHistory(id: id)
+        #expect(setup.model.fitnessSave == FitnessSaveReport(sessionID: id, status: .saving))
+        setup.fitness.releaseSaves()
+        await done.value
+        #expect(setup.model.fitnessSave == nil)
+    }
+
+    /// The Back buttons on the result and on a camera error go to the first screen through
+    /// `cancel()`, not Done: the session stays open (Finish session is offered), nothing is saved to
+    /// Health yet, and the next set joins the session and is compared.
+    @Test func goingBackFromAResultOrACameraErrorKeepsTheSession() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let id = try #require(setup.model.currentSession?.id)
+        #expect(setup.model.stage == .result)
+        await setup.model.cancel()
+        #expect(setup.model.stage == .ready)
+        #expect(setup.model.unfinishedSession?.id == id)
+
+        setup.source.startError = .denied
+        await setup.model.startPreview()
+        #expect(setup.model.stage == .error(.permissionDenied))
+        await setup.model.cancel()
+        #expect(setup.model.stage == .ready)
+        #expect(setup.model.unfinishedSession?.id == id)
+        #expect(setup.fitness.saveAttempts == 0)
+
+        setup.source.startError = nil
+        setup.clock.advance(by: 60)
+        try await setup.measureASet(setsInSession: 2)
+        #expect(setup.model.currentSession?.id == id)
+        #expect(setup.model.comparison != nil)
+    }
+
     @Test func aSessionContinuesUpToTheLongestBreak() {
         let start = Date(timeIntervalSince1970: 1_800_000_000)
         let empty = WorkoutSessionSummary(id: UUID(), startedAt: start, sets: [])
@@ -451,10 +553,12 @@ private final class FakeFitnessExporter: FitnessWorkoutSaving {
 @MainActor
 private final class TestSource: PoseStreaming {
     let previewSession = AVCaptureSession()
+    var startError: CameraSourceError?
     private var continuation: AsyncStream<PoseFrame>.Continuation?
 
     func start() async throws -> AsyncStream<PoseFrame> {
-        AsyncStream { continuation in self.continuation = continuation }
+        if let startError { throw startError }
+        return AsyncStream { continuation in self.continuation = continuation }
     }
 
     func stop() async {

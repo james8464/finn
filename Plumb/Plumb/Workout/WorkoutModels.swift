@@ -289,6 +289,11 @@ nonisolated struct WorkoutSessionSummary: Codable, Equatable, Identifiable {
     /// The Apple Health workout saved for this session, so it is never saved twice. Nil until then,
     /// and in sessions saved before 13 October 2026 (decoded as absent).
     var fitnessWorkout: FitnessWorkoutRecord? = nil
+    /// True while the session can still take sets: saved with every set and cleared when it ends
+    /// (Done, Finish session, or the break that starts a new session). After iOS terminates Plumb
+    /// without Done, the next launch finds the session still open. Nil once finished, and in
+    /// sessions saved by earlier builds, which count as finished.
+    var isOpen: Bool? = nil
 }
 
 nonisolated extension WorkoutSessionSummary {

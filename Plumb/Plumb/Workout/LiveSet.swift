@@ -26,9 +26,14 @@ nonisolated struct StartReadiness: Equatable {
     @discardableResult
     mutating func update(with frame: PoseFrame, definition: ExerciseDefinition) -> Double {
         let requirement = definition.evidence
-        let sides: [BodySide] = side.map { $0 == .left ? [.left, .right] : [.right, .left] } ?? [.left, .right]
-        guard let visibleSide = sides.first(where: { SetWindow.visible(frame, requirement: requirement, side: $0) }),
-              Self.isStartingPosture(frame, definition: definition, side: visibleSide),
+        // Once a side is followed, a frame where it is unclear is a miss, not a switch to the far
+        // side, which restarted the hold. Before that, the side seen with more confidence is tried
+        // first, and each side is checked for the starting position, not only for visibility.
+        let sides = side.map { [$0] } ?? Self.sidesByConfidence(frame, requirement: requirement)
+        guard let visibleSide = sides.first(where: {
+                  SetWindow.visible(frame, requirement: requirement, side: $0)
+                      && Self.isStartingPosture(frame, definition: definition, side: $0)
+              }),
               let anchor = frame.joints[requirement.anchor.joint(on: visibleSide)] else {
             misses += 1
             if misses > Self.toleratedMisses {
@@ -50,6 +55,15 @@ nonisolated struct StartReadiness: Equatable {
             progress = 0
         }
         return progress
+    }
+
+    /// Both sides, the one whose required joints Vision is more confident about first: the side
+    /// facing the camera, whichever way the person stands.
+    static func sidesByConfidence(_ frame: PoseFrame, requirement: EvidenceRequirement) -> [BodySide] {
+        func confidence(_ side: BodySide) -> Double {
+            requirement.joints(on: side).reduce(0) { $0 + (frame.joints[$1]?.confidence ?? 0) }
+        }
+        return confidence(.right) > confidence(.left) ? [.right, .left] : [.left, .right]
     }
 
     /// The exercise's starting position. Standing for the squat, lunge and deadlift. For the
@@ -89,6 +103,23 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
         }
     }
 
+    /// What to say for one live update: the latest count, then any observation, as one phrase
+    /// ("4. Range is shorter"). Queued as separate phrases, a count and two observations made the
+    /// announcer drop its backlog when it fell behind, count included.
+    static func phrase(for events: [LiveSetEvent], definition: ExerciseDefinition) -> String? {
+        var count: String?
+        var observations: [String] = []
+        for event in events {
+            if case .repCounted = event {
+                count = event.spoken(for: definition)
+            } else {
+                observations.append(event.spoken(for: definition))
+            }
+        }
+        let parts = (count.map { [$0] } ?? []) + observations
+        return parts.isEmpty ? nil : parts.joined(separator: ". ")
+    }
+
     /// The line shown on the camera screen.
     func caption(for definition: ExerciseDefinition) -> String? {
         switch self {
@@ -112,7 +143,8 @@ nonisolated struct LiveSetMonitor {
     static let shorterShare = 0.85
     /// The same cue is not repeated within this many reps.
     static let cueSpacing = 3
-    /// After at least one rep, away from the spot this long means the athlete walked away.
+    /// Away from the spot this long means the athlete walked away. Before any rep, this counts only
+    /// once the athlete has been at their spot for a set's minimum length.
     static let leftAfter: TimeInterval = 2.0
     /// After at least one rep, unseen this long (without being seen walking off) means the athlete left.
     static let hiddenAfter = EvidenceRubric.maximumOcclusionGap + 1
@@ -147,7 +179,12 @@ nonisolated struct LiveSetMonitor {
         lastAnalysisTime = last.time
         var events: [LiveSetEvent] = []
         analysisAccepted = false
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: definition, viewCheck: .ignore)
+        // One pass gives both the set's frames and where the athlete is in each, for the count and
+        // the stop; this runs over the whole set so far every 0.4 s.
+        let layout = SetWindow.layout(frames, requirement: definition.evidence)
+        let set = layout.range.map { Array(frames[$0]) } ?? frames
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(set, as: definition, viewCheck: .ignore,
+                                                                             trimsToSet: false)
         if case .analyzed(let analysis) = outcome {
             analysisAccepted = true
             midMovement = diagnostics?.unfinished ?? false
@@ -159,50 +196,70 @@ nonisolated struct LiveSetMonitor {
                 events.append(contentsOf: cues(forRep: countedReps))
             }
         }
-        isOver = shouldStop(frames)
+        isOver = shouldStop(frames, spots: layout.spots)
         return events
     }
 
     /// True when the set should end by itself.
     func shouldStop(_ frames: [PoseFrame]) -> Bool {
-        guard countedReps > 0, let last = frames.last else { return false }
+        shouldStop(frames, spots: SetWindow.spots(frames, requirement: definition.evidence))
+    }
+
+    /// `spots` is `SetWindow.spots(frames, ...)`, worked out only when needed.
+    private func shouldStop(_ frames: [PoseFrame], spots makeSpots: @autoclosure () -> [SetWindow.Spot]?) -> Bool {
+        guard let last = frames.last else { return false }
         // Idle only by a measurement that accepts the set and sees the person at the top, for longer
         // than the slowest rep may take: a refusal after a gap, or a slow rep under way, is not idleness.
         let idleLimit = max(Self.idleAfter, definition.phases.maximumDuration + 2)
-        if analysisAccepted, !midMovement, let lastRep = reps.last, last.time - lastRep.endTime >= idleLimit {
+        if countedReps > 0, analysisAccepted, !midMovement, let lastRep = reps.last,
+           last.time - lastRep.endTime >= idleLimit {
             return true
         }
         // Away from the spot, not merely with a joint unclear at it (`SetWindow.spots`).
-        guard let spots = SetWindow.spots(frames, requirement: definition.evidence) else { return false }
-        guard let lastIndex = spots.lastIndex(where: \.isAtSpot) else { return true }
+        guard let spots = makeSpots() else { return false }
+        guard let lastIndex = spots.lastIndex(where: \.isAtSpot) else { return countedReps > 0 }
         let gone = last.time - frames[lastIndex].time
         // Seen walking off: two seconds. Only hidden (someone in front, Vision missing them): longer
         // than the gap the evidence gate allows for a person passing in front, so it does not end a
         // set the gate would measure.
         let seenLeaving = spots[(lastIndex + 1)...].contains(.away)
+        guard countedReps > 0 else {
+            // No rep counted (every movement too shallow, or the person changed their mind): the set
+            // still ends when the athlete, after standing at their spot for a set's minimum length,
+            // is seen walking away. Never for being unseen, which getting down into a push-up can
+            // cause, and never while walking in and out without stopping at the spot.
+            guard seenLeaving, let firstIndex = spots.firstIndex(of: .inPosition),
+                  frames[lastIndex].time - frames[firstIndex].time >= EvidenceRubric.minimumSetDuration
+            else { return false }
+            return gone >= Self.leftAfter
+        }
         return gone >= (seenLeaving ? Self.leftAfter : Self.hiddenAfter)
     }
 
+    /// At most one observation per rep, said with its count. A shorter range comes first, the same
+    /// reading as the end-of-set observation; a quicker rep not pointed out then is pointed out on
+    /// the next one if it is still quicker.
     private mutating func cues(forRep number: Int) -> [LiveSetEvent] {
         guard reps.indices.contains(number - 1) else { return [] }
         let rep = reps[number - 1]
-        var events: [LiveSetEvent] = []
-        if number >= 4, number - lastFasterCue >= Self.cueSpacing {
+        var faster = false
+        if number >= 4 {
             let first = reps.prefix(3).map(\.duration).sorted()[1]
-            if first > 0, rep.duration < Self.fasterShare * first {
-                events.append(.fasterThanFirstReps(rep: number))
-                lastFasterCue = number
-                sawFasterRep = true
-            }
+            faster = first > 0 && rep.duration < Self.fasterShare * first
         }
+        if faster { sawFasterRep = true }
         if number >= 3, number - lastShorterCue >= Self.cueSpacing {
             let first = (reps[0].relativeRange + reps[1].relativeRange) / 2
             if first > 0, rep.relativeRange <= Self.shorterShare * first {
-                events.append(.shorterThanFirstReps(rep: number))
                 lastShorterCue = number
+                return [.shorterThanFirstReps(rep: number)]
             }
         }
-        return events
+        if faster, number - lastFasterCue >= Self.cueSpacing {
+            lastFasterCue = number
+            return [.fasterThanFirstReps(rep: number)]
+        }
+        return []
     }
 }
 

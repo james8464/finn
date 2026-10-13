@@ -76,8 +76,15 @@ final class WorkoutSessionModel {
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
     private var previewFrames: [PoseFrame] = []
-    /// Latest Vision 3D profile deviations seen while framing.
-    private(set) var previewDeviations: [Double] = []
+    /// Latest Vision 3D profile deviations seen while framing, newest last.
+    var previewDeviations: [Double] { previewEstimates.map { $0.deviation } }
+    /// The same, with the frame time of each: an estimate older than `previewEstimateLifetime`
+    /// no longer counts.
+    private var previewEstimates: [(time: TimeInterval, deviation: Double)] = []
+    /// Estimates stop when the phone is hot (the 3D request is skipped) or when Vision 3D measures
+    /// someone closer to the camera than the athlete; old readings must not keep asking the person
+    /// to turn or hold back a hands-free start. New ones arrive about four times a second.
+    static let previewEstimateLifetime: TimeInterval = 2
     private var lastPreviewFrameAt: ContinuousClock.Instant?
     private var framingWatchdog: Task<Void, Never>?
     private var isStopping = false
@@ -95,6 +102,9 @@ final class WorkoutSessionModel {
     @ObservationIgnored private let fitness: (any FitnessWorkoutSaving)?
     /// Sessions being saved to Apple Health right now: a session is never saved twice at once.
     @ObservationIgnored private var fitnessSavesInFlight: Set<UUID> = []
+    /// Sessions deleted while their save to Apple Health was running: if it fails, there is
+    /// nothing left to retry, so it reports nothing.
+    @ObservationIgnored private var fitnessSavesOfDeletedSessions: Set<UUID> = []
     /// Sessions saved to Apple Health in this run, kept even if writing history fails.
     @ObservationIgnored private var fitnessRecords: [UUID: FitnessWorkoutRecord] = [:]
     /// The date of a measured set, for the session it joins. Tests replace it.
@@ -146,7 +156,7 @@ final class WorkoutSessionModel {
         didSet {
             preferences.checksCameraAngle = checksCameraAngle
             source.setCameraAngleEstimation(checksCameraAngle)
-            if !checksCameraAngle { previewDeviations = [] }
+            if !checksCameraAngle { previewEstimates = [] }
         }
     }
     /// The 3D camera-angle verdict for the latest analyzed set, kept for the validation readout.
@@ -201,6 +211,8 @@ final class WorkoutSessionModel {
     /// The camera stopped during the set (another app took it, an interruption); the part captured
     /// before was reviewed.
     private(set) var endedEarly = false
+    /// The latest set reached Plumb's 2-minute limit and was stopped there.
+    private(set) var endedAtLimit = false
     /// What to change for the next try, matched to why the set was refused; nil when the reason
     /// already says it.
     private(set) var retakeHint: String?
@@ -210,10 +222,22 @@ final class WorkoutSessionModel {
     /// and when Plumb last said why.
     @ObservationIgnored private var notReadySince: TimeInterval?
     @ObservationIgnored private var lastFramingSpeech = -Double.infinity
+    /// While framing: the frame time framing began, and since when nobody has been in view.
+    @ObservationIgnored private var framingSince: TimeInterval?
+    @ObservationIgnored private var nobodySeenSince: TimeInterval?
+    /// Plumb closing the camera because framing went on with no set.
+    @ObservationIgnored private var framingCloseTask: Task<Void, Never>?
+    /// Why Plumb closed the camera by itself while framing, for the first screen; nil otherwise.
+    private(set) var framingClosedNote: String?
     /// The person's most frequent pattern in recent sets of the chosen exercise, shown before a set.
     var focus: MistakeProfile? { MistakeProfile.make(history: history, exercise: selectedExercise) }
     /// The same, for the exercise being captured.
-    var captureFocus: MistakeProfile? { MistakeProfile.make(history: history, exercise: captureExercise) }
+    /// Worked out once per camera screen: the screen reads it on every redraw, and it goes over the
+    /// whole history.
+    private(set) var captureFocus: MistakeProfile?
+    /// Whether the newest pose has the athlete's joints. The camera screen's text reads this rather
+    /// than `livePose`, which is new on every frame and redrew the whole screen 15 times a second.
+    private(set) var athleteInView = false
     /// The latest set showed the person's most frequent pattern again.
     private(set) var repeatedPattern: MistakeProfile?
     /// Receives each live event of a running set, for a connected Apple Watch.
@@ -284,6 +308,9 @@ final class WorkoutSessionModel {
             do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
             catch { historyIssue = Self.issue(for: error) }
         }
+        // iOS terminated Plumb after a set without Done: the session is still open, so the first
+        // screen offers to finish it and the next set joins it, as before the relaunch.
+        if let latest = history.first, latest.isOpen == true { currentSession = latest }
         refreshFitnessAccess()
     }
 
@@ -294,7 +321,9 @@ final class WorkoutSessionModel {
         collectionTask = nil
         guard stage == .openingCamera else { return }
         captureExercise = selectedExercise
+        captureFocus = MistakeProfile.make(history: history, exercise: captureExercise)
         recognition = .notAttempted
+        framingClosedNote = nil
         // The setup screen's Fitness line was about the session that ended; a save still running keeps it.
         if fitnessSave?.status != .saving { fitnessSave = nil }
         result = nil
@@ -310,10 +339,11 @@ final class WorkoutSessionModel {
         frames = []
         frameCount = 0
         previewFrames = []
-        previewDeviations = []
+        previewEstimates = []
         lastViewVerdict = .unavailable
         lastPreviewFrameAt = nil
         livePose = nil
+        athleteInView = false
         framingStatus = .checking
         framingWatchdog?.cancel()
         framingWatchdog = nil
@@ -335,7 +365,7 @@ final class WorkoutSessionModel {
                     if let lastPreviewFrameAt = self.lastPreviewFrameAt,
                        lastPreviewFrameAt.duration(to: .now) >= .seconds(1) {
                         self.previewFrames = []
-                        self.previewDeviations = []
+                        self.previewEstimates = []
                         self.framingStatus = .checking
                     }
                 }
@@ -347,25 +377,38 @@ final class WorkoutSessionModel {
                     case .framing, .countdown, .capturing: self.livePose = frame
                     default: self.livePose = nil
                     }
+                    let inView = !(self.livePose?.joints.isEmpty ?? true)
+                    if self.athleteInView != inView { self.athleteInView = inView }
                     if self.stage == .framing {
                         self.previewFrames.append(frame)
                         if self.previewFrames.count > 5 { self.previewFrames.removeFirst() }
                         self.lastPreviewFrameAt = .now
                         self.updateFramingStatus(with: frame)
                         self.updateHandsFreeStart(with: frame)
+                        self.closeFramingIfIdle(with: frame)
                     }
                     if (self.stage == .capturing || (self.stage == .analyzing && self.isStopping)) &&
                         self.frames.count < 1_800 {
+                        // The source picks a frame's clock when it forwards it, and the set starts
+                        // here when the frame is read: a frame stamped with the preview clock just
+                        // before the countdown ended can arrive first. Set frames count from 0, so
+                        // a clock going back means the frames so far were not the set's.
+                        if let previous = self.frames.last, frame.time < previous.time {
+                            self.frames = []
+                            self.liveMonitor = self.liveMonitor.map { LiveSetMonitor(definition: $0.definition) }
+                        }
                         self.frames.append(frame)
                         self.frameCount = self.frames.count
                         if self.stage == .capturing { self.followLiveSet() }
                     }
                 }
                 self.livePose = nil
+                self.athleteInView = false
                 guard !self.isStopping else { return }
                 self.framingWatchdog?.cancel()
                 self.framingWatchdog = nil
                 if self.stage == .capturing && self.source.endedAtLimit {
+                    self.endedAtLimit = true
                     self.stage = .analyzing
                     self.completeAnalysis()
                     self.announceResult()
@@ -458,6 +501,9 @@ final class WorkoutSessionModel {
         let exercise: ExerciseKind
         if case .recognized(let recognized, _) = recognition {
             exercise = recognized
+            // Plumb is sure the person did another exercise than the one chosen: the next sets use
+            // it, so they are framed, counted live and stopped hands-free as that exercise.
+            if recognized != captureExercise { selectedExercise = recognized }
         } else {
             exercise = captureExercise
         }
@@ -467,8 +513,12 @@ final class WorkoutSessionModel {
         resultExercise = exercise
         lastViewVerdict = ViewCheck.assess(setFrames, expected: definition.expectedView)
         // Already trimmed to the set: analyze exactly these frames, so the saved set is gated the same.
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(
+        let (outcome, measured) = ExerciseAnalyzer.analyzeWithDiagnostics(
             setFrames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore, trimsToSet: false)
+        var diagnostics = measured
+        // Plumb ended the capture (its time limit, or the camera stopping), not the athlete: a
+        // movement cut off then is not one they left unfinished, to note or to count in their pattern.
+        if endedAtLimit || endedEarly { diagnostics?.unfinished = false }
         movementNote = nil
         repExtremes = nil
         repeatedPattern = nil
@@ -554,8 +604,12 @@ final class WorkoutSessionModel {
     private func updateFramingStatus(with frame: PoseFrame) {
         let definition = captureExercise.definition
         if checksCameraAngle, let deviation = frame.profileDeviationDegrees {
-            previewDeviations.append(deviation)
-            if previewDeviations.count > 5 { previewDeviations.removeFirst() }
+            previewEstimates.append((frame.time, deviation))
+            if previewEstimates.count > 5 { previewEstimates.removeFirst() }
+        }
+        // Only when one has lapsed: every change of this list redraws what reads it.
+        if let oldest = previewEstimates.first, frame.time - oldest.time > Self.previewEstimateLifetime {
+        previewEstimates.removeAll { frame.time - $0.time > Self.previewEstimateLifetime }
         }
         if checksCameraAngle,
            ViewCheck.previewAsksToTurn(previewDeviations, expected: definition.expectedView) {
@@ -617,6 +671,50 @@ final class WorkoutSessionModel {
 
     static let notReadyDelay: TimeInterval = 3
     static let framingSpeechInterval: TimeInterval = 8
+    /// Hands-free, nobody in view this long is said aloud.
+    static let nobodySeenDelay: TimeInterval = 5
+    /// Framing closes by itself after this long with nobody in view...
+    static let nobodySeenLimit: TimeInterval = 60
+    /// ...or this long without a set starting.
+    static let framingLimit: TimeInterval = 180
+
+    /// The camera screen keeps the screen awake (`ContentView.keepsScreenOn`) and runs the camera
+    /// and Vision; left in framing, it ran until the battery or the heat stopped it. Framing now
+    /// closes after `framingLimit` without a set, or `nobodySeenLimit` with nobody in view. Hands-free,
+    /// the person a few steps away also hears when Plumb sees nobody.
+    private func closeFramingIfIdle(with frame: PoseFrame) {
+        guard stage == .framing, handsFreeTask == nil, framingCloseTask == nil else { return }
+        let since = framingSince ?? frame.time
+        framingSince = since
+        if frame.athleteVisible && !frame.joints.isEmpty {
+            nobodySeenSince = nil
+        } else if nobodySeenSince == nil {
+            nobodySeenSince = frame.time
+        }
+        let nobodyFor = nobodySeenSince.map { frame.time - $0 } ?? 0
+        let note: String?
+        if frame.time - since >= Self.framingLimit {
+            note = "Plumb closed the camera after 3 minutes without a set."
+        } else if nobodyFor >= Self.nobodySeenLimit {
+            note = "Plumb closed the camera after a minute without seeing anyone."
+        } else {
+            note = nil
+        }
+        if let note {
+            framingCloseTask = Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.say("Camera closed")
+                self.framingClosedNote = note
+                await self.cancel()
+                self.framingCloseTask = nil
+            }
+            return
+        }
+        guard handsFree, nobodyFor >= Self.nobodySeenDelay,
+              frame.time - lastFramingSpeech >= Self.framingSpeechInterval else { return }
+        lastFramingSpeech = frame.time
+        say("Plumb can’t see you. Step into view or add light")
+    }
 
     /// Counts reps while the set runs, says them and any live observation, and ends a hands-free
     /// set once the athlete walks away or stops moving after their reps.
@@ -631,9 +729,9 @@ final class WorkoutSessionModel {
             } else {
                 liveCaption = event.caption(for: definition)
             }
-            say(event.spoken(for: definition))
             onLiveEvent?(event, definition.kind)
         }
+        if let phrase = LiveSetEvent.phrase(for: events, definition: definition) { say(phrase) }
         guard handsFree, handsFreeTask == nil, monitor.isOver else { return }
         endedHandsFree = true
         handsFreeTask = Task { @MainActor [weak self] in
@@ -646,7 +744,9 @@ final class WorkoutSessionModel {
     private func announceResult() {
         switch result {
         case .measured(let analysis, _):
-            say(analysis.reps.count == 1 ? "1 rep measured" : "\(analysis.reps.count) reps measured")
+            let count = analysis.reps.count == 1 ? "1 rep measured" : "\(analysis.reps.count) reps measured"
+            // One phrase: the person may still be exercising and should know why the set ended.
+            say(endedAtLimit ? "2-minute limit reached. \(count)" : count)
         case .insufficientView, .failed:
             say("Plumb couldn’t measure this set. The reason is on screen.")
         case .interrupted, nil:
@@ -669,8 +769,11 @@ final class WorkoutSessionModel {
         liveCaption = nil
         endedHandsFree = false
         endedEarly = false
+        endedAtLimit = false
         notReadySince = nil
         lastFramingSpeech = -Double.infinity
+        framingSince = nil
+        nobodySeenSince = nil
         previewLandmarksVisible = false
     }
 
@@ -697,7 +800,11 @@ final class WorkoutSessionModel {
         currentSession = nil
         comparison = nil
         comparisonRecap = nil
-        if let finished { await saveToFitness(finished) }
+        guard var session = finished else { return }
+        // Ended: a relaunch no longer offers to finish it.
+        session.isOpen = nil
+        save(session)
+        await saveToFitness(session)
     }
 
     /// Re-reads Health's permission, which the person can change in Settings or Health at any time.
@@ -768,7 +875,10 @@ final class WorkoutSessionModel {
               !fitnessSavesInFlight.contains(id) else { return }
         // Claimed before any suspension, so a second Done or retry cannot start another save.
         fitnessSavesInFlight.insert(id)
-        defer { fitnessSavesInFlight.remove(id) }
+        defer {
+            fitnessSavesInFlight.remove(id)
+            fitnessSavesOfDeletedSessions.remove(id)
+        }
         fitnessSave = FitnessSaveReport(sessionID: id, status: .saving)
         var access = fitness.authorization
         if access == .notDetermined { access = await fitness.requestAuthorization() }
@@ -777,10 +887,10 @@ final class WorkoutSessionModel {
         case .authorized:
             break
         case .unavailable:
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .unavailable)
+            reportFitnessSave(.unavailable, for: id)
             return
         case .notDetermined, .denied:
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .needsPermission)
+            reportFitnessSave(.needsPermission, for: id)
             return
         }
         do {
@@ -791,12 +901,31 @@ final class WorkoutSessionModel {
             fitnessSave = FitnessSaveReport(sessionID: id, status: .saved)
         } catch FitnessSaveError.notAuthorized {
             fitnessAccess = .denied
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .needsPermission)
+            reportFitnessSave(.needsPermission, for: id)
         } catch FitnessSaveError.unavailable {
             fitnessAccess = .unavailable
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .unavailable)
+            reportFitnessSave(.unavailable, for: id)
         } catch {
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .failed)
+            reportFitnessSave(.failed, for: id)
+        }
+    }
+
+    /// Shows how a save ended, unless it did not go through for a session deleted meanwhile.
+    private func reportFitnessSave(_ status: FitnessSaveStatus, for id: UUID) {
+        guard fitnessSavesOfDeletedSessions.contains(id) else {
+            fitnessSave = FitnessSaveReport(sessionID: id, status: status)
+            return
+        }
+        if fitnessSave?.sessionID == id { fitnessSave = nil }
+    }
+
+    /// A deleted session's Fitness line goes with it: a failed or refused save has nothing left to
+    /// retry, and Try again did nothing. A save still running finishes in Health (the delete dialog
+    /// says so), and reports nothing if it fails.
+    private func forgetFitnessSaves(where isDeleted: (UUID) -> Bool) {
+        fitnessSavesOfDeletedSessions.formUnion(fitnessSavesInFlight.filter(isDeleted))
+        if let save = fitnessSave, isDeleted(save.sessionID), save.status != .saving, save.status != .saved {
+            fitnessSave = nil
         }
     }
 
@@ -812,6 +941,7 @@ final class WorkoutSessionModel {
     func deleteHistory(id: UUID) {
         guard store != nil else { return }
         pendingSessions.removeValue(forKey: id)
+        forgetFitnessSaves { $0 == id }
         if !pendingDeleteAll { pendingDeleteIDs.insert(id) }
         if currentSession?.id == id {
             currentSession = nil
@@ -826,6 +956,7 @@ final class WorkoutSessionModel {
         pendingDeleteAll = true
         pendingDeleteIDs = []
         pendingSessions = [:]
+        forgetFitnessSaves { _ in true }
         currentSession = nil
         comparison = nil
         comparisonRecap = nil
@@ -867,11 +998,14 @@ final class WorkoutSessionModel {
             frames, requirement: exercise.definition.evidence) else { return }
         let now = currentDate()
         // A set long after the previous one starts a new session; the earlier one ends as at Done.
-        if let open = currentSession, !open.continues(at: now) {
+        if var open = currentSession, !open.continues(at: now) {
             currentSession = nil
+            open.isOpen = nil
+            save(open)
             Task { await self.saveToFitness(open) }
         }
         var session = currentSession ?? WorkoutSessionSummary(id: UUID(), startedAt: now, sets: [])
+        session.isOpen = true
         let newSet = SetSummary(
             id: UUID(), sessionID: session.id, capturedAt: now,
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,
@@ -909,7 +1043,26 @@ final class WorkoutSessionModel {
     }
 
     private func save(_ session: WorkoutSessionSummary) {
-        guard store != nil else { return }
+        guard let store else { return }
+        // The usual case, history in good order and nothing else waiting: write this session (the
+        // store merges it into the file) and update the list in memory, instead of reading the
+        // whole history twice more on the main actor after every set.
+        if historyIssue == nil, pendingSessions.isEmpty, pendingDeleteIDs.isEmpty, !pendingDeleteAll {
+            do {
+                try store.save(session)
+            } catch {
+                pendingSessions[session.id] = session
+                historyIssue = Self.issue(for: error)
+                return
+            }
+            if let index = history.firstIndex(where: { $0.id == session.id }) {
+                history[index] = session
+            } else {
+                history.append(session)
+                history.sort { $0.startedAt > $1.startedAt }
+            }
+            return
+        }
         pendingSessions[session.id] = session
         retryHistory()
     }
@@ -932,9 +1085,10 @@ final class WorkoutSessionModel {
         collectionTask = nil
         frames = []
         previewFrames = []
-        previewDeviations = []
+        previewEstimates = []
         lastPreviewFrameAt = nil
         livePose = nil
+        athleteInView = false
         framingStatus = .checking
         frameCount = 0
         captureStartedAt = nil
