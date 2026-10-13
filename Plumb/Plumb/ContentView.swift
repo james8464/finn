@@ -771,7 +771,8 @@ struct ContentView: View {
     /// While framing hands-free: what to do, and how long until the set starts by itself.
     private var handsFreeHint: some View {
         let holding = model.handsFreeProgress > 0
-        let seen = !(model.livePose?.joints.isEmpty ?? true)
+        // Not `livePose`, which is new on every frame and made this whole view redraw with it.
+        let seen = model.athleteInView
         return VStack(spacing: 8) {
             Text(holding ? "Hold still. The set starts by itself."
                  : seen ? "Plumb starts the set once it sees you clearly and you hold still."

@@ -1,4 +1,5 @@
 import AVFoundation
+import Observation
 import Testing
 @testable import Plumb
 
@@ -296,6 +297,33 @@ struct WorkoutSessionModelTests {
         #expect(store.saves == 2)
         #expect(model.history == store.sessions)
         #expect(model.history.first?.sets.count == 2)
+    }
+
+    /// While framing, the camera screen's hint and focus line read the model on every redraw. They
+    /// read `livePose`, new on every frame, so the whole screen was rebuilt 15 times a second and
+    /// the focus recomputed over the full history. What they read now changes only when its value does.
+    @Test func framingTextIsNotInvalidatedByEveryFrame() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        source.emit(CaptureTraces.frame(time: 0, hipY: 0.42, ankleX: 0.51, legs: true))
+        try await waitUntil { model.athleteInView }
+        let changes = ChangeCounter()
+        withObservationTracking {
+            _ = model.athleteInView
+            _ = model.captureFocus
+        } onChange: {
+            changes.count += 1
+        }
+        for index in 1...10 {
+            source.emit(CaptureTraces.frame(time: Double(index) * CaptureTraces.step, hipY: 0.42, ankleX: 0.51, legs: true))
+        }
+        try await waitUntil { model.livePose?.time == 10 * CaptureTraces.step }
+        #expect(changes.count == 0)
+        source.emit(PoseFrame(time: 1, subjectCount: 0, joints: [:], athleteTracking: .hidden))
+        try await waitUntil { !model.athleteInView }
+        #expect(changes.count == 1)
+        await model.cancel()
     }
 
     @Test func stopTimingUsesTapInstantAndClearsForNextSet() async throws {
@@ -739,6 +767,11 @@ struct WorkoutSessionModelTests {
             .rightAnkle: JointPoint(x: 0.57, y: 0.90, confidence: 0.99),
         ])
     }
+}
+
+/// Counts Observation change notifications.
+nonisolated private final class ChangeCounter: @unchecked Sendable {
+    var count = 0
 }
 
 /// History in memory, counting how often the model reads and writes it.

@@ -229,7 +229,12 @@ final class WorkoutSessionModel {
     /// The person's most frequent pattern in recent sets of the chosen exercise, shown before a set.
     var focus: MistakeProfile? { MistakeProfile.make(history: history, exercise: selectedExercise) }
     /// The same, for the exercise being captured.
-    var captureFocus: MistakeProfile? { MistakeProfile.make(history: history, exercise: captureExercise) }
+    /// Worked out once per camera screen: the screen reads it on every redraw, and it goes over the
+    /// whole history.
+    private(set) var captureFocus: MistakeProfile?
+    /// Whether the newest pose has the athlete's joints. The camera screen's text reads this rather
+    /// than `livePose`, which is new on every frame and redrew the whole screen 15 times a second.
+    private(set) var athleteInView = false
     /// The latest set showed the person's most frequent pattern again.
     private(set) var repeatedPattern: MistakeProfile?
     /// Receives each live event of a running set, for a connected Apple Watch.
@@ -313,6 +318,7 @@ final class WorkoutSessionModel {
         collectionTask = nil
         guard stage == .openingCamera else { return }
         captureExercise = selectedExercise
+        captureFocus = MistakeProfile.make(history: history, exercise: captureExercise)
         recognition = .notAttempted
         framingClosedNote = nil
         // The setup screen's Fitness line was about the session that ended; a save still running keeps it.
@@ -333,6 +339,7 @@ final class WorkoutSessionModel {
         lastViewVerdict = .unavailable
         lastPreviewFrameAt = nil
         livePose = nil
+        athleteInView = false
         framingStatus = .checking
         framingWatchdog?.cancel()
         framingWatchdog = nil
@@ -366,6 +373,8 @@ final class WorkoutSessionModel {
                     case .framing, .countdown, .capturing: self.livePose = frame
                     default: self.livePose = nil
                     }
+                    let inView = !(self.livePose?.joints.isEmpty ?? true)
+                    if self.athleteInView != inView { self.athleteInView = inView }
                     if self.stage == .framing {
                         self.previewFrames.append(frame)
                         if self.previewFrames.count > 5 { self.previewFrames.removeFirst() }
@@ -390,6 +399,7 @@ final class WorkoutSessionModel {
                     }
                 }
                 self.livePose = nil
+                self.athleteInView = false
                 guard !self.isStopping else { return }
                 self.framingWatchdog?.cancel()
                 self.framingWatchdog = nil
@@ -588,7 +598,10 @@ final class WorkoutSessionModel {
             previewEstimates.append((frame.time, deviation))
             if previewEstimates.count > 5 { previewEstimates.removeFirst() }
         }
+        // Only when one has lapsed: every change of this list redraws what reads it.
+        if let oldest = previewEstimates.first, frame.time - oldest.time > Self.previewEstimateLifetime {
         previewEstimates.removeAll { frame.time - $0.time > Self.previewEstimateLifetime }
+        }
         if checksCameraAngle,
            ViewCheck.previewAsksToTurn(previewDeviations, expected: definition.expectedView) {
             framingStatus = .turnToExpectedView
@@ -1066,6 +1079,7 @@ final class WorkoutSessionModel {
         previewEstimates = []
         lastPreviewFrameAt = nil
         livePose = nil
+        athleteInView = false
         framingStatus = .checking
         frameCount = 0
         captureStartedAt = nil
