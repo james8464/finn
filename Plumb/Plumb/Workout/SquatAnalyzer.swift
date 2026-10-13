@@ -8,7 +8,10 @@ nonisolated enum SquatRubric {
     /// set, and the athlete may be hidden by someone else for up to 3 s (see `EvidenceRubric`).
     /// v5 (13 October 2026): camera capture corroborates joints with a person mask so an ankle
     /// inferred behind an obstruction cannot make a set appear measurable.
-    static let version = "squat-side-v5"
+    /// v6 (13 October 2026): only the set is measured, not the walk to the spot and back to the
+    /// phone (`SetWindow`), and the person-mask check searches around each joint in proportion to
+    /// the body and ignores an empty mask (`SilhouetteCheck`). v5 refused real sets on both counts.
+    static let version = "squat-side-v6"
     static let minimumJointConfidence = EvidenceRubric.minimumJointConfidence
     static let descentThreshold = 0.10
     /// v3: 0.05 (was 0.03), about twice Vision's hip jitter on real side-view video.

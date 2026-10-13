@@ -20,7 +20,9 @@ nonisolated final class PoseFrameAnalyzer {
     private let sequenceHandler = VNSequenceRequestHandler()
     private var analyzedFrames = 0
     private var tracker = AthleteTracker()
-    private var lastMaskSupportedJoints: Set<BodyJoint>?
+    /// Joints the latest silhouette check found off the person, kept out of the two frames until the
+    /// next check. Only refuted joints are carried: a joint the check never saw is not removed.
+    private var lastRefutedJoints: Set<BodyJoint> = []
 
     /// Keep following the current athlete until `releaseAthlete()`; called when a set starts.
     func lockAthlete() { tracker.lock() }
@@ -28,7 +30,7 @@ nonisolated final class PoseFrameAnalyzer {
     /// Pick the most prominent person again on the next frame.
     func releaseAthlete() {
         tracker.reset()
-        lastMaskSupportedJoints = nil
+        lastRefutedJoints = []
     }
 
     func analyze(_ pixelBuffer: CVPixelBuffer, time: TimeInterval, estimateAngle: Bool) -> PoseFrame {
@@ -66,17 +68,22 @@ nonisolated final class PoseFrameAnalyzer {
             }
             joints = people[athlete]
             if verifySilhouette {
-                // On a mask failure, leave no measured joints in this sample. Repeated failures
-                // make the evidence gate ask for a retake rather than trusting inferred joints.
-                joints = Self.corroborated(joints, by: maskRequest?.results?.first?.pixelBuffer)
-                lastMaskSupportedJoints = Set(joints.keys)
-            } else if let lastMaskSupportedJoints {
+                let mask = Self.personMask(maskRequest?.results?.first?.pixelBuffer)
+                switch SilhouetteCheck.verdict(for: joints, mask: mask) {
+                case .checked(let supported):
+                    lastRefutedJoints = Set(joints.keys).subtracting(supported)
+                    joints = joints.filter { supported.contains($0.key) }
+                case .unavailable:
+                    // No usable mask: keep Vision's 2D evidence, as before the silhouette check.
+                    lastRefutedJoints = []
+                }
+            } else if !lastRefutedJoints.isEmpty {
                 // Carry a negative mask verdict through the two frames between checks. Otherwise
                 // framing can alternate between "visible" and "move the phone" over covered feet.
-                joints = joints.filter { lastMaskSupportedJoints.contains($0.key) }
+                joints = joints.filter { !lastRefutedJoints.contains($0.key) }
             }
         } else if verifySilhouette {
-            lastMaskSupportedJoints = []
+            lastRefutedJoints = []
         }
         var profileDeviation: Double?
         if estimateAngle, athlete != nil, analyzedFrames % Self.cameraAngleInterval == 0 {
@@ -90,36 +97,25 @@ nonisolated final class PoseFrameAnalyzer {
                          bystanders: bystanders)
     }
 
-    /// Keep a joint only when the person mask includes pixels at or immediately around it.
-    /// Vision's 2D skeleton is allowed to estimate through an obstruction; the mask supplies
-    /// independent image evidence. The small neighborhood tolerates pose/mask edge alignment.
-    /// This mask covers all people; AthleteTracker still owns identity and overlap needs testing.
-    private static func corroborated(_ joints: [BodyJoint: JointPoint],
-                                     by mask: CVPixelBuffer?) -> [BodyJoint: JointPoint] {
-        guard let mask, CVPixelBufferGetPixelFormatType(mask) == kCVPixelFormatType_OneComponent8,
-              CVPixelBufferLockBaseAddress(mask, .readOnly) == kCVReturnSuccess else {
-            return [:]
+    /// Copies Vision's one-byte person mask; nil when there is none or it has another format.
+    private static func personMask(_ buffer: CVPixelBuffer?) -> PersonMask? {
+        guard let buffer, CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_OneComponent8,
+              CVPixelBufferLockBaseAddress(buffer, .readOnly) == kCVReturnSuccess else { return nil }
+        defer { CVPixelBufferUnlockBaseAddress(buffer, .readOnly) }
+        guard let base = CVPixelBufferGetBaseAddress(buffer)?.assumingMemoryBound(to: UInt8.self) else {
+            return nil
         }
-        defer { CVPixelBufferUnlockBaseAddress(mask, .readOnly) }
-        guard let base = CVPixelBufferGetBaseAddress(mask)?.assumingMemoryBound(to: UInt8.self) else {
-            return [:]
-        }
-        let width = CVPixelBufferGetWidth(mask)
-        let height = CVPixelBufferGetHeight(mask)
-        let stride = CVPixelBufferGetBytesPerRow(mask)
-        guard width > 0, height > 0 else { return [:] }
-        return joints.filter { _, point in
-            let x = min(width - 1, max(0, Int(point.x * Double(width))))
-            let y = min(height - 1, max(0, Int(point.y * Double(height))))
-            for dy in -2...2 {
-                for dx in -2...2 {
-                    let xx = min(width - 1, max(0, x + dx))
-                    let yy = min(height - 1, max(0, y + dy))
-                    if base[yy * stride + xx] >= 128 { return true }
-                }
+        let width = CVPixelBufferGetWidth(buffer)
+        let height = CVPixelBufferGetHeight(buffer)
+        let stride = CVPixelBufferGetBytesPerRow(buffer)
+        guard width > 0, height > 0, stride >= width else { return nil }
+        var pixels = [UInt8](repeating: 0, count: width * height)
+        for row in 0..<height {
+            for column in 0..<width {
+                pixels[row * width + column] = base[row * stride + column]
             }
-            return false
         }
+        return PersonMask(width: width, height: height, pixels: pixels)
     }
 
     /// Vision's points use a bottom-left origin; Plumb's use top-left, like the screen.
