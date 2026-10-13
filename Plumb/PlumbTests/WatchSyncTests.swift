@@ -194,7 +194,10 @@ struct WatchSyncSessionTests {
         #expect(sent.last?.demoInput == true)
     }
 
-    private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(5)) async throws {
+    /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
+    /// simulator, with many main-actor tests running at once, the live analysis of a whole set can
+    /// take several seconds.
+    private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(30)) async throws {
         let deadline = ContinuousClock.now.advanced(by: timeout)
         while !condition() {
             guard ContinuousClock.now < deadline else {

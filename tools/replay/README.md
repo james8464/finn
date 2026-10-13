@@ -30,11 +30,11 @@ The command prints JSON with `status` (`measured`, `retake`, or `failed`), `fram
 tools/replay/test_generated_videos.sh
 ```
 
-Expected results on the current macOS Vision path: six measured reps for the original and the clear lighting, size, position, tilt, resolution, and tempo variants; a retake for no movement, hidden legs, covered feet, a person made too small, or phone shake. Motion blur asked for a retake until `squat-side-v7`; with the wider person-mask search it measures the six reps (CI run of 13 October). The mirrored clip is diagnostic: this generated pose falls below the current joint-coverage gate and asks for a retake. We do not loosen the gate to force a positive result. The iOS simulator tests play the clear and covered-feet clips on the workout screen with matching pose JSON captured from Vision. The GitHub iOS workflow runs these checks automatically. Source poses change in hard steps, so this tests the video reader, Vision integration, person-mask gate, and rep counter; it is not a realistic biomechanics benchmark.
+Expected results on the current macOS Vision path: six measured reps for the original and the clear lighting, size, position, tilt, resolution, and tempo variants; a retake for no movement, hidden legs, covered feet, a person made too small, or phone shake. Motion blur and the mirrored clip asked for a retake until `squat-side-v7`; with the wider person-mask search and the set window, both measure the six reps (CI run of 13 October). The mirrored clip stays diagnostic: the script accepts either result for it. We do not loosen the gate to force a positive result. The iOS simulator tests play the clear and covered-feet clips on the workout screen with matching pose JSON captured from Vision. The GitHub iOS workflow runs these checks automatically. Source poses change in hard steps, so this tests the video reader, Vision integration, person-mask gate, and rep counter; it is not a realistic biomechanics benchmark.
 
 | Variant | What it probes | Current replay |
 | --- | --- | --- |
-| [Mirrored](fixtures/squat-mirrored.mp4) | Opposite facing direction | Retake: required joints clear in about 71% of frames, below the 80% gate |
+| [Mirrored](fixtures/squat-mirrored.mp4) | Opposite facing direction | Six measured reps since `squat-side-v7`; before, a retake with required joints clear in about 71% of frames, below the 80% gate |
 | [Dim](fixtures/squat-dim.mp4) | Lower light and saturation | 6 measured reps |
 | [Farther](fixtures/squat-far.mp4) | Person at 60% of original size | 6 measured reps |
 | [Too far](fixtures/squat-too-far.mp4) | Person at 30% of original size | Retake |

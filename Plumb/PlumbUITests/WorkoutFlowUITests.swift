@@ -236,17 +236,30 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Set up camera"].tap()
         XCTAssertTrue(app.staticTexts["Checking leg visibility"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["Hip, knee and ankle visible"].exists)
-        try app.performAccessibilityAudit()
+        try audit(app, at: "framing")
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
         XCTAssertTrue(stop.waitForExistence(timeout: 6))
         XCTAssertTrue(app.staticTexts["Analyzing live"].exists)
         XCTAssertFalse(app.staticTexts["Recording"].exists)
-        try app.performAccessibilityAudit()
+        try audit(app, at: "capture")
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
-        try app.performAccessibilityAudit()
+        try audit(app, at: "result")
+    }
+
+    /// A full audit that fails with the screen and the element of each issue, which the result
+    /// bundle's summary otherwise reduces to "Contrast failed".
+    @MainActor
+    private func audit(_ app: XCUIApplication, at screen: String) throws {
+        try app.performAccessibilityAudit { issue in
+            let element = issue.element.map {
+                "\($0.elementType.rawValue) '\($0.label)' id '\($0.identifier)' at \($0.frame)"
+            } ?? "no element"
+            XCTFail("\(screen): \(issue.compactDescription). \(issue.detailedDescription) Element: \(element)")
+            return true
+        }
     }
 
     @MainActor

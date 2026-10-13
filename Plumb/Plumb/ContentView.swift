@@ -1026,18 +1026,22 @@ struct ContentView: View {
             }
             .frame(height: 180)
             .accessibilityHidden(true)
-            Text("\(title) · rep \(snapshot.number)")
-                .font(.subheadline.weight(.semibold))
-            Text(definition.formattedDepth(snapshot.range))
-                .font(.footnote)
-                .foregroundStyle(PlumbStyle.supportingText)
+            // Only the text is the accessibility element, so its contrast is judged against the card,
+            // not against the lines of the drawing above it.
+            VStack(alignment: .leading, spacing: 6) {
+                Text("\(title) · rep \(snapshot.number)")
+                    .font(.subheadline.weight(.semibold))
+                Text(definition.formattedDepth(snapshot.range))
+                    .font(.footnote)
+                    .foregroundStyle(PlumbStyle.supportingText)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(title) rep, rep \(snapshot.number), \(definition.formattedDepth(snapshot.range))"
+                                + (angleText.map { ", \($0)" } ?? ""))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
         .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title) rep, rep \(snapshot.number), \(definition.formattedDepth(snapshot.range))"
-                            + (angleText.map { ", \($0)" } ?? ""))
     }
 
     private func comparisonGapText(_ gap: ComparisonGap) -> String {
