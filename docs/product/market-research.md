@@ -14,10 +14,8 @@ This is narrower than “AI personal trainer.” The first target is a self-dire
 | --- | --- | --- | --- |
 | Beginner doing home strength | Tutorial and mirror | Unsure what to notice; awkward camera setup | Whether one cue is understandable and nonjudgmental |
 | Self-directed gym regular | Phone video or training log | Time spent replaying clips; social discomfort filming | Whether an evidence-linked result is worth setup time |
-| Remote client of a trainer | Send clips in chat | Slow feedback; unclear clip organization | Whether human annotation plus Plumb's measurements saves time |
-| Trainer | In-person observation or video review app | Review effort and client follow-through | Which automated observations are useful vs distracting |
 
-Start with the first two. A coach product is a later opportunity and should not dictate the initial interface.
+Qualified trainers are validation reviewers, not a separate product audience in the README.
 
 ## 2. Alternatives people already use
 
@@ -29,7 +27,7 @@ This is the true baseline. It is free and flexible, and a phone video preserves 
 
 ### B. In-person trainer or trusted training partner
 
-Human coaching can consider pain, goals, equipment, fatigue, prior history, and a full 3D view. Plumb cannot claim equivalent judgment from a single camera. The opportunity is a useful, affordable observation between human sessions, and later a clearer clip for a trainer to review.
+Human coaching can consider pain, goals, equipment, fatigue, prior history, and a full 3D view. Plumb cannot claim equivalent judgment from a single camera. The opportunity is a useful, limited observation between human sessions.
 
 **Validation task:** have qualified trainers independently review the same sets and rate the visibility, correctness, and usefulness of Plumb's proposed cues. Record disagreements and the context the camera missed.
 
@@ -39,7 +37,7 @@ Human coaching can consider pain, goals, equipment, fatigue, prior history, and 
 | --- | --- | --- | --- |
 | **Tempo** | 3D motion tracking, rep counting, range-of-motion and on-screen form cues within its class experience. Tempo says cues are selective, not shown for every mistake. | Form feedback is an existing category. Plumb should test an iPhone-only, short-set workflow without a dedicated class or hardware setup. | [Tempo support](https://support.tempo.fit/support/solutions/articles/151000154714-3d-tempo-vision-form-feedback) |
 | **Ochy** | A short side/back phone video produces running gait analysis and progress comparisons. | Camera-based technique analysis already exists in running. Plumb's first focus is foundational strength sets and an immediate second-set loop. | [Ochy for runners](https://www.ochy.io/runners) |
-| **OnForm** | Coaches capture, mark up, voice-over, and share athlete videos for remote review. | Human review and video annotation are strong substitutes. A future trainer feature should complement this rather than pretend to replace it. | [OnForm knowledge base](https://support.onform.com/article/94-what-is-onform) |
+| **OnForm** | Coaches capture, mark up, voice-over, and share athlete videos for remote review. | Human review and video annotation are strong substitutes. Plumb's limited camera observation should be evaluated against them. | [OnForm knowledge base](https://support.onform.com/article/94-what-is-onform) |
 | **Peloton Guide** | Its Movement Tracker detects participation in movements during classes; Peloton support states it does not count reps or provide form correction. | Do not conflate movement recognition with technique advice. Plumb's narrow claim requires direct evidence for each cue. | [Peloton support](https://support.onepeloton.com/s/article/Peloton-Hardware-Movement-Tracker?language=en_CA) |
 | **Apple Fitness+** | Guided strength and other classes, personalized plans, and real-time metrics from Watch or compatible heart-rate devices. | Plumb is about a person's own movement in an unscripted set, not competing on class production or workout catalog. | [Apple Fitness+](https://www.apple.com/apple-fitness-plus/) |
 
@@ -65,7 +63,7 @@ This is a proposed wedge, not a statement that competitors lack evidence, privac
 2. One cue is less cognitively demanding than reviewing an entire video.
 3. The evidence points to a specific rep, which makes a suggestion checkable.
 4. A second set shows a visible change rather than an abstract score.
-5. Local processing and opt-in clip saving address a sensitive filming context.
+5. Local processing without saved workout video addresses a sensitive filming context.
 6. The current iPhone loop needs no accessory; a later iPhone + Watch experience could make timely, discreet feedback more useful if paired-device tests support it. AirPods are an optional audio route.
 
 ### Reasons someone may reject it
@@ -80,9 +78,9 @@ These objections should be tested before expanding the product.
 
 ### The choice Plumb has to win
 
-The first competitor is the user's existing phone camera. Plumb adds setup guidance, automatic review, and a next-set prompt, but also asks for framing time, permission, battery, and trust. A convincing test should compare the **whole task**—from placing the phone to deciding what to change—rather than comparing the quality of a finished cue with an unreviewed clip. If setup takes longer than the saved review time, the product may be most useful to a narrower group of deliberate trainees.
+The first competitor is the user's existing phone camera. Plumb adds setup guidance, automatic review, and a post-set cue, but also asks for framing time, permission, battery, and trust. A convincing test should compare the **whole task**—from placing the phone to deciding what to change—rather than comparing the quality of a finished cue with an unreviewed clip. If setup takes longer than the saved review time, the product may be most useful to a narrower group of deliberate trainees.
 
-An in-person trainer remains the benchmark for contextual judgment. The more credible position is a record that helps the person notice a limited visible pattern between coached sessions. For a trainer, the camera result could reduce sorting and timestamping work, but the coach must be able to disagree and add context. Plumb should never imply that an automated rule outranks the person who knows the athlete's constraints.
+An in-person trainer remains the benchmark for contextual judgment. The more credible position is a result that helps the person notice a limited visible pattern between coached sessions. Plumb should never imply that an automated rule outranks the person who knows the athlete's constraints.
 
 ## 5. Technology opportunity and constraint
 
@@ -96,7 +94,7 @@ Watch sessions and HealthKit can provide workout metrics with permission; AirPod
 
 ### Who pays and why
 
-The likely payer is the person training independently. A few free analyses should demonstrate the whole loop. A Plumb Plus plan might unlock frequent analyses, longer history, and set comparisons. The draft price is €7.99/month or €49.99/year, **not a validated price**. A trainer plan could become relevant only after observing repeat coach/client use.
+The README asks the team to design monetization and customer acquisition, but does not choose a payer, price, subscription, or trainer product. Test whether a self-directed trainee completes and values the current iPhone loop before selecting a model.
 
 ### What to measure before pricing
 
@@ -105,17 +103,17 @@ The likely payer is the person training independently. A few free analyses shoul
 - Does the cue agree with qualified human review?
 - How often does Plumb abstain because visibility is poor, and is the retake guidance helpful?
 - How many people return in a week without reminders?
-- Would they pay for more analyses, saved comparisons, or trainer review? Which feature creates the willingness to pay?
+- Would they pay for the value they already experienced? What benefit, if any, creates willingness to pay?
 
 ### Market-sizing method, once evidence exists
 
-No defensible revenue forecast follows from app-store download totals or the number of gym members alone. Define an initial geography and a reachable population of iPhone owners who practice supported strength movements independently. Then measure four separate rates: willingness to film, ability to obtain a valid camera view, repeat use after a first cue, and conversion to the paid benefit. An annual subscription scenario would be `reachable people × valid-first-session rate × retained active rate × paid conversion × net annual revenue per payer`. Each input should have an observed source and a low/base/high range; the result should be labeled a scenario, not total market size.
+No defensible revenue forecast follows from app-store download totals or the number of gym members alone. Define an initial geography and a reachable population of iPhone owners who practice supported strength movements independently. Then measure willingness to use the camera, ability to obtain a valid view, repeat use after a first cue, and willingness to pay. Choose a revenue formula only after the team chooses and validates a business model; label any estimate a scenario, not total market size.
 
-There is also a practical capacity question: how many sets can an on-device app analyze before heat, battery, storage, or a person's patience limits use? The answer affects packaging. A free allowance should let a user complete at least one full compare-two-sets loop. Charging before the second set would block the very behavior that demonstrates value. A paid tier needs a recurring reason to exist—progress history, repeatable comparisons, or coach review—not merely the same cue without a limit.
+There is also a practical capacity question: how many sets can an on-device app analyze before heat, battery, or a person's patience limits use? The answer affects the experience. Any future payment test should leave the compare-two-sets loop intact so the team can learn whether the product helps.
 
 ### Pricing experiment
 
-Start with interviews about the cost of the current workaround: time reviewing clips, occasional trainer sessions, and abandoned recordings. Then show the **same working result** to respondents and test whether they would use it again at a stated price. Separate intent from payment behavior. If a subscription is tested, measure conversion after a complete free loop, renewal, cancellation reasons, and whether the limits discourage healthy use. The draft €7.99/month and €49.99/year are hypotheses for testing, not evidence that the market will pay.
+Start with interviews about the cost of the current workaround: time reviewing clips, occasional trainer sessions, and abandoned recordings. Then show the **same working result** to respondents and ask whether they would use it again. Separate expressed willingness to pay from observed payment behavior. The README does not yet select a price or paid plan.
 
 Avoid a market-size claim until the team defines geography, target exercise population, conversion assumptions, and a source for each input. Download volumes of fitness apps do not automatically translate to demand for a camera form coach.
 
@@ -123,7 +121,7 @@ Avoid a market-size claim until the team defines geography, target exercise popu
 
 1. Small in-person tests with strength-training clubs or student gyms, with explicit filming consent and no footage posted.
 2. Trainer-led demonstrations of a before/after set, showing the evidence and limits.
-3. A privacy-safe share card that describes a user's *own observed change* without exposing a video or sensitive health metrics by default.
+3. A user-initiated text summary of the person's *own observed change*, without video or sensitive health metrics.
 4. App Store listing focused on supported exercises and device requirements, without unproven injury or accuracy claims.
 
 The team should not acquire users with a promise of universal AI coaching before the first exercise works reliably.
@@ -161,8 +159,8 @@ The first release decision needs both **accuracy and usefulness**. The [product 
 - Can the same cue language work across body types and mobility differences without implying a universal standard?
 - Does optional live speech help, or interrupt concentration and music?
 - Does Watch effort context improve decisions, or add interface noise?
-- Which paid feature drives real repeat use rather than a one-off curiosity?
-- What retention and deletion controls make people comfortable saving a clip?
+- Would any monetization model preserve the usefulness of the complete set-to-set loop?
+- Are local summary deletion controls clear enough for people filming in shared spaces?
 
 ## 9. Claims discipline
 

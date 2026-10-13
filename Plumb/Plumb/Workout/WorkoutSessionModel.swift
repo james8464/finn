@@ -127,8 +127,6 @@ final class WorkoutSessionModel {
     var usesExerciseRecognition: Bool { recognizesExercise && recognitionMethod != .unavailable }
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
-    /// The previous measured set's relevant next action, shown only during a same-exercise retry.
-    private(set) var nextSetReminder: String?
     private(set) var lastStopToResultMilliseconds: Int?
     private(set) var captureStartedAt: Date?
     private(set) var cueDismissed = false
@@ -175,13 +173,6 @@ final class WorkoutSessionModel {
         collectionTask = nil
         guard stage == .openingCamera else { return }
         captureExercise = selectedExercise
-        if let previous = currentSession?.sets.last,
-           previous.exercise == captureExercise,
-           previous.cueResponse != .notRelevant {
-            nextSetReminder = previous.cue?.nextAction
-        } else {
-            nextSetReminder = nil
-        }
         recognition = .notAttempted
         result = nil
         movementNote = nil
@@ -303,7 +294,6 @@ final class WorkoutSessionModel {
     }
 
     private func completeAnalysis() {
-        nextSetReminder = nil
         defer {
             if let stopTappedAt {
                 let parts = stopTappedAt.duration(to: ContinuousClock.now).components
@@ -498,7 +488,6 @@ final class WorkoutSessionModel {
         lastPreviewFrameAt = nil
         livePose = nil
         framingStatus = .checking
-        nextSetReminder = nil
         frameCount = 0
         captureStartedAt = nil
         result = nil

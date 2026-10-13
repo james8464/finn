@@ -370,20 +370,6 @@ struct ContentView: View {
                 }
                 #endif
                 status
-                if let reminder = model.nextSetReminder {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("From your last set")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.white.opacity(0.78))
-                        Text(reminder)
-                            .font(.subheadline)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityIdentifier("capture.nextSetReminder")
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
-                }
                 #if DEBUG
                 if isValidationMode && model.stage == .framing {
                     Text(model.previewDeviations.isEmpty ? "3D view: no estimate"
@@ -564,13 +550,10 @@ struct ContentView: View {
                             if analysis.reps.count < 4 {
                                 Text("Plumb needs at least four measured reps before it can show an observation.")
                                     .font(.title3)
-                            } else if CueSelector.hasConsistentRange(analysis) {
-                                Text(model.resultExercise.definition.copy.consistentRangeMessage)
-                                    .font(.title3.weight(.semibold))
                             } else {
                                 Text("No clear pattern to call out in this set.").font(.title3)
                             }
-                            Text("This describes one camera-visible signal, not your overall form.")
+                            Text("This is a camera measurement, not a full technique assessment.")
                                 .font(.footnote)
                                 .foregroundStyle(PlumbStyle.supportingText)
                         }
@@ -774,8 +757,6 @@ struct ContentView: View {
                                 Text(cue.observation).font(.body.weight(.semibold))
                                 nextAction(cue.nextAction)
                             }
-                        } else if CueSelector.hasConsistentRange(set.analysis) {
-                            Text(set.exercise.definition.copy.consistentRangeMessage)
                         } else {
                             Text("No clear pattern to call out in this set.")
                         }

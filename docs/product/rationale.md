@@ -35,11 +35,11 @@ This is a positioning hypothesis, not an uncontested category. Competitor featur
 
 A camera can miss a foot, confuse a joint, or see only one plane of movement. A low-confidence or incomplete observation must not become a confident instruction. The first automated cues should be reviewed by qualified trainers or movement specialists and tested against labeled sets from varied people and settings. Plumb should not imply that a particular angle, depth, or tempo is medically safe for everyone.
 
-The privacy model is equally central: video analysis on device where practical, raw clips off by default, explicit save/share controls, and contextual HealthKit permission. Health and fitness data must not be sold or used to target advertising. Product copy should explain what the camera can observe, what it cannot, and why a particular cue appeared.
+The privacy model is equally central: video analysis on device without saving workout footage, user-initiated text-summary sharing, and contextual HealthKit permission when a Watch feature exists. Health and fitness data must not be sold or used to target advertising. Product copy should explain what the camera can observe, what it cannot, and why a particular cue appeared.
 
 ## 6. Business hypothesis
 
-A limited free allowance lets people experience a complete set-to-set loop. A proposed Plumb Plus subscription pays for frequent analysis, longer history, and richer comparisons. The initial price hypothesis is €7.99 per month or €49.99 per year in the first market, subject to interviews and willingness-to-pay testing. Coaches may later pay for a workflow that adds human comments to an athlete's shared clips. There is no live subscription, trainer marketplace, or paid claim today.
+The README asks for a monetization and customer-acquisition plan but does not select a price, paid tier, or trainer product. First test whether people complete a set-to-set loop, return for another session, and value the result. Choose a commercial model only after that evidence exists; there is no payment flow today.
 
 The business should be judged by whether people complete a second set after seeing a cue, return for another session, and trust the explanation enough to use it. Download counts alone would not prove the product works.
 

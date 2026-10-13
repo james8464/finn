@@ -14,16 +14,16 @@ The [product brief](docs/product/brief.md) expands the README's feature order an
 
 **First audience:** self-directed people doing basic strength exercises at home or in a gym. They know the exercise they intend to do but cannot easily see their own movement. Beginners need simple setup and respectful language; more experienced users want objective comparisons over time. Treadmill runners are a prospective adjacent audience after a running-specific observation has been validated.
 
-**Later audience:** trainers who want a client's annotated set and the ability to add human feedback. Trainer workflows, remote sharing, and team accounts are outside the first build.
+**Validation partners:** qualified trainers can review the accuracy and usefulness of Plumb's cues. The README does not scope a trainer product or account.
 
 **Core insight:** a generic exercise video tells a person what form should look like; Plumb shows what their own last set looked like and suggests a single next action. The value is the loop: **capture → observe → understand → try again → compare**.
 
 ### Design principles
 
-1. **Evidence before interpretation.** A cue must link to a visible rep, measurement, or clip segment. If tracking is weak, say so and ask for a better camera angle.
+1. **Evidence before interpretation.** A cue must link to a visible rep or measurement. If tracking is weak, say so and ask for a better camera angle.
 2. **One useful cue.** Prioritize one actionable change per set, not a stream of criticism.
 3. **Personal progression.** Compare repeatable movement patterns with the person's own earlier sets; avoid a universal “perfect form” score.
-4. **Private by default.** Process video on device where practical; do not retain raw footage unless the person explicitly saves it.
+4. **Private by default.** Analyze video on device and do not save raw footage in the current product.
 5. **Start on iPhone; build the paired experience.** The current camera and on-device rules work without accessories. Apple Watch is core to the intended full product; AirPods, Apple TV, iPhone Duo placement, and Foundation Models have specific optional roles.
 6. **Respect physical limits.** Do not diagnose pain or prescribe load. Encourage stopping if an exercise causes pain and seeking qualified advice when appropriate.
 7. **Quiet, native presentation.** One primary action per stage, plain evidence, system typography and controls, and no decorative AI interface. See the [iPhone experience review](docs/design/iphone-experience-review.md) for Apple HIG and award-winning app references.
@@ -34,9 +34,9 @@ The [product brief](docs/product/brief.md) expands the README's feature order an
 
 1. Choose an exercise and read a short setup card: phone on a stable surface, side view, entire body and equipment in frame, enough light, clear floor.
 2. Grant camera access when starting capture. Plumb shows whether the joints required for the chosen exercise stay visible. Its 3D viewpoint check can suggest turning or reject a clearly frontal view, but actual camera suitability still needs physical-device validation. It never starts analysis silently.
-3. Tap or use a short countdown to start. The first build analyses a live frame stream on the iPhone without saving a video. Optional clip saving is a later feature requiring a separate, explicit choice.
-4. After the set, Plumb displays measured rep count, one prioritized observation, or a narrow positive note when measured rep range is consistent, plus supporting rep details. This is not a judgment of perfect overall form. A richer timeline, opt-in clip, or temporary pose overlay may follow once its usefulness, privacy, and accuracy have been tested.
-5. The person chooses **Try this next set**, **Not relevant**, or **Retake**. If the previous cue remains relevant and the next set is for the same exercise, a one-sentence reminder stays beside the camera through framing and capture. A follow-up set shows whether the observed pattern changed.
+3. Tap or use a short countdown to start. The current build analyses a live frame stream on the iPhone without saving a video.
+4. After the set, Plumb displays measured rep count and at most one supported observation, or explains that no clear pattern was found or why to retake. Supporting rep details remain available. This is not a judgment of perfect overall form.
+5. The person chooses **Try this next set**, **Not relevant**, or **Retake**. A follow-up set can show whether the same observed pattern changed; the current camera view does not display an in-set coaching reminder.
 6. In the intended paired experience, Apple Watch contributes rep timing, effort context, controls, and discreet haptics; live cues need validation before release. The current iPhone build can speak post-set observations through the system audio output, including paired AirPods.
 
 ### Example: bodyweight squat
@@ -70,7 +70,7 @@ The movement-analysis interface may later be replaced or augmented by a team-pro
 
 The repository and its support/privacy pages are public, but the root [LICENSE](LICENSE) reserves rights to the named project members and grants others viewing only. Confirm that any team-provided engine, third-party code, or training material may be included under these terms before adding it. Repository visibility is a team decision because changing it can affect collaboration and the published pages.
 
-**Business test:** Let someone complete a useful first set before any payment prompt. A freemium allowance, paid comparison/history depth, and trainer referrals are hypotheses to test with users; StoreKit, pricing, and conversion claims wait for a functioning paid tier and App Store setup. A text-only, user-initiated result share can invite a trainer without uploading video or requiring an account. Track activation as the share of new users who reach a measured result within two setup attempts, then measure a second-set return and willingness to pay with consented research rather than inventing traction.
+**Business test:** The README calls for a monetization and acquisition plan, but names no paid feature or price. Let someone complete a useful first set before testing willingness to pay. Track activation as the share of new users who reach a measured result within two setup attempts, then measure second-set return and willingness to pay with consented research rather than inventing traction.
 
 ### Prototype: one complete evidence loop
 
@@ -84,21 +84,17 @@ The repository and its support/privacy pages are public, but the root [LICENSE](
 
 ### Next if the prototype is reliable
 
-- Push-up from a side view, with a separately validated rubric such as body-line consistency and tempo.
-- Tap-to-speak post-set cue with a Stop control; output uses the system audio route and may reach paired AirPods. It is never automatic and does not request microphone access.
+- Validate the four existing side-view exercise rubrics on real people before broad claims.
+- Verify the existing tap-to-speak post-set cue on physical devices and paired AirPods. It is never automatic and does not request microphone access.
 - Apple Watch companion, beginning with a real HealthKit workout session and user-controlled saving.
-- Foundation Models to turn **structured, validated** observations into concise, supportive language. The model cannot invent a new biomechanical finding or make a medical claim.
-- Saved clips, explicit retention controls, and side-by-side comparison.
+- Verify the existing Foundation Models comparison wording on an eligible device. The model cannot invent a new biomechanical finding or make a medical claim.
 
 ### Later product
 
 - More movements and camera angles only after expert review and device testing.
 - Carefully gated live cues, central to the full product vision, when pose confidence, latency, and cue usefulness meet thresholds. One short cue at most per relevant event, with a quiet mode and discreet Watch or AirPods delivery where supported.
-- Trainer review, optional shared clips, tailored programs, and a coach account.
-- Progress trends built around consistency and user goals rather than a universal form score.
-- Optional cross-device history or trainer sharing with a real account and clear deletion controls. Offer Sign in with Apple only when one of these benefits exists, after someone has tried a set; never require an account for local capture. Current local history has no account or sync service.
-
-**Account decision:** If the next feature is private history across a person's own Apple devices, evaluate [CloudKit private database](https://developer.apple.com/documentation/cloudkit/ckcontainer/privateclouddatabase) sync first; it uses the person's iCloud account without creating a separate Plumb login. If trainer sharing or web access needs a Plumb account, add [Sign in with Apple](https://developer.apple.com/design/human-interface-guidelines/sign-in-with-apple/) through the system control after that workflow exists. Sync only derived summaries unless the person explicitly chooses to share a clip. Design conflict resolution, account deletion, and updated privacy disclosures before enabling either path. The current prototype keeps every set usable offline without sign-in.
+- Progress through local workout history and comparisons rather than a universal form score.
+- Evaluate the README's proposed iPhone Duo placement, Apple TV display, widgets, and Live Activities after the core iPhone + Watch experience works.
 
 ### Explicit exclusions for the first build
 
@@ -117,7 +113,7 @@ Cut Watch integration, then speech, then a second exercise. Keep real iPhone cap
 - **Vision** body-pose observations from a live frame stream, not isolated still photos. Every third analyzed frame also uses a fast person mask to check that inferred joints have image evidence. Vision 3D body pose estimates the camera view on supported hardware; neither pose nor segmentation alone establishes coaching accuracy. Avoid universal joint-angle cutoffs because a 2D projection changes with viewpoint.
 - A **deterministic exercise engine** converts a time series of pose points into rep phases and observed metrics. It owns every factual coaching claim.
 - **Foundation Models**, if available, only summarizes a small structured observation and chooses wording from allowed cue categories. Check model availability at runtime; fallback to reviewed templates. Do not send raw video to a language model for the MVP.
-- **SwiftData or a small local store** for workout summaries and preferences. Raw clips are opt-in and deletable.
+- **SwiftData or a small local store** for derived workout summaries and preferences. The app does not save workout video.
 - **HealthKit/watchOS**, later, for authorized workout and heart-rate context. Watch workout mirroring requires a separate watch app and physical-device testing.
 - **AVSpeechSynthesizer** for optional spoken output. Use the system audio route; respect silent/voice preferences and avoid competing with a person's music.
 
@@ -140,7 +136,7 @@ The fuller observation contract should include exercise, assessed viewpoint, inv
 
 **Viewpoint remains an unvalidated measurement gate.** The side-view rubric uses relative 2D movement and joint visibility; the validation sheet therefore separates actual camera viewpoint from a specialist's suitability judgment and counts measured results on unsuitable views. The [Vision 3D](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) check, on by default, suggests turning when the median is over 30° from profile and refuses only a sustained clearly frontal view at 75° or more. Those cutoffs were examined on public videos, but need physical iPhone confirmation and expert suitability labels. Labeled front, side, and three-quarter sets must reveal both false refusals and false acceptance.
 
-**Research sequence after the first build:** benchmark 3D pose and any camera-view classifier on real devices, then test personal calibration against expert-labeled sound reps, and finally compare synchronized Watch accelerometer plus camera data with camera-only rep boundaries and tempo. Personal calibration can detect within-person drift; it cannot establish that the baseline rep was technically sound. Temporary best/worst pose overlays could help explain a cue, but storing any frame, even briefly in memory, requires an explicit on-screen privacy description, bystander handling, and deletion at set end. These are experiments, not implemented features or a reason to broaden the first-build claim.
+**Research sequence after the first build:** benchmark the existing 3D camera-view check on real devices, then compare synchronized Watch accelerometer data with camera-only rep boundaries and tempo. These tests support the README's planned iPhone + Watch experience; neither establishes coaching accuracy without labeled sets and expert review.
 
 ### Initial exercise rubric to validate
 
@@ -162,7 +158,7 @@ The model receives a constrained observation such as `exercise=squat`, `reps=6`,
 - Request camera access only when starting a set. Explain the required camera view before the system prompt.
 - Do not request microphone access unless a future voice-input feature actually needs it; AirPods output does not require microphone capture.
 - Request HealthKit types only when the person chooses Watch/Health features. Explain what will be read or written and allow the camera experience without permission.
-- Analyze locally by default. No raw video upload in the prototype. Saving and sharing clips require separate explicit actions; provide deletion and retention controls.
+- Analyze camera frames locally. Do not save or upload workout video. Provide deletion controls for derived summaries.
 - Keep HealthKit data out of advertising, sale, and unrelated analytics. Publish a privacy policy before any public HealthKit release.
 - Clearly label AI-generated wording and let the person inspect the underlying observed signal and dismiss a cue.
 
@@ -174,21 +170,21 @@ Test on physical iPhones with different cameras and performance levels, varied l
 
 Keep the first implementation small enough to inspect: `ready → framing → countdown → capturing → analyzing → result`, with explicit `permission denied`, `interrupted`, and `insufficient evidence` exits. Analysis should finish or cancel cleanly when the app backgrounds, the camera is interrupted, or the person stops early. Never leave the interface claiming to record after capture has ended. A second set belongs to the same exercise session so comparison is possible without guessing which attempts are related.
 
-A saved **set summary** needs a stable session and set ID, exercise/rubric version, camera orientation, start/end time, rep boundaries, aggregate metrics, evidence for any selected cue, analysis confidence, and the person's response. Store a clip URL only after an explicit save. Keep pose traces only as long as required for the promised review and let the person delete the entire session. HealthKit identifiers, if added, belong in a separate optional record so a camera-only user never needs Health authorization.
+A saved **set summary** needs a stable session and set ID, exercise/rubric version, camera orientation, start/end time, rep boundaries, aggregate metrics, evidence for any selected cue, analysis confidence, and the person's response. Raw video is not saved; keep pose traces only as long as analysis needs them and let the person delete the entire session. HealthKit identifiers, if added for the Watch, belong in a separate optional record so a camera-only user never needs Health authorization.
 
-The interface should distinguish five outcomes: **observation available**, **consistent measured range**, **no supported pattern**, **insufficient view**, and **analysis failed**. Consistency names one measured property; it does not certify overall technique. “No supported pattern” should not become an invented correction. If rep count is uncertain, show a range or abstain rather than an exact but brittle number. A cue card should contain the observed pattern, the reps or time that support it, one voluntary next action, and a way to dismiss it.
+The interface should distinguish four outcomes: **observation available**, **no supported pattern**, **insufficient view**, and **analysis failed**. “No supported pattern” should not become an invented correction or a perfect-form claim. If rep count is uncertain, show a range or abstain rather than an exact but brittle number. A cue card should contain the observed pattern, the reps or time that support it, one voluntary next action, and a way to dismiss it.
 
 ### Accessibility and workout context
 
 The person may be several steps from the phone, moving, or unable to touch the screen immediately. Setup and stop controls need large targets and clear state changes. Countdowns and spoken results must also have visual equivalents; audio is opt-in and must not be required to understand a cue. Respect Reduce Motion and avoid flashing pose overlays. VoiceOver should announce recording state, rep count, and the cue in a sensible order. Dynamic Type must not hide the stop control or evidence. The camera framing guide should explain placement with text and a simple diagram, not colour alone.
 
-Filming in a shared gym is a social constraint as well as a technical one. The camera should not analyze bystanders as the subject; if another person becomes prominent, pause or abstain. Make capture status obvious on screen, keep raw footage local by default, and ask the person to follow venue rules. A discreet no-clip mode matters for users who want feedback without building a video library.
+Filming in a shared gym is a social constraint as well as a technical one. The camera should not analyze bystanders as the subject; if another person becomes prominent, pause or abstain. Make capture status obvious on screen, process footage locally without saving it, and ask the person to follow venue rules.
 
 ## 5. Business model hypothesis
 
-**Free:** a small weekly allowance of analyzed sets, basic set summaries, and a short history. **Plumb Plus:** unlimited analyzed sets, longer trend history, saved comparisons, and optional voice coaching. A starting pricing hypothesis is €7.99/month or €49.99/year in the first market; validate willingness to pay and platform economics before putting prices in the app. No subscription or payment flow is implemented yet.
+The README calls for monetization and customer acquisition to be designed into the product, but does not select a paid plan, price, or paywall. Test willingness to pay only after the iPhone set-to-set loop is useful and validated. No subscription or payment flow is implemented.
 
-The first acquisition wedge is a useful shareable *result*, not a social feed: a person can share a privacy-safe summary of what changed between two sets. Trainers may later use Plumb to review client clips, with opt-in sharing and a separate plan. Do not build a coach marketplace for the challenge.
+The first acquisition hypothesis is a useful shareable *result*, not a social feed: a person can share a text summary of what changed between two sets. This does not require a trainer workflow or uploaded footage.
 
 **Differentiation to test:** iPhone-only entry, evidence-linked cues, personal set-to-set comparisons, local processing, and an eventual iPhone + Watch loop with timely corrections. AirPods audio is an optional delivery route. Competitors already offer form feedback or video review; the claim is a focused combination and user experience, not that Plumb invented camera coaching.
 
@@ -245,7 +241,7 @@ The repository now includes a simulator-tested camera-to-result flow, local set 
 | Training advice could be unsafe for a person | Avoid diagnosis and universal prescriptions; expert cue review; allow dismissal |
 | Live feedback is late or distracting | Post-set first; only add live cues after latency and usability tests |
 | Camera setup is awkward in a gym | Short setup, stable placement, countdown, no accessory requirement |
-| Video and Health data are sensitive | Local processing, opt-in saves, granular permissions, clear deletion |
+| Video and Health data are sensitive | Local analysis without saved video, contextual permissions, clear summary deletion |
 | Watch integration consumes the challenge schedule | Independent iPhone loop; Watch is additive |
 | Demo pose tracking fails in venue lighting | Test venue setup, explicit low-confidence state, labeled recording fallback |
 | Paid model is premature | Validate willingness to pay before implementing IAP |

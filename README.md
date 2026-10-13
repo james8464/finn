@@ -42,14 +42,13 @@ We are building the Plumb idea. Keep in mind:
 
 _Updated 13 October 2026._
 
-**In one sentence:** an iPhone-only app that analyzes one selected exercise at a time from the side, counts reps, and gives a bounded result after the set. It has not yet been tested on a real iPhone with real people.
+**In one sentence:** an iPhone-only app that analyzes one selected exercise at a time from the side, counts reps, and gives at most one supported observation after the set. It has not yet been tested on a real iPhone with real people.
 
 **What the app does**
 
 - Four exercises, filmed from the side: bodyweight squat, push-up, static lunge, stiff-leg deadlift.
 - Before the set: live camera view with the tracked skeleton and framing tips.
-- After the set: a rep count and at most one observation when the evidence supports it, a qualified note when measured range is consistent, no supported pattern, or an explanation of why to retake.
-- A relevant one-sentence cue from the last set stays beside the camera through framing and capture of the next set of the same exercise.
+- After the set: a rep count and at most one observation when the evidence supports it. Otherwise, it says there is no clear pattern or explains why to retake.
 - Compares two sets, keeps a local history, and shares a result as text.
 - Reads the observation aloud on tap, through the iPhone speaker or AirPods.
 - Optional: Apple Intelligence can reword the comparison. If it is unavailable or fails, a pre-written sentence is shown.
@@ -65,7 +64,7 @@ _Updated 13 October 2026._
 **Not proven yet**
 
 - Tested only in the simulator, on generated videos, and on public videos. No run yet on a physical iPhone across lighting, clothing, and camera angles.
-- Nine generated test videos cover six clear squats, no movement, hidden legs or feet, lower light, two distances, slower tempo, and the opposite facing direction. The mirrored clip currently asks for a retake. These tests are reproducible but do not establish accuracy on real people.
+- Four baseline generated test videos cover six clear squats, no movement, hidden legs, and covered feet. Five variants probe light, distance, tempo, and facing direction; the mirrored clip currently asks for a retake. These tests are reproducible but do not establish accuracy on real people.
 - No qualified trainer has reviewed the coaching observations.
 - The silhouette check has not yet been measured on the public videos.
 

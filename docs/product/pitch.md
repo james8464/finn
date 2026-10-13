@@ -14,7 +14,7 @@ Plumb turns an iPhone camera into a private technique mirror: after a supported 
 
 **The Apple ecosystem (1:25–1:55).** The iPhone camera is the core sensor. Vision estimates pose and corroborates sampled joints against a person mask on device. On eligible iPhones, Foundation Models can reword a measured set-to-set comparison, with a deterministic fallback; the model does not invent the measurement. The current app can speak a post-set observation through the system audio route, including paired AirPods. The intended product pairs iPhone with Apple Watch for rep timing, effort, and discreet, timely cues; that Watch technology is not in this build. iPhone Duo placement and Apple TV display are proposed extensions, not demo features.
 
-**Why Plumb (1:55–2:25).** Existing products offer classes, hardware-based form feedback, running analysis, or coach video review. Plumb's proposed wedge is a focused iPhone loop for self-directed strength training: evidence, one cue, another set, and visible progress. Privacy and uncertainty are part of that loop. Let a new user see value before any account or paywall; then test return visits, trainer referrals through deliberate text sharing, and willingness to pay for deeper comparisons. These are acquisition and revenue hypotheses, not measured results. Treadmill running is a possible next use case, requiring separate camera setup, measurement, and expert validation; it is not in this demo.
+**Why Plumb (1:55–2:25).** Existing products offer classes, hardware-based form feedback, running analysis, or coach video review. Plumb's proposed wedge is a focused iPhone loop for self-directed strength training: evidence, one cue, another set, and visible progress. Privacy and uncertainty are part of that loop. Test return visits and willingness to pay after a person sees the current result; no paid model has been chosen. Treadmill running is a possible next use case, requiring separate camera setup, measurement, and expert validation; it is not in this demo.
 
 **The close (2:25–3:00).** Better form is not a single score. It is noticing one thing, changing it, and seeing the result. Plumb helps you find your line, one set at a time.
 
@@ -32,13 +32,13 @@ Plumb turns an iPhone camera into a private technique mirror: after a supported 
 
 **Does the AI watch raw video and decide what good form is?** No. Vision extracts pose points and a deterministic squat rule produces the measurement. Foundation Models may reword a measured comparison; if unavailable, reviewed templates work offline.
 
-**Can it coach live?** The full product aims to correct a validated issue as early as possible. The current build gives post-set feedback and a next-set reminder. In-set prompts and Watch haptics are future features gated by tracking confidence, latency, and user testing so cues do not distract or mislead.
+**Can it coach live?** The full product aims to correct a validated issue as early as possible. The current build gives post-set feedback. In-set prompts and Watch haptics are future features gated by tracking confidence, latency, and user testing so cues do not distract or mislead.
 
 **Do I need a Watch or AirPods?** No for the current iPhone build. Apple Watch is central to the intended paired experience; AirPods are an optional audio route today. Neither currently contributes a form measurement to Plumb.
 
 **Why is a single-camera result trustworthy?** Its accuracy has not yet been established on a physical iPhone. Plumb links each provisional cue to named reps and withholds feedback when important joints are obscured. The team must measure agreement with annotated sets and expert review before broader claims.
 
-**What is the business?** A proposed freemium allowance for analyzed sets and a paid tier for more analysis and comparison history. Pricing is a hypothesis, not a current subscription.
+**What is the business?** Monetization and acquisition are part of the product work, but the README has not selected a paid feature, price, or subscription. The first test is whether people value the iPhone set-to-set loop enough to return.
 
 **What can you ship for the challenge?** The target is one real iPhone camera-to-cue loop for a side-view bodyweight squat and a build uploaded through App Store Connect. A grounded Foundation Models comparison recap and existing tap-to-speak output can support the demo if verified on a device; Watch integration remains a later prototype. Uploading a build is distinct from App Review approval or public release.
 

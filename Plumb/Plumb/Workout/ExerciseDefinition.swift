@@ -97,10 +97,6 @@ nonisolated struct ExerciseCopy: Equatable, Sendable {
     let rangeExplanation: String
     /// Rep accessibility description of the range value.
     let rangeAccessibilityName: String
-
-    var consistentRangeMessage: String {
-        "Your measured \(rangeNoun) stayed consistent across these reps."
-    }
 }
 
 /// One exercise rubric as data: what to track, how a rep moves, which view it needs, and what to say.

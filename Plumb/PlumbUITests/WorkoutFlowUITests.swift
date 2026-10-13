@@ -303,7 +303,7 @@ final class WorkoutFlowUITests: XCTestCase {
     }
 
     @MainActor
-    func testDemoSetShowsMeasuredResultAndRetake() throws {
+    func testDemoSetShowsMeasuredResultAndRetake() {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
@@ -331,19 +331,11 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(firstRep.label.contains("relative camera-observed range"))
         app.buttons["Try this next set"].tap()
         XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 5))
-        let reminder = app.staticTexts["capture.nextSetReminder"]
-        XCTAssertEqual(reminder.label, "Choose a range you can repeat on each rep.")
         app.buttons["Start set"].tap()
         XCTAssertTrue(app.buttons["Stop set"].waitForExistence(timeout: 6))
-        XCTAssertTrue(reminder.exists)
-        capture(app, name: "Next set reminder")
-        try app.performAccessibilityAudit(for: [
-            .sufficientElementDescription, .dynamicType, .textClipped, .trait,
-        ])
         Thread.sleep(forTimeInterval: 4)
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Compared with your previous set"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Your measured range stayed consistent across these reps."].exists)
         XCTAssertTrue(app.staticTexts["Camera-measured range was longer in set 2."].exists)
         let rangeMetric = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Range:")).firstMatch
         XCTAssertFalse(rangeMetric.exists)

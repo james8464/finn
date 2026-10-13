@@ -14,7 +14,7 @@
 
 **User objective:** A solo lifter can understand one camera-visible change in their own squat set, try a specific adjustment, and see whether that measured pattern changed in a second set. Success is the person's comprehension and repeat use, not a universal “form score.”
 
-**Business objective:** Prove that this loop is more useful than recording and manually reviewing a clip. Test setup friction, cue relevance, willingness to repeat, and willingness to pay for deeper history with the interviews in the product plan. Do not build subscriptions before this value is demonstrated.
+**Business objective:** Prove that this loop is more useful than recording and manually reviewing a clip. Test setup friction, cue relevance, willingness to repeat, and willingness to pay with the interviews in the product plan. The README does not choose a paid feature or model.
 
 **Challenge objective:** The [Build Challenge brief](https://luma.com/cmdf-bc2) asks for a clear use case, working core experience, path to monetization, and a build submitted through App Store Connect. It names Apple Intelligence/Foundation Models, on-device AI, Liquid Glass, App Intents, and StoreKit as technologies teams *can* explore. It publishes no scoring rubric. Our strategy is an inference from that brief: make a reliable, memorable **scan → evidence → one cue → try again → compare** demo, show a credible business test, and use Apple technology only where it improves that loop.
 
@@ -188,10 +188,10 @@ Tasks 1 and 3 can advance in parallel; Task 2 needs Task 1's models; Task 4 join
 | --- | --- | --- |
 | 1 | Spoken post-set cue through system audio, including paired AirPods | Tap-to-speak and Stop now work in simulator; headphone routing and audio quality need a physical iPhone check |
 | 2 | Apple Watch workout context and user-controlled HealthKit save | iPhone loop stable; watchOS target and paired-device testing available |
-| 3 | Push-up rubric and then carefully gated live cues | Separate labeled data, expert review, latency and distraction tests |
-| 4 | Saved clips, sharing, subscriptions | Explicit retention/deletion design and user value validated |
+| 3 | Validate the existing four exercise rubrics, then research carefully gated live cues | Separate labeled data, expert review, latency and distraction tests |
+| 4 | Text-summary sharing and monetization research | Confirm the existing share flow works on a physical iPhone; test willingness to pay before choosing a model |
 
-After the first gate, use the labeled camera-view sets to compare a view classifier and Vision 3D with the frozen 2D baseline. Only then test whether synchronized Watch accelerometer data improves rep boundaries, tempo, or temporary occlusion recovery. Keep personal calibration and temporary best/worst pose overlays behind expert-labeled baseline reps, privacy review, and physical-device testing; neither is a shipping claim in this plan.
+After the first gate, use labeled camera-view sets to assess the existing Vision 3D check against the frozen 2D baseline. Only then test whether synchronized Watch accelerometer data improves rep boundaries, tempo, or temporary occlusion recovery. These tests support the README's planned iPhone + Watch experience and do not establish accurate technique coaching by themselves.
 
 ## Platform references
 

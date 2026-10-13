@@ -6,34 +6,31 @@
 
 People training alone often cannot see how their own movement changes through a set. Reviewing a video takes time and still leaves the interpretation to them. Plumb turns a short, camera-visible movement into one bounded observation they can check in the next set.
 
-The first audience is a self-directed iPhone user doing basic strength work at home or in a gym. The intended full experience pairs iPhone camera analysis with Apple Watch rep timing, effort context, discreet haptics, and timely, validated advice. The expansion includes treadmill runners, whose continuous movement needs a different session and analysis design. A trainer may later review a person's shared result or opted-in clip, but trainer accounts are not needed for the first experience.
+The first audience is a self-directed iPhone user doing basic strength work at home or in a gym. The intended full experience pairs iPhone camera analysis with Apple Watch rep timing, effort context, discreet haptics, and timely, validated advice. The expansion includes treadmill runners, whose continuous movement needs a different session and analysis design. Qualified trainers help validate coaching cues; a trainer account is not part of the README's product scope.
 
-**Product loop:** choose an exercise → place the iPhone → analyze live without saving video → review one supported finding or a retake reason → try another set with a short reminder → compare the same measured signal. No account or accessory is required for this loop.
+**Current product loop:** choose an exercise → place the iPhone → analyze live without saving video → review at most one supported finding, no clear pattern, or a retake reason → try another set → compare the same measured signal. No account or accessory is required for this iPhone build.
 
 ## What a result means
 
 | Outcome | What Plumb says | Evidence needed |
 | --- | --- | --- |
 | Shorter observed range | The later reps had a smaller measured range; one next-set action appears. | At least four measured reps, a sufficient view, and the exercise's versioned range rule. |
-| Consistent observed range | The measured range stayed similar across this set. | At least four measured reps, clear pose evidence, and every rep within the stated consistency rule. |
 | No supported pattern | Plumb has no specific range finding for this set. | A measurable set with no rule supported. |
 | Retake | The view or movement cannot support a measured result. | Missing/weak joints, wrong view, interruption, or incomplete movement. |
 | Analysis failed | Plumb could not complete the set analysis and offers a retry. | A capture or processing error; do not present this as a movement finding. |
 
-A consistent range is **one positive measurement**, not proof of “perfect form.” A single side camera cannot check every joint, force, load, pain, or personal constraint. The UI must never certify perfect or safe technique. Positive copy should name the measured property and retain the one-view limitation. A qualified coach and real-person holdout must review any new technique claim before release.
+A single side camera cannot check every joint, force, load, pain, or personal constraint. The UI must not certify perfect or safe technique. A qualified coach and real-person holdout must review any new technique claim before release.
 
 ## Features and sequence
 
 | Priority | Feature | Current state / next decision |
 | --- | --- | --- |
 | Now | iPhone side-view squat, push-up, static lunge, and stiff-leg deadlift; rep analysis, evidence gate, one observation, history, comparison, text sharing | Implemented with simulator and synthetic video checks; real-person accuracy remains unvalidated. |
-| Now | One-sentence next-set reminder | Show the last relevant cue during framing and capture for the same exercise; clear it after a new result, dismissal, exercise change, or session end. |
-| Now | Restrained positive feedback | Report consistent *measured range* only when evidence and rep-to-rep agreement support it. Never label form perfect. |
 | Before release | Physical iPhone validation, cue review, accessibility, privacy and signing checks | Test consented sets across people, views, clothing, light, and occlusion. Suppress claims that miss the [validation gates](../../planning.md#6-validation-and-success-measures). |
 | Core product expansion | Apple Watch workout session, rep timing, tempo, effort context, and discreet haptics | Watch is central to the intended iPhone + Watch experience, but absent from this build. Prototype after the iPhone loop is dependable; compare sensor-assisted timing with camera-only analysis before claiming an improvement. |
 | Next movement | Treadmill running | Research safe camera placement and a running-specific, expert-reviewed gait signal. Begin with post-run feedback; do not reuse strength rep thresholds. |
 | Full product | Timely live cues, including Watch haptics and optional AirPods audio | Central to the vision; release only when tracking confidence, latency, coach review, and distraction testing support the particular cue. |
-| Later surfaces and business | iPhone Duo placement, Apple TV display, widgets, Live Activities, trainer workflow, saved clips, CloudKit or Sign in with Apple, paid tier | Investigate a useful role and privacy choice for each. None is a current build or submission claim. |
+| Later surfaces and business | iPhone Duo placement, Apple TV display, widgets, Live Activities, and a tested monetization model | These are named in the README but are not current features or submission claims. |
 
 ## Apple platform choices
 
@@ -42,7 +39,7 @@ A consistent range is **one positive measurement**, not proof of “perfect form
 - **AirPods:** audio output for a user-requested observation works today through the system route. Head-motion-assisted movement checks are planned and need availability, permission, timing, and coaching validation; headphones do not currently measure form for Plumb.
 - **Apple Watch:** core to the intended paired experience, currently unbuilt. Workout context, timing, and haptics come first; any camera/watch sensor fusion needs synchronized, paired-device tests.
 - **iPhone Duo and Apple TV:** proposed placement and living-room display surfaces, respectively; neither is implemented or validated.
-- **Native UI:** system typography, controls, accessibility, and quiet black/white branding from the [brand guide](../../Design/README.md). The measured fact and next action should remain the focus. Apple's [feedback guidance](https://developer.apple.com/design/human-interface-guidelines/feedback) favors passive status for information a person can glance at, and its [workout guidance](https://developer.apple.com/design/human-interface-guidelines/workouts) cautions against distracting information during activity; the next-set reminder is one short line, not a live stream of corrections.
+- **Native UI:** system typography, controls, accessibility, and quiet black/white branding from the [brand guide](../../Design/README.md). The measured fact and next action should remain the focus. Apple's [feedback guidance](https://developer.apple.com/design/human-interface-guidelines/feedback) favors passive status for information a person can glance at, and its [workout guidance](https://developer.apple.com/design/human-interface-guidelines/workouts) cautions against distracting information during activity. The current camera view shows framing and set controls, not coaching prompts.
 
 ## How we decide whether it works
 

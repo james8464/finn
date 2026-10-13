@@ -1,16 +1,6 @@
 import Foundation
 
 nonisolated enum CueSelector {
-    /// A positive finding about one measured signal, never a judgment of overall technique.
-    /// Every counted rep must stay within 12% of the largest range, with clear pose evidence.
-    static func hasConsistentRange(_ analysis: SetAnalysis) -> Bool {
-        guard analysis.confidence >= 0.8, analysis.reps.count >= 4,
-              let smallest = analysis.reps.map(\.relativeRange).min(),
-              let largest = analysis.reps.map(\.relativeRange).max(),
-              largest > 0 else { return false }
-        return smallest / largest >= 0.88
-    }
-
     /// One within-set observation: the last two reps' range against the first two.
     /// The wording comes from the exercise definition; the rule is the same for every exercise.
     static func select(from analysis: SetAnalysis,
