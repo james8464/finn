@@ -97,7 +97,7 @@ A 10° phone tilt changes neither count: the squat signal is a ratio of vertical
 **What it does.** About four times per second (every fourth processed frame at 15 fps), the capture code runs `VNDetectHumanBodyPose3DRequest` on the same camera frame as the 2D pose. It moves the hips and shoulders into the camera's frame with `cameraOriginMatrix` and computes the angle between the body's left-right axis and the line from the camera to the hips: 0° is a true side view, 90° faces the camera or turns away from it.
 
 - Median of the set's estimates at 30° or less: nothing to say.
-- Above 30°: the set is measured, and the result adds "Plumb saw you about N° from side-on. Turn a little more side-on next time; counts are most reliable from the side." While framing, three of the last five estimates above 30° show "Turn a little: side to the camera". Neither stops the set.
+- Above 30°: the set is measured, and the result adds "Plumb saw you about N° from side-on. Turn a little more side-on next time; counts are most reliable from the side." While framing, three of the last five estimates above 30° show "Turn a little: side to the camera". Neither stops the set. Framing estimates older than 2 s no longer count, so when they stop (a hot phone skips the 3D request; Vision 3D measures only the person closest to the camera) old front-on readings from the walk to the spot do not keep asking to turn or hold back a hands-free start.
 - At 75° or more, with estimates spanning at least 3 s: the set is refused with "This exercise needs a side view. Turn so your side faces the camera, then try again. Plumb measured about N° away from the view it needs."
 - Fewer than four estimates: no decision, and the 2D rules apply alone, as on the simulator.
 

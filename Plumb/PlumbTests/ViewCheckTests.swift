@@ -159,6 +159,30 @@ struct ViewCheckSessionTests {
         await model.cancel()
     }
 
+    /// The person walks to their spot with their back to the phone (read as front-on), then stands
+    /// side-on and still while 3D estimates stop: a hot phone skips them, and Vision 3D measures only
+    /// the person closest to the camera. The old front readings lapse, so the turn tip clears and the
+    /// hands-free set starts; before, they stayed and "Turn your side to the camera" was said forever.
+    @Test func oldFrontReadingsLapseWhenEstimatesStop() async throws {
+        let defaults = try #require(UserDefaults(suiteName: "PlumbViewCheckStale-\(UUID().uuidString)"))
+        let source = AngleRecordingSource()
+        let model = WorkoutSessionModel(source: source, exerciseClassifier: nil,
+                                        preferences: PlumbPreferences(defaults: defaults, handsFreeByDefault: true))
+        model.handsFreeCountdown = 0
+        await model.startPreview()
+        let walking = withDeviation(CaptureTraces.squats(reps: 0, from: 0, standing: 0.6), 85, every: 1)
+        let sideOn = CaptureTraces.squats(reps: 0, from: 0.7, standing: 8)
+        for frame in walking + sideOn {
+            source.emit(frame)
+            if model.stage == .capturing { break }
+            await Task.yield()
+        }
+        for _ in 0..<500 where model.stage != .capturing { try await Task.sleep(for: .milliseconds(10)) }
+        #expect(model.stage == .capturing)
+        #expect(model.previewDeviations.count < ViewCheck.minimumPreviewEstimates)
+        await model.cancel()
+    }
+
     @Test func frontViewSetIsRefusedUnlessTheCheckIsOff() async throws {
         let (model, source) = makeModel()
         await capture(model, source, withDeviation(pushUpTrace(reps: 6), 75), exercise: .pushUp)

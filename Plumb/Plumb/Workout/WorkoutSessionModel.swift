@@ -76,8 +76,15 @@ final class WorkoutSessionModel {
     private var collectionTask: Task<Void, Never>?
     private var frames: [PoseFrame] = []
     private var previewFrames: [PoseFrame] = []
-    /// Latest Vision 3D profile deviations seen while framing.
-    private(set) var previewDeviations: [Double] = []
+    /// Latest Vision 3D profile deviations seen while framing, newest last.
+    var previewDeviations: [Double] { previewEstimates.map { $0.deviation } }
+    /// The same, with the frame time of each: an estimate older than `previewEstimateLifetime`
+    /// no longer counts.
+    private var previewEstimates: [(time: TimeInterval, deviation: Double)] = []
+    /// Estimates stop when the phone is hot (the 3D request is skipped) or when Vision 3D measures
+    /// someone closer to the camera than the athlete; old readings must not keep asking the person
+    /// to turn or hold back a hands-free start. New ones arrive about four times a second.
+    static let previewEstimateLifetime: TimeInterval = 2
     private var lastPreviewFrameAt: ContinuousClock.Instant?
     private var framingWatchdog: Task<Void, Never>?
     private var isStopping = false
@@ -143,7 +150,7 @@ final class WorkoutSessionModel {
         didSet {
             preferences.checksCameraAngle = checksCameraAngle
             source.setCameraAngleEstimation(checksCameraAngle)
-            if !checksCameraAngle { previewDeviations = [] }
+            if !checksCameraAngle { previewEstimates = [] }
         }
     }
     /// The 3D camera-angle verdict for the latest analyzed set, kept for the validation readout.
@@ -309,7 +316,7 @@ final class WorkoutSessionModel {
         frames = []
         frameCount = 0
         previewFrames = []
-        previewDeviations = []
+        previewEstimates = []
         lastViewVerdict = .unavailable
         lastPreviewFrameAt = nil
         livePose = nil
@@ -334,7 +341,7 @@ final class WorkoutSessionModel {
                     if let lastPreviewFrameAt = self.lastPreviewFrameAt,
                        lastPreviewFrameAt.duration(to: .now) >= .seconds(1) {
                         self.previewFrames = []
-                        self.previewDeviations = []
+                        self.previewEstimates = []
                         self.framingStatus = .checking
                     }
                 }
@@ -556,9 +563,10 @@ final class WorkoutSessionModel {
     private func updateFramingStatus(with frame: PoseFrame) {
         let definition = captureExercise.definition
         if checksCameraAngle, let deviation = frame.profileDeviationDegrees {
-            previewDeviations.append(deviation)
-            if previewDeviations.count > 5 { previewDeviations.removeFirst() }
+            previewEstimates.append((frame.time, deviation))
+            if previewEstimates.count > 5 { previewEstimates.removeFirst() }
         }
+        previewEstimates.removeAll { frame.time - $0.time > Self.previewEstimateLifetime }
         if checksCameraAngle,
            ViewCheck.previewAsksToTurn(previewDeviations, expected: definition.expectedView) {
             framingStatus = .turnToExpectedView
@@ -941,7 +949,7 @@ final class WorkoutSessionModel {
         collectionTask = nil
         frames = []
         previewFrames = []
-        previewDeviations = []
+        previewEstimates = []
         lastPreviewFrameAt = nil
         livePose = nil
         framingStatus = .checking
