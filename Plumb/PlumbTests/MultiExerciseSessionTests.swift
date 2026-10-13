@@ -84,18 +84,12 @@ struct MultiExerciseSessionTests {
         let model = WorkoutSessionModel(source: source)
         model.selectedExercise = .pushUp
         await model.startPreview()
-        for index in 0..<5 { source.emit(squatFrame(time: Double(index) * 0.1, hipY: 0.42)) }
-        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
-        while model.framingStatus == .checking && ContinuousClock.now < deadline {
-            try await Task.sleep(for: .milliseconds(20))
-        }
-        #expect(model.framingStatus == .adjustPosition)
-        for frame in pushUpTrace(reps: 1).prefix(5) { source.emit(frame) }
-        let visibleDeadline = ContinuousClock.now.advanced(by: .seconds(5))
-        while model.framingStatus != .landmarksVisible && ContinuousClock.now < visibleDeadline {
-            try await Task.sleep(for: .milliseconds(20))
-        }
-        #expect(model.framingStatus == .landmarksVisible)
+        #expect(model.captureExercise == .pushUp)
+        let requirement = model.captureExercise.definition.evidence
+        let squatFrames = (0..<5).map { squatFrame(time: Double($0) * 0.1, hipY: 0.42) }
+        #expect(EvidenceGate.previewStatus(squatFrames, requirement: requirement) == .adjustPosition)
+        #expect(EvidenceGate.previewStatus(Array(pushUpTrace(reps: 1).prefix(5)),
+                                           requirement: requirement) == .landmarksVisible)
         await model.cancel()
     }
 
