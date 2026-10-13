@@ -71,6 +71,8 @@ nonisolated enum ExerciseAnalyzer {
     static func analyzeWithDiagnostics(_ frames: [PoseFrame], as definition: ExerciseDefinition,
                                        viewCheck: ViewCheckPolicy = .enforce)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
+        // Walking to the spot and back to the phone is not part of the set.
+        let frames = SetWindow.active(frames, requirement: definition.evidence)
         let side: BodySide
         switch EvidenceGate.assess(frames, requirement: definition.evidence) {
         case .usable(let acceptedSide): side = acceptedSide

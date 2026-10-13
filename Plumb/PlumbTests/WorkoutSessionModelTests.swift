@@ -58,6 +58,28 @@ struct WorkoutSessionModelTests {
         #expect(analysis.reps.count == 6)
     }
 
+    /// Start at the phone, walk to the spot, squat, walk back to stop: measured and saved.
+    @Test func walkingToTheSpotAndBackIsMeasuredAndSaved() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: "PlumbWalkTests-\(UUID().uuidString)", directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = LocalSessionStore(url: directory.appending(path: "sessions.json"))
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0)
+            + CaptureTraces.walkOut(from: 14.0)
+        for frame in capture { source.emit(frame) }
+        await model.endSet()
+        guard case .measured(let analysis, _) = model.result else {
+            Issue.record("Expected the set between walking in and out to be measured, got \(String(describing: model.result))")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+        #expect(model.history.first?.sets.count == 1)
+    }
+
     @Test func stopTimingUsesTapInstantAndClearsForNextSet() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)

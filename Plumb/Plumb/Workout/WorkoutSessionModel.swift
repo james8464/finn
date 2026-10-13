@@ -309,7 +309,9 @@ final class WorkoutSessionModel {
             stopTappedAt = nil
             stage = .result
         }
-        let recognition = recognizeExercise()
+        // The capture includes walking to the spot and back to the phone; only the set is analyzed.
+        let captured = SetWindow.active(frames, requirement: captureExercise.definition.evidence)
+        let recognition = recognizeExercise(in: captured)
         self.recognition = recognition
         let exercise: ExerciseKind
         if case .recognized(let recognized, _) = recognition {
@@ -318,10 +320,12 @@ final class WorkoutSessionModel {
             exercise = captureExercise
         }
         let definition = exercise.definition
+        let setFrames = exercise == captureExercise
+            ? captured : SetWindow.active(frames, requirement: definition.evidence)
         resultExercise = exercise
-        lastViewVerdict = ViewCheck.assess(frames, expected: definition.expectedView)
+        lastViewVerdict = ViewCheck.assess(setFrames, expected: definition.expectedView)
         let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(
-            frames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore)
+            setFrames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore)
         movementNote = nil
         repExtremes = nil
         switch outcome {
@@ -333,10 +337,10 @@ final class WorkoutSessionModel {
                 return
             }
             movementNote = explanation
-            repExtremes = RepExtremes.make(analysis, frames: frames, definition: definition)
+            repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
             let cue = CueSelector.select(from: analysis, exercise: definition)
             result = .measured(analysis, cue)
-            record(analysis: analysis, cue: cue, exercise: exercise)
+            record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames)
         case .insufficientView(let reason):
             result = .insufficientView(reason)
         case .failed(let reason):
@@ -360,7 +364,7 @@ final class WorkoutSessionModel {
             ? EvidenceGate.unclearJoint(previewFrames, requirement: definition.evidence) : nil
     }
 
-    private func recognizeExercise() -> ExerciseRecognition {
+    private func recognizeExercise(in frames: [PoseFrame]) -> ExerciseRecognition {
         guard recognizesExercise, !frames.isEmpty else { return .notAttempted }
         switch recognitionMethod {
         case .keypointModel:
@@ -434,7 +438,7 @@ final class WorkoutSessionModel {
         } catch { historyIssue = Self.issue(for: error) }
     }
 
-    private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind) {
+    private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind, frames: [PoseFrame]) {
         guard case .usable(let side) = EvidenceGate.assess(
             frames, requirement: exercise.definition.evidence) else { return }
         var session = currentSession ?? WorkoutSessionSummary(id: UUID(), startedAt: .now, sets: [])
