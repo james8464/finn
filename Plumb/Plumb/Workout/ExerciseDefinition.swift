@@ -105,6 +105,24 @@ nonisolated struct ExerciseCopy: Equatable, Sendable {
     }
 }
 
+/// A within-person posture change, not an absolute standard of correct technique.
+nonisolated struct PostureRule: Equatable, Sendable {
+    let cueKind: CueKind
+    let minimumIncrease: Double
+    let observation: String
+    let nextAction: String
+
+    /// The change in a few words, for the most-frequent-pattern summary.
+    var title: String {
+        switch cueKind {
+        case .torsoTiltIncreased: "Torso tilting farther at the end of the set"
+        case .hipDropIncreased: "Hips sagging at the end of the set"
+        case .kneeBendIncreased: "Knees bending more at the end of the set"
+        case .rangeDecreased: "Range shorter at the end of the set"
+        }
+    }
+}
+
 /// One exercise rubric as data: what to track, how a rep moves, which view it needs, and what to say.
 /// Thresholds are product hypotheses for a within-person comparison, not validated standards.
 nonisolated struct ExerciseDefinition: Equatable, Sendable {
@@ -122,6 +140,7 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
     let minimumBodyScale: Double
     /// Folder name and label used by the optional Create ML exercise classifier.
     let classifierLabel: String
+    let posture: PostureRule
     let copy: ExerciseCopy
 
     static let all: [ExerciseDefinition] = [.squat, .pushUp, .staticLunge, .stiffLegDeadlift]
@@ -171,7 +190,7 @@ nonisolated extension ExerciseKind {
 }
 
 nonisolated extension ExerciseDefinition {
-    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v6`).
+    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v7`).
     static let squat = ExerciseDefinition(
         kind: .bodyweightSquat,
         rubricVersion: SquatRubric.version,
@@ -190,6 +209,11 @@ nonisolated extension ExerciseDefinition {
         rangeDisplayScale: 0.6,
         minimumBodyScale: 0.1,
         classifierLabel: "squat",
+        posture: PostureRule(
+            cueKind: .torsoTiltIncreased, minimumIncrease: 12,
+            observation: "Your torso tilted farther from upright in the last two reps.",
+            nextAction: "Try keeping your torso angle similar from rep to rep."
+        ),
         copy: ExerciseCopy(
             name: "Squat",
             shareNoun: "squat",
@@ -219,7 +243,7 @@ nonisolated extension ExerciseDefinition {
     /// Side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.
     static let pushUp = ExerciseDefinition(
         kind: .pushUp,
-        rubricVersion: "push-up-side-v5",
+        rubricVersion: "push-up-side-v6",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.shoulder, .elbow, .wrist], anchor: .wrist),
         signal: .jointBend(from: .shoulder, vertex: .elbow, to: .wrist),
@@ -229,6 +253,11 @@ nonisolated extension ExerciseDefinition {
         rangeDisplayScale: 120,
         minimumBodyScale: 0.03,
         classifierLabel: "push_up",
+        posture: PostureRule(
+            cueKind: .hipDropIncreased, minimumIncrease: 0.06,
+            observation: "Your hips sat lower relative to your shoulder-to-ankle line in the last two reps.",
+            nextAction: "Try keeping your hips aligned with your shoulders and ankles."
+        ),
         copy: ExerciseCopy(
             name: "Push-up",
             shareNoun: "push-up",
@@ -259,7 +288,7 @@ nonisolated extension ExerciseDefinition {
     /// camera-facing leg (hip, knee, ankle).
     static let staticLunge = ExerciseDefinition(
         kind: .staticLunge,
-        rubricVersion: "static-lunge-side-v5",
+        rubricVersion: "static-lunge-side-v6",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .hip, vertex: .knee, to: .ankle),
@@ -269,6 +298,11 @@ nonisolated extension ExerciseDefinition {
         rangeDisplayScale: 120,
         minimumBodyScale: 0.03,
         classifierLabel: "static_lunge",
+        posture: PostureRule(
+            cueKind: .torsoTiltIncreased, minimumIncrease: 12,
+            observation: "Your torso tilted farther from upright in the last two reps.",
+            nextAction: "Try keeping your torso angle similar from rep to rep."
+        ),
         copy: ExerciseCopy(
             name: "Static lunge",
             shareNoun: "lunge",
@@ -298,7 +332,7 @@ nonisolated extension ExerciseDefinition {
     /// Side-view stiff-leg deadlift, measured as hip hinge (shoulder, hip, knee). Feet stay planted.
     static let stiffLegDeadlift = ExerciseDefinition(
         kind: .stiffLegDeadlift,
-        rubricVersion: "stiff-leg-deadlift-side-v5",
+        rubricVersion: "stiff-leg-deadlift-side-v6",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.shoulder, .hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .shoulder, vertex: .hip, to: .knee),
@@ -308,6 +342,11 @@ nonisolated extension ExerciseDefinition {
         rangeDisplayScale: 120,
         minimumBodyScale: 0.03,
         classifierLabel: "stiff_leg_deadlift",
+        posture: PostureRule(
+            cueKind: .kneeBendIncreased, minimumIncrease: 12,
+            observation: "Your knees bent more during the last two hinges.",
+            nextAction: "Try keeping a comfortable, similar knee bend through each hinge."
+        ),
         copy: ExerciseCopy(
             name: "Stiff-leg deadlift",
             shareNoun: "stiff-leg deadlift",

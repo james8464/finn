@@ -132,7 +132,7 @@ Camera frame
   → post-set cue + user response
 ```
 
-The fuller observation contract should include exercise, assessed viewpoint, involved joints, confidence, metric, threshold version, and rep/time range. The current prototype stores a smaller derived summary and does not claim to know its actual camera angle. Thresholds are product hypotheses reviewed with trainers, not medical constants. The app should suppress a cue if the required joints are missing, a rep is incomplete, the camera moves, another person dominates the frame, or evidence conflicts.
+The fuller observation contract should include exercise, assessed viewpoint, involved joints, confidence, metric, threshold version, and rep/time range. The current prototype stores a smaller derived summary and estimates camera angle when Vision 3D is available; that estimate still needs physical-device validation. Thresholds are product hypotheses awaiting trainer review, not medical constants. The app should suppress a cue if the required joints are missing, a rep is incomplete, the camera moves, another person dominates the frame, or evidence conflicts.
 
 **Viewpoint remains an unvalidated measurement gate.** The side-view rubric uses relative 2D movement and joint visibility; the validation sheet therefore separates actual camera viewpoint from a specialist's suitability judgment and counts measured results on unsuitable views. The [Vision 3D](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) check, on by default, suggests turning when the median is over 30° from profile and refuses only a sustained clearly frontal view at 75° or more. Those cutoffs were examined on public videos, but need physical iPhone confirmation and expert suitability labels. Labeled front, side, and three-quarter sets must reveal both false refusals and false acceptance.
 
@@ -142,10 +142,10 @@ The fuller observation contract should include exercise, assessed viewpoint, inv
 
 | Exercise | Observable signal | What Plumb may say | What it must not infer |
 | --- | --- | --- | --- |
-| Side-view squat | Rep count, range consistency, time per phase | “Your range became shorter in later reps.” | Joint health, strength, safe load, universal depth standard |
-| Side-view push-up (draft rule in the app: elbow bend) | Rep count, elbow-bend consistency, tempo; body line later | “Your elbow bend became smaller in the last two reps.” | Cause of pain or exact muscle activation |
-| Side-view static lunge (draft rule: knee bend) | Rep count, knee-bend consistency on the camera-facing leg | “Your knee bend became smaller in the last two reps.” | Knee health, which leg is weaker |
-| Side-view stiff-leg deadlift (draft rule: hip hinge) | Rep count, hip-hinge consistency | “Your hip hinge became smaller in the last two reps.” | Back safety, hamstring flexibility, safe load |
+| Side-view squat | Rep count, range consistency, and torso tilt at the bottom | “Your torso tilted farther from upright in the last two reps.” | Joint health, strength, safe load, universal depth standard |
+| Side-view push-up | Rep count, elbow-bend consistency, and hip alignment relative to the body line | “Your hips sat lower relative to your shoulder-to-ankle line in the last two reps.” | Cause of pain, exact muscle activation, proof of a straight body line |
+| Side-view static lunge | Rep count, knee-bend consistency, and torso tilt at the bottom | “Your torso tilted farther from upright in the last two reps.” | Knee health, which leg is weaker |
+| Side-view stiff-leg deadlift | Rep count, hip-hinge consistency, and knee bend at the bottom | “Your knees bent more during the last two hinges.” | Back safety, hamstring flexibility, safe load |
 
 A coach/physio review of cue wording and a labeled test set are required before shipping automated technique claims. User-reported relevance helps prioritize cues but does not replace accuracy testing.
 

@@ -161,7 +161,7 @@ nonisolated struct TrackedSetEvidenceTests {
             return
         }
         #expect(analysis.reps.count == 10)
-        #expect(analysis.rubricVersion == "squat-side-v6")
+        #expect(analysis.rubricVersion == "squat-side-v7")
     }
 
     @Test func someoneWalkingInFrontForTwoSecondsIsBridged() {

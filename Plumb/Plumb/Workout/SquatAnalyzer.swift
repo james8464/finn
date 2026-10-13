@@ -8,10 +8,11 @@ nonisolated enum SquatRubric {
     /// set, and the athlete may be hidden by someone else for up to 3 s (see `EvidenceRubric`).
     /// v5 (13 October 2026): camera capture corroborates joints with a person mask so an ankle
     /// inferred behind an obstruction cannot make a set appear measurable.
-    /// v6 (13 October 2026): only the set is measured, not the walk to the spot and back to the
-    /// phone (`SetWindow`), and the person-mask check searches around each joint in proportion to
-    /// the body and ignores an empty mask (`SilhouetteCheck`). v5 refused real sets on both counts.
-    static let version = "squat-side-v6"
+    /// v6 (13 October 2026, main): adds an optional torso-tilt reading at the bottom of each rep.
+    /// v7 (13 October 2026): v6 plus measuring only the set, not the walk to the spot and back to the
+    /// phone (`SetWindow`), a person-mask search in proportion to the body that ignores an empty mask
+    /// (`SilhouetteCheck`), and a rep's deepest point kept after a wobble. v5 refused real sets.
+    static let version = "squat-side-v7"
     static let minimumJointConfidence = EvidenceRubric.minimumJointConfidence
     static let descentThreshold = 0.10
     /// v3: 0.05 (was 0.03), about twice Vision's hip jitter on real side-view video.
@@ -51,8 +52,8 @@ nonisolated enum ExerciseAnalyzer {
 
     private enum Phase {
         case top
-        case descending(start: TimeInterval, peak: Double)
-        case ascending(start: TimeInterval, peak: Double)
+        case descending(start: TimeInterval, peak: Double, peakIndex: Int)
+        case ascending(start: TimeInterval, peak: Double, peakIndex: Int)
     }
 
     private struct Sample {
@@ -62,6 +63,7 @@ nonisolated enum ExerciseAnalyzer {
         /// Reference height for vertical travel, shortest limb segment for a bend.
         let scale: Double
         let confidence: Double
+        let posture: Double?
     }
 
     static func analyze(_ frames: [PoseFrame], as definition: ExerciseDefinition,
@@ -100,7 +102,7 @@ nonisolated enum ExerciseAnalyzer {
             }
         }
 
-        let samples = frames.compactMap { sample(from: $0, signal: definition.signal, side: side) }
+        let samples = frames.compactMap { sample(from: $0, as: definition, side: side) }
         guard samples.count >= 5 else {
             return (.insufficientView(definition.copy.keepJointsVisible), nil)
         }
@@ -153,14 +155,15 @@ nonisolated enum ExerciseAnalyzer {
                 localTop = min(localTop, distance)
                 diagnostics.deepest = max(diagnostics.deepest, distance - localTop)
                 if distance - localTop >= phases.leaveTop {
-                    phase = .descending(start: lastTopTime, peak: distance)
+                    phase = .descending(start: lastTopTime, peak: distance, peakIndex: index)
                 }
-            case .descending(let start, let peak):
+            case .descending(let start, let peak, let peakIndex):
                 let updatedPeak = max(peak, distance)
+                let updatedPeakIndex = distance > peak ? index : peakIndex
                 diagnostics.deepest = max(diagnostics.deepest, updatedPeak - localTop)
                 if updatedPeak - localTop >= phases.reachBottom &&
                     updatedPeak - distance >= phases.returnFromBottom {
-                    phase = .ascending(start: start, peak: updatedPeak)
+                    phase = .ascending(start: start, peak: updatedPeak, peakIndex: updatedPeakIndex)
                 } else if distance <= localTop + phases.backAtTop {
                     // Came back up without reaching the bottom: a shallow movement.
                     diagnostics.shallow += 1
@@ -169,21 +172,25 @@ nonisolated enum ExerciseAnalyzer {
                     localTop = distance
                     phase = .top
                 } else {
-                    phase = .descending(start: start, peak: updatedPeak)
+                    phase = .descending(start: start, peak: updatedPeak, peakIndex: updatedPeakIndex)
                 }
-            case .ascending(let start, let lastPeak):
+            case .ascending(let start, let lastPeak, let lastPeakIndex):
                 // A pause or wobble on the way down can look like the way up; the rep's depth is
-                // still its deepest point.
+                // still its deepest point, and its posture is read there.
                 let peak = max(lastPeak, distance)
+                let peakIndex = distance > lastPeak ? index : lastPeakIndex
                 let depth = peak - localTop
                 if distance <= localTop + max(phases.backAtTop, depth * repEndShareOfDepth) {
                     let duration = sample.time - start
                     if (phases.minimumDuration...phases.maximumDuration).contains(duration) {
+                        let nearby = samples[max(0, peakIndex - 2)...min(samples.count - 1, peakIndex + 2)]
+                            .compactMap(\.posture)
                         reps.append(RepMetric(
                             number: reps.count + 1,
                             startTime: start,
                             endTime: sample.time,
-                            relativeRange: depth
+                            relativeRange: depth,
+                            postureValue: angledView == nil && nearby.count >= 3 ? median(nearby) : nil
                         ))
                     } else {
                         diagnostics.outsideTempo += 1
@@ -192,7 +199,7 @@ nonisolated enum ExerciseAnalyzer {
                     localTop = distance
                     phase = .top
                 } else {
-                    phase = .ascending(start: start, peak: peak)
+                    phase = .ascending(start: start, peak: peak, peakIndex: peakIndex)
                 }
             }
         }
@@ -210,7 +217,7 @@ nonisolated enum ExerciseAnalyzer {
             return nil
         }
         let candidates = frames.filter { $0.time >= rep.startTime && $0.time <= rep.endTime }
-            .compactMap { frame in sample(from: frame, signal: definition.signal, side: side).map { (frame, $0.value) } }
+            .compactMap { frame in sample(from: frame, as: definition, side: side).map { (frame, $0.value) } }
         switch definition.signal {
         case .verticalTravel: return candidates.max { $0.1 < $1.1 }?.0
         case .jointBend: return candidates.min { $0.1 < $1.1 }?.0
@@ -236,14 +243,15 @@ nonisolated enum ExerciseAnalyzer {
         return point
     }
 
-    private static func sample(from frame: PoseFrame, signal: MovementSignal,
+    private static func sample(from frame: PoseFrame, as definition: ExerciseDefinition,
                                side: BodySide) -> Sample? {
-        switch signal {
+        let posture = postureValue(in: frame, exercise: definition.kind, side: side)
+        switch definition.signal {
         case .verticalTravel(let jointRole, let referenceRole):
             guard let joint = confidentPoint(jointRole, in: frame, side: side),
                   let reference = confidentPoint(referenceRole, in: frame, side: side) else { return nil }
             return Sample(time: frame.time, value: joint.y, scale: reference.y,
-                          confidence: min(joint.confidence, reference.confidence))
+                          confidence: min(joint.confidence, reference.confidence), posture: posture)
         case .jointBend(let fromRole, let vertexRole, let toRole):
             guard let from = confidentPoint(fromRole, in: frame, side: side),
                   let vertex = confidentPoint(vertexRole, in: frame, side: side),
@@ -253,7 +261,41 @@ nonisolated enum ExerciseAnalyzer {
             let firstSegment = hypot(from.x - vertex.x, (from.y - vertex.y) * frame.aspectRatio)
             let secondSegment = hypot(to.x - vertex.x, (to.y - vertex.y) * frame.aspectRatio)
             return Sample(time: frame.time, value: angle, scale: min(firstSegment, secondSegment),
-                          confidence: min(from.confidence, vertex.confidence, to.confidence))
+                          confidence: min(from.confidence, vertex.confidence, to.confidence), posture: posture)
+        }
+    }
+
+    /// One camera-visible posture signal at a rep's deepest phase. Supporting joints need a
+    /// higher confidence than the rep signal; a missing joint leaves the reading unavailable.
+    private static func postureValue(in frame: PoseFrame, exercise: ExerciseKind,
+                                     side: BodySide) -> Double? {
+        func point(_ role: JointRole) -> JointPoint? {
+            guard let value = frame.joints[role.joint(on: side)], value.confidence >= 0.5 else { return nil }
+            return value
+        }
+        switch exercise {
+        case .bodyweightSquat, .staticLunge:
+            guard let shoulder = point(.shoulder), let hip = point(.hip) else { return nil }
+            let dx = shoulder.x - hip.x
+            let dy = (shoulder.y - hip.y) * frame.aspectRatio
+            guard hypot(dx, dy) >= 0.08 else { return nil }
+            return atan2(abs(dx), abs(dy)) * 180 / .pi
+        case .pushUp:
+            guard let shoulder = point(.shoulder), let hip = point(.hip),
+                  let ankle = point(.ankle), abs(ankle.x - shoulder.x) >= 0.1 else { return nil }
+            let dx = ankle.x - shoulder.x
+            let share = (hip.x - shoulder.x) / dx
+            guard (0.15...0.85).contains(share) else { return nil }
+            let dy = (ankle.y - shoulder.y) * frame.aspectRatio
+            let length = hypot(dx, dy)
+            guard length >= 0.15 else { return nil }
+            let lineY = shoulder.y + share * (ankle.y - shoulder.y)
+            return (hip.y - lineY) * frame.aspectRatio / length
+        case .stiffLegDeadlift:
+            guard let hip = point(.hip), let knee = point(.knee), let ankle = point(.ankle),
+                  let angle = angle(from: hip, vertex: knee, to: ankle,
+                                    aspectRatio: frame.aspectRatio) else { return nil }
+            return 180 - angle
         }
     }
 

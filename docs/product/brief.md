@@ -15,7 +15,8 @@ The first audience is a self-directed iPhone user doing basic strength work at h
 | Outcome | What Plumb says | Evidence needed |
 | --- | --- | --- |
 | Shorter observed range | The later reps had a smaller measured range; one next-set action appears. | At least four measured reps, a sufficient view, and the exercise's versioned range rule. |
-| No supported pattern | Plumb has no specific range finding for this set. | A measurable set with no rule supported. |
+| Posture change | The later reps changed in one exercise-specific, camera-visible posture measure; one next-set action appears. | At least four measured reps, clear supporting joints, a side-on view, and comparable rep range. |
+| No supported pattern | Plumb has no specific posture or range finding for this set. | A measurable set with no rule supported. |
 | Retake | The view or movement cannot support a measured result. | Missing/weak joints, wrong view, interruption, or incomplete movement. |
 | Analysis failed | Plumb could not complete the set analysis and offers a retry. | A capture or processing error; do not present this as a movement finding. |
 

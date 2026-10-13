@@ -12,6 +12,9 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     case unfinishedLastRep
     /// The last two reps had a clearly shorter range than the first two (the end-of-set observation).
     case rangeDropped
+    /// The last two reps showed a posture change against the first two: torso tilt, hip alignment or
+    /// knee bend, depending on the exercise (`PostureRule`).
+    case postureChanged
     /// A rep was clearly faster than the first reps of the set (said live).
     case spedUp
     /// The camera saw the person at an angle instead of from the side.
@@ -26,7 +29,11 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
             if diagnostics.unfinished { issues.append(.unfinishedLastRep) }
             if diagnostics.angledView != nil { issues.append(.angledView) }
         }
-        if cue?.kind == .rangeDecreased { issues.append(.rangeDropped) }
+        switch cue?.kind {
+        case .rangeDecreased?: issues.append(.rangeDropped)
+        case .torsoTiltIncreased?, .hipDropIncreased?, .kneeBendIncreased?: issues.append(.postureChanged)
+        case nil: break
+        }
         if spedUp { issues.append(.spedUp) }
         return issues
     }
@@ -39,6 +46,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
         case .unfinishedLastRep: "Last movement not finished"
         case .rangeDropped: "\(definition.copy.rangeNoun.prefix(1).uppercased() + definition.copy.rangeNoun.dropFirst()) "
             + "\(definition.copy.lessRange) at the end of the set"
+        case .postureChanged: definition.posture.title
         case .spedUp: "Reps faster than your first ones"
         case .angledView: "Filmed at an angle"
         }
@@ -54,6 +62,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
                    definition.phases.minimumDuration, definition.phases.maximumDuration)
         case .unfinishedLastRep: "Come back to your starting position before the set ends."
         case .rangeDropped: definition.copy.nextAction
+        case .postureChanged: definition.posture.nextAction
         case .spedUp: "Keep the pace of your first reps."
         case .angledView: "Turn so your side faces the camera."
         }

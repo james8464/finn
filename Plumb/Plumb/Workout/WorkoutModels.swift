@@ -82,21 +82,27 @@ nonisolated struct RepMetric: Codable, Equatable {
     /// Range of this rep in its exercise's own unit: the squat stores hip travel divided by
     /// standing leg length; angle-based exercises store degrees of bend from the starting position.
     let relativeRange: Double
+    /// Optional side-view posture reading at the deepest phase. Its meaning is exercise-specific;
+    /// older saved sessions have no reading and must not produce posture advice.
+    let postureValue: Double?
 
     var duration: TimeInterval { endTime - startTime }
     /// The squat's original name for `relativeRange`, kept for existing callers and saved history.
     var normalizedHipTravel: Double { relativeRange }
 
-    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, relativeRange: Double) {
+    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, relativeRange: Double,
+         postureValue: Double? = nil) {
         self.number = number
         self.startTime = startTime
         self.endTime = endTime
         self.relativeRange = relativeRange
+        self.postureValue = postureValue
     }
 
-    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, normalizedHipTravel: Double) {
+    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, normalizedHipTravel: Double,
+         postureValue: Double? = nil) {
         self.init(number: number, startTime: startTime, endTime: endTime,
-                  relativeRange: normalizedHipTravel)
+                  relativeRange: normalizedHipTravel, postureValue: postureValue)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -104,6 +110,7 @@ nonisolated struct RepMetric: Codable, Equatable {
         case startTime
         case endTime
         case relativeRange = "normalizedHipTravel"
+        case postureValue
     }
 }
 
@@ -206,8 +213,11 @@ nonisolated enum FramingStatus: Equatable {
     case turnToExpectedView
 }
 
-nonisolated enum CueKind: String, Codable {
+nonisolated enum CueKind: String, Codable, Sendable {
     case rangeDecreased
+    case torsoTiltIncreased
+    case hipDropIncreased
+    case kneeBendIncreased
 }
 
 nonisolated struct Cue: Codable, Equatable {

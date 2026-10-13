@@ -16,7 +16,7 @@ def row(set_id, participant_id, **changes):
         "device_model": "iPhone 18 Pro",
         "ios_build": "27.0",
         "app_commit": "abc123",
-        "rubric_version": "squat-side-v4",
+        "rubric_version": "squat-side-v7",
         "side": "left",
         "view_category": "side",
         "lighting": "bright_even",

@@ -99,7 +99,7 @@ nonisolated struct WatchSyncRulesTests {
     private func analysis(reps: Int) -> SetAnalysis {
         SetAnalysis(reps: (1...reps).map {
             RepMetric(number: $0, startTime: Double($0 - 1) * 2, endTime: Double($0) * 2, relativeRange: 0.2)
-        }, confidence: 0.9, rubricVersion: "squat-side-v6")
+        }, confidence: 0.9, rubricVersion: "squat-side-v7")
     }
 }
 
