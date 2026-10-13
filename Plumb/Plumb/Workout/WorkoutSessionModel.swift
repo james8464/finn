@@ -219,6 +219,13 @@ final class WorkoutSessionModel {
     /// and when Plumb last said why.
     @ObservationIgnored private var notReadySince: TimeInterval?
     @ObservationIgnored private var lastFramingSpeech = -Double.infinity
+    /// While framing: the frame time framing began, and since when nobody has been in view.
+    @ObservationIgnored private var framingSince: TimeInterval?
+    @ObservationIgnored private var nobodySeenSince: TimeInterval?
+    /// Plumb closing the camera because framing went on with no set.
+    @ObservationIgnored private var framingCloseTask: Task<Void, Never>?
+    /// Why Plumb closed the camera by itself while framing, for the first screen; nil otherwise.
+    private(set) var framingClosedNote: String?
     /// The person's most frequent pattern in recent sets of the chosen exercise, shown before a set.
     var focus: MistakeProfile? { MistakeProfile.make(history: history, exercise: selectedExercise) }
     /// The same, for the exercise being captured.
@@ -307,6 +314,7 @@ final class WorkoutSessionModel {
         guard stage == .openingCamera else { return }
         captureExercise = selectedExercise
         recognition = .notAttempted
+        framingClosedNote = nil
         // The setup screen's Fitness line was about the session that ended; a save still running keeps it.
         if fitnessSave?.status != .saving { fitnessSave = nil }
         result = nil
@@ -364,6 +372,7 @@ final class WorkoutSessionModel {
                         self.lastPreviewFrameAt = .now
                         self.updateFramingStatus(with: frame)
                         self.updateHandsFreeStart(with: frame)
+                        self.closeFramingIfIdle(with: frame)
                     }
                     if (self.stage == .capturing || (self.stage == .analyzing && self.isStopping)) &&
                         self.frames.count < 1_800 {
@@ -640,6 +649,50 @@ final class WorkoutSessionModel {
 
     static let notReadyDelay: TimeInterval = 3
     static let framingSpeechInterval: TimeInterval = 8
+    /// Hands-free, nobody in view this long is said aloud.
+    static let nobodySeenDelay: TimeInterval = 5
+    /// Framing closes by itself after this long with nobody in view...
+    static let nobodySeenLimit: TimeInterval = 60
+    /// ...or this long without a set starting.
+    static let framingLimit: TimeInterval = 180
+
+    /// The camera screen keeps the screen awake (`ContentView.keepsScreenOn`) and runs the camera
+    /// and Vision; left in framing, it ran until the battery or the heat stopped it. Framing now
+    /// closes after `framingLimit` without a set, or `nobodySeenLimit` with nobody in view. Hands-free,
+    /// the person a few steps away also hears when Plumb sees nobody.
+    private func closeFramingIfIdle(with frame: PoseFrame) {
+        guard stage == .framing, handsFreeTask == nil, framingCloseTask == nil else { return }
+        let since = framingSince ?? frame.time
+        framingSince = since
+        if frame.athleteVisible && !frame.joints.isEmpty {
+            nobodySeenSince = nil
+        } else if nobodySeenSince == nil {
+            nobodySeenSince = frame.time
+        }
+        let nobodyFor = nobodySeenSince.map { frame.time - $0 } ?? 0
+        let note: String?
+        if frame.time - since >= Self.framingLimit {
+            note = "Plumb closed the camera after 3 minutes without a set."
+        } else if nobodyFor >= Self.nobodySeenLimit {
+            note = "Plumb closed the camera after a minute without seeing anyone."
+        } else {
+            note = nil
+        }
+        if let note {
+            framingCloseTask = Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.say("Camera closed")
+                self.framingClosedNote = note
+                await self.cancel()
+                self.framingCloseTask = nil
+            }
+            return
+        }
+        guard handsFree, nobodyFor >= Self.nobodySeenDelay,
+              frame.time - lastFramingSpeech >= Self.framingSpeechInterval else { return }
+        lastFramingSpeech = frame.time
+        say("Plumb can’t see you. Step into view or add light")
+    }
 
     /// Counts reps while the set runs, says them and any live observation, and ends a hands-free
     /// set once the athlete walks away or stops moving after their reps.
@@ -697,6 +750,8 @@ final class WorkoutSessionModel {
         endedAtLimit = false
         notReadySince = nil
         lastFramingSpeech = -Double.infinity
+        framingSince = nil
+        nobodySeenSince = nil
         previewLandmarksVisible = false
     }
 

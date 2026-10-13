@@ -179,6 +179,14 @@ struct ContentView: View {
                     fitnessStatus(save)
                         .padding(.bottom, 20)
                 }
+                // Framing that went on with no set (or nobody in view) closed the camera by itself.
+                if let note = model.framingClosedNote {
+                    Text(note)
+                        .font(.subheadline)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                        .padding(.bottom, 20)
+                        .accessibilityIdentifier("setup.framingClosed")
+                }
                 // Cancel, or the app going to the background during a set, comes back here without Done.
                 if let open = model.unfinishedSession {
                     unfinishedSessionLine(open)

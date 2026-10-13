@@ -229,6 +229,55 @@ struct WorkoutSessionModelTests {
         #expect(analysis.reps.count == 6)
     }
 
+    /// Hands-free in a dim room, or standing just outside the picture: Vision finds nobody. Plumb
+    /// says so to the person a few steps away, and after a minute with nobody in view it closes the
+    /// camera, so the screen can lock and the camera and Vision stop.
+    @Test func framingWithNobodyInViewSaysSoAndClosesTheCamera() async throws {
+        let source = TestPoseSource()
+        let announcer = RecordingAnnouncer()
+        let preferences = PlumbPreferences(defaults: UserDefaults(suiteName: "PlumbNobody-\(UUID())")!,
+                                           handsFreeByDefault: true)
+        let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
+        await model.startPreview()
+        var time = 0.0
+        while time < 70 {
+            source.emit(PoseFrame(time: time, subjectCount: 0, joints: [:], athleteTracking: .hidden))
+            time += CaptureTraces.step
+        }
+        try await waitUntil { model.stage == .ready }
+        #expect(model.stage == .ready)
+        #expect(source.stopCount >= 1)
+        let help = announcer.phrases.filter { $0 == "Plumb can’t see you. Step into view or add light" }
+        #expect((5...8).contains(help.count), "\(announcer.phrases)")
+        #expect(model.framingClosedNote == "Plumb closed the camera after a minute without seeing anyone.")
+        await model.startPreview()
+        #expect(model.framingClosedNote == nil)
+        await model.cancel()
+    }
+
+    /// The phone left on the camera screen with a person in view but no set started (an ankle
+    /// behind furniture, or they gave up): framing closes by itself after three minutes.
+    @Test func framingWithoutASetClosesAfterThreeMinutes() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        var time = 0.0
+        while time < 175 {
+            source.emit(CaptureTraces.frame(time: time, hipY: 0.42, ankleX: 0.51, legs: true))
+            time += CaptureTraces.step
+        }
+        try await waitUntil { model.livePose.map { $0.time >= 174.9 } ?? false }
+        #expect(model.stage == .framing)
+        while time < 185 {
+            source.emit(CaptureTraces.frame(time: time, hipY: 0.42, ankleX: 0.51, legs: true))
+            time += CaptureTraces.step
+        }
+        try await waitUntil { model.stage == .ready }
+        #expect(model.stage == .ready)
+        #expect(source.stopCount >= 1)
+        #expect(model.framingClosedNote == "Plumb closed the camera after 3 minutes without a set.")
+    }
+
     @Test func stopTimingUsesTapInstantAndClearsForNextSet() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
