@@ -672,3 +672,69 @@ private final class RecordingAnnouncer: LiveAnnouncing {
     private(set) var phrases: [String] = []
     func announce(_ text: String) { phrases.append(text) }
 }
+
+/// 13 October: push-ups filmed while Squat was chosen were refused for the squat's joints, with no
+/// word about push-ups. The app now remembers the chosen exercise and says which one it saw.
+@MainActor
+struct ChosenExerciseTests {
+    @Test func theAppRemembersTheChosenExerciseAcrossLaunches() throws {
+        let defaults = try #require(UserDefaults(suiteName: "PlumbChosen-\(UUID())"))
+        let preferences = PlumbPreferences(defaults: defaults, remembersExercise: true)
+        let first = WorkoutSessionModel(source: TestPoseSource(), preferences: preferences)
+        #expect(first.selectedExercise == .bodyweightSquat)
+        first.selectedExercise = .pushUp
+        let relaunched = WorkoutSessionModel(source: TestPoseSource(), preferences: preferences)
+        #expect(relaunched.selectedExercise == .pushUp)
+
+        // Tests and demo input keep starting on the squat.
+        let plain = PlumbPreferences(defaults: defaults)
+        #expect(WorkoutSessionModel(source: TestPoseSource(), preferences: plain).selectedExercise == .bodyweightSquat)
+    }
+
+    @Test func pushUpsFilmedWithSquatChosenSaySoInsteadOfOnlyAskingForTheLegs() async throws {
+        let source = TestPoseSource()
+        let defaults = try #require(UserDefaults(suiteName: "PlumbChosen-\(UUID())"))
+        let model = WorkoutSessionModel(source: source, preferences: PlumbPreferences(defaults: defaults))
+        model.recognizesExercise = false
+        #expect(model.selectedExercise == .bodyweightSquat)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        var time = 0.0
+        for _ in 0..<5 {
+            var t = 0.0
+            while t < 2.0 {
+                let bend = 70 * (1 - cos(2 * .pi * t / 2.0)) / 2
+                source.emit(CaptureTraces.pushUpFrame(time: time, elbowBend: bend, wristX: 0.62, wristY: 0.86))
+                t += CaptureTraces.step
+                time += CaptureTraces.step
+            }
+        }
+        await model.endSet()
+        guard case .insufficientView = model.result else {
+            Issue.record("Expected the squat to be refused, got \(String(describing: model.result))")
+            return
+        }
+        let hint = try #require(model.retakeHint)
+        #expect(hint.contains("5 push-ups"))
+        #expect(hint.contains("choose Push-up"))
+    }
+
+    @Test func aSquatRefusedForHiddenFeetSuggestsNoOtherExercise() async throws {
+        let source = TestPoseSource()
+        let defaults = try #require(UserDefaults(suiteName: "PlumbChosen-\(UUID())"))
+        let model = WorkoutSessionModel(source: source, preferences: PlumbPreferences(defaults: defaults))
+        model.recognizesExercise = false
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for frame in CaptureTraces.squats(reps: 6, from: 0) {
+            source.emit(CaptureTraces.frame(time: frame.time, hipY: frame.joints[.leftHip]?.y ?? 0.42,
+                                            ankleX: 0.51, legs: true, ankle: false))
+        }
+        await model.endSet()
+        guard case .insufficientView = model.result else {
+            Issue.record("Expected a refusal without ankles, got \(String(describing: model.result))")
+            return
+        }
+        #expect(model.retakeHint?.contains("Plumb counted") != true)
+    }
+}
