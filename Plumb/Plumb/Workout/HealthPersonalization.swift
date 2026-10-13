@@ -225,6 +225,8 @@ nonisolated enum HealthCoach {
         case .pushUp: 0.64
         case .bodyweightSquat, .staticLunge: 0.85
         case .stiffLegDeadlift: nil
+        // The whole body hangs from the bar.
+        case .pullUp, .muscleUp: 1.0
         }
     }
 

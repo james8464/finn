@@ -12,14 +12,15 @@ nonisolated enum FitnessActivity: String, Equatable, Sendable {
 nonisolated extension ExerciseKind {
     /// The Health workout type for a set of this exercise.
     ///
-    /// The bodyweight squat, push-up and static lunge are body-weight strength exercises, and the
+    /// The bodyweight squat, push-up, static lunge, pull-up and bar muscle-up are body-weight strength
+    /// exercises, and the
     /// stiff-leg deadlift is done with body weight or free weights (Plumb cannot see a load), which
     /// is exactly Apple's functional strength training. `traditionalStrengthTraining` is "primarily
     /// using machines or free weights", which an unloaded set is not; `crossTraining` mixes cardio,
     /// strength and flexibility, and `mixedCardio` is cardio. Neither describes a strength set.
     var fitnessActivity: FitnessActivity {
         switch self {
-        case .bodyweightSquat, .pushUp, .staticLunge, .stiffLegDeadlift: .functionalStrengthTraining
+        case .bodyweightSquat, .pushUp, .staticLunge, .stiffLegDeadlift, .pullUp, .muscleUp: .functionalStrengthTraining
         }
     }
 }

@@ -58,9 +58,10 @@ nonisolated enum ExerciseAnalyzer {
 
     private struct Sample {
         let time: TimeInterval
-        /// Hip height for vertical travel, joint angle in degrees for a bend.
+        /// Joint height for vertical travel or rise, joint angle in degrees for a bend.
         let value: Double
-        /// Reference height for vertical travel, shortest limb segment for a bend.
+        /// Reference height for vertical travel, joint-to-reference distance for a rise, shortest
+        /// limb segment for a bend.
         let scale: Double
         let confidence: Double
         let posture: Double?
@@ -119,6 +120,18 @@ nonisolated enum ExerciseAnalyzer {
                 return (.insufficientView(definition.copy.bodyTooSmall), nil)
             }
             travel = { max(0, ($0 - baseline) / standingLength) }
+        case .verticalRise:
+            // The rest position is the hang: shoulders at their lowest, an arm's length below the
+            // hands. The hands hold the bar, so their height is one value for the set; the frames
+            // where Vision misses them (often, with the bar near the top of the picture) still count.
+            baseline = percentile(samples.map(\.value), 0.9)
+            let hands = samples.map(\.scale).filter { !$0.isNaN }
+            guard hands.count >= 3 else { return (.insufficientView(definition.copy.keepJointsVisible), nil) }
+            let armLength = baseline - median(hands)
+            guard armLength > definition.minimumBodyScale else {
+                return (.insufficientView(definition.copy.bodyTooSmall), nil)
+            }
+            travel = { max(0, (baseline - $0) / armLength) }
         case .jointBend:
             baseline = percentile(samples.map(\.value), 0.9)
             guard median(samples.map(\.scale)) > definition.minimumBodyScale else {
@@ -220,7 +233,7 @@ nonisolated enum ExerciseAnalyzer {
             .compactMap { frame in sample(from: frame, as: definition, side: side).map { (frame, $0.value) } }
         switch definition.signal {
         case .verticalTravel: return candidates.max { $0.1 < $1.1 }?.0
-        case .jointBend: return candidates.min { $0.1 < $1.1 }?.0
+        case .jointBend, .verticalRise: return candidates.min { $0.1 < $1.1 }?.0
         }
     }
 
@@ -252,6 +265,13 @@ nonisolated enum ExerciseAnalyzer {
                   let reference = confidentPoint(referenceRole, in: frame, side: side) else { return nil }
             return Sample(time: frame.time, value: joint.y, scale: reference.y,
                           confidence: min(joint.confidence, reference.confidence), posture: posture)
+        case .verticalRise(let jointRole, let referenceRole):
+            // The reference (the hands on the bar) is optional per frame: `scale` holds its height or NaN.
+            guard let joint = confidentPoint(jointRole, in: frame, side: side) else { return nil }
+            let reference = confidentPoint(referenceRole, in: frame, side: side)
+                ?? confidentPoint(referenceRole, in: frame, side: side == .left ? .right : .left)
+            return Sample(time: frame.time, value: joint.y, scale: reference?.y ?? .nan,
+                          confidence: joint.confidence, posture: posture)
         case .jointBend(let fromRole, let vertexRole, let toRole):
             guard let from = confidentPoint(fromRole, in: frame, side: side),
                   let vertex = confidentPoint(vertexRole, in: frame, side: side),
@@ -296,6 +316,12 @@ nonisolated enum ExerciseAnalyzer {
                   let angle = angle(from: hip, vertex: knee, to: ankle,
                                     aspectRatio: frame.aspectRatio) else { return nil }
             return 180 - angle
+        case .pullUp, .muscleUp:
+            // Swing at the top: how far the hips sit forward or back of the shoulders, in torso lengths.
+            guard let shoulder = point(.shoulder), let hip = point(.hip) else { return nil }
+            let torso = hypot(shoulder.x - hip.x, (shoulder.y - hip.y) * frame.aspectRatio)
+            guard torso >= 0.05 else { return nil }
+            return abs(hip.x - shoulder.x) / torso
         }
     }
 

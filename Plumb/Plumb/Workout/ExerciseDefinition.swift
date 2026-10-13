@@ -7,11 +7,15 @@ nonisolated enum MovementSignal: Equatable, Sendable {
     case verticalTravel(joint: JointRole, reference: JointRole)
     /// Degrees that the angle at `vertex`, between `from` and `to`, closes from its starting value.
     case jointBend(from: JointRole, vertex: JointRole, to: JointRole)
+    /// Upward travel of `joint` from its lowest position, divided by its largest distance below
+    /// `reference`. Pull-ups use shoulder rise over arm length, with the hands on the bar.
+    case verticalRise(joint: JointRole, reference: JointRole)
 
     var joints: [JointRole] {
         switch self {
         case .verticalTravel(let joint, let reference): [joint, reference]
         case .jointBend(let from, let vertex, let to): [from, vertex, to]
+        case .verticalRise(let joint, let reference): [joint, reference]
         }
     }
 }
@@ -19,11 +23,15 @@ nonisolated enum MovementSignal: Equatable, Sendable {
 /// The camera view a rubric was written for. Other views make its 2D measurements unreliable.
 nonisolated enum ExpectedView: String, Equatable, Sendable {
     case side
+    /// Pull-ups and muscle-ups: the shoulders' rise toward the hands reads the same from the
+    /// side, the front or the back, so the 3D check never asks to turn.
+    case any
 
     /// Framing prompt when Vision 3D pose sees the person from another angle.
     var turnPrompt: String {
         switch self {
         case .side: "Turn a little: side to the camera"
+        case .any: ""
         }
     }
 
@@ -31,6 +39,7 @@ nonisolated enum ExpectedView: String, Equatable, Sendable {
     var wrongViewMessage: String {
         switch self {
         case .side: "This exercise needs a side view. Turn so your side faces the camera, then try again."
+        case .any: ""
         }
     }
 }
@@ -118,6 +127,7 @@ nonisolated struct PostureRule: Equatable, Sendable {
         case .torsoTiltIncreased: "Torso tilting farther at the end of the set"
         case .hipDropIncreased: "Hips sagging at the end of the set"
         case .kneeBendIncreased: "Knees bending more at the end of the set"
+        case .swingIncreased: "Body swinging more at the end of the set"
         case .rangeDecreased: "Range shorter at the end of the set"
         }
     }
@@ -143,7 +153,7 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
     let posture: PostureRule
     let copy: ExerciseCopy
 
-    static let all: [ExerciseDefinition] = [.squat, .pushUp, .staticLunge, .stiffLegDeadlift]
+    static let all: [ExerciseDefinition] = [.squat, .pushUp, .staticLunge, .stiffLegDeadlift, .pullUp, .muscleUp]
 
     static func definition(for kind: ExerciseKind) -> ExerciseDefinition {
         switch kind {
@@ -151,6 +161,8 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
         case .pushUp: .pushUp
         case .staticLunge: .staticLunge
         case .stiffLegDeadlift: .stiffLegDeadlift
+        case .pullUp: .pullUp
+        case .muscleUp: .muscleUp
         }
     }
 
@@ -168,6 +180,8 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
     /// A depth in words, such as "hips 11% of leg length down" or "elbow bent 28°".
     func formattedDepth(_ value: Double) -> String {
         switch (rangeUnit, signal) {
+        case (.bodyLengthFraction, .verticalRise):
+            return "shoulders up \(Int((value * 100).rounded()))% of your arm length"
         case (.bodyLengthFraction, _):
             return "hips \(Int((value * 100).rounded()))% of your leg length down"
         case (.degrees, .jointBend(_, let vertex, _)):
@@ -370,6 +384,97 @@ nonisolated extension ExerciseDefinition {
             nextAction: "Keep your hip hinge similar from rep to rep.",
             rangeExplanation: "Hip hinge is how much the angle between your torso and thigh closed from the starting position, as seen by the camera. Use it only to compare your own sets from the same view.",
             rangeAccessibilityName: "camera-observed hip hinge"
+        )
+    )
+
+    /// Pull-up from any view, measured as how far the shoulders rise from the hang, as a share of
+    /// the arm's length, with the hands on the bar staying still. Grip (overhand, underhand,
+    /// neutral) cannot be seen in 2D pose, so Plumb does not name it.
+    static let pullUp = ExerciseDefinition(
+        kind: .pullUp,
+        rubricVersion: "pull-up-v1",
+        expectedView: .any,
+        evidence: EvidenceRequirement(joints: [.shoulder, .hip], anchor: .wrist),
+        signal: .verticalRise(joint: .shoulder, reference: .wrist),
+        phases: RepPhases(leaveTop: 0.15, reachBottom: 0.55, returnFromBottom: 0.08, backAtTop: 0.12,
+                          minimumDuration: 0.6, maximumDuration: 10.0),
+        rangeUnit: .bodyLengthFraction,
+        rangeDisplayScale: 1.0,
+        minimumBodyScale: 0.06,
+        classifierLabel: "pull_up",
+        posture: PostureRule(
+            cueKind: .swingIncreased, minimumIncrease: 0.15,
+            observation: "Your body swung more at the top of the last two reps.",
+            nextAction: "Try keeping your legs still under you on each pull."
+        ),
+        copy: ExerciseCopy(
+            name: "Pull-up",
+            shareNoun: "pull-up",
+            setupTitle: "Pull-up check",
+            placementTitle: "Place your iPhone",
+            placementDetail: "At chest height, a few steps from the bar, with your hands and feet in view.",
+            stanceTitle: "Start from a hang",
+            stanceDetail: "Straight arms, hands on the bar. Side, front or back to the phone all work.",
+            framingPrompt: "Show hands to feet.",
+            checkingVisibility: "Checking arm visibility",
+            showJoints: "Show shoulders, hips and hands",
+            jointsVisible: "Shoulders and hips visible",
+            keepJointsVisible: "Keep your shoulders, hips and hands in view for the whole set.",
+            bodyTooSmall: "Plumb couldn’t measure your arm length. Move the phone a little closer, with the bar in view.",
+            retakeHint: "Keep your hands, shoulders and hips in view, from the side, the front or the back.",
+            noCompleteReps: "No complete pull-ups were measured. Start from a hang with straight arms and pull until your chin passes your hands.",
+            rangeNoun: "pull height",
+            moreRange: "higher",
+            lessRange: "lower",
+            observation: "Your pulls got lower in the last two reps.",
+            nextAction: "Try a pace you can keep consistent.",
+            rangeExplanation: "Pull height is how far your shoulders rose from the hang, as a share of your arm length, as seen by the camera. Use it only to compare your own sets from the same view.",
+            rangeAccessibilityName: "camera-observed pull height"
+        )
+    )
+
+    /// Bar muscle-up from any view: the same rise as a pull-up, but at least 1.2 arm lengths from
+    /// the hang, which puts the shoulders above the hands. A pull-up, however high, stays below.
+    static let muscleUp = ExerciseDefinition(
+        kind: .muscleUp,
+        rubricVersion: "muscle-up-v1",
+        expectedView: .any,
+        evidence: EvidenceRequirement(joints: [.shoulder, .hip], anchor: .wrist),
+        signal: .verticalRise(joint: .shoulder, reference: .wrist),
+        phases: RepPhases(leaveTop: 0.15, reachBottom: 1.2, returnFromBottom: 0.1, backAtTop: 0.12,
+                          minimumDuration: 1.0, maximumDuration: 12.0),
+        rangeUnit: .bodyLengthFraction,
+        rangeDisplayScale: 2.0,
+        minimumBodyScale: 0.06,
+        classifierLabel: "muscle_up",
+        posture: PostureRule(
+            cueKind: .swingIncreased, minimumIncrease: 0.15,
+            observation: "Your body swung more at the top of the last two reps.",
+            nextAction: "Try keeping your legs still under you on each pull."
+        ),
+        copy: ExerciseCopy(
+            name: "Muscle-up",
+            shareNoun: "muscle-up",
+            setupTitle: "Muscle-up check",
+            placementTitle: "Place your iPhone",
+            placementDetail: "At chest height, a few steps from the bar, with the space above it in view.",
+            stanceTitle: "Start from a hang",
+            stanceDetail: "Straight arms, hands on the bar. Keep the space above the bar in view.",
+            framingPrompt: "Show the bar, the space above it and your feet.",
+            checkingVisibility: "Checking arm visibility",
+            showJoints: "Show shoulders, hips and hands",
+            jointsVisible: "Shoulders and hips visible",
+            keepJointsVisible: "Keep your shoulders, hips and hands in view for the whole set.",
+            bodyTooSmall: "Plumb couldn’t measure your arm length. Move the phone a little further back, with the bar and the space above it in view.",
+            retakeHint: "Keep your hands, shoulders and hips in view above and below the bar.",
+            noCompleteReps: "No complete muscle-ups were measured: your shoulders did not get above your hands. If you meant pull-ups, choose Pull-up.",
+            rangeNoun: "rise",
+            moreRange: "higher",
+            lessRange: "lower",
+            observation: "Your rise got lower in the last two reps.",
+            nextAction: "Try a pace you can keep consistent.",
+            rangeExplanation: "Rise is how far your shoulders went up from the hang, as a share of your arm length, as seen by the camera. Above 100% your shoulders are above your hands.",
+            rangeAccessibilityName: "camera-observed rise"
         )
     )
 }

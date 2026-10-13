@@ -889,6 +889,11 @@ struct ContentView: View {
                                     .font(.subheadline)
                                     .accessibilityIdentifier("result.movementNote")
                             }
+                            ForEach(model.formNotes, id: \.self) { note in
+                                Text(note)
+                                    .font(.subheadline)
+                                    .accessibilityIdentifier("result.formNote")
+                            }
                             ForEach(model.resultHealthNotes, id: \.text) { note in
                                 healthNote(note)
                                     .accessibilityIdentifier("result.healthNote")

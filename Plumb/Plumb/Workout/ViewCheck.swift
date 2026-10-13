@@ -79,6 +79,7 @@ nonisolated enum ViewCheck {
     private static func fits(_ deviation: Double, expected: ExpectedView) -> Bool {
         switch expected {
         case .side: deviation <= maximumSideDeviationDegrees
+        case .any: true
         }
     }
 

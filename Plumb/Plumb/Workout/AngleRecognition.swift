@@ -43,7 +43,21 @@ nonisolated enum AngleRecognizer {
             guard let features = PoseWindowFeatureExtractor.features(window) else { return nil }
             return try? classifier.classify(features)
         }
-        return ExerciseRecognizer.decide(predictions)
+        return ExerciseRecognizer.decide(mergingHangingWindows(predictions))
+    }
+
+    /// A muscle-up starts with a pull, so many of its windows look like a pull-up. Pull-up and
+    /// muscle-up windows vote together as one family; the set is a muscle-up when at least a
+    /// quarter of that family's windows saw the shoulders pass above the hands.
+    static func mergingHangingWindows(_ predictions: [ClassifierPrediction]) -> [ClassifierPrediction] {
+        let family = predictions.filter { $0.label == "pull_up" || $0.label == "muscle_up" }
+        guard !family.isEmpty else { return predictions }
+        let muscleUps = family.filter { $0.label == "muscle_up" }.count
+        let label = Double(muscleUps) >= 0.25 * Double(family.count) ? "muscle_up" : "pull_up"
+        return predictions.map { prediction in
+            prediction.label == "pull_up" || prediction.label == "muscle_up"
+                ? ClassifierPrediction(label: label, confidence: prediction.confidence) : prediction
+        }
     }
 }
 
