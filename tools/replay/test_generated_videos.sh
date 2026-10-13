@@ -22,8 +22,15 @@ result = json.load(sys.stdin)
 assert result["status"] == expected_status, (label, result)
 assert result["measuredReps"] == int(expected_reps), (label, result)
 assert result["frameCount"] > 0, (label, result)
-print("{}: {}, {} reps, {} frames".format(
-    label, result["status"], result["measuredReps"], result["frameCount"]))
+# The hands-free live count never says more reps than the result, and is at most one behind it
+# (the last rep can end after the final live analysis).
+live = result["liveReps"]
+assert live <= result["measuredReps"], ("live count above the result", label, result)
+assert live >= result["measuredReps"] - 1, ("live count behind the result", label, result)
+print("{}: {}, {} reps, {} frames; live {} reps, cues {}, hands-free start {}".format(
+    label, result["status"], result["measuredReps"], result["frameCount"], live,
+    result["liveCues"] or "none",
+    "at {:.1f} s".format(result["handsFreeReadyAt"]) if result.get("handsFreeReadyAt") is not None else "never"))
 ' "$label" "$expected_status" "$reps" || failures+=("$label")
 }
 
@@ -55,7 +62,9 @@ python3 - "$scratch/mirrored-result.json" <<'PY'
 import json, sys
 result = json.load(open(sys.argv[1]))
 assert result["status"] in {"measured", "retake"}, result
-print("mirrored diagnostic: {}, {} reps".format(result["status"], result["measuredReps"]))
+assert result["liveReps"] <= result["measuredReps"], ("live count above the result", result)
+print("mirrored diagnostic: {}, {} reps; live {} reps".format(
+    result["status"], result["measuredReps"], result["liveReps"]))
 PY
 
 # The live five-frame preview must not claim all squat landmarks are visible while the feet
