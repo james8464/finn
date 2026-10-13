@@ -9,6 +9,8 @@ nonisolated struct PlumbPreferences: @unchecked Sendable {
     static let speaksLiveKey = "plumb.speaksLive"
     static let savesToFitnessKey = "plumb.savesToFitness"
     static let selectedExerciseKey = "plumb.selectedExercise"
+    static let personalizesWithHealthKey = "plumb.personalizesWithHealth"
+    static let personalizationOfferedKey = "plumb.personalizationOffered"
 
     let defaults: UserDefaults
     /// Hands-free capture until the person changes it. On in the app, where the phone stands a
@@ -78,5 +80,18 @@ nonisolated struct PlumbPreferences: @unchecked Sendable {
     var savesToFitness: Bool {
         get { defaults.bool(forKey: Self.savesToFitnessKey) }
         nonmutating set { defaults.set(newValue, forKey: Self.savesToFitnessKey) }
+    }
+
+    /// Off by default: Plumb reads heart rate, recovery, sleep, recent activity and body measurements
+    /// from Health to adapt its advice, only once the person turns this on and allows it in Health.
+    var personalizesWithHealth: Bool {
+        get { defaults.bool(forKey: Self.personalizesWithHealthKey) }
+        nonmutating set { defaults.set(newValue, forKey: Self.personalizesWithHealthKey) }
+    }
+
+    /// Whether the one-time "Make Plumb more personal?" offer was shown, whatever the answer.
+    var personalizationOffered: Bool {
+        get { defaults.bool(forKey: Self.personalizationOfferedKey) }
+        nonmutating set { defaults.set(newValue, forKey: Self.personalizationOfferedKey) }
     }
 }

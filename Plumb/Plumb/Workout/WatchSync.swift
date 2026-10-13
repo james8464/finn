@@ -40,14 +40,16 @@ nonisolated enum WatchSyncRules {
 
     static func state(stage: WorkoutStage, exercise: ExerciseKind, liveReps: Int, caption: String?,
                       result: WorkoutResult?, cueDismissed: Bool, handsFree: Bool,
-                      demoInput: Bool) -> WatchState {
+                      demoInput: Bool, measuresHeartRate: Bool = false) -> WatchState {
         let watchStage = Self.stage(for: stage)
         var state = WatchState(
             stage: watchStage,
             exercise: exercise.definition.copy.name,
             wristControls: AccessoryRoles.role(of: .appleWatch, for: exercise).offers(.startStopFromWrist),
             handsFree: handsFree,
-            demoInput: demoInput)
+            demoInput: demoInput,
+            // Demo input films nobody, so there is no heart rate to pair with it.
+            measuresHeartRate: measuresHeartRate && !demoInput)
         switch watchStage {
         case .countdown:
             if case .countdown(let seconds) = stage { state.countdown = seconds }
@@ -127,6 +129,10 @@ final class WatchSync {
         return state
     }
 
+    func handle(_ heartRate: WatchHeartRate) {
+        model?.receiveHeartRate(heartRate.beatsPerMinute, at: Date(timeIntervalSince1970: heartRate.measuredAt))
+    }
+
     func handle(_ command: WatchCommand) {
         guard let model else { return }
         switch WatchSyncRules.action(for: command, stage: model.stage, exercise: model.captureExercise) {
@@ -172,6 +178,6 @@ final class WatchSync {
         return WatchSyncRules.state(stage: model.stage, exercise: exercise, liveReps: model.liveRepCount,
                                     caption: model.liveCaption, result: model.result,
                                     cueDismissed: model.cueDismissed, handsFree: model.handsFree,
-                                    demoInput: demoInput)
+                                    demoInput: demoInput, measuresHeartRate: model.personalizesWithHealth)
     }
 }

@@ -110,6 +110,10 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        if let heartRate = WatchHeartRate(message: message) {
+            Task { @MainActor [weak self] in self?.sync?.handle(heartRate) }
+            return
+        }
         guard let command = WatchCommand(message: message) else { return }
         Task { @MainActor [weak self] in self?.sync?.handle(command) }
     }
