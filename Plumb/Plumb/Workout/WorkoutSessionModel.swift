@@ -102,6 +102,9 @@ final class WorkoutSessionModel {
     @ObservationIgnored private let fitness: (any FitnessWorkoutSaving)?
     /// Sessions being saved to Apple Health right now: a session is never saved twice at once.
     @ObservationIgnored private var fitnessSavesInFlight: Set<UUID> = []
+    /// Sessions deleted while their save to Apple Health was running: if it fails, there is
+    /// nothing left to retry, so it reports nothing.
+    @ObservationIgnored private var fitnessSavesOfDeletedSessions: Set<UUID> = []
     /// Sessions saved to Apple Health in this run, kept even if writing history fails.
     @ObservationIgnored private var fitnessRecords: [UUID: FitnessWorkoutRecord] = [:]
     /// The date of a measured set, for the session it joins. Tests replace it.
@@ -792,7 +795,10 @@ final class WorkoutSessionModel {
               !fitnessSavesInFlight.contains(id) else { return }
         // Claimed before any suspension, so a second Done or retry cannot start another save.
         fitnessSavesInFlight.insert(id)
-        defer { fitnessSavesInFlight.remove(id) }
+        defer {
+            fitnessSavesInFlight.remove(id)
+            fitnessSavesOfDeletedSessions.remove(id)
+        }
         fitnessSave = FitnessSaveReport(sessionID: id, status: .saving)
         var access = fitness.authorization
         if access == .notDetermined { access = await fitness.requestAuthorization() }
@@ -801,10 +807,10 @@ final class WorkoutSessionModel {
         case .authorized:
             break
         case .unavailable:
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .unavailable)
+            reportFitnessSave(.unavailable, for: id)
             return
         case .notDetermined, .denied:
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .needsPermission)
+            reportFitnessSave(.needsPermission, for: id)
             return
         }
         do {
@@ -815,12 +821,31 @@ final class WorkoutSessionModel {
             fitnessSave = FitnessSaveReport(sessionID: id, status: .saved)
         } catch FitnessSaveError.notAuthorized {
             fitnessAccess = .denied
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .needsPermission)
+            reportFitnessSave(.needsPermission, for: id)
         } catch FitnessSaveError.unavailable {
             fitnessAccess = .unavailable
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .unavailable)
+            reportFitnessSave(.unavailable, for: id)
         } catch {
-            fitnessSave = FitnessSaveReport(sessionID: id, status: .failed)
+            reportFitnessSave(.failed, for: id)
+        }
+    }
+
+    /// Shows how a save ended, unless it did not go through for a session deleted meanwhile.
+    private func reportFitnessSave(_ status: FitnessSaveStatus, for id: UUID) {
+        guard fitnessSavesOfDeletedSessions.contains(id) else {
+            fitnessSave = FitnessSaveReport(sessionID: id, status: status)
+            return
+        }
+        if fitnessSave?.sessionID == id { fitnessSave = nil }
+    }
+
+    /// A deleted session's Fitness line goes with it: a failed or refused save has nothing left to
+    /// retry, and Try again did nothing. A save still running finishes in Health (the delete dialog
+    /// says so), and reports nothing if it fails.
+    private func forgetFitnessSaves(where isDeleted: (UUID) -> Bool) {
+        fitnessSavesOfDeletedSessions.formUnion(fitnessSavesInFlight.filter(isDeleted))
+        if let save = fitnessSave, isDeleted(save.sessionID), save.status != .saving, save.status != .saved {
+            fitnessSave = nil
         }
     }
 
@@ -836,6 +861,7 @@ final class WorkoutSessionModel {
     func deleteHistory(id: UUID) {
         guard store != nil else { return }
         pendingSessions.removeValue(forKey: id)
+        forgetFitnessSaves { $0 == id }
         if !pendingDeleteAll { pendingDeleteIDs.insert(id) }
         if currentSession?.id == id {
             currentSession = nil
@@ -850,6 +876,7 @@ final class WorkoutSessionModel {
         pendingDeleteAll = true
         pendingDeleteIDs = []
         pendingSessions = [:]
+        forgetFitnessSaves { _ in true }
         currentSession = nil
         comparison = nil
         comparisonRecap = nil

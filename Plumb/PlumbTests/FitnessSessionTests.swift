@@ -370,6 +370,39 @@ struct FitnessSessionTests {
         #expect(relaunched.unfinishedSession == nil)
     }
 
+    /// Done failed to save to Health, then the person deletes that session, or all data. The first
+    /// screen no longer offers "Couldn't save to Fitness · Try again" for a session that is gone,
+    /// where Try again did nothing.
+    @Test func deletingASessionClearsItsFailedSave() async throws {
+        for deletesAll in [false, true] {
+            let setup = try Setup(savesToFitness: true)
+            setup.fitness.failures = [CocoaError(.fileWriteUnknown)]
+            try await setup.measureASet()
+            let id = try #require(setup.model.currentSession?.id)
+            await setup.model.finishSession()
+            #expect(setup.model.fitnessSave == FitnessSaveReport(sessionID: id, status: .failed))
+            if deletesAll { setup.model.deleteAllData() } else { setup.model.deleteHistory(id: id) }
+            #expect(setup.model.fitnessSave == nil, "delete all: \(deletesAll)")
+        }
+    }
+
+    /// A save still running when its session is deleted, which then fails: there was never a
+    /// workout in Health, and nothing is left to retry.
+    @Test func aSaveFailingAfterItsSessionWasDeletedLeavesNoRetry() async throws {
+        let setup = try Setup(savesToFitness: true)
+        try await setup.measureASet()
+        let id = try #require(setup.model.currentSession?.id)
+        setup.fitness.holdsSaves = true
+        setup.fitness.failures = [CocoaError(.fileWriteUnknown)]
+        let done = Task { await setup.model.finishSession() }
+        try await waitUntil { setup.fitness.saveAttempts == 1 }
+        setup.model.deleteHistory(id: id)
+        #expect(setup.model.fitnessSave == FitnessSaveReport(sessionID: id, status: .saving))
+        setup.fitness.releaseSaves()
+        await done.value
+        #expect(setup.model.fitnessSave == nil)
+    }
+
     @Test func aSessionContinuesUpToTheLongestBreak() {
         let start = Date(timeIntervalSince1970: 1_800_000_000)
         let empty = WorkoutSessionSummary(id: UUID(), startedAt: start, sets: [])
