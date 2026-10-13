@@ -37,29 +37,52 @@ nonisolated enum SetWindow {
     /// Indices of the set within the capture; nil when nothing needs trimming or no set was found.
     static func activeRange(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> ClosedRange<Int>? {
         guard frames.count >= 2, let inPosition = positions(frames, requirement: requirement) else { return nil }
-        let present = presence(frames, requirement: requirement, inPosition: inPosition)
         guard var start = frames.indices.first(where: { index in
             inPosition[index] && settled(frames, inPosition, from: index, forward: true)
         }), var end = frames.indices.last(where: { index in
             inPosition[index] && settled(frames, inPosition, from: index, forward: false)
         }), start < end,
               frames[end].time - frames[start].time >= EvidenceRubric.minimumSetDuration else { return nil }
-        // Reps at the spot with a joint unclear stay in the set, so the gate judges them.
-        while start > 0 && present[start - 1] { start -= 1 }
-        while end < frames.count - 1 && present[end + 1] { end += 1 }
+        // Reps at the spot with a joint unclear, or with Vision missing the athlete for a moment,
+        // stay in the set, so the gate judges them. A dropout of a few frames right after the last
+        // rep used to end the set at that rep's top and drop it.
+        let spots = spots(frames, requirement: requirement, inPosition: inPosition)
+        start = extended(from: start, by: -1, spots: spots, frames: frames)
+        end = extended(from: end, by: 1, spots: spots, frames: frames)
         guard start > 0 || end < frames.count - 1 else { return nil }
         return start...end
     }
 
-    /// For each frame, whether the athlete is at their spot: in position, or seen with the body's
-    /// reference joint near its place during the set and the torso the same size, even when an
-    /// exercise joint is unclear (an ankle behind a bench). Walking in or back to the phone moves
-    /// the reference joint across the frame or makes the torso grow, so those frames are not.
-    static func presence(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> [Bool]? {
-        spots(frames, requirement: requirement)?.map(\.isAtSpot)
+    /// Moves `index` outward while the athlete is at the spot, across stretches where they are unseen
+    /// for at most `EvidenceRubric.maximumTrackingGap` when they are at the spot again after them.
+    /// Stops at the first frame where they are seen away from it.
+    private static func extended(from index: Int, by step: Int, spots: [Spot], frames: [PoseFrame]) -> Int {
+        var edge = index
+        var cursor = index + step
+        while frames.indices.contains(cursor) {
+            switch spots[cursor] {
+            case .inPosition, .atSpot:
+                edge = cursor
+                cursor += step
+            case .away:
+                return edge
+            case .unseen:
+                var probe = cursor
+                while frames.indices.contains(probe), spots[probe] == .unseen,
+                      abs(frames[probe].time - frames[edge].time) <= EvidenceRubric.maximumTrackingGap {
+                    probe += step
+                }
+                guard frames.indices.contains(probe), spots[probe].isAtSpot else { return edge }
+                edge = probe
+                cursor = probe + step
+            }
+        }
+        return edge
     }
 
-    /// Where the athlete is in each frame, relative to their spot during the set.
+    /// Where the athlete is in each frame, relative to their spot during the set: in position, or at
+    /// the spot with an exercise joint unclear (an ankle behind a bench), or seen away from it
+    /// (walking in or back to the phone moves the hip across the frame or makes the torso grow).
     enum Spot: Equatable {
         /// In position (see `positions`).
         case inPosition
@@ -76,11 +99,6 @@ nonisolated enum SetWindow {
     static func spots(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> [Spot]? {
         guard let inPosition = positions(frames, requirement: requirement) else { return nil }
         return spots(frames, requirement: requirement, inPosition: inPosition)
-    }
-
-    private static func presence(_ frames: [PoseFrame], requirement: EvidenceRequirement,
-                                 inPosition: [Bool]) -> [Bool] {
-        spots(frames, requirement: requirement, inPosition: inPosition).map(\.isAtSpot)
     }
 
     private static func spots(_ frames: [PoseFrame], requirement: EvidenceRequirement,
