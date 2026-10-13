@@ -131,8 +131,12 @@ nonisolated struct ExerciseAnalyzerTests {
         for definition in ExerciseDefinition.all {
             #expect(ExerciseDefinition.definition(for: definition.kind) == definition)
             #expect(ExerciseDefinition.definition(forClassifierLabel: definition.classifierLabel) == definition)
-            #expect(definition.expectedView == .side)
-            for joint in definition.signal.joints + [definition.evidence.anchor] {
+            // Hanging exercises read the same from any view, and their hands (the reference and
+            // the still joint) only need to be seen now and then; every other joint is required.
+            let hanging = [ExerciseKind.pullUp, .muscleUp].contains(definition.kind)
+            #expect(definition.expectedView == (hanging ? .any : .side))
+            let required = hanging ? [JointRole.shoulder] : definition.signal.joints + [definition.evidence.anchor]
+            for joint in required {
                 #expect(definition.evidence.joints.contains(joint),
                         "\(definition.kind) must require \(joint) to measure it")
             }

@@ -26,10 +26,20 @@ nonisolated struct PoseWindowFeatures: Equatable, Sendable {
     var stance: Double
     /// Wrist height relative to the hip, in hip-to-ankle lengths (positive is below the hip).
     var wristDrop: Double
+    /// Wrist height above the shoulder, in hip-to-ankle lengths (75th percentile, so the hang
+    /// counts even when the shoulders later pass the hands; positive when hanging from a bar).
+    var handLift: Double = 0
+    /// Wrist height spread over hip-to-ankle length: near zero when the hands hold a bar.
+    var wristTravel: Double = 0
+    /// Share of frames with the shoulders above the hands (the top of a muscle-up).
+    var shouldersOverHands: Double = 0
 
+    /// Angle models trained before the pull-up rules use the first thirteen; the last three were
+    /// added for hanging exercises.
     static let featureNames = [
         "coverage", "elbowRange", "kneeRange", "hipRange", "shoulderRange", "elbowMedian", "kneeMedian",
         "hipMedian", "trunkTiltMedian", "trunkTiltRange", "hipTravel", "stance", "wristDrop",
+        "handLift", "wristTravel", "shouldersOverHands",
     ]
 
     var values: [String: Double] {
@@ -37,7 +47,8 @@ nonisolated struct PoseWindowFeatures: Equatable, Sendable {
          "hipRange": hipRange, "shoulderRange": shoulderRange, "elbowMedian": elbowMedian, "kneeMedian": kneeMedian,
          "hipMedian": hipMedian, "trunkTiltMedian": trunkTiltMedian,
          "trunkTiltRange": trunkTiltRange, "hipTravel": hipTravel, "stance": stance,
-         "wristDrop": wristDrop]
+         "wristDrop": wristDrop, "handLift": handLift, "wristTravel": wristTravel,
+         "shouldersOverHands": shouldersOverHands]
     }
 }
 
@@ -68,6 +79,7 @@ nonisolated enum PoseWindowFeatureExtractor {
         var elbows: [Double] = [], knees: [Double] = [], hips: [Double] = [], shoulders: [Double] = []
         var tilts: [Double] = [], hipHeights: [Double] = [], legLengths: [Double] = []
         var stances: [Double] = [], wristDrops: [Double] = []
+        var handLifts: [Double] = [], wristHeights: [Double] = [], over = 0, handFrames = 0
         var measured = 0
         for frame in window {
             let aspect = frame.aspectRatio
@@ -89,6 +101,16 @@ nonisolated enum PoseWindowFeatureExtractor {
                 if let shoulderAngle = self.angle(hip, shoulder, elbow) { shoulders.append(shoulderAngle) }
                 let leg = hypot(ankle.x - hip.x, ankle.y - hip.y)
                 if leg > 0 { wristDrops.append((wrist.y - hip.y) / leg) }
+            }
+            if let wrist = point(.wrist) {
+                let leg = hypot(ankle.x - hip.x, ankle.y - hip.y)
+                if leg > 0 {
+                    handLifts.append((shoulder.y - wrist.y) / leg)
+                    wristHeights.append(wrist.y)
+                }
+                handFrames += 1
+                // Clearly above, not level with the hands: a high pull-up reaches the bar too.
+                if leg > 0 && (wrist.y - shoulder.y) / leg > 0.1 { over += 1 }
             }
             if let angle = angle(hip, knee, ankle) { knees.append(angle) }
             if let angle = angle(shoulder, hip, knee) { hips.append(angle) }
@@ -112,7 +134,10 @@ nonisolated enum PoseWindowFeatureExtractor {
             trunkTiltMedian: median(tilts), trunkTiltRange: spread(tilts),
             hipTravel: leg > 0 ? spread(hipHeights) / leg : 0,
             stance: stances.count * 2 >= measured ? median(stances) : -1,
-            wristDrop: wristDrops.isEmpty ? 0 : median(wristDrops)
+            wristDrop: wristDrops.isEmpty ? 0 : median(wristDrops),
+            handLift: handLifts.isEmpty ? 0 : percentile(handLifts, 0.75),
+            wristTravel: leg > 0 ? spread(wristHeights) / leg : 0,
+            shouldersOverHands: handFrames > 0 ? Double(over) / Double(handFrames) : 0
         )
     }
 
@@ -136,6 +161,12 @@ nonisolated enum PoseWindowFeatureExtractor {
         return acos(min(1, max(-1, cosine))) * 180 / .pi
     }
 
+    private static func percentile(_ values: [Double], _ fraction: Double) -> Double {
+        guard !values.isEmpty else { return 0 }
+        let sorted = values.sorted()
+        return sorted[Int(Double(sorted.count - 1) * fraction)]
+    }
+
     private static func median(_ values: [Double]) -> Double {
         guard !values.isEmpty else { return 0 }
         let sorted = values.sorted()
@@ -157,6 +188,13 @@ nonisolated enum AngleRules {
     static func label(for f: PoseWindowFeatures) -> String? {
         let moving = max(f.elbowRange, f.kneeRange, f.hipRange, f.shoulderRange)
         if moving < 15 && f.hipTravel < 0.08 { return "none" }
+        // Pull-up or muscle-up: hanging with the hands above the shoulders, the body rises while
+        // the hands stay put (a press moves the hands and keeps the body still). The shoulders
+        // passing above the hands makes it a muscle-up.
+        if f.handLift >= 0.25 && f.hipTravel >= 0.15 && f.wristTravel < 0.5 * f.hipTravel
+            && f.trunkTiltMedian < 40 {
+            return f.shouldersOverHands >= 0.08 ? "muscle_up" : "pull_up"
+        }
         // Push-up: body nearly horizontal and straight at the hip, elbows bend, knees stay straight.
         if f.trunkTiltMedian >= 55 && f.hipMedian >= 145 && f.elbowRange >= 20 && f.kneeRange < 30 {
             return "push_up"

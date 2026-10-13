@@ -4,7 +4,7 @@
 >
 > - **This file is the source of truth. Keep it true.**
 > - **Idea:** a fitness coach on iPhone + Apple Watch that aims to check every rep and give appropriate, actionable advice on posture and execution. Track your progress and your workouts.
-> - **Today we have:** iPhone only, four side-view exercises with rep counting and limited, evidence-linked posture or range advice after a set; hands-free sets with the live rep count on screen and in your ears (AirPods or speaker); your most frequent pattern before each set; optional saving of each finished session to Apple Health as a workout, so it shows in the Fitness app (written and unit-tested, not yet built in Xcode or tried on an iPhone). Optional Personalize with Health (13 October): with the person's permission, Plumb reads heart rate, recovery, sleep, recent activity, age, weight and height on the iPhone to suggest lighter days, adapt rest and show the set's heart rate from Apple Watch; each tip names its data.
+> - **Today we have:** iPhone only, six exercises (four filmed from the side, pull-ups and muscle-ups from any view) with rep counting and limited, evidence-linked posture or range advice after a set; hands-free sets with the live rep count on screen and in your ears (AirPods or speaker); your most frequent pattern before each set; optional saving of each finished session to Apple Health as a workout, so it shows in the Fitness app (written and unit-tested, not yet built in Xcode or tried on an iPhone). Optional Personalize with Health (13 October): with the person's permission, Plumb reads heart rate, recovery, sleep, recent activity, age, weight and height on the iPhone to suggest lighter days, adapt rest and show the set's heart rate from Apple Watch; each tip names its data.
 > - **In the build, not yet tried on a watch:** an Apple Watch companion that mirrors the iPhone's count and taps the wrist on each rep (target `PlumbWatch`, embedded in the iPhone app since 13 October).
 > - **Not built yet:** Apple Watch wrist-motion measurement, Apple TV, AirPods head tracking, widgets, Live Activities.
 
@@ -47,7 +47,7 @@ _Updated 13 October 2026._
 
 **What the app does**
 
-- Four exercises, filmed from the side: bodyweight squat, push-up, static lunge, stiff-leg deadlift.
+- Four exercises filmed from the side: bodyweight squat, push-up, static lunge, stiff-leg deadlift. Pull-ups and bar muscle-ups from the side, the front or the back: reps count when the shoulders rise more than half an arm length (above the hands for a muscle-up), and the result says whether the chin passed the hands, whether the arms were straight at the hang, and how much the body swung. These two have synthetic tests and one real two-rep clip only.
 - Hands-free sets (new on 13 October, on by default, switch in Options): the phone stands a few steps away. The countdown starts once you hold still in position (a plank for push-ups); the set ends when you walk back to the phone or stop moving after your reps. Only the set is measured, not the walk to your spot and back. Start set and Stop set still work. The screen stays on while the camera is open.
 - Before the set: live camera view with the tracked skeleton, the joint Plumb cannot see clearly ("Ankle not clear"), and framing tips, said aloud hands-free.
 - During the set: the reps counted so far, large on screen and said aloud through AirPods or other headphones when connected, otherwise the speaker; a rep clearly faster or shorter than your first reps of the set is pointed out once. The count names the exercise being measured ("5 push-ups"), and the app keeps the chosen exercise across launches. When a set is refused for the chosen exercise's joints but clearly shows reps of another one, the result says so ("Plumb counted 5 push-ups in this set, but Squat was chosen").
@@ -84,7 +84,7 @@ _Updated 13 October 2026._
 
 **Challenge goal:** a reliable iPhone loop and a build submitted through App Store Connect. Public release depends on validation and distribution access.
 
-_For developers:_ each exercise is defined in `ExerciseDefinition.swift` (rule versions `squat-side-v7` and `*-side-v6`, which combine main's posture readings with the set window and capture fixes); the set window is `SetWindow.swift`, hands-free and live reps `LiveSet.swift`, the frequent pattern `MistakeProfile.swift`, what headphones and the Apple Watch add `Accessories.swift`, and the Apple Health workout `FitnessWorkout.swift` (logic) and `HealthKitWorkoutExporter.swift` (HealthKit calls; entitlements in `Plumb/Plumb.entitlements`). Generated test videos are in `tools/replay`.
+_For developers:_ each exercise is defined in `ExerciseDefinition.swift` (rule versions `squat-side-v7`, `*-side-v6`, `pull-up-v1` and `muscle-up-v1`, which combine main's posture readings with the set window and capture fixes); the set window is `SetWindow.swift`, hands-free and live reps `LiveSet.swift`, the frequent pattern `MistakeProfile.swift`, what headphones and the Apple Watch add `Accessories.swift`, and the Apple Health workout `FitnessWorkout.swift` (logic) and `HealthKitWorkoutExporter.swift` (HealthKit calls; entitlements in `Plumb/Plumb.entitlements`). Generated test videos are in `tools/replay`.
 
 Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 
