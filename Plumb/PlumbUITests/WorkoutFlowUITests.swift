@@ -37,16 +37,24 @@ final class WorkoutFlowUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 2)
         XCTAssertNotEqual(elapsed.value as? String, initial)
         Thread.sleep(forTimeInterval: 2)
-        let previousSetElapsed = elapsed.value as? String ?? ""
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
         XCTAssertFalse(elapsed.exists)
         app.buttons["Try this next set"].tap()
+        let restartTappedAt = ProcessInfo.processInfo.systemUptime
         app.buttons["Start set"].tap()
         XCTAssertTrue(elapsed.waitForExistence(timeout: 6))
         let restarted = elapsed.value as? String ?? ""
-        XCTAssertLessThan(restarted, previousSetElapsed,
-                          "The next set's timer should restart below the previous set's elapsed time")
+        let parts = restarted.split(separator: ":").compactMap { Int($0) }
+        guard parts.count == 2 else {
+            XCTFail("Expected an MM:SS timer, got \(restarted)")
+            return
+        }
+        let displayedSeconds = Double(parts[0] * 60 + parts[1])
+        let timeSinceRestart = ProcessInfo.processInfo.systemUptime - restartTappedAt
+        // Querying the UI can take several seconds on CI; compare against the new tap's clock.
+        XCTAssertLessThanOrEqual(displayedSeconds, timeSinceRestart + 1,
+                                 "The next set's timer should start from its own Start tap")
     }
 
     @MainActor
