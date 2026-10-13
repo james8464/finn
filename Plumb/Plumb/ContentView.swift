@@ -733,7 +733,9 @@ struct ContentView: View {
                 .lineLimit(1)
                 .contentTransition(.numericText())
                 .animation(.snappy, value: model.liveRepCount)
-            Text(model.liveRepCount == 1 ? "rep" : "reps")
+            // The exercise being measured, such as "push-ups", so a wrong choice shows before the reps
+            // are done (13 October: push-ups filmed while Squat was chosen counted nothing).
+            Text(captureCopy.name.lowercased() + (model.liveRepCount == 1 ? "" : "s"))
                 .font(.headline)
         }
         // A dark backing keeps the white count readable over a bright camera image, like the other

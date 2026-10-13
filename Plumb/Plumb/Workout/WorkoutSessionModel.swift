@@ -101,8 +101,11 @@ final class WorkoutSessionModel {
     @ObservationIgnored private let currentDate: () -> Date
 
     private(set) var stage: WorkoutStage = .ready
-    /// The exercise chosen on the setup screen. A capture keeps the exercise it started with.
-    var selectedExercise: ExerciseKind = .bodyweightSquat
+    /// The exercise chosen on the setup screen. A capture keeps the exercise it started with. The app
+    /// remembers it across launches (`PlumbPreferences.selectedExercise`).
+    var selectedExercise: ExerciseKind = .bodyweightSquat {
+        didSet { preferences.selectedExercise = selectedExercise }
+    }
     /// The exercise used for the framing check and analysis of the current capture.
     private(set) var captureExercise: ExerciseKind = .bodyweightSquat
     private(set) var result: WorkoutResult?
@@ -252,6 +255,7 @@ final class WorkoutSessionModel {
         self.usesTrainedModel = preferences.usesTrainedModel
         self.checksCameraAngle = preferences.checksCameraAngle
         self.savesToFitness = preferences.savesToFitness
+        if let remembered = preferences.selectedExercise { selectedExercise = remembered }
         if let store {
             do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
             catch { historyIssue = Self.issue(for: error) }
@@ -466,8 +470,9 @@ final class WorkoutSessionModel {
             record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues)
         case .insufficientView(let reason):
             result = .insufficientView(reason)
-            retakeHint = Self.retakeHint(for: setFrames, definition: definition,
-                                         viewRefused: lastViewVerdict.isMismatch && checksCameraAngle)
+            retakeHint = Self.otherExerciseHint(in: frames, chosen: exercise, refusedFrames: setFrames)
+                ?? Self.retakeHint(for: setFrames, definition: definition,
+                                   viewRefused: lastViewVerdict.isMismatch && checksCameraAngle)
         case .failed(let reason):
             result = .failed(reason)
         }
@@ -484,6 +489,31 @@ final class WorkoutSessionModel {
         case .reject(.missingJoints), .reject(.lowConfidence): return definition.copy.retakeHint
         default: return nil
         }
+    }
+
+    /// When the chosen exercise was refused because its joints were not clear enough, but the same
+    /// capture shows clear reps of another exercise (push-ups filmed while Squat was chosen, 13 October):
+    /// the person probably picked the wrong exercise, so say which one Plumb saw. The camera angle is
+    /// not checked here, since the angle verdict belonged to the wrong exercise.
+    static func otherExerciseHint(in frames: [PoseFrame], chosen: ExerciseKind,
+                                  refusedFrames: [PoseFrame]) -> String? {
+        switch EvidenceGate.assess(refusedFrames, requirement: chosen.definition.evidence) {
+        case .reject(.missingJoints), .reject(.lowConfidence): break
+        default: return nil
+        }
+        var best: (kind: ExerciseKind, reps: Int)?
+        for kind in ExerciseKind.allCases where kind != chosen {
+            let definition = kind.definition
+            let window = SetWindow.active(frames, requirement: definition.evidence)
+            guard case .analyzed(let analysis) = ExerciseAnalyzer.analyzeWithDiagnostics(
+                window, as: definition, viewCheck: .ignore, trimsToSet: false).outcome,
+                analysis.reps.count >= 2, analysis.reps.count > (best?.reps ?? 0) else { continue }
+            best = (kind, analysis.reps.count)
+        }
+        guard let best else { return nil }
+        let name = best.kind.definition.copy.name
+        return "Plumb counted \(best.reps) \(name.lowercased())s in this set, but \(chosen.definition.copy.name) was chosen. "
+            + "If you did \(name.lowercased())s, choose \(name) on the first screen and retake the set."
     }
 
     private func updateFramingStatus(with frame: PoseFrame) {

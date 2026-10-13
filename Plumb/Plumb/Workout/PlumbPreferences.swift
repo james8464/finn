@@ -8,20 +8,38 @@ nonisolated struct PlumbPreferences: @unchecked Sendable {
     static let handsFreeKey = "plumb.handsFree"
     static let speaksLiveKey = "plumb.speaksLive"
     static let savesToFitnessKey = "plumb.savesToFitness"
+    static let selectedExerciseKey = "plumb.selectedExercise"
 
     let defaults: UserDefaults
     /// Hands-free capture until the person changes it. On in the app, where the phone stands a
     /// few steps away; off for tests and demo input, which tap Start and Stop themselves.
     let handsFreeByDefault: Bool
+    /// Whether the chosen exercise is kept for the next launch. On in the app; off for tests and demo
+    /// input, which expect each model to start on the squat.
+    let remembersExercise: Bool
 
-    init(defaults: UserDefaults, handsFreeByDefault: Bool = false) {
+    init(defaults: UserDefaults, handsFreeByDefault: Bool = false, remembersExercise: Bool = false) {
         self.defaults = defaults
         self.handsFreeByDefault = handsFreeByDefault
+        self.remembersExercise = remembersExercise
     }
 
     static let standard = PlumbPreferences(defaults: .standard)
     /// The app's own options: hands-free capture on unless the person turned it off.
-    static let app = PlumbPreferences(defaults: .standard, handsFreeByDefault: true)
+    static let app = PlumbPreferences(defaults: .standard, handsFreeByDefault: true, remembersExercise: true)
+
+    /// The exercise chosen last time, so relaunching the app (an update from Xcode, the system closing
+    /// it) does not quietly go back to the squat. Nil when nothing is remembered.
+    var selectedExercise: ExerciseKind? {
+        get {
+            guard remembersExercise else { return nil }
+            return defaults.string(forKey: Self.selectedExerciseKey).flatMap(ExerciseKind.init(rawValue:))
+        }
+        nonmutating set {
+            guard remembersExercise else { return }
+            defaults.set(newValue?.rawValue, forKey: Self.selectedExerciseKey)
+        }
+    }
 
     /// On by default: the joint-angle rules recognize the exercise after a set, and the
     /// person's choice stays whenever they are not sure.
