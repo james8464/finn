@@ -13,8 +13,14 @@ struct ContentView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var model: WorkoutSessionModel
     @State private var observationSpeaker = ObservationSpeaker()
+    /// Headphones and a paired Apple Watch; idle unless `connectsAccessories`.
+    @State private var accessories = AccessoryMonitor()
+    /// True for the live camera, and for demo input only behind `-plumb-watch-demo`.
+    private let connectsAccessories: Bool
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
+    /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
+    @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 88
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -44,11 +50,26 @@ struct ContentView: View {
     @MainActor init(source: any PoseStreaming, store: any SessionStoring = LocalSessionStore(),
                     narrator: ComparisonNarrator? = nil,
                     exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
-                    preferences: PlumbPreferences = .standard) {
+                    preferences: PlumbPreferences = .standard,
+                    announcer: (any LiveAnnouncing)? = nil,
+                    fitness: (any FitnessWorkoutSaving)? = nil,
+                    connectsAccessories: Bool = false) {
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
                                                          narrator: narrator,
                                                          exerciseClassifier: exerciseClassifier,
-                                                         preferences: preferences))
+                                                         preferences: preferences,
+                                                         announcer: announcer,
+                                                         fitness: fitness))
+        self.connectsAccessories = connectsAccessories
+    }
+
+    /// Demo or recorded input, marked as such on the watch too.
+    private var usesSyntheticInput: Bool {
+        #if DEBUG
+        return isDemo || isVideoFileInput
+        #else
+        return false
+        #endif
     }
 
     var body: some View {
@@ -82,12 +103,25 @@ struct ContentView: View {
         #if DEBUG
         .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
         #endif
+        // The phone stands a few steps away and nobody touches it: keep the screen on while the
+        // camera is open, or Auto-Lock interrupts framing and throws the set away.
+        .onChange(of: model.stage, initial: true) { _, stage in
+            UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(stage)
+        }
+        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+        .task {
+            guard connectsAccessories else { return }
+            accessories.start(model: model, demoInput: usesSyntheticInput)
+        }
         .onChange(of: scenePhase) { _, phase in
+            if phase == .active && connectsAccessories { accessories.refreshHeadphones() }
             if phase != .active { observationSpeaker.stop() }
             if phase == .background { Task { await model.backgrounded() } }
             if phase == .active && model.historyIssue == .unavailable {
                 model.retryHistory()
             }
+            // The person may have allowed or turned off Plumb in Health settings meanwhile.
+            if phase == .active { model.refreshFitnessAccess() }
         }
         .confirmationDialog("Delete this session?", isPresented: Binding(
             get: { deleteCandidate != nil },
@@ -98,14 +132,25 @@ struct ContentView: View {
                 deleteCandidate = nil
             }
         } message: {
-            Text("Its measured set summaries will be removed from this iPhone.")
+            // Plumb never deletes Health data: say so where the person decides.
+            Text(deleteCandidateLeavesHealthWorkout
+                 ? "Its measured set summaries will be removed from this iPhone. The workout saved to Apple Health stays there; you can delete it in the Health app."
+                 : "Its measured set summaries will be removed from this iPhone.")
         }
         .alert("Delete all local data?", isPresented: $deleteAllRequested) {
             Button("Delete all data", role: .destructive) { model.deleteAllData() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This removes saved sessions and any recovered history backups from this iPhone.")
+            Text(model.leavesHealthWorkouts
+                 ? "This removes saved sessions and any recovered history backups from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
+                 : "This removes saved sessions and any recovered history backups from this iPhone.")
         }
+    }
+
+    /// Whether the session about to be deleted has a workout in Apple Health, which stays there.
+    private var deleteCandidateLeavesHealthWorkout: Bool {
+        guard let id = deleteCandidate else { return false }
+        return model.leavesHealthWorkout(forSession: id)
     }
 
     private var setup: some View {
@@ -114,12 +159,38 @@ struct ContentView: View {
                 Text("Review your movement after each set.")
                     .foregroundStyle(PlumbStyle.supportingText)
                     .padding(.bottom, 28)
+                // After Done: whether the session reached Apple Fitness.
+                if let save = model.fitnessSave {
+                    fitnessStatus(save)
+                        .padding(.bottom, 20)
+                }
+                // Cancel, or the app going to the background during a set, comes back here without Done.
+                if let open = model.unfinishedSession {
+                    unfinishedSessionLine(open)
+                        .padding(.bottom, 20)
+                }
                 exercisePicker
                 if model.usesExerciseRecognition {
                     Text("After the set, Plumb also checks which exercise you did. If it isn’t sure, it keeps your choice.")
                         .font(.footnote)
                         .foregroundStyle(PlumbStyle.supportingText)
                         .padding(.top, 8)
+                }
+                if let focus = model.focus {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("YOUR FOCUS")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(PlumbStyle.supportingText)
+                        Text(focus.focus)
+                            .font(.body.weight(.semibold))
+                        Text(focus.summary)
+                            .font(.subheadline)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 28)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("setup.focus")
                 }
                 Text("SET UP")
                     .font(.footnote.weight(.semibold))
@@ -131,6 +202,7 @@ struct ContentView: View {
                 Divider().padding(.leading, 44)
                 setupStep(selectedCopy.stanceTitle, detail: selectedCopy.stanceDetail,
                           symbol: "figure.stand")
+                accessoryNotes
 
                 Text("Analysis stays on this iPhone. No video is saved.")
                     .font(.footnote)
@@ -173,6 +245,116 @@ struct ContentView: View {
                     Label("Privacy", systemImage: "hand.raised")
                 }
             }
+        }
+    }
+
+    /// One short line about the latest save to Apple Health, with Try again when it can help.
+    private func fitnessStatus(_ save: FitnessSaveReport) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label(save.status.text, systemImage: Self.fitnessSymbol(save.status))
+                .font(.subheadline)
+                .accessibilityIdentifier("fitness.status")
+            if save.status.offersRetry && model.savesToFitness {
+                Button("Try again") { Task { await model.saveToFitness(sessionID: save.sessionID) } }
+                    .font(.subheadline)
+                    .frame(minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .accessibilityIdentifier("fitness.retry")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// The session still open on the first screen, with a way to end it as Done does.
+    private func unfinishedSessionLine(_ session: WorkoutSessionSummary) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(session.sets.count == 1 ? "Session in progress · 1 measured set"
+                 : "Session in progress · \(session.sets.count) measured sets")
+                .font(.subheadline)
+            if model.offersFitness && model.savesToFitness {
+                Text("Finish it to save it to Apple Fitness.")
+                    .font(.footnote)
+                    .foregroundStyle(PlumbStyle.supportingText)
+            }
+            Button("Finish session") { Task { await model.finishSession() } }
+                .font(.subheadline)
+                .frame(minHeight: 44, alignment: .leading)
+                .contentShape(Rectangle())
+                .accessibilityIdentifier("setup.finishSession")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private static func fitnessSymbol(_ status: FitnessSaveStatus) -> String {
+        switch status {
+        case .saving: "arrow.triangle.2.circlepath"
+        case .saved: "checkmark.circle"
+        case .failed: "exclamationmark.circle"
+        case .needsPermission: "hand.raised"
+        case .unavailable: "heart.slash"
+        }
+    }
+
+    /// Under the Apple Fitness switch: why it is off for demo input, or what Health allows.
+    private var fitnessOptionNote: String? {
+        guard model.offersFitness else { return "Demo and recorded input are never saved to Apple Health." }
+        guard model.savesToFitness else { return nil }
+        switch model.fitnessAccess {
+        case .denied: return "Health doesn’t let Plumb save workouts. \(FitnessSaveStatus.needsPermission.text)."
+        case .unavailable: return "\(FitnessSaveStatus.unavailable.text)."
+        case .authorized, .notDetermined: return nil
+        }
+    }
+
+    /// In a saved session: saved to Fitness, or a way to save it when the option is on.
+    @ViewBuilder private func fitnessHistoryLine(_ session: WorkoutSessionSummary) -> some View {
+        if let record = model.fitnessRecord(forSession: session.id) {
+            Label("Saved to Fitness on \(record.savedAt.formatted(date: .abbreviated, time: .shortened))",
+                  systemImage: "checkmark.circle")
+                .font(.subheadline)
+                .padding(.top, 32)
+                .accessibilityIdentifier("history.savedToFitness")
+        } else if model.offersFitness && model.savesToFitness {
+            VStack(alignment: .leading, spacing: 4) {
+                if let save = model.fitnessSave, save.sessionID == session.id {
+                    Label(save.status.text, systemImage: Self.fitnessSymbol(save.status))
+                        .font(.subheadline)
+                }
+                if model.canSaveToFitness(session) {
+                    // Saving the session still open on the first screen finishes it.
+                    Button(model.unfinishedSession?.id == session.id ? "Finish session and save to Fitness"
+                           : "Save to Fitness") { Task { await model.saveToFitness(sessionID: session.id) } }
+                        .frame(minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .accessibilityIdentifier("history.saveToFitness")
+                }
+            }
+            .padding(.top, 32)
+        }
+    }
+
+    private static func keepsScreenOn(_ stage: WorkoutStage) -> Bool {
+        switch stage {
+        case .openingCamera, .framing, .countdown, .capturing, .analyzing: true
+        case .ready, .result, .error: false
+        }
+    }
+
+    /// What connected headphones or a paired Apple Watch add to the chosen exercise, one line each.
+    @ViewBuilder private var accessoryNotes: some View {
+        let lines = AccessoryGuide.setupLines(for: model.selectedExercise, status: accessories.status,
+                                              speaksLive: model.speaksLive)
+        if !lines.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(lines, id: \.accessory) { line in
+                    Label(line.text, systemImage: line.accessory == .appleWatch ? "applewatch" : "headphones")
+                }
+            }
+            .font(.footnote)
+            .foregroundStyle(PlumbStyle.supportingText)
+            .padding(.top, 20)
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("setup.accessories")
         }
     }
 
@@ -245,16 +427,30 @@ struct ContentView: View {
                 Divider()
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Saved results").font(.headline).accessibilityAddTraits(.isHeader)
-                    Text("Measured set summaries are saved on this iPhone so you can review previous sets.")
+                    Text("Measured set summaries are saved on this iPhone so you can review previous sets. They include which measured patterns each set showed, so Plumb can point out your most frequent one.")
                     Text("Saved summaries may be included in your device backup.")
                     Text("Delete saved sessions in History.")
                 }
                 Divider()
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Optional audio").font(.headline).accessibilityAddTraits(.isHeader)
-                    Text("Tap to hear an observation through your iPhone or headphones. Plumb does not record sound or use the microphone.")
+                    Text("Apple Health").font(.headline).accessibilityAddTraits(.isHeader)
+                    Text("If you turn on Save workouts to Apple Fitness, Plumb writes each finished session to Health as a workout, with your permission: its time, sets, measured reps, and exercise names.")
+                    Text("Plumb reads nothing from Health and never adds calories or heart rate. Nothing leaves this iPhone through Plumb.")
+                    Text("Health keeps these workouts under your Health settings. Deleting history in Plumb doesn’t remove them; delete them in the Health app.")
                 }
                 Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Optional audio").font(.headline).accessibilityAddTraits(.isHeader)
+                    Text("Plumb says the countdown, each rep, and short live observations, and you can tap to hear an observation, through your iPhone or headphones. Turn spoken reps off in Options. Plumb does not record sound or use the microphone.")
+                }
+                Divider()
+                if WatchBridge.isWatchAppBundled {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Apple Watch").font(.headline).accessibilityAddTraits(.isHeader)
+                        Text("When Plumb is open on your paired Apple Watch, this iPhone sends it the exercise name, the set’s progress, the rep count, live observations, and the result line. Video and pose points stay on this iPhone. The watch does not measure your movement.")
+                    }
+                    Divider()
+                }
                 if model.recognitionMethod != .unavailable {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Optional exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
@@ -321,6 +517,45 @@ struct ContentView: View {
                     .accessibilityIdentifier("options.checkCameraAngle")
                     Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. It only refuses a set when you clearly face the camera, or face away, for several seconds. If it asks you to turn while your side already faces the camera, switch this off.")
                 }
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Hands-free").font(.headline).accessibilityAddTraits(.isHeader)
+                    Toggle("Start and stop sets for me", isOn: Binding(
+                        get: { model.handsFree },
+                        set: { model.handsFree = $0 }
+                    ))
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.handsFree")
+                    Text("Once you hold still in position for a moment, Plumb counts down and starts the set. It ends the set when you walk back to your iPhone, or when you stop moving after your reps. Start set and Stop set still work.")
+                    Toggle("Say reps aloud", isOn: Binding(
+                        get: { model.speaksLive },
+                        set: { model.speaksLive = $0 }
+                    ))
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.speaksLive")
+                    Text("Plumb says the countdown, each counted rep, and when a rep is clearly faster or shorter than your first reps of the set. It uses your AirPods or other headphones when they are connected, otherwise the iPhone speaker.")
+                }
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Apple Fitness").font(.headline).accessibilityAddTraits(.isHeader)
+                    Toggle("Save workouts to Apple Fitness", isOn: Binding(
+                        get: { model.savesToFitness },
+                        set: { isOn in
+                            model.savesToFitness = isOn
+                            // Permission in context: Health asks when the person turns this on.
+                            if isOn { Task { await model.requestFitnessAccess() } }
+                        }
+                    ))
+                    .frame(minHeight: 44)
+                    .disabled(!model.offersFitness)
+                    .accessibilityIdentifier("options.savesToFitness")
+                    Text("When you finish a session (Done, or Finish session on the first screen), Plumb saves it to Apple Health as a strength training workout with its time and measured reps, never calories or heart rate, so it shows in the Fitness app.")
+                    if let note = fitnessOptionNote {
+                        Text(note)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityIdentifier("options.fitnessNote")
+                    }
+                }
             }
             .font(.body)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -370,6 +605,14 @@ struct ContentView: View {
                 }
                 #endif
                 status
+                if accessories.status.isConnected(.appleWatch) {
+                    Label("Apple Watch connected", systemImage: "applewatch")
+                        .font(.footnote.weight(.semibold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(.black.opacity(0.68), in: Capsule())
+                        .accessibilityIdentifier("capture.watch")
+                }
                 #if DEBUG
                 if isValidationMode && model.stage == .framing {
                     Text(model.previewDeviations.isEmpty ? "3D view: no estimate"
@@ -386,6 +629,18 @@ struct ContentView: View {
                     Text("\u{00A0}\(captureCopy.framingPrompt)\u{00A0}")
                         .multilineTextAlignment(.center)
                         .accessibilityLabel(captureCopy.framingPrompt)
+                    if let focus = model.captureFocus {
+                        Text("Focus: \(focus.focus)")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+                            .accessibilityIdentifier("capture.focus")
+                    }
+                    if model.handsFree {
+                        handsFreeHint
+                    }
                     Button { Task { await model.beginSet() } } label: {
                         Text("Start set").foregroundStyle(.black)
                     }
@@ -393,6 +648,16 @@ struct ContentView: View {
                         .controlSize(.large)
                         .tint(.white)
                 } else if model.stage == .capturing {
+                    liveCount
+                    if let caption = model.liveCaption {
+                        Text(caption)
+                            .font(.subheadline.weight(.semibold))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(.black.opacity(0.68), in: Capsule())
+                            .accessibilityIdentifier("capture.liveCaption")
+                    }
                     if let startedAt = model.captureStartedAt {
                         TimelineView(.periodic(from: startedAt, by: 1)) { timeline in
                             let seconds = max(0, Int(timeline.date.timeIntervalSince(startedAt)))
@@ -436,6 +701,52 @@ struct ContentView: View {
         .toolbar(.hidden, for: .navigationBar)
     }
 
+    /// While framing hands-free: what to do, and how long until the set starts by itself.
+    private var handsFreeHint: some View {
+        let holding = model.handsFreeProgress > 0
+        let seen = !(model.livePose?.joints.isEmpty ?? true)
+        return VStack(spacing: 8) {
+            Text(holding ? "Hold still. The set starts by itself."
+                 : seen ? "Plumb starts the set once it sees you clearly and you hold still."
+                 : "Go to your spot. The set starts once you hold still.")
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+            ProgressView(value: model.handsFreeProgress)
+                .tint(.white)
+                .frame(maxWidth: 180)
+                .accessibilityHidden(true)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("capture.handsFree")
+    }
+
+    /// The reps counted so far, readable from where the person stands.
+    private var liveCount: some View {
+        VStack(spacing: 0) {
+            Text("\(model.liveRepCount)")
+                .font(.system(size: liveCountSize, weight: .semibold, design: .rounded))
+                .monospacedDigit()
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .contentTransition(.numericText())
+                .animation(.snappy, value: model.liveRepCount)
+            Text(model.liveRepCount == 1 ? "rep" : "reps")
+                .font(.headline)
+        }
+        // A dark backing keeps the white count readable over a bright camera image, like the other
+        // labels drawn over the feed (the full accessibility audit checks this contrast).
+        .padding(.horizontal, 24)
+        .padding(.vertical, 8)
+        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 20))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Reps counted")
+        .accessibilityValue("\(model.liveRepCount)")
+        .accessibilityIdentifier("capture.liveReps")
+    }
+
     private var status: some View {
         HStack(spacing: 10) {
             if model.isRecording {
@@ -466,7 +777,8 @@ struct ContentView: View {
                 Text("Get ready")
             }
         }
-        .font(.subheadline.weight(.semibold))
+        // Hands-free, the person reads it from their spot a few steps away.
+        .font(model.handsFree ? .title3.weight(.semibold) : .subheadline.weight(.semibold))
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(.black.opacity(0.68), in: Capsule())
@@ -474,151 +786,182 @@ struct ContentView: View {
     }
 
     private var result: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Spacer()
-                    Button("Done") {
-                        observationSpeaker.stop()
-                        Task { await model.finishSession() }
+        // The action sits below the scroll view, not over it: text scrolled under a translucent bar
+        // stays half visible and fails the contrast audit.
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Spacer()
+                        Button("Done") {
+                            observationSpeaker.stop()
+                            Task { await model.finishSession() }
+                        }
+                        .buttonStyle(.plain)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
-                    .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
-                }
-                Text(resultTitle)
-                    .font(.largeTitle.bold())
-                if let result = model.result {
-                    switch result {
-                    case .measured(let analysis, let cue):
-                        Text("\(analysis.reps.count) measured reps")
-                            .font(.subheadline)
-                            .monospacedDigit()
+                    Text(resultTitle)
+                        .font(.largeTitle.bold())
+                    if model.endedEarly {
+                        Text("The camera stopped during the set. Plumb reviewed the part it captured.")
+                            .font(.footnote)
                             .foregroundStyle(PlumbStyle.supportingText)
-                        recognitionNote
-                        if let note = model.movementNote {
-                            Text(note)
+                            .accessibilityIdentifier("result.endedEarly")
+                    }
+                    if model.endedHandsFree {
+                        Text("Plumb ended the set when you walked away or stopped moving.")
+                            .font(.footnote)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityIdentifier("result.endedHandsFree")
+                    }
+                    if let result = model.result {
+                        switch result {
+                        case .measured(let analysis, let cue):
+                            Text("\(analysis.reps.count) measured reps")
                                 .font(.subheadline)
-                                .accessibilityIdentifier("result.movementNote")
-                        }
-                        if model.historyIssue != nil {
-                            Text("Couldn’t confirm this set was saved.")
-                                .font(.subheadline)
-                            if model.historyIssue == .unavailable {
-                                Button("Retry saving") { model.retryHistory() }
-                                    .frame(minHeight: 44, alignment: .leading)
-                            } else {
-                                NavigationLink("Review history") { historyPage }
-                                    .frame(minHeight: 44, alignment: .leading)
-                            }
-                        }
-                        if let cue {
-                            Divider().padding(.vertical, 12)
-                            if model.cueDismissed {
-                                Text("Observation marked not relevant.")
-                                    .font(.body)
-                                    .foregroundStyle(PlumbStyle.supportingText)
-                            } else {
-                                Text(cue.observation)
-                                    .font(.title3.weight(.semibold))
-                                Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
+                                .monospacedDigit()
+                                .foregroundStyle(PlumbStyle.supportingText)
+                            recognitionNote
+                            if let note = model.movementNote {
+                                Text(note)
                                     .font(.subheadline)
-                                    .foregroundStyle(PlumbStyle.supportingText)
-                                nextAction(cue.nextAction)
-                                    .padding(.top, 4)
-                                if let spokenText = SpokenObservation.text(for: analysis, cue: cue) {
-                                    Button {
-                                        if observationSpeaker.isSpeaking {
-                                            observationSpeaker.stop()
-                                        } else {
-                                            observationSpeaker.speak(spokenText)
+                                    .accessibilityIdentifier("result.movementNote")
+                            }
+                            if let pattern = model.repeatedPattern {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Your most frequent pattern came back")
+                                        .font(.subheadline.weight(.semibold))
+                                    Text(pattern.summary)
+                                        .font(.subheadline)
+                                        .foregroundStyle(PlumbStyle.supportingText)
+                                    Text(pattern.focus)
+                                        .font(.subheadline)
+                                }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityIdentifier("result.repeatedPattern")
+                            }
+                            if model.historyIssue != nil {
+                                Text("Couldn’t confirm this set was saved.")
+                                    .font(.subheadline)
+                                if model.historyIssue == .unavailable {
+                                    Button("Retry saving") { model.retryHistory() }
+                                        .frame(minHeight: 44, alignment: .leading)
+                                } else {
+                                    NavigationLink("Review history") { historyPage }
+                                        .frame(minHeight: 44, alignment: .leading)
+                                }
+                            }
+                            if let cue {
+                                Divider().padding(.vertical, 12)
+                                if model.cueDismissed {
+                                    Text("Observation marked not relevant.")
+                                        .font(.body)
+                                        .foregroundStyle(PlumbStyle.supportingText)
+                                } else {
+                                    Text(cue.observation)
+                                        .font(.title3.weight(.semibold))
+                                    Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
+                                        .font(.subheadline)
+                                        .foregroundStyle(PlumbStyle.supportingText)
+                                    nextAction(cue.nextAction)
+                                        .padding(.top, 4)
+                                    if let spokenText = SpokenObservation.text(for: analysis, cue: cue) {
+                                        Button {
+                                            if observationSpeaker.isSpeaking {
+                                                observationSpeaker.stop()
+                                            } else {
+                                                observationSpeaker.speak(spokenText)
+                                            }
+                                        } label: {
+                                            Label(observationSpeaker.isSpeaking ? "Stop speaking" : "Listen to observation",
+                                                  systemImage: observationSpeaker.isSpeaking ? "stop.fill" : "speaker.wave.2")
+                                                .frame(minHeight: 44, alignment: .leading)
                                         }
-                                    } label: {
-                                        Label(observationSpeaker.isSpeaking ? "Stop speaking" : "Listen to observation",
-                                              systemImage: observationSpeaker.isSpeaking ? "stop.fill" : "speaker.wave.2")
-                                            .frame(minHeight: 44, alignment: .leading)
+                                        .buttonStyle(.plain)
                                     }
-                                    .buttonStyle(.plain)
+                                    Button("Not relevant") {
+                                        observationSpeaker.stop()
+                                        model.dismissCue()
+                                    }
+                                        .buttonStyle(.plain)
+                                        .font(.subheadline)
+                                        .foregroundStyle(PlumbStyle.supportingText)
+                                        .frame(minHeight: 44)
+                                        .contentShape(Rectangle())
                                 }
-                                Button("Not relevant") {
-                                    observationSpeaker.stop()
-                                    model.dismissCue()
-                                }
-                                    .buttonStyle(.plain)
-                                    .font(.subheadline)
-                                    .foregroundStyle(PlumbStyle.supportingText)
-                                    .frame(minHeight: 44)
-                                    .contentShape(Rectangle())
-                            }
-                        } else {
-                            Divider().padding(.vertical, 12)
-                            if analysis.reps.count < 4 {
-                                Text("Plumb needs at least four measured reps before it can show an observation.")
-                                    .font(.title3)
                             } else {
-                                Text("No clear pattern to call out in this set.").font(.title3)
+                                Divider().padding(.vertical, 12)
+                                if analysis.reps.count < 4 {
+                                    Text("Plumb needs at least four measured reps before it can show an observation.")
+                                        .font(.title3)
+                                } else {
+                                    Text("No clear pattern to call out in this set.").font(.title3)
+                                }
+                                Text("This is a camera measurement, not a full technique assessment.")
+                                    .font(.footnote)
+                                    .foregroundStyle(PlumbStyle.supportingText)
                             }
-                            Text("This is a camera measurement, not a full technique assessment.")
-                                .font(.footnote)
-                                .foregroundStyle(PlumbStyle.supportingText)
-                        }
-                        Divider().padding(.vertical, 12)
-                        if let comparison = model.comparison {
-                            comparisonView(comparison)
-                        } else if let gap = model.comparisonGap {
-                            Text(gap == .differentExercise
-                                 ? "Plumb compares sets of the same exercise. Do another set of this exercise to compare."
-                                 : "These sets used different camera views, so Plumb can’t compare them reliably.")
-                                .foregroundStyle(PlumbStyle.supportingText)
-                        }
-                        DisclosureGroup("Rep details") {
-                            repList(analysis.reps, exercise: model.resultExercise)
-                        }
-                        ShareLink(item: SetShareSummary.text(for: analysis, cue: cue,
-                                                              cueDismissed: model.cueDismissed,
-                                                              comparison: model.comparison,
-                                                              exercise: model.resultExercise)) {
-                            Label("Share summary", systemImage: "square.and.arrow.up")
-                                .frame(minHeight: 44, alignment: .leading)
-                        }
-                        .font(.subheadline)
-                        .accessibilityIdentifier("result.shareSummary")
-                        .accessibilityHint("Shares the measured summary without video")
-                        if let extremes = model.repExtremes {
                             Divider().padding(.vertical, 12)
-                            repExtremesView(extremes)
+                            if let comparison = model.comparison {
+                                comparisonView(comparison)
+                            } else if let gap = model.comparisonGap {
+                                Text(comparisonGapText(gap))
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                            }
+                            if let extremes = model.repExtremes {
+                                repExtremesView(extremes)
+                                Divider().padding(.vertical, 12)
+                            }
+                            DisclosureGroup("Rep details") {
+                                repList(analysis.reps, exercise: model.resultExercise)
+                            }
+                            ShareLink(item: SetShareSummary.text(for: analysis, cue: cue,
+                                                                  cueDismissed: model.cueDismissed,
+                                                                  comparison: model.comparison,
+                                                                  exercise: model.resultExercise)) {
+                                Label("Share summary", systemImage: "square.and.arrow.up")
+                                    .frame(minHeight: 44, alignment: .leading)
+                            }
+                            .font(.subheadline)
+                            .accessibilityIdentifier("result.shareSummary")
+                            .accessibilityHint("Shares the measured summary without video")
+                        case .insufficientView(let reason):
+                            recognitionNote
+                            Text(reason)
+                            if let hint = model.retakeHint {
+                                Text(hint)
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                            }
+                            // Changing an option here keeps the session, so the next set still compares.
+                            NavigationLink("Options") { optionsPage }
+                                .frame(minHeight: 44, alignment: .leading)
+                                .accessibilityIdentifier("result.options")
+                        case .failed(let reason):
+                            Text(reason)
+                        case .interrupted:
+                            Text("Camera capture stopped before the set was complete.")
                         }
-                    case .insufficientView(let reason):
-                        recognitionNote
-                        Text(reason)
-                        Text(model.resultExercise.definition.copy.retakeHint)
-                            .foregroundStyle(PlumbStyle.supportingText)
-                    case .failed(let reason):
-                        Text(reason)
-                    case .interrupted:
-                        Text("Camera capture stopped before the set was complete.")
                     }
+                    #if DEBUG
+                    if isValidationMode, let milliseconds = model.lastStopToResultMilliseconds {
+                        Text("Validation timing · Stop to result: \(milliseconds) ms")
+                            .font(.footnote.monospacedDigit())
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityIdentifier("validation.stopToResult")
+                    }
+                    if isValidationMode {
+                        Text("Validation 3D view · \(viewVerdictReadout(model.lastViewVerdict))")
+                            .font(.footnote.monospacedDigit())
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityIdentifier("validation.viewCheck")
+                    }
+                    #endif
                 }
-                #if DEBUG
-                if isValidationMode, let milliseconds = model.lastStopToResultMilliseconds {
-                    Text("Validation timing · Stop to result: \(milliseconds) ms")
-                        .font(.footnote.monospacedDigit())
-                        .foregroundStyle(PlumbStyle.supportingText)
-                        .accessibilityIdentifier("validation.stopToResult")
-                }
-                if isValidationMode {
-                    Text("Validation 3D view · \(viewVerdictReadout(model.lastViewVerdict))")
-                        .font(.footnote.monospacedDigit())
-                        .foregroundStyle(PlumbStyle.supportingText)
-                        .accessibilityIdentifier("validation.viewCheck")
-                }
-                #endif
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 24)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 24)
-        }
-        .safeAreaInset(edge: .bottom) {
             Button {
                 observationSpeaker.stop()
                 Task { await model.startPreview() }
@@ -685,19 +1028,35 @@ struct ContentView: View {
             }
             .frame(height: 180)
             .accessibilityHidden(true)
-            Text("\(title) · rep \(snapshot.number)")
-                .font(.subheadline.weight(.semibold))
-            Text(definition.formattedDepth(snapshot.range))
-                .font(.footnote)
-                .foregroundStyle(PlumbStyle.supportingText)
+            // Only the text is the accessibility element, so its contrast is judged against the card,
+            // not against the lines of the drawing above it.
+            VStack(alignment: .leading, spacing: 6) {
+                Text("\(title) · rep \(snapshot.number)")
+                    .font(.subheadline.weight(.semibold))
+                Text(definition.formattedDepth(snapshot.range))
+                    .font(.footnote)
+                    .foregroundStyle(PlumbStyle.supportingText)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(title) rep, rep \(snapshot.number), \(definition.formattedDepth(snapshot.range))"
+                                + (angleText.map { ", \($0)" } ?? ""))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        // A thin outline instead of a tinted card keeps the captions at full contrast.
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(PlumbStyle.supportingText.opacity(0.35), lineWidth: 1))
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title) rep, rep \(snapshot.number), \(definition.formattedDepth(snapshot.range))"
-                            + (angleText.map { ", \($0)" } ?? ""))
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func comparisonGapText(_ gap: ComparisonGap) -> String {
+        switch gap {
+        case .differentExercise:
+            "Plumb compares sets of the same exercise. Do another set of this exercise to compare."
+        case .tooFewReps:
+            "Plumb compares sets with at least \(SetComparison.minimumReps) measured reps each."
+        case .differentSide:
+            "Your earlier sets were filmed from your other side, so Plumb can’t compare them."
+        case .incompatibleSets:
+            "These sets used different camera views, so Plumb can’t compare them reliably."
+        }
     }
 
     private var resultTitle: String {
@@ -756,7 +1115,9 @@ struct ContentView: View {
                             NavigationLink { historyDetail(session) } label: {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(session.startedAt.formatted(date: .abbreviated, time: .shortened))
-                                    Text("\(session.sets.count) measured sets")
+                                    Text(model.fitnessRecord(forSession: session.id) == nil
+                                         ? "\(session.sets.count) measured sets"
+                                         : "\(session.sets.count) measured sets · Saved to Fitness")
                                         .font(.subheadline)
                                         .foregroundStyle(PlumbStyle.supportingText)
                                 }
@@ -826,6 +1187,7 @@ struct ContentView: View {
                         Divider().padding(.vertical, 28)
                     }
                 }
+                fitnessHistoryLine(session)
                 Text("These are camera measurements from one view, not a full technique assessment.")
                     .font(.footnote)
                     .foregroundStyle(PlumbStyle.supportingText)

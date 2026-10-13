@@ -8,6 +8,8 @@ scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
 "$replay" --build-to "$scratch/replay"
 
+# Every clip runs and prints its result; the script fails at the end if any clip differed.
+failures=()
 check_result() {
   local label="$1" video="$2" expected_status="$3" reps="$4"
   local result
@@ -20,9 +22,16 @@ result = json.load(sys.stdin)
 assert result["status"] == expected_status, (label, result)
 assert result["measuredReps"] == int(expected_reps), (label, result)
 assert result["frameCount"] > 0, (label, result)
-print("{}: {}, {} reps, {} frames".format(
-    label, result["status"], result["measuredReps"], result["frameCount"]))
-' "$label" "$expected_status" "$reps"
+# The hands-free live count never says more reps than the result, and is at most one behind it
+# (the last rep can end after the final live analysis).
+live = result["liveReps"]
+assert live <= result["measuredReps"], ("live count above the result", label, result)
+assert live >= result["measuredReps"] - 1, ("live count behind the result", label, result)
+print("{}: {}, {} reps, {} frames; live {} reps, cues {}, hands-free start {}".format(
+    label, result["status"], result["measuredReps"], result["frameCount"], live,
+    result["liveCues"] or "none",
+    "at {:.1f} s".format(result["handsFreeReadyAt"]) if result.get("handsFreeReadyAt") is not None else "never"))
+' "$label" "$expected_status" "$reps" || failures+=("$label")
 }
 
 check_result "synthetic squat" "squat-six-reps.mp4" measured 6
@@ -38,7 +47,10 @@ check_result "warm indoor color" "squat-warm-indoor.mp4" measured 6
 check_result "low resolution" "squat-low-resolution.mp4" measured 6
 check_result "off-center framing" "squat-off-center.mp4" measured 6
 check_result "tilted phone" "squat-angled-phone.mp4" measured 6
-check_result "motion blur" "squat-motion-blur.mp4" retake 0
+# Three blended frames (about 0.1 s of blur at 30 fps): since squat-side-v7 searches the person
+# mask around each joint at 4% of body size, the blurred edge no longer hides the ankles and all
+# six squats are counted, as on the sharp clip.
+check_result "motion blur" "squat-motion-blur.mp4" measured 6
 check_result "moving phone" "squat-phone-shake.mp4" retake 0
 
 # Mirroring the source currently reduces Vision's required-joint coverage from roughly 81% to
@@ -50,7 +62,9 @@ python3 - "$scratch/mirrored-result.json" <<'PY'
 import json, sys
 result = json.load(open(sys.argv[1]))
 assert result["status"] in {"measured", "retake"}, result
-print("mirrored diagnostic: {}, {} reps".format(result["status"], result["measuredReps"]))
+assert result["liveReps"] <= result["measuredReps"], ("live count above the result", result)
+print("mirrored diagnostic: {}, {} reps; live {} reps".format(
+    result["status"], result["measuredReps"], result["liveReps"]))
 PY
 
 # The live five-frame preview must not claim all squat landmarks are visible while the feet
@@ -68,3 +82,8 @@ for index in range(10, len(frames)):
         assert visible < 4, ("covered feet reported as visible", index, side, visible)
 print("feet hidden framing: stays in adjustPosition")
 PY
+
+if (( ${#failures} )); then
+  print -u2 -- "Clips with an unexpected result: ${(j:, :)failures}"
+  exit 1
+fi

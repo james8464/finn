@@ -37,6 +37,9 @@ nonisolated struct Comparison: Codable, Equatable {
 }
 
 nonisolated enum SetComparison {
+    /// Each set needs this many measured reps for its median to mean something.
+    static let minimumReps = 4
+
     static func compare(_ first: SetSummary, _ second: SetSummary) -> Comparison? {
         guard first.sessionID == second.sessionID,
               first.id != second.id,
@@ -46,8 +49,8 @@ nonisolated enum SetComparison {
               first.analysis.rubricVersion == second.analysis.rubricVersion,
               first.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
               second.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
-              first.analysis.reps.count >= 4,
-              second.analysis.reps.count >= 4 else { return nil }
+              first.analysis.reps.count >= minimumReps,
+              second.analysis.reps.count >= minimumReps else { return nil }
 
         let firstRange = median(first.analysis.reps.map(\.relativeRange))
         let secondRange = median(second.analysis.reps.map(\.relativeRange))

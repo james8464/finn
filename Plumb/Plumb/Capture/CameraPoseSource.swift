@@ -138,6 +138,12 @@ final class CameraPoseSource: PoseStreaming {
             throw CameraSourceError.unavailable
         }
 
+        // Upright from the first frame: how this camera is mounted and how the phone is held, before
+        // the camera screen's own rotation coordinator takes over.
+        if let device = driver.cameraDevice {
+            driver.setCaptureRotation(AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
+                .videoRotationAngleForHorizonLevelCapture)
+        }
         let backendStream: AsyncStream<PoseFrame>
         do {
             backendStream = try await driver.start()

@@ -97,6 +97,12 @@ nonisolated struct ExerciseCopy: Equatable, Sendable {
     let rangeExplanation: String
     /// Rep accessibility description of the range value.
     let rangeAccessibilityName: String
+
+    /// Said during a set when a rep's range is clearly shorter than the first reps, such as
+    /// "Range is shorter" or "Elbow bend is smaller".
+    var liveShorterCue: String {
+        rangeNoun.prefix(1).uppercased() + rangeNoun.dropFirst() + " is \(lessRange)"
+    }
 }
 
 /// A within-person posture change, not an absolute standard of correct technique.
@@ -105,6 +111,16 @@ nonisolated struct PostureRule: Equatable, Sendable {
     let minimumIncrease: Double
     let observation: String
     let nextAction: String
+
+    /// The change in a few words, for the most-frequent-pattern summary.
+    var title: String {
+        switch cueKind {
+        case .torsoTiltIncreased: "Torso tilting farther at the end of the set"
+        case .hipDropIncreased: "Hips sagging at the end of the set"
+        case .kneeBendIncreased: "Knees bending more at the end of the set"
+        case .rangeDecreased: "Range shorter at the end of the set"
+        }
+    }
 }
 
 /// One exercise rubric as data: what to track, how a rep moves, which view it needs, and what to say.
@@ -174,7 +190,7 @@ nonisolated extension ExerciseKind {
 }
 
 nonisolated extension ExerciseDefinition {
-    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v6`).
+    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v7`).
     static let squat = ExerciseDefinition(
         kind: .bodyweightSquat,
         rubricVersion: SquatRubric.version,
@@ -211,7 +227,7 @@ nonisolated extension ExerciseDefinition {
             showJoints: "Show hip, knee and ankle",
             jointsVisible: "Hip, knee and ankle visible",
             keepJointsVisible: "Keep your hip and ankle visible for the whole set.",
-            bodyTooSmall: "Move the phone back so your full body is visible.",
+            bodyTooSmall: "Your legs look too small to measure. Move the phone closer, keeping your whole body in view.",
             retakeHint: "Move the phone farther back and keep your hip, knee, and ankle visible.",
             noCompleteReps: "No complete squat repetitions were measured. Try another set with your full body in view.",
             rangeNoun: "range",
@@ -227,7 +243,7 @@ nonisolated extension ExerciseDefinition {
     /// Side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.
     static let pushUp = ExerciseDefinition(
         kind: .pushUp,
-        rubricVersion: "push-up-side-v5",
+        rubricVersion: "push-up-side-v6",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.shoulder, .elbow, .wrist], anchor: .wrist),
         signal: .jointBend(from: .shoulder, vertex: .elbow, to: .wrist),
@@ -272,7 +288,7 @@ nonisolated extension ExerciseDefinition {
     /// camera-facing leg (hip, knee, ankle).
     static let staticLunge = ExerciseDefinition(
         kind: .staticLunge,
-        rubricVersion: "static-lunge-side-v5",
+        rubricVersion: "static-lunge-side-v6",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .hip, vertex: .knee, to: .ankle),
@@ -316,7 +332,7 @@ nonisolated extension ExerciseDefinition {
     /// Side-view stiff-leg deadlift, measured as hip hinge (shoulder, hip, knee). Feet stay planted.
     static let stiffLegDeadlift = ExerciseDefinition(
         kind: .stiffLegDeadlift,
-        rubricVersion: "stiff-leg-deadlift-side-v5",
+        rubricVersion: "stiff-leg-deadlift-side-v6",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.shoulder, .hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .shoulder, vertex: .hip, to: .knee),

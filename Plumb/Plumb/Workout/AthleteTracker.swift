@@ -14,13 +14,24 @@ import Foundation
 /// While framing, it moves to someone else only if they are clearly more prominent
 /// (`switchFactor`) or the current person has been gone for `reacquireAfter`. Once a set starts,
 /// `lock()` keeps it on the same person for the whole set: if they are hidden, frames have no
-/// athlete until they reappear, and the evidence gate decides whether the gap was too long.
+/// athlete until they reappear, and the evidence gate decides whether the gap was too long. After
+/// `reacquireAfter` without a match, a lone person of about the athlete's size is taken as the
+/// athlete again (they changed pose while Vision missed them); with several people it waits.
 nonisolated struct AthleteTracker {
     struct Box: Equatable {
         /// Centre and diagonal in pixel proportions (y scaled by the frame's height / width).
         let x: Double
         let y: Double
         let size: Double
+        /// Half the width and half the height, in the same units.
+        var halfWidth = 0.0
+        var halfHeight = 0.0
+
+        /// The boxes overlap once this one is widened by `margin` of its size on each side.
+        func overlaps(_ other: Box, margin: Double) -> Bool {
+            abs(x - other.x) <= halfWidth + other.halfWidth + margin * size
+                && abs(y - other.y) <= halfHeight + other.halfHeight + margin * size
+        }
     }
 
     private struct Seen {
@@ -38,12 +49,21 @@ nonisolated struct AthleteTracker {
     static let jointMemory: TimeInterval = 2.0
     static let reacquireAfter: TimeInterval = 1.0
     static let switchFactor = 1.5
+    /// During a set, a lone person this much smaller or larger than the athlete is not picked up as
+    /// them after a loss.
+    static let reacquireSizeRange = 0.5...2.0
+    /// ...and must overlap where the athlete was last seen, widened by this share of their size.
+    static let reacquireMargin = 0.25
     /// Two candidates this close in distance could be swapped; the frame then has no athlete.
     static let ambiguityMargin = 0.05
 
     private var memory: [BodyJoint: Seen] = [:]
     /// The athlete's size (box diagonal), smoothed and updated only by fairly complete detections.
     private var size = 0.0
+    /// Where the athlete's box was when last matched.
+    private var lastBox: Box?
+    /// Where everyone else was then: a coach or partner beside the athlete is never taken for them.
+    private var lastOthers: [Box] = []
     private(set) var isLocked = false
     private var lastMatchTime = -Double.infinity
 
@@ -83,19 +103,38 @@ nonisolated struct AthleteTracker {
                     chosen = leader
                 }
                 remember(people[chosen], box: boxes[chosen], aspectRatio: aspectRatio, time: time)
+                lastOthers = boxes.indices.filter { $0 != chosen }.compactMap { boxes[$0] }
                 return chosen
             }
-            if isLocked || time - lastMatchTime < Self.reacquireAfter { return nil }
+            if time - lastMatchTime < Self.reacquireAfter { return nil }
+            if isLocked {
+                // During a set, pick the athlete up again only when they are clearly the one person
+                // in view, at about the size they were. Getting down into a push-up can hide them
+                // from Vision for a moment and bring them back far from where they were last seen;
+                // before, every remaining frame of the set then had no athlete.
+                let candidates = boxes.indices.filter { boxes[$0] != nil }
+                guard candidates.count == 1, let box = boxes[candidates[0]], size > 0,
+                      Self.reacquireSizeRange.contains(box.size / size),
+                      let lastBox, box.overlaps(lastBox, margin: Self.reacquireMargin),
+                      !lastOthers.contains(where: { hypot($0.x - box.x, $0.y - box.y) <= Self.reacquireMargin * size })
+                else { return nil }
+                forget()
+                remember(people[candidates[0]], box: box, aspectRatio: aspectRatio, time: time)
+                return candidates[0]
+            }
             forget()
         }
         guard let pick = Self.mostProminent(boxes, aspectRatio: aspectRatio) else { return nil }
         remember(people[pick], box: boxes[pick], aspectRatio: aspectRatio, time: time)
+        lastOthers = boxes.indices.filter { $0 != pick }.compactMap { boxes[$0] }
         return pick
     }
 
     private mutating func forget() {
         memory = [:]
         size = 0
+        lastBox = nil
+        lastOthers = []
         lastMatchTime = -.infinity
     }
 
@@ -125,6 +164,7 @@ nonisolated struct AthleteTracker {
         }
         // A detection missing the legs gives a small box; it does not shrink the size.
         if let box {
+            lastBox = box
             if size == 0 {
                 size = box.size
             } else if box.size >= 0.8 * size {
@@ -159,6 +199,7 @@ nonisolated struct AthleteTracker {
               let minY = points.map(\.y).min(), let maxY = points.map(\.y).max() else { return nil }
         let width = maxX - minX
         let height = (maxY - minY) * aspectRatio
-        return Box(x: (minX + maxX) / 2, y: (minY + maxY) / 2 * aspectRatio, size: hypot(width, height))
+        return Box(x: (minX + maxX) / 2, y: (minY + maxY) / 2 * aspectRatio, size: hypot(width, height),
+                   halfWidth: width / 2, halfHeight: height / 2)
     }
 }

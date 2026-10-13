@@ -8,8 +8,11 @@ nonisolated enum SquatRubric {
     /// set, and the athlete may be hidden by someone else for up to 3 s (see `EvidenceRubric`).
     /// v5 (13 October 2026): camera capture corroborates joints with a person mask so an ankle
     /// inferred behind an obstruction cannot make a set appear measurable.
-    /// v6 (13 October 2026): adds an optional torso-tilt reading at the bottom of each rep.
-    static let version = "squat-side-v6"
+    /// v6 (13 October 2026, main): adds an optional torso-tilt reading at the bottom of each rep.
+    /// v7 (13 October 2026): v6 plus measuring only the set, not the walk to the spot and back to the
+    /// phone (`SetWindow`), a person-mask search in proportion to the body that ignores an empty mask
+    /// (`SilhouetteCheck`), and a rep's deepest point kept after a wobble. v5 refused real sets.
+    static let version = "squat-side-v7"
     static let minimumJointConfidence = EvidenceRubric.minimumJointConfidence
     static let descentThreshold = 0.10
     /// v3: 0.05 (was 0.03), about twice Vision's hip jitter on real side-view video.
@@ -70,9 +73,12 @@ nonisolated enum ExerciseAnalyzer {
 
     /// The analysis plus what the movement looked like, so the result can say why a movement
     /// did not count instead of staying silent.
+    /// `trimsToSet` keeps only the set itself (`SetWindow`); pass false for frames already trimmed.
     static func analyzeWithDiagnostics(_ frames: [PoseFrame], as definition: ExerciseDefinition,
-                                       viewCheck: ViewCheckPolicy = .enforce)
+                                       viewCheck: ViewCheckPolicy = .enforce, trimsToSet: Bool = true)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
+        // Walking to the spot and back to the phone is not part of the set.
+        let frames = trimsToSet ? SetWindow.active(frames, requirement: definition.evidence) : frames
         let side: BodySide
         switch EvidenceGate.assess(frames, requirement: definition.evidence) {
         case .usable(let acceptedSide): side = acceptedSide
@@ -133,7 +139,9 @@ nonisolated enum ExerciseAnalyzer {
         // Every threshold is measured from the local top: the highest (most open) point since the
         // previous rep ended. In a run of continuous reps the person may not come all the way back
         // to the set's top, and on a real phone that top drifts by a few percent during a set.
-        var localTop = Double.infinity
+        // A set that opens partway down a rep (it started during the countdown) measures that first
+        // rep from the set's top, so its depth is not cut short.
+        var localTop = travel(smoothed[0]) > phases.backAtTop ? 0 : Double.infinity
         var lastTopTime = samples[0].time
         var reps: [RepMetric] = []
         var diagnostics = MovementDiagnostics(requiredDepth: phases.reachBottom, angledView: angledView)
@@ -166,7 +174,11 @@ nonisolated enum ExerciseAnalyzer {
                 } else {
                     phase = .descending(start: start, peak: updatedPeak, peakIndex: updatedPeakIndex)
                 }
-            case .ascending(let start, let peak, let peakIndex):
+            case .ascending(let start, let lastPeak, let lastPeakIndex):
+                // A pause or wobble on the way down can look like the way up; the rep's depth is
+                // still its deepest point, and its posture is read there.
+                let peak = max(lastPeak, distance)
+                let peakIndex = distance > lastPeak ? index : lastPeakIndex
                 let depth = peak - localTop
                 if distance <= localTop + max(phases.backAtTop, depth * repEndShareOfDepth) {
                     let duration = sample.time - start
@@ -186,6 +198,8 @@ nonisolated enum ExerciseAnalyzer {
                     lastTopTime = sample.time
                     localTop = distance
                     phase = .top
+                } else {
+                    phase = .ascending(start: start, peak: peak, peakIndex: peakIndex)
                 }
             }
         }

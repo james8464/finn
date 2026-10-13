@@ -256,10 +256,14 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
     var cueResponse: CueResponse
     let exercise: ExerciseKind
     let cameraView: CameraView
+    /// What this set showed (`SetIssue`), for the person's most frequent pattern. Nil in summaries
+    /// saved before 13 October 2026.
+    let issues: [SetIssue]?
 
     init(id: UUID, sessionID: UUID, capturedAt: Date, bodySide: BodySide,
          analysis: SetAnalysis, cue: Cue?, cueResponse: CueResponse,
-         exercise: ExerciseKind = .bodyweightSquat, cameraView: CameraView = .side) {
+         exercise: ExerciseKind = .bodyweightSquat, cameraView: CameraView = .side,
+         issues: [SetIssue]? = nil) {
         self.id = id
         self.sessionID = sessionID
         self.capturedAt = capturedAt
@@ -269,6 +273,7 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
         self.cueResponse = cueResponse
         self.exercise = exercise
         self.cameraView = cameraView
+        self.issues = issues
     }
 }
 
@@ -276,4 +281,20 @@ nonisolated struct WorkoutSessionSummary: Codable, Equatable, Identifiable {
     let id: UUID
     let startedAt: Date
     var sets: [SetSummary]
+    /// The Apple Health workout saved for this session, so it is never saved twice. Nil until then,
+    /// and in sessions saved before 13 October 2026 (decoded as absent).
+    var fitnessWorkout: FitnessWorkoutRecord? = nil
+}
+
+nonisolated extension WorkoutSessionSummary {
+    /// The longest break between two sets of one session. Cancel, or the app going to the background
+    /// during a set, leaves the session open without Done; a set measured after a longer break starts
+    /// a new session, so one session, and its Apple Health workout, never spans hours or days.
+    static let longestBreak: TimeInterval = 30 * 60
+
+    /// Whether a set measured at `date` still belongs to this session.
+    func continues(at date: Date) -> Bool {
+        let latest = sets.map(\.capturedAt).max() ?? startedAt
+        return date.timeIntervalSince(latest) <= Self.longestBreak
+    }
 }

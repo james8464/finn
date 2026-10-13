@@ -83,10 +83,10 @@ struct PostureAdviceTests {
         #expect(analysis.reps.count == 6)
         #expect(analysis.reps.allSatisfy { $0.postureValue != nil })
 
-        let reps = (0..<6).map { index in
+        let reps = (0..<6).map { (index: Int) -> RepMetric in
             RepMetric(number: index + 1, startTime: Double(index) * 2,
-                      endTime: Double(index + 1) * 2, relativeRange: 75,
-                      postureValue: index >= 4 ? 27 : 9)
+                      endTime: Double(index + 1) * 2, relativeRange: 75.0,
+                      postureValue: index >= 4 ? 27.0 : 9.0)
         }
         let changed = SetAnalysis(reps: reps, confidence: 0.9,
                                   rubricVersion: ExerciseDefinition.stiffLegDeadlift.rubricVersion)
@@ -97,11 +97,11 @@ struct PostureAdviceTests {
     }
 
     @Test func changingRangeDoesNotConfusePostureWithRange() {
-        let reps = (0..<6).map { index in
+        let reps = (0..<6).map { (index: Int) -> RepMetric in
             RepMetric(number: index + 1, startTime: Double(index) * 2,
                       endTime: Double(index + 1) * 2,
-                      relativeRange: index >= 4 ? 60 : 80,
-                      postureValue: index >= 4 ? 35 : 10)
+                      relativeRange: index >= 4 ? 60.0 : 80.0,
+                      postureValue: index >= 4 ? 35.0 : 10.0)
         }
         let analysis = SetAnalysis(reps: reps, confidence: 0.9,
                                    rubricVersion: ExerciseDefinition.staticLunge.rubricVersion)

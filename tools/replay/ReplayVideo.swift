@@ -11,6 +11,40 @@ enum ReplayVideo {
         let status: String
         let reason: String?
         let rubricVersion: String?
+        /// Reps the hands-free live count reached, feeding the frames one by one as the camera does.
+        let liveReps: Int
+        /// Live cues other than the count, as they would be spoken.
+        let liveCues: [String]
+        /// When the live monitor would have ended the set by itself, if it did.
+        let liveStopAt: Double?
+        /// When a hands-free start would have triggered (the person held still in position).
+        let handsFreeReadyAt: Double?
+    }
+
+    /// The hands-free path on the same frames: the start readiness, the live count and cues, and
+    /// the automatic stop, as `WorkoutSessionModel` drives them during a capture.
+    private static func followLive(_ poses: [PoseFrame], definition: ExerciseDefinition)
+        -> (reps: Int, cues: [String], stopAt: Double?, readyAt: Double?) {
+        var readiness = StartReadiness()
+        var monitor = LiveSetMonitor(definition: definition)
+        var seen: [PoseFrame] = []
+        seen.reserveCapacity(poses.count)
+        var cues: [String] = []
+        var stopAt: Double?
+        var readyAt: Double?
+        for frame in poses {
+            if readyAt == nil {
+                _ = readiness.update(with: frame, definition: definition)
+                if readiness.isReady { readyAt = frame.time }
+            }
+            seen.append(frame)
+            for event in monitor.update(with: seen) {
+                if case .repCounted = event { continue }
+                cues.append(event.spoken(for: definition))
+            }
+            if stopAt == nil, monitor.isOver { stopAt = frame.time }
+        }
+        return (monitor.countedReps, cues, stopAt, readyAt)
     }
 
     static func main() async {
@@ -54,6 +88,7 @@ enum ReplayVideo {
         }
         let definition = ExerciseDefinition.definition(for: kind)
         let (result, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(poses, as: definition)
+        let live = followLive(poses, definition: definition)
         let report: Report
         switch result {
         case .analyzed(let analysis):
@@ -63,20 +98,28 @@ enum ReplayVideo {
                     .compactMap { $0 }.joined(separator: " ")
                 report = Report(exercise: kind.rawValue, frameCount: poses.count,
                                 measuredReps: 0, status: "retake", reason: reason,
-                                rubricVersion: analysis.rubricVersion)
+                                rubricVersion: analysis.rubricVersion,
+                                liveReps: live.reps, liveCues: live.cues, liveStopAt: live.stopAt,
+                                handsFreeReadyAt: live.readyAt)
             } else {
                 report = Report(exercise: kind.rawValue, frameCount: poses.count,
                                 measuredReps: analysis.reps.count, status: "measured", reason: nil,
-                                rubricVersion: analysis.rubricVersion)
+                                rubricVersion: analysis.rubricVersion,
+                                liveReps: live.reps, liveCues: live.cues, liveStopAt: live.stopAt,
+                                handsFreeReadyAt: live.readyAt)
             }
         case .insufficientView(let reason):
             report = Report(exercise: kind.rawValue, frameCount: poses.count,
                             measuredReps: 0, status: "retake", reason: reason,
-                            rubricVersion: nil)
+                            rubricVersion: nil,
+                            liveReps: live.reps, liveCues: live.cues, liveStopAt: live.stopAt,
+                            handsFreeReadyAt: live.readyAt)
         case .failed(let reason):
             report = Report(exercise: kind.rawValue, frameCount: poses.count,
                             measuredReps: 0, status: "failed", reason: reason,
-                            rubricVersion: nil)
+                            rubricVersion: nil,
+                            liveReps: live.reps, liveCues: live.cues, liveStopAt: live.stopAt,
+                            handsFreeReadyAt: live.readyAt)
         }
         FileHandle.standardOutput.write(try encoder.encode(report))
         FileHandle.standardOutput.write(Data("\n".utf8))

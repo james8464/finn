@@ -56,3 +56,44 @@ final class ObservationSpeaker: NSObject, AVSpeechSynthesizerDelegate {
         }
     }
 }
+
+/// Says the countdown, rep counts, and live observations during a set. Phrases queue so a count is
+/// not cut off by the observation that follows it; when they pile up, the backlog is dropped so
+/// what is said stays current with the set.
+@MainActor
+final class LiveAnnouncer: NSObject, LiveAnnouncing, AVSpeechSynthesizerDelegate {
+    private let synthesizer: AVSpeechSynthesizer
+    private var queued = 0
+
+    override init() {
+        let synthesizer = AVSpeechSynthesizer()
+        // Plays through the current route (AirPods or other headphones when connected) without
+        // taking over the app's audio session.
+        synthesizer.usesApplicationAudioSession = false
+        self.synthesizer = synthesizer
+        super.init()
+        synthesizer.delegate = self
+    }
+
+    func announce(_ text: String) {
+        if queued >= 2 {
+            synthesizer.stopSpeaking(at: .immediate)
+            queued = 0
+        }
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.rate = min(AVSpeechUtteranceMaximumSpeechRate, AVSpeechUtteranceDefaultSpeechRate * 1.1)
+        queued += 1
+        synthesizer.speak(utterance)
+    }
+
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        Task { @MainActor [weak self] in self?.finishOne() }
+    }
+
+    /// Only `announce` cancels, and it resets the count itself.
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {}
+
+    private func finishOne() {
+        queued = max(0, queued - 1)
+    }
+}
