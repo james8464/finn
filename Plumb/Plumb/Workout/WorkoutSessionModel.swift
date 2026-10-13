@@ -1021,7 +1021,26 @@ final class WorkoutSessionModel {
     }
 
     private func save(_ session: WorkoutSessionSummary) {
-        guard store != nil else { return }
+        guard let store else { return }
+        // The usual case, history in good order and nothing else waiting: write this session (the
+        // store merges it into the file) and update the list in memory, instead of reading the
+        // whole history twice more on the main actor after every set.
+        if historyIssue == nil, pendingSessions.isEmpty, pendingDeleteIDs.isEmpty, !pendingDeleteAll {
+            do {
+                try store.save(session)
+            } catch {
+                pendingSessions[session.id] = session
+                historyIssue = Self.issue(for: error)
+                return
+            }
+            if let index = history.firstIndex(where: { $0.id == session.id }) {
+                history[index] = session
+            } else {
+                history.append(session)
+                history.sort { $0.startedAt > $1.startedAt }
+            }
+            return
+        }
         pendingSessions[session.id] = session
         retryHistory()
     }

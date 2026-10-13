@@ -278,6 +278,26 @@ struct WorkoutSessionModelTests {
         #expect(model.framingClosedNote == "Plumb closed the camera after 3 minutes without a set.")
     }
 
+    /// After every set the model read the whole history three times (two of them itself) and
+    /// rewrote it on the main actor before the result appeared, more slowly as history grew. A set
+    /// now writes its session once and updates the list in memory.
+    @Test func aMeasuredSetDoesNotReadTheHistoryAgain() async throws {
+        let store = CountingSessionStore()
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source, store: store)
+        #expect(store.loads == 1)
+        for _ in 0..<2 {
+            await model.startPreview()
+            await model.beginSet(countdown: 0)
+            for frame in trace(reps: 6) { source.emit(frame) }
+            await model.endSet()
+        }
+        #expect(store.loads == 1)
+        #expect(store.saves == 2)
+        #expect(model.history == store.sessions)
+        #expect(model.history.first?.sets.count == 2)
+    }
+
     @Test func stopTimingUsesTapInstantAndClearsForNextSet() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
@@ -719,6 +739,31 @@ struct WorkoutSessionModelTests {
             .rightAnkle: JointPoint(x: 0.57, y: 0.90, confidence: 0.99),
         ])
     }
+}
+
+/// History in memory, counting how often the model reads and writes it.
+nonisolated private final class CountingSessionStore: SessionStoring, @unchecked Sendable {
+    private(set) var sessions: [WorkoutSessionSummary] = []
+    private(set) var loads = 0
+    private(set) var saves = 0
+
+    func load() throws -> [WorkoutSessionSummary] {
+        loads += 1
+        return sessions
+    }
+
+    func save(_ session: WorkoutSessionSummary) throws {
+        saves += 1
+        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
+            sessions[index] = session
+        } else {
+            sessions.append(session)
+        }
+    }
+
+    func delete(id: UUID) throws { sessions.removeAll { $0.id == id } }
+    func deleteAll() throws { sessions = [] }
+    func recoverCorruptStore() throws -> URL { throw SessionStoreError.notCorrupted }
 }
 
 nonisolated private final class ToggleSessionStore: SessionStoring, @unchecked Sendable {
