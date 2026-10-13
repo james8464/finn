@@ -4,8 +4,9 @@
 >
 > - **This file is the source of truth. Keep it true.**
 > - **Idea:** a fitness coach on iPhone + Apple Watch that aims to check every rep and give a timely correction. Track your progress and your workouts.
-> - **Today we have:** iPhone, four side-view exercises, and a first Apple Watch companion that shows the iPhone's live rep count and taps the wrist (not yet run on a real watch).
-> - **Not built yet:** the full iPhone technology, the full app, Apple Watch measurement: wrist motion, heart rate, workout session (and Apple TV, AirPods head tracking, widgets, Live Activities).
+> - **Today we have:** iPhone only, four side-view exercises, hands-free sets with the live rep count on screen and in your ears (AirPods or speaker), and your most frequent pattern before each set.
+> - **Written, not yet in the build:** an Apple Watch companion that mirrors the iPhone's count (its Xcode target and icon are still to add).
+> - **Not built yet:** Apple Watch measurement (wrist motion, heart rate, workout session), Apple TV, AirPods head tracking, widgets, Live Activities.
 
 ## Rules for AI agents and contributors
 
@@ -15,13 +16,13 @@
 
 ## Plumb idea
 
-The intended Plumb experience is a fitness coach on iPhone and Apple Watch. Prop your phone up once per exercise: the camera checks your posture and execution on every rep, while the Watch tracks reps, tempo, and effort, can tap your wrist when a validated issue appears, and can display real-time advice. iPhone and Apple Watch are the core of this vision. The goal is to deliver a correction as early as the evidence allows, then keep the workout's data in the app so you can track progress. A first Watch companion that mirrors the iPhone's count is built (see [Current state](#current-state)); Watch tracking of reps, tempo, and effort is planned.
+The intended Plumb experience is a fitness coach on iPhone and Apple Watch. Prop your phone up once per exercise: the camera checks your posture and execution on every rep, while the Watch tracks reps, tempo, and effort, can tap your wrist when a validated issue appears, and can display real-time advice. iPhone and Apple Watch are the core of this vision. The goal is to deliver a correction as early as the evidence allows, then keep the workout's data in the app so you can track progress. A first Watch companion that mirrors the iPhone's count is written but not yet in the build (see [Current state](#current-state)); Watch tracking of reps, tempo, and effort is planned.
 
 Apple Foundation Models may help phrase validated observations on eligible devices; the coaching facts come from camera pose analysis and exercise-specific rules, with a non-generative fallback. The product is designed to say when the view is too weak to support a cue.
 
 We want Plumb to use as much of Apple's ecosystem as it can, with each device doing the job it is best at.
 
-- **AirPods** can deliver corrections directly to your ears. Motion-capable models may also provide head-motion data for a future, exercise-specific compensatory-movement check; whether that signal is useful and reliable needs device and coach validation. An optional post-set spoken observation already uses the current audio output, including paired AirPods. [Apple's headphone motion API](https://developer.apple.com/documentation/coremotion/cmheadphonemotionmanager) requires an availability check and motion permission.
+- **AirPods** can deliver corrections directly to your ears. Motion-capable models may also provide head-motion data for a future, exercise-specific compensatory-movement check; whether that signal is useful and reliable needs device and coach validation. The countdown, each rep, live observations and the post-set observation already use the current audio output, including paired AirPods. [Apple's headphone motion API](https://developer.apple.com/documentation/coremotion/cmheadphonemotionmanager) requires an availability check and motion permission.
 - **iPhone Duo** could stand on its own for camera placement; that setup still needs testing. [Apple describes its hands-free standing design](https://www.apple.com/iphone-duo/).
 - **Apple TV:** working out in the living room. The iPhone analyzes its live camera feed, and the feedback could appear on the TV.
 
@@ -42,40 +43,42 @@ We are building the Plumb idea. Keep in mind:
 
 _Updated 13 October 2026._
 
-**In one sentence:** an iPhone app that analyzes one selected exercise at a time from the side, counts reps, and gives at most one supported observation after the set, with a first Apple Watch companion that shows the count. It has not yet been tested on a real iPhone or Apple Watch with real people.
+**In one sentence:** an iPhone-only app that analyzes one selected exercise at a time from the side, counts reps live and says them, and gives at most one supported observation after the set. It has not yet been tested on a real iPhone with real people.
 
 **What the app does**
 
 - Four exercises, filmed from the side: bodyweight squat, push-up, static lunge, stiff-leg deadlift.
-- Before the set: live camera view with the tracked skeleton and framing tips.
-- After the set: a rep count and at most one observation when the evidence supports it. Otherwise, it says there is no clear pattern or explains why to retake.
-- Compares two sets, keeps a local history, and shares a result as text.
-- Reads the observation aloud on tap, through the iPhone speaker or AirPods.
-- During a set, says the countdown, each rep, and live observations through AirPods or other headphones when connected. The setup screen says when headphones or a paired Apple Watch are around and what each adds to the chosen exercise. Neither is required.
-- Apple Watch companion (new on 13 October): when Plumb is open on a paired watch, it shows the exercise, the stage, a large live rep count, and live observations; taps the wrist on each rep, with a distinct tap for an observation; and starts or stops the set from the wrist (not for push-ups, where the hands stay on the floor). The watch measures nothing: every number comes from the iPhone camera. Only the count and short texts go to the watch, never video.
+- Hands-free sets (new on 13 October, on by default, switch in Options): the phone stands a few steps away. The countdown starts once you hold still in position (a plank for push-ups); the set ends when you walk back to the phone or stop moving after your reps. Only the set is measured, not the walk to your spot and back. Start set and Stop set still work. The screen stays on while the camera is open.
+- Before the set: live camera view with the tracked skeleton, the joint Plumb cannot see clearly ("Ankle not clear"), and framing tips, said aloud hands-free.
+- During the set: the reps counted so far, large on screen and said aloud through AirPods or other headphones when connected, otherwise the speaker; a rep clearly faster or shorter than your first reps of the set is pointed out once.
+- After the set: a rep count and at most one observation when the evidence supports it, the deepest and shallowest reps drawn from their pose points, or a reason to retake with advice matched to it.
+- Your most frequent pattern (new on 13 October): each saved set lists what it showed (movements too shallow to count, too fast or slow, an unfinished last rep, a shorter range at the end, reps faster than the first ones, an angled view). The pattern that comes back in your recent sets of an exercise is shown before the next one, and the result says when it returns.
+- Compares a set with the latest compatible earlier set of the same exercise, keeps a local history, and shares a result as text.
 - Optional: Apple Intelligence can reword the comparison. If it is unavailable or fails, a pre-written sentence is shown.
-- Video is analyzed on the iPhone and never saved.
+- Video is analyzed on the iPhone and never saved. The app ships a privacy manifest (no tracking, no collected data).
 
 **How it avoids wrong answers**
 
 - Checks that the person is filmed from the side (Vision 3D). A slight angle gives a placement tip; facing the camera for several seconds refuses the set.
-- Checks that every detected joint lies on the person's silhouette, so a hidden ankle is not invented (new on 13 October).
-- Follows one athlete and ignores other people in view.
+- Checks that every detected joint lies on the person's silhouette, so a hidden ankle is not invented. Since 13 October the check searches in proportion to the body and ignores an empty mask; the first version also rejected visible ankles and wrists.
+- Follows one athlete and ignores other people in view. Only someone standing in front of the athlete excuses a gap of up to 3 s; a lone athlete lost for a moment (getting into a push-up) is picked up again.
 - Optional: recognizes the exercise automatically and keeps the user's choice when unsure.
 
 **Not proven yet**
 
-- Tested only in the simulator, on generated videos, and on public videos. No run yet on a physical iPhone across lighting, clothing, and camera angles.
-- Four baseline generated test videos cover six clear squats, no movement, hidden legs, and covered feet. Five variants probe light, distance, tempo, and facing direction; the mirrored clip currently asks for a retake. These tests are reproducible but do not establish accuracy on real people.
+- Tested only in the simulator, on generated videos, on public videos (earlier versions), and, for the analysis logic, on synthetic walk-in, walk-out, occlusion and wobble traces in a Linux build of the same Swift files. No run yet on a physical iPhone across lighting, clothing, and camera angles: hands-free start and stop, spoken reps, landscape display and heat handling are untested on a device.
+- The changes of 13 October afternoon (hands-free, set window, silhouette search, frequent pattern, privacy manifest) have not yet been built in Xcode: the GitHub push from the cloud session was refused, so the iOS CI has not run them.
+- Four baseline generated test videos cover six clear squats, no movement, hidden legs, and covered feet. Five variants probe light, distance, tempo, and facing direction; the mirrored clip asked for a retake before the silhouette change. The recorded pose fixtures predate it. These tests are reproducible but do not establish accuracy on real people.
 - No qualified trainer has reviewed the coaching observations.
 - The silhouette check has not yet been measured on the public videos.
-- Apple Watch companion: its messages and set mirroring are unit-tested, but it has not yet been compiled in Xcode or run on a physical Apple Watch. Taps with the wrist lowered are untested.
 
-**Not built:** Apple Watch measurement (wrist motion, heart rate, HealthKit workout session), a watch app icon, Apple TV, AirPods head tracking, widgets, Live Activities, accounts, subscriptions.
+**Written, not in the build yet:** an Apple Watch companion (`Plumb/PlumbWatch`, `Accessories.swift`, `WatchBridge.swift`). It would show the exercise, stage, live rep count and observations, tap the wrist on each rep, and start or stop the set from the wrist. Its messages and set mirroring are unit-tested. The Xcode target is a separate commit (`adcbd89`, branch `worktree-agent-a5251f6fe2375b37d`) because it needs the watchOS 27 platform and a watch app icon; until it is added, the iPhone app does not talk to a watch. See `docs/design/apple-watch-and-airpods.md`.
+
+**Not built:** Apple Watch measurement (wrist motion, heart rate, HealthKit workout session), Apple TV, AirPods head tracking, widgets, Live Activities, accounts, subscriptions, running analysis (see `docs/product/running-stride.md`).
 
 **Challenge goal:** a reliable iPhone loop and a build submitted through App Store Connect. Public release depends on validation and distribution access.
 
-_For developers:_ each exercise is defined in `ExerciseDefinition.swift` (rule versions `squat-side-v5` and `*-side-v4`), and what headphones and the Apple Watch add to it in `Accessories.swift`. The watch app is in `Plumb/PlumbWatch`. Generated test videos are in `tools/replay`.
+_For developers:_ each exercise is defined in `ExerciseDefinition.swift` (rule versions `squat-side-v6` and `*-side-v5`); the set window is `SetWindow.swift`, hands-free and live reps `LiveSet.swift`, the frequent pattern `MistakeProfile.swift`, and what headphones and the Apple Watch add `Accessories.swift`. Generated test videos are in `tools/replay`.
 
 Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 
@@ -95,9 +98,10 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 - `planning.md`: experience, scoped MVP, technical approach, privacy, validation, and timeline
 - `docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`: task-by-task plan for the first real iPhone squat session
 - `docs/validation/squat-v1-protocol.md`: consent, physical-device test, annotation, and claim gates
-- `docs/validation/physical-iphone-run.md`: step-by-step device smoke run when the iPhone is available
+- `docs/validation/physical-iphone-run.md`: step-by-step device smoke run when the iPhone is available, including hands-free sets
+- `docs/product/running-stride.md`: what Plumb could measure for running (Watch metrics, treadmill camera) and in what order
 - `docs/validation/squat-v1-results.md`: actual results status; no real sets collected yet
-- `docs/validation/exercise-rules-v1.md`: push-up, lunge, and deadlift rules, the 3D camera-angle check, and what each still needs on a physical iPhone
+- `docs/validation/exercise-rules-v1.md`: push-up, lunge, and deadlift rules, the set window, hands-free timings, the frequent-pattern rule, the 3D camera-angle check, and what each still needs on a physical iPhone
 - `tools/replay/README.md`: generated simulator sets for every exercise, missing-joint refusal, and Mac replay of a saved video through Vision and the production analyzer
 - `tools/exercise-classifier/README.md`: clip format, labeling, Create ML training, and installing the exercise classifier
 - `docs/release/app-store-submission.md`: release checks and App Store Connect status
@@ -125,4 +129,4 @@ Project for the October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 
 The layered Icon Composer source is `Plumb/Plumb/AppIcon.icon`. Flat marks and a preview are in `Plumb/BrandArtwork`.
 
-The capture screen shows an elapsed clock while a set is active. For repeatable development testing, the Debug build has generated six-rep fixtures for all four exercises and a missing-wrist case. The fixtures test app behavior without doing a workout; they do not validate pose detection or coaching accuracy on real people. See the replay guide for simulator commands and saved-video analysis on a Mac.
+The capture screen shows the live rep count and an elapsed clock while a set is active. For repeatable development testing, the Debug build has generated six-rep fixtures for all four exercises and a missing-wrist case. The fixtures test app behavior without doing a workout; they do not validate pose detection or coaching accuracy on real people. See the replay guide for simulator commands and saved-video analysis on a Mac.

@@ -2,6 +2,8 @@
 
 _13 October 2026. Status: written and unit-tested on Linux (messages, roles, set mirroring); not yet compiled in Xcode and not yet run on a physical Apple Watch or with AirPods._
 
+**Not in the build yet.** The PlumbWatch Xcode target is commit `adcbd89` (branch `worktree-agent-a5251f6fe2375b37d`), kept out of the main line before the App Store submission: it needs the watchOS 27 platform in Xcode and CI, and an upload needs a watch app icon. Until it is cherry-picked, the iPhone app never activates WatchConnectivity (`WatchBridge.isWatchAppBundled` looks for an embedded watch app) and shows no watch line. Headphone detection and spoken reps work without it. To turn the watch on: enable watchOS for `AppIcon.icon` in Icon Composer, cherry-pick `adcbd89`, add the icon to the target, and build on a paired watch.
+
 Théophile asked to define, per exercise, whether Plumb needs an Apple Watch and/or AirPods; to check whether each is connected; to run that device's loop when it is; and, ideally, to give near-real-time feedback on the wrist during a set ("faster", "slower") so the person works the muscle better.
 
 **What exists now:** neither device is needed for any exercise. Both only deliver what the iPhone camera measured, closer to the person, who stands a few steps from the phone. Neither adds a measurement yet, so neither changes the analysis or the observation after the set.
