@@ -634,7 +634,7 @@ struct ContentView: View {
             let name = kind.definition.copy.name
             Text(kind == model.captureExercise
                  ? "Recognized as \(name) on this iPhone."
-                 : "Recognized as \(name) on this iPhone, so Plumb used it instead of \(chosen).")
+                 : "Recognized as \(name) on this iPhone, so Plumb used it instead of \(chosen). Your next sets use \(name).")
                 .font(.subheadline)
                 .accessibilityIdentifier("result.recognition")
         case .uncertain:

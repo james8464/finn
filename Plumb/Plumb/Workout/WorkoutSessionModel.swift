@@ -478,6 +478,9 @@ final class WorkoutSessionModel {
         let exercise: ExerciseKind
         if case .recognized(let recognized, _) = recognition {
             exercise = recognized
+            // Plumb is sure the person did another exercise than the one chosen: the next sets use
+            // it, so they are framed, counted live and stopped hands-free as that exercise.
+            if recognized != captureExercise { selectedExercise = recognized }
         } else {
             exercise = captureExercise
         }
