@@ -1188,6 +1188,8 @@ struct ContentView: View {
             "Your earlier sets were filmed from your other side, so Plumb can’t compare them."
         case .incompatibleSets:
             "These sets used different camera views, so Plumb can’t compare them reliably."
+        case .partlyVisible:
+            "Plumb saw this set only partly, so it doesn’t compare it with your earlier sets."
         }
     }
 

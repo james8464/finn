@@ -19,6 +19,8 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     case spedUp
     /// The camera saw the person at an angle instead of from the side.
     case angledView
+    /// The joints were clear in only 65 to 80% of the set (`PartialVisibility`).
+    case partlyVisible
 
     /// Issues of one measured set, from its diagnostics, its observation and its live events.
     static func issues(diagnostics: MovementDiagnostics?, cue: Cue?, spedUp: Bool) -> [SetIssue] {
@@ -28,6 +30,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
             if diagnostics.outsideTempo > 0 { issues.append(.outsideTempo) }
             if diagnostics.unfinished { issues.append(.unfinishedLastRep) }
             if diagnostics.angledView != nil { issues.append(.angledView) }
+            if diagnostics.partialVisibility != nil { issues.append(.partlyVisible) }
         }
         switch cue?.kind {
         case .rangeDecreased?: issues.append(.rangeDropped)
@@ -50,6 +53,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
         case .postureChanged: definition.posture.title
         case .spedUp: "Reps faster than your first ones"
         case .angledView: "Filmed at an angle"
+        case .partlyVisible: "Joints not always in view"
         }
     }
 
@@ -66,6 +70,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
         case .postureChanged: definition.posture.nextAction
         case .spedUp: "Keep the pace of your first reps."
         case .angledView: "Turn so your side faces the camera."
+        case .partlyVisible: "Keep your whole body in view, with even light."
         }
     }
 }
