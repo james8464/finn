@@ -15,7 +15,7 @@ COLUMNS = (
     "cue_rep_numbers expert_supported expert_show expert_unassessable expert_view_suitable "
     "result_latency_ms capture_duration_s interruption thermal_issue failure_reason notes"
 ).split()
-RUBRIC = "squat-side-v5"
+RUBRIC = "squat-side-v6"
 
 
 class ValidationError(ValueError):
@@ -90,7 +90,7 @@ def evaluate(rows):
         if row["app_outcome"] != "measured" and row.get("app_reps", "").strip():
             raise ValidationError(f"{set_id}: rejected outcome cannot have app_reps")
         cue_kind = row.get("cue_kind", "").strip()
-        if cue_kind not in {"", "rangeDecreased"}:
+        if cue_kind not in {"", "rangeDecreased", "torsoTiltIncreased"}:
             raise ValidationError(f"{set_id}: invalid cue_kind for frozen rubric")
         if cue_kind and row["app_outcome"] != "measured":
             raise ValidationError(f"{set_id}: cue requires a measured outcome")

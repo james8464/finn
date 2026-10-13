@@ -8,8 +8,8 @@ Built and launched commit `8c2959e` on the iPhone 18 Pro Max simulator (iOS 27.0
 
 | Evidence | Current state |
 | --- | --- |
-| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v5` |
-| Historical app capture path on public gym videos (v4, before person mask) | 44 of 50 measured with athlete tracking (5 without); 43 of 44 within one rep of an independent dip counter. The current v5 mask has not been replayed on this set. See "Other people in view" in [`exercise-rules-v1.md`](exercise-rules-v1.md) |
+| Frozen app commit / rubric | Commit to be frozen before holdout / `squat-side-v6` |
+| Historical app capture path on public gym videos (v4, before person mask) | 44 of 50 measured with athlete tracking (5 without); 43 of 44 within one rep of an independent dip counter. The v5 person-mask and v6 posture cue have not been replayed on this set. See "Other people in view" in [`exercise-rules-v1.md`](exercise-rules-v1.md) |
 | Generated video regressions (v5) | Original, dim, farther, and slower six-rep clips measured; standing still, hidden legs, covered feet, and too-small subject refused. The mirrored clip is a diagnostic retake. These clips reuse synthetic imagery and are not participant validation. [Replay details](../../tools/replay/README.md) |
 | Replay on public videos (not participants) | 42 of 50 Mendeley side-view squat videos measured by `squat-side-v3` (0 of 50 by `squat-side-v2`); counts within one rep of an independent dip counter on all 42; no human count. See [`exercise-rules-v1.md`](exercise-rules-v1.md) |
 | Tuning sets | 0 |

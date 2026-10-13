@@ -9,7 +9,7 @@ def row(set_id, participant_id, view, suitable, outcome):
     result = dict.fromkeys(COLUMNS, "")
     result.update(set_id=set_id, participant_id=participant_id, split="holdout",
                   consent_version="v1", device_model="iPhone", ios_build="27.0",
-                  app_commit="abc123", rubric_version="squat-side-v5", lighting="even",
+                  app_commit="abc123", rubric_version="squat-side-v6", lighting="even",
                   side="left", view_category=view, body_visible="yes", bystander="no",
                   setup_attempts="1", app_outcome=outcome,
                   app_reps="5" if outcome == "measured" else "",
@@ -41,6 +41,14 @@ class ViewValidationTests(unittest.TestCase):
     def test_unknown_view_category_is_rejected(self):
         with self.assertRaisesRegex(ValidationError, "invalid view_category"):
             evaluate([row("front-1", "person-a", "diagonal", "no", "measured")])
+
+    def test_posture_cue_can_be_reviewed_in_holdout(self):
+        sample = row("side-1", "person-a", "side", "yes", "measured")
+        sample["cue_kind"] = "torsoTiltIncreased"
+        sample["cue_rep_numbers"] = "4;5"
+        sample["expert_supported"] = "yes"
+        sample["expert_show"] = "yes"
+        evaluate([sample])
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ struct SquatAnalyzerTests {
         }
 
         #expect(analysis.reps.count == 6)
-        #expect(analysis.rubricVersion == "squat-side-v5")
+        #expect(analysis.rubricVersion == "squat-side-v6")
         #expect(analysis.reps.map(\.number) == [1, 2, 3, 4, 5, 6])
         #expect(analysis.reps.allSatisfy { $0.duration > 1.3 && $0.duration < 2.1 })
         #expect(analysis.reps.allSatisfy { $0.normalizedHipTravel > 0.35 && $0.normalizedHipTravel < 0.5 })
