@@ -53,13 +53,15 @@ struct ContentView: View {
                     preferences: PlumbPreferences = .standard,
                     announcer: (any LiveAnnouncing)? = nil,
                     fitness: (any FitnessWorkoutSaving)? = nil,
+                    health: (any HealthReading)? = nil,
                     connectsAccessories: Bool = false) {
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
                                                          narrator: narrator,
                                                          exerciseClassifier: exerciseClassifier,
                                                          preferences: preferences,
                                                          announcer: announcer,
-                                                         fitness: fitness))
+                                                         fitness: fitness,
+                                                         health: health))
         self.connectsAccessories = connectsAccessories
     }
 
@@ -109,6 +111,19 @@ struct ContentView: View {
             UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(stage)
         }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+        // Personalize with Health: read again whenever the first screen shows.
+        .task(id: model.stage == .ready) {
+            if model.stage == .ready { await model.refreshHealth() }
+        }
+        .sheet(isPresented: Binding(
+            get: { model.showsPersonalizationOffer },
+            set: { if !$0 { model.showsPersonalizationOffer = false } }
+        )) {
+            PersonalizationOfferView { personalize in
+                Task { await model.answerPersonalizationOffer(personalize: personalize) }
+            }
+            .presentationDetents([.medium, .large])
+        }
         .task {
             guard connectsAccessories else { return }
             accessories.start(model: model, demoInput: usesSyntheticInput)
@@ -203,6 +218,11 @@ struct ContentView: View {
                 setupStep(selectedCopy.stanceTitle, detail: selectedCopy.stanceDetail,
                           symbol: "figure.stand")
                 accessoryNotes
+                if let note = model.readinessNote {
+                    healthNote(note)
+                        .padding(.top, 20)
+                        .accessibilityIdentifier("setup.healthReadiness")
+                }
 
                 Text("Analysis stays on this iPhone. No video is saved.")
                     .font(.footnote)
@@ -340,6 +360,19 @@ struct ContentView: View {
         }
     }
 
+    /// A personalized line and, under it, the Health data it rests on.
+    private func healthNote(_ note: HealthNote) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(note.text)
+                .font(.subheadline)
+            Text(note.basis)
+                .font(.footnote)
+                .foregroundStyle(PlumbStyle.supportingText)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+
     /// What connected headphones or a paired Apple Watch add to the chosen exercise, one line each.
     @ViewBuilder private var accessoryNotes: some View {
         let lines = AccessoryGuide.setupLines(for: model.selectedExercise, status: accessories.status,
@@ -435,7 +468,7 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Apple Health").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("If you turn on Save workouts to Apple Fitness, Plumb writes each finished session to Health as a workout, with your permission: its time, sets, measured reps, and exercise names.")
-                    Text("Plumb reads nothing from Health and never adds calories or heart rate. Nothing leaves this iPhone through Plumb.")
+                    Text("Plumb reads Health only if you turn on Personalize with Health: heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height, to adapt its advice to you. It never writes calories or heart rate, and nothing leaves this iPhone through Plumb.")
                     Text("Health keeps these workouts under your Health settings. Deleting history in Plumb doesn’t remove them; delete them in the Health app.")
                 }
                 Divider()
@@ -554,6 +587,32 @@ struct ContentView: View {
                         Text(note)
                             .foregroundStyle(PlumbStyle.supportingText)
                             .accessibilityIdentifier("options.fitnessNote")
+                    }
+                }
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Personalize with Health").font(.headline).accessibilityAddTraits(.isHeader)
+                    Toggle("Use my Health data", isOn: Binding(
+                        get: { model.personalizesWithHealth },
+                        // Permission in context: Health asks for each type when the person turns this on.
+                        set: { isOn in Task { await model.setPersonalizesWithHealth(isOn) } }
+                    ))
+                    .frame(minHeight: 44)
+                    .disabled(!model.offersHealthPersonalization)
+                    .accessibilityIdentifier("options.personalizesWithHealth")
+                    Text("Plumb adapts its advice to you: rest between sets, a lighter day after a short night or a heavy day, and your heart rate from Apple Watch. Each tip says which data it uses. Nothing leaves this iPhone, and Plumb works fully without it.")
+                    if !model.offersHealthPersonalization {
+                        Text("Demo and recorded input never read Health.")
+                            .foregroundStyle(PlumbStyle.supportingText)
+                    }
+                    ForEach(HealthReadType.allCases, id: \.self) { type in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(type.title).font(.subheadline.weight(.semibold))
+                            Text(type.use)
+                                .font(.subheadline)
+                                .foregroundStyle(PlumbStyle.supportingText)
+                        }
+                        .accessibilityElement(children: .combine)
                     }
                 }
             }
@@ -733,7 +792,9 @@ struct ContentView: View {
                 .lineLimit(1)
                 .contentTransition(.numericText())
                 .animation(.snappy, value: model.liveRepCount)
-            Text(model.liveRepCount == 1 ? "rep" : "reps")
+            // The exercise being measured, such as "push-ups", so a wrong choice shows before the reps
+            // are done (13 October: push-ups filmed while Squat was chosen counted nothing).
+            Text(captureCopy.name.lowercased() + (model.liveRepCount == 1 ? "" : "s"))
                 .font(.headline)
         }
         // A dark backing keeps the white count readable over a bright camera image, like the other
@@ -827,6 +888,15 @@ struct ContentView: View {
                                 Text(note)
                                     .font(.subheadline)
                                     .accessibilityIdentifier("result.movementNote")
+                            }
+                            ForEach(model.formNotes, id: \.self) { note in
+                                Text(note)
+                                    .font(.subheadline)
+                                    .accessibilityIdentifier("result.formNote")
+                            }
+                            ForEach(model.resultHealthNotes, id: \.text) { note in
+                                healthNote(note)
+                                    .accessibilityIdentifier("result.healthNote")
                             }
                             if let pattern = model.repeatedPattern {
                                 VStack(alignment: .leading, spacing: 4) {

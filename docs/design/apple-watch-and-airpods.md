@@ -1,8 +1,8 @@
 # Apple Watch and AirPods during a set
 
-_13 October 2026. Status: written and unit-tested on Linux (messages, roles, set mirroring); not yet compiled in Xcode and not yet run on a physical Apple Watch or with AirPods._
+_13 October 2026. Status: unit-tested (messages, roles, set mirroring) and compiled in Xcode for the iPhone and watch simulators; not yet run on a physical Apple Watch or with AirPods._
 
-**Not in the build yet.** The PlumbWatch Xcode target is commit `adcbd89` (branch `worktree-agent-a5251f6fe2375b37d`), kept out of the main line before the App Store submission: it needs the watchOS 27 platform in Xcode and CI, and an upload needs a watch app icon. Until it is cherry-picked, the iPhone app never activates WatchConnectivity (`WatchBridge.isWatchAppBundled` looks for an embedded watch app) and shows no watch line. Headphone detection and spoken reps work without it. To turn the watch on: enable watchOS for `AppIcon.icon` in Icon Composer, cherry-pick `adcbd89`, add the icon to the target, and build on a paired watch.
+**In the build since 13 October.** The `PlumbWatch` target is a single-target SwiftUI watch app (watchOS 10 or later, bundle `com.james8464.Plumb.watchkitapp`, companion of `com.james8464.Plumb`), embedded in the iPhone app under `Watch/`. That makes `WatchBridge.isWatchAppBundled` true, so the iPhone activates WatchConnectivity. It compiles the `Plumb/PlumbWatch` folder plus `Workout/WatchMessages.swift` and `AppIcon.icon` through a synchronized-folder membership exception; `AppIcon.icon` now lists watchOS among its platforms. Building the `Plumb` scheme also builds the watch app, so Xcode and CI need the watchOS platform. A team that signs with its own bundle prefix changes the watch's bundle identifier and `WKCompanionAppBundleIdentifier` together.
 
 Théophile asked to define, per exercise, whether Plumb needs an Apple Watch and/or AirPods; to check whether each is connected; to run that device's loop when it is; and, ideally, to give near-real-time feedback on the wrist during a set ("faster", "slower") so the person works the muscle better.
 
@@ -69,7 +69,7 @@ Watch to iPhone, `type = "command"`, `v = 1`, `command`: `startSet` or `stopSet`
 On simulators (no workout needed):
 
 1. In Xcode, run the `Plumb` scheme on an iPhone simulator that has a paired Apple Watch simulator, with launch arguments `-plumb-ui-demo -plumb-watch-demo`.
-2. Run the `PlumbWatch` scheme (Xcode creates it) on the paired watch simulator and keep it open.
+2. Run the `PlumbWatch` scheme on the paired watch simulator and keep it open.
 3. On the iPhone: Set up camera. The watch shows "Get in position" and DEMO INPUT. Tap Start set on the watch, check the countdown, the rep count rising, the result line, and that Stop set ends the set. Choose Push-up and check that the watch hides the buttons.
 
 On devices:
@@ -84,9 +84,8 @@ On devices:
 ## Not done
 
 - **No wrist-motion measurement.** The watch's accelerometer and gyroscope are not read; reps, tempo and range come only from the iPhone camera. Using wrist motion (for example a tempo check on push-ups) needs a measured rule and validation first.
-- **No HealthKit workout session on the watch.** No heart rate, calories, or live Activity ring tracking on the wrist, and the watch asks no Health permission. A workout session would also keep the watch app running with the wrist down. (Since 13 October the iPhone can save a finished session to Apple Health as a workout, with its own opt-in in Options; the watch takes no part in it.)
+- **Heart rate only, and only with Personalize with Health.** Since 13 October the watch runs a HealthKit workout session (functional strength training, `workout-processing` background mode) while the iPhone camera is open, if the person turned on Personalize with Health on the iPhone (`WatchState.measuresHeartRate`). It shows the heart rate and sends each reading to the iPhone (`WatchHeartRate` message), then discards the workout when the camera closes: the iPhone saves the session to Fitness itself when asked. No calories or ring tracking from the watch. Not yet run on a physical watch.
 - **Screen and taps with the wrist down.** WatchKit plays haptics only while the watch app is active, and the iPhone sends live messages only while the watch app is reachable. `WKExtendedRuntimeSession` was not added: it needs a watch Info.plist background mode (`WKBackgroundModes`, physical therapy) that generated Info.plist settings do not cover, and its effect on reachability needs a device test. Until then, the latest state waits in the application context.
 - **No AirPods head tracking** (`CMHeadphoneMotionManager`); AirPods only play the spoken count.
-- **No watch app icon.** `AppIcon.icon` enables only the iOS/macOS square platforms. Enable watchOS in Icon Composer, then add the icon to the PlumbWatch target and set `ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon` for it. App Store upload needs this.
-- **Not compiled in Xcode yet.** WatchConnectivity, WatchKit, AVFAudio and SwiftUI code was checked against stand-in modules on Linux only. The Xcode target is in its own commit: building the `Plumb` scheme now also builds the watch app, so Xcode and CI need the watchOS 27 platform installed. Drop that commit if they do not have it.
+- **Not run on a physical watch yet.** The watch app compiles for the watch simulator and is embedded in the iPhone build; pairing, reachability and taps still need a device test.
 - **Privacy pages.** Before a release that includes the watch app, add an Apple Watch paragraph to the public privacy policy (rep count, stage and observation text go to the person's own watch; no video or pose points). The App Privacy answer stays "not collected": nothing reaches the developer.

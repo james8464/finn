@@ -143,6 +143,7 @@ nonisolated extension ExerciseDefinition {
         switch signal {
         case .jointBend(let from, let vertex, let to): (from, vertex, to)
         case .verticalTravel: (.hip, .knee, .ankle)
+        case .verticalRise: (.shoulder, .elbow, .wrist)
         }
     }
 }

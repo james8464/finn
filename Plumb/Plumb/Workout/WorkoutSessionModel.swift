@@ -69,7 +69,7 @@ final class WorkoutSessionModel {
     private let source: any PoseStreaming
     @ObservationIgnored private let store: (any SessionStoring)?
     @ObservationIgnored private let narrator: ComparisonNarrator
-    @ObservationIgnored private let preferences: PlumbPreferences
+    @ObservationIgnored let preferences: PlumbPreferences
     @ObservationIgnored private let exerciseClassifier: (any ExerciseClassifying)?
     @ObservationIgnored private let angleClassifier: (any AngleWindowClassifying)?
     @ObservationIgnored private let ruleClassifier: (any AngleWindowClassifying)?
@@ -98,11 +98,14 @@ final class WorkoutSessionModel {
     /// Sessions saved to Apple Health in this run, kept even if writing history fails.
     @ObservationIgnored private var fitnessRecords: [UUID: FitnessWorkoutRecord] = [:]
     /// The date of a measured set, for the session it joins. Tests replace it.
-    @ObservationIgnored private let currentDate: () -> Date
+    @ObservationIgnored let currentDate: () -> Date
 
     private(set) var stage: WorkoutStage = .ready
-    /// The exercise chosen on the setup screen. A capture keeps the exercise it started with.
-    var selectedExercise: ExerciseKind = .bodyweightSquat
+    /// The exercise chosen on the setup screen. A capture keeps the exercise it started with. The app
+    /// remembers it across launches (`PlumbPreferences.selectedExercise`).
+    var selectedExercise: ExerciseKind = .bodyweightSquat {
+        didSet { preferences.selectedExercise = selectedExercise }
+    }
     /// The exercise used for the framing check and analysis of the current capture.
     private(set) var captureExercise: ExerciseKind = .bodyweightSquat
     private(set) var result: WorkoutResult?
@@ -113,6 +116,9 @@ final class WorkoutSessionModel {
     /// The deepest and shallowest reps of the latest measured set, drawn on the result. Pose
     /// points only, kept in memory and never saved.
     private(set) var repExtremes: RepExtremes?
+    /// Per-rep facts for the latest measured set (pull-ups: chin above the hands, straight arms,
+    /// swing). Empty for exercises without such checks.
+    private(set) var formNotes: [String] = []
     /// What the optional exercise classifier concluded for the latest set.
     private(set) var recognition: ExerciseRecognition = .notAttempted
     /// Whether Plumb recognizes the exercise after a set (joint-angle rules unless the trained
@@ -221,6 +227,24 @@ final class WorkoutSessionModel {
     private(set) var fitnessAccess: FitnessAuthorization = .notDetermined
     /// The latest save to Apple Health, for the session it concerns.
     private(set) var fitnessSave: FitnessSaveReport?
+    /// Personalize with Health (`WorkoutSessionModel+Health.swift`). Nil for demo and recorded
+    /// input, which never read Health.
+    @ObservationIgnored let health: (any HealthReading)?
+    /// Whether Plumb reads Health to adapt its advice. Off by default; turning it on asks Health.
+    var personalizesWithHealth: Bool {
+        didSet { preferences.personalizesWithHealth = personalizesWithHealth }
+    }
+    /// What Plumb last read from Health; nil until read, or while the option is off.
+    var healthSnapshot: HealthSnapshot?
+    /// The one-time "Make Plumb more personal?" offer is on screen.
+    var showsPersonalizationOffer = false
+    /// The latest heart rate from the Apple Watch, while a set or the rest after it runs.
+    var liveHeartRate: Int?
+    @ObservationIgnored var liveHeartRateAt: Date?
+    /// Watch heart rate readings received while the set ran.
+    @ObservationIgnored var setHeartRateReadings: [Double] = []
+    /// Heart rate during the latest set, from the Apple Watch.
+    var setHeartRate: SetHeartRate?
     /// False for demo and recorded input: those sessions are never saved to Apple Health.
     var offersFitness: Bool { fitness != nil }
     /// A session still open on the first screen: Cancel, or the app going to the background during
@@ -235,6 +259,7 @@ final class WorkoutSessionModel {
          preferences: PlumbPreferences = .standard,
          announcer: (any LiveAnnouncing)? = nil,
          fitness: (any FitnessWorkoutSaving)? = nil,
+         health: (any HealthReading)? = nil,
          currentDate: @escaping () -> Date = { Date() }) {
         self.source = source
         self.store = store
@@ -245,6 +270,7 @@ final class WorkoutSessionModel {
         self.preferences = preferences
         self.announcer = announcer
         self.fitness = fitness
+        self.health = health
         self.currentDate = currentDate
         self.handsFree = preferences.handsFree
         self.speaksLive = preferences.speaksLive
@@ -252,6 +278,8 @@ final class WorkoutSessionModel {
         self.usesTrainedModel = preferences.usesTrainedModel
         self.checksCameraAngle = preferences.checksCameraAngle
         self.savesToFitness = preferences.savesToFitness
+        self.personalizesWithHealth = preferences.personalizesWithHealth
+        if let remembered = preferences.selectedExercise { selectedExercise = remembered }
         if let store {
             do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
             catch { historyIssue = Self.issue(for: error) }
@@ -273,6 +301,8 @@ final class WorkoutSessionModel {
         movementNote = nil
         repExtremes = nil
         repeatedPattern = nil
+        setHeartRate = nil
+        formNotes = []
         lastStopToResultMilliseconds = nil
         captureStartedAt = nil
         stopTappedAt = nil
@@ -384,6 +414,8 @@ final class WorkoutSessionModel {
         liveCaption = nil
         endedHandsFree = false
         captureStartedAt = .now
+        setHeartRateReadings = []
+        setHeartRate = nil
         stage = .capturing
         if countdown > 0 { say("Go") }
     }
@@ -444,6 +476,7 @@ final class WorkoutSessionModel {
         // A comparison belongs to the set it was made for; the new set makes its own or none.
         comparison = nil
         comparisonRecap = nil
+        formNotes = []
         switch outcome {
         case .analyzed(let analysis):
             let explanation = diagnostics?.explanation(for: definition, counted: analysis.reps.count)
@@ -454,6 +487,7 @@ final class WorkoutSessionModel {
             }
             movementNote = explanation
             repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
+            formNotes = FormChecks.sentences(for: analysis, frames: setFrames, definition: definition)
             // A camera angle outside the supported side view can distort relative range.
             let cue = diagnostics?.angledView == nil
                 ? CueSelector.select(from: analysis, exercise: definition) : nil
@@ -463,11 +497,14 @@ final class WorkoutSessionModel {
             let earlier = MistakeProfile.make(history: history, exercise: exercise)
             repeatedPattern = earlier.flatMap { issues.contains($0.issue) ? $0 : nil }
             result = .measured(analysis, cue)
+            setHeartRate = SetHeartRate.make(setHeartRateReadings)
             record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues)
+            offerPersonalizationIfDue()
         case .insufficientView(let reason):
             result = .insufficientView(reason)
-            retakeHint = Self.retakeHint(for: setFrames, definition: definition,
-                                         viewRefused: lastViewVerdict.isMismatch && checksCameraAngle)
+            retakeHint = Self.otherExerciseHint(in: frames, chosen: exercise, refusedFrames: setFrames)
+                ?? Self.retakeHint(for: setFrames, definition: definition,
+                                   viewRefused: lastViewVerdict.isMismatch && checksCameraAngle)
         case .failed(let reason):
             result = .failed(reason)
         }
@@ -484,6 +521,34 @@ final class WorkoutSessionModel {
         case .reject(.missingJoints), .reject(.lowConfidence): return definition.copy.retakeHint
         default: return nil
         }
+    }
+
+    /// When the chosen exercise was refused because its joints were not clear enough, but the same
+    /// capture shows clear reps of another exercise (push-ups filmed while Squat was chosen, 13 October):
+    /// the person probably picked the wrong exercise, so say which one Plumb saw. The camera angle is
+    /// not checked here, since the angle verdict belonged to the wrong exercise.
+    static func otherExerciseHint(in frames: [PoseFrame], chosen: ExerciseKind,
+                                  refusedFrames: [PoseFrame]) -> String? {
+        switch EvidenceGate.assess(refusedFrames, requirement: chosen.definition.evidence) {
+        case .reject(.missingJoints), .reject(.lowConfidence): break
+        default: return nil
+        }
+        var best: (kind: ExerciseKind, reps: Int)?
+        // Only exercises of the same kind of setup: a bar exercise counts the shoulders' rise, which a
+        // squat or push-up also shows, so floor and bar exercises never suggest each other.
+        let hanging = chosen.definition.expectedView == .any
+        for kind in ExerciseKind.allCases where kind != chosen && (kind.definition.expectedView == .any) == hanging {
+            let definition = kind.definition
+            let window = SetWindow.active(frames, requirement: definition.evidence)
+            guard case .analyzed(let analysis) = ExerciseAnalyzer.analyzeWithDiagnostics(
+                window, as: definition, viewCheck: .ignore, trimsToSet: false).outcome,
+                analysis.reps.count >= 2, analysis.reps.count > (best?.reps ?? 0) else { continue }
+            best = (kind, analysis.reps.count)
+        }
+        guard let best else { return nil }
+        let name = best.kind.definition.copy.name
+        return "Plumb counted \(best.reps) \(name.lowercased())s in this set, but \(chosen.definition.copy.name) was chosen. "
+            + "If you did \(name.lowercased())s, choose \(name) on the first screen and retake the set."
     }
 
     private func updateFramingStatus(with frame: PoseFrame) {
@@ -877,6 +942,7 @@ final class WorkoutSessionModel {
         movementNote = nil
         repExtremes = nil
         repeatedPattern = nil
+        formNotes = []
         lastStopToResultMilliseconds = nil
         stopTappedAt = nil
     }

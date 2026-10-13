@@ -6,7 +6,8 @@ import Foundation
 /// trajectories; the camera adds yaw, framing, jitter, dropped joints, and weaker far-side
 /// confidence. It is a stand-in for real recordings, not a model of real movement.
 nonisolated enum SyntheticExerciseMotion {
-    static let labels = ["squat", "push_up", "static_lunge", "stiff_leg_deadlift", "other", "none"]
+    static let labels = ["squat", "push_up", "static_lunge", "stiff_leg_deadlift", "pull_up", "muscle_up",
+                         "other", "none"]
 
     struct Settings {
         var duration: ClosedRange<Double> = 7...14
@@ -122,6 +123,9 @@ nonisolated enum SyntheticExerciseMotion {
         case deadlift(knee: Double, maximumLean: Double)
         case other(kind: Int)
         case none(arms: Double, plank: Bool)
+        /// Hanging from a bar: the shoulders rise by `top` arm lengths at full depth (pull-up about
+        /// 0.85, muscle-up about 1.8), and the hips swing forward and back by `swing` meters.
+        case hang(top: Double, swing: Double)
 
         init<G: RandomNumberGenerator>(label: String, using rng: inout G) {
             switch label {
@@ -132,6 +136,10 @@ nonisolated enum SyntheticExerciseMotion {
             case "stiff_leg_deadlift": self = .deadlift(knee: .random(in: 5...18, using: &rng),
                                                         maximumLean: .random(in: 60...85, using: &rng))
             case "other": self = .other(kind: Int.random(in: 0..<6, using: &rng))
+            case "pull_up": self = .hang(top: .random(in: 0.75...0.95, using: &rng),
+                                         swing: .random(in: 0...0.08, using: &rng))
+            case "muscle_up": self = .hang(top: .random(in: 1.7...1.95, using: &rng),
+                                           swing: .random(in: 0.02...0.12, using: &rng))
             default: self = .none(arms: .random(in: 0...60, using: &rng), plank: Int.random(in: 0..<4, using: &rng) == 0)
             }
         }
@@ -186,6 +194,25 @@ nonisolated enum SyntheticExerciseMotion {
                 put(&sk, .leftWrist, .rightWrist, wrist, b.shoulderWidth)
             case .other(let kind):
                 other(&sk, b, kind: kind, amount: s, time: time)
+            case .hang(let top, let swing):
+                let arm = b.upperArm + b.forearm
+                let bar = b.ankleHeight + b.shin + b.thigh + b.torso + arm + 0.3
+                let wrist = (0.0, bar)
+                let rise = top * arm * s
+                // From the hang the shoulders rise straight up toward the bar, then over it.
+                let shoulder = (-0.04 + (rise > arm ? 0.12 * min(1, (rise - arm) / (0.6 * arm)) : 0),
+                                bar - arm + rise)
+                let elbow = knee(from: wrist, to: shoulder, first: b.forearm, second: b.upperArm,
+                                 bendForward: rise <= arm)
+                let sway = swing * sin(time * 2.4)
+                let hip = (shoulder.0 + sway, shoulder.1 - b.torso)
+                let kneePoint = (hip.0 + 0.04 + sway * 0.5, hip.1 - b.thigh)
+                let ankle = (kneePoint.0 - 0.05, kneePoint.1 - b.shin)
+                legs(&sk, b, near: (ankle, kneePoint, hip), far: (ankle, kneePoint, hip))
+                put(&sk, .leftShoulder, .rightShoulder, shoulder, b.shoulderWidth)
+                put(&sk, .leftElbow, .rightElbow, elbow, b.shoulderWidth)
+                put(&sk, .leftWrist, .rightWrist, wrist, b.shoulderWidth)
+                sk[.nose] = (shoulder.0 + 0.1, shoulder.1 + 0.24, 0)
             case .none(let arms, let plank):
                 if plank {
                     return Motion.pushUp(sag: 0.01).skeleton(body: b, amount: 0.02 * sin(time), time: time)

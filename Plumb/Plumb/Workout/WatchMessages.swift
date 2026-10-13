@@ -52,6 +52,9 @@ nonisolated struct WatchState: Equatable, Sendable {
     var handsFree = false
     /// The iPhone is replaying demo input, not filming a person.
     var demoInput = false
+    /// The person turned on Personalize with Health: the watch runs a workout session while the
+    /// camera is open and sends its heart rate back.
+    var measuresHeartRate = false
     /// When the iPhone sent this state, in seconds since 1970. The watch keeps the newest.
     var sentAt = 0.0
 
@@ -71,6 +74,7 @@ nonisolated struct WatchState: Equatable, Sendable {
             WatchMessageKey.wristControls: wristControls,
             WatchMessageKey.handsFree: handsFree,
             WatchMessageKey.demoInput: demoInput,
+            WatchMessageKey.measuresHeartRate: measuresHeartRate,
             WatchMessageKey.sentAt: sentAt,
         ]
         if let caption { message[WatchMessageKey.caption] = caption }
@@ -93,12 +97,14 @@ nonisolated struct WatchState: Equatable, Sendable {
         wristControls = message[WatchMessageKey.wristControls] as? Bool ?? true
         handsFree = message[WatchMessageKey.handsFree] as? Bool ?? false
         demoInput = message[WatchMessageKey.demoInput] as? Bool ?? false
+        measuresHeartRate = message[WatchMessageKey.measuresHeartRate] as? Bool ?? false
         sentAt = WatchMessageKey.number(message[WatchMessageKey.sentAt]) ?? 0
     }
 
     init(stage: WatchStage = .ready, countdown: Int = 0, exercise: String = "", reps: Int = 0,
          caption: String? = nil, haptic: WatchHaptic = .none, summary: String? = nil,
-         wristControls: Bool = true, handsFree: Bool = false, demoInput: Bool = false, sentAt: Double = 0) {
+         wristControls: Bool = true, handsFree: Bool = false, demoInput: Bool = false,
+         measuresHeartRate: Bool = false, sentAt: Double = 0) {
         self.stage = stage
         self.countdown = countdown
         self.exercise = exercise
@@ -109,6 +115,7 @@ nonisolated struct WatchState: Equatable, Sendable {
         self.wristControls = wristControls
         self.handsFree = handsFree
         self.demoInput = demoInput
+        self.measuresHeartRate = measuresHeartRate
         self.sentAt = sentAt
     }
 
@@ -146,6 +153,34 @@ nonisolated enum WatchCommand: String, CaseIterable, Equatable, Sendable {
     }
 }
 
+/// Watch to iPhone: one heart rate reading from the watch's workout session.
+nonisolated struct WatchHeartRate: Equatable, Sendable {
+    let beatsPerMinute: Double
+    /// When the watch measured it, in seconds since 1970.
+    let measuredAt: Double
+
+    static let messageType = "heartRate"
+
+    func message() -> [String: Any] {
+        [WatchMessageKey.messageType: Self.messageType,
+         WatchMessageKey.version: WatchMessageKey.currentVersion,
+         WatchMessageKey.beatsPerMinute: beatsPerMinute,
+         WatchMessageKey.measuredAt: measuredAt]
+    }
+
+    init(beatsPerMinute: Double, measuredAt: Double) {
+        self.beatsPerMinute = beatsPerMinute
+        self.measuredAt = measuredAt
+    }
+
+    init?(message: [String: Any]) {
+        guard message[WatchMessageKey.messageType] as? String == Self.messageType,
+              let beats = WatchMessageKey.number(message[WatchMessageKey.beatsPerMinute]),
+              let measuredAt = WatchMessageKey.number(message[WatchMessageKey.measuredAt]) else { return nil }
+        self.init(beatsPerMinute: beats, measuredAt: measuredAt)
+    }
+}
+
 nonisolated enum WatchMessageKey {
     static let currentVersion = 1
 
@@ -163,6 +198,9 @@ nonisolated enum WatchMessageKey {
     static let demoInput = "demoInput"
     static let sentAt = "sentAt"
     static let command = "command"
+    static let measuresHeartRate = "heartRate"
+    static let beatsPerMinute = "bpm"
+    static let measuredAt = "measuredAt"
 
     /// Numbers come back as NSNumber on Apple platforms and as Int or Double elsewhere.
     static func integer(_ value: Any?) -> Int? {

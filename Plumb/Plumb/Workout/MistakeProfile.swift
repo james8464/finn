@@ -31,7 +31,8 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
         }
         switch cue?.kind {
         case .rangeDecreased?: issues.append(.rangeDropped)
-        case .torsoTiltIncreased?, .hipDropIncreased?, .kneeBendIncreased?: issues.append(.postureChanged)
+        case .torsoTiltIncreased?, .hipDropIncreased?, .kneeBendIncreased?, .swingIncreased?:
+            issues.append(.postureChanged)
         case nil: break
         }
         if spedUp { issues.append(.spedUp) }
