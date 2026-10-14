@@ -20,6 +20,10 @@ tools/replay/replay.sh --exercise pushUp --video /absolute/path/to/clip.mov \
 tools/replay/replay.sh --exercise pushUp --poses /tmp/plumb-pushup-poses.json
 ```
 
+The Mac extractor can pad the picture with a black border before Vision sees it (`PLUMB_REPLAY_MARGIN=0.25 tools/replay/replay.sh ...`, a share of the picture size). Vision then finds the shoulders and head of a person the frame cuts off; the app's camera path does not do this. The JSON also gives `recognized`, the exercise the angle rules read from the poses whatever was chosen.
+
+A push-up the arm rubric cannot read (filmed from the front, or so close that the arm is cut off) is counted from the shoulders going down and up (`push-up-shoulders-v1`, no elbow bend or posture). The hands must stay planted. On three real sets (local, not in this repository) it gave 10, 6 or 7, and 10 reps for 10, 7 and 10 performed.
+
 The command prints JSON with `status` (`measured`, `retake`, or `failed`), `frameCount`, `measuredReps`, and a `reason` or `rubricVersion` when available. `--poses-output` is optional. Supported exercise values are `bodyweightSquat`, `pushUp`, `staticLunge`, and `stiffLegDeadlift`. The pose JSON can also be supplied to the app's Debug video-file path on the simulator with `-plumb-video-file <video> -plumb-video-poses <json>`; Xcode must make those files readable to the simulator process.
 
 ## Generated video checks

@@ -66,7 +66,7 @@ struct ViewCheckTests {
 
     @Test func analyzerRefusesAFrontViewForEveryExercise() {
         let traces: [(ExerciseDefinition, [PoseFrame])] = [
-            (.squat, squatTrace()), (.pushUp, pushUpTrace(reps: 6)),
+            (.squat, squatTrace()),
             (.staticLunge, lungeTrace(reps: 6)), (.stiffLegDeadlift, hingeTrace(reps: 5)),
         ]
         for (definition, trace) in traces {
@@ -84,6 +84,16 @@ struct ViewCheckTests {
             }
             #expect(!ignored.reps.isEmpty)
         }
+    }
+
+    @Test func aFrontViewPushUpIsCountedFromTheShoulders() {
+        let front = withDeviation(pushUpTrace(reps: 6), 85)
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(front, as: .pushUp) else {
+            Issue.record("A push-up filmed from the front is counted from the shoulders, not refused")
+            return
+        }
+        #expect(analysis.reps.count == 6)
+        #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
     }
 
     @Test func anAngledViewIsMeasuredWithATip() throws {
@@ -183,19 +193,29 @@ struct ViewCheckSessionTests {
         await model.cancel()
     }
 
+    @Test func aPushUpFromTheFrontIsNeverAskedToTurn() async throws {
+        let (model, source) = makeModel()
+        model.selectedExercise = .pushUp
+        await model.startPreview()
+        for frame in withDeviation(squatFrames(count: 12), 85, every: 1) { source.emit(frame) }
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(model.framingStatus != .turnToExpectedView)
+        await model.cancel()
+    }
+
     @Test func frontViewSetIsRefusedUnlessTheCheckIsOff() async throws {
         let (model, source) = makeModel()
-        await capture(model, source, withDeviation(pushUpTrace(reps: 6), 75), exercise: .pushUp)
+        await capture(model, source, withDeviation(CaptureTraces.squats(reps: 6, from: 0), 75), exercise: .bodyweightSquat)
         #expect({
             if case .insufficientView(let reason) = model.result { return reason.hasPrefix(ExpectedView.side.wrongViewMessage) }
             return false
         }())
-        #expect(model.lastViewVerdict == .mismatch(medianDeviation: 75, estimates: 31))
+        #expect(model.lastViewVerdict == .mismatch(medianDeviation: 75, estimates: 46))
         #expect(model.currentSession == nil)
 
         model.checksCameraAngle = false
         #expect(source.cameraAngleSettings.last == false)
-        await capture(model, source, withDeviation(pushUpTrace(reps: 6), 75), exercise: .pushUp)
+        await capture(model, source, withDeviation(CaptureTraces.squats(reps: 6, from: 0), 75), exercise: .bodyweightSquat)
         guard case .measured(let analysis, _) = model.result else {
             Issue.record("With the check off, the set should be measured")
             return

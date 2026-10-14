@@ -142,7 +142,7 @@ nonisolated extension ExerciseDefinition {
     var displayedAngle: (from: JointRole, vertex: JointRole, to: JointRole) {
         switch signal {
         case .jointBend(let from, let vertex, let to): (from, vertex, to)
-        case .verticalTravel: (.hip, .knee, .ankle)
+        case .verticalTravel, .shoulderDrop: (.hip, .knee, .ankle)
         case .verticalRise: (.shoulder, .elbow, .wrist)
         }
     }

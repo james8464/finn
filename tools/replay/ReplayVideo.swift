@@ -1,4 +1,5 @@
 import AVFoundation
+import CoreImage
 import Foundation
 
 /// Mac-only harness: frame extraction and scoring use the same pose and exercise analyzers as the app.
@@ -19,6 +20,8 @@ enum ReplayVideo {
         let liveStopAt: Double?
         /// When a hands-free start would have triggered (the person held still in position).
         let handsFreeReadyAt: Double?
+        /// What the app's angle rules say the exercise is, whatever the person chose.
+        var recognized: String?
     }
 
     /// The hands-free path on the same frames: the start readiness, the live count and cues, and
@@ -121,8 +124,50 @@ enum ReplayVideo {
                             liveReps: live.reps, liveCues: live.cues, liveStopAt: live.stopAt,
                             handsFreeReadyAt: live.readyAt)
         }
-        FileHandle.standardOutput.write(try encoder.encode(report))
+        var finalReport = report
+        switch AngleRecognizer.recognize(poses, using: AngleRuleClassifier()) {
+        case .recognized(let kind, _): finalReport.recognized = kind.rawValue
+        case .uncertain: finalReport.recognized = "uncertain"
+        case .notAttempted: finalReport.recognized = nil
+        }
+        FileHandle.standardOutput.write(try encoder.encode(finalReport))
         FileHandle.standardOutput.write(Data("\n".utf8))
+    }
+
+    /// The orientation a track's transform asks for, read from its rotation part only. Videos that a
+    /// messaging app re-encoded carry a translation left over from the original size (a 1024 x 576
+    /// clip with ty = 3840), and `AVVideoComposition(withPropertiesOf:)` then renders a 576 x 3840
+    /// canvas where the person falls mostly off the edge.
+    static func orientation(of transform: CGAffineTransform) -> CGImagePropertyOrientation {
+        switch (transform.a.rounded(), transform.b.rounded(), transform.c.rounded(), transform.d.rounded()) {
+        case (0, 1, -1, 0): .right
+        case (0, -1, 1, 0): .left
+        case (-1, 0, 0, -1): .down
+        case (-1, 0, 0, 1): .upMirrored
+        case (1, 0, 0, -1): .downMirrored
+        default: .up
+        }
+    }
+
+    /// Draws `source` upright into a new BGRA buffer.
+    private static func upright(_ source: CVPixelBuffer, _ orientation: CGImagePropertyOrientation,
+                                context: CIContext, margin: Double = 0) -> CVPixelBuffer? {
+        if orientation == .up && margin == 0 { return source }
+        let image = CIImage(cvPixelBuffer: source).oriented(orientation)
+        let extent = image.extent.integral
+        // A black border around the picture lets Vision see a person the frame cuts off.
+        let border = (extent.width * margin).rounded()
+        let width = Int(extent.width + 2 * border)
+        let height = Int(extent.height + 2 * border)
+        var buffer: CVPixelBuffer?
+        guard CVPixelBufferCreate(nil, width, height, kCVPixelFormatType_32BGRA,
+                                  [kCVPixelBufferIOSurfacePropertiesKey as String: [:]] as CFDictionary,
+                                  &buffer) == kCVReturnSuccess, let buffer else { return nil }
+        let placed = image.transformed(by: CGAffineTransform(translationX: border - extent.minX,
+                                                              y: border - extent.minY))
+        let canvas = CGRect(x: 0, y: 0, width: width, height: height)
+        context.render(placed.composited(over: CIImage(color: .black).cropped(to: canvas)), to: buffer)
+        return buffer
     }
 
     private static func extract(from url: URL) async throws -> [PoseFrame] {
@@ -130,12 +175,13 @@ enum ReplayVideo {
         guard let track = try await asset.loadTracks(withMediaType: .video).first else {
             throw Failure.noVideoTrack
         }
-        let composition = try await AVVideoComposition.videoComposition(withPropertiesOf: asset)
+        let orientation = orientation(of: try await track.load(.preferredTransform))
+        let margin = Double(ProcessInfo.processInfo.environment["PLUMB_REPLAY_MARGIN"] ?? "") ?? 0
+        let context = CIContext()
         let reader = try AVAssetReader(asset: asset)
-        let output = AVAssetReaderVideoCompositionOutput(
-            videoTracks: [track],
-            videoSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA])
-        output.videoComposition = composition
+        let output = AVAssetReaderTrackOutput(
+            track: track,
+            outputSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA])
         guard reader.canAdd(output) else { throw Failure.reader }
         reader.add(output)
         guard reader.startReading() else { throw Failure.reader }
@@ -146,7 +192,8 @@ enum ReplayVideo {
         while let sample = output.copyNextSampleBuffer() {
             let time = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sample))
             guard time.isFinite, time - lastSampled >= PoseFrameAnalyzer.minimumInterval,
-                  let image = CMSampleBufferGetImageBuffer(sample) else { continue }
+                  let raw = CMSampleBufferGetImageBuffer(sample),
+                  let image = upright(raw, orientation, context: context, margin: margin) else { continue }
             lastSampled = time
             poses.append(analyzer.analyze(image, time: time, estimateAngle: true))
         }

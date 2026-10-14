@@ -25,6 +25,8 @@ xcrun swiftc -swift-version 6 -o "$binary" \
   "$project_root/Plumb/Plumb/Workout/MistakeProfile.swift" \
   "$project_root/Plumb/Plumb/Workout/FitnessWorkout.swift" \
   "$project_root/Plumb/Plumb/Workout/LiveSet.swift" \
+  "$project_root/Plumb/Plumb/Workout/AngleRecognition.swift" \
+  "$project_root/Plumb/Plumb/Workout/PoseWindowFeatures.swift" \
   "$project_root/Plumb/Plumb/Capture/PoseFrameAnalyzer.swift"
 if $build_only; then exit 0; fi
 "$binary" "$@"

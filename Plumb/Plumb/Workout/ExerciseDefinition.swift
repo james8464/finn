@@ -10,12 +10,17 @@ nonisolated enum MovementSignal: Equatable, Sendable {
     /// Upward travel of `joint` from its lowest position, divided by its largest distance below
     /// `reference`. Pull-ups use shoulder rise over arm length, with the hands on the bar.
     case verticalRise(joint: JointRole, reference: JointRole)
+    /// Downward travel of the shoulders' midpoint from its highest position, in image widths. Used
+    /// to count push-ups whose elbows and wrists the side-view rubric cannot read, such as a set
+    /// filmed from the front with the phone on the floor.
+    case shoulderDrop
 
     var joints: [JointRole] {
         switch self {
         case .verticalTravel(let joint, let reference): [joint, reference]
         case .jointBend(let from, let vertex, let to): [from, vertex, to]
         case .verticalRise(let joint, let reference): [joint, reference]
+        case .shoulderDrop: [.shoulder]
         }
     }
 }
@@ -180,6 +185,8 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
     /// A depth in words, such as "hips 11% of leg length down" or "elbow bent 28°".
     func formattedDepth(_ value: Double) -> String {
         switch (rangeUnit, signal) {
+        case (_, .shoulderDrop):
+            return "shoulders \(Int((value * 100).rounded()))% of the picture width down"
         case (.bodyLengthFraction, .verticalRise):
             return "shoulders up \(Int((value * 100).rounded()))% of your arm length"
         case (.bodyLengthFraction, _):
@@ -258,7 +265,7 @@ nonisolated extension ExerciseDefinition {
     static let pushUp = ExerciseDefinition(
         kind: .pushUp,
         rubricVersion: "push-up-side-v6",
-        expectedView: .side,
+        expectedView: .any,
         evidence: EvidenceRequirement(joints: [.shoulder, .elbow, .wrist], anchor: .wrist),
         signal: .jointBend(from: .shoulder, vertex: .elbow, to: .wrist),
         phases: RepPhases(leaveTop: 25, reachBottom: 40, returnFromBottom: 10, backAtTop: 15,
@@ -278,15 +285,15 @@ nonisolated extension ExerciseDefinition {
             setupTitle: "Push-up check",
             placementTitle: "Place your iPhone low",
             placementDetail: "On the floor or a low step, a few steps away.",
-            stanceTitle: "Turn sideways",
-            stanceDetail: "Start at the top, with your arms straight.",
-            framingPrompt: "Turn sideways. Keep your whole body in view.",
-            checkingVisibility: "Checking arm visibility",
-            showJoints: "Show shoulder, elbow and wrist",
-            jointsVisible: "Shoulder, elbow and wrist visible",
-            keepJointsVisible: "Keep your shoulder, elbow and wrist visible for the whole set.",
-            bodyTooSmall: "Plumb couldn’t measure your elbow angle. Keep your side to the camera and move the phone a little closer.",
-            retakeHint: "Keep your side to the camera, with your shoulder, elbow, and wrist visible.",
+            stanceTitle: "Face the phone or turn sideways",
+            stanceDetail: "Front or side both work. Start at the top, with your arms straight.",
+            framingPrompt: "Face the phone or turn sideways. Keep your upper body and hands in view.",
+            checkingVisibility: "Checking shoulder and hand visibility",
+            showJoints: "Show your shoulders and hands",
+            jointsVisible: "Shoulders and hands visible",
+            keepJointsVisible: "Keep your shoulders and hands visible for the whole set.",
+            bodyTooSmall: "Plumb couldn’t measure your movement. Keep your shoulders and hands in view and move the phone a little closer.",
+            retakeHint: "Face the phone or turn sideways, with your shoulders and hands visible.",
             noCompleteReps: "No complete push-up repetitions were measured. Start at the top with your arms straight and keep your whole body in view.",
             rangeNoun: "elbow bend",
             moreRange: "greater",
@@ -297,6 +304,35 @@ nonisolated extension ExerciseDefinition {
             rangeAccessibilityName: "camera-observed elbow bend"
         )
     )
+
+    /// Push-up counted from the shoulders going down and up, when the side-view rubric cannot read
+    /// the arms: filmed from the front, or too close for the elbow and wrist to stay in the picture.
+    /// Not in `all`: the person never picks it, `ExerciseAnalyzer` falls back to it. The rep phases
+    /// are set per set from the shoulders' own travel (`withPhases`), so the phone can stand a
+    /// metre or four metres away. The 0.06 image widths below is the least travel it accepts.
+    /// Tuned on 3 real push-up sets (14 October 2026), a product hypothesis, not a validated standard.
+    static let pushUpShoulders = ExerciseDefinition(
+        kind: .pushUp,
+        rubricVersion: "push-up-shoulders-v1",
+        expectedView: .any,
+        evidence: EvidenceRequirement(joints: [.shoulder], anchor: .wrist),
+        signal: .shoulderDrop,
+        phases: RepPhases(leaveTop: 0.03, reachBottom: 0.1, returnFromBottom: 0.03, backAtTop: 0.03,
+                          minimumDuration: 0.4, maximumDuration: 8.0),
+        rangeUnit: .bodyLengthFraction,
+        rangeDisplayScale: 0.6,
+        minimumBodyScale: 0.06,
+        classifierLabel: "push_up",
+        posture: ExerciseDefinition.pushUp.posture,
+        copy: ExerciseDefinition.pushUp.copy
+    )
+
+    func withPhases(_ phases: RepPhases) -> ExerciseDefinition {
+        ExerciseDefinition(kind: kind, rubricVersion: rubricVersion, expectedView: expectedView,
+                           evidence: evidence, signal: signal, phases: phases, rangeUnit: rangeUnit,
+                           rangeDisplayScale: rangeDisplayScale, minimumBodyScale: minimumBodyScale,
+                           classifierLabel: classifierLabel, posture: posture, copy: copy)
+    }
 
     /// Side-view static lunge (split squat): feet stay planted, measured as knee bend on the
     /// camera-facing leg (hip, knee, ankle).

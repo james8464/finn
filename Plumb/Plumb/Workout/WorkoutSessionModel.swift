@@ -591,8 +591,12 @@ final class WorkoutSessionModel {
         var best: (kind: ExerciseKind, reps: Int)?
         // Only exercises of the same kind of setup: a bar exercise counts the shoulders' rise, which a
         // squat or push-up also shows, so floor and bar exercises never suggest each other.
-        let hanging = chosen.definition.expectedView == .any
-        for kind in ExerciseKind.allCases where kind != chosen && (kind.definition.expectedView == .any) == hanging {
+        func hangs(_ definition: ExerciseDefinition) -> Bool {
+            if case .verticalRise = definition.signal { return true }
+            return false
+        }
+        let hanging = hangs(chosen.definition)
+        for kind in ExerciseKind.allCases where kind != chosen && hangs(kind.definition) == hanging {
             let definition = kind.definition
             let window = SetWindow.active(frames, requirement: definition.evidence)
             guard case .analyzed(let analysis) = ExerciseAnalyzer.analyzeWithDiagnostics(
