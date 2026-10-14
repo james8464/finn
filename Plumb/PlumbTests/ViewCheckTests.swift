@@ -93,7 +93,7 @@ struct ViewCheckTests {
             return
         }
         #expect(analysis.reps.count == 6)
-        #expect(analysis.rubricVersion == "push-up-shoulders-v1")
+        #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
     }
 
     @Test func anAngledViewIsMeasuredWithATip() throws {
@@ -190,6 +190,16 @@ struct ViewCheckSessionTests {
         for _ in 0..<500 where model.stage != .capturing { try await Task.sleep(for: .milliseconds(10)) }
         #expect(model.stage == .capturing)
         #expect(model.previewDeviations.count < ViewCheck.minimumPreviewEstimates)
+        await model.cancel()
+    }
+
+    @Test func aPushUpFromTheFrontIsNeverAskedToTurn() async throws {
+        let (model, source) = makeModel()
+        model.selectedExercise = .pushUp
+        await model.startPreview()
+        for frame in withDeviation(squatFrames(count: 12), 85, every: 1) { source.emit(frame) }
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(model.framingStatus != .turnToExpectedView)
         await model.cancel()
     }
 

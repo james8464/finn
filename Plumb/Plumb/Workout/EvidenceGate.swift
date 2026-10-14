@@ -159,7 +159,9 @@ nonisolated enum EvidenceGate {
         case .unstableFraming:
             let movement = anchorMovement(frames, requirement: requirement,
                                           side: bestSide(frames, requirement: requirement).side)
-            return "Your \(requirement.anchor.rawValue) moved \(Int((movement * 100).rounded()))% of the frame during the set "
+            // No clear anchor joint at all gives an infinite movement, which has no percentage.
+            let moved = movement.isFinite ? "moved \(Int((movement * 100).rounded()))% of the frame" : "was not seen"
+            return "Your \(requirement.anchor.rawValue) \(moved) during the set "
                 + "(the limit is \(Int(EvidenceRubric.maximumAnchorMovement * 100))%). Keep the phone still and your "
                 + "\(requirement.anchor == .wrist ? "hands" : "feet") planted."
         }

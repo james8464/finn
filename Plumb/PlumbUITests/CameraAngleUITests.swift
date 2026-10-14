@@ -57,4 +57,25 @@ final class CameraAngleUITests: XCTestCase {
         XCTAssertTrue(readout.label.contains("75° from profile"))
         XCTAssertTrue(readout.label.contains("refused"))
     }
+
+    /// A push-up filmed from the front is measured, not refused: the framing screen and the
+    /// result never ask the person to turn sideways.
+    @MainActor
+    func testFrontViewPushUpIsMeasuredNotRefused() {
+        let app = XCUIApplication()
+        app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-front-view"]
+        app.launch()
+        app.buttons["Push-up"].tap()
+        app.buttons["Start a set"].tap()
+        XCTAssertTrue(app.staticTexts["Checking shoulder and hand visibility"].waitForExistence(timeout: 5))
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        XCTAssertFalse(app.staticTexts["Turn a little: side to the camera"].exists)
+        stop.tap()
+        XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts.matching(NSPredicate(
+            format: "label CONTAINS %@", "needs a side view")).firstMatch.exists)
+    }
 }

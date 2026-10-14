@@ -133,8 +133,10 @@ nonisolated struct ExerciseAnalyzerTests {
             #expect(ExerciseDefinition.definition(forClassifierLabel: definition.classifierLabel) == definition)
             // Hanging exercises read the same from any view, and their hands (the reference and
             // the still joint) only need to be seen now and then; every other joint is required.
+            // Push-ups are accepted from any view too: the arm rubric prefers the side, the
+            // shoulder count does not care.
             let hanging = [ExerciseKind.pullUp, .muscleUp].contains(definition.kind)
-            #expect(definition.expectedView == (hanging ? .any : .side))
+            #expect(definition.expectedView == (hanging || definition.kind == .pushUp ? .any : .side))
             let required = hanging ? [JointRole.shoulder] : definition.signal.joints + [definition.evidence.anchor]
             for joint in required {
                 #expect(definition.evidence.joints.contains(joint),

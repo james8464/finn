@@ -35,7 +35,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any).matching(
             NSPredicate(format: "label CONTAINS %@", "On the floor or a low step")).firstMatch.exists)
         app.buttons["Start a set"].tap()
-        XCTAssertTrue(app.staticTexts["Checking arm visibility"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Checking shoulder and hand visibility"].waitForExistence(timeout: 5))
     }
 
     @MainActor

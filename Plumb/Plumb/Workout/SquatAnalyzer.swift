@@ -120,6 +120,15 @@ nonisolated enum ExerciseAnalyzer {
         // Only a clearly frontal view held for several seconds refuses the set; an angled one is
         // measured and the result suggests turning a little.
         var angledView: Double?
+        // Push-ups are accepted from any view, but hip sag is a side-view measure: from the front
+        // or at an angle the count stands and the posture advice is left out, with no tip to turn.
+        var postureFromSide = true
+        if viewCheck == .enforce, definition.kind == .pushUp, definition.expectedView == .any {
+            switch ViewCheck.assess(frames, expected: .side) {
+            case .angled, .mismatch: postureFromSide = false
+            case .matches, .unavailable: break
+            }
+        }
         if viewCheck == .enforce {
             switch ViewCheck.assess(frames, expected: definition.expectedView) {
             case .mismatch(let deviation, _):
@@ -133,12 +142,14 @@ nonisolated enum ExerciseAnalyzer {
         }
 
         let samples = frames.compactMap { sample(from: $0, as: definition, side: side) }
-        return countReps(samples, in: frames, as: definition, side: side, partial: partial, angledView: angledView)
+        return countReps(samples, in: frames, as: definition, side: side, partial: partial, angledView: angledView,
+                         postureFromSide: postureFromSide)
     }
 
     /// The rep state machine, shared by the side-view rubric and the front-view count.
     private static func countReps(_ samples: [Sample], in frames: [PoseFrame], as definition: ExerciseDefinition,
-                                  side: BodySide, partial: PartialVisibility?, angledView: Double?)
+                                  side: BodySide, partial: PartialVisibility?, angledView: Double?,
+                                  postureFromSide: Bool = true)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
         guard samples.count >= 5 else {
             return (.insufficientView(definition.copy.keepJointsVisible), nil)
@@ -247,7 +258,7 @@ nonisolated enum ExerciseAnalyzer {
                             startTime: start,
                             endTime: sample.time,
                             relativeRange: depth,
-                            postureValue: angledView == nil && nearby.count >= 3 ? median(nearby) : nil
+                            postureValue: angledView == nil && postureFromSide && nearby.count >= 3 ? median(nearby) : nil
                         ))
                     } else {
                         diagnostics.outsideTempo += 1
