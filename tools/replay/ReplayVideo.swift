@@ -1,4 +1,5 @@
 import AVFoundation
+import CoreImage
 import Foundation
 
 /// Mac-only harness: frame extraction and scoring use the same pose and exercise analyzers as the app.
@@ -125,17 +126,47 @@ enum ReplayVideo {
         FileHandle.standardOutput.write(Data("\n".utf8))
     }
 
+    /// The orientation a track's transform asks for, read from its rotation part only. Videos that a
+    /// messaging app re-encoded carry a translation left over from the original size (a 1024 x 576
+    /// clip with ty = 3840), and `AVVideoComposition(withPropertiesOf:)` then renders a 576 x 3840
+    /// canvas where the person falls mostly off the edge.
+    static func orientation(of transform: CGAffineTransform) -> CGImagePropertyOrientation {
+        switch (transform.a.rounded(), transform.b.rounded(), transform.c.rounded(), transform.d.rounded()) {
+        case (0, 1, -1, 0): .right
+        case (0, -1, 1, 0): .left
+        case (-1, 0, 0, -1): .down
+        case (-1, 0, 0, 1): .upMirrored
+        case (1, 0, 0, -1): .downMirrored
+        default: .up
+        }
+    }
+
+    /// Draws `source` upright into a new BGRA buffer.
+    private static func upright(_ source: CVPixelBuffer, _ orientation: CGImagePropertyOrientation,
+                                context: CIContext) -> CVPixelBuffer? {
+        if orientation == .up { return source }
+        let image = CIImage(cvPixelBuffer: source).oriented(orientation)
+        let extent = image.extent.integral
+        var buffer: CVPixelBuffer?
+        guard CVPixelBufferCreate(nil, Int(extent.width), Int(extent.height), kCVPixelFormatType_32BGRA,
+                                  [kCVPixelBufferIOSurfacePropertiesKey as String: [:]] as CFDictionary,
+                                  &buffer) == kCVReturnSuccess, let buffer else { return nil }
+        context.render(image.transformed(by: CGAffineTransform(translationX: -extent.minX, y: -extent.minY)),
+                       to: buffer)
+        return buffer
+    }
+
     private static func extract(from url: URL) async throws -> [PoseFrame] {
         let asset = AVURLAsset(url: url)
         guard let track = try await asset.loadTracks(withMediaType: .video).first else {
             throw Failure.noVideoTrack
         }
-        let composition = try await AVVideoComposition.videoComposition(withPropertiesOf: asset)
+        let orientation = orientation(of: try await track.load(.preferredTransform))
+        let context = CIContext()
         let reader = try AVAssetReader(asset: asset)
-        let output = AVAssetReaderVideoCompositionOutput(
-            videoTracks: [track],
-            videoSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA])
-        output.videoComposition = composition
+        let output = AVAssetReaderTrackOutput(
+            track: track,
+            outputSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA])
         guard reader.canAdd(output) else { throw Failure.reader }
         reader.add(output)
         guard reader.startReading() else { throw Failure.reader }
@@ -146,7 +177,8 @@ enum ReplayVideo {
         while let sample = output.copyNextSampleBuffer() {
             let time = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sample))
             guard time.isFinite, time - lastSampled >= PoseFrameAnalyzer.minimumInterval,
-                  let image = CMSampleBufferGetImageBuffer(sample) else { continue }
+                  let raw = CMSampleBufferGetImageBuffer(sample),
+                  let image = upright(raw, orientation, context: context) else { continue }
             lastSampled = time
             poses.append(analyzer.analyze(image, time: time, estimateAngle: true))
         }
