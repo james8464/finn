@@ -11,7 +11,8 @@ nonisolated enum MovementSignal: Equatable, Sendable {
     /// `reference`. Pull-ups use shoulder rise over arm length, with the hands on the bar.
     case verticalRise(joint: JointRole, reference: JointRole)
     /// Downward travel of the shoulders' midpoint from its highest position, in image widths. Used
-    /// to count squats filmed from the front, where the legs and the side-view angles cannot be read.
+    /// to count push-ups whose elbows and wrists the side-view rubric cannot read, such as a set
+    /// filmed from the front with the phone on the floor.
     case shoulderDrop
 
     var joints: [JointRole] {
@@ -260,26 +261,6 @@ nonisolated extension ExerciseDefinition {
         )
     )
 
-    /// Squat filmed from the front or at an angle: only the repetitions are counted, from the
-    /// shoulders' drop. Thresholds are in image widths, on 3 real front-view sets and 3 side-view
-    /// sets (14 October 2026), and are a product hypothesis, not a validated standard. Not in `all`:
-    /// the person never picks it, `ExerciseAnalyzer` falls back to it for a squat refused as non-side.
-    static let squatFront = ExerciseDefinition(
-        kind: .bodyweightSquat,
-        rubricVersion: "squat-front-v1",
-        expectedView: .any,
-        evidence: EvidenceRequirement(joints: [.shoulder], anchor: .shoulder),
-        signal: .shoulderDrop,
-        phases: RepPhases(leaveTop: 0.06, reachBottom: 0.18, returnFromBottom: 0.05, backAtTop: 0.06,
-                          minimumDuration: 0.4, maximumDuration: 8.0),
-        rangeUnit: .bodyLengthFraction,
-        rangeDisplayScale: 0.6,
-        minimumBodyScale: 0.15,
-        classifierLabel: "squat",
-        posture: ExerciseDefinition.squat.posture,
-        copy: ExerciseDefinition.squat.copy
-    )
-
     /// Side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.
     static let pushUp = ExerciseDefinition(
         kind: .pushUp,
@@ -323,6 +304,35 @@ nonisolated extension ExerciseDefinition {
             rangeAccessibilityName: "camera-observed elbow bend"
         )
     )
+
+    /// Push-up counted from the shoulders going down and up, when the side-view rubric cannot read
+    /// the arms: filmed from the front, or too close for the elbow and wrist to stay in the picture.
+    /// Not in `all`: the person never picks it, `ExerciseAnalyzer` falls back to it. The rep phases
+    /// are set per set from the shoulders' own travel (`withPhases`), so the phone can stand a
+    /// metre or four metres away. The 0.06 image widths below is the least travel it accepts.
+    /// Tuned on 3 real push-up sets (14 October 2026), a product hypothesis, not a validated standard.
+    static let pushUpShoulders = ExerciseDefinition(
+        kind: .pushUp,
+        rubricVersion: "push-up-shoulders-v1",
+        expectedView: .any,
+        evidence: EvidenceRequirement(joints: [.shoulder], anchor: .wrist),
+        signal: .shoulderDrop,
+        phases: RepPhases(leaveTop: 0.03, reachBottom: 0.1, returnFromBottom: 0.03, backAtTop: 0.03,
+                          minimumDuration: 0.4, maximumDuration: 8.0),
+        rangeUnit: .bodyLengthFraction,
+        rangeDisplayScale: 0.6,
+        minimumBodyScale: 0.06,
+        classifierLabel: "push_up",
+        posture: ExerciseDefinition.pushUp.posture,
+        copy: ExerciseDefinition.pushUp.copy
+    )
+
+    func withPhases(_ phases: RepPhases) -> ExerciseDefinition {
+        ExerciseDefinition(kind: kind, rubricVersion: rubricVersion, expectedView: expectedView,
+                           evidence: evidence, signal: signal, phases: phases, rangeUnit: rangeUnit,
+                           rangeDisplayScale: rangeDisplayScale, minimumBodyScale: minimumBodyScale,
+                           classifierLabel: classifierLabel, posture: posture, copy: copy)
+    }
 
     /// Side-view static lunge (split squat): feet stay planted, measured as knee bend on the
     /// camera-facing leg (hip, knee, ankle).

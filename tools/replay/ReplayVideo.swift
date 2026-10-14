@@ -20,6 +20,8 @@ enum ReplayVideo {
         let liveStopAt: Double?
         /// When a hands-free start would have triggered (the person held still in position).
         let handsFreeReadyAt: Double?
+        /// What the app's angle rules say the exercise is, whatever the person chose.
+        var recognized: String?
     }
 
     /// The hands-free path on the same frames: the start readiness, the live count and cues, and
@@ -122,7 +124,13 @@ enum ReplayVideo {
                             liveReps: live.reps, liveCues: live.cues, liveStopAt: live.stopAt,
                             handsFreeReadyAt: live.readyAt)
         }
-        FileHandle.standardOutput.write(try encoder.encode(report))
+        var finalReport = report
+        switch AngleRecognizer.recognize(poses, using: AngleRuleClassifier()) {
+        case .recognized(let kind, _): finalReport.recognized = kind.rawValue
+        case .uncertain: finalReport.recognized = "uncertain"
+        case .notAttempted: finalReport.recognized = nil
+        }
+        FileHandle.standardOutput.write(try encoder.encode(finalReport))
         FileHandle.standardOutput.write(Data("\n".utf8))
     }
 
@@ -143,16 +151,22 @@ enum ReplayVideo {
 
     /// Draws `source` upright into a new BGRA buffer.
     private static func upright(_ source: CVPixelBuffer, _ orientation: CGImagePropertyOrientation,
-                                context: CIContext) -> CVPixelBuffer? {
-        if orientation == .up { return source }
+                                context: CIContext, margin: Double = 0) -> CVPixelBuffer? {
+        if orientation == .up && margin == 0 { return source }
         let image = CIImage(cvPixelBuffer: source).oriented(orientation)
         let extent = image.extent.integral
+        // A black border around the picture lets Vision see a person the frame cuts off.
+        let border = (extent.width * margin).rounded()
+        let width = Int(extent.width + 2 * border)
+        let height = Int(extent.height + 2 * border)
         var buffer: CVPixelBuffer?
-        guard CVPixelBufferCreate(nil, Int(extent.width), Int(extent.height), kCVPixelFormatType_32BGRA,
+        guard CVPixelBufferCreate(nil, width, height, kCVPixelFormatType_32BGRA,
                                   [kCVPixelBufferIOSurfacePropertiesKey as String: [:]] as CFDictionary,
                                   &buffer) == kCVReturnSuccess, let buffer else { return nil }
-        context.render(image.transformed(by: CGAffineTransform(translationX: -extent.minX, y: -extent.minY)),
-                       to: buffer)
+        let placed = image.transformed(by: CGAffineTransform(translationX: border - extent.minX,
+                                                              y: border - extent.minY))
+        let canvas = CGRect(x: 0, y: 0, width: width, height: height)
+        context.render(placed.composited(over: CIImage(color: .black).cropped(to: canvas)), to: buffer)
         return buffer
     }
 
@@ -162,6 +176,7 @@ enum ReplayVideo {
             throw Failure.noVideoTrack
         }
         let orientation = orientation(of: try await track.load(.preferredTransform))
+        let margin = Double(ProcessInfo.processInfo.environment["PLUMB_REPLAY_MARGIN"] ?? "") ?? 0
         let context = CIContext()
         let reader = try AVAssetReader(asset: asset)
         let output = AVAssetReaderTrackOutput(
@@ -178,7 +193,7 @@ enum ReplayVideo {
             let time = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sample))
             guard time.isFinite, time - lastSampled >= PoseFrameAnalyzer.minimumInterval,
                   let raw = CMSampleBufferGetImageBuffer(sample),
-                  let image = upright(raw, orientation, context: context) else { continue }
+                  let image = upright(raw, orientation, context: context, margin: margin) else { continue }
             lastSampled = time
             poses.append(analyzer.analyze(image, time: time, estimateAngle: true))
         }

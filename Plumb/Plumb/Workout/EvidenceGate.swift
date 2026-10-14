@@ -37,6 +37,15 @@ nonisolated enum EvidenceGate {
         return visible ? .landmarksVisible : .adjustPosition
     }
 
+    /// Frames that follow one athlete ignore everyone else. Without that, nobody can tell whose
+    /// joints these are, so another person in view refuses the set.
+    static func isCrowded(_ frames: [PoseFrame]) -> Bool {
+        guard !frames.contains(where: { $0.athleteTracking != nil }) else { return false }
+        let bystanderFrames = frames.filter { $0.subjectCount > 1 }.count
+        return Double(bystanderFrames) / Double(frames.count) > 0.2
+            || longestBystanderRun(frames) >= EvidenceRubric.maximumBystanderDuration
+    }
+
     /// `allowsPartial` lowers the joint coverage needed from `minimumCoverage` to `partialCoverage`;
     /// every other rule stays.
     static func assess(_ frames: [PoseFrame],
@@ -47,17 +56,7 @@ nonisolated enum EvidenceGate {
             return .reject(.tooShort)
         }
 
-        // Frames that follow one athlete ignore everyone else. Without that, nobody can tell
-        // whose joints these are, so another person in view refuses the set.
-        if !frames.contains(where: { $0.athleteTracking != nil }) {
-            let bystanderFrames = frames.filter { $0.subjectCount > 1 }.count
-            if Double(bystanderFrames) / Double(frames.count) > 0.2 {
-                return .reject(.multiplePeople)
-            }
-            if longestBystanderRun(frames) >= EvidenceRubric.maximumBystanderDuration {
-                return .reject(.multiplePeople)
-            }
-        }
+        if isCrowded(frames) { return .reject(.multiplePeople) }
 
         let best = bestSide(frames, requirement: requirement)
         let total = Double(frames.count)
