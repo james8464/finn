@@ -10,12 +10,16 @@ nonisolated enum MovementSignal: Equatable, Sendable {
     /// Upward travel of `joint` from its lowest position, divided by its largest distance below
     /// `reference`. Pull-ups use shoulder rise over arm length, with the hands on the bar.
     case verticalRise(joint: JointRole, reference: JointRole)
+    /// Downward travel of the shoulders' midpoint from its highest position, in image widths. Used
+    /// to count squats filmed from the front, where the legs and the side-view angles cannot be read.
+    case shoulderDrop
 
     var joints: [JointRole] {
         switch self {
         case .verticalTravel(let joint, let reference): [joint, reference]
         case .jointBend(let from, let vertex, let to): [from, vertex, to]
         case .verticalRise(let joint, let reference): [joint, reference]
+        case .shoulderDrop: [.shoulder]
         }
     }
 }
@@ -180,6 +184,8 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
     /// A depth in words, such as "hips 11% of leg length down" or "elbow bent 28°".
     func formattedDepth(_ value: Double) -> String {
         switch (rangeUnit, signal) {
+        case (_, .shoulderDrop):
+            return "shoulders \(Int((value * 100).rounded()))% of the picture width down"
         case (.bodyLengthFraction, .verticalRise):
             return "shoulders up \(Int((value * 100).rounded()))% of your arm length"
         case (.bodyLengthFraction, _):
@@ -252,6 +258,26 @@ nonisolated extension ExerciseDefinition {
             rangeExplanation: "Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view.",
             rangeAccessibilityName: "relative camera-observed range"
         )
+    )
+
+    /// Squat filmed from the front or at an angle: only the repetitions are counted, from the
+    /// shoulders' drop. Thresholds are in image widths, on 3 real front-view sets and 3 side-view
+    /// sets (14 October 2026), and are a product hypothesis, not a validated standard. Not in `all`:
+    /// the person never picks it, `ExerciseAnalyzer` falls back to it for a squat refused as non-side.
+    static let squatFront = ExerciseDefinition(
+        kind: .bodyweightSquat,
+        rubricVersion: "squat-front-v1",
+        expectedView: .any,
+        evidence: EvidenceRequirement(joints: [.shoulder], anchor: .shoulder),
+        signal: .shoulderDrop,
+        phases: RepPhases(leaveTop: 0.06, reachBottom: 0.18, returnFromBottom: 0.05, backAtTop: 0.06,
+                          minimumDuration: 0.4, maximumDuration: 8.0),
+        rangeUnit: .bodyLengthFraction,
+        rangeDisplayScale: 0.6,
+        minimumBodyScale: 0.15,
+        classifierLabel: "squat",
+        posture: ExerciseDefinition.squat.posture,
+        copy: ExerciseDefinition.squat.copy
     )
 
     /// Side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.

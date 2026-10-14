@@ -78,6 +78,20 @@ nonisolated enum ExerciseAnalyzer {
     static func analyzeWithDiagnostics(_ frames: [PoseFrame], as definition: ExerciseDefinition,
                                        viewCheck: ViewCheckPolicy = .enforce, trimsToSet: Bool = true)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
+        let sideView = analyzeSideView(frames, as: definition, viewCheck: viewCheck, trimsToSet: trimsToSet)
+        // The squat rubric is written for a side view. When it refuses a set because the person
+        // faced the phone, the shoulders still show how many times they went down.
+        guard viewCheck == .enforce, definition == .squat,
+              case .insufficientView = sideView.outcome,
+              let frontView = analyzeFrontView(frames) else {
+            return sideView
+        }
+        return frontView
+    }
+
+    private static func analyzeSideView(_ frames: [PoseFrame], as definition: ExerciseDefinition,
+                                        viewCheck: ViewCheckPolicy, trimsToSet: Bool)
+        -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
         // Walking to the spot and back to the phone is not part of the set.
         let frames = trimsToSet ? SetWindow.active(frames, requirement: definition.evidence) : frames
         let side: BodySide
@@ -112,6 +126,13 @@ nonisolated enum ExerciseAnalyzer {
         }
 
         let samples = frames.compactMap { sample(from: $0, as: definition, side: side) }
+        return countReps(samples, in: frames, as: definition, side: side, partial: partial, angledView: angledView)
+    }
+
+    /// The rep state machine, shared by the side-view rubric and the front-view count.
+    private static func countReps(_ samples: [Sample], in frames: [PoseFrame], as definition: ExerciseDefinition,
+                                  side: BodySide, partial: PartialVisibility?, angledView: Double?)
+        -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
         guard samples.count >= 5 else {
             return (.insufficientView(definition.copy.keepJointsVisible), nil)
         }
@@ -146,6 +167,14 @@ nonisolated enum ExerciseAnalyzer {
                 return (.insufficientView(definition.copy.bodyTooSmall), nil)
             }
             travel = { max(0, baseline - $0) }
+        case .shoulderDrop:
+            // The top is where the shoulders sit highest. A set that barely moves them (a person
+            // standing, or Vision's jitter) never reaches the amplitude of a squat.
+            baseline = percentile(samples.map(\.value), 0.1)
+            guard percentile(samples.map(\.value), 0.9) - baseline > definition.minimumBodyScale else {
+                return (.insufficientView(definition.copy.keepJointsVisible), nil)
+            }
+            travel = { max(0, $0 - baseline) }
         }
 
         let smoothed = samples.indices.map { index -> Double in
@@ -249,6 +278,75 @@ nonisolated enum ExerciseAnalyzer {
                                       rubricVersion: definition.rubricVersion)), diagnostics)
     }
 
+    // MARK: Front view
+
+    /// Counts a squat filmed from the front or at an angle, from the shoulders going down and up.
+    /// Nil when the 3D estimates do not say the person was off side-on, or when no rep is found: the
+    /// side-view refusal then stays, because it explains more. Depth and posture are not measured
+    /// from here, so the result carries no posture advice.
+    private static func analyzeFrontView(_ frames: [PoseFrame])
+        -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?)? {
+        let deviation: Double
+        switch ViewCheck.assess(frames, expected: .side) {
+        case .angled(let value, _), .mismatch(let value, _): deviation = value
+        case .matches, .unavailable: return nil
+        }
+        guard let first = frames.first, let last = frames.last,
+              last.time - first.time >= EvidenceRubric.minimumSetDuration else { return nil }
+        let samples = frontViewSamples(frames)
+        guard Double(samples.count) / Double(frames.count) >= EvidenceRubric.partialCoverage else { return nil }
+        let definition = ExerciseDefinition.squatFront
+        let result = countReps(samples, in: frames, as: definition, side: .left, partial: nil, angledView: nil)
+        guard case .analyzed(let analysis) = result.outcome, !analysis.reps.isEmpty else { return nil }
+        var diagnostics = result.diagnostics ?? MovementDiagnostics(requiredDepth: definition.phases.reachBottom)
+        diagnostics.frontView = deviation
+        return (result.outcome, diagnostics)
+    }
+
+    /// Height of the shoulders (their midpoint, in image-width units so the scale does not depend on
+    /// the picture's shape), per frame. When Vision loses both shoulders, the nose stands in at its
+    /// usual distance above them; a gap of at most `EvidenceRubric.maximumTrackingGap` is bridged
+    /// with a straight line, as the rep passes through it. Longer gaps stay empty.
+    private static func frontViewSamples(_ frames: [PoseFrame]) -> [Sample] {
+        func clear(_ frame: PoseFrame, _ joint: BodyJoint) -> JointPoint? {
+            frame.joints[joint].flatMap { $0.confidence >= EvidenceRubric.minimumJointConfidence ? $0 : nil }
+        }
+        struct Reading { let value: Double?; let nose: Double?; let confidence: Double }
+        let readings = frames.map { frame -> Reading in
+            let shoulders = [clear(frame, .leftShoulder), clear(frame, .rightShoulder)].compactMap { $0 }
+            let nose = clear(frame, .nose)
+            return Reading(
+                value: shoulders.isEmpty ? nil
+                    : shoulders.map(\.y).reduce(0, +) / Double(shoulders.count) * frame.aspectRatio,
+                nose: nose.map { $0.y * frame.aspectRatio },
+                confidence: (shoulders.map(\.confidence) + [nose?.confidence].compactMap { $0 }).min() ?? 0)
+        }
+        let offsets = readings.compactMap { reading in
+            reading.value.flatMap { value in reading.nose.map { value - $0 } }
+        }
+        let noseOffset = offsets.isEmpty ? nil : median(offsets)
+        var heights: [Double?] = readings.map { reading in
+            reading.value ?? noseOffset.flatMap { offset in reading.nose.map { $0 + offset } }
+        }
+        let known = heights.indices.filter { heights[$0] != nil }
+        for (before, after) in zip(known, known.dropFirst()) where after > before + 1 {
+            let span = frames[after].time - frames[before].time
+            guard span <= EvidenceRubric.maximumTrackingGap,
+                  let start = heights[before], let end = heights[after] else { continue }
+            for index in (before + 1)..<after {
+                let share = (frames[index].time - frames[before].time) / span
+                heights[index] = start + (end - start) * share
+            }
+        }
+        return frames.indices.compactMap { index in
+            heights[index].map {
+                Sample(time: frames[index].time, value: $0, scale: 0,
+                       confidence: max(readings[index].confidence, EvidenceRubric.minimumJointConfidence),
+                       posture: nil)
+            }
+        }
+    }
+
     /// The frame where a rep went deepest (hips lowest, or the joint most bent), to draw it.
     static func deepestFrame(of rep: RepMetric, in frames: [PoseFrame],
                              as definition: ExerciseDefinition) -> PoseFrame? {
@@ -261,6 +359,7 @@ nonisolated enum ExerciseAnalyzer {
         switch definition.signal {
         case .verticalTravel: return candidates.max { $0.1 < $1.1 }?.0
         case .jointBend, .verticalRise: return candidates.min { $0.1 < $1.1 }?.0
+        case .shoulderDrop: return candidates.max { $0.1 < $1.1 }?.0
         }
     }
 
@@ -299,6 +398,9 @@ nonisolated enum ExerciseAnalyzer {
                 ?? confidentPoint(referenceRole, in: frame, side: side == .left ? .right : .left)
             return Sample(time: frame.time, value: joint.y, scale: reference?.y ?? .nan,
                           confidence: joint.confidence, posture: posture)
+        case .shoulderDrop:
+            // Built over the whole set by `frontViewSamples`: it needs the nose offset and the gaps.
+            return nil
         case .jointBend(let fromRole, let vertexRole, let toRole):
             guard let from = confidentPoint(fromRole, in: frame, side: side),
                   let vertex = confidentPoint(vertexRole, in: frame, side: side),
@@ -382,6 +484,9 @@ nonisolated struct MovementDiagnostics: Equatable, Sendable {
     var partialVisibility: PartialVisibility?
     /// Reps of a partly visible set left out because their own frames were not clear enough.
     var unclearReps = 0
+    /// The median 3D deviation from side-on when the reps were counted from the shoulders because
+    /// the person faced the camera or stood at an angle.
+    var frontView: Double?
 
     /// Sentences for the result screen, or nil when every movement counted.
     func explanation(for definition: ExerciseDefinition, counted: Int) -> String? {
@@ -398,6 +503,9 @@ nonisolated struct MovementDiagnostics: Equatable, Sendable {
         }
         if unfinished {
             parts.append("The last movement did not come back to the starting position.")
+        }
+        if let frontView {
+            parts.append("You faced the phone (about \(Int(frontView.rounded()))° from side-on), so Plumb counted the reps from your shoulders going down and up. It does not measure depth or posture from this view: stand side-on for that.")
         }
         if let angledView {
             parts.append("Plumb saw you about \(Int(angledView.rounded()))° from side-on. Turn a little more side-on next time; counts are most reliable from the side.")
