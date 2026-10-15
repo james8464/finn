@@ -123,7 +123,7 @@ MICROPHONE: not used. Plumb speaks but never records; there is no microphone per
 
 APPLE INTELLIGENCE, two uses:
 - Reword comparison (result screen): on eligible devices, the on-device Foundation Models framework rephrases an already measured comparison. On other devices the button shows a fixed sentence. No images reach the model.
-- Coach (conversation): the person asks about their sets. Plumb builds the context from the saved set summaries only (exercise, reps, date, observation) and sends it through the Foundation Models framework. It tries Apple's server model on Private Cloud Compute first (needs Apple Intelligence and a connection; Apple does not store the requests), then the on-device model, then a fixed text. No image, video or pose point is ever sent. Plumb has no server and no third-party model provider. Without Apple Intelligence on the review device, the coach answers with the fixed text: expected.
+- Coach (conversation): the person asks about their sets. Plumb sends the question, saved set summaries (exercise, reps, date, observation), and the selected training goal and experience level, if provided, through the Foundation Models framework. It tries Apple's server model on Private Cloud Compute first (needs Apple Intelligence and a connection; Apple does not store the requests), then the on-device model, then a fixed response. No image, video or pose point is ever sent. Plumb has no server and no third-party model provider. Without Apple Intelligence on the review device, the coach answers with fixed text: expected.
 ```
 
 ## Export compliance

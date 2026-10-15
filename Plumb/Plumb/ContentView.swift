@@ -275,12 +275,14 @@ struct ContentView: View {
             Button("Delete all data", role: .destructive) {
                 model.deleteAllData()
                 badges.reset()
+                preferences.resetLocalChoices()
+                route = nil
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text(model.leavesHealthWorkouts
-                 ? "This removes saved sessions and any recovered history backups from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
-                 : "This removes saved sessions and any recovered history backups from this iPhone.")
+                 ? "This removes saved sessions, awards and preferences from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
+                 : "This removes saved sessions, awards and preferences from this iPhone.")
         }
     }
 
@@ -931,7 +933,7 @@ struct ContentView: View {
                 .optionCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
-                    Text("The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your answers set the order of the exercises and how the coach talks to you.")
+                    Text("The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your choices set exercise order and help Coach select relevant saved sets.")
                     Button("Replay the welcome") { showsOnboarding = true }
                         .font(.body.weight(.medium))
                         .foregroundStyle(Color.primary)

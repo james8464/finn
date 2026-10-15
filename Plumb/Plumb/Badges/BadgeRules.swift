@@ -6,7 +6,7 @@ nonisolated enum BadgeKind: Codable, Hashable, Sendable {
     case firstSet
     /// Sets on three different days within seven days.
     case threeDaysInAWeek
-    /// A fully visible set with at least `SetComparison.minimumReps` reps and nothing to correct.
+    /// A fully visible set with at least `SetComparison.minimumReps` reps and no flagged pattern.
     case cleanSet
     /// A measured set of each of the six exercises.
     case allSixExercises
@@ -27,7 +27,7 @@ nonisolated enum BadgeKind: Codable, Hashable, Sendable {
         switch self {
         case .firstSet: String(localized: "First set")
         case .threeDaysInAWeek: String(localized: "Three days in a week")
-        case .cleanSet: String(localized: "Nothing to fix")
+        case .cleanSet: String(localized: "No flagged pattern")
         case .allSixExercises: String(localized: "All six")
         case .repRecord(let kind): String(localized: "\(kind.definition.copy.name) record")
         case .longerRange(let kind): String(localized: "Longer \(kind.definition.copy.rangeNoun), \(kind.chipName.lowercased())")
@@ -39,7 +39,7 @@ nonisolated enum BadgeKind: Codable, Hashable, Sendable {
         switch self {
         case .firstSet: String(localized: "Finish one measured set.")
         case .threeDaysInAWeek: String(localized: "Measure sets on three different days within seven days.")
-        case .cleanSet: String(localized: "A fully visible set of \(SetComparison.minimumReps) reps or more with no observation to correct.")
+        case .cleanSet: String(localized: "A measured set of \(SetComparison.minimumReps) reps or more with no pattern flagged by Plumb's current checks.")
         case .allSixExercises: String(localized: "Measure at least one set of each of the six exercises.")
         case .repRecord: String(localized: "Beat your highest rep count for this exercise. Needs an earlier set to beat.")
         case .longerRange: String(localized: "Two comparable sets in one session where your median range grew by 15% or more.")
@@ -100,7 +100,7 @@ nonisolated enum BadgeRules {
         }) {
             earned.append(EarnedBadge(kind: .cleanSet, earnedAt: clean.capturedAt,
                                       detail: Self.text(reps: clean.analysis.reps.count, of: clean.exercise)
-                                      + String(localized: ", every joint clear, no pattern to correct."),
+                                      + String(localized: ", with no pattern flagged by Plumb's current checks."),
                                       setID: clean.id))
         }
 

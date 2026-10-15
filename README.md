@@ -46,7 +46,7 @@ History stores local summaries, compares compatible sets, identifies a recurring
 
 ### Home and Coach
 
-The Home dashboard links to recent sessions and the Workout flow. Coach uses Apple Intelligence, when available, to select up to two relevant saved sets; Plumb writes the displayed response from their recorded counts and observations. Invalid model output and unavailable models use fixed text. (A Claude demo is Debug-only.) Posture, Weights, Awards, and Plumb+ destinations are placeholders.
+First launch asks for a goal, experience level, favorite exercises, and spoken feedback preference; these choices stay on the iPhone. The Home dashboard links to recent sessions, posture observations, a best set in reps, Awards, and the Workout flow. Awards mark measured milestones, including a set with no pattern flagged by Plumb's current checks; they do not certify perfect form. Coach uses Apple Intelligence, when available, to select up to two relevant saved sets. The selected goal and level can accompany the request; Plumb writes the displayed response from recorded counts and observations. Invalid model output and unavailable models use fixed text. (A Claude demo is Debug-only.) Plumb+ stays hidden until its subscription exists.
 
 ### Apple Watch
 
@@ -64,18 +64,17 @@ App Intents can start a selected set, report the last saved set, or open History
 
 The embedded extension shows the last measured set and can open the camera on its exercise. A local Live Activity shows count and elapsed time during a set. Shared data contains a saved-set summary — not video or Health data. Unit tests and a simulator build exist; App Group provisioning and the experience on a physical iPhone remain unchecked.
 
-### MWM Setup
+### Distribution setup
 
 | Item | Detail |
 |------|--------|
-| Bundle ID | Team 08 |
-| Analytics | Spark Flash SDK (bundled) |
-| Debug key | MWM sandbox |
-| Release key | MWM production |
-| Events tracked | App opens, StoreKit transaction updates |
-| StoreKit catalog | Local, six subscription products (shared `Plumb` scheme) |
-| Paywall | Not yet implemented |
-| Privacy draft | [docs/release/app-privacy-answers.md](docs/release/app-privacy-answers.md) — lists Spark's data categories; publish matching privacy page before App Store submission |
+| Bundle ID | `com.finlearn.plumb` |
+| Apple Developer team in the project | `2FN6Y5NHS5` |
+| Analytics SDK | None in the checked-in project |
+| StoreKit catalog and paywall | Not implemented |
+| Privacy draft | [docs/release/app-privacy-answers.md](docs/release/app-privacy-answers.md) — review against the final signed archive before publication |
+
+If the team adopts MWM signing or an SDK, update the code and privacy documents before submission.
 
 ---
 
@@ -131,7 +130,7 @@ open Plumb/Plumb.xcodeproj
 # 3. Build and run (⌘R)
 ```
 
-Device signing requires access to the MWM Apple Developer team (`ZUQ3ZP29N4`) and provisioning for the app, Watch, widget, HealthKit, and App Group capabilities.
+The checked-in project signs with team `2FN6Y5NHS5`; device builds require that team's provisioning for the app, Watch, widget, HealthKit, and App Group capabilities. A separate development-signed build under James's team has been installed and launched on an iPhone 16 Pro Max.
 
 | Resource | Link |
 |----------|------|
