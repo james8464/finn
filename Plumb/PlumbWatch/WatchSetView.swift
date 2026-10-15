@@ -7,7 +7,7 @@ struct WatchSetView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 6) {
+            VStack(spacing: 10) {
                 if let state = link.state {
                     content(for: state)
                 } else {
@@ -118,8 +118,12 @@ struct WatchSetView: View {
     }
 
     private func command(_ title: LocalizedStringKey, _ command: WatchCommand) -> some View {
-        Button(title) { link.send(command) }
+        Button { link.send(command) } label: {
+            Label(title, systemImage: command == .stopSet ? "stop.fill" : "play.fill")
+                .frame(minHeight: 32)
+        }
             .buttonStyle(.borderedProminent)
+            .tint(command == .stopSet ? .red : .blue)
             .disabled(!link.isPhoneReachable)
     }
 }

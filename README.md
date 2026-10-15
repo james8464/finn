@@ -44,9 +44,11 @@ A few words of the same advice appear large on the camera screen during the set.
 
 History stores local summaries, compares compatible sets, identifies a recurring pattern, and shares text through the system sheet.
 
-### Home and Coach
+### Interface and Coach
 
-The Home dashboard links to recent sessions and the Workout flow. Coach uses Apple Intelligence, when available, to select up to two relevant saved sets; Plumb writes the displayed response from their recorded counts and observations. Invalid model output and unavailable models use fixed text. (A Claude demo is Debug-only.) Posture, Weights, Awards, and Plumb+ destinations are placeholders.
+Native Summary, Workout, History and Coach tabs keep their navigation state. Summary shows saved activity, recent workouts, the most measured reps for the selected exercise, and earned awards. System text, semantic colours and adaptive layouts support light/dark appearance and larger text. See the [design research](docs/architecture/specs/2026-10-15-native-ui-design.md) and [173-topic HIG review](docs/design/hig-ui-coverage.md).
+
+Coach uses Apple Intelligence, when available, to select up to two relevant saved sets; Plumb writes the displayed response from their recorded counts and observations. Invalid model output and unavailable models use fixed text. A Claude demo is Debug-only. Source information is available beside the composer.
 
 ### Apple Watch
 

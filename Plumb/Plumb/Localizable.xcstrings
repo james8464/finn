@@ -369,6 +369,86 @@
         }
       }
     },
+    "%lld awards earned" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld award earned"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld awards earned"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld récompense obtenue"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld récompenses obtenues"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld awards earned from your saved sets." : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld award earned from your saved sets."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld awards earned from your saved sets."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld récompense obtenue grâce à vos séries enregistrées."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld récompenses obtenues grâce à vos séries enregistrées."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld badges earned" : {
       "localizations" : {
         "fr" : {
@@ -401,6 +481,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld jours d’affilée"
+          }
+        }
+      }
+    },
+    "%lld earned" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld earned"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld earned"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld obtenue"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld obtenues"
+                }
+              }
+            }
           }
         }
       }
@@ -552,6 +672,16 @@
         }
       }
     },
+    "%lld of %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sur %lld"
+          }
+        }
+      }
+    },
     "%lld reps" : {
       "localizations" : {
         "en" : {
@@ -588,6 +718,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld reps in the last 7 days" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld répétitions au cours des 7 derniers jours"
           }
         }
       }
@@ -923,6 +1063,22 @@
         }
       }
     },
+    "12 weeks" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 weeks"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 semaines"
+          }
+        }
+      }
+    },
     "2 to 3 m" : {
       "localizations" : {
         "fr" : {
@@ -1013,6 +1169,32 @@
         }
       }
     },
+    "About Coach" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos de Coach"
+          }
+        }
+      }
+    },
+    "About measurements" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About measurements"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos des mesures"
+          }
+        }
+      }
+    },
     "Account" : {
       "localizations" : {
         "fr" : {
@@ -1039,6 +1221,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Énergie active"
+          }
+        }
+      }
+    },
+    "Activity" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activité"
           }
         }
       }
@@ -1099,6 +1291,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les six"
+          }
+        }
+      }
+    },
+    "All your saved sessions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes vos séances enregistrées"
           }
         }
       }
@@ -1415,12 +1617,32 @@
         }
       }
     },
+    "Award earned" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récompense obtenue"
+          }
+        }
+      }
+    },
     "Awards" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Récompenses"
+          }
+        }
+      }
+    },
+    "Awards reflect measurements in your saved sets. They don’t assess overall technique or fitness." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les récompenses reflètent les mesures de vos séries enregistrées. Elles n’évaluent pas votre technique ni votre condition physique globale."
           }
         }
       }
@@ -1471,6 +1693,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les badges viennent de ce que Plumb mesure : une série, un record, une amplitude plus grande. Voici ce qu’il faut pour chacun."
+          }
+        }
+      }
+    },
+    "Based on your saved sets" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À partir de vos séries enregistrées"
           }
         }
       }
@@ -1565,12 +1797,32 @@
         }
       }
     },
+    "Camera frames stay on your iPhone. No video is saved." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les images restent sur votre iPhone. Aucune vidéo n’est enregistrée."
+          }
+        }
+      }
+    },
     "Camera interrupted" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Caméra interrompue"
+          }
+        }
+      }
+    },
+    "Camera privacy" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confidentialité de la caméra"
           }
         }
       }
@@ -1643,6 +1895,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Forme cardio : VO2 max %@."
+          }
+        }
+      }
+    },
+    "Change exercise or options while keeping this session open." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changez d’exercice ou d’options en gardant cette séance ouverte."
           }
         }
       }
@@ -1755,12 +2017,42 @@
         }
       }
     },
+    "Choose a focus for your set notes. You can change this later." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez un objectif pour vos notes de série. Vous pourrez le modifier plus tard."
+          }
+        }
+      }
+    },
     "Choose a range you can repeat on each rep." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choisis une amplitude que tu peux tenir à chaque répétition."
+          }
+        }
+      }
+    },
+    "Choose a workout" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un entraînement"
+          }
+        }
+      }
+    },
+    "Choose an exercise. Plumb counts your reps and helps you review each set." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez un exercice. Plumb compte vos répétitions et vous aide à analyser chaque série."
           }
         }
       }
@@ -1801,6 +2093,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Coach"
+          }
+        }
+      }
+    },
+    "Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coach décrit les mesures enregistrées. Il ne peut pas diagnostiquer une blessure ni évaluer toute votre technique."
           }
         }
       }
@@ -2166,6 +2468,16 @@
         }
       }
     },
+    "Discover your first milestone" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Découvrez votre premier objectif"
+          }
+        }
+      }
+    },
     "Done" : {
       "localizations" : {
         "fr" : {
@@ -2282,6 +2594,22 @@
         }
       }
     },
+    "Estimates from joint angles; uses your selection when uncertain." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimates from joint angles; uses your selection when uncertain."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estime le mouvement à partir des angles articulaires ; utilise votre sélection en cas d’incertitude."
+          }
+        }
+      }
+    },
     "Estimates the load of each rep, such as the weight a push-up lifts." : {
       "localizations" : {
         "fr" : {
@@ -2312,6 +2640,16 @@
         }
       }
     },
+    "Every set is a beginning." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque série est un début."
+          }
+        }
+      }
+    },
     "Exercise" : {
       "localizations" : {
         "fr" : {
@@ -2332,12 +2670,44 @@
         }
       }
     },
+    "Exercise recognition unavailable. Uses your selection." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercise recognition unavailable. Uses your selection."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconnaissance indisponible. Votre sélection est utilisée."
+          }
+        }
+      }
+    },
     "Exercise: %@" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exercice : %@"
+          }
+        }
+      }
+    },
+    "Experimental on-device estimate. Uses your selection when uncertain." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimental on-device estimate. Uses your selection when uncertain."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimation expérimentale sur cet iPhone. Votre sélection est utilisée en cas d’incertitude."
           }
         }
       }
@@ -2428,6 +2798,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Termine une série de %@ et elle apparaîtra ici, avec ses répétitions et ce que Plumb a remarqué."
+          }
+        }
+      }
+    },
+    "Finish a measured set to earn your first award." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminez une série mesurée pour obtenir votre première récompense."
           }
         }
       }
@@ -2782,6 +3162,22 @@
         }
       }
     },
+    "Health data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health data"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Données Santé"
+          }
+        }
+      }
+    },
     "Health doesn’t let Plumb save workouts. %@." : {
       "localizations" : {
         "fr" : {
@@ -2958,6 +3354,22 @@
         }
       }
     },
+    "Hold position to start. Walk back or stop moving to finish." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold position to start. Walk back or stop moving to finish."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenez la position pour commencer. Revenez vers l’iPhone ou arrêtez le mouvement pour terminer."
+          }
+        }
+      }
+    },
     "Hold still. The set starts by itself." : {
       "localizations" : {
         "fr" : {
@@ -3004,6 +3416,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comment l’amplitude est mesurée"
+          }
+        }
+      }
+    },
+    "How this answer is made" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment cette réponse est créée"
           }
         }
       }
@@ -3341,6 +3763,16 @@
         }
       }
     },
+    "Last 7 days" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 derniers jours"
+          }
+        }
+      }
+    },
     "Last Set" : {
       "localizations" : {
         "fr" : {
@@ -3567,6 +3999,16 @@
         }
       }
     },
+    "Make time for your next set." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prenez le temps de faire une nouvelle série."
+          }
+        }
+      }
+    },
     "Measure at least one set of each of the six exercises." : {
       "localizations" : {
         "fr" : {
@@ -3639,6 +4081,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Médiane des répétitions mesurées de chaque séance."
+          }
+        }
+      }
+    },
+    "Milestones" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectifs"
           }
         }
       }
@@ -3763,6 +4215,32 @@
         }
       }
     },
+    "No account is needed. Plumb keeps your saved workouts on this iPhone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun compte n’est nécessaire. Plumb conserve vos entraînements sur cet iPhone."
+          }
+        }
+      }
+    },
+    "No account required" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No account required"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun compte requis"
+          }
+        }
+      }
+    },
     "No account, no upload" : {
       "localizations" : {
         "fr" : {
@@ -3779,6 +4257,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas de compte, pas d’envoi. Les résumés de tes séries restent sur cet iPhone."
+          }
+        }
+      }
+    },
+    "No awards yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No awards yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune récompense"
           }
         }
       }
@@ -3924,12 +4418,44 @@
         }
       }
     },
+    "No observation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No observation"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune observation"
+          }
+        }
+      }
+    },
     "No observation shared." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune observation partagée."
+          }
+        }
+      }
+    },
+    "No previous week" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No previous week"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune semaine précédente"
           }
         }
       }
@@ -3944,12 +4470,38 @@
         }
       }
     },
+    "No saved sets" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune série enregistrée"
+          }
+        }
+      }
+    },
     "No session yet." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune séance pour l’instant."
+          }
+        }
+      }
+    },
+    "No sessions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sessions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance"
           }
         }
       }
@@ -4075,6 +4627,16 @@
         }
       }
     },
+    "ON THIS IPHONE" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SUR CET IPHONE"
+          }
+        }
+      }
+    },
     "Observation marked not relevant." : {
       "localizations" : {
         "fr" : {
@@ -4091,6 +4653,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Observation : %@"
+          }
+        }
+      }
+    },
+    "Observations require 4 measured reps." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observations require 4 measured reps."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les observations nécessitent 4 répétitions mesurées."
           }
         }
       }
@@ -4307,6 +4885,16 @@
         }
       }
     },
+    "Partly visible · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partiellement visible · %@"
+          }
+        }
+      }
+    },
     "Paste the demo API key" : {
       "localizations" : {
         "fr" : {
@@ -4323,6 +4911,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Personnaliser avec Santé"
+          }
+        }
+      }
+    },
+    "Pick up with %@, or choose another exercise." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprenez avec %@ ou choisissez un autre exercice."
           }
         }
       }
@@ -4784,6 +5382,22 @@
         }
       }
     },
+    "Posture feedback requires a side view. Turn this off if the angle estimate is wrong." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posture feedback requires a side view. Turn this off if the angle estimate is wrong."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les observations de posture nécessitent une vue de profil. Désactivez cette option si l’angle estimé est incorrect."
+          }
+        }
+      }
+    },
     "Posture score not available yet" : {
       "localizations" : {
         "fr" : {
@@ -4944,6 +5558,16 @@
         }
       }
     },
+    "Recent workout" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernier entraînement"
+          }
+        }
+      }
+    },
     "Recognize the exercise automatically" : {
       "localizations" : {
         "fr" : {
@@ -5066,6 +5690,22 @@
         }
       }
     },
+    "Repeated observation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeated observation"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observation récurrente"
+          }
+        }
+      }
+    },
     "Replay the welcome" : {
       "localizations" : {
         "fr" : {
@@ -5112,6 +5752,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Répétitions par séance"
+          }
+        }
+      }
+    },
+    "Reps this week" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reps this week"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions cette semaine"
+          }
+        }
+      }
+    },
+    "Reps without observations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reps without observations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions sans observation"
+          }
+        }
+      }
+    },
+    "Reps without observations per session" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reps without observations per session"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions sans observation par séance"
           }
         }
       }
@@ -5346,6 +6034,22 @@
         }
       }
     },
+    "Saves finished sessions with duration and reps, without calorie or heart-rate estimates." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saves finished sessions with duration and reps, without calorie or heart-rate estimates."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre la durée et les répétitions des séances terminées, sans estimation de calories ni de fréquence cardiaque."
+          }
+        }
+      }
+    },
     "Saving to Fitness…" : {
       "localizations" : {
         "fr" : {
@@ -5556,6 +6260,16 @@
         }
       }
     },
+    "Set summary" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résumé de la série"
+          }
+        }
+      }
+    },
     "Sets" : {
       "localizations" : {
         "fr" : {
@@ -5578,6 +6292,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Des séries %1$@, %2$@ et %3$@, en moins de sept jours."
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglages"
           }
         }
       }
@@ -6218,6 +6942,32 @@
         }
       }
     },
+    "Summary" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résumé"
+          }
+        }
+      }
+    },
+    "Tailors rest and recovery advice. Data stays on this iPhone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tailors rest and recovery advice. Data stays on this iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adapte les conseils de repos et de récupération. Les données restent sur cet iPhone."
+          }
+        }
+      }
+    },
     "Tap Try again to finish removing the local data." : {
       "localizations" : {
         "fr" : {
@@ -6498,6 +7248,22 @@
         }
       }
     },
+    "Total reps" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total reps"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions au total"
+          }
+        }
+      }
+    },
     "Train again next week and the two weeks compare here." : {
       "localizations" : {
         "fr" : {
@@ -6708,6 +7474,36 @@
         }
       }
     },
+    "Use a stable support at hip height, a few steps away." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisez un support stable à hauteur de hanches, à quelques pas de vous."
+          }
+        }
+      }
+    },
+    "Use a stable support. Keep the phone upright, with the camera near hip height." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisez un support stable. Gardez le téléphone vertical, avec la caméra à hauteur de hanches."
+          }
+        }
+      }
+    },
+    "Use heart rate, recovery, sleep, workouts, age, weight and height from Health to tailor rest times and suggest lighter days." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisez votre fréquence cardiaque, votre récupération, votre sommeil, vos entraînements, votre âge, votre poids et votre taille depuis Santé pour adapter vos temps de repos et suggérer des journées plus légères."
+          }
+        }
+      }
+    },
     "Use my Health data" : {
       "localizations" : {
         "fr" : {
@@ -6764,6 +7560,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La vidéo est traitée sur cet iPhone et jamais enregistrée."
+          }
+        }
+      }
+    },
+    "View awards" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir les récompenses"
+          }
+        }
+      }
+    },
+    "View milestones" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir les objectifs"
           }
         }
       }
@@ -7050,6 +7866,16 @@
         }
       }
     },
+    "Your activity" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre activité"
+          }
+        }
+      }
+    },
     "Your body swung more at the top of the last two reps." : {
       "localizations" : {
         "fr" : {
@@ -7072,6 +7898,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ta poitrine a plongé en bas du mouvement %1$@ : ton buste était penché d’environ %2$lld° de plus que tes tibias."
+          }
+        }
+      }
+    },
+    "Your data stays on this iPhone. Each tip explains what it uses. Turn this off anytime in Options." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos données restent sur cet iPhone. Chaque conseil explique les données utilisées. Désactivez cette option à tout moment dans Options."
           }
         }
       }
@@ -7118,6 +7954,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ton premier badge est à une série d’ici."
+          }
+        }
+      }
+    },
+    "Your first finished session will appear here." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre première séance terminée apparaîtra ici."
           }
         }
       }
@@ -7329,6 +8175,16 @@
         }
       }
     },
+    "Your next set starts here." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre prochaine série commence ici."
+          }
+        }
+      }
+    },
     "Your numbers start with one set." : {
       "localizations" : {
         "fr" : {
@@ -7370,6 +8226,16 @@
         }
       }
     },
+    "Your progress, recognised." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos progrès récompensés."
+          }
+        }
+      }
+    },
     "Your pulls got lower in the last two reps." : {
       "localizations" : {
         "fr" : {
@@ -7396,6 +8262,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ta montée a été moins haute sur les deux dernières répétitions."
+          }
+        }
+      }
+    },
+    "Your set notes" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos notes de série"
           }
         }
       }
@@ -7802,6 +8678,16 @@
         }
       }
     },
+    "measured reps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions mesurées"
+          }
+        }
+      }
+    },
     "muscle-up" : {
       "localizations" : {
         "fr" : {
@@ -7982,6 +8868,26 @@
         }
       }
     },
+    "rep · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétition · %@"
+          }
+        }
+      }
+    },
+    "reps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions"
+          }
+        }
+      }
+    },
     "reps against last week" : {
       "localizations" : {
         "fr" : {
@@ -8008,6 +8914,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "répétitions cette semaine"
+          }
+        }
+      }
+    },
+    "reps · %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions · %@"
           }
         }
       }
@@ -8169,6 +9085,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "la position du buste"
+          }
+        }
+      }
+    },
+    "vs. last week" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vs. last week"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "par rapport à la semaine dernière"
           }
         }
       }

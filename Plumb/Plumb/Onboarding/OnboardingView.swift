@@ -10,6 +10,7 @@ struct OnboardingView: View {
     @State private var step = 0
     @State private var profile: OnboardingProfile
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private static let stepCount = 5
 
@@ -37,22 +38,29 @@ struct OnboardingView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
         }
-        .darkScreen()
+        .background(HomeStyle.background.ignoresSafeArea())
+        .tint(HomeStyle.accent)
         .interactiveDismissDisabled()
     }
 
     // MARK: Chrome
 
     private var progress: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<Self.stepCount, id: \.self) { index in
-                Capsule()
-                    .fill(index <= step ? Color.white : Color.white.opacity(0.18))
-                    .frame(height: 4)
+        HStack {
+            Button { withAnimation(reduceMotion ? nil : HomeStyle.spring) { step -= 1 } } label: {
+                Label("Back", systemImage: "chevron.left")
+                    .frame(minHeight: 44)
             }
+            .disabled(step == 0)
+            .opacity(step == 0 ? 0 : 1)
+            Spacer()
+            Text("\(step + 1) of \(Self.stepCount)")
+                .font(.subheadline).monospacedDigit().foregroundStyle(.secondary)
+            Spacer()
+            Button("Not now", action: finish).frame(minHeight: 44)
+                .accessibilityIdentifier("onboarding.finish")
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Step \(step + 1) of \(Self.stepCount)")
+        .accessibilityElement(children: .contain)
     }
 
     private var isLast: Bool { step == Self.stepCount - 1 }
@@ -60,12 +68,13 @@ struct OnboardingView: View {
     private var actions: some View {
         VStack(spacing: 2) {
             Button(action: advance) {
-                PrimaryActionLabel(title: isLast ? "Start" : "Continue")
+                PrimaryActionLabel(title: isLast ? "Start" : "Continue",
+                                   symbol: isLast ? "checkmark" : "arrow.right")
             }
             .buttonStyle(PressableStyle())
             .accessibilityIdentifier("onboarding.continue")
             Button(isLast ? "Skip this" : "Skip") {
-                if isLast { finish() } else { withAnimation(HomeStyle.spring) { step += 1 } }
+                if isLast { finish() } else { withAnimation(reduceMotion ? nil : HomeStyle.spring) { step += 1 } }
             }
             .font(.subheadline.weight(.medium))
             .foregroundStyle(HomeStyle.supportingText)
@@ -75,7 +84,7 @@ struct OnboardingView: View {
     }
 
     private func advance() {
-        if isLast { finish() } else { withAnimation(HomeStyle.spring) { step += 1 } }
+        if isLast { finish() } else { withAnimation(reduceMotion ? nil : HomeStyle.spring) { step += 1 } }
     }
 
     private func finish() {
@@ -91,7 +100,7 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(title)
-                        .font(.system(size: 34, weight: .bold))
+                        .font(.largeTitle.bold())
                         .accessibilityAddTraits(.isHeader)
                     Text(subtitle)
                         .font(.body)
@@ -102,8 +111,8 @@ struct OnboardingView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
-            .padding(.top, 32)
-            .padding(.bottom, 24)
+            .padding(.top, 28)
+            .padding(.bottom, 16)
         }
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
@@ -111,7 +120,7 @@ struct OnboardingView: View {
 
     private var goalPage: some View {
         page(String(localized: "What brings you here?"),
-             String(localized: "Plumb adapts what it says after each set. Pick one.")) {
+             String(localized: "Choose a focus for your set notes. You can change this later.")) {
             VStack(spacing: 10) {
                 ForEach(TrainingGoal.allCases, id: \.self) { goal in
                     ChoiceCard(title: goal.title, detail: goal.detail, symbol: goal.symbol,
@@ -127,7 +136,7 @@ struct OnboardingView: View {
     private var exercisesPage: some View {
         page(String(localized: "Which exercises?"),
              String(localized: "They come first on your screen. The first one is ready when you open Plumb.")) {
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: 10) {
                 ForEach(ExerciseKind.allCases, id: \.self) { kind in
                     ExerciseTile(kind: kind,
                                  rank: profile.favoriteExercises.firstIndex(of: kind).map { $0 + 1 }) {
@@ -174,7 +183,7 @@ struct OnboardingView: View {
                 }
                 .tint(Color(uiColor: .systemGreen))
                 .accessibilityIdentifier("onboarding.speaksLive")
-                .darkGlassCard()
+                .optionCard()
                 HStack(alignment: .top, spacing: 14) {
                     Image(systemName: "airpods.pro")
                         .font(.title2)
@@ -188,7 +197,7 @@ struct OnboardingView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .darkGlassCard()
+                .optionCard()
             }
         }
     }
@@ -205,13 +214,13 @@ struct OnboardingView: View {
                     placementRow("rectangle.portrait.and.arrow.right", String(localized: "From the side"),
                                  String(localized: "Your profile faces the camera. From the front, Plumb still counts your reps, but posture advice needs your side."))
                     placementRow("arrow.up.and.down", String(localized: "At hip height"),
-                                 String(localized: "Lean it against a bottle, a shoe or a bag, on the floor or a low bench."))
+                                 String(localized: "Use a stable support. Keep the phone upright, with the camera near hip height."))
                     placementRow("figure.walk", String(localized: "A few steps away"),
                                  String(localized: "Two to three meters. Walk back to your iPhone to end the set."))
                     placementRow("person.crop.rectangle", String(localized: "Whole body in the frame"),
                                  String(localized: "Head and feet both visible, with a bit of room above and below."))
                 }
-                .darkGlassCard()
+                .optionCard()
                 Label("The camera is asked for when you start your first set, not now.", systemImage: "camera")
                     .font(.footnote)
                     .foregroundStyle(HomeStyle.supportingText)
@@ -247,9 +256,7 @@ private struct ChoiceCard: View {
     let tap: () -> Void
 
     var body: some View {
-        Button {
-            withAnimation(HomeStyle.spring) { tap() }
-        } label: {
+        Button(action: tap) {
             HStack(alignment: .top, spacing: 14) {
                 if let symbol {
                     Image(systemName: symbol)
@@ -262,24 +269,20 @@ private struct ChoiceCard: View {
                     Text(title).font(.headline)
                     Text(detail)
                         .font(.subheadline)
-                        .opacity(selected ? 0.7 : 0.6)
+                        .opacity(0.78)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(selected ? HomeStyle.accent : Color(uiColor: .secondaryLabel))
                     .font(.title3)
                     .accessibilityHidden(true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .foregroundStyle(selected ? Color.black : Color.white)
-            .background {
-                if selected {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous).fill(.white)
-                } else {
-                    Color.clear.plumbGlass(in: RoundedRectangle(cornerRadius: 20, style: .continuous), interactive: true)
-                }
-            }
+            .foregroundStyle(Color.primary)
+            .background(selected ? HomeStyle.accent.opacity(0.12) : HomeStyle.card,
+                        in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -294,9 +297,7 @@ private struct ExerciseTile: View {
     let tap: () -> Void
 
     var body: some View {
-        Button {
-            withAnimation(HomeStyle.spring) { tap() }
-        } label: {
+        Button(action: tap) {
             VStack(alignment: .leading, spacing: 8) {
                 ZStack(alignment: .topTrailing) {
                     ExerciseFigureView(kind: kind)
@@ -317,9 +318,13 @@ private struct ExerciseTile: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .plumbGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), interactive: true)
+            .background(
+                LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom],
+                               startPoint: .top, endPoint: .bottom),
+                in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .strokeBorder(.white, lineWidth: rank == nil ? 0 : 1.5))
+                .strokeBorder(rank == nil ? .white.opacity(0.08) : .white, lineWidth: rank == nil ? 1 : 2))
+            .environment(\.colorScheme, .dark)
         }
         .buttonStyle(PressableStyle())
         .accessibilityLabel(kind.definition.copy.name)
@@ -355,9 +360,9 @@ struct PlacementScene: View {
             .background(
                 LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom],
                                startPoint: .top, endPoint: .bottom),
-                in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .strokeBorder(HomeStyle.hairline, lineWidth: 0.5))
+                in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(.white.opacity(0.08), lineWidth: 1))
             .environment(\.colorScheme, .dark)
         }
         .accessibilityElement()

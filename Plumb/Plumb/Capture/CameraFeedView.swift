@@ -54,7 +54,7 @@ private struct SkeletonOverlay: View {
     }
 
     private func draw(_ geometry: SkeletonGeometry, in context: inout GraphicsContext, size canvas: CGSize) {
-        SkeletonPainter.draw(geometry, in: &context, size: canvas, clear: .white, labelText: .black, lineWidth: 2)
+        SkeletonPainter.draw(geometry, in: &context, size: canvas, clear: .white, labelText: .black)
     }
 }
 

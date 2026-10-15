@@ -1,49 +1,58 @@
 import AVFoundation
 import SwiftUI
 
-/// Colors of the app. Plumb is dark: white on deep black, glass over a dark silk, and the camera
-/// behind the first screen. No accent color.
+/// Shared semantic colours. Content surfaces stay opaque; system bars provide materials.
 enum HomeStyle {
-    static let background = Color.black
-    /// A card on the dark silk: a faint white veil, with a hairline of its own.
-    static let card = Color.white.opacity(0.08)
-    static let hairline = Color.white.opacity(0.14)
-    static let supportingText = Color.white.opacity(0.6)
-    /// The placement drawing of the welcome is dark in both appearances, like the camera it stands for.
+    static let background = Color(uiColor: .systemBackground)
+    static let accent = Color.primary
+    /// Monochrome actions invert with the system appearance.
+    static let filledAccent = Color.primary
+    static let onAccent = Color(uiColor: .systemBackground)
+    static let card = Color(uiColor: .secondarySystemBackground)
+    static let supportingText = Color(uiColor: .secondaryLabel)
+    /// The camera card is dark in both appearances, like the camera view it stands for.
     static let cameraTop = Color(white: 0.11)
     static let cameraBottom = Color(white: 0.05)
+    /// Supporting text on the camera card, solid so its contrast does not depend on what is behind.
     static let cameraSecondaryText = Color(white: 0.8)
     static let spring = Animation.spring(response: 0.45, dampingFraction: 0.86)
 }
 
-/// The pages behind the first screen's one icon.
-enum HomeRoute: Hashable, CaseIterable {
-    case history, coach, awards, options, privacy
+/// A small category marker shared by dashboard widgets and supporting pages.
+struct HomeSymbol: View {
+    let name: String
+    var color: Color = HomeStyle.accent
+    var size: CGFloat = 40
 
-    var title: String {
-        switch self {
-        case .history: String(localized: "History")
-        case .coach: String(localized: "Coach")
-        case .awards: String(localized: "Awards")
-        case .options: String(localized: "Options")
-        case .privacy: String(localized: "Privacy")
-        }
-    }
-
-    var symbol: String {
-        switch self {
-        case .history: "clock.arrow.circlepath"
-        case .coach: "bubble.left.and.text.bubble.right"
-        case .awards: "rosette"
-        case .options: "slider.horizontal.3"
-        case .privacy: "lock"
-        }
+    var body: some View {
+        Image(systemName: name)
+            .font(.system(size: size * 0.48, weight: .semibold))
+            .symbolRenderingMode(.hierarchical)
+            .foregroundStyle(color)
+            .frame(width: size, height: size)
+            .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: size * 0.28))
+            .accessibilityHidden(true)
     }
 }
 
+/// Quiet separation from the canvas; content remains opaque and readable.
+struct HomeSurface: ViewModifier {
+    var radius: CGFloat = 20
+
+    func body(content: Content) -> some View {
+        content.background(HomeStyle.card, in: RoundedRectangle(cornerRadius: radius))
+    }
+}
+
+/// The secondary pages reachable from the first screen.
+enum HomeRoute: Hashable {
+    case history, options, privacy, coach
+    case account, lastWorkout, posture, weights, awards, plus
+}
+
 extension ExerciseKind {
-    /// The short name, for a menu row.
-    nonisolated var chipName: String {
+    /// The name on the exercise chips, as short as it can be.
+    var chipName: String {
         switch self {
         case .bodyweightSquat: String(localized: "Squat")
         case .pushUp: String(localized: "Push-up")
@@ -53,107 +62,164 @@ extension ExerciseKind {
         case .muscleUp: String(localized: "Muscle-up")
         }
     }
-
-    /// The first screen's title, one whole sentence so every language reads naturally.
-    var readyTitle: LocalizedStringKey {
-        switch self {
-        case .bodyweightSquat: "Ready for squats?"
-        case .pushUp: "Ready for push-ups?"
-        case .staticLunge: "Ready for lunges?"
-        case .stiffLegDeadlift: "Ready for deadlifts?"
-        case .pullUp: "Ready for pull-ups?"
-        case .muscleUp: "Ready for muscle-ups?"
-        }
-    }
-
-    /// The name in a sentence: "27 push-ups".
-    var pluralName: String {
-        switch self {
-        case .bodyweightSquat: String(localized: "squats")
-        case .pushUp: String(localized: "push-ups")
-        case .staticLunge: String(localized: "lunges")
-        case .stiffLegDeadlift: String(localized: "deadlifts")
-        case .pullUp: String(localized: "pull-ups")
-        case .muscleUp: String(localized: "muscle-ups")
-        }
-    }
 }
 
-/// Liquid Glass behind a label, or a plain surface when the person has turned transparency off.
-struct PlumbGlass<S: InsettableShape>: ViewModifier {
-    let shape: S
-    var prominent = false
-    var interactive = false
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+/// One chip per exercise. The selected one is filled; VoiceOver reads the full exercise name. At
+/// accessibility text sizes the chips become one menu, which never runs off the screen.
+struct ExerciseChips: View {
+    @Binding var selection: ExerciseKind
+    /// The order of the chips: the exercises picked at the first launch come first.
+    var order: [ExerciseKind] = ExerciseKind.allCases
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    func body(content: Content) -> some View {
-        if reduceTransparency {
-            content.background(prominent ? Color.white : Color(white: 0.1), in: shape)
-        } else if prominent {
-            content.glassEffect(.regular.tint(Color.white).interactive(interactive), in: shape)
+    var body: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            Menu {
+                Picker("Exercise", selection: $selection.animation(reduceMotion ? nil : HomeStyle.spring)) {
+                    ForEach(order, id: \.self) { kind in
+                        Text(kind.definition.copy.name).tag(kind)
+                    }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Text(selection.definition.copy.name)
+                        .font(.headline)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.subheadline.weight(.semibold))
+                        .accessibilityHidden(true)
+                }
+                .padding(.horizontal, 18)
+                .frame(minHeight: 44)
+                .foregroundStyle(Color.primary)
+                .background(HomeStyle.card, in: Capsule())
+            }
+            .accessibilityLabel("Exercise: \(selection.definition.copy.name)")
         } else {
-            content
-                .glassEffect(.regular.tint(Color.black.opacity(0.35)).interactive(interactive), in: shape)
-                .overlay(shape.strokeBorder(HomeStyle.hairline, lineWidth: 0.5))
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal) {
+                    HStack(spacing: 8) {
+                        ForEach(order, id: \.self) { kind in
+                            chip(kind).id(kind)
+                        }
+                    }
+                }
+                .scrollIndicators(.hidden)
+                // The chosen exercise is kept across launches: bring its chip into view.
+                .onAppear { proxy.scrollTo(selection, anchor: .center) }
+                .onChange(of: selection) { _, kind in
+                    withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(kind, anchor: .center) }
+                }
+            }
+            .sensoryFeedback(.selection, trigger: selection)
         }
+    }
+
+    private func chip(_ kind: ExerciseKind) -> some View {
+        let selected = kind == selection
+        return Button {
+            withAnimation(reduceMotion ? nil : HomeStyle.spring) { selection = kind }
+        } label: {
+            Text(kind.chipName)
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, 15)
+                .frame(minHeight: 44)
+                .foregroundStyle(selected ? HomeStyle.onAccent : Color.primary)
+                .background(selected ? HomeStyle.accent : HomeStyle.card, in: Capsule())
+                .contentShape(Capsule())
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityLabel(kind.definition.copy.name)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("exercise.\(kind.rawValue)")
     }
 }
 
-extension View {
-    /// A light glass surface, solid when transparency is reduced.
-    func plumbGlass<S: InsettableShape>(in shape: S, interactive: Bool = false) -> some View {
-        modifier(PlumbGlass(shape: shape, interactive: interactive))
-    }
+/// The dark card at the top of the first screen: the chosen exercise drawn as Plumb's camera sees
+/// it, its name, and where to put the phone.
+struct ExerciseHeroCard: View {
+    let kind: ExerciseKind
+    /// Shorter once there is a last session to show below it.
+    var compact = false
+    @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 340
 
-    /// The one filled surface of a screen: black glass (white at night).
-    func plumbProminentGlass<S: InsettableShape>(in shape: S, interactive: Bool = false) -> some View {
-        modifier(PlumbGlass(shape: shape, prominent: true, interactive: interactive))
+    var body: some View {
+        let copy = kind.definition.copy
+        VStack(alignment: .leading, spacing: 0) {
+            Label(kind.definition.expectedView == .side ? "Side view" : "Side, front or back",
+                  systemImage: "camera.viewfinder")
+                .font(.footnote.weight(.semibold))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(.white.opacity(0.12), in: Capsule())
+                .accessibilityLabel(kind.definition.expectedView == .side ? "Filmed from the side"
+                                    : "Filmed from the side, the front or the back")
+            ExerciseFigureView(kind: kind)
+                .frame(maxWidth: .infinity)
+                .frame(height: min(compact ? figureHeight * 0.62 : figureHeight, 400))
+                .padding(.vertical, 12)
+                .id(kind)
+                .transition(.opacity)
+            Text(copy.name)
+                .font(.title3.weight(.semibold))
+                .accessibilityAddTraits(.isHeader)
+            Text("\(copy.placementDetail) \(copy.stanceTitle).")
+                .font(.subheadline)
+                .foregroundStyle(HomeStyle.cameraSecondaryText)
+                .padding(.top, 2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(.white)
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom], startPoint: .top, endPoint: .bottom),
+            in: RoundedRectangle(cornerRadius: 32, style: .continuous)
+        )
+        .overlay(RoundedRectangle(cornerRadius: 32, style: .continuous)
+            .strokeBorder(.white.opacity(0.08), lineWidth: 1))
+        .environment(\.colorScheme, .dark)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("home.exercise")
     }
+}
 
-    /// A group of settings on its own rounded card.
-    func optionCard() -> some View {
-        padding(18)
+/// A light card on the grouped background, for the focus, the last session and status lines.
+struct HomeCard<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        content
+            .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .strokeBorder(HomeStyle.hairline, lineWidth: 0.5))
-    }
-
-    /// The dark silk behind every screen that is not the camera, so the glass has something to blur.
-    func plumbBackdrop() -> some View {
-        background { PlumbBackdrop() }
-            .scrollContentBackground(.hidden)
     }
 }
 
-/// The dark silk, darkened a little more so white text reads over it.
-struct PlumbBackdrop: View {
-    var body: some View {
-        ZStack {
-            Color.black
-            Image("SilkBackdrop")
-                .resizable()
-                .scaledToFill()
-                .overlay(.black.opacity(0.35))
-        }
-        .ignoresSafeArea()
-        .accessibilityHidden(true)
-    }
-}
-
-/// The one filled action of a screen: a full-width white pill, black text.
+/// The one filled action of a screen: a full-width pill with its arrow in a circle of its own.
 struct PrimaryActionLabel: View {
     let title: LocalizedStringKey
-    var symbol: String? = nil
+    var symbol = "arrow.right"
 
     var body: some View {
-        Text(title)
-            .font(.headline)
-            .padding(.horizontal, 24)
-            .frame(maxWidth: .infinity, minHeight: 56)
-            .foregroundStyle(.black)
-            .background(.white, in: Capsule())
-            .contentShape(Capsule())
+        HStack(spacing: 12) {
+            Text(title)
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Image(systemName: symbol)
+                .font(.headline)
+                .foregroundStyle(Color.primary)
+                .frame(width: 44, height: 44)
+                .background(Color(uiColor: .systemBackground), in: Circle())
+                .accessibilityHidden(true)
+        }
+        .padding(.leading, 24)
+        .padding(.trailing, 8)
+        .padding(.vertical, 8)
+        .frame(minHeight: 60)
+        .foregroundStyle(Color(uiColor: .systemBackground))
+        .background(Color.primary, in: Capsule())
+        .contentShape(Capsule())
     }
 }
 
@@ -218,7 +284,7 @@ struct CameraPrimer: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
         }
-        .tint(.primary)
+        .tint(HomeStyle.accent)
     }
 
     private func primerRow(_ symbol: String, _ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
@@ -239,55 +305,11 @@ struct CameraPrimer: View {
     }
 }
 
-/// The four tabs of the app.
-enum AppTab: Hashable {
-    case workout, stats, coach
-}
-
-/// The six exercises, large, each with its moving figure: touch one and the first screen follows.
-struct ExercisePickerSheet: View {
-    let order: [ExerciseKind]
-    @Binding var selection: ExerciseKind
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12),
-                                         count: dynamicTypeSize.isAccessibilitySize ? 1 : 2), spacing: 12) {
-                    ForEach(order, id: \.self) { kind in
-                        let selected = kind == selection
-                        Button {
-                            selection = kind
-                            dismiss()
-                        } label: {
-                            VStack(spacing: 6) {
-                                ExerciseFigureView(kind: kind, lineColor: selected ? .black : .white)
-                                    .frame(height: 140)
-                                Text(kind.definition.copy.name)
-                                    .font(.headline)
-                            }
-                            .padding(.vertical, 14)
-                            .frame(maxWidth: .infinity)
-                            .foregroundStyle(selected ? Color.black : Color.white)
-                            .background(selected ? Color.white : HomeStyle.card,
-                                        in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                        }
-                        .buttonStyle(PressableStyle())
-                        .accessibilityLabel(kind.definition.copy.name)
-                        .accessibilityAddTraits(selected ? .isSelected : [])
-                        .accessibilityIdentifier("exercise.\(kind.rawValue)")
-                    }
-                }
-                .padding(20)
-            }
-            .scrollIndicators(.hidden)
-            .plumbBackdrop()
-            .navigationTitle("Exercises")
-            .toolbarTitleDisplayMode(.inline)
-        }
-        .presentationDragIndicator(.visible)
-        .sensoryFeedback(.selection, trigger: selection)
+extension View {
+    /// A group of settings on its own rounded card, as on the first screen.
+    func optionCard() -> some View {
+        padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .modifier(HomeSurface())
     }
 }

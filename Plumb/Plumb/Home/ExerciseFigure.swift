@@ -165,18 +165,19 @@ nonisolated struct ExerciseFigure {
 struct ExerciseFigureView: View {
     let kind: ExerciseKind
     var lineColor: Color = .white
+    var animates = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Seconds for one rep, down and up.
     private let period = 3.2
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { timeline in
+        TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion || !animates)) { timeline in
             let seconds = timeline.date.timeIntervalSinceReferenceDate
             // Down slowly, hold, then back up; still at the bottom when motion is reduced.
-            let phase = reduceMotion ? 0.85 : (1 - cos(2 * .pi * seconds / period)) / 2
+            let phase = reduceMotion || !animates ? 0.85 : (1 - cos(2 * .pi * seconds / period)) / 2
             // The plumb bob sways a little, like a real one.
-            let sway = reduceMotion ? 0 : sin(2 * .pi * seconds / 2.6) * 1.2
+            let sway = reduceMotion || !animates ? 0 : sin(2 * .pi * seconds / 2.6) * 1.2
             Canvas { context, size in
                 draw(in: &context, size: size, phase: phase, swayDegrees: sway)
             }

@@ -116,15 +116,17 @@ struct MeasuredFigure<Content: View>: View {
     let sources: [WorkoutSessionSummary]
     @ViewBuilder var content: Content
     @State private var showsSources = false
+    @ScaledMetric(relativeTo: .largeTitle) private var valueSize = 44.0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Button {
-                withAnimation(HomeStyle.spring) { showsSources.toggle() }
+                withAnimation(reduceMotion ? nil : HomeStyle.spring) { showsSources.toggle() }
             } label: {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(value)
-                        .font(.system(size: 44, weight: .bold))
+                        .font(.system(size: valueSize, weight: .bold))
                         .tracking(-1.2)
                         .monospacedDigit()
                         .foregroundStyle(.white)
@@ -158,19 +160,20 @@ struct RegularityCalendar: View {
 
     var body: some View {
         let most = max(1, days.map(\.reps).max() ?? 1)
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 3), count: 7)
+        let rows = Array(repeating: GridItem(.fixed(18), spacing: 3), count: 7)
         let spoken = days.filter { $0.reps > 0 }
             .map { "\($0.day.formatted(date: .abbreviated, time: .omitted)): \($0.reps)" }.joined(separator: "; ")
         VStack(alignment: .leading, spacing: 6) {
-            LazyVGrid(columns: columns, spacing: 3) {
+            LazyHGrid(rows: rows, spacing: 3) {
                 ForEach(days, id: \.day) { entry in
                     RoundedRectangle(cornerRadius: 3, style: .continuous)
                         .fill(entry.reps == 0 ? Color.white.opacity(0.08)
                               : Color.white.opacity(0.3 + 0.7 * Double(entry.reps) / Double(most)))
-                        .aspectRatio(1, contentMode: .fit)
+                        .frame(width: 18, height: 18)
                 }
             }
-            Text("Last 12 weeks, one square per day.")
+            .frame(height: 144)
+            Text("12 weeks")
                 .font(.footnote)
                 .foregroundStyle(HomeStyle.supportingText)
         }
@@ -186,10 +189,10 @@ struct QualityChart: View {
 
     var body: some View {
         Chart(Array(points.enumerated()), id: \.offset) { _, point in
-            LineMark(x: .value("Date", point.date), y: .value("Clean reps", point.share * 100))
+            LineMark(x: .value("Date", point.date), y: .value("Reps without observations", point.share * 100))
                 .foregroundStyle(.white)
                 .interpolationMethod(.monotone)
-            PointMark(x: .value("Date", point.date), y: .value("Clean reps", point.share * 100))
+            PointMark(x: .value("Date", point.date), y: .value("Reps without observations", point.share * 100))
                 .foregroundStyle(.white)
         }
         .chartYScale(domain: 0...100)
@@ -197,7 +200,7 @@ struct QualityChart: View {
         .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) }
         .frame(height: 120)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Clean reps per session")
+        .accessibilityLabel("Reps without observations per session")
         .accessibilityValue(points.map { "\($0.date.formatted(date: .abbreviated, time: .omitted)): \(Int($0.share * 100)) percent" }
             .joined(separator: "; "))
     }
@@ -206,6 +209,7 @@ struct QualityChart: View {
 /// One exercise: its records, tempo, range and curve.
 struct ExerciseStatsCard: View {
     let facts: StatsSummary.ExerciseFacts
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         let definition = facts.kind.definition
@@ -213,7 +217,10 @@ struct ExerciseStatsCard: View {
             Text(definition.copy.name)
                 .font(.title3.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
-            HStack(alignment: .firstTextBaseline, spacing: 18) {
+            let layout = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+                : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 18))
+            layout {
                 figure("\(facts.bestSet)", "Best set")
                 figure("\(facts.reps)", "Reps")
                 figure("\(facts.sessions.count)", "Sessions")
@@ -236,10 +243,6 @@ struct ExerciseStatsCard: View {
                 .accessibilityValue(facts.repsPerSession.map {
                     "\($0.date.formatted(date: .abbreviated, time: .omitted)): \($0.reps)"
                 }.joined(separator: "; "))
-            } else {
-                Text("One more session and the curve starts here.")
-                    .font(.footnote)
-                    .foregroundStyle(HomeStyle.supportingText)
             }
             Text("Tempo \(facts.tempo.formatted(.number.precision(.fractionLength(1)))) s per rep · median \(definition.copy.rangeNoun) \(definition.formattedRange(facts.medianRange))")
                 .font(.footnote)

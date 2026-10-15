@@ -290,8 +290,8 @@ nonisolated enum CoachFallback {
     static func opening(context: CoachContext, language: CoachLanguage = .current()) -> String {
         guard let latest = context.latest else {
             return switch language {
-            case .english: "No saved set yet. Once you finish one, I can go over what Plumb measured."
-            case .french: "Aucune série enregistrée pour l'instant. Dès que tu en finis une, je reprends ce que Plumb a mesuré."
+            case .english: "No saved set yet."
+            case .french: "Aucune série enregistrée."
             }
         }
         return summary(of: latest, language: language)

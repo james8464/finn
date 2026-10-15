@@ -1,16 +1,17 @@
-# Home dashboard
+# Plumb interface
 
-The dashboard became Plumb's main screen on 15 October 2026. [DashboardView.swift](../../Plumb/Plumb/Home/DashboardView.swift) shows recent activity and routes people to their next set. The [Workout flow](iphone-experience-review.md) keeps its exercise picker and camera setup.
+James requested Théophile’s original design on 15 October 2026, superseding the monochrome hybrid. Restore the source design from [design/visuals-tabs at c0ffdff](https://github.com/james8464/hackathon-project/tree/c0ffdff).
 
-| Destination | Current behavior |
-| --- | --- |
-| Home | Latest saved session, Sessions link, and account settings |
-| Coach | Conversation grounded in saved set summaries |
-| Workout | Exercise selection and capture flow |
-| Posture, Weights, Awards, Plumb+ | Clearly marked placeholders |
+- Home uses the minimalist charcoal background (James’s subsequent request), pink Try Plumb/demo card, glass Last workout, Posture, Best set, Sessions and Awards cards, and scrolling Home/account header.
+- Home widgets have no outline. Use the exact sRGB Figma `brand/pink/selection` (`#FF2D92`), with black text on filled pink. Keep useful labels and measured facts; omit motivational headings and repeated explanatory subtitles.
 
-The tab bar uses native Liquid Glass, with opaque surfaces under Reduce Transparency. Reduce Motion removes selection animation; accessibility text sizes use one-column cards. The photo in [HomeBackdrop](../../Plumb/Plumb/Assets.xcassets/HomeBackdrop.imageset/home-backdrop.png) is decorative generated artwork, not workout footage. Debug preview data is visibly labeled and does not enter history.
+The glass bar contains Home, Posture, Coach and Workout (+), with the original symbols, spacing, selection capsule and default label size. Stable dark fills and a subtle selection gradient retain the glass outline while keeping label contrast predictable.
+- Posture opens measured set reviews. Workout opens setup, never the camera immediately. The illustrated demo neither records nor saves sample workouts.
+- Preserve newer independent navigation stacks, saved data, localization, keyboard dismissal and camera/privacy behavior.
+- Unavailable posture scores stay blank. Sample values appear only in explicitly labelled previews.
 
-[Dashboard screenshot](screenshots/2026-10-14-home-dashboard.png) · [Tab-bar screenshot](screenshots/2026-10-14-liquid-glass-tab-bar.png)
+The original design uses dark appearance. At accessibility text sizes the tabs use two rows and Home cards stack. Tab labels retain 11 points at default size but scale with the body curve; caption2 plateaus at smaller settings. Preserve Reduce Motion and Reduce Transparency. Bottom actions must remain above navigation.
 
-[Pull request 25](https://github.com/james8464/hackathon-project/pull/25) combined the dashboard with the existing Coach and Workout flows; its focused iOS 27 simulator run passed 400 tests. Physical-device layout and camera-flow checks remain outstanding.
+James requested integration into main after verification. Preserve current main functionality while keeping the approved Home / Posture / Coach / Workout destinations.
+
+[Research](../architecture/specs/2026-10-15-native-ui-design.md) · [HIG reference](apple-hig-agent-reference.md) · [Verification](native-ui-verification.md)
