@@ -97,6 +97,7 @@ struct PostureGuideView: View {
         .foregroundStyle(.white)
         .background { HomeBackdrop() }
         .navigationTitle("Posture")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     @ViewBuilder private var comparison: some View {
