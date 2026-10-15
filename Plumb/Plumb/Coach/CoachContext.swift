@@ -1,5 +1,22 @@
 import Foundation
 
+/// The facts that must match before two form readings can describe a trend.
+nonisolated private struct FormHistoryKey: Hashable {
+    let exercise: String
+    let side: String
+    let view: String
+    let rubric: String
+    let check: String
+
+    init(_ set: SetSummary, check: FormCheck) {
+        exercise = set.exercise.rawValue
+        side = set.bodySide.rawValue
+        view = set.cameraView.rawValue
+        rubric = set.analysis.rubricVersion
+        self.check = check.rawValue
+    }
+}
+
 /// One saved set, reduced to what the coach may talk about. Every field comes from the local
 /// history; nothing here is measured or guessed by the coach itself.
 nonisolated struct CoachSetFact: Equatable, Identifiable, Sendable {
@@ -41,16 +58,26 @@ nonisolated struct CoachContext: Equatable, Sendable {
             let comparison: String?
         }
         var pending: [Pending] = []
+        var previousByCheck: [FormHistoryKey: SetSummary] = [:]
         for session in history.sorted(by: { $0.startedAt < $1.startedAt }) {
             let sets = session.sets.sorted { $0.capturedAt < $1.capturedAt }
-            var previous: SetSummary?
+            var previousInSession: SetSummary?
             for set in sets {
-                var comparison: String?
-                if let previous, let compared = SetComparison.compare(previous, set) {
-                    comparison = describe(compared, exercise: set.exercise)
+                var comparisons: [String] = []
+                if let previousInSession,
+                   let compared = SetComparison.compare(previousInSession, set) {
+                    comparisons.append(describe(compared, exercise: set.exercise))
                 }
-                pending.append(Pending(set: set, comparison: comparison))
-                previous = set
+                let eligible = FormTrend.eligibleMeasurements(in: set)
+                let priorSets = eligible.compactMap { previousByCheck[FormHistoryKey(set, check: $0.check)] }
+                    .sorted { $0.capturedAt > $1.capturedAt }
+                comparisons += FormTrend.compareLatest(to: set, among: priorSets).map(\.sentence)
+                pending.append(Pending(set: set,
+                                       comparison: comparisons.isEmpty ? nil : comparisons.joined(separator: " ")))
+                previousInSession = set
+                for measurement in eligible {
+                    previousByCheck[FormHistoryKey(set, check: measurement.check)] = set
+                }
             }
         }
         let kept = Array(pending.suffix(limit))
@@ -144,9 +171,10 @@ nonisolated enum CoachInstructions {
         You select saved sets relevant to the person's question. Plumb writes the answer from its \
         recorded facts; your words are never shown to the person.
 
-        Use only the numbered sets under "Saved sets". Output one or two labels separated by a \
-        comma, for example "Set 2" or "Set 2, Set 3". If none of the saved sets answers the question, \
-        output only "NONE". Do not add an explanation, measurements, advice, or other words. \
+        Use only the numbered sets under "Saved sets". Select at most two. In a text response, \
+        output only their labels separated by a comma, for example "Set 2" or "Set 2, Set 3"; \
+        output "NONE" if none answers the question. In a structured response, return their numbers \
+        or an empty list. Do not add an explanation, measurements, advice, or other words. \
         No medical advice: do not select a set as proof of injury, safety or diagnosis.
         """
 }

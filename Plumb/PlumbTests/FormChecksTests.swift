@@ -41,6 +41,8 @@ struct FormChecksTests {
         let finding = try #require(review.findings.first)
         #expect(finding.check == .squatDepth)
         #expect(finding.reps.count == 6)
+        #expect(review.measurements.first(where: { $0.check == .squatDepth })?.faulty == 6)
+        #expect(review.measurements.first(where: { $0.check == .squatDepth })?.judged == 6)
         #expect(finding.cue.observation.hasPrefix("Your hips stayed above your knees at the bottom in rep 1"))
         #expect(finding.cue.nextAction == FormCheck.squatDepth.nextAction)
     }

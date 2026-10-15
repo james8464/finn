@@ -49,7 +49,10 @@ nonisolated enum SyntheticExerciseMotion {
 
         return projected.map { time, points in
             var joints: [BodyJoint: JointPoint] = [:]
-            for (joint, point) in points {
+            // Dictionary iteration is randomized between processes. Keep the seeded generator's
+            // joint dropout and jitter reproducible across simulator runs.
+            for joint in BodyJoint.allCases {
+                guard let point = points[joint] else { continue }
                 if Double.random(in: 0..<1, using: &rng) < dropRate { continue }
                 let near = camera.nearSide == side(of: joint)
                 let x = offsetX + scale * (point.x - minX) + gaussian(using: &rng) * jitter
