@@ -158,3 +158,13 @@ The Options audit identified the DEBUG-only DEMO INPUT badge’s explicit text-s
 Captures: [Home](screenshots/2026-10-15-pink/home-demo.png), [statistics](screenshots/2026-10-15-pink/statistics-demo.png), [award detail](screenshots/2026-10-15-pink/award-detail-demo.png). These explicitly show synthetic input. The Home capture precedes the minor selected-capsule background darkening; its accent value and borderless widgets match the final code.
 
 The final generic iOS Simulator build succeeded for the committed source. The remaining verification limitation is the DEBUG badge audit rerun described above; the simulator would not finish booting. Main is published with that limitation documented.
+
+## iPhone update and warning fixes
+
+The previously incomplete Options audit passed on James’s physical iPhone: element descriptions, Dynamic Type, hit regions, clipping and traits. This resolves the DEBUG badge verification limitation above.
+
+The phone build exposed deprecated preview renderer calls and two isolation warnings. Preview delivery now uses the iOS 27 sample-buffer receiver, with a synchronizer owned by the display view. Delivery and detach share one lock; copied presentation metadata leaves the analysis buffer unchanged. Pure exercise labels and Siri snippet content are explicitly nonisolated.
+
+The signed Release build succeeded. Twenty-four targeted tests passed on the physical iPhone, covering real receiver enqueue/detach/reattach and metadata isolation, skeleton alignment/rotation and Siri report behavior. The project warnings identified in this pass are cleared. Xcode’s metadata-extraction notice for a target without AppIntents remains a tool notice.
+
+Installed the Release app over the existing `com.jamesdurup.plumbtestoct` app and launched it successfully. Existing application data and repository signing settings were preserved. An obsolete `com.james8464.Plumb.uitests.xctrunner` test helper was removed to free a personal-signing slot; the older Plumb application was kept.

@@ -133,6 +133,8 @@ private struct FeedDisplay: UIViewRepresentable {
 final class FeedDisplayView: UIView {
     override class var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
     private var displayLayer: AVSampleBufferDisplayLayer { layer as! AVSampleBufferDisplayLayer }
+    private let synchronizer = AVSampleBufferRenderSynchronizer()
+    private lazy var receiver = synchronizer.sampleBufferReceiver(adding: displayLayer.sampleBufferRenderer)
     private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
     private var observations: [NSKeyValueObservation] = []
 
@@ -147,6 +149,7 @@ final class FeedDisplayView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         displayLayer.videoGravity = .resizeAspect
+        synchronizer.rate = 1
         backgroundColor = .black
     }
 
@@ -161,7 +164,7 @@ final class FeedDisplayView: UIView {
         observations = []
         rotationCoordinator = nil
         guard let feed, window != nil else { return }
-        feed.sink.attach(displayLayer.sampleBufferRenderer)
+        feed.sink.attach(receiver)
         guard let device = feed.device else { return }
         let coordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: displayLayer)
         rotationCoordinator = coordinator

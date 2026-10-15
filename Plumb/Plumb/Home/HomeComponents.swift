@@ -52,7 +52,7 @@ enum HomeRoute: Hashable {
 
 extension ExerciseKind {
     /// The name on the exercise chips, as short as it can be.
-    var chipName: String {
+    nonisolated var chipName: String {
         switch self {
         case .bodyweightSquat: String(localized: "Squat")
         case .pushUp: String(localized: "Push-up")

@@ -51,21 +51,23 @@ final class PreviewFeed {
 /// Passes frames from the capture queue to the on-screen renderer.
 nonisolated final class PreviewFrameSink: @unchecked Sendable {
     private let lock = NSLock()
-    private var renderer: AVSampleBufferVideoRenderer?
+    private var receiver: AVSampleBufferVideoRenderer.Receiver?
 
-    func attach(_ renderer: AVSampleBufferVideoRenderer?) {
+    func attach(_ receiver: AVSampleBufferVideoRenderer.Receiver?) {
         lock.lock()
-        self.renderer?.flush()
-        self.renderer = renderer
-        lock.unlock()
+        defer { lock.unlock() }
+        self.receiver?.flush()
+        self.receiver = receiver
     }
 
-    func enqueue(_ sampleBuffer: CMSampleBuffer) {
+    @discardableResult
+    func enqueue(_ sampleBuffer: CMSampleBuffer) -> AVSampleBufferVideoRenderer.Receiver.EnqueueResult? {
         lock.lock()
-        let renderer = self.renderer
-        lock.unlock()
-        guard let renderer else { return }
-        if let attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true),
+        defer { lock.unlock() }
+        guard let receiver, CMSampleBufferDataIsReady(sampleBuffer),
+              let copy = try? CMSampleBuffer(copying: sampleBuffer) else { return nil }
+        // Own the presentation metadata; pose analysis still reads the original capture buffer.
+        if let attachments = CMSampleBufferGetSampleAttachmentsArray(copy, createIfNecessary: true),
            CFArrayGetCount(attachments) > 0 {
             let dictionary = unsafeBitCast(CFArrayGetValueAtIndex(attachments, 0),
                                            to: CFMutableDictionary.self)
@@ -73,7 +75,14 @@ nonisolated final class PreviewFrameSink: @unchecked Sendable {
                                  Unmanaged.passUnretained(kCMSampleAttachmentKey_DisplayImmediately).toOpaque(),
                                  Unmanaged.passUnretained(kCFBooleanTrue).toOpaque())
         }
-        if renderer.status == .failed { renderer.flush() }
-        renderer.enqueue(sampleBuffer)
+        let ready = CMReadySampleBuffer<CMSampleBuffer.DynamicContent>(unsafeBuffer: copy)
+        let result = receiver.enqueueImmediately(ready)
+        switch result {
+        case .cancelledDueToFlushRequiredToResume, .cancelledDueToError:
+            receiver.flush()
+            return receiver.enqueueImmediately(ready)
+        default:
+            return result
+        }
     }
 }
