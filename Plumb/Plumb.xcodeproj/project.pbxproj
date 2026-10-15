@@ -429,6 +429,7 @@
 				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "PlumbWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -461,6 +462,7 @@
 				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "PlumbWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -615,6 +617,7 @@
 				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "Plumb-Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Only after you turn on Personalize with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone.";
@@ -652,6 +655,7 @@
 				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "Plumb-Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Only after you turn on Personalize with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone.";
@@ -772,6 +776,7 @@
 				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "PlumbWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plumb reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices.";
@@ -809,6 +814,7 @@
 				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "PlumbWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plumb reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices.";
