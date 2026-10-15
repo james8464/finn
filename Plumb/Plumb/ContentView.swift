@@ -115,6 +115,9 @@ struct ContentView: View {
             UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(stage)
         }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+        // Siri or a shortcut asked for a set or the history; a set in progress is never interrupted.
+        .onChange(of: SiriLaunchRequests.shared.pending, initial: true) { _, _ in applySiriRequest() }
+        .onChange(of: model.stage) { _, _ in applySiriRequest() }
         // Personalize with Health: read again whenever the first screen shows.
         .task(id: model.stage == .ready) {
             if model.stage == .ready { await model.refreshHealth() }
@@ -163,6 +166,27 @@ struct ContentView: View {
             Text(model.leavesHealthWorkouts
                  ? "This removes saved sessions and any recovered history backups from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
                  : "This removes saved sessions and any recovered history backups from this iPhone.")
+        }
+    }
+
+    /// Carries out what Siri asked ("Start a squat set in Plumb", "Show my history in Plumb") once the
+    /// model can take it; otherwise the request waits for the next stage change.
+    private func applySiriRequest() {
+        guard let request = SiriLaunchRequests.shared.pending,
+              SiriLaunchRequests.canApply(request, at: model.stage) else { return }
+        SiriLaunchRequests.shared.pending = nil
+        switch request {
+        case .startSet(let exercise):
+            route = nil
+            observationSpeaker.stop()
+            model.selectedExercise = exercise
+            if !usesSyntheticInput && CameraPermission.notAskedYet {
+                showsCameraPrimer = true
+            } else {
+                Task { await model.startPreview() }
+            }
+        case .showHistory:
+            route = .history
         }
     }
 
