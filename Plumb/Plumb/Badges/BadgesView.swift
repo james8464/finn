@@ -1,54 +1,187 @@
 import SwiftUI
 
-/// The Awards tab: every badge, earned ones with the measured fact behind them and the date, the
-/// rest with how to earn them. Dark silk, glass rows, one white disc per earned badge.
+/// The Awards page on its own, for the places that still push it: the section, full screen.
 struct BadgesView: View {
     let ledger: BadgeLedger
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                DarkScreenTitle(title: "Awards", subtitle: ledger.count == 0 ? nil
-                    : ledger.count == 1 ? "1 badge earned" : "\(ledger.count) badges earned")
-                    .padding(.bottom, 12)
-                    .accessibilityIdentifier("badges.count")
-                if ledger.count == 0 {
-                    emptyState
-                }
-                ForEach(ledger.all, id: \.kind) { entry in
-                    BadgeRow(kind: entry.kind, earned: entry.earned)
-                }
-                Text("Every badge rests on sets measured on this iPhone. Nothing leaves it.")
-                    .font(.footnote)
-                    .foregroundStyle(HomeStyle.supportingText)
-                    .padding(.horizontal, 4)
-                    .padding(.top, 8)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-            .padding(.bottom, 24)
+            BadgesSection(ledger: ledger)
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
         .darkScreen()
         .navigationTitle("")
         .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+    }
+}
+
+/// The Awards section of Stats, made to sit in a scroll: the title, a row of earned badges, then
+/// the ones left to earn with their condition. Touching a badge opens its detail.
+struct BadgesSection: View {
+    let ledger: BadgeLedger
+    @State private var selected: BadgeEntry?
+
+    var body: some View {
+        let entries = ledger.all.map { BadgeEntry(kind: $0.kind, earned: $0.earned) }
+        let earned = entries.filter { $0.earned != nil }
+        let remaining = entries.filter { $0.earned == nil }
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Awards")
+                    .font(.title2.bold())
+                    .accessibilityAddTraits(.isHeader)
+                Spacer()
+                Text(ledger.count == 1 ? "1 badge earned" : "\(ledger.count) badges earned")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(HomeStyle.supportingText)
+                    .accessibilityIdentifier("badges.count")
+            }
+            if earned.isEmpty {
+                emptyState
+            } else {
+                ScrollView(.horizontal) {
+                    HStack(alignment: .top, spacing: 14) {
+                        ForEach(earned) { entry in
+                            Button { selected = entry } label: {
+                                VStack(spacing: 8) {
+                                    BadgeMark(kind: entry.kind, earned: true, size: 60)
+                                    Text(entry.kind.title)
+                                        .font(.caption.weight(.medium))
+                                        .multilineTextAlignment(.center)
+                                        .lineLimit(2)
+                                        .frame(width: 84)
+                                }
+                            }
+                            .buttonStyle(PressableStyle())
+                            .accessibilityLabel(entry.kind.title)
+                            .accessibilityValue("Earned")
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                .scrollIndicators(.hidden)
+                .scrollClipDisabled()
+            }
+            if !remaining.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(Array(remaining.enumerated()), id: \.element.id) { index, entry in
+                        Button { selected = entry } label: {
+                            HStack(alignment: .top, spacing: 12) {
+                                BadgeMark(kind: entry.kind, earned: false, size: 36)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(entry.kind.title)
+                                        .font(.subheadline.weight(.semibold))
+                                    Text(entry.kind.rule)
+                                        .font(.footnote)
+                                        .foregroundStyle(HomeStyle.supportingText)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                Spacer(minLength: 0)
+                            }
+                            .padding(.vertical, 10)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(PressableStyle())
+                        .accessibilityElement(children: .combine)
+                        .accessibilityValue("Not earned yet")
+                        if index < remaining.count - 1 {
+                            Divider().overlay(HomeStyle.hairline)
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .plumbGlass(in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            }
+        }
+        .foregroundStyle(.white)
         .onAppear { ledger.acknowledge() }
+        .sheet(item: $selected) { entry in
+            BadgeDetailView(kind: entry.kind, earned: entry.earned)
+        }
     }
 
     private var emptyState: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            BadgeMark(kind: .firstSet, earned: false, size: 56)
-            Text("Your first badge is one set away.")
-                .font(.title2.weight(.semibold))
-            Text("Badges come from what Plumb measures: a set, a record, a longer range. Here is what each one takes.")
-                .font(.subheadline)
-                .foregroundStyle(HomeStyle.supportingText)
-                .fixedSize(horizontal: false, vertical: true)
+        HStack(alignment: .top, spacing: 14) {
+            BadgeMark(kind: .firstSet, earned: false, size: 46)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Your first badge is one set away.")
+                    .font(.headline)
+                Text("Badges come from what Plumb measures: a set, a record, a longer range. Here is what each one takes.")
+                    .font(.subheadline)
+                    .foregroundStyle(HomeStyle.supportingText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
-        .darkGlassCard()
+        .darkGlassCard(padding: 16)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("badges.empty")
+    }
+}
+
+/// A badge and whether it was earned, so a sheet can show it.
+struct BadgeEntry: Identifiable, Equatable {
+    let kind: BadgeKind
+    let earned: EarnedBadge?
+    var id: BadgeKind { kind }
+}
+
+/// One badge on its own sheet: the mark large, the measured fact and the date when earned, the
+/// condition when not.
+struct BadgeDetailView: View {
+    let kind: BadgeKind
+    let earned: EarnedBadge?
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 18) {
+                BadgeMark(kind: kind, earned: earned != nil, size: 120)
+                    .padding(.top, 36)
+                Text(kind.title)
+                    .font(.title.bold())
+                    .multilineTextAlignment(.center)
+                    .accessibilityAddTraits(.isHeader)
+                if let earned {
+                    Text(earned.detail)
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(earned.earnedAt.formatted(.dateTime.day().month(.wide).year().hour().minute()))
+                        .font(.footnote)
+                        .foregroundStyle(HomeStyle.supportingText)
+                } else {
+                    Text(kind.rule)
+                        .font(.body)
+                        .foregroundStyle(HomeStyle.supportingText)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Text("Every badge rests on sets measured on this iPhone. Nothing leaves it.")
+                    .font(.footnote)
+                    .foregroundStyle(Color.white.opacity(0.4))
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 8)
+            }
+            .padding(.horizontal, 32)
+            Spacer(minLength: 24)
+            Button { dismiss() } label: {
+                PrimaryActionLabel(title: "Done")
+            }
+            .buttonStyle(PressableStyle())
+            .padding(.horizontal, 20)
+            .padding(.bottom, 12)
+        }
+        .frame(maxWidth: .infinity)
+        .darkScreen()
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .presentationBackground(.black)
+        .accessibilityIdentifier("badges.detail")
     }
 }
 
