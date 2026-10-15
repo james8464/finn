@@ -46,7 +46,7 @@ History stores local summaries, compares compatible sets, identifies a recurring
 
 ### Home and Coach
 
-First launch asks for a goal, experience level, favorite exercises, and spoken feedback preference; these choices stay on the iPhone. The Home dashboard links to recent sessions, posture observations, a best set in reps, Awards, and the Workout flow. Awards mark measured milestones, including a set with no pattern flagged by Plumb's current checks; they do not certify perfect form. Coach uses Apple Intelligence, when available, to select up to two relevant saved sets. The selected goal and level can accompany the request; Plumb writes the displayed response from recorded counts and observations. Invalid model output and unavailable models use fixed text. (A Claude demo is Debug-only.) Plumb+ stays hidden until its subscription exists.
+First launch asks for a goal, experience level, favorite exercises, and spoken feedback preference; these choices stay on the iPhone. The first screen has an exercise picker and a Start button. More opens History, Coach, Awards, Options, and Privacy. Awards mark measured milestones, including a set with no pattern flagged by Plumb's current checks; they do not certify perfect form. Coach uses Apple Intelligence, when available, to select up to two relevant saved sets. The selected goal and level can accompany the request; Plumb writes the displayed response from recorded counts and observations. Invalid model output and unavailable models use fixed text. (A Claude demo is Debug-only.) Plumb+ stays hidden until its subscription exists.
 
 ### Apple Watch
 

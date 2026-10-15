@@ -1,16 +1,9 @@
-# Home dashboard
+# First screen
 
-The dashboard became Plumb's main screen on 15 October 2026. [DashboardView.swift](../../Plumb/Plumb/Home/DashboardView.swift) shows recent activity and routes people to their next set. The [Workout flow](iphone-experience-review.md) keeps its exercise picker and camera setup.
+Plumb opens with one exercise title and one Start button. Tap the title to choose an exercise, or swipe sideways to move through the exercise list. A short note appears only when there is a saved session, a current focus, or another useful update. The privacy link explains what the camera analyzes and what is stored before a set begins.
 
-| Destination | Current behavior |
-| --- | --- |
-| Home | Latest saved session, Sessions link, and account settings |
-| Coach | Conversation grounded in saved set summaries |
-| Workout | Exercise selection and capture flow |
-| Posture, Weights, Awards, Plumb+ | Clearly marked placeholders |
+The More button opens History, Coach, Awards, Options, and Privacy. During a set, the camera view keeps the rep count and a short cue readable from a few steps away. Results appear in a sheet over the first screen.
 
-The tab bar uses native Liquid Glass, with opaque surfaces under Reduce Transparency. Reduce Motion removes selection animation; accessibility text sizes use one-column cards. The photo in [HomeBackdrop](../../Plumb/Plumb/Assets.xcassets/HomeBackdrop.imageset/home-backdrop.png) is decorative generated artwork, not workout footage. Debug preview data is visibly labeled and does not enter history.
+The visual system uses system background and text colors, San Francisco, SF Symbols, and restrained Liquid Glass on controls. A blurred live camera view forms the first-screen backdrop after camera permission is granted. The demo uses a plain system background and labels its synthetic input. Reduce Transparency uses solid surfaces, and Reduce Motion avoids optional exercise-selection animation.
 
-[Dashboard screenshot](screenshots/2026-10-14-home-dashboard.png) · [Tab-bar screenshot](screenshots/2026-10-14-liquid-glass-tab-bar.png)
-
-[Pull request 25](https://github.com/james8464/hackathon-project/pull/25) combined the dashboard with the existing Coach and Workout flows; its focused iOS 27 simulator run passed 400 tests. Physical-device layout and camera-flow checks remain outstanding.
+The [14 October dashboard screenshot](screenshots/2026-10-14-home-dashboard.png) documents an earlier design. It is not a reference for the current build. Physical iPhone installation and launch have been checked; real workout accuracy still needs participant validation.
