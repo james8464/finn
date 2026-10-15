@@ -18,7 +18,7 @@ Hardware and tools: Xcode 27; iOS 27 iPhone 18 Pro Max simulator (`11C0BAAB-3356
 | Spanish home | **Mixed**: primary headings and actions translated, but “No awards yet” remained in English. [Capture](evidence/finn-device-audit/spanish-home.png). |
 | Widget deep link | **Partly checked**: the URL parser passes its unit test; opening the URL in the simulator raised iOS's first-use “Open in Finn?” confirmation. The simulator had no controllable touch surface in this run, so destination navigation was not visually confirmed. |
 | Watch idle screen | **Passed**: app opened with a legible iPhone prompt and visible settings control. [Capture](evidence/finn-device-audit/watch-idle.png). |
-| Paired Watch live/result and language | **Unresolved.** With the simulators paired and connected, the Watch stayed on its idle prompt during the iPhone's six-rep set and result. Severe memory pressure affected this run; repeat under stable load before classifying it as an app sync defect. An earlier French relaunch ended with CoreSimulator `NSMachErrorDomain -308`, so language rendering is unconfirmed. |
+| Paired Watch live/result and language | **Blocked by simulator WatchConnectivity.** On two connected-pair attempts, the Watch stayed on its idle prompt while the iPhone completed a six-rep set and result. The repeat's iPhone `wcd` log reported `NSXPCConnectionInvalid` while enumerating installed Watch apps and “initial set up failed”; this prevents an app-level sync verdict. The embedded Watch bundle has the correct companion identifier. [Phone result](evidence/finn-device-audit/paired-phone-result.png) · [Watch at result](evidence/finn-device-audit/paired-watch-idle.png). An earlier French relaunch ended with CoreSimulator `NSMachErrorDomain -308`, so language rendering is unconfirmed. |
 
 ### Feature coverage
 
@@ -58,9 +58,15 @@ Hardware and tools: Xcode 27; iOS 27 iPhone 18 Pro Max simulator (`11C0BAAB-3356
 
 ### F5 — Disconnected Watch screen forces English
 
-**Low, source review; French relaunch not completed.** `WatchSetView.swift` sets its SwiftUI locale from the latest iPhone state, but falls back to `en-GB` when there is no state. The first-launch prompt and settings therefore use English on an otherwise French or Spanish Watch until the phone sends a state, despite complete Watch translations. The English idle screen was confirmed visually; the attempted French capture ended with the CoreSimulator service error noted above.
+**Low, source review; French relaunch not completed.** `WatchSetView.swift` sets its SwiftUI locale from the latest iPhone state, but falls back to `en-GB` when there is no state. The first-launch prompt and settings therefore use English on an otherwise French or Spanish Watch until the phone sends a state, despite complete Watch translations. The English idle screen was confirmed visually. One French relaunch ended with CoreSimulator `NSMachErrorDomain -308`; a repeat remained on the launch image under heavy simulator load, so there is no French-screen capture.
 
 **Improvement:** Use the Watch's current locale until a valid iPhone language arrives, then follow the iPhone language for shared set content.
+
+### F6 — Paired Watch delivery needs a clean-device gate
+
+**High validation priority; simulator infrastructure failure observed, product defect not established.** Two connected simulator-pair attempts left the Watch on its idle prompt during an iPhone set. The repeat logged `wcd` failures to enumerate installed Watch apps (`NSXPCConnectionInvalid`) and “initial set up failed.” The phone's embedded `FinnWatch.app` declares `WKCompanionAppBundleIdentifier = ai.mwm.build.challenge.team.08`, matching the iPhone bundle ID. This makes WatchConnectivity setup, rather than the SwiftUI screen alone, the first thing to isolate. [Paired captures](evidence/finn-device-audit/paired-phone-result.png) · [Watch capture](evidence/finn-device-audit/paired-watch-idle.png).
+
+**Next check:** On an otherwise idle Mac, create a fresh paired iPhone/Watch simulator, install the combined iPhone app through Xcode, then repeat a labelled set while inspecting `WCSession` activation, `isWatchAppInstalled`, and message/context delivery. Confirm stage, coaching and result on a physical paired Watch before calling the feature ready.
 
 ## Remaining validation
 
