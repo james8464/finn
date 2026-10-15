@@ -164,7 +164,7 @@ nonisolated struct ExerciseFigure {
 /// the animated drawing: one slow rep after another, inside the open corners of Finn's icon
 struct ExerciseFigureView: View {
     let kind: ExerciseKind
-    var lineColor: Color = .white
+    var lineColour: Color = .white
     var animates = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -206,7 +206,7 @@ struct ExerciseFigureView: View {
         var floor = Path()
         floor.move(to: CGPoint(x: room.minX, y: floorY))
         floor.addLine(to: CGPoint(x: room.maxX, y: floorY))
-        context.stroke(floor, with: .color(lineColor.opacity(0.16)), lineWidth: 1)
+        context.stroke(floor, with: .color(lineColour.opacity(0.16)), lineWidth: 1)
 
         // the finn line: a string with its bob over the midfoot, or the body line of a push-up
         if kind == .pushUp {
@@ -214,7 +214,7 @@ struct ExerciseFigureView: View {
             var guide = Path()
             guide.move(to: place(from))
             guide.addLine(to: place(to))
-            context.stroke(guide, with: .color(lineColor.opacity(0.4)),
+            context.stroke(guide, with: .color(lineColour.opacity(0.4)),
                            style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [2, 6]))
         } else {
             let x = place(figure.guide(at: phase).0).x
@@ -225,13 +225,13 @@ struct ExerciseFigureView: View {
             var string = Path()
             string.move(to: top)
             string.addLine(to: bob)
-            context.stroke(string, with: .color(lineColor.opacity(0.38)), lineWidth: 1)
+            context.stroke(string, with: .color(lineColour.opacity(0.38)), lineWidth: 1)
             var weight = Path()
             weight.move(to: CGPoint(x: bob.x - 5, y: bob.y))
             weight.addLine(to: CGPoint(x: bob.x + 5, y: bob.y))
             weight.addLine(to: CGPoint(x: bob.x, y: bob.y + 10))
             weight.closeSubpath()
-            context.fill(weight, with: .color(lineColor.opacity(0.75)))
+            context.fill(weight, with: .color(lineColour.opacity(0.75)))
         }
 
         // the bar, seen end-on from the side
@@ -239,7 +239,7 @@ struct ExerciseFigureView: View {
             var bar = Path()
             bar.move(to: place(CGPoint(x: -0.2, y: ExerciseFigure.barHeight)))
             bar.addLine(to: place(CGPoint(x: 0.2, y: ExerciseFigure.barHeight)))
-            context.stroke(bar, with: .color(lineColor.opacity(0.55)),
+            context.stroke(bar, with: .color(lineColour.opacity(0.55)),
                            style: StrokeStyle(lineWidth: width * 1.4, lineCap: .round))
         }
 
@@ -250,21 +250,21 @@ struct ExerciseFigureView: View {
             bone.move(to: place(p))
             bone.addLine(to: place(q))
             let far = [ExerciseFigure.Joint.backToe, .backAnkle, .backKnee].contains(a)
-            context.stroke(bone, with: .color(lineColor.opacity(far ? 0.5 : 1)), style: line)
+            context.stroke(bone, with: .color(lineColour.opacity(far ? 0.5 : 1)), style: line)
         }
         if let head = pose[.head] {
             let radius = ExerciseFigure.headRadius * scale
-            let center = place(head)
-            context.fill(Path(ellipseIn: CGRect(x: center.x - radius, y: center.y - radius,
+            let centre = place(head)
+            context.fill(Path(ellipseIn: CGRect(x: centre.x - radius, y: centre.y - radius,
                                                 width: 2 * radius, height: 2 * radius)),
-                         with: .color(lineColor))
+                         with: .color(lineColour))
         }
         let dot = width * 0.95
         for joint in [ExerciseFigure.Joint.ankle, .knee, .hip, .shoulder, .elbow, .wrist, .backKnee] {
             guard let p = pose[joint] else { continue }
             let c = place(p)
             context.fill(Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: 2 * dot, height: 2 * dot)),
-                         with: .color(lineColor))
+                         with: .color(lineColour))
             context.stroke(Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: 2 * dot, height: 2 * dot)),
                            with: .color(HomeStyle.cameraBottom), lineWidth: 1.5)
         }
@@ -279,7 +279,7 @@ struct ExerciseFigureView: View {
         brackets.move(to: CGPoint(x: frame.maxX - corner, y: frame.maxY))
         brackets.addLine(to: CGPoint(x: frame.maxX, y: frame.maxY))
         brackets.addLine(to: CGPoint(x: frame.maxX, y: frame.maxY - corner))
-        context.stroke(brackets, with: .color(lineColor.opacity(0.6)),
+        context.stroke(brackets, with: .color(lineColour.opacity(0.6)),
                        style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
     }
 }

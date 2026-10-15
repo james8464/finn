@@ -21,16 +21,16 @@ enum HomeStyle {
 /// a small category marker shared by dashboard widgets and supporting pages
 struct HomeSymbol: View {
     let name: String
-    var color: Color = HomeStyle.accent
+    var colour: Color = HomeStyle.accent
     var size: CGFloat = 40
 
     var body: some View {
         Image(systemName: name)
             .font(.system(size: size * 0.48, weight: .semibold))
             .symbolRenderingMode(.hierarchical)
-            .foregroundStyle(color)
+            .foregroundStyle(colour)
             .frame(width: size, height: size)
-            .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: size * 0.28))
+            .background(colour.opacity(0.12), in: RoundedRectangle(cornerRadius: size * 0.28))
             .accessibilityHidden(true)
     }
 }
@@ -206,7 +206,7 @@ struct PrimaryActionLabel: View {
         let shape = typeSize.isAccessibilitySize
             ? AnyShape(RoundedRectangle(cornerRadius: 24, style: .continuous)) : AnyShape(Capsule())
         HStack(spacing: 12) {
-            WrappingText(text: String(localized: title), style: .headline, color: .systemBackground)
+            WrappingText(text: String(localized: title), style: .headline, colour: .systemBackground)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: symbol)
                 .font(.system(size: 17, weight: .semibold))
@@ -280,12 +280,12 @@ struct CameraPrimer: View {
                 layout {
                     Button { dismiss() } label: {
                         WrappingText(text: String(localized: "Not now"), style: .subheadline, weight: .medium,
-                                     color: .secondaryLabel, alignment: .center).frame(minHeight: 44)
+                                     colour: .secondaryLabel, alignment: .center).frame(minHeight: 44)
                     }
                     .accessibilityLabel("Not now")
                     Button(action: onPrivacy) {
                         WrappingText(text: String(localized: "Privacy details"), style: .subheadline, weight: .medium,
-                                     color: .secondaryLabel, alignment: .center).frame(minHeight: 44)
+                                     colour: .secondaryLabel, alignment: .center).frame(minHeight: 44)
                     }
                         .accessibilityLabel("Privacy details")
                         .accessibilityIdentifier("primer.privacy")
@@ -309,7 +309,7 @@ struct CameraPrimer: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
                 WrappingText(text: String(localized: title), style: .headline)
-                WrappingText(text: String(localized: detail), style: .subheadline, color: .label.withAlphaComponent(0.8))
+                WrappingText(text: String(localized: detail), style: .subheadline, colour: .label.withAlphaComponent(0.8))
             }
         }
         .accessibilityElement(children: .combine)

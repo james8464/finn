@@ -16,7 +16,7 @@ struct PostureAdviceTests {
             }
             return PoseFrame(time: original.time, subjectCount: 1, joints: joints)
         }
-        let analysis = try measured(ExerciseAnalyzer.analyze(frames, as: .squat))
+        let analysis = try measured(ExerciseAnalyzer.analyse(frames, as: .squat))
         #expect(analysis.reps.count == 6)
         #expect(CueSelector.select(from: analysis, exercise: .squat)?.kind == .torsoTiltIncreased)
     }
@@ -31,7 +31,7 @@ struct PostureAdviceTests {
             return PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: joints,
                              aspectRatio: frame.aspectRatio)
         }
-        let analysis = try measured(ExerciseAnalyzer.analyze(frames, as: .pushUp))
+        let analysis = try measured(ExerciseAnalyzer.analyse(frames, as: .pushUp))
         let cue = CueSelector.select(from: analysis, exercise: .pushUp)
         #expect(cue?.repNumbers == [5, 6])
         #expect(cue?.observation == "Your hips sat lower relative to your shoulder-to-ankle line in the last two reps.")
@@ -48,7 +48,7 @@ struct PostureAdviceTests {
             }
             return PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: joints)
         }
-        let analysis = try measured(ExerciseAnalyzer.analyze(frames, as: .staticLunge))
+        let analysis = try measured(ExerciseAnalyzer.analyse(frames, as: .staticLunge))
         let cue = CueSelector.select(from: analysis, exercise: .staticLunge)
         #expect(cue?.repNumbers == [5, 6])
         #expect(cue?.observation == "Your torso tilted farther from upright in the last two reps.")
@@ -63,7 +63,7 @@ struct PostureAdviceTests {
             return PoseFrame(time: frame.time, subjectCount: 1, joints: joints,
                              aspectRatio: frame.aspectRatio, profileDeviationDegrees: 45)
         }
-        let analysis = try measured(ExerciseAnalyzer.analyze(frames, as: .pushUp))
+        let analysis = try measured(ExerciseAnalyzer.analyse(frames, as: .pushUp))
         #expect(analysis.reps.count == 6)
         #expect(CueSelector.select(from: analysis, exercise: .pushUp) == nil)
     }
@@ -73,13 +73,13 @@ struct PostureAdviceTests {
             PoseFrame(time: frame.time, subjectCount: 1,
                       joints: frame.joints.filter { $0.key != .leftHip })
         }
-        let analysis = try measured(ExerciseAnalyzer.analyze(frames, as: .pushUp))
+        let analysis = try measured(ExerciseAnalyzer.analyse(frames, as: .pushUp))
         #expect(analysis.reps.count == 6)
         #expect(CueSelector.select(from: analysis, exercise: .pushUp) == nil)
     }
 
     @Test func deadliftTracksKneeBendAndUsesSpecificWording() throws {
-        let analysis = try measured(ExerciseAnalyzer.analyze(hingeTrace(reps: 6), as: .stiffLegDeadlift))
+        let analysis = try measured(ExerciseAnalyzer.analyse(hingeTrace(reps: 6), as: .stiffLegDeadlift))
         #expect(analysis.reps.count == 6)
         #expect(analysis.reps.allSatisfy { $0.postureValue != nil })
 

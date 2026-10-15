@@ -18,7 +18,7 @@ nonisolated final class PoseFrameAnalyzer {
     // the 3D request is stateful, so it is reused across frames
     private let poseRequest3D = VNDetectHumanBodyPose3DRequest()
     private let sequenceHandler = VNSequenceRequestHandler()
-    private var analyzedFrames = 0
+    private var analysedFrames = 0
     private var tracker = AthleteTracker()
     /// joints the latest silhouette check found off the person, kept out of the two frames until the
     /// next check. Only refuted joints are carried: a joint the check never saw is not removed.
@@ -33,14 +33,14 @@ nonisolated final class PoseFrameAnalyzer {
         lastRefutedJoints = []
     }
 
-    func analyze(_ pixelBuffer: CVPixelBuffer, time: TimeInterval, estimateAngle: Bool) -> PoseFrame {
+    func analyse(_ pixelBuffer: CVPixelBuffer, time: TimeInterval, estimateAngle: Bool) -> PoseFrame {
         let width = CVPixelBufferGetWidth(pixelBuffer)
         let height = CVPixelBufferGetHeight(pixelBuffer)
         let aspectRatio = width > 0 && height > 0 ? Double(height) / Double(width) : 1
         let request = VNDetectHumanBodyPoseRequest()
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
-        analyzedFrames += 1
-        let verifySilhouette = analyzedFrames % Self.silhouetteInterval == 0
+        analysedFrames += 1
+        let verifySilhouette = analysedFrames % Self.silhouetteInterval == 0
         do {
             try handler.perform([request])
         } catch {
@@ -79,7 +79,7 @@ nonisolated final class PoseFrameAnalyzer {
             lastRefutedJoints = []
         }
         var profileDeviation: Double?
-        if estimateAngle, athlete != nil, analyzedFrames % Self.cameraAngleInterval == 0 {
+        if estimateAngle, athlete != nil, analysedFrames % Self.cameraAngleInterval == 0 {
             profileDeviation = cameraAngle(in: pixelBuffer, athlete: joints)
         }
         let bystanders = people.indices.filter { $0 != athlete }.map { people[$0] }.filter { !$0.isEmpty }
@@ -137,11 +137,12 @@ nonisolated final class PoseFrameAnalyzer {
         var joints: [BodyJoint: JointPoint] = [:]
         for (name, visionName) in mapping {
             guard let point = try? observation.recognizedPoint(visionName), point.confidence > 0 else { continue }
-            joints[name] = JointPoint(
-                x: min(1, max(0, Double(point.location.x))),
-                y: min(1, max(0, 1 - Double(point.location.y))),
+            let measured = JointPoint(
+                x: Double(point.location.x),
+                y: 1 - Double(point.location.y),
                 confidence: Double(point.confidence)
             )
+            if measured.isUsable { joints[name] = measured }
         }
         return joints
     }

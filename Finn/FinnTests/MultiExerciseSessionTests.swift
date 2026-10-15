@@ -23,7 +23,7 @@ struct MultiExerciseSessionTests {
             Issue.record("Expected a measured push-up set, got \(String(describing: model.result))")
             return
         }
-        #expect(analysis.rubricVersion == "push-up-side-v7")
+        #expect(analysis.rubricVersion == "push-up-side-v8")
         #expect(analysis.reps.count == 6)
         #expect(model.resultExercise == .pushUp)
         #expect(try store.load().first?.sets.first?.exercise == .pushUp)

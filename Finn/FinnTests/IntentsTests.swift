@@ -102,7 +102,10 @@ nonisolated struct IntentsTests {
         #expect(emptyDialog == LastSetReport.nothingYet)
         #expect(emptyContent == .nothingYet)
 
-        let session = sessions([set(.staticLunge, reps: 6, minutesAgo: 10, observation: "Front knee bent less on the last two reps.")])[0]
+        let recorded = set(.staticLunge, reps: 6, minutesAgo: 10,
+                           observation: "Front knee bent less on the last two reps.")
+        let session = WorkoutSessionSummary(id: recorded.sessionID, startedAt: recorded.capturedAt,
+                                            sets: [recorded])
         try store.save(session)
         let (dialog, content) = LastSetIntent.answer(from: store, now: Self.now)
         #expect(dialog.hasPrefix("Your last set in Finn: Static lunge, 6 measured reps,"))

@@ -1,12 +1,12 @@
 import Foundation
 
-/// One coaching check a coach would make from the side, measured at the bottom of each rep with
+/// One coaching check a coach would make from the side, measured across each rep with
 /// `BodySegments`. Each threshold below is a product hypothesis checked against labelled side-view
 /// videos (see `docs/validation/form-checks-v1.md`), not a validated standard or a safety limit.
 /// Nothing here can be seen only from the front (knees caving in, elbows flaring), so no check
 /// reads it.
 nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
-// listed in the order the advice is given when several show in one set: the body's shape first,
+    // Listed in advice order when several faults show in one set: the body's shape first,
     // then how deep the rep went.
     case pushUpHipsSag
     case pushUpHipsPike
@@ -26,8 +26,8 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
     // wrongly accuses. Lunge and stiff-leg deadlift limits come from common coaching cues only: that
     // set has neither exercise.
 
-    /// Push-up: hip more than this many torso lengths below the shoulder-to-ankle line at the bottom
-    /// (hips sagging).
+    /// Push-up: hip persistently below the body line by this many torso lengths (hips sagging).
+    /// The line uses the knee when the ankle is unclear.
     static let pushUpMaximumSag = 0.2
     /// Push-up: hip more than this many torso lengths above that line (hips piked up).
     static let pushUpMaximumPike = 0.2
@@ -37,11 +37,11 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
     /// Squat: thigh more than this many degrees above level at the bottom. Level (0°) is a parallel
     /// squat; Vision's hip point sits above the hip crease, and good sets bottomed out around 15°.
     static let squatMaximumThighAboveLevel = 30.0
-    /// Squat: torso leaning more than this many degrees beyond the shins at the bottom. Coaches cue a
+    /// Squat: torso persistently leaning more than this many degrees beyond the shins. Coaches cue a
     /// torso roughly parallel to the shins; the bad squats of the labelled set do not show this fault,
     /// so the limit is set high to keep false alarms rare.
     static let squatMaximumTorsoBeyondShin = 45.0
-    /// Lunge: torso more than this many degrees from upright at the bottom.
+    /// Lunge: torso persistently more than this many degrees from upright.
     static let lungeMaximumTorsoLean = 25.0
     /// Lunge: front knee angle above this many degrees at the bottom. A full split squat brings it
     /// near 90°.
@@ -53,7 +53,7 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
     /// A thigh leaning at least this far from vertical at the bottom of a lunge is the front leg;
     /// the back thigh stays closer to vertical.
     static let lungeFrontThighTilt = 45.0
-    /// Stiff-leg deadlift: knees bent more than this many degrees at the bottom of the hinge.
+    /// Stiff-leg deadlift: knees persistently bent more than this many degrees during the hinge.
     static let deadliftMaximumKneeBend = 30.0
     /// Stiff-leg deadlift: torso less than this many degrees from upright at the bottom.
     static let deadliftMinimumTorsoLean = 50.0
@@ -79,6 +79,15 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
         allCases.filter { $0.exercise == exercise }
     }
 
+    var needsBottomPosition: Bool {
+        switch self {
+        case .pushUpDepth, .squatDepth, .lungeFrontKnee, .deadliftHinge:
+            true
+        case .pushUpHipsSag, .pushUpHipsPike, .squatChestDrop, .lungeTorsoLean, .deadliftKneeBend:
+            false
+        }
+    }
+
     /// Joints the check reads, on the side the camera sees best.
     var joints: [JointRole] {
         switch self {
@@ -93,11 +102,10 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// The reading in one frame, or nil when a joint it needs is not clear.
     /// Confidence each joint needs for this check. The body line accepts the rep count's 0.3: Vision
     /// gives the hips of a body lying level low confidence (on 48 side-view push-up videos the near hip
-    /// reached 0.5 in 13% of frames and 0.3 in 62%), and the median over a rep's bottom frames
-    /// steadies the reading.
+    /// reached 0.5 in 13% of frames and 0.3 in 62%). Sustained episodes and their median readings
+    /// now separate body-line faults from short tracking glitches.
     var minimumConfidence: Double {
         switch self {
         case .pushUpHipsSag, .pushUpHipsPike: EvidenceRubric.minimumJointConfidence
@@ -173,7 +181,7 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
         case .pushUpHipsSag: String(localized: "Hips sagging below your body line")
         case .pushUpHipsPike: String(localized: "Hips raised above your body line")
         case .pushUpDepth: String(localized: "Elbows not bending to 90°")
-        case .squatChestDrop: String(localized: "Chest dropping forward at the bottom")
+        case .squatChestDrop: String(localized: "Chest dropping forward")
         case .squatDepth: String(localized: "Hips staying above your knees")
         case .lungeTorsoLean: String(localized: "Torso leaning forward")
         case .lungeFrontKnee: String(localized: "Front knee not bending to 90°")
@@ -184,26 +192,27 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
 
     /// The sentence on the result, with the reps that showed it and the typical reading.
     func observation(reps: [Int], typical: Double) -> String {
+        guard typical.isFinite, abs(typical) <= 1_000 else { return "" }
         let inReps = String(localized: "in \(FormChecks.list(reps))")
         let degrees = Int(typical.rounded())
         let share = Int((abs(typical) * 100).rounded())
         return switch self {
         case .pushUpHipsSag:
-            String(localized: "Your hips sagged below the line from your shoulders to your ankles \(inReps), by about \(share)% of your torso length.")
+            String(localized: "Your hips sagged below your body line \(inReps), by about \(share)% of your torso length.")
         case .pushUpHipsPike:
-            String(localized: "Your hips rose above the line from your shoulders to your ankles \(inReps), by about \(share)% of your torso length.")
+            String(localized: "Your hips rose above your body line \(inReps), by about \(share)% of your torso length.")
         case .pushUpDepth:
             String(localized: "Your elbows stayed at about \(degrees)° at the bottom \(inReps). A full push-up brings them to about 90°.")
         case .squatChestDrop:
-            String(localized: "Your chest dropped forward at the bottom \(inReps): your torso leaned about \(degrees)° more than your shins.")
+            String(localized: "Your chest dropped forward \(inReps): your torso leaned about \(degrees)° more than your shins.")
         case .squatDepth:
             String(localized: "Your hips stayed above your knees at the bottom \(inReps): your thighs were about \(degrees)° above level.")
         case .lungeTorsoLean:
-            String(localized: "Your torso leaned about \(degrees)° forward at the bottom \(inReps).")
+            String(localized: "Your torso leaned about \(degrees)° forward \(inReps).")
         case .lungeFrontKnee:
             String(localized: "Your front knee stayed at about \(degrees)° at the bottom \(inReps). A full lunge brings it near 90°.")
         case .deadliftKneeBend:
-            String(localized: "Your knees bent about \(degrees)° at the bottom of the hinge \(inReps), more like a squat than a stiff-leg deadlift.")
+            String(localized: "Your knees bent about \(degrees)° during the hinge \(inReps), more like a squat than a stiff-leg deadlift.")
         case .deadliftHinge:
             String(localized: "Your torso stopped at about \(degrees)° from upright \(inReps), early in the hinge.")
         }
@@ -282,6 +291,33 @@ nonisolated struct FormReview: Equatable, Sendable {
     /// Every check supported by enough clear reps, including checks that found no fault.
     var measurements: [FormMeasurement] = []
     var notes: [String] = []
+    /// Kept in memory so live catch-up cues can use only evidence available by that rep.
+    var repReadings: [FormCheck: [FormRepReading]] = [:]
+
+    func findings(through number: Int, exercise: ExerciseKind) -> [FormFinding] {
+        var result: [FormFinding] = []
+        for check in FormCheck.checks(for: exercise) {
+            let readings = (repReadings[check] ?? []).filter { $0.number <= number }
+            let faulty = readings.filter(\.isFault)
+            guard readings.count * 2 >= number,
+                  faulty.count >= FormCheck.minimumFaultyReps,
+                  Double(faulty.count) >= FormCheck.minimumFaultyShare * Double(readings.count) else { continue }
+            let values = faulty.map(\.value).sorted()
+            result.append(FormFinding(check: check, reps: faulty.map(\.number), judged: readings.count,
+                                      typical: values[values.count / 2]))
+        }
+        if let sag = result.firstIndex(where: { $0.check == .pushUpHipsSag }),
+           let pike = result.firstIndex(where: { $0.check == .pushUpHipsPike }) {
+            result.remove(at: result[sag].reps.count >= result[pike].reps.count ? pike : sag)
+        }
+        return result
+    }
+}
+
+nonisolated struct FormRepReading: Equatable, Sendable {
+    let number: Int
+    let value: Double
+    let isFault: Bool
 }
 
 /// A compact, comparable measurement. The video and joint coordinates stay off disk.
@@ -298,6 +334,10 @@ nonisolated struct FormMeasurement: Codable, Equatable, Sendable {
 /// body swung. Each check is a camera measurement from the side, not a judgement of technique;
 /// when a joint it needs is not tracked, it says so instead of guessing.
 nonisolated enum FormChecks {
+    /// A fault must last long enough to distinguish it from a brief landmark error.
+    static let minimumFaultDuration: TimeInterval = 0.2
+    static let maximumReadingGap: TimeInterval = 0.2
+    static let bottomWindowRadius: TimeInterval = 0.15
     /// Elbow angle from which an arm counts as straight at the bottom of a pull-up.
     static let straightArmDegrees = 150.0
     /// Hip travel, forward and back, above which the body is said to swing (share of arm length).
@@ -313,6 +353,10 @@ nonisolated enum FormChecks {
     /// checks say nothing, since an angled view bends every 2D angle.
     static func review(_ analysis: SetAnalysis, frames: [PoseFrame], definition: ExerciseDefinition,
                        viewCheck: ExerciseAnalyzer.ViewCheckPolicy = .enforce) -> FormReview {
+        guard PoseFrame.hasIncreasingTimestamps(frames), analysis.reps.allSatisfy(\.isValid),
+              analysis.reps.enumerated().allSatisfy({ $0.element.number == $0.offset + 1 }) else {
+            return FormReview()
+        }
         switch definition.kind {
         case .pullUp, .muscleUp:
             return FormReview(notes: pullChecks(analysis, frames: frames, definition: definition))
@@ -327,7 +371,9 @@ nonisolated enum FormChecks {
                                    viewCheck: ExerciseAnalyzer.ViewCheckPolicy) -> FormReview {
 // push-ups counted from the shoulders (filmed from the front, or the arm out of the picture)
         // have no side-view joints to read; the result already says so.
-        guard !analysis.reps.isEmpty, analysis.rubricVersion != ExerciseDefinition.pushUpShoulders.rubricVersion,
+        guard !analysis.reps.isEmpty,
+              analysis.rubricVersion != ExerciseDefinition.pushUpShoulders.rubricVersion,
+              analysis.rubricVersion != ExerciseDefinition.squatTrunk.rubricVersion,
               case .usable(let side) = EvidenceGate.assess(frames, requirement: definition.evidence) else {
             return FormReview()
         }
@@ -343,48 +389,102 @@ nonisolated enum FormChecks {
                 break
             }
         }
-        let bottoms = analysis.reps.map { rep in
-            (rep, bottomFrames(of: rep, in: frames, definition: definition, side: side))
+        // All checks share the rep windows and angle assessment. Avoid scanning the full capture
+        // again for each check; the windows are found with timestamp binary searches.
+        let windows = analysis.reps.map { rep in
+            let whole = Array(frames[ExerciseAnalyzer.frameRange(
+                from: rep.startTime, through: rep.endTime, in: frames)])
+            let bottom = bottomFrames(of: rep, in: frames, definition: definition, side: side)
+            let supportsSide = viewCheck == .ignore || supportsSideMeasurements(whole[...])
+            return (rep: rep, whole: whole, bottom: bottom, supportsSide: supportsSide)
         }
         let thigh = standingThigh(frames, side: side)
         var review = FormReview()
         for check in FormCheck.checks(for: definition.kind) {
-            let readings = bottoms.compactMap { rep, window -> (Int, Double)? in
-                let values = window.compactMap { check.measure($0, side: side, standingThigh: thigh) }
-                guard values.count * 2 > window.count, !values.isEmpty else { return nil }
-                return (rep.number, median(values))
+            let readings = windows.compactMap { window -> FormRepReading? in
+                guard window.supportsSide else { return nil }
+                let observed = check.needsBottomPosition ? window.bottom : window.whole
+                return reading(check, rep: window.rep, frames: observed, side: side, standingThigh: thigh)
             }
+            review.repReadings[check] = readings
             guard readings.count >= FormCheck.minimumFaultyReps, readings.count * 2 >= analysis.reps.count else {
-                review.notes.append(cannotCheck(check, bottoms: bottoms.flatMap(\.1), side: side))
+                let observed = windows.flatMap { check.needsBottomPosition ? $0.bottom : $0.whole }
+                review.notes.append(cannotCheck(check, frames: observed, side: side))
                 continue
             }
-            let faulty = readings.filter { check.isFault($0.1) }
+            let faulty = readings.filter(\.isFault)
             review.measurements.append(FormMeasurement(check: check, judged: readings.count,
                                                        faulty: faulty.count,
-                                                       typical: median(readings.map(\.1))))
-            guard faulty.count >= FormCheck.minimumFaultyReps,
-                  Double(faulty.count) >= FormCheck.minimumFaultyShare * Double(readings.count) else { continue }
-            review.findings.append(FormFinding(check: check, reps: faulty.map(\.0), judged: readings.count,
-                                               typical: median(faulty.map(\.1))))
+                                                       typical: median(readings.map(\.value))))
         }
-// sag and pike read the same line; when both show, the one seen on more reps is kept.
-        if let sag = review.findings.firstIndex(where: { $0.check == .pushUpHipsSag }),
-           let pike = review.findings.firstIndex(where: { $0.check == .pushUpHipsPike }) {
-            review.findings.remove(at: review.findings[sag].reps.count >= review.findings[pike].reps.count ? pike : sag)
-        }
+        review.findings = review.findings(through: analysis.reps.count, exercise: definition.kind)
 // the first finding becomes the set's observation; the others are listed as facts.
         review.notes.insert(contentsOf: review.findings.dropFirst().map(\.observation), at: 0)
         return review
     }
 
-    /// The frames around a rep's deepest point (up to two on each side, within the rep), where every
-    /// check reads its value. A median over them keeps one jittery frame from deciding.
+    /// Depth checks use a short time window around the bottom. A fixed frame count changes its
+    /// meaning when the camera slows down; timestamps keep the physical interval consistent.
     static func bottomFrames(of rep: RepMetric, in frames: [PoseFrame],
                              definition: ExerciseDefinition, side: BodySide) -> [PoseFrame] {
         guard let index = ExerciseAnalyzer.deepestFrameIndex(of: rep, in: frames,
                                                              as: definition, side: side) else { return [] }
-        return frames[max(0, index - 2)...min(frames.count - 1, index + 2)]
-            .filter { $0.time >= rep.startTime && $0.time <= rep.endTime }
+        let start = max(rep.startTime, frames[index].time - bottomWindowRadius)
+        let end = min(rep.endTime, frames[index].time + bottomWindowRadius)
+        return Array(frames[ExerciseAnalyzer.frameRange(from: start, through: end, in: frames)])
+    }
+
+    private static func reading(_ check: FormCheck, rep: RepMetric, frames: [PoseFrame],
+                                side: BodySide, standingThigh: Double?) -> FormRepReading? {
+        let readings = frames.compactMap { frame -> (time: TimeInterval, value: Double)? in
+            guard let value = check.measure(frame, side: side, standingThigh: standingThigh),
+                  value.isFinite else { return nil }
+            return (frame.time, value)
+        }
+        guard readings.count >= 3, readings.count * 2 > frames.count,
+              let first = readings.first, let last = readings.last else { return nil }
+
+        if check.needsBottomPosition {
+            guard last.time - first.time >= 0.1 else { return nil }
+            let value = median(readings.map(\.value))
+            return FormRepReading(number: rep.number, value: value, isFault: check.isFault(value))
+        }
+
+        var observedDuration = 0.0
+        var runStart: Int?
+        var sustained: Range<Int>?
+        for index in readings.indices {
+            let current = readings[index]
+            let gap = index == 0 ? 0 : current.time - readings[index - 1].time
+            if gap <= maximumReadingGap + 0.000_001 {
+                observedDuration += gap
+            } else {
+                runStart = nil
+            }
+            guard check.isFault(current.value) else {
+                runStart = nil
+                continue
+            }
+            let start = runStart ?? index
+            runStart = start
+            let run = start..<(index + 1)
+            if run.count >= 3, current.time - readings[start].time + 0.000_001 >= minimumFaultDuration {
+                // The longest supported episode represents the rep, not its single worst frame.
+                if run.count > (sustained?.count ?? 0) { sustained = run }
+            }
+        }
+        guard observedDuration >= rep.duration * 0.6 else { return nil }
+        let values = sustained.map { readings[$0].map(\.value) } ?? readings.map(\.value)
+        return FormRepReading(number: rep.number, value: median(values), isFault: sustained != nil)
+    }
+
+    /// A set-wide median can hide the athlete turning for a few reps. Those reps must not
+    /// become either faults or evidence of improvement. Older captures without 3D retain the
+    /// existing 2D path; absence of an angle estimate is not proof of a side view.
+    private static func supportsSideMeasurements(_ frames: ArraySlice<PoseFrame>) -> Bool {
+        let estimates = frames.compactMap(\.profileDeviationDegrees)
+        guard estimates.count >= 2 else { return true }
+        return median(estimates) <= ViewCheck.maximumSideDeviationDegrees
     }
 
     /// The thigh's length over the set (its 90th percentile, the length seen standing).
@@ -394,31 +494,31 @@ nonisolated enum FormChecks {
         return lengths[Int(Double(lengths.count - 1) * 0.9)]
     }
 
-    /// Why a check said nothing: the joint it needs that was least often clear at the bottom of the
-    /// reps, or, with every joint clear, a view that does not show the measurement.
-    private static func cannotCheck(_ check: FormCheck, bottoms: [PoseFrame], side: BodySide) -> String {
+    /// Explain missing evidence from the same windows the check actually measured.
+    private static func cannotCheck(_ check: FormCheck, frames: [PoseFrame], side: BodySide) -> String {
         if check == .lungeFrontKnee {
-            let legSeen = bottoms.contains { frame in
+            let legSeen = frames.contains { frame in
                 BodySegments(frame: frame, side: side).kneeAngle != nil
             }
-            if legSeen {
+            let frontSeen = frames.contains { check.measure($0, side: side) != nil }
+            if legSeen && !frontSeen {
                 return String(localized: "Finn couldn’t check your front knee bend: it saw only your back leg clearly. Turn so your front leg is nearer the phone.")
             }
         }
         let weakest = check.joints.min { first, second in
-            clearCount(first, in: bottoms, side: side, minimum: check.minimumConfidence)
-                < clearCount(second, in: bottoms, side: side, minimum: check.minimumConfidence)
+            clearCount(first, in: frames, side: side, minimum: check.minimumConfidence)
+                < clearCount(second, in: frames, side: side, minimum: check.minimumConfidence)
         } ?? check.joints[0]
-        if clearCount(weakest, in: bottoms, side: side, minimum: check.minimumConfidence) * 2 > bottoms.count {
+        if clearCount(weakest, in: frames, side: side, minimum: check.minimumConfidence) * 2 > frames.count {
             return String(localized: "Finn couldn’t check your \(check.subject) from this camera position. Keep your side square to the phone.")
         }
-        return String(localized: "Finn couldn’t check your \(check.subject): your \(weakest.localizedName.lowercased()) wasn’t clear enough at the bottom of the reps.")
+        return String(localized: "Finn couldn’t check your \(check.subject): your \(weakest.localisedName.lowercased()) wasn’t clear enough during the reps.")
     }
 
     private static func clearCount(_ role: JointRole, in frames: [PoseFrame], side: BodySide,
                                    minimum: Double) -> Int {
         frames.filter {
-            ($0.joints[role.joint(on: side)]?.confidence ?? 0) >= minimum
+            $0.athleteVisible && ($0.joints[role.joint(on: side)]?.confidence ?? 0) >= minimum
         }.count
     }
 

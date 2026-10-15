@@ -28,6 +28,7 @@ protocol RecapGenerating: AnyObject {
 final class ComparisonNarrator {
     private let generator: any RecapGenerating
     private let timeout: Duration
+    private let generation = ModelGenerationGate<GeneratedRecap>()
 
     init(generator: any RecapGenerating, timeout: Duration = .seconds(3)) {
         self.generator = generator
@@ -39,24 +40,10 @@ final class ComparisonNarrator {
     }
 
     func recap(for comparison: Comparison) async -> Recap {
-        guard generator.available else { return template(for: comparison) }
-        let stream = AsyncStream<GeneratedRecap?>(bufferingPolicy: .bufferingNewest(1)) { continuation in
-            let generation = Task { @MainActor [generator] in
-                continuation.yield(try? await generator.generate(for: comparison))
-                continuation.finish()
-            }
-            let timer = Task.detached { [timeout] in
-                guard (try? await Task.sleep(for: timeout)) != nil else { return }
-                continuation.yield(nil)
-                continuation.finish()
-            }
-            continuation.onTermination = { @Sendable _ in
-                generation.cancel()
-                timer.cancel()
-            }
+        guard !Task.isCancelled, generator.available else { return template(for: comparison) }
+        let generated = await generation.response(timeout: timeout) { [generator] in
+            try await generator.generate(for: comparison)
         }
-        var iterator = stream.makeAsyncIterator()
-        let generated = await iterator.next() ?? nil
         guard let generated, isValid(generated, for: comparison) else {
             return template(for: comparison)
         }
@@ -156,7 +143,9 @@ private final class AppleRecapGenerator: RecapGenerating {
             Evidence rep numbers: \(comparison.cueRepNumbers).
             """
         let session = LanguageModelSession(instructions: instructions)
-        let response = try await session.respond(to: prompt, generating: AppleGeneratedRecap.self)
+        try Task.checkCancellation()
+        let response = try await session.respond(to: prompt, generating: AppleGeneratedRecap.self,
+                                                  options: GenerationOptions(maximumResponseTokens: 256))
         return GeneratedRecap(explanation: response.content.explanation,
                               evidenceRepNumbers: response.content.evidenceRepNumbers)
     }

@@ -100,13 +100,13 @@ enum SkeletonPainter {
             let fitsRight = angle.vertex.x + offset + size.width / 2 + 8 <= canvas.width
             let halfBadge = size.width / 2 + 8
             let wanted = angle.vertex.x + (fitsRight ? offset : -offset)
-            let center = CGPoint(x: min(max(wanted, halfBadge), max(halfBadge, canvas.width - halfBadge)),
+            let centre = CGPoint(x: min(max(wanted, halfBadge), max(halfBadge, canvas.width - halfBadge)),
                                  y: angle.vertex.y)
-            let badge = CGRect(x: center.x - size.width / 2 - 8, y: center.y - size.height / 2 - 4,
+            let badge = CGRect(x: centre.x - size.width / 2 - 8, y: centre.y - size.height / 2 - 4,
                                width: size.width + 16, height: size.height + 8)
             context.fill(Path(roundedRect: badge, cornerRadius: badge.height / 2),
                          with: .color(angle.reliable ? clear : weak))
-            context.draw(resolved, at: center)
+            context.draw(resolved, at: centre)
         }
     }
 }

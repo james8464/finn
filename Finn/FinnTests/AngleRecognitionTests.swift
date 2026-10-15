@@ -17,7 +17,7 @@ struct AngleRuleRecognitionTests {
         for (label, kind) in exercises {
             let hits = (0..<30).filter { _ in
                 let frames = SyntheticExerciseMotion.sequence(label: label, using: &rng)
-                if case .recognized(kind, _) = AngleRecognizer.recognize(frames, using: AngleRuleClassifier()) {
+                if case .recognized(kind, _) = AngleRecognizer.recognise(frames, using: AngleRuleClassifier()) {
                     return true
                 }
                 return false
@@ -31,7 +31,7 @@ struct AngleRuleRecognitionTests {
         for label in ["other", "none"] {
             let uncertain = (0..<30).filter { _ in
                 let frames = SyntheticExerciseMotion.sequence(label: label, using: &rng)
-                return AngleRecognizer.recognize(frames, using: AngleRuleClassifier()) == .uncertain
+                return AngleRecognizer.recognise(frames, using: AngleRuleClassifier()) == .uncertain
             }.count
             #expect(uncertain >= 27, "\(label): \(uncertain) of 30")
         }
@@ -49,7 +49,7 @@ struct AngleRuleRecognitionTests {
 // with one ankle left, the stance is unknown and a squat cannot be told from a lunge.
         let features = PoseWindowFeatureExtractor.windows(frames).compactMap(PoseWindowFeatureExtractor.features)
         #expect(features.allSatisfy { $0.stance == -1 })
-        #expect(AngleRecognizer.recognize(frames, using: AngleRuleClassifier()) == .uncertain)
+        #expect(AngleRecognizer.recognise(frames, using: AngleRuleClassifier()) == .uncertain)
     }
 
     @Test func featuresNeedTheTrunkAndLegs() {
@@ -80,13 +80,13 @@ struct AngleRuleRecognitionTests {
         var rng = SyntheticRandom(seed: 606)
         for (label, kind) in exercises {
             let frames = SyntheticExerciseMotion.sequence(label: label, using: &rng)
-            guard case .recognized(kind, _) = AngleRecognizer.recognize(frames, using: model) else {
+            guard case .recognized(kind, _) = AngleRecognizer.recognise(frames, using: model) else {
                 Issue.record("The bundled angle model missed a synthetic \(label)")
                 continue
             }
         }
         let still = SyntheticExerciseMotion.sequence(label: "none", using: &rng)
-        #expect(AngleRecognizer.recognize(still, using: model) == .uncertain)
+        #expect(AngleRecognizer.recognise(still, using: model) == .uncertain)
     }
 }
 
@@ -95,7 +95,7 @@ struct AngleRuleSessionTests {
     @Test func rulesRecognizeWhenNoModelShips() async throws {
         let defaults = try #require(UserDefaults(suiteName: "FinnRules-\(UUID().uuidString)"))
         let preferences = FinnPreferences(defaults: defaults)
-        preferences.recognizesExercise = true
+        preferences.recognisesExercise = true
         let source = RuleSessionSource()
         let model = WorkoutSessionModel(source: source, exerciseClassifier: nil, angleClassifier: nil,
                                         preferences: preferences)
@@ -108,7 +108,7 @@ struct AngleRuleSessionTests {
         for frame in SyntheticExerciseMotion.sequence(label: "push_up", using: &rng) { source.emit(frame) }
         await model.endSet()
         guard case .recognized(.pushUp, _) = model.recognition else {
-            Issue.record("Expected the rules to recognize a push-up, got \(model.recognition)")
+            Issue.record("Expected the rules to recognise a push-up, got \(model.recognition)")
             return
         }
         #expect(model.resultExercise == .pushUp)

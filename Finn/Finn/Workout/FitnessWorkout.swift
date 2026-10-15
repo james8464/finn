@@ -201,7 +201,7 @@ nonisolated struct FitnessSaveReport: Equatable, Sendable {
 /// (`HealthKitWorkoutExporter`); tests use a fake.
 protocol FitnessWorkoutSaving: AnyObject {
     /// Health's current permission for Finn to save workouts. Reading it never prompts.
-    var authorization: FitnessAuthorization { get }
+    var authorisation: FitnessAuthorization { get }
     /// Shows Health's permission sheet when the person has not answered yet; returns the result.
     func requestAuthorization() async -> FitnessAuthorization
     /// Saves the workout and returns its HealthKit identifier when Health gives it back. Throws

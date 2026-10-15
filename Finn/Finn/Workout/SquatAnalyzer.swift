@@ -12,7 +12,10 @@ nonisolated enum SquatRubric {
     /// v7 (13 October 2026): v6 plus measuring only the set, not the walk to the spot and back to the
     /// phone (`SetWindow`), a person-mask search in proportion to the body that ignores an empty mask
     /// (`SilhouetteCheck`), and a rep's deepest point kept after a wobble. v5 refused real sets.
-    static let version = "squat-side-v7"
+    /// v8 (15 October 2026): rejects broken clocks, median-filters isolated tracking spikes and
+    /// abandons movements hidden for more than 0.75 s. Form checks also read sustained faults
+    /// throughout a rep; their real-person accuracy still needs a separate held-out evaluation.
+    static let version = "squat-side-v8"
     static let minimumJointConfidence = EvidenceRubric.minimumJointConfidence
     static let descentThreshold = 0.10
     /// v3: 0.05 (was 0.03), about twice Vision's hip jitter on real side-view video.
@@ -29,8 +32,8 @@ nonisolated enum SquatRubric {
 
 /// The side-view squat, now one entry in `ExerciseDefinition`. Kept for existing callers.
 nonisolated enum SquatAnalyzer {
-    static func analyze(_ frames: [PoseFrame]) -> AnalysisOutcome {
-        ExerciseAnalyzer.analyze(frames, as: .squat)
+    static func analyse(_ frames: [PoseFrame]) -> AnalysisOutcome {
+        ExerciseAnalyzer.analyse(frames, as: .squat)
     }
 }
 
@@ -72,21 +75,24 @@ nonisolated enum ExerciseAnalyzer {
         let posture: Double?
     }
 
-    static func analyze(_ frames: [PoseFrame], as definition: ExerciseDefinition,
+    static func analyse(_ frames: [PoseFrame], as definition: ExerciseDefinition,
                         viewCheck: ViewCheckPolicy = .enforce) -> AnalysisOutcome {
-        analyzeWithDiagnostics(frames, as: definition, viewCheck: viewCheck).outcome
+        analyseWithDiagnostics(frames, as: definition, viewCheck: viewCheck).outcome
     }
 
     /// The analysis plus what the movement looked like, so the result can say why a movement
     /// did not count instead of staying silent.
     /// `trimsToSet` keeps only the set itself (`SetWindow`); pass false for frames already trimmed.
-    static func analyzeWithDiagnostics(_ frames: [PoseFrame], as definition: ExerciseDefinition,
+    static func analyseWithDiagnostics(_ frames: [PoseFrame], as definition: ExerciseDefinition,
                                        viewCheck: ViewCheckPolicy = .enforce, trimsToSet: Bool = true)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
+        guard PoseFrame.hasIncreasingTimestamps(frames) else {
+            return (.insufficientView(definition.copy.keepJointsVisible), nil)
+        }
 // walking to the spot and back to the phone is not part of the set, for either count: the
         // replay tool then gives what the iPhone gives, which trims before calling.
         let frames = trimsToSet ? SetWindow.active(frames, requirement: definition.evidence) : frames
-        let sideView = analyzeSideView(frames, as: definition, viewCheck: viewCheck)
+        let sideView = analyseSideView(frames, as: definition, viewCheck: viewCheck)
 // the push-up rubric reads the elbow, which needs a side view with the whole arm in the
         // picture. Filmed from the front, or close enough to cut the arm off, the shoulders still
         // show how many times the person went down. The squat rubric reads the hip against the
@@ -97,8 +103,8 @@ nonisolated enum ExerciseAnalyzer {
         // at 3 while the athlete squatted on.
         let trunkCount: (([PoseFrame]) -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?)?)?
         switch definition {
-        case .pushUp: trunkCount = analyzeShoulders
-        case .squat: trunkCount = analyzeHips
+        case .pushUp: trunkCount = analyseShoulders
+        case .squat: trunkCount = analyseHips
         default: trunkCount = nil
         }
         guard let trunkCount else { return sideView }
@@ -114,7 +120,7 @@ nonisolated enum ExerciseAnalyzer {
         return fromTrunk
     }
 
-    private static func analyzeSideView(_ frames: [PoseFrame], as definition: ExerciseDefinition,
+    private static func analyseSideView(_ frames: [PoseFrame], as definition: ExerciseDefinition,
                                         viewCheck: ViewCheckPolicy)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
         let side: BodySide
@@ -162,12 +168,12 @@ nonisolated enum ExerciseAnalyzer {
     }
 
     /// The rep state machine, shared by the side-view rubric and the front-view count.
-    /// `restartAfterGap`: a stretch without samples longer than this ends any rep under way, and
-    /// the next one is measured from where the person is seen again. Nil bridges every gap, for
-    /// rubrics whose evidence gate already refused long ones.
+    /// A tracking gap abandons the open rep. The evidence gate can tolerate a passing bystander
+    /// without discarding the whole set, but that does not reveal movement behind the bystander.
     private static func countReps(_ samples: [Sample], in frames: [PoseFrame], as definition: ExerciseDefinition,
                                   side: BodySide, partial: PartialVisibility?, angledView: Double?,
-                                  postureFromSide: Bool = true, restartAfterGap: TimeInterval? = nil)
+                                  postureFromSide: Bool = true,
+                                  restartAfterGap: TimeInterval = EvidenceRubric.maximumTrackingGap)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
         guard samples.count >= 5 else {
             return (.insufficientView(definition.copy.keepJointsVisible), nil)
@@ -190,7 +196,7 @@ nonisolated enum ExerciseAnalyzer {
             // hands. The hands hold the bar, so their height is one value for the set; the frames
             // where Vision misses them (often, with the bar near the top of the picture) still count.
             baseline = percentile(samples.map(\.value), 0.9)
-            let hands = samples.map(\.scale).filter { !$0.isNaN }
+            let hands = samples.map(\.scale).filter(\.isFinite)
             guard hands.count >= 3 else { return (.insufficientView(definition.copy.keepJointsVisible), nil) }
             let armLength = baseline - median(hands)
             guard armLength > definition.minimumBodyScale else {
@@ -214,10 +220,9 @@ nonisolated enum ExerciseAnalyzer {
         }
 
         let smoothed = samples.indices.map { index -> Double in
-            let lower = max(0, index - 1)
-            let upper = min(samples.count - 1, index + 1)
-            let window = samples[lower...upper]
-            return window.map(\.value).reduce(0, +) / Double(window.count)
+            filteredValue(previous: index > 0 ? samples[index - 1] : nil,
+                          current: samples[index],
+                          next: index + 1 < samples.count ? samples[index + 1] : nil)
         }
 
         let phases = definition.phases
@@ -234,7 +239,7 @@ nonisolated enum ExerciseAnalyzer {
         diagnostics.postureFromSide = postureFromSide
         for (index, sample) in samples.enumerated() {
             let distance = travel(smoothed[index])
-            if let restartAfterGap, index > 0, sample.time - samples[index - 1].time > restartAfterGap {
+            if index > 0, sample.time - samples[index - 1].time > restartAfterGap {
 // the athlete was out of view: what they did meanwhile is unknown.
                 phase = .top
                 localTop = distance
@@ -338,16 +343,11 @@ nonisolated enum ExerciseAnalyzer {
 
     // MARK: Shoulders only
 
-    /// A shoulder gap is read as a hidden bottom when both of its ends are at least this share of
-    /// the seen travel below the top, and filled down to this share of it.
-    private static let hiddenBottomEntry = 0.25
-    private static let hiddenBottomDepth = 0.8
-
     /// Counts a push-up from the shoulders going down and up. Nil when the set is too short, the
     /// shoulders (or the nose standing in for them) are seen in too few frames, the hands do not
     /// stay planted, or no rep is found: the arm rubric's refusal then stays, because it explains more.
     /// Depth and posture are not measured from here, so the result carries no posture advice.
-    private static func analyzeShoulders(_ frames: [PoseFrame])
+    private static func analyseShoulders(_ frames: [PoseFrame])
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?)? {
         guard let first = frames.first, let last = frames.last,
               last.time - first.time >= EvidenceRubric.minimumSetDuration,
@@ -393,7 +393,7 @@ nonisolated enum ExerciseAnalyzer {
     /// refusal then stays, because it explains more. No coverage share is required: reps done
     /// while the athlete is seen count, a stretch out of view does not cancel them.
     /// Depth is measured in torso lengths, posture not at all: the result carries no posture advice.
-    private static func analyzeHips(_ frames: [PoseFrame])
+    private static func analyseHips(_ frames: [PoseFrame])
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?)? {
         guard let first = frames.first, let last = frames.last,
               last.time - first.time >= EvidenceRubric.minimumSetDuration,
@@ -512,16 +512,13 @@ nonisolated enum ExerciseAnalyzer {
         return percentile(heights, 0.75) - percentile(heights, 0.25) < shoulderTravel / 3
     }
 
-    /// Height of the shoulders (their midpoint, in image-width units so the scale does not depend on
-    /// the picture's shape), per frame. When Vision loses both shoulders, the nose stands in at its
-    /// usual distance above them; a gap of at most `EvidenceRubric.maximumTrackingGap` is bridged,
-    /// as the rep passes through it. Longer gaps stay empty. Vision loses the shoulders at the
-    /// bottom of a push-up, where the head leaves the picture or the arms hide them, so a gap that
-    /// starts and ends well below the top is filled with a dip towards the deepest seen position
-    /// instead of a straight line, which would flatten the rep out of existence.
+    /// Observed shoulder height in image-width units. The nose may stand in at its measured
+    /// offset, but a missing body stays missing. Inferring a dip in an occlusion can manufacture
+    /// a rep when the person actually paused or left the frame.
     private static func shoulderSamples(_ frames: [PoseFrame]) -> [Sample] {
         func clear(_ frame: PoseFrame, _ joint: BodyJoint) -> JointPoint? {
-            frame.joints[joint].flatMap { $0.confidence >= EvidenceRubric.minimumJointConfidence ? $0 : nil }
+            guard frame.athleteVisible else { return nil }
+            return frame.joints[joint].flatMap { $0.confidence >= EvidenceRubric.minimumJointConfidence ? $0 : nil }
         }
         struct Reading { let value: Double?; let nose: Double?; let confidence: Double }
         let readings = frames.map { frame -> Reading in
@@ -537,26 +534,8 @@ nonisolated enum ExerciseAnalyzer {
             reading.value.flatMap { value in reading.nose.map { value - $0 } }
         }
         let noseOffset = offsets.isEmpty ? nil : median(offsets)
-        var heights: [Double?] = readings.map { reading in
+        let heights: [Double?] = readings.map { reading in
             reading.value ?? noseOffset.flatMap { offset in reading.nose.map { $0 + offset } }
-        }
-        let known = heights.indices.filter { heights[$0] != nil }
-        let seen = heights.compactMap { $0 }
-        let top = seen.isEmpty ? 0 : percentile(seen, 0.1)
-        let reach = seen.isEmpty ? 0 : percentile(seen, 0.9) - top
-        for (before, after) in zip(known, known.dropFirst()) where after > before + 1 {
-            let span = frames[after].time - frames[before].time
-            guard span <= EvidenceRubric.maximumTrackingGap,
-                  let start = heights[before], let end = heights[after] else { continue }
-            let hiddenBottom = reach > ExerciseDefinition.pushUpShoulders.minimumBodyScale
-                && min(start, end) - top >= reach * hiddenBottomEntry
-            for index in (before + 1)..<after {
-                let share = (frames[index].time - frames[before].time) / span
-                let line = start + (end - start) * share
-                heights[index] = hiddenBottom
-                    ? line + max(0, top + reach * hiddenBottomDepth - line) * sin(.pi * share)
-                    : line
-            }
         }
         return frames.indices.compactMap { index in
             heights[index].map {
@@ -574,13 +553,7 @@ nonisolated enum ExerciseAnalyzer {
                                                             allowsPartial: true) else {
             return nil
         }
-        let candidates = frames.filter { $0.time >= rep.startTime && $0.time <= rep.endTime }
-            .compactMap { frame in sample(from: frame, as: definition, side: side).map { (frame, $0.value) } }
-        switch definition.signal {
-        case .verticalTravel: return candidates.max { $0.1 < $1.1 }?.0
-        case .jointBend, .verticalRise: return candidates.min { $0.1 < $1.1 }?.0
-        case .shoulderDrop: return candidates.max { $0.1 < $1.1 }?.0
-        }
+        return deepestFrameIndex(of: rep, in: frames, as: definition, side: side).map { frames[$0] }
     }
 
     /// A rep's interval in chronological capture frames. Binary search avoids revisiting the whole
@@ -608,21 +581,39 @@ nonisolated enum ExerciseAnalyzer {
     /// Same signal and tie behaviour as `deepestFrame`, with the already selected athlete side.
     static func deepestFrameIndex(of rep: RepMetric, in frames: [PoseFrame],
                                   as definition: ExerciseDefinition, side: BodySide) -> Int? {
+        let candidates = frameRange(from: rep.startTime, through: rep.endTime, in: frames)
+            .compactMap { index -> (index: Int, sample: Sample)? in
+                sample(from: frames[index], as: definition, side: side).map { (index, $0) }
+            }
         var best: (index: Int, value: Double)?
-        for index in frameRange(from: rep.startTime, through: rep.endTime, in: frames) {
-            guard let value = sample(from: frames[index], as: definition, side: side)?.value else { continue }
+        for position in candidates.indices {
+            let candidate = candidates[position]
+            // Use the same isolated-spike rejection as the counter. One misplaced joint must
+            // not move the form window away from the actual bottom of the rep.
+            let value = filteredValue(previous: position > 0 ? candidates[position - 1].sample : nil,
+                                      current: candidate.sample,
+                                      next: position + 1 < candidates.count ? candidates[position + 1].sample : nil)
             if let previous = best {
                 let better: Bool
                 switch definition.signal {
                 case .verticalTravel, .shoulderDrop: better = value > previous.value
                 case .jointBend, .verticalRise: better = value < previous.value
                 }
-                if better { best = (index, value) }
+                if better { best = (candidate.index, value) }
             } else {
-                best = (index, value)
+                best = (candidate.index, value)
             }
         }
         return best?.index
+    }
+
+    /// Reject an isolated spike without smoothing across a tracking gap or inventing motion.
+    private static func filteredValue(previous: Sample?, current: Sample, next: Sample?) -> Double {
+        guard let previous, let next,
+              current.time - previous.time <= 0.2, next.time - current.time <= 0.2 else {
+            return current.value
+        }
+        return median([previous.value, current.value, next.value])
     }
 
     /// Angle at `vertex` in degrees, with y scaled by the image aspect ratio so it matches x.
@@ -632,7 +623,8 @@ nonisolated enum ExerciseAnalyzer {
         let second = (x: c.x - b.x, y: (c.y - b.y) * aspectRatio)
         let firstLength = hypot(first.x, first.y)
         let secondLength = hypot(second.x, second.y)
-        guard firstLength > 0, secondLength > 0 else { return nil }
+        guard firstLength.isFinite, secondLength.isFinite,
+              firstLength > 0, secondLength > 0 else { return nil }
         let cosine = (first.x * second.x + first.y * second.y) / (firstLength * secondLength)
         return acos(min(1, max(-1, cosine))) * 180 / .pi
     }
@@ -646,6 +638,7 @@ nonisolated enum ExerciseAnalyzer {
 
     private static func sample(from frame: PoseFrame, as definition: ExerciseDefinition,
                                side: BodySide) -> Sample? {
+        guard frame.athleteVisible else { return nil }
         let posture = postureValue(in: frame, exercise: definition.kind, side: side)
         switch definition.signal {
         case .verticalTravel(let jointRole, let referenceRole):

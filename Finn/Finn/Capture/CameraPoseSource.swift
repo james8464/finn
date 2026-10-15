@@ -63,7 +63,7 @@ nonisolated enum CameraSourceState: Equatable {
 
 @MainActor
 final class CameraPoseSource: PoseStreaming {
-    private let authorize: @MainActor () async -> Bool
+    private let authorise: @MainActor () async -> Bool
     private let driver: any CameraCaptureDriving
     private let setDurationLimit: Duration
     private let setDurationLimitSeconds: TimeInterval
@@ -78,9 +78,9 @@ final class CameraPoseSource: PoseStreaming {
     var previewSession: AVCaptureSession { driver.session }
     let previewFeed: PreviewFeed?
 
-    init(authorize: @escaping @MainActor () async -> Bool, driver: any CameraCaptureDriving,
+    init(authorise: @escaping @MainActor () async -> Bool, driver: any CameraCaptureDriving,
          setDurationLimit: Duration = .seconds(120)) {
-        self.authorize = authorize
+        self.authorise = authorise
         self.driver = driver
         self.setDurationLimit = setDurationLimit
         let components = setDurationLimit.components
@@ -97,7 +97,7 @@ final class CameraPoseSource: PoseStreaming {
     }
 
     static func live() -> CameraPoseSource {
-        CameraPoseSource(authorize: {
+        CameraPoseSource(authorise: {
             switch AVCaptureDevice.authorizationStatus(for: .video) {
             case .authorized: return true
             case .notDetermined: return await AVCaptureDevice.requestAccess(for: .video)
@@ -127,7 +127,7 @@ final class CameraPoseSource: PoseStreaming {
         let currentID = UUID()
         runID = currentID
         state = .starting
-        guard await authorize() else {
+        guard await authorise() else {
             if runID == currentID { runID = nil; state = .idle }
             throw CameraSourceError.denied
         }
@@ -165,8 +165,12 @@ final class CameraPoseSource: PoseStreaming {
             guard let self else { return }
             var previewFirstTime: TimeInterval?
             var setFirstTime: TimeInterval?
+            var previousTime: TimeInterval?
             for await frame in backendStream {
                 guard self.runID == currentID else { break }
+                guard frame.time.isFinite, frame.time >= 0 else { continue }
+                if let previousTime, frame.time <= previousTime { continue }
+                previousTime = frame.time
                 let elapsed: TimeInterval
                 if self.isSetActive {
                     if setFirstTime == nil { setFirstTime = frame.time }

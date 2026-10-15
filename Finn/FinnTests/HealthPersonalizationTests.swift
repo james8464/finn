@@ -136,17 +136,17 @@ struct HealthCoachTests {
 struct HealthSessionTests {
     @Test func theOfferShowsOnceAfterTheFirstMeasuredSetAndLaterKeepsHealthUntouched() async throws {
         let setup = try HealthSetup()
-        #expect(!setup.model.showsPersonalizationOffer)
+        #expect(!setup.model.showsPersonalisationOffer)
         await setup.measureASet()
-        #expect(setup.model.showsPersonalizationOffer)
-        await setup.model.answerPersonalizationOffer(personalize: false)
-        #expect(!setup.model.showsPersonalizationOffer)
-        #expect(!setup.model.personalizesWithHealth)
+        #expect(setup.model.showsPersonalisationOffer)
+        await setup.model.answerPersonalisationOffer(personalise: false)
+        #expect(!setup.model.showsPersonalisationOffer)
+        #expect(!setup.model.personalisesWithHealth)
         #expect(setup.health.requests == 0)
         #expect(setup.health.reads == 0)
 
         await setup.measureASet()
-        #expect(!setup.model.showsPersonalizationOffer)
+        #expect(!setup.model.showsPersonalisationOffer)
         #expect(setup.model.resultHealthNotes.isEmpty)
     }
 
@@ -157,8 +157,8 @@ struct HealthSessionTests {
         setup.health.snapshotToReturn.weight = 70
         setup.health.snapshotToReturn.sleepLastNight = 5 * 3600
         await setup.measureASet()
-        await setup.model.answerPersonalizationOffer(personalize: true)
-        #expect(setup.model.personalizesWithHealth)
+        await setup.model.answerPersonalisationOffer(personalise: true)
+        #expect(setup.model.personalisesWithHealth)
         #expect(setup.health.requests == 1)
         #expect(setup.model.readinessNote?.basis == "From your sleep in Health.")
 
@@ -177,7 +177,7 @@ struct HealthSessionTests {
         #expect(texts.contains("Each squat moved about 60 kg, roughly 85% of your weight."))
 
 // turned off in Options: nothing personal is shown and no heart rate is kept.
-        await setup.model.setPersonalizesWithHealth(false)
+        await setup.model.setPersonalisesWithHealth(false)
         #expect(setup.model.resultHealthNotes.isEmpty)
         #expect(setup.model.readinessNote == nil)
     }
@@ -185,8 +185,8 @@ struct HealthSessionTests {
     @Test func demoInputNeverOffersOrReadsHealth() async throws {
         let setup = try HealthSetup(withHealth: false)
         await setup.measureASet()
-        #expect(!setup.model.offersHealthPersonalization)
-        #expect(!setup.model.showsPersonalizationOffer)
+        #expect(!setup.model.offersHealthPersonalisation)
+        #expect(!setup.model.showsPersonalisationOffer)
     }
 }
 
@@ -202,7 +202,7 @@ private final class HealthSetup {
         let clock = clock
         model = WorkoutSessionModel(source: source, preferences: FinnPreferences(defaults: defaults),
                                     health: withHealth ? health : nil, currentDate: { clock.date })
-        model.recognizesExercise = false
+        model.recognisesExercise = false
     }
 
     func measureASet() async {

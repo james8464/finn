@@ -184,9 +184,9 @@ struct BadgeDetailView: View {
                 if let earned {
                     WrappingText(text: earned.detail, alignment: .center)
                     WrappingText(text: earned.earnedAt.formatted(.dateTime.day().month(.wide).year().hour().minute()),
-                                 style: .footnote, color: .secondaryLabel, alignment: .center)
+                                 style: .footnote, colour: .secondaryLabel, alignment: .center)
                 } else {
-                    WrappingText(text: kind.rule, color: .secondaryLabel, alignment: .center)
+                    WrappingText(text: kind.rule, colour: .secondaryLabel, alignment: .center)
                 }
             }
             .padding(.horizontal, 32)

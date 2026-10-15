@@ -4,13 +4,13 @@ import Foundation
 /// one-time offer after a first set. `HealthCoach` holds the rules.
 extension WorkoutSessionModel {
     /// Health can be read on this device, for live camera sessions only.
-    var offersHealthPersonalization: Bool { health?.isAvailable ?? false }
+    var offersHealthPersonalisation: Bool { health?.isAvailable ?? false }
 
     /// turns personalisation on or off from Options or the offer. Turning it on shows Health's sheet
     /// for the types not answered yet, then reads them.
-    func setPersonalizesWithHealth(_ isOn: Bool) async {
-        personalizesWithHealth = isOn
-        preferences.personalizationOffered = true
+    func setPersonalisesWithHealth(_ isOn: Bool) async {
+        personalisesWithHealth = isOn
+        preferences.personalisationOffered = true
         guard isOn else {
             healthSnapshot = nil
             return
@@ -21,32 +21,32 @@ extension WorkoutSessionModel {
 
     /// Reads Health again, when the option is on. Called when the setup screen shows.
     func refreshHealth() async {
-        guard personalizesWithHealth, let health, health.isAvailable else { return }
+        guard personalisesWithHealth, let health, health.isAvailable else { return }
         let snapshot = await health.snapshot(now: currentDate())
 // the person may have turned the option off while Health was read.
-        guard personalizesWithHealth else { return }
+        guard personalisesWithHealth else { return }
         healthSnapshot = snapshot
     }
 
     /// The answer to "Make Finn more personal?". Asked once, whatever the answer.
-    func answerPersonalizationOffer(personalize: Bool) async {
-        showsPersonalizationOffer = false
-        preferences.personalizationOffered = true
-        if personalize { await setPersonalizesWithHealth(true) }
+    func answerPersonalisationOffer(personalise: Bool) async {
+        showsPersonalisationOffer = false
+        preferences.personalisationOffered = true
+        if personalise { await setPersonalisesWithHealth(true) }
     }
 
     /// after the first measured live set, offer personalisation once.
-    func offerPersonalizationIfDue() {
-        guard offersHealthPersonalization, !personalizesWithHealth,
-              !preferences.personalizationOffered else { return }
+    func offerPersonalisationIfDue() {
+        guard offersHealthPersonalisation, !personalisesWithHealth,
+              !preferences.personalisationOffered else { return }
 // counted as asked as soon as it shows: closing it with a swipe means "Later".
-        preferences.personalizationOffered = true
-        showsPersonalizationOffer = true
+        preferences.personalisationOffered = true
+        showsPersonalisationOffer = true
     }
 
     /// A heart rate from the Apple Watch. Kept for the set while it runs; shown during the rest after.
     func receiveHeartRate(_ beatsPerMinute: Double, at date: Date) {
-        guard personalizesWithHealth, beatsPerMinute.isFinite, beatsPerMinute > 25, beatsPerMinute < 250 else { return }
+        guard personalisesWithHealth, beatsPerMinute.isFinite, beatsPerMinute > 25, beatsPerMinute < 250 else { return }
         if let liveHeartRateAt, date < liveHeartRateAt { return }
         liveHeartRate = Int(beatsPerMinute.rounded())
         liveHeartRateAt = date
@@ -61,13 +61,13 @@ extension WorkoutSessionModel {
 
     /// Before a set: a lighter session after a short night, a heavy day or a sign of low recovery.
     var readinessNote: HealthNote? {
-        guard personalizesWithHealth, let healthSnapshot else { return nil }
+        guard personalisesWithHealth, let healthSnapshot else { return nil }
         return HealthCoach.readiness(healthSnapshot)
     }
 
     /// After a measured set: heart rate, rest, load and depth, each with the data it rests on.
     var resultHealthNotes: [HealthNote] {
-        guard personalizesWithHealth, case .measured(let analysis, _) = result else { return [] }
+        guard personalisesWithHealth, case .measured(let analysis, _) = result else { return [] }
         let snapshot = healthSnapshot
         var notes: [HealthNote] = []
         if let setHeartRate { notes.append(HealthCoach.heartRateLine(setHeartRate, age: snapshot?.age)) }

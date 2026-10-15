@@ -12,7 +12,7 @@ nonisolated struct EvidenceAndCueTests {
                       joints: frame.joints.filter { $0.key != .leftKnee && $0.key != .rightKnee })
         }
         #expect(EvidenceGate.assess(frames) == .reject(.missingJoints))
-        guard case .insufficientView = SquatAnalyzer.analyze(frames) else {
+        guard case .insufficientView = SquatAnalyzer.analyse(frames) else {
             Issue.record("The analyzer must not count an unverified view")
             return
         }
@@ -44,7 +44,7 @@ nonisolated struct EvidenceAndCueTests {
                 : frame
         }
         #expect(EvidenceGate.assess(frames) == .reject(.multiplePeople))
-        #expect(SquatAnalyzer.analyze(frames) == .insufficientView(
+        #expect(SquatAnalyzer.analyse(frames) == .insufficientView(
             "Another person was in view. Keep only yourself in frame and try again."
         ))
     }
@@ -74,7 +74,7 @@ nonisolated struct EvidenceAndCueTests {
                 : frame
         }
         #expect(EvidenceGate.assess(frames).isRejected)
-        guard case .insufficientView = SquatAnalyzer.analyze(frames) else {
+        guard case .insufficientView = SquatAnalyzer.analyse(frames) else {
             Issue.record("A tracking gap must not produce a measured set")
             return
         }
@@ -139,7 +139,7 @@ nonisolated struct EvidenceAndCueTests {
         SetAnalysis(
             reps: ranges.enumerated().map { index, range in
                 RepMetric(number: index + 1, startTime: Double(index) * 2,
-                          endTime: Double(index + 1) * 2, normalizedHipTravel: range)
+                          endTime: Double(index + 1) * 2, normalisedHipTravel: range)
             },
             confidence: 0.95,
             rubricVersion: SquatRubric.version

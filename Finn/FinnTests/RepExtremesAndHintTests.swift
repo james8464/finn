@@ -17,7 +17,7 @@ struct RepExtremesAndHintTests {
 
     @Test func deepestAndShallowestRepsAreDrawnFromTheirLowestFrame() throws {
         let frames = varyingSquat()
-        guard case .analyzed(let analysis) = SquatAnalyzer.analyze(frames) else {
+        guard case .analyzed(let analysis) = SquatAnalyzer.analyse(frames) else {
             Issue.record("The set must be measured")
             return
         }

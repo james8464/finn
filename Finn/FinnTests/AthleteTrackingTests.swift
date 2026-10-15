@@ -209,17 +209,17 @@ nonisolated struct TrackedSetEvidenceTests {
     }
 
     @Test func otherPeopleInViewNoLongerRefuseATrackedSet() throws {
-        guard case .analyzed(let analysis) = SquatAnalyzer.analyze(trackedSquat()) else {
+        guard case .analyzed(let analysis) = SquatAnalyzer.analyse(trackedSquat()) else {
             Issue.record("A tracked set with a bystander must be measured")
             return
         }
         #expect(analysis.reps.count == 10)
-        #expect(analysis.rubricVersion == "squat-side-v7")
+        #expect(analysis.rubricVersion == "squat-side-v8")
     }
 
     @Test func someoneWalkingInFrontForTwoSecondsIsBridged() {
 // hidden from 4.5 s to 6.5 s: across the bottom of one rep and the next.
-        guard case .analyzed(let analysis) = SquatAnalyzer.analyze(trackedSquat(hiddenFrom: 4.5, hiddenTo: 6.5)) else {
+        guard case .analyzed(let analysis) = SquatAnalyzer.analyse(trackedSquat(hiddenFrom: 4.5, hiddenTo: 6.5)) else {
             Issue.record("A two-second occlusion must not cancel the set")
             return
         }
@@ -228,7 +228,7 @@ nonisolated struct TrackedSetEvidenceTests {
     }
 
     @Test func aLongOcclusionIsRefusedWithAClearReason() {
-        guard case .insufficientView(let reason) = SquatAnalyzer.analyze(trackedSquat(hiddenFrom: 8, hiddenTo: 12)) else {
+        guard case .insufficientView(let reason) = SquatAnalyzer.analyse(trackedSquat(hiddenFrom: 8, hiddenTo: 12)) else {
             Issue.record("Four seconds without the athlete must be refused")
             return
         }
@@ -244,7 +244,7 @@ nonisolated struct TrackedSetEvidenceTests {
             return PoseFrame(time: frame.time, subjectCount: 2, joints: [:], athleteTracking: .hidden,
                              bystanders: [person(x: 0.9)])
         }
-        guard case .insufficientView(let reason) = SquatAnalyzer.analyze(frames) else {
+        guard case .insufficientView(let reason) = SquatAnalyzer.analyse(frames) else {
             Issue.record("2.8 s without the athlete, with nobody in front of them, must be refused")
             return
         }
@@ -258,7 +258,7 @@ nonisolated struct TrackedSetEvidenceTests {
             return PoseFrame(time: frame.time, subjectCount: 1, joints: [:], athleteTracking: .hidden,
                              bystanders: [person(x: 0.58)])
         }
-        guard case .analyzed = SquatAnalyzer.analyze(frames) else {
+        guard case .analyzed = SquatAnalyzer.analyse(frames) else {
             Issue.record("A two-second occlusion by someone in front must not cancel the set")
             return
         }
@@ -272,7 +272,7 @@ nonisolated struct TrackedSetEvidenceTests {
             joints[.rightAnkle] = nil
             return PoseFrame(time: frame.time, subjectCount: 1, joints: joints, athleteTracking: .tracked)
         }
-        guard case .insufficientView(let reason) = SquatAnalyzer.analyze(frames) else {
+        guard case .insufficientView(let reason) = SquatAnalyzer.analyse(frames) else {
             Issue.record("Two seconds without the ankle must be refused")
             return
         }
@@ -282,7 +282,7 @@ nonisolated struct TrackedSetEvidenceTests {
 
     @Test func losingTheAthleteWithNobodyElseKeepsTheShortLimit() {
         let frames = trackedSquat(hiddenFrom: 8, hiddenTo: 9.2, bystanders: false)
-        guard case .insufficientView(let reason) = SquatAnalyzer.analyze(frames) else {
+        guard case .insufficientView(let reason) = SquatAnalyzer.analyse(frames) else {
             Issue.record("1.2 s without anyone in view must still be refused")
             return
         }

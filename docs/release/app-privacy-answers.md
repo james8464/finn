@@ -9,7 +9,7 @@ App Store Connect > Finn > App Privacy:
 1. **Privacy Policy URL:** https://james8464.github.io/finn/privacy.html
 2. **Data collection:** choose **No, we do not collect data from this app**, then **Publish**.
 
-Export compliance, asked when you attach the build: the project declares `ITSAppUsesNonExemptEncryption = NO` for the app, watch and widget targets. Verify the exact signed archive and answer App Store Connect's export question from that build. Finn does not add its own encryption; the Apple Foundation Models framework may use iOS networking for Private Cloud Compute.
+Export compliance, asked when you attach the build: the project declares `ITSAppUsesNonExemptEncryption = NO` for the app, watch and widget targets. Verify the exact signed archive and answer App Store Connect's export question from that build. Finn does not add its own encryption. The backend reliability update uses the on-device Coach model and does not request Private Cloud Compute.
 
 Why the label stays Data Not Collected, feature by feature:
 
@@ -21,13 +21,15 @@ Why the label stays Data Not Collected, feature by feature:
 | Spoken reps | No microphone, no recording | nothing to declare |
 | Apple Watch mirror | iPhone to paired watch over Apple's Watch Connectivity, nothing to a server | not collected |
 | Reword comparison | On-device Foundation Models only | not collected |
-| Coach (now in `main`) | The question, saved set summaries (exercise, reps, date, observation), and selected training goal and experience level go to Apple's Private Cloud Compute through the Foundation Models framework when the device supports Apple Intelligence; Apple states the requests are not stored and are used only for the request; the developer never receives them | not collected under Apple's definition (data transmitted off device is "collected" only when the developer or a partner can access it beyond servicing the request; and "you are not responsible for disclosing data collected by Apple", [App privacy details](https://developer.apple.com/app-store/app-privacy-details/)). Disclosed anyway in the privacy policy, section "Coach", and in the review notes |
+| Coach (backend reliability update) | No; the on-device Foundation Models model selects saved sets, with a local fallback on failure or timeout | not collected; no Coach request goes to a server in this build |
 
 The privacy manifest (`Finn/Finn/PrivacyInfo.xcprivacy`) matches: no tracking, no tracking domains, no collected data types, and required-reason declarations for UserDefaults (CA92.1) and system boot time (35F9.1). The coach adds no required-reason API.
 
 ### Coach: what the team must do before the server model can select sets
 
-The Private Cloud Compute model is not open to every app. On 15 October Apple's page [Accessing Private Cloud Compute](https://developer.apple.com/private-cloud-compute) lists three conditions: the developer is enrolled in the App Store Small Business Program, has fewer than 2 million first-time downloads across its apps, and has the Private Cloud Compute entitlement assigned to the account, requested through the form that page links to ([developer forum answer](https://developer.apple.com/forums/thread/829539)). Installs through TestFlight or ad hoc do not count. Until the entitlement is granted to team 2FN6Y5NHS5, the server model reports itself unavailable and the coach falls back to on-device set selection, then to a fixed summary, which is what the code does. The build can be submitted without it. Apple's page says nothing about an extra App Store Connect declaration; the WWDC26 session [319](https://developer.apple.com/videos/play/wwdc2026/319/) says Private Cloud Compute "is designed with end-to-end privacy in mind, ensuring that user data is never stored", that requests "are counted with your user's iCloud account" and that "each user gets a daily limit". The Claude engine in the repository is compiled in Debug only and is absent from the Release binary (checked with `strings` on the archive); a Release build that included it would need a third-party-partner row in this table and a new privacy policy.
+The backend reliability update deliberately excludes Private Cloud Compute from normal engine selection. The app lacks Apple's managed entitlement; device-level model availability is not evidence that this app may use it. See [Apple's entitlement documentation](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.private-cloud-compute) and [server-side integration guidance](https://developer.apple.com/documentation/foundationmodels/adding-server-side-intelligence-with-private-cloud-compute). Enabling it later requires entitlement approval, a correctly signed build, physical-device verification and another review of these data-flow statements. It is not required for the on-device Coach.
+
+The explicit Claude demo option remains Debug-only. It is outside the release policy and sends requests to Anthropic only when configured with a key. Check its absence in the final Release archive before publishing these answers.
 
 ## Source audit of 13 October (still valid for the archive of 15 October)
 

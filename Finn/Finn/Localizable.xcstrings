@@ -6829,30 +6829,30 @@
         }
       }
     },
-    "Chest dropping forward at the bottom" : {
+    "Chest dropping forward" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poitrine qui plonge en bas du mouvement"
+            "value" : "Poitrine qui plonge vers l’avant"
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chest dropping forward at the bottom"
+            "value" : "Chest dropping forward"
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chest dropping forward at the bottom"
+            "value" : "Chest dropping forward"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pecho que cae hacia adelante en la parte inferior"
+            "value" : "Pecho que cae hacia adelante"
           }
         }
       }
@@ -15058,36 +15058,36 @@
         }
       }
     },
-    "Finn couldn’t check your %@: your %@ wasn’t clear enough at the bottom of the reps." : {
+    "Finn couldn’t check your %@: your %@ wasn’t clear enough during the reps." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Finn couldn’t check your %1$@: your %2$@ wasn’t clear enough at the bottom of the reps."
+            "value" : "Finn couldn’t check your %1$@: your %2$@ wasn’t clear enough during the reps."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finn n’a pas pu contrôler %1$@ : articulation pas assez nette en bas des répétitions (%2$@)."
+            "value" : "Finn n’a pas pu contrôler %1$@ : articulation pas assez nette pendant les répétitions (%2$@)."
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finn couldn’t check your %1$@: your %2$@ wasn’t clear enough at the bottom of the reps."
+            "value" : "Finn couldn’t check your %1$@: your %2$@ wasn’t clear enough during the reps."
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finn couldn’t check your %1$@: your %2$@ wasn’t clear enough at the bottom of the reps."
+            "value" : "Finn couldn’t check your %1$@: your %2$@ wasn’t clear enough during the reps."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finn no pudo comprobar tu %1$@: tu %2$@ no estaba lo suficientemente clara en la parte inferior de las repeticiones."
+            "value" : "Finn no pudo comprobar tu %1$@: tu %2$@ no estaba lo suficientemente clara durante las repeticiones."
           }
         }
       }
@@ -22398,36 +22398,36 @@
         }
       }
     },
-    "Your chest dropped forward at the bottom %@: your torso leaned about %lld° more than your shins." : {
+    "Your chest dropped forward %@: your torso leaned about %lld° more than your shins." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Your chest dropped forward at the bottom %1$@: your torso leaned about %2$lld° more than your shins."
+            "value" : "Your chest dropped forward %1$@: your torso leaned about %2$lld° more than your shins."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ta poitrine a plongé en bas du mouvement %1$@ : ton buste était penché d’environ %2$lld° de plus que tes tibias."
+            "value" : "Ta poitrine a plongé %1$@ : ton buste était penché d’environ %2$lld° de plus que tes tibias."
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your chest dropped forward at the bottom %1$@: your torso leaned about %2$lld° more than your shins."
+            "value" : "Your chest dropped forward %1$@: your torso leaned about %2$lld° more than your shins."
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your chest dropped forward at the bottom %1$@: your torso leaned about %2$lld° more than your shins."
+            "value" : "Your chest dropped forward %1$@: your torso leaned about %2$lld° more than your shins."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu pecho cayó hacia adelante en la parte inferior del movimiento %1$@: tu torso estaba inclinado unos %2$lld° más que tus espinillas."
+            "value" : "Tu pecho cayó hacia adelante %1$@: tu torso estaba inclinado unos %2$lld° más que tus espinillas."
           }
         }
       }
@@ -22688,70 +22688,70 @@
         }
       }
     },
-    "Your hips rose above the line from your shoulders to your ankles %@, by about %lld%% of your torso length." : {
+    "Your hips rose above your body line %@, by about %lld%% of your torso length." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Your hips rose above the line from your shoulders to your ankles %1$@, by about %2$lld%% of your torso length."
+            "value" : "Your hips rose above your body line %1$@, by about %2$lld%% of your torso length."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tes hanches sont montées au-dessus de la ligne épaules-chevilles %1$@, d’environ %2$lld %% de la longueur de ton buste."
+            "value" : "Tes hanches sont montées au-dessus de la ligne de ton corps %1$@, d’environ %2$lld %% de la longueur de ton buste."
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your hips rose above the line from your shoulders to your ankles %1$@, by about %2$lld%% of your torso length."
+            "value" : "Your hips rose above your body line %1$@, by about %2$lld%% of your torso length."
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your hips rose above the line from your shoulders to your ankles %1$@, by about %2$lld%% of your torso length."
+            "value" : "Your hips rose above your body line %1$@, by about %2$lld%% of your torso length."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu cadera subió por encima de la línea desde tus hombros hasta tus tobillos %1$@, aproximadamente %2$lld%% de la longitud de tu torso."
+            "value" : "Tu cadera subió por encima de la línea de tu cuerpo %1$@, aproximadamente %2$lld%% de la longitud de tu torso."
           }
         }
       }
     },
-    "Your hips sagged below the line from your shoulders to your ankles %@, by about %lld%% of your torso length." : {
+    "Your hips sagged below your body line %@, by about %lld%% of your torso length." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Your hips sagged below the line from your shoulders to your ankles %1$@, by about %2$lld%% of your torso length."
+            "value" : "Your hips sagged below your body line %1$@, by about %2$lld%% of your torso length."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tes hanches sont passées sous la ligne épaules-chevilles %1$@, d’environ %2$lld %% de la longueur de ton buste."
+            "value" : "Tes hanches sont passées sous la ligne de ton corps %1$@, d’environ %2$lld %% de la longueur de ton buste."
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your hips sagged below the line from your shoulders to your ankles %1$@, by about %2$lld%% of your torso length."
+            "value" : "Your hips sagged below your body line %1$@, by about %2$lld%% of your torso length."
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your hips sagged below the line from your shoulders to your ankles %1$@, by about %2$lld%% of your torso length."
+            "value" : "Your hips sagged below your body line %1$@, by about %2$lld%% of your torso length."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu cadera bajó por debajo de la línea desde tus hombros hasta tus tobillos %1$@, aproximadamente %2$lld%% de la longitud de tu torso."
+            "value" : "Tu cadera bajó por debajo de la línea de tu cuerpo %1$@, aproximadamente %2$lld%% de la longitud de tu torso."
           }
         }
       }
@@ -22779,7 +22779,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu cadera quedó más baja respecto a la línea desde tus hombros hasta tus tobillos en las dos últimas repeticiones."
+            "value" : "Tu cadera quedó más baja respecto a la línea de tu cuerpo en las dos últimas repeticiones."
           }
         }
       }
@@ -22930,36 +22930,36 @@
         }
       }
     },
-    "Your knees bent about %lld° at the bottom of the hinge %@, more like a squat than a stiff-leg deadlift." : {
+    "Your knees bent about %lld° during the hinge %@, more like a squat than a stiff-leg deadlift." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Your knees bent about %1$lld° at the bottom of the hinge %2$@, more like a squat than a stiff-leg deadlift."
+            "value" : "Your knees bent about %1$lld° during the hinge %2$@, more like a squat than a stiff-leg deadlift."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tes genoux se sont pliés d’environ %1$lld° en bas de la descente %2$@, plus comme un squat qu’un soulevé de terre jambes tendues."
+            "value" : "Tes genoux se sont pliés d’environ %1$lld° pendant le mouvement %2$@, plus comme un squat qu’un soulevé de terre jambes tendues."
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your knees bent about %1$lld° at the bottom of the hinge %2$@, more like a squat than a stiff-leg deadlift."
+            "value" : "Your knees bent about %1$lld° during the hinge %2$@, more like a squat than a stiff-leg deadlift."
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your knees bent about %1$lld° at the bottom of the hinge %2$@, more like a squat than a stiff-leg deadlift."
+            "value" : "Your knees bent about %1$lld° during the hinge %2$@, more like a squat than a stiff-leg deadlift."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus rodillas se flexionaron aproximadamente %1$lld° en la parte inferior de la bisagra %2$@, más parecido a una sentadilla que a un peso muerto con piernas rectas."
+            "value" : "Tus rodillas se flexionaron aproximadamente %1$lld° durante el movimiento de bisagra %2$@, más parecido a una sentadilla que a un peso muerto con piernas rectas."
           }
         }
       }
@@ -23348,36 +23348,36 @@
         }
       }
     },
-    "Your torso leaned about %lld° forward at the bottom %@." : {
+    "Your torso leaned about %lld° forward %@." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Your torso leaned about %1$lld° forward at the bottom %2$@."
+            "value" : "Your torso leaned about %1$lld° forward %2$@."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ton buste était penché d’environ %1$lld° vers l’avant en bas du mouvement %2$@."
+            "value" : "Ton buste était penché d’environ %1$lld° vers l’avant %2$@."
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your torso leaned about %1$lld° forward at the bottom %2$@."
+            "value" : "Your torso leaned about %1$lld° forward %2$@."
           }
         },
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your torso leaned about %1$lld° forward at the bottom %2$@."
+            "value" : "Your torso leaned about %1$lld° forward %2$@."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu torso se inclinó aproximadamente %1$lld° hacia adelante en la parte inferior del movimiento %2$@."
+            "value" : "Tu torso se inclinó aproximadamente %1$lld° hacia adelante %2$@."
           }
         }
       }

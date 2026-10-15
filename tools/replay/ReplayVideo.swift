@@ -27,6 +27,9 @@ enum ReplayVideo {
         var recognized: String?
         /// Start and end of each measured rep, in seconds, to check a count against the video.
         var repTimes: [[Double]] = []
+        /// Readable and flagged rep counts per check; omitted checks are unknown, not correct form.
+        var formMeasurements: [FormMeasurement] = []
+        var formFindings: [String] = []
     }
 
     /// The hands-free path on the same frames: the start readiness, the live count and cues, and
@@ -98,7 +101,7 @@ enum ReplayVideo {
             try encoder.encode(poses).write(to: output, options: .atomic)
         }
         let definition = ExerciseDefinition.definition(for: kind)
-        let (result, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(poses, as: definition)
+        let (result, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(poses, as: definition)
         let live = followLive(poses, definition: definition)
         let report: Report
         switch result {
@@ -136,8 +139,12 @@ enum ReplayVideo {
         finalReport.liveMaxReps = live.maxReps
         if case .analyzed(let analysis) = result, finalReport.status == "measured" {
             finalReport.repTimes = analysis.reps.map { [($0.startTime * 10).rounded() / 10, ($0.endTime * 10).rounded() / 10] }
+            let frames = SetWindow.active(poses, requirement: definition.evidence)
+            let review = FormChecks.review(analysis, frames: frames, definition: definition)
+            finalReport.formMeasurements = review.measurements
+            finalReport.formFindings = review.findings.map { $0.check.rawValue }
         }
-        switch AngleRecognizer.recognize(poses, using: AngleRuleClassifier()) {
+        switch AngleRecognizer.recognise(poses, using: AngleRuleClassifier()) {
         case .recognized(let kind, _): finalReport.recognized = kind.rawValue
         case .uncertain: finalReport.recognized = "uncertain"
         case .notAttempted: finalReport.recognized = nil
@@ -197,8 +204,8 @@ enum ReplayVideo {
         guard reader.canAdd(output) else { throw Failure.reader }
         reader.add(output)
         guard reader.startReading() else { throw Failure.reader }
-        let analyzer = PoseFrameAnalyzer()
-        analyzer.lockAthlete()
+        let analyser = PoseFrameAnalyzer()
+        analyser.lockAthlete()
         var poses: [PoseFrame] = []
         var lastSampled = -Double.infinity
         while let sample = output.copyNextSampleBuffer() {
@@ -207,7 +214,7 @@ enum ReplayVideo {
                   let raw = CMSampleBufferGetImageBuffer(sample),
                   let image = upright(raw, orientation, context: context, margin: margin) else { continue }
             lastSampled = time
-            poses.append(analyzer.analyze(image, time: time, estimateAngle: true))
+            poses.append(analyser.analyse(image, time: time, estimateAngle: true))
         }
         guard reader.status == .completed else { throw Failure.reader }
         return poses

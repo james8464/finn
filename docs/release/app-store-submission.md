@@ -23,7 +23,7 @@ The bundle ID row reflects the current Xcode project. The older archive needs to
 
 The local iPhone 16 Pro Max (iOS 27.0.1) installed and launched a temporary James-team Debug build of d8f1503 on 15 October. Automated UI testing allowed Camera and opened its live preview, which correctly asked for the missing hip, knee and ankle while the phone faced a ceiling. A newer development-signed build with Coach, widgets, the dashboard and form checks also installed and launched; a repeat camera UI test did not complete because Xcode could not create the test runner's runtime profile folder on the phone. These checks do not validate a real exercise or a FinLearn-signed build.
 
-Still open: a physical-iPhone run of the final FinLearn build with real sets, the Apple Watch on a real watch, the French interface (`claude/fr`) if it ships, the Coach on device, the Private Cloud Compute entitlement for its server model (see the privacy answers), and three real-set screenshots (set in progress, result, home after a set).
+Still open: a physical-iPhone run of the final FinLearn build with real sets, the Apple Watch on a real watch, the French interface (`claude/fr`) if it ships, the on-device Coach and its fallback (Private Cloud Compute is disabled in the reliability update; see the privacy answers), and three real-set screenshots (set in progress, result, home after a set).
 
 ## Earlier state (13 October, kept for the record)
 

@@ -51,7 +51,7 @@ struct ContentView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 64
     /// live advice during a set: a short order that fits on one line and reads from three metres
     @ScaledMetric(relativeTo: .largeTitle) private var liveCueSize: CGFloat = 44
-    private var destructiveLabelColor: Color {
+    private var destructiveLabelColour: Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
                 ? UIColor(red: 1, green: 69 / 255, blue: 58 / 255, alpha: 1)
@@ -140,7 +140,7 @@ struct ContentView: View {
             case "options": route = .options
             case "privacy": route = .privacy
             case "awards": route = .awards
-            case "health": model.showsPersonalizationOffer = true
+            case "health": model.showsPersonalisationOffer = true
             case "camera-primer":
                 selectedTab = .workout
                 showsCameraPrimer = true
@@ -186,16 +186,16 @@ struct ContentView: View {
         // Siri or a shortcut asked for a set or the history; a set in progress is never interrupted
         .onChange(of: SiriLaunchRequests.shared.pending, initial: true) { _, _ in applySiriRequest() }
         .onChange(of: model.stage) { _, _ in applySiriRequest() }
-        // personalize with Health: read again whenever the first screen shows
+        // personalise with Health: read again whenever the first screen shows
         .task(id: model.stage == .ready) {
             if model.stage == .ready { await model.refreshHealth() }
         }
         .sheet(isPresented: Binding(
-            get: { model.showsPersonalizationOffer },
-            set: { if !$0 { model.showsPersonalizationOffer = false } }
+            get: { model.showsPersonalisationOffer },
+            set: { if !$0 { model.showsPersonalisationOffer = false } }
         )) {
-            PersonalizationOfferView { personalize in
-                Task { await model.answerPersonalizationOffer(personalize: personalize) }
+            PersonalizationOfferView { personalise in
+                Task { await model.answerPersonalisationOffer(personalise: personalise) }
             }
             .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         }
@@ -203,7 +203,7 @@ struct ContentView: View {
             OnboardingView(preferences: preferences) { profile in
                 // the answers take effect now, not at the next launch
                 model.speaksLive = profile.speaksLive
-                if let first = profile.favoriteExercises.first { model.selectedExercise = first }
+                if let first = profile.favouriteExercises.first { model.selectedExercise = first }
                 showsOnboarding = false
             }
         }
@@ -512,7 +512,7 @@ struct ContentView: View {
                 .accessibilityIdentifier("setup.exercise")
                 ExerciseHeroCard(kind: model.selectedExercise, compact: !model.history.isEmpty)
                 accessoryNotes
-                // personalize with Health: a line adapted to the person, with the data it rests on
+                // personalise with Health: a line adapted to the person, with the data it rests on
                 if let note = model.readinessNote {
                     HomeCard { healthNote(note) }
                         .accessibilityIdentifier("setup.healthReadiness")
@@ -844,7 +844,7 @@ struct ContentView: View {
                 if model.recognitionMethod != .unavailable {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Optional exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
-                        Text("Unless you turn it off in Options, Finn reads pose points after a set to recognize the exercise from your joint angles. Pose points and video stay on this iPhone.")
+                        Text("Unless you turn it off in Options, Finn reads pose points after a set to recognise the exercise from your joint angles. Pose points and video stay on this iPhone.")
                     }
                     Divider()
                 }
@@ -894,14 +894,14 @@ struct ContentView: View {
                     Text("Exercise recognition").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     if model.recognitionMethod != .unavailable {
                         Toggle("Recognize the exercise automatically", isOn: Binding(
-                            get: { model.recognizesExercise },
-                            set: { model.recognizesExercise = $0 }
+                            get: { model.recognisesExercise },
+                            set: { model.recognisesExercise = $0 }
                         ))
                         .font(.body)
                         .foregroundStyle(Color.primary)
                         .tint(Color(uiColor: .systemGreen))
                         .frame(minHeight: 44)
-                        .accessibilityIdentifier("options.recognizeExercise")
+                        .accessibilityIdentifier("options.recogniseExercise")
                     }
                     switch model.recognitionMethod {
                     case .keypointModel, .angleModel:
@@ -1087,18 +1087,18 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Personalize with Health").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Use my Health data", isOn: Binding(
-                        get: { model.personalizesWithHealth },
+                        get: { model.personalisesWithHealth },
                         // permission in context: Health asks for each type when the person turns this on
-                        set: { isOn in Task { await model.setPersonalizesWithHealth(isOn) } }
+                        set: { isOn in Task { await model.setPersonalisesWithHealth(isOn) } }
                     ))
                     .font(.body)
                     .foregroundStyle(Color.primary)
                     .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
-                    .disabled(!model.offersHealthPersonalization)
+                    .disabled(!model.offersHealthPersonalisation)
                     .accessibilityIdentifier("options.personalizesWithHealth")
                     Text("Tailors rest and recovery advice. Data stays on this iPhone.")
-                    if !model.offersHealthPersonalization {
+                    if !model.offersHealthPersonalisation {
                         Text("Demo and recorded input never read Health.")
                             .foregroundStyle(FinnStyle.supportingText)
                     }
@@ -1385,7 +1385,7 @@ struct ContentView: View {
                     Image(systemName: "viewfinder")
                     if let joint = model.unclearJoint {
                         // théophile: say which joint is unclear instead of guessing
-                        Text("\(joint.localizedName) not clear: step back or add light")
+                        Text("\(joint.localisedName) not clear: step back or add light")
                     } else {
                         Text(captureCopy.showJoints)
                     }
@@ -1924,7 +1924,7 @@ struct ContentView: View {
                                     .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
-                            .foregroundStyle(destructiveLabelColor)
+                            .foregroundStyle(destructiveLabelColour)
                             .accessibilityLabel("Delete session from \(session.startedAt.formatted(date: .abbreviated, time: .omitted))")
                         }
                     }
@@ -1933,7 +1933,7 @@ struct ContentView: View {
             Section {
                 Button(role: .destructive) { deleteAllRequested = true } label: {
                     Text("Delete all local data")
-                        .foregroundStyle(destructiveLabelColor)
+                        .foregroundStyle(destructiveLabelColour)
                         .frame(minHeight: 44, alignment: .leading)
                 }
             }

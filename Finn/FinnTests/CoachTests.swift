@@ -257,6 +257,69 @@ struct CoachTests {
         #expect(conversation.messages.count == 3)
     }
 
+    @Test func standardBuildNeverSelectsUnentitledCloudCompute() {
+        #expect(CoachEngineSelector.standard().current()?.kind != .privateCloudCompute)
+    }
+
+    @Test func noSavedSetsNeverStartsInference() async {
+        let engine = StubCoachEngine(output: "Set 1")
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let answer = await responder.answer("Hello", context: CoachContext(facts: []), history: [])
+        #expect(answer.engine == .fallback)
+        #expect(engine.calls == 0)
+    }
+
+    @Test func promptSizeStaysBoundedForLongQuestionsAndHistory() {
+        let huge = String(repeating: "more context ", count: 10_000)
+        let turns = (0..<20).map { _ in CoachMessage(role: .person, text: huge) }
+        let prompt = FoundationModelsCoachPrompt.prompt(
+            question: huge, context: CoachContext.make(history: history()), history: turns)
+        #expect(prompt.count <= FoundationModelsCoachPrompt.maximumPromptCharacters)
+        #expect(prompt.contains("Person now asks:"))
+    }
+
+    @Test func negativeContextLimitDoesNotTrap() {
+        #expect(CoachContext.make(history: history(), limit: -1).isEmpty)
+    }
+
+    @Test func refreshingDeletedHistoryDiscardsAnInFlightAnswer() async {
+        let engine = StubCoachEngine(output: "Set 1", delay: .milliseconds(100))
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let conversation = CoachConversation(history: history(), responder: responder)
+        let request = Task { await conversation.send("How was set 1?") }
+        while !conversation.isAnswering { await Task.yield() }
+        conversation.refresh(history: [])
+        await request.value
+        #expect(conversation.messages.count == 2)
+        #expect(!conversation.isAnswering)
+    }
+
+    @Test func leavingCoachCancelsTheTurnWithoutAppendingAnAnswer() async {
+        let engine = StubCoachEngine(output: "Set 1", delay: .seconds(5))
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let conversation = CoachConversation(history: history(), responder: responder)
+        let request = Task { await conversation.send("How was set 1?") }
+        while !conversation.isAnswering { await Task.yield() }
+        request.cancel()
+        await request.value
+        #expect(conversation.messages.count == 2)
+        #expect(!conversation.isAnswering)
+    }
+
+    @Test func aTimedOutUncooperativeModelCannotStartOverlappingInference() async {
+        let engine = SuspendedCoachEngine()
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]),
+                                       timeout: .milliseconds(30), language: .english)
+        let context = CoachContext.make(history: history())
+        let first = await responder.answer("First", context: context, history: [])
+        #expect(first.engine == .fallback)
+        let second = await responder.answer("Second", context: context, history: [])
+        #expect(second.engine == .fallback)
+        #expect(engine.calls == 1)
+        engine.finish()
+        await Task.yield()
+    }
+
     // MARK: Validator and prompt
 
     @Test func answerCheckReadsSetReferencesInBothLanguages() {
@@ -344,5 +407,25 @@ private final class StubCoachEngine: CoachEngine {
         if let delay { try await Task.sleep(for: delay) }
         guard let output else { throw Failure() }
         return output
+    }
+}
+
+/// Simulates a framework operation that ignores task cancellation until it finishes.
+@MainActor
+private final class SuspendedCoachEngine: CoachEngine {
+    let kind = CoachEngineKind.onDevice
+    let available = true
+    private(set) var calls = 0
+    private var continuation: CheckedContinuation<String, Never>?
+
+    func reply(to question: String, context: CoachContext, history: [CoachMessage],
+               language: CoachLanguage) async throws -> String {
+        calls += 1
+        return await withCheckedContinuation { continuation = $0 }
+    }
+
+    func finish() {
+        continuation?.resume(returning: "Set 1")
+        continuation = nil
     }
 }

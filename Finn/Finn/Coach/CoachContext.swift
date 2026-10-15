@@ -80,7 +80,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
                 }
             }
         }
-        let kept = Array(pending.suffix(limit))
+        let kept = Array(pending.suffix(max(0, min(limit, 32))))
         let facts = kept.enumerated().map { offset, item -> CoachSetFact in
             let set = item.set
             let definition = set.exercise.definition
@@ -141,6 +141,14 @@ nonisolated enum CoachLanguage: Equatable, Sendable {
     case english
     case french
     case spanish
+
+    var locale: Locale {
+        switch self {
+        case .english: Locale(identifier: "en-GB")
+        case .french: Locale(identifier: "fr")
+        case .spanish: Locale(identifier: "es")
+        }
+    }
 
     static func current(locale: Locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? Locale.current.identifier)) -> CoachLanguage {
         switch locale.language.languageCode?.identifier {

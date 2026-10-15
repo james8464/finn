@@ -5,6 +5,7 @@ struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var draft = ""
     @State private var showsSource = false
+    @State private var replyTask: Task<Void, Never>?
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var fieldFocused: Bool
@@ -71,8 +72,10 @@ struct CoachView: View {
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.title)
                             .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                             .symbolRenderingMode(.hierarchical)
                     }
+                    .buttonStyle(.plain)
                     .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || conversation.isAnswering)
                     .accessibilityLabel("Send")
                     .accessibilityIdentifier("coach.send")
@@ -120,6 +123,7 @@ struct CoachView: View {
             .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         }
         .onAppear { conversation.refresh(history: history) }
+        .onDisappear { replyTask?.cancel() }
     }
 
     private var engineLine: String {
@@ -180,6 +184,6 @@ struct CoachView: View {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !conversation.isAnswering else { return }
         draft = ""
-        Task { await conversation.send(text) }
+        replyTask = Task { await conversation.send(text) }
     }
 }

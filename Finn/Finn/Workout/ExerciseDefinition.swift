@@ -222,7 +222,7 @@ nonisolated extension ExerciseKind {
 }
 
 nonisolated extension ExerciseDefinition {
-    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v7`).
+    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v8`).
     static let squat = ExerciseDefinition(
         kind: .bodyweightSquat,
         rubricVersion: SquatRubric.version,
@@ -283,7 +283,7 @@ nonisolated extension ExerciseDefinition {
     /// Side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.
     static let pushUp = ExerciseDefinition(
         kind: .pushUp,
-        rubricVersion: "push-up-side-v7",
+        rubricVersion: "push-up-side-v8",
         expectedView: .any,
         evidence: EvidenceRequirement(joints: [.shoulder, .elbow, .wrist], anchor: .wrist),
         signal: .jointBend(from: .shoulder, vertex: .elbow, to: .wrist),
@@ -333,7 +333,7 @@ nonisolated extension ExerciseDefinition {
     /// Tuned on 3 real push-up sets (14 October 2026), a product hypothesis, not a validated standard.
     static let pushUpShoulders = ExerciseDefinition(
         kind: .pushUp,
-        rubricVersion: "push-up-shoulders-v2",
+        rubricVersion: "push-up-shoulders-v3",
         expectedView: .any,
         evidence: EvidenceRequirement(joints: [.shoulder], anchor: .wrist),
         signal: .shoulderDrop,
@@ -357,7 +357,7 @@ nonisolated extension ExerciseDefinition {
     /// hypothesis checked on real squats (15 October 2026), not a validated standard.
     static let squatTrunk = ExerciseDefinition(
         kind: .bodyweightSquat,
-        rubricVersion: "squat-trunk-v1",
+        rubricVersion: "squat-trunk-v2",
         expectedView: .any,
         evidence: EvidenceRequirement(joints: [.hip], anchor: .hip),
         signal: .shoulderDrop,
@@ -383,7 +383,7 @@ nonisolated extension ExerciseDefinition {
     /// camera-facing leg (hip, knee, ankle).
     static let staticLunge = ExerciseDefinition(
         kind: .staticLunge,
-        rubricVersion: "static-lunge-side-v6",
+        rubricVersion: "static-lunge-side-v7",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .hip, vertex: .knee, to: .ankle),
@@ -428,7 +428,7 @@ nonisolated extension ExerciseDefinition {
     /// Side-view stiff-leg deadlift, measured as hip hinge (shoulder, hip, knee). Feet stay planted.
     static let stiffLegDeadlift = ExerciseDefinition(
         kind: .stiffLegDeadlift,
-        rubricVersion: "stiff-leg-deadlift-side-v6",
+        rubricVersion: "stiff-leg-deadlift-side-v7",
         expectedView: .side,
         evidence: EvidenceRequirement(joints: [.shoulder, .hip, .knee, .ankle], anchor: .ankle),
         signal: .jointBend(from: .shoulder, vertex: .hip, to: .knee),
@@ -475,7 +475,7 @@ nonisolated extension ExerciseDefinition {
     /// neutral) cannot be seen in 2D pose, so Finn does not name it.
     static let pullUp = ExerciseDefinition(
         kind: .pullUp,
-        rubricVersion: "pull-up-v1",
+        rubricVersion: "pull-up-v2",
         expectedView: .any,
         evidence: EvidenceRequirement(joints: [.shoulder, .hip], anchor: .wrist),
         signal: .verticalRise(joint: .shoulder, reference: .wrist),
@@ -521,7 +521,7 @@ nonisolated extension ExerciseDefinition {
     /// the hang, which puts the shoulders above the hands. A pull-up, however high, stays below.
     static let muscleUp = ExerciseDefinition(
         kind: .muscleUp,
-        rubricVersion: "muscle-up-v1",
+        rubricVersion: "muscle-up-v2",
         expectedView: .any,
         evidence: EvidenceRequirement(joints: [.shoulder, .hip], anchor: .wrist),
         signal: .verticalRise(joint: .shoulder, reference: .wrist),

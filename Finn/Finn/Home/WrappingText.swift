@@ -6,7 +6,7 @@ struct WrappingText: UIViewRepresentable {
     let text: String
     var style: UIFont.TextStyle = .body
     var weight: UIFont.Weight?
-    var color: UIColor = .label
+    var colour: UIColor = .label
     var alignment: NSTextAlignment = .natural
 
     func makeUIView(context: Context) -> UILabel {
@@ -27,7 +27,7 @@ struct WrappingText: UIViewRepresentable {
             $0.preferredContentSizeCategory = UIContentSizeCategory(context.environment.dynamicTypeSize)
             $0.userInterfaceStyle = context.environment.colorScheme == .dark ? .dark : .light
         }
-        label.textColor = color.resolvedColor(with: traits)
+        label.textColor = colour.resolvedColor(with: traits)
         let font = UIFont.preferredFont(forTextStyle: style, compatibleWith: traits)
         if let weight {
             let descriptor = font.fontDescriptor.addingAttributes([

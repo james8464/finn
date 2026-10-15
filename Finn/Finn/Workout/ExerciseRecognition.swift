@@ -44,7 +44,7 @@ nonisolated enum ExerciseRecognizer {
     static let minimumAgreement = 0.6
     static let maximumWindows = 40
 
-    static func recognize(_ frames: [PoseFrame],
+    static func recognise(_ frames: [PoseFrame],
                           using classifier: any ExerciseClassifying) -> ExerciseRecognition {
         let length = classifier.windowLength
         let poses = resample(frames, rate: classifier.frameRate)

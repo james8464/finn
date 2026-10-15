@@ -46,14 +46,18 @@ final class CoachConversation {
     }
 
     func send(_ text: String) async {
-        let question = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let question = String(text.trimmingCharacters(in: .whitespacesAndNewlines)
+            .prefix(FoundationModelsCoachPrompt.maximumQuestionCharacters))
         guard !question.isEmpty, !isAnswering else { return }
         let earlier = messages
         messages.append(CoachMessage(role: .person, text: question))
         isAnswering = true
         defer { isAnswering = false }
-        let answer = await responder.answer(question, context: context, history: earlier)
+        let askedContext = context
+        let answer = await responder.answer(question, context: askedContext, history: earlier)
+        guard !Task.isCancelled, context == askedContext else { return }
         messages.append(answer)
+        if messages.count > 40 { messages.removeFirst(messages.count - 40) }
     }
 
     /// questions the person can tap, so the demo does not start from a blank field

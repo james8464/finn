@@ -51,6 +51,7 @@ nonisolated enum EvidenceGate {
     static func assess(_ frames: [PoseFrame],
                        requirement: EvidenceRequirement = .squat,
                        allowsPartial: Bool = false) -> EvidenceAssessment {
+        guard PoseFrame.hasIncreasingTimestamps(frames) else { return .reject(.trackingGap) }
         guard let first = frames.first, let last = frames.last,
               last.time - first.time >= EvidenceRubric.minimumSetDuration else {
             return .reject(.tooShort)
@@ -99,11 +100,13 @@ nonisolated enum EvidenceGate {
     /// that advice needs; a rep hidden for most of its frames is left out.
     static func isClear(_ frames: [PoseFrame], requirement: EvidenceRequirement, side: BodySide,
                         from start: TimeInterval, to end: TimeInterval) -> Bool {
-        let span = frames.filter { $0.time >= start && $0.time <= end }
+        let span = frames[ExerciseAnalyzer.frameRange(from: start, through: end, in: frames)]
         guard !span.isEmpty else { return false }
         let joints = requirement.joints(on: side)
         let clear = span.filter { frame in
-            joints.allSatisfy { (frame.joints[$0]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence }
+            frame.athleteVisible && joints.allSatisfy {
+                (frame.joints[$0]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence
+            }
         }.count
         return Double(clear) / Double(span.count) >= EvidenceRubric.partialCoverage
     }
@@ -195,7 +198,9 @@ nonisolated enum EvidenceGate {
             (.right, requirement.joints(on: .right)),
         ]
         return sides.map { side, joints in
-            let complete = frames.filter { frame in joints.allSatisfy { frame.joints[$0] != nil } }
+            let complete = frames.filter { frame in
+                frame.athleteVisible && joints.allSatisfy { frame.joints[$0] != nil }
+            }
             let confident = complete.filter { frame in
                 joints.allSatisfy {
                     (frame.joints[$0]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence

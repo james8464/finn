@@ -9,12 +9,15 @@ nonisolated struct StartReadiness: Equatable {
     static let stillRadius = 0.04
     /// Frames in a row Vision may miss a joint without restarting the hold.
     static let toleratedMisses = 3
+    /// A stalled camera is not evidence that the person held still.
+    static let maximumFrameGap: TimeInterval = 0.35
 
     private var since: TimeInterval?
     private var anchorX = 0.0
     private var anchorY = 0.0
     private var side: BodySide?
     private var misses = 0
+    private var previousFrameTime: TimeInterval?
     /// From 0 when not in position to 1 when the set can start.
     private(set) var progress = 0.0
 
@@ -25,6 +28,15 @@ nonisolated struct StartReadiness: Equatable {
     /// Takes the next framing frame and returns the updated progress.
     @discardableResult
     mutating func update(with frame: PoseFrame, definition: ExerciseDefinition) -> Double {
+        guard frame.time.isFinite, frame.time >= 0 else {
+            reset()
+            return progress
+        }
+        if let previousFrameTime,
+           frame.time <= previousFrameTime || frame.time - previousFrameTime > Self.maximumFrameGap {
+            reset()
+        }
+        previousFrameTime = frame.time
         let requirement = definition.evidence
 // once a side is followed, a frame where it is unclear is a miss, not a switch to the far
         // side, which restarted the hold. Before that, the side seen with more confidence is tried
@@ -181,9 +193,7 @@ nonisolated struct LiveSetMonitor {
     private var lastFasterCue = Int.min / 2
     private var lastShorterCue = Int.min / 2
     /// The latest analysis, its frames and what it noticed, for the form checks.
-    private var latestAnalysis: SetAnalysis?
-    private var latestFrames: [PoseFrame] = []
-    private var latestDiagnostics: MovementDiagnostics?
+    private var latestReview = FormReview()
     /// The rep each form fault was last pointed out on.
     private var lastFormCue: [FormCheck: Int] = [:]
     /// The latest analysis saw the person from the side, with the set's joints clear: the range cue
@@ -202,6 +212,10 @@ nonisolated struct LiveSetMonitor {
     /// analysis runs every `analysisInterval` seconds of frames, not on every frame.
     mutating func update(with frames: [PoseFrame]) -> [LiveSetEvent] {
         guard let last = frames.last, last.time - lastAnalysisTime >= Self.analysisInterval else { return [] }
+        guard PoseFrame.hasIncreasingTimestamps(frames) else {
+            analysisAccepted = false
+            return []
+        }
         lastAnalysisTime = last.time
         var events: [LiveSetEvent] = []
         analysisAccepted = false
@@ -209,17 +223,20 @@ nonisolated struct LiveSetMonitor {
         // the stop; this runs over the whole set so far every 0.4 s.
         let layout = SetWindow.layout(frames, requirement: definition.evidence)
         let set = layout.range.map { Array(frames[$0]) } ?? frames
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(set, as: definition, viewCheck: .ignore,
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(set, as: definition, viewCheck: .ignore,
                                                                              trimsToSet: false)
         if case .analyzed(let analysis) = outcome {
             analysisAccepted = true
             midMovement = diagnostics?.unfinished ?? false
             reps = analysis.reps
-            latestAnalysis = analysis
-            latestFrames = set
-            latestDiagnostics = diagnostics
             rangeAdviceFromSide = diagnostics?.partialVisibility == nil && diagnostics?.countedFromShoulders != true
+                && diagnostics?.countedFromHips != true
                 && Self.seenFromTheSide(set)
+            if reps.count > highestSaid {
+                latestReview = rangeAdviceFromSide
+                    ? FormChecks.review(analysis, frames: set, definition: definition)
+                    : FormReview()
+            }
 // the count is the analysis of the whole set so far, the same the result makes at the
             // end. Measured over a longer set, a movement said as a rep can stop counting (on
             // 15 October, fast push-ups: the top the set is measured from settled lower as the set
@@ -327,12 +344,8 @@ nonisolated extension LiveSetMonitor {
     /// same checks as the result, on the set so far, and silent for a partly visible set, a push-up
     /// counted from the shoulders, or a person filmed at an angle.
     fileprivate func formFault(onRep number: Int) -> FormCheck? {
-        guard let analysis = latestAnalysis, latestDiagnostics?.partialVisibility == nil,
-              latestDiagnostics?.countedFromShoulders != true else { return nil }
-        let analysisSoFar = SetAnalysis(reps: Array(analysis.reps.prefix(number)), confidence: analysis.confidence,
-                                        rubricVersion: analysis.rubricVersion)
-        let review = FormChecks.review(analysisSoFar, frames: latestFrames, definition: definition)
-        return review.findings.first { finding in
+        guard rangeAdviceFromSide else { return nil }
+        return latestReview.findings(through: number, exercise: definition.kind).first { finding in
             finding.reps.contains(number) && number - (lastFormCue[finding.check] ?? Int.min / 2) >= Self.cueSpacing
         }?.check
     }

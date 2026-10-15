@@ -536,7 +536,7 @@ struct WorkoutSessionModelTests {
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         let preferences = FinnPreferences(defaults: defaults)
-        preferences.recognizesExercise = false
+        preferences.recognisesExercise = false
         preferences.checksCameraAngle = true
         let frames = (0...120).map { index -> PoseFrame in
             let phase = Double(index % 20) / 20
@@ -546,7 +546,7 @@ struct WorkoutSessionModelTests {
             return PoseFrame(time: pose.time, subjectCount: 1, joints: pose.joints,
                              profileDeviationDegrees: 45)
         }
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .squat) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .squat) else {
             Issue.record("The angled set should retain measurable reps")
             return
         }
@@ -898,7 +898,7 @@ struct ChosenExerciseTests {
         let source = TestPoseSource()
         let defaults = try #require(UserDefaults(suiteName: "FinnChosen-\(UUID())"))
         let model = WorkoutSessionModel(source: source, preferences: FinnPreferences(defaults: defaults))
-        model.recognizesExercise = false
+        model.recognisesExercise = false
         #expect(model.selectedExercise == .bodyweightSquat)
         await model.startPreview()
         await model.beginSet(countdown: 0)
@@ -927,7 +927,7 @@ struct ChosenExerciseTests {
         let source = TestPoseSource()
         let defaults = try #require(UserDefaults(suiteName: "FinnChosen-\(UUID())"))
         let model = WorkoutSessionModel(source: source, preferences: FinnPreferences(defaults: defaults))
-        model.recognizesExercise = false
+        model.recognisesExercise = false
         await model.startPreview()
         await model.beginSet(countdown: 0)
         for frame in CaptureTraces.squats(reps: 6, from: 0) {
@@ -952,7 +952,7 @@ struct ChosenExerciseTests {
             let source = TestPoseSource()
             let defaults = try #require(UserDefaults(suiteName: "FinnFront-\(UUID())"))
             let model = WorkoutSessionModel(source: source, preferences: FinnPreferences(defaults: defaults))
-            model.recognizesExercise = false
+            model.recognisesExercise = false
             model.selectedExercise = .pushUp
             await model.startPreview()
             await model.beginSet(countdown: 0)

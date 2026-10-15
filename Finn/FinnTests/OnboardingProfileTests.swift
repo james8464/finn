@@ -27,7 +27,7 @@ struct OnboardingProfileTests {
     @Test func freshInstallHasNoAnswersAndShowsTheWelcome() {
         let prefs = preferences()
         #expect(!prefs.onboardingCompleted)
-        #expect(prefs.onboardingProfile == OnboardingProfile(goal: nil, level: nil, favoriteExercises: [], speaksLive: true))
+        #expect(prefs.onboardingProfile == OnboardingProfile(goal: nil, level: nil, favouriteExercises: [], speaksLive: true))
         #expect(prefs.exerciseOrder == ExerciseKind.allCases)
         #expect(prefs.onboardingProfile.coachNote == nil)
     }
@@ -35,12 +35,12 @@ struct OnboardingProfileTests {
     @Test func applyingTheAnswersWritesEveryPreference() {
         let prefs = preferences()
         let profile = OnboardingProfile(goal: .strength, level: .experienced,
-                                        favoriteExercises: [.pullUp, .pushUp], speaksLive: false)
+                                        favouriteExercises: [.pullUp, .pushUp], speaksLive: false)
         prefs.apply(profile)
         #expect(prefs.onboardingCompleted)
         #expect(prefs.trainingGoal == .strength)
         #expect(prefs.trainingLevel == .experienced)
-        #expect(prefs.favoriteExercises == [.pullUp, .pushUp])
+        #expect(prefs.favouriteExercises == [.pullUp, .pushUp])
         #expect(prefs.speaksLive == false)
         // The first favourite is the exercise ready on the first screen.
         #expect(prefs.selectedExercise == .pullUp)
@@ -49,7 +49,7 @@ struct OnboardingProfileTests {
 
     @Test func favoritesComeFirstThenTheOthersInTheirUsualOrder() {
         let prefs = preferences()
-        prefs.apply(OnboardingProfile(goal: nil, level: nil, favoriteExercises: [.muscleUp, .staticLunge], speaksLive: true))
+        prefs.apply(OnboardingProfile(goal: nil, level: nil, favouriteExercises: [.muscleUp, .staticLunge], speaksLive: true))
         #expect(prefs.exerciseOrder == [.muscleUp, .staticLunge, .bodyweightSquat, .pushUp, .stiffLegDeadlift, .pullUp])
         #expect(prefs.exerciseOrder.count == ExerciseKind.allCases.count)
     }
@@ -60,15 +60,15 @@ struct OnboardingProfileTests {
         prefs.apply(OnboardingProfile())
         #expect(prefs.onboardingCompleted)
         #expect(prefs.trainingGoal == nil)
-        #expect(prefs.favoriteExercises.isEmpty)
+        #expect(prefs.favouriteExercises.isEmpty)
         #expect(prefs.selectedExercise == .stiffLegDeadlift)
         #expect(prefs.speaksLive)
     }
 
     @Test func unknownStoredExercisesAreDropped() {
         let prefs = preferences()
-        prefs.defaults.set(["bodyweightSquat", "handstand"], forKey: FinnPreferences.favoriteExercisesKey)
-        #expect(prefs.favoriteExercises == [.bodyweightSquat])
+        prefs.defaults.set(["bodyweightSquat", "handstand"], forKey: FinnPreferences.favouriteExercisesKey)
+        #expect(prefs.favouriteExercises == [.bodyweightSquat])
     }
 
     @Test func coachNoteFollowsLevelAndGoal() {
@@ -83,8 +83,8 @@ struct OnboardingProfileTests {
     @Test func deletingLocalDataForgetsOnboardingAndHealthChoices() {
         let prefs = preferences()
         prefs.apply(OnboardingProfile(goal: .comeback, level: .regular,
-                                      favoriteExercises: [.pushUp], speaksLive: false))
-        prefs.personalizesWithHealth = true
+                                      favouriteExercises: [.pushUp], speaksLive: false))
+        prefs.personalisesWithHealth = true
         prefs.savesToFitness = true
         prefs.hapticFeedback = .regular
         prefs.soundFeedback = .bright
@@ -92,10 +92,10 @@ struct OnboardingProfileTests {
         #expect(!prefs.onboardingCompleted)
         #expect(prefs.trainingGoal == nil)
         #expect(prefs.trainingLevel == nil)
-        #expect(prefs.favoriteExercises.isEmpty)
+        #expect(prefs.favouriteExercises.isEmpty)
         #expect(prefs.selectedExercise == nil)
         #expect(prefs.speaksLive)
-        #expect(!prefs.personalizesWithHealth)
+        #expect(!prefs.personalisesWithHealth)
         #expect(!prefs.savesToFitness)
         #expect(prefs.hapticFeedback == .gentle)
         #expect(prefs.soundFeedback == .off)

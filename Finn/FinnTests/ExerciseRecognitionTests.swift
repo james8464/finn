@@ -7,21 +7,21 @@ import Testing
 struct ExerciseRecognizerTests {
     @Test func confidentAgreementNamesTheExercise() {
         let classifier = ScriptedClassifier { _ in ("push_up", 0.95) }
-        #expect(ExerciseRecognizer.recognize(keypointFrames(seconds: 6), using: classifier)
+        #expect(ExerciseRecognizer.recognise(keypointFrames(seconds: 6), using: classifier)
                 == .recognized(.pushUp, agreement: 1))
     }
 
     @Test func lowConfidenceWindowsDoNotVote() {
 // five windows; only two are confident, below the 60% agreement needed.
         let classifier = ScriptedClassifier { index in index.isMultiple(of: 3) ? ("squat", 0.9) : ("squat", 0.5) }
-        #expect(ExerciseRecognizer.recognize(keypointFrames(seconds: 6), using: classifier) == .uncertain)
+        #expect(ExerciseRecognizer.recognise(keypointFrames(seconds: 6), using: classifier) == .uncertain)
         #expect(classifier.calls == 5)
     }
 
     @Test func otherAndNoneNeverSelectAnAnalyzer() {
         for label in ["other", "none", "jumping_jack"] {
             let classifier = ScriptedClassifier { _ in (label, 0.99) }
-            #expect(ExerciseRecognizer.recognize(keypointFrames(seconds: 6), using: classifier) == .uncertain)
+            #expect(ExerciseRecognizer.recognise(keypointFrames(seconds: 6), using: classifier) == .uncertain)
         }
     }
 
@@ -29,20 +29,20 @@ struct ExerciseRecognizerTests {
         let classifier = ScriptedClassifier { index in
             index < 2 ? ("squat", 0.9) : index < 4 ? ("push_up", 0.9) : ("squat", 0.3)
         }
-        #expect(ExerciseRecognizer.recognize(keypointFrames(seconds: 6), using: classifier) == .uncertain)
+        #expect(ExerciseRecognizer.recognise(keypointFrames(seconds: 6), using: classifier) == .uncertain)
     }
 
     @Test func tooShortOrFailingInputIsUncertain() {
         let classifier = ScriptedClassifier { _ in ("squat", 0.99) }
-        #expect(ExerciseRecognizer.recognize(keypointFrames(seconds: 1), using: classifier) == .uncertain)
-        #expect(ExerciseRecognizer.recognize([], using: classifier) == .uncertain)
+        #expect(ExerciseRecognizer.recognise(keypointFrames(seconds: 1), using: classifier) == .uncertain)
+        #expect(ExerciseRecognizer.recognise([], using: classifier) == .uncertain)
         let failing = ScriptedClassifier(fails: true) { _ in ("squat", 0.99) }
-        #expect(ExerciseRecognizer.recognize(keypointFrames(seconds: 6), using: failing) == .uncertain)
+        #expect(ExerciseRecognizer.recognise(keypointFrames(seconds: 6), using: failing) == .uncertain)
     }
 
     @Test func longSetsAreSampledWithBoundedWindows() {
         let classifier = ScriptedClassifier { _ in ("squat", 0.99) }
-        _ = ExerciseRecognizer.recognize(keypointFrames(seconds: 120), using: classifier)
+        _ = ExerciseRecognizer.recognise(keypointFrames(seconds: 120), using: classifier)
         #expect(classifier.calls == ExerciseRecognizer.maximumWindows)
         #expect(classifier.windowSizes.allSatisfy { $0 == classifier.windowLength })
     }
@@ -100,7 +100,7 @@ struct CoreMLExerciseClassifierTests {
         let frames = stride(from: 0.0, through: 5, by: 1.0 / 15).map {
             PoseFrame(time: $0, subjectCount: 1, joints: [:], keypoints: [Float](repeating: 0.4, count: 54))
         }
-        #expect(ExerciseRecognizer.recognize(frames, using: try fixture()) == .recognized(.pushUp, agreement: 1))
+        #expect(ExerciseRecognizer.recognise(frames, using: try fixture()) == .recognized(.pushUp, agreement: 1))
     }
 
     @Test func bundledModelLoadsWhenTheTeamAddsOne() {
@@ -130,7 +130,7 @@ struct RecognitionSessionTests {
             Issue.record("Expected a measured push-up set")
             return
         }
-        #expect(analysis.rubricVersion == "push-up-side-v7")
+        #expect(analysis.rubricVersion == "push-up-side-v8")
         #expect(model.currentSession?.sets.last?.exercise == .pushUp)
     }
 
@@ -166,15 +166,15 @@ struct RecognitionSessionTests {
         let first = WorkoutSessionModel(source: RecognitionPoseSource(),
                                         exerciseClassifier: ScriptedClassifier { _ in ("squat", 0.99) },
                                         preferences: preferences)
-        #expect(first.recognizesExercise)
+        #expect(first.recognisesExercise)
         #expect(!first.usesTrainedModel)
         #expect(first.recognitionMethod == .angleRules)
-        first.recognizesExercise = false
+        first.recognisesExercise = false
         first.usesTrainedModel = true
         #expect(first.recognitionMethod == .keypointModel)
         let second = WorkoutSessionModel(source: RecognitionPoseSource(), exerciseClassifier: nil,
                                          preferences: preferences)
-        #expect(!second.recognizesExercise)
+        #expect(!second.recognisesExercise)
         #expect(second.usesTrainedModel)
         // Without a model in the build, the rules still run.
         #expect(second.recognitionMethod == .angleRules)
@@ -184,7 +184,7 @@ struct RecognitionSessionTests {
                            rules: Bool = true) -> (WorkoutSessionModel, RecognitionPoseSource) {
         let defaults = UserDefaults(suiteName: "FinnRecognition-\(UUID().uuidString)")!
         let preferences = FinnPreferences(defaults: defaults)
-        preferences.recognizesExercise = recognizes
+        preferences.recognisesExercise = recognizes
         preferences.usesTrainedModel = classifier != nil
         let source = RecognitionPoseSource()
         return (WorkoutSessionModel(source: source, exerciseClassifier: classifier, angleClassifier: nil,

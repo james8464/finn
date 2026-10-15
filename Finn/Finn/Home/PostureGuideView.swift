@@ -56,7 +56,7 @@ struct PostureGuideView: View {
                         .font(.subheadline)
                         .accessibilityIdentifier("posture.playback")
                     }
-                    ExerciseFigureView(kind: exercise, lineColor: DashboardStyle.accent,
+                    ExerciseFigureView(kind: exercise, lineColour: DashboardStyle.accent,
                                        animates: playsIllustration)
                         .frame(height: 230)
                         .frame(maxWidth: .infinity)

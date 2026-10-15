@@ -15,7 +15,7 @@ struct PersonalizationOfferView: View {
                     .accessibilityAddTraits(.isHeader)
                 WrappingText(text: String(localized: "Use heart rate, recovery, sleep, workouts, age, weight and height from Health to tailor rest times and suggest lighter days."))
                 WrappingText(text: String(localized: "Data stays on this iPhone. Change access anytime in Options."),
-                             color: .secondaryLabel)
+                             colour: .secondaryLabel)
             }
             .frame(maxWidth: 600, alignment: .leading)
             .padding(24)
@@ -23,7 +23,7 @@ struct PersonalizationOfferView: View {
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: 4) {
                 Button { answer(true) } label: {
-                    WrappingText(text: String(localized: "Continue"), color: .black, alignment: .center)
+                    WrappingText(text: String(localized: "Continue"), colour: .black, alignment: .center)
                         .frame(maxWidth: .infinity, minHeight: 32)
                 }
                 .buttonStyle(.borderedProminent)

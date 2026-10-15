@@ -172,17 +172,17 @@ struct OnboardingView: View {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: 10) {
                 ForEach(ExerciseKind.allCases, id: \.self) { kind in
                     ExerciseTile(kind: kind,
-                                 rank: profile.favoriteExercises.firstIndex(of: kind).map { $0 + 1 }) {
-                        if let index = profile.favoriteExercises.firstIndex(of: kind) {
-                            profile.favoriteExercises.remove(at: index)
+                                 rank: profile.favouriteExercises.firstIndex(of: kind).map { $0 + 1 }) {
+                        if let index = profile.favouriteExercises.firstIndex(of: kind) {
+                            profile.favouriteExercises.remove(at: index)
                         } else {
-                            profile.favoriteExercises.append(kind)
+                            profile.favouriteExercises.append(kind)
                         }
                     }
                     .accessibilityIdentifier("onboarding.exercise.\(kind.rawValue)")
                 }
             }
-            .sensoryFeedback(.selection, trigger: profile.favoriteExercises)
+            .sensoryFeedback(.selection, trigger: profile.favouriteExercises)
         }
     }
 
