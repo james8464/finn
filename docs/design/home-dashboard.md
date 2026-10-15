@@ -2,14 +2,16 @@
 
 James requested Théophile’s original design on 15 October 2026, superseding the monochrome hybrid. Restore the source design from [design/visuals-tabs at c0ffdff](https://github.com/james8464/hackathon-project/tree/c0ffdff).
 
-- Home uses the minimalist charcoal background (James’s subsequent request), lime Try Plumb/demo card, glass Last workout, Posture, Best set, Sessions and Awards cards, and scrolling Home/account header.
-- The glass bar contains Home, Posture, Coach and Workout (+), with the original symbols, spacing, selection capsule and default label size. Stable dark fills and a subtle selection gradient retain the glass outline while keeping label contrast predictable.
+- Home uses the minimalist charcoal background (James’s subsequent request), pink Try Plumb/demo card, glass Last workout, Posture, Best set, Sessions and Awards cards, and scrolling Home/account header.
+- Home widgets have no outline. Use the exact sRGB Figma `brand/pink/selection` (`#FF2D92`), with black text on filled pink. Keep useful labels and measured facts; omit motivational headings and repeated explanatory subtitles.
+
+The glass bar contains Home, Posture, Coach and Workout (+), with the original symbols, spacing, selection capsule and default label size. Stable dark fills and a subtle selection gradient retain the glass outline while keeping label contrast predictable.
 - Posture opens measured set reviews. Workout opens setup, never the camera immediately. The illustrated demo neither records nor saves sample workouts.
 - Preserve newer independent navigation stacks, saved data, localization, keyboard dismissal and camera/privacy behavior.
 - Unavailable posture scores stay blank. Sample values appear only in explicitly labelled previews.
 
 The original design uses dark appearance. At accessibility text sizes the tabs use two rows and Home cards stack. Tab labels retain 11 points at default size but scale with the body curve; caption2 plateaus at smaller settings. Preserve Reduce Motion and Reduce Transparency. Bottom actions must remain above navigation.
 
-Keep work on `ui/apple-native-revamp` with PR 26 draft. Main and teammates’ branches are independent.
+James requested integration into main after verification. Preserve current main functionality while keeping the approved Home / Posture / Coach / Workout destinations.
 
 [Research](../architecture/specs/2026-10-15-native-ui-design.md) · [HIG reference](apple-hig-agent-reference.md) · [Verification](native-ui-verification.md)

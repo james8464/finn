@@ -14,7 +14,7 @@ The Figma guide is the identity reference for the iPhone app: purpose, mark, col
 
 ## Colour
 
-The Home dashboard follows the user-supplied 14 October screen reference: a dark amber photograph, translucent cards, white text and a lime (`#CCF759`) selection accent. This overrides the earlier monochrome guidance below for the dashboard and its tab bar. Existing workout, history and settings components retain their semantic colours. See [implementation notes](../docs/design/home-dashboard.md).
+Home uses a minimalist charcoal background, borderless cards and the exact Figma pink `#FF2D92` in place of lime. The source is [`brand/pink/selection`, node 68:12](https://www.figma.com/design/Y9asB4rM1J0tJcbr7Wim2q?node-id=68-12), verified from the live file on 15 October 2026. Utility controls keep their semantic colours. See [interface rules](../docs/design/home-dashboard.md).
 
 | Token | Hex | Role |
 | --- | --- | --- |
@@ -23,6 +23,7 @@ The Home dashboard follows the user-supplied 14 October screen reference: a dark
 | Supporting | `#474747` | Reference for small supporting text in Light Mode |
 | Grouped | `#F2F2F7` | Reference for optional grouped surfaces in Light Mode |
 | Separator | `#C6C6C8` | Reference for quiet divisions in Light Mode |
+| Pink accent | `#FF2D92` | Home selection and highlights |
 | Icon ink | `#141414` | Custom mark and dark icon ground |
 
 The iPhone interface uses semantic iOS colours (`systemBackground`, primary labels, system separators) and a monochrome adaptive action. Supporting copy uses 72% of the adaptive primary label because the default secondary gray missed a small-text contrast audit in Light Mode. The values above are Figma references, not fixed overrides for system colours. The system resolves Light, Dark, and increased contrast appearances. Reserve colour for meaningful platform states such as a destructive action; never use colour alone to communicate a form judgement. The camera view should leave the person and their movement clearly visible.

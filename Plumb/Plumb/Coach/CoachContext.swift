@@ -17,6 +17,8 @@ nonisolated struct CoachSetFact: Equatable, Identifiable, Sendable {
     /// Comparison with the previous compatible set of the same session, when there was one.
     let comparison: String?
     let partlyVisible: Bool
+    /// The one thing to do next, from the same observation, on its own for the advice answers.
+    var nextAction: String? = nil
 
     var label: String { "Set \(number)" }
 }
@@ -56,10 +58,12 @@ nonisolated struct CoachContext: Equatable, Sendable {
             let set = item.set
             let definition = set.exercise.definition
             var observation: String?
+            var nextAction: String?
             if let cue = set.cue {
                 observation = [cue.observation, cue.nextAction]
                     .filter { !$0.isEmpty }
                     .joined(separator: " ")
+                nextAction = cue.nextAction.isEmpty ? nil : cue.nextAction
             }
             let issues = (set.issues ?? []).map { $0.title(for: definition) }
             return CoachSetFact(number: offset + 1, id: set.id,
@@ -69,17 +73,22 @@ nonisolated struct CoachContext: Equatable, Sendable {
                                 observation: observation,
                                 issues: issues,
                                 comparison: item.comparison,
-                                partlyVisible: set.partlyVisible ?? false)
+                                partlyVisible: set.partlyVisible ?? false,
+                                nextAction: nextAction)
         }
         return CoachContext(facts: facts)
     }
 
+    /// One whole sentence fragment per language, so French never mixes with English words.
     private static func describe(_ comparison: Comparison, exercise: ExerciseKind) -> String {
         let copy = exercise.definition.copy
         switch comparison.rangeDirection {
-        case .longer: return "camera-measured \(copy.rangeNoun) \(copy.moreRange) than the previous set"
-        case .shorter: return "camera-measured \(copy.rangeNoun) \(copy.lessRange) than the previous set"
-        case .noClearChange: return "no clear \(copy.rangeNoun) change against the previous set"
+        case .longer:
+            return String(localized: "camera-measured \(copy.rangeNoun) \(copy.moreRange) than the previous set")
+        case .shorter:
+            return String(localized: "camera-measured \(copy.rangeNoun) \(copy.lessRange) than the previous set")
+        case .noClearChange:
+            return String(localized: "no clear \(copy.rangeNoun) change against the previous set")
         }
     }
 
@@ -142,9 +151,30 @@ nonisolated enum CoachInstructions {
         """
 }
 
-/// Fixed sentences built from the saved observations, used when no language model can run.
-/// It does not pretend to converse: it reports, and says what it cannot do.
+/// Sentences built from the saved observations, used when no language model can run. It reads
+/// the question for its intent (advice for next time, progress, one set, or a recap) and answers
+/// from the recorded facts only; it never invents.
 nonisolated enum CoachFallback {
+    /// What the person is asking for, guessed from a few words. Recap when nothing matches.
+    enum Intent: Equatable {
+        case advice, progress, set(Int), recap
+    }
+
+    static func intent(of question: String) -> Intent {
+        let text = question.lowercased()
+            .folding(options: [.diacriticInsensitive], locale: nil)
+        if let match = text.firstMatch(of: /(?:set|serie)\s*#?\s*(\d+)/), let number = Int(match.output.1) {
+            return .set(number)
+        }
+        let advice = ["next", "should", "keep in mind", "improve", "work on", "focus", "tip", "advice",
+                      "prochain", "faire quoi", "je dois", "attention", "conseil", "ameliorer", "travailler"]
+        if advice.contains(where: text.contains) { return .advice }
+        let progress = ["change", "progress", "better", "worse", "evol", "compar", "over time", "trend",
+                        "chang", "progres", "mieux", "moins bien", "au fil"]
+        if progress.contains(where: text.contains) { return .progress }
+        return .recap
+    }
+
     static func reply(to question: String, context: CoachContext,
                       language: CoachLanguage = .current()) -> String {
         guard let latest = context.latest else {
@@ -153,26 +183,115 @@ nonisolated enum CoachFallback {
             case .french: "Plumb n'a encore aucune série enregistrée, donc rien à commenter. Finis une série et reviens."
             }
         }
-        var lines: [String] = []
-        let preface = switch language {
-        case .english: "Without a language model on this iPhone, I can only repeat what Plumb saved."
-        case .french: "Sans modèle de langage sur cet iPhone, je ne peux que répéter ce que Plumb a enregistré."
+        switch intent(of: question) {
+        case .advice:
+            return advice(context: context, language: language)
+        case .progress:
+            return progress(context: context, language: language)
+        case .set(let number):
+            if let fact = context.facts.first(where: { $0.number == number }) {
+                return summary(of: fact, language: language)
+            }
+            return switch language {
+            case .english: "Plumb has no set \(number) in its last \(context.facts.count) saved sets. " + summary(of: latest, language: language)
+            case .french: "Plumb n'a pas de série \(number) parmi ses \(context.facts.count) dernières séries. " + summary(of: latest, language: language)
+            }
+        case .recap:
+            var lines = [summary(of: latest, language: language)]
+            if context.facts.count > 1 {
+                let earlier = context.facts.dropLast().reversed().prefix(2)
+                for fact in earlier { lines.append(summary(of: fact, language: language)) }
+            }
+            return lines.joined(separator: " ")
         }
-        lines.append(preface)
-        lines.append(summary(of: latest, language: language))
-        if context.facts.count > 1 {
-            let earlier = context.facts.dropLast().reversed().prefix(2)
-            for fact in earlier { lines.append(summary(of: fact, language: language)) }
+    }
+
+    /// For each exercise, the latest recorded next action and the sets that showed it.
+    static func advice(context: CoachContext, language: CoachLanguage) -> String {
+        var lines: [String] = []
+        var seen: Set<String> = []
+        for fact in context.facts.reversed() where !seen.contains(fact.exerciseName) {
+            seen.insert(fact.exerciseName)
+            let same = context.facts.filter { $0.exerciseName == fact.exerciseName }
+            guard let action = same.last(where: { $0.nextAction != nil })?.nextAction else { continue }
+            let numbers = same.filter { $0.nextAction == action }.map(\.number)
+            let name = fact.exerciseName.lowercased()
+            switch language {
+            case .english:
+                lines.append("For your \(name): \(action) That is what Plumb saw on \(setList(numbers, language: language)).")
+            case .french:
+                lines.append("Pour tes \(name) : \(action) C'est ce que Plumb a vu sur \(setList(numbers, language: language)).")
+            }
+        }
+        if lines.isEmpty {
+            let clean = context.facts.filter { $0.nextAction == nil && !$0.partlyVisible && $0.issues.isEmpty }
+            return switch language {
+            case .english:
+                clean.isEmpty
+                    ? "Plumb recorded no next action on your last \(context.facts.count) sets, so there is nothing to work on yet. Keep measuring from the side and I will have more."
+                    : "Nothing to fix: Plumb found no clear pattern on \(setList(clean.map(\.number), language: language)). Keep the same range and tempo."
+            case .french:
+                clean.isEmpty
+                    ? "Plumb n'a noté aucune action sur tes \(context.facts.count) dernières séries, donc rien à travailler pour l'instant. Continue à mesurer de profil et j'en saurai plus."
+                    : "Rien à corriger : Plumb n'a trouvé aucun motif net sur \(setList(clean.map(\.number), language: language)). Garde la même amplitude et le même tempo."
+            }
         }
         return lines.joined(separator: " ")
+    }
+
+    /// Per exercise, reps on the first and the last recorded set, and the last camera comparison.
+    static func progress(context: CoachContext, language: CoachLanguage) -> String {
+        var lines: [String] = []
+        var seen: Set<String> = []
+        for fact in context.facts where !seen.contains(fact.exerciseName) {
+            seen.insert(fact.exerciseName)
+            let same = context.facts.filter { $0.exerciseName == fact.exerciseName }
+            guard let first = same.first, let last = same.last else { continue }
+            var line: String
+            if same.count == 1 {
+                line = switch language {
+                case .english: "\(fact.exerciseName): one set saved, \(first.repCount) reps on \(language.setWord.lowercased()) \(first.number)."
+                case .french: "\(fact.exerciseName) : une seule série enregistrée, \(first.repCount) répétitions sur la série \(first.number)."
+                }
+            } else {
+                line = switch language {
+                case .english: "\(fact.exerciseName): \(first.repCount) reps on set \(first.number), \(last.repCount) on set \(last.number)."
+                case .french: "\(fact.exerciseName) : \(first.repCount) répétitions sur la série \(first.number), \(last.repCount) sur la série \(last.number)."
+                }
+            }
+            if let comparison = same.last(where: { $0.comparison != nil })?.comparison {
+                let tail = switch language {
+                case .english: " Last camera comparison: \(comparison)."
+                case .french: " Dernière comparaison caméra : \(comparison)."
+                }
+                line += tail
+            }
+            lines.append(line)
+        }
+        return lines.joined(separator: " ")
+    }
+
+    /// "set 3", "sets 2 and 3", "sets 6 to 8", or "sets 2, 5 and 8".
+    static func setList(_ numbers: [Int], language: CoachLanguage) -> String {
+        let sorted = Array(Set(numbers)).sorted()
+        let word = language.setWord.lowercased()
+        let plural = language == .english ? "sets" : "séries"
+        let and = language == .english ? "and" : "et"
+        let to = language == .english ? "to" : "à"
+        guard let first = sorted.first, let last = sorted.last else { return "" }
+        if sorted.count == 1 { return "\(word) \(first)" }
+        if sorted.count == 2 { return "\(plural) \(first) \(and) \(last)" }
+        if sorted.count == last - first + 1 { return "\(plural) \(first) \(to) \(last)" }
+        let head = sorted.dropLast().map(String.init).joined(separator: ", ")
+        return "\(plural) \(head) \(and) \(last)"
     }
 
     /// The opening line shown before the person asks anything.
     static func opening(context: CoachContext, language: CoachLanguage = .current()) -> String {
         guard let latest = context.latest else {
             return switch language {
-            case .english: "No saved set yet. Once you finish one, I can go over what Plumb measured."
-            case .french: "Aucune série enregistrée pour l'instant. Dès que tu en finis une, je reprends ce que Plumb a mesuré."
+            case .english: "No saved set yet."
+            case .french: "Aucune série enregistrée."
             }
         }
         return summary(of: latest, language: language)

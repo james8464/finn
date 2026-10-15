@@ -4,12 +4,6 @@ import SwiftUI
 /// Shared semantic colours. Content surfaces stay opaque; system bars provide materials.
 enum HomeStyle {
     static let background = Color(uiColor: .systemBackground)
-    static let lime = Color(red: 0.80, green: 0.97, blue: 0.35)
-    static let activityGreen = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 0.80, green: 0.97, blue: 0.35, alpha: 1)
-            : UIColor(red: 0.25, green: 0.39, blue: 0.05, alpha: 1)
-    })
     static let accent = Color.primary
     /// Monochrome actions invert with the system appearance.
     static let filledAccent = Color.primary
@@ -43,14 +37,10 @@ struct HomeSymbol: View {
 
 /// Quiet separation from the canvas; content remains opaque and readable.
 struct HomeSurface: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
     var radius: CGFloat = 20
 
     func body(content: Content) -> some View {
-        content
-            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: radius))
-            .overlay(RoundedRectangle(cornerRadius: radius)
-                .strokeBorder(Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.035), lineWidth: 0.5))
+        content.background(HomeStyle.card, in: RoundedRectangle(cornerRadius: radius))
     }
 }
 

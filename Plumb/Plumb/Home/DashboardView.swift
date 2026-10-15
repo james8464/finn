@@ -16,7 +16,8 @@ enum HomeTab: String, CaseIterable {
 }
 
 enum DashboardStyle {
-    static let lime = Color(red: 0.80, green: 0.97, blue: 0.35)
+    /// Figma brand/pink/selection, node 68:12: #FF2D92 (sRGB).
+    static let accent = Color(.sRGB, red: 1, green: 45.0 / 255, blue: 146.0 / 255, opacity: 1)
     static let secondary = Color.white.opacity(0.7)
 }
 
@@ -85,7 +86,7 @@ struct DashboardView: View {
                 if isPreview {
                     Text("DESIGN PREVIEW · SAMPLE DATA")
                         .font(.caption2.weight(.semibold))
-                        .foregroundStyle(DashboardStyle.lime)
+                        .foregroundStyle(DashboardStyle.accent)
                 }
 
                 tryPlumbCard
@@ -134,7 +135,7 @@ struct DashboardView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             heading("Sessions")
                             Spacer(minLength: 30)
-                            Text(history.isEmpty ? "No sessions recorded." : "\(history.count) sessions recorded.")
+                            Text(history.isEmpty ? "No sessions" : "\(history.count) sessions")
                                 .font(.footnote)
                                 .foregroundStyle(DashboardStyle.secondary)
                             Spacer(minLength: 30)
@@ -163,7 +164,7 @@ struct DashboardView: View {
         .background { HomeBackdrop() }
     }
 
-    /// A solid lime invitation to the real workout, with a separate illustrated preview.
+    /// A solid brand-colour invitation to the real workout, with a separate illustrated preview.
     private var tryPlumbCard: some View {
         VStack(spacing: 0) {
             Button(action: tryPlumb) {
@@ -177,9 +178,6 @@ struct DashboardView: View {
                     }
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Try Plumb").font(.title3.bold()).fixedSize(horizontal: false, vertical: true)
-                        Text("Your first set starts here.")
-                            .font(.subheadline)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
                     if !dynamicTypeSize.isAccessibilitySize {
                         Spacer(minLength: 0)
@@ -205,7 +203,7 @@ struct DashboardView: View {
             .accessibilityIdentifier("home.watchDemo")
         }
         .foregroundStyle(.black)
-        .background(DashboardStyle.lime, in: RoundedRectangle(cornerRadius: 24))
+        .background(DashboardStyle.accent, in: RoundedRectangle(cornerRadius: 24))
     }
 
     /// The Plumb+ banner, kept for 1.1 behind `DashboardFlags.showsPlumbPlusBanner`.
@@ -254,7 +252,7 @@ struct DashboardView: View {
                 Circle().stroke(.white.opacity(0.13), lineWidth: 10)
                 if isPreview {
                     Circle().trim(from: 0, to: 0.78)
-                        .stroke(DashboardStyle.lime, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                        .stroke(DashboardStyle.accent, style: StrokeStyle(lineWidth: 10, lineCap: .round))
                         .rotationEffect(.degrees(-90))
                 }
                 VStack(spacing: 0) {
@@ -276,7 +274,7 @@ struct DashboardView: View {
             Text(subtitle).font(.footnote).foregroundStyle(DashboardStyle.secondary)
             Text(LocalizedStringKey(label)).font(.footnote).foregroundStyle(DashboardStyle.secondary).padding(.top, 7)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(value).font(.system(size: 32, weight: .bold)).foregroundStyle(DashboardStyle.lime)
+                Text(value).font(.system(size: 32, weight: .bold)).foregroundStyle(DashboardStyle.accent)
                 if let unit { Text(unit).font(.subheadline).foregroundStyle(DashboardStyle.secondary) }
             }
             miniatureChart.padding(.top, 3)
@@ -291,7 +289,7 @@ struct DashboardView: View {
                     Capsule().fill(.white.opacity(0.045))
                         .overlay(alignment: .bottom) {
                             if isPreview && [0, 1, 6, 9, 10].contains(index) {
-                                Capsule().fill(index >= 9 ? DashboardStyle.lime : .white.opacity(0.25))
+                                Capsule().fill(index >= 9 ? DashboardStyle.accent : .white.opacity(0.25))
                                     .frame(height: index == 10 ? 38 : (index == 0 ? 12 : 20))
                             }
                         }
@@ -315,7 +313,7 @@ struct DashboardView: View {
     private func card<Content: View>(_ route: HomeRoute, id: String, @ViewBuilder content: () -> Content) -> some View {
         Button { open(route) } label: {
             content().padding(14).frame(maxWidth: .infinity, alignment: .leading)
-                .modifier(DashboardGlass())
+                .modifier(DashboardGlass(showsBorder: false))
                 .contentShape(RoundedRectangle(cornerRadius: 15))
         }
         .buttonStyle(PressableStyle())

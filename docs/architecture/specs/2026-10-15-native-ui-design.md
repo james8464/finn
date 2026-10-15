@@ -139,3 +139,7 @@ James requested Théophile’s original design from `design/visuals-tabs` (`c0ff
 ### Follow-up: minimal background
 
 James requested a plain charcoal Home background, preserving Théophile’s cards and green/tab design. Stable dark tab surfaces replace variable glass fills to resolve contrast findings; the selection retains its outline and movement. Large-text Last workout uses an explicit vertical layout to prevent clipping. See the current verification record.
+
+### Borderless cards and pink
+
+James requested borderless Home widgets, less explanatory UI text, the exact Figma pink `#FF2D92`, and publication to main. Keep essential facts and recovery guidance; put measurement and Coach implementation details behind their named disclosures. Preserve main’s functional enhancements within the approved four-tab layout.

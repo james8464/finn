@@ -76,7 +76,7 @@ struct CoachView: View {
                     .accessibilityIdentifier("coach.send")
                 }
                 Button { showsSource = true } label: {
-                    Label(typeSize.isAccessibilitySize ? "About Coach" : "Based on your saved sets", systemImage: "info.circle")
+                    Label("About Coach", systemImage: "info.circle")
                         .fixedSize(horizontal: false, vertical: true)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -104,7 +104,10 @@ struct CoachView: View {
         .sheet(isPresented: $showsSource) {
             NavigationStack {
                 List {
-                    Section("How this answer is made") { Text(engineLine) }
+                    Section("How this answer is made") {
+                        Text(engineLine)
+                        if let note = conversation.engineNote { Text(note).foregroundStyle(.secondary) }
+                    }
                     Section { Text("Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique.") }
                 }
                 .navigationTitle("About Coach")

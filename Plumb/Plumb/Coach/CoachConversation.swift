@@ -37,6 +37,9 @@ final class CoachConversation {
     /// Which engine would answer the next question.
     var engineKind: CoachEngineKind { responder.currentEngineKind }
 
+    /// Why no model answers, when none does: a sentence the person can act on.
+    var engineNote: String? { responder.unavailableReason }
+
     /// The saved sets changed (a new set, a deletion): the coach reads them again.
     func refresh(history: [WorkoutSessionSummary]) {
         context = CoachContext.make(history: history)
@@ -70,11 +73,6 @@ final class CoachConversation {
 
     private static func opening(for context: CoachContext, engine: CoachEngineKind,
                                 language: CoachLanguage) -> String {
-        let summary = CoachFallback.opening(context: context, language: language)
-        guard engine != .fallback, !context.isEmpty else { return summary }
-        switch language {
-        case .english: return summary + " Ask me anything about these sets."
-        case .french: return summary + " Pose-moi tes questions sur ces séries."
-        }
+        CoachFallback.opening(context: context, language: language)
     }
 }

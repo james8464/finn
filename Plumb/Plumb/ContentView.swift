@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 import UIKit
 
@@ -54,6 +55,7 @@ struct ContentView: View {
         })
     }
     #if DEBUG
+    @ScaledMetric(relativeTo: .body) private var demoLabelSize = 12.0
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") }
     private var isVideoFileInput: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-video-file") }
     private var usesTestDarkAppearance: Bool {
@@ -276,8 +278,7 @@ struct ContentView: View {
     #if DEBUG
     private var demoIndicator: some View {
         Text("DEMO INPUT")
-            .font(.caption.bold())
-            .dynamicTypeSize(...DynamicTypeSize.large)
+            .font(.system(size: demoLabelSize, weight: .bold))
             .foregroundStyle(.black)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
@@ -359,8 +360,7 @@ struct ContentView: View {
             if let last = model.history.first {
                 historyDetail(last)
             } else {
-                ContentUnavailableView("No workouts yet", systemImage: "figure.strengthtraining.functional",
-                                       description: Text("Start a set in the Workout tab. Your last workout will appear here."))
+                ContentUnavailableView("No workouts yet", systemImage: "figure.strengthtraining.functional")
                     .navigationTitle("Last workout")
             }
         case .account: accountPage
@@ -379,8 +379,6 @@ struct ContentView: View {
                 Label("Plumb", systemImage: "figure.strengthtraining.functional")
                     .font(.title2.weight(.semibold))
                     .padding(.vertical, 8)
-                Text("Your workouts are stored on this iPhone.")
-                    .foregroundStyle(.secondary)
             }
             Section {
                 NavigationLink { optionsPage } label: {
@@ -394,7 +392,7 @@ struct ContentView: View {
                 }
             }
             Section("Account") {
-                Text("No account is needed. Plumb keeps your saved workouts on this iPhone.")
+                Text("No account required")
                     .foregroundStyle(.secondary)
             }
         }
@@ -470,7 +468,7 @@ struct ContentView: View {
             VStack(spacing: 4) {
                 // Said where the decision is made: before the camera opens.
                 Button { route = .privacy } label: {
-                    Label(dynamicTypeSize.isAccessibilitySize ? "Camera privacy" : "Analyzed on this iPhone. No video is saved.", systemImage: "lock.fill")
+                    Label("Camera privacy", systemImage: "lock.fill")
                         .font(.footnote)
                         .foregroundStyle(Color.primary)
                         .multilineTextAlignment(.center)
@@ -827,11 +825,11 @@ struct ContentView: View {
                     }
                     switch model.recognitionMethod {
                     case .keypointModel, .angleModel:
-                        Text("After each set, an on-device model trained by the Plumb team guesses the exercise from your pose points. If it isn’t confident, Plumb uses the exercise you chose. Its accuracy is still being tested.")
+                        Text("Experimental on-device estimate. Uses your selection when uncertain.")
                     case .angleRules:
-                        Text("After each set, Plumb guesses the exercise from your joint angles: which joint bends, how far, and how your torso is tilted. If the guess isn’t clear, Plumb uses the exercise you chose.")
+                        Text("Estimates from joint angles; uses your selection when uncertain.")
                     case .unavailable:
-                        Text("This build has no exercise recognition, so Plumb uses the exercise you choose on the first screen.")
+                        Text("Exercise recognition unavailable. Uses your selection.")
                     }
                     if model.hasExerciseClassifier {
                         Toggle("Use the trained model instead (experimental)", isOn: Binding(
@@ -857,7 +855,7 @@ struct ContentView: View {
                     .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.checkCameraAngle")
-                    Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. When you clearly face the camera, or face away, it still counts your reps but gives no posture advice. If it asks you to turn while your side already faces the camera, switch this off.")
+                    Text("Posture feedback requires a side view. Turn this off if the angle estimate is wrong.")
                 }
                 .optionCard()
                 VStack(alignment: .leading, spacing: 10) {
@@ -871,7 +869,7 @@ struct ContentView: View {
                     .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.handsFree")
-                    Text("Once you hold still in position for a moment, Plumb counts down and starts the set. It ends the set when you walk back to your iPhone, or when you stop moving after your reps. Start set and Stop set still work.")
+                    Text("Hold position to start. Walk back or stop moving to finish.")
                     Toggle("Say reps aloud", isOn: Binding(
                         get: { model.speaksLive },
                         set: { model.speaksLive = $0 }
@@ -881,7 +879,6 @@ struct ContentView: View {
                     .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.speaksLive")
-                    Text("Plumb says the countdown, each counted rep, and when a rep is clearly faster or shorter than your first reps of the set. It uses your AirPods or other headphones when they are connected, otherwise the iPhone speaker.")
                 }
                 .optionCard()
                 VStack(alignment: .leading, spacing: 10) {
@@ -900,7 +897,7 @@ struct ContentView: View {
                     .frame(minHeight: 44)
                     .disabled(!model.offersFitness)
                     .accessibilityIdentifier("options.savesToFitness")
-                    Text("When you finish a session (Done, or Finish session on the first screen), Plumb saves it to Apple Health as a strength training workout with its time and measured reps, never calories or heart rate, so it shows in the Fitness app.")
+                    Text("Saves finished sessions with duration and reps, without calorie or heart-rate estimates.")
                     if let note = fitnessOptionNote {
                         Text(note)
                             .foregroundStyle(PlumbStyle.supportingText)
@@ -921,25 +918,26 @@ struct ContentView: View {
                     .frame(minHeight: 44)
                     .disabled(!model.offersHealthPersonalization)
                     .accessibilityIdentifier("options.personalizesWithHealth")
-                    Text("Plumb adapts its advice to you: rest between sets, a lighter day after a short night or a heavy day, and your heart rate from Apple Watch. Each tip says which data it uses. Nothing leaves this iPhone, and Plumb works fully without it.")
+                    Text("Tailors rest and recovery advice. Data stays on this iPhone.")
                     if !model.offersHealthPersonalization {
                         Text("Demo and recorded input never read Health.")
                             .foregroundStyle(PlumbStyle.supportingText)
                     }
-                    ForEach(HealthReadType.allCases, id: \.self) { type in
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(type.title).font(.subheadline.weight(.semibold))
-                            Text(type.use)
-                                .font(.subheadline)
-                                .foregroundStyle(PlumbStyle.supportingText)
+                    DisclosureGroup("Health data") {
+                        ForEach(HealthReadType.allCases, id: \.self) { type in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(type.title).font(.subheadline.weight(.semibold))
+                                Text(type.use)
+                                    .font(.subheadline)
+                                    .foregroundStyle(PlumbStyle.supportingText)
+                            }
+                            .accessibilityElement(children: .combine)
                         }
-                        .accessibilityElement(children: .combine)
                     }
                 }
                 .optionCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
-                    Text("The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your answers set the order of the exercises and how the coach talks to you.")
                     Button("Replay the welcome") { showsOnboarding = true }
                         .font(.body.weight(.medium))
                         .foregroundStyle(Color.primary)
@@ -1270,6 +1268,14 @@ struct ContentView: View {
                         .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 20))
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("\(analysis.reps.count) measured reps")
+                        if analysis.reps.count >= 2 {
+                            depthChart(analysis.reps, exercise: model.resultExercise, highlighted: cue?.repNumbers ?? [])
+                        }
+                        NavigationLink { CoachView(history: model.history) } label: {
+                            Label("Ask the coach", systemImage: "bubble.left.and.text.bubble.right")
+                                .frame(minHeight: 44, alignment: .leading)
+                        }
+                        .accessibilityIdentifier("result.askCoach")
                         recognitionNote
                         if let note = model.movementNote {
                             Text(note)
@@ -1287,7 +1293,7 @@ struct ContentView: View {
                         }
                         if let pattern = model.repeatedPattern {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Your most frequent pattern came back")
+                                Text("Repeated observation")
                                     .font(.subheadline.weight(.semibold))
                                 Text(pattern.summary)
                                     .font(.subheadline)
@@ -1350,10 +1356,10 @@ struct ContentView: View {
                         } else {
                             Divider().padding(.vertical, 12)
                             if analysis.reps.count < 4 {
-                                Text("Plumb needs at least four measured reps before it can show an observation.")
+                                Text("Observations require 4 measured reps.")
                                     .font(.title3)
                             } else {
-                                Text("No clear pattern to call out in this set.").font(.title3)
+                                Text("No observation").font(.title3)
                             }
                             Text("This is a camera measurement, not a full technique assessment.")
                                 .font(.footnote)
@@ -1590,6 +1596,87 @@ struct ContentView: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
+    private func depthChart(_ reps: [RepMetric], exercise: ExerciseKind, highlighted: [Int]) -> some View {
+        let definition = exercise.definition
+        let noun = definition.copy.rangeNoun
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("\(noun.prefix(1).uppercased() + noun.dropFirst()) per rep")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            Chart(reps, id: \.number) { rep in
+                BarMark(x: .value("Rep", rep.number),
+                        y: .value("Range", min(1.2, rep.relativeRange / definition.rangeDisplayScale)))
+                    .foregroundStyle(highlighted.contains(rep.number) ? Color.primary : Color.primary.opacity(0.28))
+                    .cornerRadius(5)
+            }
+            .chartYAxis(.hidden)
+            .chartXAxis {
+                AxisMarks(values: reps.map(\.number)) { _ in
+                    AxisValueLabel().font(.caption2)
+                }
+            }
+            .chartXScale(domain: 0.5...(Double(reps.count) + 0.5))
+            .frame(height: 120)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(noun) per rep")
+            .accessibilityValue(reps.map { "rep \($0.number), \(definition.accessibleRange($0.relativeRange))" }
+                .joined(separator: "; "))
+        }
+        .accessibilityIdentifier("result.depthChart")
+    }
+
+    @ViewBuilder private func statsSections(_ sessions: [WorkoutSessionSummary]) -> some View {
+        let summary = StatsSummary(sessions: sessions)
+        let trend = summary.weekTrend
+        Section {
+            MeasuredFigure(value: "\(summary.totalReps)", label: "Total reps", sources: sessions) {
+                HStack(spacing: 16) {
+                    Label(summary.streakDays == 1 ? String(localized: "1 day in a row")
+                          : String(localized: "\(summary.streakDays) days in a row"), systemImage: "flame")
+                    Label(sessions.count == 1 ? String(localized: "1 session")
+                          : String(localized: "\(sessions.count) sessions"), systemImage: "calendar")
+                }
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.white)
+                RegularityCalendar(days: summary.dailyReps)
+                    .padding(.top, 4)
+            }
+        }
+        Section {
+            let change = trend.change.map { Int(($0 * 100).rounded()) }
+            MeasuredFigure(value: change.map { ($0 >= 0 ? "+" : "") + "\($0) %" } ?? "\(trend.thisWeek)",
+                           label: change == nil ? "Reps this week" : "vs. last week",
+                           sources: sessions.filter { Calendar.current.isDate($0.startedAt, equalTo: .now, toGranularity: .weekOfYear) }) {
+                Text(change == nil ? String(localized: "No previous week")
+                     : String(localized: "\(trend.thisWeek) reps this week, \(trend.lastWeek) last week."))
+                    .font(.footnote)
+                    .foregroundStyle(PlumbStyle.supportingText)
+            }
+        }
+        let quality = summary.qualityPerSession
+        if quality.count >= 2 {
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Reps without observations")
+                        .font(.headline)
+                        .accessibilityAddTraits(.isHeader)
+                    QualityChart(points: quality)
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        ForEach(summary.exercises, id: \.kind) { facts in
+            Section { ExerciseStatsCard(facts: facts) }
+        }
+        Section {
+            NavigationLink { BadgesView(ledger: badges) } label: {
+                Label("Awards", systemImage: "rosette")
+                    .frame(minHeight: 44)
+            }
+            .accessibilityIdentifier("stats.awards")
+        }
+    }
+
     private var historyPage: some View { historyList(title: "History", exercise: nil) }
 
     /// The saved sessions, every one or only those with a set of `exercise`.
@@ -1625,16 +1712,13 @@ struct ContentView: View {
                             .accessibilityHidden(true)
                         Text(exerciseName.map { "No \($0) sets saved yet." } ?? "No saved sessions yet.")
                             .font(.headline)
-                        Text(exerciseName.map { "Finish a \($0) set and it shows up here, with its reps and what Plumb noticed." }
-                             ?? "Finish a set and it shows up here, with its reps and what Plumb noticed.")
-                            .font(.subheadline)
-                            .foregroundStyle(PlumbStyle.supportingText)
-                            .multilineTextAlignment(.center)
+
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 24)
                 }
             } else {
+                if exercise == nil { statsSections(sessions) }
                 Section("Saved sessions") {
                     ForEach(sessions) { session in
                         HStack(spacing: 12) {
@@ -1702,7 +1786,7 @@ struct ContentView: View {
                                 nextAction(cue.nextAction)
                             }
                         } else {
-                            Text("No clear pattern to call out in this set.")
+                            Text("No observation")
                         }
                         DisclosureGroup("Rep details") {
                             repList(set.analysis.reps, exercise: set.exercise)
@@ -1714,10 +1798,12 @@ struct ContentView: View {
                     }
                 }
                 fitnessHistoryLine(session)
-                Text("These are camera measurements from one view, not a full technique assessment.")
-                    .font(.footnote)
-                    .foregroundStyle(PlumbStyle.supportingText)
-                    .padding(.top, 32)
+                DisclosureGroup("About measurements") {
+                    Text("These are camera measurements from one view, not a full technique assessment.")
+                        .font(.footnote)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                }
+                .padding(.top, 24)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)

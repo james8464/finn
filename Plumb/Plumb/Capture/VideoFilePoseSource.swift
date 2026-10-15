@@ -80,12 +80,13 @@ nonisolated enum VideoFileReader {
                 videoSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA])
             output.videoComposition = composition
             guard reader.canAdd(output) else { return }
-            reader.add(output)
-            guard reader.startReading() else { return }
+            let provider = reader.outputProvider(for: output)
+            guard (try? reader.start()) != nil else { return }
             let clock = ContinuousClock()
             let start = clock.now
             var lastAnalyzed = -Double.infinity
-            while !Task.isCancelled, let sample = output.copyNextSampleBuffer() {
+            while !Task.isCancelled, let ready = try? await provider.next() {
+                let sample = ready.withUnsafeSampleBuffer { $0 }
                 let time = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sample))
                 guard time.isFinite else { continue }
                 try? await clock.sleep(until: start + .milliseconds(Int(time * 1000)))

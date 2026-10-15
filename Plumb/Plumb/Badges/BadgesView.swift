@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BadgesView: View {
     let ledger: BadgeLedger
+    @State private var selected: BadgeEntry?
 
     var body: some View {
         List {
@@ -10,11 +11,9 @@ struct BadgesView: View {
                     Image(systemName: "rosette")
                         .font(.largeTitle).foregroundStyle(HomeStyle.accent)
                         .accessibilityHidden(true)
-                    Text(ledger.count == 0 ? "Every set is a beginning." : "Your progress, recognised.")
-                        .font(.title2.bold())
                     Text(ledger.count == 0
-                         ? "Finish a measured set to earn your first award."
-                         : "\(ledger.count) awards earned from your saved sets.")
+                         ? "No awards yet"
+                         : "\(ledger.count) awards earned")
                         .foregroundStyle(.secondary)
                         .accessibilityIdentifier("badges.count")
                 }
@@ -25,23 +24,32 @@ struct BadgesView: View {
             if !ledger.earned.isEmpty {
                 Section("Earned") {
                     ForEach(ledger.all.filter { $0.earned != nil }, id: \.kind) { entry in
-                        BadgeRow(kind: entry.kind, earned: entry.earned)
+                        badgeButton(kind: entry.kind, earned: entry.earned)
                     }
                 }
             }
             Section {
                 ForEach(ledger.all.filter { $0.earned == nil }, id: \.kind) { entry in
-                    BadgeRow(kind: entry.kind, earned: nil)
+                    badgeButton(kind: entry.kind, earned: nil)
                 }
             } header: {
                 Text("Milestones")
-            } footer: {
-                Text("Awards reflect measurements in your saved sets. They don’t assess overall technique or fitness.")
             }
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Awards")
         .onAppear { ledger.acknowledge() }
+        .sheet(item: $selected) { entry in
+            BadgeDetailView(kind: entry.kind, earned: entry.earned)
+        }
+    }
+
+    private func badgeButton(kind: BadgeKind, earned: EarnedBadge?) -> some View {
+        Button { selected = BadgeEntry(kind: kind, earned: earned) } label: {
+            BadgeRow(kind: kind, earned: earned)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("badge.row")
     }
 }
 
@@ -77,7 +85,7 @@ struct BadgeMark: View {
     var body: some View {
         ZStack {
             if earned {
-                Circle().fill(DashboardStyle.lime)
+                Circle().fill(DashboardStyle.accent)
             } else {
                 Circle().strokeBorder(.white.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [3, 4]))
             }
@@ -109,7 +117,7 @@ struct AwardsCardContent<Heading: View>: View {
                     }
                 }
             }
-            Text(badges.isEmpty ? "Your first badge is one set away."
+            Text(badges.isEmpty ? "No awards yet"
                  : (badges.count == 1 ? "1 badge · \(badges.last!.kind.title)"
                     : "\(badges.count) badges · latest: \(badges.last!.kind.title)"))
                 .font(.footnote)
@@ -151,3 +159,62 @@ struct BadgeUnlockCard: View {
         .accessibilityIdentifier("result.badges")
     }
 }
+
+struct BadgeEntry: Identifiable, Equatable {
+    let kind: BadgeKind
+    let earned: EarnedBadge?
+    var id: BadgeKind { kind }
+}
+
+/// One badge on its own sheet: the mark large, the measured fact and the date when earned, the
+/// condition when not.
+struct BadgeDetailView: View {
+    let kind: BadgeKind
+    let earned: EarnedBadge?
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ScrollView {
+        VStack(spacing: 0) {
+            VStack(spacing: 18) {
+                BadgeMark(kind: kind, earned: earned != nil, size: 120)
+                    .padding(.top, 36)
+                Text(kind.title)
+                    .font(.title.bold())
+                    .multilineTextAlignment(.center)
+                    .accessibilityAddTraits(.isHeader)
+                if let earned {
+                    Text(earned.detail)
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(earned.earnedAt.formatted(.dateTime.day().month(.wide).year().hour().minute()))
+                        .font(.footnote)
+                        .foregroundStyle(HomeStyle.supportingText)
+                } else {
+                    Text(kind.rule)
+                        .font(.body)
+                        .foregroundStyle(HomeStyle.supportingText)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.horizontal, 32)
+            Spacer(minLength: 24)
+            Button { dismiss() } label: {
+                PrimaryActionLabel(title: "Done")
+            }
+            .buttonStyle(PressableStyle())
+            .padding(.horizontal, 20)
+            .padding(.bottom, 12)
+        }
+        .frame(maxWidth: .infinity)
+        }
+        .background(HomeStyle.background)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .presentationBackground(HomeStyle.background)
+        .accessibilityIdentifier("badges.detail")
+    }
+}
+

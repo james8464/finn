@@ -140,3 +140,21 @@ The update installed successfully over the existing app on James’s iPhone. Aut
 The largest-text Home checks passed with both normal and synthetic input, including Workout/Coach controls and return to Home. The destinations tour also passed. The combined audit/keyboard test encountered long simulator animation-idle waits and the pre-existing keyboard `Invalid frame dimension` runtime warning; all its assertions passed. These are separate from the resolved contrast/clipping audit findings.
 
 Final five-test batch: **5 passed, 0 failures** (largest-text demo flow, normal-input Home clipping/hit regions, destination tour, full dark setup audit, full opaque-surface setup audit). Together with the earlier full normal setup audit, all targeted contrast/clipping checks pass without filtering. Signed Release build and phone installation succeeded.
+
+## Borderless Home and Figma pink
+
+Home widgets now have no outline. The shared brand token is exact sRGB `#FF2D92`, read from the live Figma variable `brand/pink/selection` at node `68:12`. The selected-tab background is dark enough to retain small-label contrast without altering the pink.
+
+Removed repeated invitations, motivational headings, duplicate storage explanations and redundant empty-state paragraphs. Widget details retain their titles, measured values, dates, award conditions and recovery controls. Measurement limits sit in an About measurements disclosure; Coach implementation and availability details remain in About Coach.
+
+Integration retains main’s measured statistics, award-detail sheets, highlighted rep-range chart, result-to-Coach action and newer Coach selection/availability handling. Stats headline values scale; exercise figures stack at accessibility sizes. The approved four tabs and independent navigation stacks remain. Main’s competing three-tab styling is superseded by James’s current design instructions. Read-only review found no remaining actionable integration issues.
+
+Options now omits duplicate voice/welcome explanations, shortens recognition, camera, hands-free and Fitness guidance, and groups the Health data inventory in a disclosure. The twelve-week activity calendar uses compact week columns instead of a full-screen block of day squares. The localization merge retains every language entry from both parent branches.
+
+Verification: 15 Coach tests passed. The final saved-workout/statistics/award-sheet flow and normal-input largest-text Home clipping/hit-region audit passed. The full setup accessibility audit and destination tour also passed during integration. No translation entries are missing from either parent.
+
+The Options audit identified the DEBUG-only DEMO INPUT badge’s explicit text-size cap. It now uses body-scaled 12-point text with no cap. The subsequent runner terminated during bootstrap, and the dedicated simulator then remained in Booting; the final badge audit could not be completed. This is an unresolved verification limitation, not a claimed passing audit. Production Options content and toggle assertions passed before that badge finding. No findings were filtered out to obtain a pass.
+
+Captures: [Home](screenshots/2026-10-15-pink/home-demo.png), [statistics](screenshots/2026-10-15-pink/statistics-demo.png), [award detail](screenshots/2026-10-15-pink/award-detail-demo.png). These explicitly show synthetic input. The Home capture precedes the minor selected-capsule background darkening; its accent value and borderless widgets match the final code.
+
+The final generic iOS Simulator build succeeded for the committed source. The remaining verification limitation is the DEBUG badge audit rerun described above; the simulator would not finish booting. Main is published with that limitation documented.

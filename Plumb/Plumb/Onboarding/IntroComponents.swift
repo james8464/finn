@@ -32,7 +32,7 @@ struct IntroHeading: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(eyebrow).font(.caption2.weight(.semibold)).tracking(1.5)
-                .foregroundStyle(DashboardStyle.lime)
+                .foregroundStyle(DashboardStyle.accent)
             Text(title).font(.system(size: titleSize, weight: .bold)).tracking(-1.2)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
@@ -58,7 +58,7 @@ struct IntroAction: View {
             .padding(.vertical, 20)
             .frame(maxWidth: .infinity, minHeight: 60)
             .foregroundStyle(.black)
-            .background(DashboardStyle.lime, in: Capsule())
+            .background(DashboardStyle.accent, in: Capsule())
         }
         .buttonStyle(PressableStyle())
     }

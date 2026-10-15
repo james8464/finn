@@ -79,7 +79,7 @@ struct DemoStoryPage: View {
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 6) {
                         Text("DEMO · SET REVIEWED").font(.caption2.weight(.semibold))
-                            .foregroundStyle(DashboardStyle.lime)
+                            .foregroundStyle(DashboardStyle.accent)
                         Text("6 squat reps").font(.title2.bold())
                         Text("00:18 · Example session").font(.caption)
                             .foregroundStyle(DashboardStyle.secondary)
@@ -95,7 +95,7 @@ struct DemoStoryPage: View {
                             .font(.subheadline.weight(.semibold))
                         Spacer()
                         Text("EXAMPLE").font(.caption2.weight(.semibold))
-                            .foregroundStyle(DashboardStyle.lime)
+                            .foregroundStyle(DashboardStyle.accent)
                     }
                     Text("Your last two reps were shorter.").font(.title3.weight(.semibold))
                     Text("Try slowing down and matching the depth of your first reps on the next set.")
@@ -105,7 +105,7 @@ struct DemoStoryPage: View {
                 .padding(20)
                 .background(Color(white: 0.11), in: RoundedRectangle(cornerRadius: 24))
                 .overlay(RoundedRectangle(cornerRadius: 24)
-                    .strokeBorder(DashboardStyle.lime.opacity(0.4), lineWidth: 1))
+                    .strokeBorder(DashboardStyle.accent.opacity(0.4), lineWidth: 1))
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("demo.advice")
             }
@@ -149,7 +149,7 @@ struct DemoCameraCard: View {
                     Text("DEMO").font(.caption2.bold()).tracking(1)
                         .padding(.horizontal, 10).padding(.vertical, 7)
                         .foregroundStyle(.black)
-                        .background(DashboardStyle.lime, in: Capsule())
+                        .background(DashboardStyle.accent, in: Capsule())
                 }
                 Spacer()
                 HStack(alignment: .bottom) {
@@ -175,7 +175,7 @@ struct DemoCameraCard: View {
             if !welcome {
                 // Frame corners echo the production capture screen. They are decorative, not pose data.
                 DemoFrameCorners()
-                    .stroke(DashboardStyle.lime.opacity(0.8), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                    .stroke(DashboardStyle.accent.opacity(0.8), style: StrokeStyle(lineWidth: 2, lineCap: .round))
                     .padding(.horizontal, 25).padding(.top, 70).padding(.bottom, 90)
                     .accessibilityHidden(true)
             }

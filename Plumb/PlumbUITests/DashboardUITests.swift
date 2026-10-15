@@ -75,7 +75,7 @@ final class DashboardUITests: XCTestCase {
     }
 
     @MainActor
-    func testSavedWorkoutAppearsOnDashboard() {
+    func testSavedWorkoutAppearsOnDashboard() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo"]
@@ -101,6 +101,22 @@ final class DashboardUITests: XCTestCase {
         XCTAssertEqual(app.buttons["home.lastSession"].frame.minY, savedPosition, accuracy: 3)
         app.buttons["home.lastSession"].tap()
         XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.disclosureTriangles["About measurements"].exists || app.buttons["About measurements"].exists)
+        try saveWidget("session")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.swipeUp()
+        app.buttons["home.sessions"].tap()
+        XCTAssertTrue(app.staticTexts["Total reps"].waitForExistence(timeout: 5))
+        try saveWidget("statistics")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["home.awards"].tap()
+        XCTAssertTrue(app.buttons["badge.row"].firstMatch.waitForExistence(timeout: 5))
+        try saveWidget("awards")
+        app.buttons["badge.row"].firstMatch.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["badges.detail"].waitForExistence(timeout: 5))
+        try saveWidget("award-detail")
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.navigationBars["Awards"].waitForExistence(timeout: 3))
     }
 
     @MainActor
@@ -136,4 +152,12 @@ final class DashboardUITests: XCTestCase {
         for _ in 0..<6 where !app.buttons["home.awards"].isHittable { scroll.swipeUp() }
         XCTAssertTrue(app.buttons["home.awards"].isHittable)
     }
+    @MainActor
+    private func saveWidget(_ name: String) throws {
+        guard let directory = ProcessInfo.processInfo.environment["PLUMB_CAPTURE_DIR"] else { return }
+        let url = URL(fileURLWithPath: directory, isDirectory: true)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        try XCUIScreen.main.screenshot().pngRepresentation.write(to: url.appending(path: "\(name).png"))
+    }
+
 }

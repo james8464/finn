@@ -11,7 +11,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
         // XCTest refuses identifier queries longer than 128 characters, so match the start.
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(
-            format: "label BEGINSWITH %@", "After each set, Plumb guesses the exercise from your joint angles")).firstMatch.exists)
+            format: "label BEGINSWITH %@", "Estimates from joint angles; uses your selection when uncertain.")).firstMatch.exists)
         let toggle = app.switches["options.recognizeExercise"]
         XCTAssertTrue(toggle.exists)
         XCTAssertEqual(toggle.value as? String, "1")

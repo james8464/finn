@@ -25,6 +25,7 @@ struct DashboardGlass: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     var radius: CGFloat = 15
     var stableBackdrop = false
+    var showsBorder = true
 
     func body(content: Content) -> some View {
         content
@@ -38,10 +39,12 @@ struct DashboardGlass: ViewModifier {
                 }
             }
             .overlay {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(LinearGradient(colors: [.white.opacity(0.32), .white.opacity(0.13)],
-                                                 startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
-                    .accessibilityHidden(true)
+                if showsBorder {
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .strokeBorder(LinearGradient(colors: [.white.opacity(0.32), .white.opacity(0.13)],
+                                                     startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                        .accessibilityHidden(true)
+                }
             }
     }
 }
@@ -116,7 +119,7 @@ struct HomeTabBar: View {
                             .font(.system(size: labelSize, weight: selection == tab ? .medium : .regular))
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    .foregroundStyle(selection == tab ? DashboardStyle.lime : DashboardStyle.secondary)
+                    .foregroundStyle(selection == tab ? DashboardStyle.accent : DashboardStyle.secondary)
                     .frame(maxWidth: .infinity, minHeight: typeSize.isAccessibilitySize ? min(tabHeight, 88) - 2 : 62)
                     .padding(.vertical, 1)
                     .contentShape(Capsule())
@@ -134,7 +137,7 @@ struct HomeTabBar: View {
                 .matchedGeometryEffect(id: "selection", in: glassSelection)
         } else {
             Capsule()
-                .fill(LinearGradient(colors: [Color(white: 0.14), Color(white: 0.10)],
+                .fill(LinearGradient(colors: [Color(white: 0.12), Color(white: 0.08)],
                                      startPoint: .top, endPoint: .bottom))
                 .overlay {
                     Capsule().strokeBorder(.white.opacity(0.10), lineWidth: 1)
