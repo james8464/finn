@@ -26,7 +26,7 @@ struct FinnApp: App {
         WindowGroup {
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-finn-launch-preview") {
-                FinnLaunchMark(previewReducesMotion: ProcessInfo.processInfo.arguments
+                FinnLaunchPreview(reducesMotion: ProcessInfo.processInfo.arguments
                     .contains("-finn-launch-reduce-motion"))
                     .preferredColorScheme(.dark)
             } else if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
