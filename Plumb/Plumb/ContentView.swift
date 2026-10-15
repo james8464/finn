@@ -273,14 +273,16 @@ struct ContentView: View {
             case .coach:
                 CoachView(history: model.history)
             case .posture:
-                UnfinishedPage(title: selectedTab.rawValue, symbol: selectedTab.symbol)
+                // The sets Plumb measured, with what it noticed in each: posture lives in the history.
+                historyList(title: "Posture", exercise: nil)
+                    .scrollContentBackground(.hidden)
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             HomeTabBar(selection: $selectedTab)
         }
         .background { HomeBackdrop() }
-        .toolbar(selectedTab == .workout ? .visible : .hidden, for: .navigationBar)
+        .toolbar(selectedTab == .workout || selectedTab == .posture ? .visible : .hidden, for: .navigationBar)
         .environment(\.colorScheme, .dark)
         .preferredColorScheme(.dark)
     }
@@ -300,10 +302,12 @@ struct ContentView: View {
                     .navigationTitle("Last workout")
             }
         case .account: accountPage
-        case .posture: UnfinishedPage(title: "Posture", symbol: "figure.walk")
-        case .weights: UnfinishedPage(title: "Weights", symbol: "dumbbell")
+        case .posture: historyList(title: "Posture", exercise: nil)
+        case .weights: historyList(title: "Best set", exercise: model.selectedExercise)
         case .awards: BadgesView(ledger: badges)
-        case .plus: UnfinishedPage(title: "Plumb+", symbol: "sparkles")
+        // The subscription does not exist yet (1.1): the banner is hidden, and its route lands on
+        // the account page rather than on a placeholder.
+        case .plus: accountPage
         }
     }
 
@@ -328,7 +332,8 @@ struct ContentView: View {
                 }
             }
             Section("Account") {
-                Text("Not made yet").foregroundStyle(.secondary)
+                Text("Plumb needs no account: there is no server, nothing to sign in to, and nothing to sync.")
+                    .foregroundStyle(.secondary)
             }
         }
         .navigationTitle("Account settings")
@@ -1465,8 +1470,15 @@ struct ContentView: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    private var historyPage: some View {
-        List {
+    private var historyPage: some View { historyList(title: "History", exercise: nil) }
+
+    /// The saved sessions, every one or only those with a set of `exercise`.
+    private func historyList(title: String, exercise: ExerciseKind?) -> some View {
+        let sessions = exercise.map { kind in
+            model.history.filter { $0.sets.contains { $0.exercise == kind } }
+        } ?? model.history
+        let exerciseName = exercise?.definition.copy.name.lowercased()
+        return List {
             if model.historyIssue == .corrupted {
                 Section {
                     Text("Couldn’t read saved history").font(.headline)
@@ -1484,16 +1496,17 @@ struct ContentView: View {
                         .foregroundStyle(PlumbStyle.supportingText)
                     Button("Try again") { model.retryHistory() }
                 }
-            } else if model.history.isEmpty {
+            } else if sessions.isEmpty {
                 Section {
                     VStack(spacing: 10) {
                         Image(systemName: "clock.arrow.circlepath")
                             .font(.largeTitle)
                             .foregroundStyle(PlumbStyle.supportingText)
                             .accessibilityHidden(true)
-                        Text("No saved sessions yet.")
+                        Text(exerciseName.map { "No \($0) sets saved yet." } ?? "No saved sessions yet.")
                             .font(.headline)
-                        Text("Finish a set and it shows up here, with its reps and what Plumb noticed.")
+                        Text(exerciseName.map { "Finish a \($0) set and it shows up here, with its reps and what Plumb noticed." }
+                             ?? "Finish a set and it shows up here, with its reps and what Plumb noticed.")
                             .font(.subheadline)
                             .foregroundStyle(PlumbStyle.supportingText)
                             .multilineTextAlignment(.center)
@@ -1503,7 +1516,7 @@ struct ContentView: View {
                 }
             } else {
                 Section("Saved sessions") {
-                    ForEach(model.history) { session in
+                    ForEach(sessions) { session in
                         HStack(spacing: 12) {
                             NavigationLink { historyDetail(session) } label: {
                                 VStack(alignment: .leading, spacing: 4) {
@@ -1541,7 +1554,7 @@ struct ContentView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("History")
+        .navigationTitle(title)
     }
 
     private func historyDetail(_ session: WorkoutSessionSummary) -> some View {

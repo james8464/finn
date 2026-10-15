@@ -18,6 +18,12 @@ enum DashboardStyle {
     static let secondary = Color.white.opacity(0.7)
 }
 
+/// What the 1.0 build hides. The Plumb+ banner waits for the subscription (1.1): App Store rule
+/// 2.1(a) refuses placeholder content, so it is not shown until it opens something real.
+enum DashboardFlags {
+    static let showsPlumbPlusBanner = false
+}
+
 struct HomeBackdrop: View {
     var body: some View {
         GeometryReader { proxy in
@@ -153,6 +159,15 @@ struct DashboardView: View {
         #endif
     }
 
+    /// The most reps Plumb measured in one set of the chosen exercise. Plumb measures no load, so
+    /// the record is in reps, never in kilograms.
+    private var bestReps: String {
+        if isPreview { return "12" }
+        let best = history.flatMap(\.sets).filter { $0.exercise == exercise }
+            .map { $0.analysis.reps.count }.max()
+        return best.map(String.init) ?? "—"
+    }
+
     private var duration: String {
         if isPreview { return "42:18" }
         guard let last = history.first, let workout = FitnessWorkout.make(from: last) else { return "—" }
@@ -221,8 +236,8 @@ struct DashboardView: View {
                                label: "Average score", value: isPreview ? "78" : "—", unit: nil)
                     }
                     card(.weights, id: "home.weights") {
-                        metric(title: "Weights", subtitle: "Barbell Squat",
-                               label: "Best set", value: isPreview ? "60" : "—", unit: "kg")
+                        metric(title: "Best set", subtitle: exercise.chipName,
+                               label: "Most reps in one set", value: bestReps, unit: "reps")
                     }
                     card(.history, id: "home.sessions") {
                         VStack(alignment: .leading, spacing: 0) {
@@ -241,6 +256,22 @@ struct DashboardView: View {
                     }
                 }
 
+                if DashboardFlags.showsPlumbPlusBanner {
+                    plusBanner
+                }
+            }
+            .padding(.horizontal, 21)
+            .padding(.top, 5)
+            .padding(.bottom, 16)
+            .frame(maxWidth: 600)
+            .frame(maxWidth: .infinity)
+        }
+        .scrollIndicators(.hidden)
+        .foregroundStyle(.white)
+    }
+
+    /// The Plumb+ banner, kept for 1.1 behind `DashboardFlags.showsPlumbPlusBanner`.
+    private var plusBanner: some View {
                 Button { open(.plus) } label: {
                     ZStack(alignment: .topLeading) {
                         GeometryReader { proxy in
@@ -266,15 +297,6 @@ struct DashboardView: View {
                 }
                 .buttonStyle(PressableStyle())
                 .accessibilityIdentifier("home.plus")
-            }
-            .padding(.horizontal, 21)
-            .padding(.top, 5)
-            .padding(.bottom, 16)
-            .frame(maxWidth: 600)
-            .frame(maxWidth: .infinity)
-        }
-        .scrollIndicators(.hidden)
-        .foregroundStyle(.white)
     }
 
     private var durationLabel: some View {
@@ -360,25 +382,5 @@ struct DashboardView: View {
         }
         .buttonStyle(PressableStyle())
         .accessibilityIdentifier(id)
-    }
-}
-
-struct UnfinishedPage: View {
-    let title: String
-    let symbol: String
-
-    var body: some View {
-        VStack(spacing: 18) {
-            Image(systemName: symbol).font(.system(size: 44)).foregroundStyle(DashboardStyle.lime)
-            Text(title).font(.largeTitle.bold())
-            Text("Not made yet").font(.title3).foregroundStyle(DashboardStyle.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .foregroundStyle(.white)
-        .background { HomeBackdrop().overlay(.black.opacity(0.45)).ignoresSafeArea() }
-        .navigationTitle(title)
-        .toolbarTitleDisplayMode(.inline)
-        .toolbar(.visible, for: .navigationBar)
-        .preferredColorScheme(.dark)
     }
 }
