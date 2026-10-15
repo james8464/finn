@@ -16,3 +16,13 @@ Reviewed the native previews at full size, iPhone Home Screen/Settings sizes and
 The direction follows [Apple’s app-icon HIG](https://developer.apple.com/design/human-interface-guidelines/app-icons) and [Icon Composer guidance](https://developer.apple.com/documentation/xcode/creating-your-app-icon-using-icon-composer). [Logo-shape research](https://ira.lib.polyu.edu.hk/handle/10397/64985) informed the move away from capsules; associations depend on context and are not a usability guarantee.
 
 `Studies/TrainingPartner.icon` preserves the unused character exploration. It has no target membership; the app uses the selected F signature.
+
+## Opening motion
+
+`FinnStartupView` reads saved sessions and badges off the main thread. The three original F plates settle by 10 points over 0.48 seconds, staggered by at most 90 ms. For longer loads, only the pink plate gently changes opacity (80–100%, 2.4-second cycle). The mark occupies roughly 80 × 87 points at the centre of a black screen.
+
+Content appears immediately when local data is ready, with a 0.32-second fade and no minimum splash duration. Health and network requests do not hold startup. Returning from the background preserves navigation and does not repeat the animation. Reduce Motion uses a static mark and a 0.12-second fade; animation pauses while inactive. VoiceOver receives one loading label, without visual copy or simulated progress.
+
+The system launch screen is plain black. Motion runs in SwiftUI after launch, following Apple’s [launching](https://developer.apple.com/design/human-interface-guidelines/launching), [loading](https://developer.apple.com/design/human-interface-guidelines/loading) and [motion](https://developer.apple.com/design/human-interface-guidelines/motion) guidance. To inspect the longer-loading motion in a Debug build, launch with `-finn-launch-preview`; add `-finn-launch-reduce-motion` for its static variant. Native navigation mounts without an insertion animation before the logo fades away.
+
+Release verification caught blank tab content caused by a debug-only header inside an unconditional `safeAreaInset`. Keep the entire modifier inside `#if DEBUG`. The corrected Release build was installed and checked across two cold launches on an iPhone 16 Pro Max, with saved sessions and badges intact. Startup tests cover prepared history, corrupt-file recovery, badge restoration and navigation after launch/backgrounding.

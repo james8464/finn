@@ -13,6 +13,8 @@ struct ContentView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private let routesURLsFromParent: Bool
+    @Binding private var launchURL: URL?
     @State private var model: WorkoutSessionModel
     @State private var observationSpeaker = ObservationSpeaker()
     @State private var workoutFeedback = WorkoutFeedback()
@@ -84,17 +86,24 @@ struct ContentView: View {
                     health: (any HealthReading)? = nil,
                     connectsAccessories: Bool = false,
                     badgeStore: (any BadgeStoring)? = nil,
-                    showsOnboarding: Bool? = nil) {
+                    showsOnboarding: Bool? = nil,
+                    startup: FinnStartupSnapshot? = nil,
+                    launchURL: Binding<URL?> = .constant(nil),
+                    routesURLsFromParent: Bool = false) {
+        self.routesURLsFromParent = routesURLsFromParent
+        _launchURL = launchURL
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
                                                          narrator: narrator,
                                                          exerciseClassifier: exerciseClassifier,
                                                          preferences: preferences,
                                                          announcer: announcer,
                                                          fitness: fitness,
-                                                         health: health))
+                                                         health: health,
+                                                         initialHistory: startup?.history))
         self.connectsAccessories = connectsAccessories
         self.preferences = preferences
-        _badges = State(initialValue: BadgeLedger(store: badgeStore ?? LocalBadgeStore()))
+        _badges = State(initialValue: BadgeLedger(store: badgeStore ?? LocalBadgeStore(),
+                                                       initialEarned: startup?.badges))
         // demo and recorded input skip the welcome unless asked for it (`-finn-ui-onboarding`)
         _showsOnboarding = State(initialValue: showsOnboarding ?? !preferences.onboardingCompleted)
     }
@@ -108,6 +117,17 @@ struct ContentView: View {
         #endif
     }
 
+    private func handleLaunchURL(_ url: URL) {
+        guard let link = FinnDeepLink(url), case .startSet(let key) = link,
+              model.stage == .ready || model.stage == .result else { return }
+        if let key, let exercise = ExerciseKind(rawValue: key) { model.selectedExercise = exercise }
+        if !usesSyntheticInput && CameraPermission.notAskedYet {
+            showsCameraPrimer = true
+        } else {
+            Task { await model.startPreview() }
+        }
+    }
+
     var body: some View {
         ZStack {
             // keep each tab's navigation and Coach draft alive while a set is on screen
@@ -118,11 +138,11 @@ struct ContentView: View {
             if model.stage != .ready {
                 NavigationStack {
                     sessionContent
+                        #if DEBUG
                         .safeAreaInset(edge: .top, spacing: 0) {
-                            #if DEBUG
                             if isDemo && !isCaptureStage && !isErrorStage { demoIndicator }
-                            #endif
                         }
+                        #endif
                         .navigationDestination(item: $sessionRoute) { destinationPage($0) }
                 }
                 .background(HomeStyle.background)
@@ -242,14 +262,12 @@ struct ContentView: View {
         }
         // the home screen widget opens the camera on its exercise (`finn://start-set`)
         .onOpenURL { url in
-            guard let link = FinnDeepLink(url), case .startSet(let key) = link,
-                  model.stage == .ready || model.stage == .result else { return }
-            if let key, let exercise = ExerciseKind(rawValue: key) { model.selectedExercise = exercise }
-            if !usesSyntheticInput && CameraPermission.notAskedYet {
-                showsCameraPrimer = true
-            } else {
-                Task { await model.startPreview() }
-            }
+            if !routesURLsFromParent { handleLaunchURL(url) }
+        }
+        .onChange(of: launchURL, initial: true) { _, url in
+            guard let url else { return }
+            launchURL = nil
+            handleLaunchURL(url)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active && connectsAccessories { accessories.refreshHeadphones() }
@@ -347,11 +365,11 @@ struct ContentView: View {
                 ForEach(HomeTab.allCases, id: \.self) { tab in
                     NavigationStack {
                         tabContent(tab)
+                            #if DEBUG
                             .safeAreaInset(edge: .top, spacing: 0) {
-                                #if DEBUG
                                 if isDemo { demoIndicator }
-                                #endif
                             }
+                            #endif
                             .navigationDestination(item: Binding(
                                 get: { tabRoutes[tab] },
                                 set: { tabRoutes[tab] = $0 }
@@ -404,11 +422,11 @@ struct ContentView: View {
 
     private func destinationPage(_ destination: HomeRoute) -> some View {
         destinationContent(destination)
+            #if DEBUG
             .safeAreaInset(edge: .top, spacing: 0) {
-                #if DEBUG
                 if isDemo { demoIndicator }
-                #endif
             }
+            #endif
     }
 
     @ViewBuilder private func destinationContent(_ destination: HomeRoute) -> some View {

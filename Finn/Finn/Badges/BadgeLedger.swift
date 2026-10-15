@@ -45,9 +45,9 @@ final class BadgeLedger {
     private(set) var justEarned: [EarnedBadge] = []
     @ObservationIgnored private let store: any BadgeStoring
 
-    init(store: any BadgeStoring = LocalBadgeStore()) {
+    init(store: any BadgeStoring = LocalBadgeStore(), initialEarned: [EarnedBadge]? = nil) {
         self.store = store
-        earned = (try? store.load()) ?? []
+        earned = initialEarned ?? (try? store.load()) ?? []
     }
 
     /// the badges in display order, earned ones with their date, the rest locked

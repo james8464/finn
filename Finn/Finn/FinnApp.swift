@@ -25,7 +25,11 @@ struct FinnApp: App {
     var body: some Scene {
         WindowGroup {
             #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
+            if ProcessInfo.processInfo.arguments.contains("-finn-launch-preview") {
+                FinnLaunchMark(previewReducesMotion: ProcessInfo.processInfo.arguments
+                    .contains("-finn-launch-reduce-motion"))
+                    .preferredColorScheme(.dark)
+            } else if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
                 ContentView(source: DemoPoseSource(startError:
                     ProcessInfo.processInfo.arguments.contains("-finn-ui-camera-unavailable")
                     ? .unavailable : nil,
@@ -60,20 +64,12 @@ struct FinnApp: App {
                             connectsAccessories: Self.mirrorsDemoOnWatch,
                             badgeStore: MemoryBadgeStore(), showsOnboarding: false)
             } else {
-                ContentView(source: CameraPoseSource.live(),
-                            store: WidgetSharingSessionStore(base: LocalSessionStore()),
-                            preferences: .app, announcer: LiveAnnouncer(),
-                            fitness: HealthKitWorkoutExporter(), health: HealthKitReader(),
-                            connectsAccessories: true)
+                FinnStartupView()
             }
             #else
             // only live camera sessions can reach Apple Health; demo and recorded input never do
             // the widget shows only what this store saves
-            ContentView(source: CameraPoseSource.live(),
-                        store: WidgetSharingSessionStore(base: LocalSessionStore()),
-                        preferences: .app, announcer: LiveAnnouncer(),
-                        fitness: HealthKitWorkoutExporter(), health: HealthKitReader(),
-                        connectsAccessories: true)
+            FinnStartupView()
             #endif
         }
     }
