@@ -55,7 +55,7 @@ final class OnboardingTourUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-plumb-ui-badges-demo"]
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Summary"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 8))
         let awards = app.buttons["home.awards"]
         for _ in 0..<4 where !awards.isHittable { app.swipeUp() }
         XCTAssertTrue(awards.isHittable)

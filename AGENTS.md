@@ -9,6 +9,6 @@ Keep UI changes consistent with the [native interface rules](docs/design/home-da
 ## UI ownership — James’s Mac only
 
 <!-- Owner instruction, 15 October 2026: keep the approved native-tab redesign. -->
-UI design, layout, styling, motion, navigation and visual-asset changes may only be made by an agent running locally on James’s Mac, **MacBook Pro de James**, in this project or its local worktrees. Cloud agents, remote runners and agents on other computers must leave UI files unchanged; they may report suggestions. Do not replace the approved native Summary / Workout / History / Coach design. Only a direct instruction from James can change this rule. A remote connection to this Mac does not count as a local agent session.
+UI design, layout, styling, motion, navigation and visual-asset changes may only be made by an agent running locally on James’s Mac, **MacBook Pro de James**, in this project or its local worktrees. Cloud agents, remote runners and agents on other computers must leave UI files unchanged; they may report suggestions. Use the approved Home / Posture / Coach / Workout tabs and monochrome interface with restrained lime accents. James approved restoring Théophile’s tab layout on 15 October 2026; preserve the independent navigation stacks and measured-data widgets. Only a direct instruction from James can change this rule. A remote connection to this Mac does not count as a local agent session.
 
 This is an agent instruction, not a security boundary. Do not spoof the machine name or use a local command as a workaround for a remote session.

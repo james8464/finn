@@ -123,3 +123,11 @@ After reviewing the coloured widgets, James preferred the earlier black-and-whit
 Summary contains a static exercise illustration, seven-day rep chart, paired Best set/Awards widgets and a Recent workout card only when history exists. Workout retains the animated placement demonstration, disabled with Reduce Motion. Chart bars are centred on local calendar days; VoiceOver receives all seven values. Accessibility sizes stack widgets and chart content.
 
 Use native automatic title display on Summary. Forcing large-title mode caused the title to expand on tab return and shifted the content. Regression checks cover title collapse, expansion and scroll position after switching tabs at normal and accessibility text sizes. Workout actions and the Coach composer use safe-area insets. Coach rejects empty or concurrent submissions before clearing the draft.
+
+## Superseding refinement: Théophile + monochrome
+
+James and teammates requested the monochrome design combined with Théophile’s green theme and custom background. James explicitly chose to restore Home, Posture, Coach and Workout (+). This supersedes the earlier four-tab labels and the monochrome-only accent rule above.
+
+Recovered `origin/design/visuals-tabs` at `c0ffdff`; original dashboard commit `536d3ba`. Reuse its artwork in greyscale with an appearance-dependent wash, and its tab order, symbols, floating capsule and lime selection. Keep native TabView stacks behind the custom bar so tab switches preserve state. Posture displays saved measured reviews; History remains available through Home activity, Settings and Workout’s menu.
+
+Keep current exercise drawings and compact widgets. Lime marks selection and small action details; activity bars use a darker accessible green in light appearance. Respect reduced transparency/motion, stack larger-text content and hide the tab bar while typing. Verify navigation, title/scroll state, saved-session flow, French, dark appearance and keyboard layouts.

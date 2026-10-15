@@ -9,12 +9,13 @@ final class NativeUIReviewUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo"]
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Summary"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 8))
         try save("summary")
         app.selectTab("Workout")
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 3))
+        XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
         try save("workout")
-        app.selectTab("History")
+        app.selectTab("Posture")
         XCTAssertTrue(app.staticTexts["No saved sessions yet."].waitForExistence(timeout: 3))
         try save("history-empty")
         app.selectTab("Coach")
@@ -24,7 +25,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["About Coach"].waitForExistence(timeout: 3))
         try save("coach-source")
         app.buttons["Done"].tap()
-        app.selectTab("Summary")
+        app.selectTab("Home")
         app.buttons["home.account"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
         try save("settings")
@@ -42,17 +43,23 @@ final class NativeUIReviewUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-plumb-ui-dark"]
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Summary"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 8))
         try save("summary-dark")
+        let regularHomeFrame = app.buttons["tab.home"].frame
         app.openWorkoutTab()
+        XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
         try save("workout-dark")
         app.terminate()
         app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Summary"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 8))
         try save("summary-largest-text")
+        XCTAssertGreaterThan(app.buttons["tab.home"].frame.height, regularHomeFrame.height)
+        XCTAssertGreaterThan(app.buttons["tab.home"].frame.width, regularHomeFrame.width)
+        try app.performAccessibilityAudit(for: [.textClipped, .hitRegion])
         app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].isHittable)
+        XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
         try save("workout-largest-text")
         app.selectTab("Coach")
         let field = app.textFields["coach.field"]
@@ -63,6 +70,9 @@ final class NativeUIReviewUITests: XCTestCase {
         try save("coach-largest-text-keyboard")
         app.buttons["coach.send"].tap()
         XCTAssertTrue(app.staticTexts["My last set"].waitForExistence(timeout: 5))
+        app.buttons["coach.dismissKeyboard"].tap()
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 3))
+        app.selectTab("Home")
     }
 
     @MainActor
@@ -70,7 +80,7 @@ final class NativeUIReviewUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-AppleLanguages", "(fr)", "-AppleLocale", "fr_FR"]
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Résumé"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.buttons["summary.workout"].label.contains("Choisir"))
         try save("summary-french")
         let best = app.buttons["home.weights"]
@@ -94,7 +104,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Make Plumb more personal?"].exists)
         try save("health-offer-largest-text")
         app.buttons["offer.later"].tap()
-        XCTAssertTrue(app.tabBars.buttons["Summary"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 3))
     }
 
     @MainActor

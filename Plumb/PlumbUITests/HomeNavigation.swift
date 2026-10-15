@@ -7,7 +7,7 @@ extension XCUIApplication {
         let skip = buttons["onboarding.finish"]
         guard skip.waitForExistence(timeout: 2) else { return }
         skip.tap()
-        XCTAssertTrue(tabBars.firstMatch.waitForExistence(timeout: 8))
+        XCTAssertTrue(buttons["tab.home"].waitForExistence(timeout: 8))
     }
 
     @MainActor
@@ -18,8 +18,9 @@ extension XCUIApplication {
 
     @MainActor
     func selectTab(_ title: String) {
-        let tab = tabBars.buttons[title]
-        XCTAssertTrue(tab.waitForExistence(timeout: 8), "Missing native tab: \(title)")
+        let ids = ["Home": "home", "Posture": "posture", "Coach": "coach", "Workout": "workout", "Séance": "workout"]
+        let tab = buttons["tab.\(ids[title] ?? title.lowercased())"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 8), "Missing tab: \(title)")
         tab.tap()
     }
 

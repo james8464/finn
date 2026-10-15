@@ -3,14 +3,14 @@ import Charts
 
 /// Stable destinations. Starting a set is an action inside Workout, never a tab action.
 enum HomeTab: String, CaseIterable {
-    case home = "Summary", workout = "Workout", history = "History", coach = "Coach"
+    case home = "Home", posture = "Posture", coach = "Coach", workout = "Workout"
 
     var symbol: String {
         switch self {
-        case .home: "chart.bar.xaxis"
-        case .workout: "figure.strengthtraining.functional"
-        case .history: "clock.arrow.circlepath"
-        case .coach: "bubble.left.and.text.bubble.right"
+        case .home: "house.fill"
+        case .workout: "plus"
+        case .posture: "figure.run"
+        case .coach: "person"
         }
     }
 
@@ -18,7 +18,7 @@ enum HomeTab: String, CaseIterable {
         switch self {
         case .home: "tab.home"
         case .workout: "tab.workout"
-        case .history: "tab.history"
+        case .posture: "tab.posture"
         case .coach: "tab.coach"
         }
     }
@@ -60,8 +60,8 @@ struct DashboardView: View {
             .frame(maxWidth: .infinity)
         }
         .accessibilityIdentifier("summary.scroll")
-        .background(HomeStyle.background)
-        .navigationTitle("Summary")
+        .background { HomeBackdrop() }
+        .navigationTitle("Home")
     }
 
     private var workoutCard: some View {
@@ -80,6 +80,7 @@ struct DashboardView: View {
                     Spacer(minLength: 0)
                     Image(systemName: "arrow.right.circle.fill")
                         .font(.system(size: 32, weight: .regular))
+                        .foregroundStyle(HomeStyle.lime)
                         .accessibilityHidden(true)
                 }
             }
@@ -138,7 +139,7 @@ struct DashboardView: View {
             BarMark(x: .value("Day", day.date.formatted(.dateTime.weekday(.wide))),
                     y: .value("Reps", day.reps), width: .ratio(0.5))
                 .cornerRadius(3)
-                .foregroundStyle(HomeStyle.accent)
+                .foregroundStyle(HomeStyle.activityGreen)
                 .accessibilityLabel(day.date.formatted(date: .complete, time: .omitted))
                 .accessibilityValue(String(localized: "\(day.reps) reps"))
         }

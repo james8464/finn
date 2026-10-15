@@ -1,24 +1,20 @@
-# Native interface
+# Plumb interface
 
-Plumb uses four system tabs: Summary, Workout, History and Coach. Each keeps its own navigation state. Settings is available in the toolbar; Workout also has a menu for related screens.
+Use Home, Posture, Coach and Workout (+), in that order. James approved restoring Théophile’s tab composition on 15 October 2026. The floating bar uses his home, runner, person-with-sparkles and plus symbols. Each destination retains its own navigation stack.
 
-- **Summary:** selected workout, seven-day activity, best set for the selected exercise, awards and the latest saved session.
-- **Workout:** exercise selection, illustrated camera placement, relevant saved observations, and Start a set.
-- **History:** saved measurements, session details and deletion controls.
-- **Coach:** a conversation grounded in saved sets, with source information one tap away.
+- **Home:** selected exercise illustration, seven-day measured reps, best set, awards and latest saved session. Activity opens History.
+- **Posture:** saved sessions and their measured set reviews. Do not invent posture scores.
+- **Coach:** conversation grounded in saved sets, with source information available.
+- **Workout:** exercise selection, camera-placement illustration and Start a set. Selecting the plus tab opens setup; it does not start the camera.
 
-Use system text styles, a semantic white/black canvas and monochrome actions that invert with appearance. Reserve system glass for navigation and controls. Show real measurements; avoid decorative charts, unimplemented feature cards and generated photo backdrops. Keep camera controls legible over live footage.
+Keep the black-and-white foundation, system text styles and concise labels. Théophile’s original background is desaturated and softened behind Home. Lime highlights selected tabs, exercise chips and action arrows; charts use a darker green in light appearance for contrast. Other content surfaces remain opaque. Preserve light/dark appearance, Dynamic Type, Reduce Motion and Reduce Transparency.
 
-[Research and design decisions](../architecture/specs/2026-10-15-native-ui-design.md) · [HIG coverage](hig-ui-coverage.md) · [Verification](native-ui-verification.md) · [Implementation plan](../architecture/plans/2026-10-15-native-ui.md)
+Large titles collapse with scrolling. Bottom controls respect safe areas. The tab bar hides while the keyboard is open; the Coach composer remains accessible. At accessibility text sizes tab labels remain visible, the bar uses two rows, and Home widgets stack vertically. Coach offers a Done keyboard control to restore navigation without sending a message.
 
-The earlier photo dashboard is preserved in Git history and [PR 25](https://github.com/james8464/hackathon-project/pull/25). Its screenshots describe that version, not the current interface.
+## Source and preservation
 
-## Widget refinement
+Théophile’s branch is [design/visuals-tabs](https://github.com/james8464/hackathon-project/tree/design/visuals-tabs), last inspected at `c0ffdff`. His dashboard originated in `536d3ba`; the branch and its history were not lost. This refinement reuses the original HomeBackdrop asset and tab composition without replacing the app’s measurement or storage logic.
 
-Summary uses an illustrated selected-workout card, a seven-day rep widget, compact Best set/Awards tiles and a recent-session card. The chart groups sets by their local capture date and excludes future measurements. Empty history shows a short explanation instead of fabricated graph bars. Accessibility text sizes stack compact tiles vertically.
+Keep the combined design on `ui/apple-native-revamp` and PR 26 draft until James requests a merge. Other worktrees remain independent.
 
-Keep this exploration on `ui/apple-native-revamp`. Do not merge it into main without James's instruction. Secondary surfaces use quiet grey fills and thin borders, without shadows; symbols identify content. System large titles collapse with the primary scroll view. Workout actions and the Coach composer use safe-area insets so content stays reachable.
-
-## Chosen visual direction
-
-James selected the earlier black-and-white exercise illustration as the strongest reference. Keep the large dark exercise card and capsule actions. Use Fitness-inspired compact widgets for real measurements, without coloured dashboard tiles or stock photography. Colour remains appropriate for Stop, errors and system status. Keep labels factual and short; omit introductory slogans and repeated explanations.
+[Research](../architecture/specs/2026-10-15-native-ui-design.md) · [HIG coverage](hig-ui-coverage.md) · [Verification](native-ui-verification.md)

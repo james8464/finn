@@ -4,6 +4,12 @@ import SwiftUI
 /// Shared semantic colours. Content surfaces stay opaque; system bars provide materials.
 enum HomeStyle {
     static let background = Color(uiColor: .systemBackground)
+    static let lime = Color(red: 0.80, green: 0.97, blue: 0.35)
+    static let activityGreen = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.80, green: 0.97, blue: 0.35, alpha: 1)
+            : UIColor(red: 0.25, green: 0.39, blue: 0.05, alpha: 1)
+    })
     static let accent = Color.primary
     /// Monochrome actions invert with the system appearance.
     static let filledAccent = Color.primary
@@ -128,8 +134,8 @@ struct ExerciseChips: View {
                 .font(.subheadline.weight(.semibold))
                 .padding(.horizontal, 15)
                 .frame(minHeight: 44)
-                .foregroundStyle(selected ? HomeStyle.onAccent : Color.primary)
-                .background(selected ? HomeStyle.filledAccent : HomeStyle.card, in: Capsule())
+                .foregroundStyle(selected ? Color.black : Color.primary)
+                .background(selected ? HomeStyle.lime : HomeStyle.card, in: Capsule())
                 .contentShape(Capsule())
         }
         .buttonStyle(PressableStyle())
@@ -213,9 +219,9 @@ struct PrimaryActionLabel: View {
             Spacer(minLength: 0)
             Image(systemName: symbol)
                 .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(HomeStyle.filledAccent)
+                .foregroundStyle(.black)
                 .frame(width: 34, height: 34)
-                .background(HomeStyle.onAccent, in: Circle())
+                .background(HomeStyle.lime, in: Circle())
                 .accessibilityHidden(true)
         }
         .padding(.leading, 22)

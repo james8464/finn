@@ -94,6 +94,13 @@ struct CoachView: View {
         .background(HomeStyle.background.ignoresSafeArea())
         .navigationTitle("Coach")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { fieldFocused = false }
+                    .accessibilityIdentifier("coach.dismissKeyboard")
+            }
+        }
         .sheet(isPresented: $showsSource) {
             NavigationStack {
                 List {

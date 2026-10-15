@@ -79,3 +79,23 @@ The earlier 468-test run belongs to the initial native pass; it was not repeated
 - [Largest-text Coach with keyboard](screenshots/2026-10-15-monochrome/coach-largest-text-keyboard-demo.png).
 
 Keep this work on `ui/apple-native-revamp`, with PR 26 draft. Main and teammates' worktrees are unchanged by this refinement.
+
+## Théophile hybrid refinement
+
+Recovered `origin/design/visuals-tabs` at `c0ffdff`, including the original background image. It was still on GitHub. James explicitly approved restoring Home / Posture / Coach / Workout (+). The hybrid keeps monochrome exercise cards and measured-data widgets, adds lime selection/action accents, and presents the original backdrop in greyscale with a wash and bottom fade.
+
+The custom bar retains the underlying TabView and independent navigation stacks. It occupies a separate layout region: the initial outer safe-area inset covered Start a set and Coach’s source link. Regression checks now assert that Start stays above the bar. Accessibility text uses two tab rows with visible labels and stable identities. Coach’s Done keyboard control restores navigation without submitting a draft.
+
+Measurement/storage logic and localization entries are unchanged. The original backdrop matches the source branch byte for byte; display treatment is applied in SwiftUI. Other branches, main and worktrees remain untouched.
+
+Current screenshots: [Home, light](screenshots/2026-10-15-theophile-hybrid/home-light.png), [Home, dark](screenshots/2026-10-15-theophile-hybrid/home-dark.png), [Workout with largest text](screenshots/2026-10-15-theophile-hybrid/workout-largest-text-demo.png), [Coach keyboard](screenshots/2026-10-15-theophile-hybrid/coach-largest-text-keyboard-demo.png). Screenshots marked demo use synthetic input.
+
+### Hybrid verification status
+
+Nine distinct navigation/screen checks passed across focused runs: five dashboard checks and four screen tours, including French, saved-session flow, nested navigation, title/scroll preservation and keyboard return. The final two-test typography/layout rerun passed and checks growth of tab targets and runs clipping/hit-region audits at the largest text size.
+
+**Open audit limitation:** the full light/dark setup audits still report `Dynamic Type font sizes are partially unsupported` on custom tab nodes. Some intermediate runs also reported contrast on those nodes. The bar uses semantic text fonts, scalable symbols and targets, and visible larger labels, and rendered screenshots were inspected; these observations do not make the full audits green. No audit issues were suppressed. Keep the automated warning visible for follow-up.
+
+The signed iPhone Release build uses a temporary personal-team signing copy; repository signing settings are unchanged. This verification does not establish physical camera accuracy or service integration behavior.
+
+The final signed iPhone Release build passed. Installed and launched successfully on James’s connected iPhone, preserving the existing app container.

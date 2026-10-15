@@ -33,6 +33,7 @@ struct ContentView: View {
         }
     }
     @State private var selectedTab: HomeTab = .home
+    @State private var keyboardVisible = false
     /// What the camera does, shown once before iOS asks for it.
     @State private var showsCameraPrimer = false
     /// The first-launch screens (`Onboarding/`), also replayed from Options.
@@ -126,7 +127,7 @@ struct ContentView: View {
             switch arguments[index + 1] {
             case "coach": selectedTab = .coach
             case "workout": selectedTab = .workout
-            case "history": selectedTab = .history
+            case "history": route = .history
             case "options": route = .options
             case "privacy": route = .privacy
             case "awards": route = .awards
@@ -289,31 +290,46 @@ struct ContentView: View {
     }
 
     private var setup: some View {
-        TabView(selection: $selectedTab) {
-            ForEach(HomeTab.allCases, id: \.self) { tab in
-                NavigationStack {
-                    tabContent(tab)
-                        .navigationDestination(item: Binding(
-                            get: { tabRoutes[tab] },
-                            set: { tabRoutes[tab] = $0 }
-                        )) { destinationPage($0) }
-                        .toolbar {
-                            if tab != .workout {
-                                ToolbarItem(placement: .topBarTrailing) {
-                                    Button { route = .account } label: {
-                                        Label("Settings", systemImage: "gearshape")
+        VStack(spacing: 0) {
+            TabView(selection: $selectedTab) {
+                ForEach(HomeTab.allCases, id: \.self) { tab in
+                    NavigationStack {
+                        tabContent(tab)
+                            .navigationDestination(item: Binding(
+                                get: { tabRoutes[tab] },
+                                set: { tabRoutes[tab] = $0 }
+                            )) { destinationPage($0) }
+                            .toolbar {
+                                if tab != .workout {
+                                    ToolbarItem(placement: .topBarTrailing) {
+                                        Button { route = .account } label: {
+                                            Label("Settings", systemImage: "gearshape")
+                                        }
+                                        .accessibilityIdentifier("home.account")
                                     }
-                                    .accessibilityIdentifier("home.account")
                                 }
                             }
-                        }
+                    }
+                    .toolbar(.hidden, for: .tabBar)
+                    .tabItem {
+                        Label(LocalizedStringKey(tab.rawValue), systemImage: tab.symbol)
+                            .accessibilityIdentifier(tab.identifier)
+                    }
+                    .tag(tab)
                 }
-                .tabItem {
-                    Label(LocalizedStringKey(tab.rawValue), systemImage: tab.symbol)
-                        .accessibilityIdentifier(tab.identifier)
-                }
-                .tag(tab)
             }
+            if !keyboardVisible {
+                HomeTabBar(selection: $selectedTab)
+                    .padding(.top, 8)
+                    .padding(.bottom, 4)
+            }
+        }
+        .background(HomeStyle.background)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            keyboardVisible = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            keyboardVisible = false
         }
     }
 
@@ -323,7 +339,7 @@ struct ContentView: View {
             DashboardView(history: model.history, exercise: model.selectedExercise,
                           badges: badges.earned, startWorkout: { selectedTab = .workout }) { route = $0 }
         case .workout: workoutSetup
-        case .history: historyPage
+        case .posture: historyList(title: "Posture", exercise: nil)
         case .coach: CoachView(history: model.history)
         }
     }
