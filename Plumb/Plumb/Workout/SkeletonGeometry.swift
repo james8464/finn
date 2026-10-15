@@ -67,7 +67,7 @@ nonisolated struct SkeletonGeometry: Equatable {
                                                 aspectRatio: frame.aspectRatio) {
             let rounded = Int(degrees.rounded())
             angle = AngleLabel(vertex: place(vertex), degrees: rounded,
-                               text: "\(roles.vertex.rawValue.capitalized) \(rounded)°",
+                               text: "\(roles.vertex.localizedName) \(rounded)°",
                                reliable: reliable(from) && reliable(vertex) && reliable(to))
         } else {
             angle = nil
