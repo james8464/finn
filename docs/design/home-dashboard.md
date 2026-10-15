@@ -15,3 +15,5 @@ The original design uses dark appearance. At accessibility text sizes the tabs u
 James requested integration into main after verification. Preserve current main functionality while keeping the approved Home / Posture / Coach / Workout destinations.
 
 [Research](../architecture/specs/2026-10-15-native-ui-design.md) · [HIG reference](apple-hig-agent-reference.md) · [Verification](native-ui-verification.md)
+
+Supporting screens follow the system appearance with semantic grouped surfaces and native controls. Options uses one grouped Form section per preference category; privacy topics expand in place. Workout setup, results, Coach and Posture use consistent typography and opaque content surfaces. The Home dashboard retains its approved charcoal and pink presentation.

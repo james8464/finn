@@ -6,7 +6,8 @@ struct CoachView: View {
     @State private var draft = ""
     @State private var showsSource = false
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     @FocusState private var fieldFocused: Bool
     private let history: [WorkoutSessionSummary]
 
@@ -25,8 +26,25 @@ struct CoachView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     ForEach(conversation.messages) { message in
-                        bubble(message)
+                        if conversation.messages.count == 1 {
+                            VStack(alignment: .leading, spacing: 16) {
+                                Image(systemName: "bubble.left.and.text.bubble.right")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(AppPageStyle.tint)
+                                    .accessibilityHidden(true)
+                                Text("Ask about your sets")
+                                    .font(.title2.weight(.bold))
+                                Text(message.text)
+                                    .font(.body)
+                                    .foregroundStyle(AppPageStyle.secondaryText)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .modifier(AppSurface())
                             .id(message.id)
+                        } else {
+                            bubble(message)
+                            .id(message.id)
+                        }
                     }
                     if conversation.isAnswering {
                         HStack(spacing: 8) {
@@ -51,6 +69,7 @@ struct CoachView: View {
                 withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(last.id, anchor: .bottom) }
             }
         }
+        .clipped()
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 6) {
                 HStack(spacing: 10) {
@@ -73,31 +92,33 @@ struct CoachView: View {
                             .frame(width: 44, height: 44)
                             .symbolRenderingMode(.hierarchical)
                     }
+                    .tint(AppPageStyle.tint)
                     .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || conversation.isAnswering)
                     .accessibilityLabel("Send")
                     .accessibilityIdentifier("coach.send")
                 }
-                Button { showsSource = true } label: {
-                    Label("About Coach", systemImage: "info.circle")
-                        .fixedSize(horizontal: false, vertical: true)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("coach.engine")
-                .accessibilityHint("Explains how the Coach chooses its answer")
             }
             .padding(.horizontal, 20)
             .padding(.top, 10)
             .padding(.bottom, 8)
-            .background(HomeStyle.background)
+            .background(AppPageStyle.background)
         }
-        .background(HomeStyle.background.ignoresSafeArea())
+        .background(AppPageStyle.background.ignoresSafeArea())
         .navigationTitle("Coach")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showsSource = true } label: {
+                    Image(systemName: "info.circle")
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .frame(minWidth: 44, minHeight: 44)
+                .accessibilityLabel("About Coach")
+                .accessibilityIdentifier("coach.engine")
+                .accessibilityHint("Explains how the Coach chooses its answer")
+            }
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
                 Button("Done") { fieldFocused = false }
@@ -109,7 +130,7 @@ struct CoachView: View {
                 List {
                     Section("Source") {
                         Text(engineLine)
-                        if let note = conversation.engineNote { Text(note).foregroundStyle(.secondary) }
+                        if let note = conversation.engineNote { Text(note).foregroundStyle(AppPageStyle.secondaryText) }
                     }
                     Section { Text("Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique.") }
                 }
@@ -159,7 +180,7 @@ struct CoachView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(message.text)
                     .font(.body)
-                    .foregroundStyle(isCoach ? Color.primary : HomeStyle.onAccent)
+                    .foregroundStyle(isCoach ? Color.primary : Color.black)
                     .fixedSize(horizontal: false, vertical: true)
                 if isCoach, !history.isEmpty, let engine = message.engine {
                     Text(engine.label)
@@ -169,7 +190,7 @@ struct CoachView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(isCoach ? HomeStyle.card : HomeStyle.filledAccent,
+            .background(isCoach ? AppPageStyle.surface : AppPageStyle.action,
                         in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             if isCoach { Spacer(minLength: 40) }
         }

@@ -4,7 +4,8 @@ struct PostureGuideView: View {
     let history: [WorkoutSessionSummary]
     @State private var exercise: ExerciseKind
     @State private var playsIllustration = true
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     init(history: [WorkoutSessionSummary], initialExercise: ExerciseKind) {
         self.history = history
@@ -31,9 +32,9 @@ struct PostureGuideView: View {
                                     .font(.subheadline.weight(.semibold))
                                     .padding(.horizontal, 14)
                                     .frame(minHeight: 44)
-                                    .background(exercise == kind ? DashboardStyle.accent : Color.white.opacity(0.12),
+                                    .background(exercise == kind ? DashboardStyle.accent : AppPageStyle.surface,
                                                 in: Capsule())
-                                    .foregroundStyle(exercise == kind ? .black : .white)
+                                    .foregroundStyle(exercise == kind ? Color.black : Color.primary)
                             }
                             .buttonStyle(.plain)
                             .accessibilityIdentifier("posture.exercise.\(kind.rawValue)")
@@ -54,19 +55,21 @@ struct PostureGuideView: View {
                             playsIllustration.toggle()
                         }
                         .font(.subheadline)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .buttonStyle(.bordered)
+                        .disabled(reduceMotion)
                         .accessibilityIdentifier("posture.playback")
                     }
-                    ExerciseFigureView(kind: exercise, lineColor: DashboardStyle.accent,
-                                       animates: playsIllustration)
+                    ExerciseFigureView(kind: exercise, lineColor: AppPageStyle.tint,
+                                       animates: playsIllustration && !reduceMotion)
                         .frame(height: 230)
                         .frame(maxWidth: .infinity)
                         .accessibilityIdentifier("posture.illustration")
                     Text(reduceMotion ? "Motion paused for Reduce Motion" : "Illustration for guidance; bodies and ranges vary")
                         .font(.caption)
-                        .foregroundStyle(DashboardStyle.secondary)
+                        .foregroundStyle(AppPageStyle.secondaryText)
                 }
-                .padding(16)
-                .modifier(DashboardGlass())
+                .modifier(AppSurface())
 
                 VStack(alignment: .leading, spacing: 12) {
                     Text("How to move")
@@ -83,8 +86,7 @@ struct PostureGuideView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .modifier(DashboardGlass())
+                .modifier(AppSurface())
 
                 comparison
             }
@@ -94,8 +96,8 @@ struct PostureGuideView: View {
             .frame(maxWidth: .infinity)
         }
         .accessibilityIdentifier("posture.guide")
-        .foregroundStyle(.white)
-        .background { HomeBackdrop() }
+        .foregroundStyle(Color.primary)
+        .background(AppPageStyle.background.ignoresSafeArea())
         .navigationTitle("Posture")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -114,7 +116,7 @@ struct PostureGuideView: View {
                     Text("·")
                     Text(latest.capturedAt.formatted(date: .abbreviated, time: .omitted))
                 }
-                .foregroundStyle(DashboardStyle.secondary)
+                .foregroundStyle(AppPageStyle.secondaryText)
 
                 if !evidence.measurements.isEmpty {
                     ForEach(evidence.measurements, id: \.check) { measurement in
@@ -135,7 +137,7 @@ struct PostureGuideView: View {
                     ForEach(evidence.trends, id: \.check) { trend in
                         Text(trend.sentence)
                             .font(.subheadline)
-                            .foregroundStyle(DashboardStyle.secondary)
+                            .foregroundStyle(AppPageStyle.secondaryText)
                     }
                 } else if let issue = evidence.movementIssue {
                     Text("What Finn noticed")
@@ -150,17 +152,16 @@ struct PostureGuideView: View {
                          ? String(localized: "No reliable side-view form comparison for this set. Keep your whole body in view and record another set.")
                          : String(localized: "No specific movement change measured for this set. Keep your whole body in view and record another set."))
                         .font(.subheadline)
-                        .foregroundStyle(DashboardStyle.secondary)
+                        .foregroundStyle(AppPageStyle.secondaryText)
                 }
             } else {
                 Text("Record a set of this exercise to see your measured movement here.")
                     .font(.subheadline)
-                    .foregroundStyle(DashboardStyle.secondary)
+                    .foregroundStyle(AppPageStyle.secondaryText)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .modifier(DashboardGlass())
+        .modifier(AppSurface())
         .accessibilityIdentifier("posture.comparison")
     }
 
@@ -174,17 +175,17 @@ struct PostureGuideView: View {
                 Text(measurement.check.subject.capitalized)
                     .font(.subheadline.weight(.semibold))
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text("Guide:").foregroundStyle(DashboardStyle.secondary)
+                    Text("Guide:").foregroundStyle(AppPageStyle.secondaryText)
                     Text(measurement.check.guidePoint)
                 }
                 .font(.caption)
                 HStack(spacing: 4) {
-                    Text("Your set:").foregroundStyle(DashboardStyle.secondary)
+                    Text("Your set:").foregroundStyle(AppPageStyle.secondaryText)
                     Text("\(measurement.faulty)/\(measurement.judged)")
                     Text("readable reps flagged")
                 }
                 .font(.caption)
-                .foregroundStyle(DashboardStyle.secondary)
+                .foregroundStyle(AppPageStyle.secondaryText)
             }
             Spacer(minLength: 0)
         }

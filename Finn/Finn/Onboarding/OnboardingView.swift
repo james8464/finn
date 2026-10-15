@@ -9,7 +9,8 @@ struct OnboardingView: View {
 
     @State private var step = 0
     @State private var profile: OnboardingProfile
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     @Environment(\.dynamicTypeSize) private var typeSize
 
     private static let stepCount = 5
@@ -373,7 +374,8 @@ private struct ExerciseTile: View {
 /// on the right, a dotted line between them at hip height, and the camera's field of view.
 struct PlacementScene: View {
     let kind: ExerciseKind
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { timeline in

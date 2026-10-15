@@ -14,7 +14,7 @@ struct BadgesView: View {
                     Text(ledger.count == 0
                          ? "No awards yet"
                          : "\(ledger.count) awards earned")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(AppPageStyle.secondaryText)
                         .accessibilityIdentifier("badges.count")
                 }
                 .padding(.vertical, 12)
@@ -38,6 +38,7 @@ struct BadgesView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Awards")
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear { ledger.acknowledge() }
         .sheet(item: $selected) { entry in
             BadgeDetailView(kind: entry.kind, earned: entry.earned)
@@ -63,11 +64,11 @@ struct BadgeRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(kind.title).font(.headline).fixedSize(horizontal: false, vertical: true)
                 Text(earned?.detail ?? kind.rule)
-                    .font(.subheadline).foregroundStyle(.secondary)
+                    .font(.subheadline).foregroundStyle(AppPageStyle.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
                 if let earned {
                     Label(earned.earnedAt.formatted(date: .abbreviated, time: .omitted), systemImage: "checkmark")
-                        .font(.footnote).foregroundStyle(.secondary)
+                        .font(.footnote).foregroundStyle(AppPageStyle.secondaryText)
                 }
             }
         }
@@ -87,11 +88,11 @@ struct BadgeMark: View {
             if earned {
                 Circle().fill(DashboardStyle.accent)
             } else {
-                Circle().strokeBorder(.white.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [3, 4]))
+                Circle().strokeBorder(Color.secondary.opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [3, 4]))
             }
             Image(systemName: kind.symbol)
                 .font(.system(size: size * 0.42, weight: .semibold))
-                .foregroundStyle(earned ? Color.black : Color.white.opacity(0.55))
+                .foregroundStyle(earned ? Color.black : Color.secondary)
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
@@ -143,7 +144,7 @@ struct BadgeUnlockCard: View {
                     ForEach(badges) { badge in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(badge.kind.title).font(.headline)
-                            Text(badge.detail).font(.subheadline).foregroundStyle(.secondary)
+                            Text(badge.detail).font(.subheadline).foregroundStyle(AppPageStyle.secondaryText)
                         }
                     }
                     Label("View awards", systemImage: "chevron.right").font(.subheadline)

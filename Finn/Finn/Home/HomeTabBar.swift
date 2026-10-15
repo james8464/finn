@@ -51,7 +51,10 @@ struct DashboardGlass: ViewModifier {
 
 struct HomeTabBar: View {
     @Binding var selection: HomeTab
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    var dashboardAppearance = true
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.dynamicTypeSize) private var typeSize
     // Caption2 plateaus at smaller sizes. Body scaling preserves 11pt at default
@@ -59,6 +62,7 @@ struct HomeTabBar: View {
     @ScaledMetric(relativeTo: .body) private var labelSize = 11.0
     @ScaledMetric(relativeTo: .body) private var tabHeight = 64.0
     @Namespace private var glassSelection
+    private var lightSurface: Bool { !dashboardAppearance && colorScheme == .light }
 
     var body: some View {
         tabs
@@ -80,7 +84,7 @@ struct HomeTabBar: View {
         .padding(4)
         // Stable charcoal surfaces retain the glass outline without variable contrast
         // beneath small labels. The selection still moves between tabs.
-        .modifier(DashboardGlass(radius: 48, stableBackdrop: true))
+        .modifier(TabSurface(light: lightSurface))
         .animation(reduceMotion ? nil : .spring(duration: 0.28, bounce: 0.12), value: selection)
         .sensoryFeedback(.selection, trigger: selection)
         .padding(.horizontal, 12)
@@ -119,7 +123,9 @@ struct HomeTabBar: View {
                             .font(.system(size: labelSize, weight: selection == tab ? .medium : .regular))
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    .foregroundStyle(selection == tab ? DashboardStyle.accent : DashboardStyle.secondary)
+                    .foregroundStyle(selection == tab
+                                     ? (lightSurface ? AppPageStyle.tint : DashboardStyle.accent)
+                                     : (lightSurface ? AppPageStyle.secondaryText : DashboardStyle.secondary))
                     .frame(maxWidth: .infinity, minHeight: typeSize.isAccessibilitySize ? min(tabHeight, 88) - 2 : 62)
                     .padding(.vertical, 1)
                     .contentShape(Capsule())
@@ -132,7 +138,10 @@ struct HomeTabBar: View {
     }
 
     @ViewBuilder private var selectionCapsule: some View {
-        if reduceTransparency || HomeAccessibilityDiagnostics.opaqueSurface {
+        if lightSurface {
+            Capsule().fill(Color(uiColor: .secondarySystemGroupedBackground))
+                .matchedGeometryEffect(id: "selection", in: glassSelection)
+        } else if reduceTransparency || HomeAccessibilityDiagnostics.opaqueSurface {
             Capsule().fill(Color(white: 0.04))
                 .matchedGeometryEffect(id: "selection", in: glassSelection)
         } else {
@@ -143,6 +152,20 @@ struct HomeTabBar: View {
                     Capsule().strokeBorder(.white.opacity(0.10), lineWidth: 1)
                 }
                 .matchedGeometryEffect(id: "selection", in: glassSelection)
+        }
+    }
+}
+
+private struct TabSurface: ViewModifier {
+    let light: Bool
+
+    func body(content: Content) -> some View {
+        if light {
+            content
+                .background(Color(uiColor: .tertiarySystemGroupedBackground), in: Capsule())
+                .overlay(Capsule().strokeBorder(Color(uiColor: .separator).opacity(0.25), lineWidth: 0.5))
+        } else {
+            content.modifier(DashboardGlass(radius: 48, stableBackdrop: true))
         }
     }
 }

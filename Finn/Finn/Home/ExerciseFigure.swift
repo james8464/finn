@@ -166,7 +166,8 @@ struct ExerciseFigureView: View {
     let kind: ExerciseKind
     var lineColor: Color = .white
     var animates = true
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     /// Seconds for one rep, down and up.
     private let period = 3.2
