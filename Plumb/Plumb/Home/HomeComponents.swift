@@ -198,7 +198,7 @@ struct HomeCard<Content: View>: View {
 
 /// The one filled action of a screen: a full-width pill with its arrow in a circle of its own.
 struct PrimaryActionLabel: View {
-    let title: LocalizedStringKey
+    let title: LocalizedStringResource
     var symbol = "arrow.right"
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -206,9 +206,7 @@ struct PrimaryActionLabel: View {
         let shape = typeSize.isAccessibilitySize
             ? AnyShape(RoundedRectangle(cornerRadius: 24, style: .continuous)) : AnyShape(Capsule())
         HStack(spacing: 12) {
-            Text(title)
-                .font(.headline)
-                .fixedSize(horizontal: false, vertical: true)
+            WrappingText(text: String(localized: title), style: .headline, color: .systemBackground)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: symbol)
                 .font(.system(size: 17, weight: .semibold))
@@ -224,6 +222,7 @@ struct PrimaryActionLabel: View {
         .foregroundStyle(Color(uiColor: .systemBackground))
         .background(Color.primary, in: shape)
         .contentShape(shape)
+        .accessibilityLabel(Text(title))
     }
 }
 
@@ -254,8 +253,7 @@ struct CameraPrimer: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    Text("What the camera does")
-                        .font(.title2.bold())
+                    WrappingText(text: String(localized: "What the camera does"), style: .title2, weight: .bold)
                         .accessibilityAddTraits(.isHeader)
                     primerRow("figure.strengthtraining.functional", "Counts your reps",
                               "Plumb follows one person from the side and ignores anyone else in view.")
@@ -280,8 +278,16 @@ struct CameraPrimer: View {
                     ? AnyLayout(VStackLayout(spacing: 4))
                     : AnyLayout(HStackLayout(spacing: 24))
                 layout {
-                    Button { dismiss() } label: { Text("Not now").frame(minHeight: 44) }
-                    Button(action: onPrivacy) { Text("Privacy details").frame(minHeight: 44) }
+                    Button { dismiss() } label: {
+                        WrappingText(text: String(localized: "Not now"), style: .subheadline, weight: .medium,
+                                     color: .secondaryLabel, alignment: .center).frame(minHeight: 44)
+                    }
+                    .accessibilityLabel("Not now")
+                    Button(action: onPrivacy) {
+                        WrappingText(text: String(localized: "Privacy details"), style: .subheadline, weight: .medium,
+                                     color: .secondaryLabel, alignment: .center).frame(minHeight: 44)
+                    }
+                        .accessibilityLabel("Privacy details")
                         .accessibilityIdentifier("primer.privacy")
                 }
                 .font(.subheadline.weight(.medium))
@@ -295,18 +301,15 @@ struct CameraPrimer: View {
         .tint(HomeStyle.accent)
     }
 
-    private func primerRow(_ symbol: String, _ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
+    private func primerRow(_ symbol: String, _ title: LocalizedStringResource, _ detail: LocalizedStringResource) -> some View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: symbol)
                 .font(.system(size: 20))
                 .frame(width: 32)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.headline)
-                Text(detail)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.primary.opacity(0.8))
-                    .fixedSize(horizontal: false, vertical: true)
+                WrappingText(text: String(localized: title), style: .headline)
+                WrappingText(text: String(localized: detail), style: .subheadline, color: .label.withAlphaComponent(0.8))
             }
         }
         .accessibilityElement(children: .combine)

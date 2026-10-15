@@ -179,27 +179,14 @@ struct BadgeDetailView: View {
             VStack(spacing: 18) {
                 BadgeMark(kind: kind, earned: earned != nil, size: 120)
                     .padding(.top, 36)
-                Text(kind.title)
-                    .font(.title.bold())
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
+                WrappingText(text: kind.title, style: .title1, weight: .bold, alignment: .center)
                     .accessibilityAddTraits(.isHeader)
                 if let earned {
-                    Text(earned.detail)
-                        .font(.body)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(earned.earnedAt.formatted(.dateTime.day().month(.wide).year().hour().minute()))
-                        .font(.footnote)
-                        .foregroundStyle(HomeStyle.supportingText)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
+                    WrappingText(text: earned.detail, alignment: .center)
+                    WrappingText(text: earned.earnedAt.formatted(.dateTime.day().month(.wide).year().hour().minute()),
+                                 style: .footnote, color: .secondaryLabel, alignment: .center)
                 } else {
-                    Text(kind.rule)
-                        .font(.body)
-                        .foregroundStyle(HomeStyle.supportingText)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
+                    WrappingText(text: kind.rule, color: .secondaryLabel, alignment: .center)
                 }
             }
             .padding(.horizontal, 32)

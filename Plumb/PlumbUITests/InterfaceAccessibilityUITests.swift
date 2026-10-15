@@ -46,13 +46,20 @@ final class InterfaceAccessibilityUITests: XCTestCase {
             if id == "home.awards" {
                 app.buttons["badge.row"].firstMatch.tap()
                 try check(app, "\(prefix)-03-award-detail")
+                for _ in 0..<12 where !app.buttons["Done"].isHittable { app.scrollViews.firstMatch.swipeUp() }
                 app.buttons["Done"].tap()
             }
             app.navigationBars.buttons.element(boundBy: 0).tap()
         }
         try check(app, "\(prefix)-04-home-bottom")
-        for _ in 0..<6 where !app.buttons["home.account"].isHittable { app.swipeDown() }
+        // iOS 27 can report an offscreen scroll child as hittable. Start the
+        // settings survey from a fresh Home instead of tapping that stale node.
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(app.buttons["home.account"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["home.account"].isHittable)
         app.buttons["home.account"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
         try check(app, "\(prefix)-05-settings")
         app.buttons["Options"].tap()
         try check(app, "\(prefix)-06-options-top")

@@ -398,16 +398,28 @@ struct ContentView: View {
             }
             Section {
                 NavigationLink { optionsPage } label: {
-                    Label("Options", systemImage: "slider.horizontal.3")
-                        .fixedSize(horizontal: false, vertical: true)
+                    Label {
+                        WrappingText(text: String(localized: "Options"))
+                    } icon: {
+                        Image(systemName: "slider.horizontal.3").accessibilityHidden(true)
+                    }
+                    .accessibilityLabel("Options")
                 }
                 NavigationLink { historyPage } label: {
-                    Label("History", systemImage: "clock.arrow.circlepath")
-                        .fixedSize(horizontal: false, vertical: true)
+                    Label {
+                        WrappingText(text: String(localized: "History"))
+                    } icon: {
+                        Image(systemName: "clock.arrow.circlepath").accessibilityHidden(true)
+                    }
+                    .accessibilityLabel("History")
                 }
                 NavigationLink { privacyPage } label: {
-                    Label("Privacy", systemImage: "lock")
-                        .fixedSize(horizontal: false, vertical: true)
+                    Label {
+                        WrappingText(text: String(localized: "Privacy"))
+                    } icon: {
+                        Image(systemName: "lock").accessibilityHidden(true)
+                    }
+                    .accessibilityLabel("Privacy")
                 }
             }
             Section("Account") {

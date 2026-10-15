@@ -177,8 +177,20 @@ Sheets, onboarding and results now inherit the app’s dark appearance. Health�
 
 The survey captured 84 screen states across Home details, awards, settings, privacy, Health, camera setup, all five onboarding pages, both demo pages, four tabs, framing, capture, results, saved sessions and camera errors at normal and largest text sizes. Follow-up tests scroll long pages to their final controls. Demo captures and laptop previews use isolated synthetic input; they do not establish camera measurement accuracy or live Coach/Health integration.
 
-**Audit limitation:** the broader structural scan reported predictive clipping on some fully visible native rows and sheet labels. It was not repeated in full after the final targeted fixes. Findings remain unsuppressed in `InterfaceAccessibilityUITests`; screenshots and scrolling checks are separate evidence, not a claim that every automated accessibility audit passes. The palette test checks the actual brand/secondary-label combinations against stable dark surfaces, not every material or system control.
+**Earlier audit limitation, resolved in the clipping follow-up below:** the broader structural scan reported predictive clipping on some fully visible native rows and sheet labels. Findings remain unsuppressed in `InterfaceAccessibilityUITests`. The palette test checks the actual brand/secondary-label combinations against stable dark surfaces, not every material or system control.
 
 To repeat the manual survey, set `TEST_RUNNER_PLUMB_CAPTURE_DIR` when running `InterfaceAccessibilityUITests`. Add `TEST_RUNNER_PLUMB_FULL_ACCESSIBILITY_AUDIT=1` for contrast and Dynamic Type diagnostics. Capture tours skip without an output directory; the Home text-scaling regression and palette test run normally.
 
 Final verification: 7 unit tests and 9 UI tests passed. After the last Health/Coach colour adjustments, the palette, Health actions at both text sizes and native destination tour passed again. Simulator and signed iPhone Release builds succeeded. Installed and launched over the existing iPhone app without erasing its container. The laptop preview runs in Device Hub on the dedicated **Plumb Accessibility Review** simulator using `-plumb-ui-demo`.
+
+## Clipping follow-up
+
+The isolated regression reproduced clipping predictions on award details, Health, camera setup and Settings at normal and largest text sizes. Replacing only the award title with an equivalent native label cleared that title’s finding while leaving the other findings reproducible. Its visible title bounds matched within one pixel.
+
+The affected text now uses `WrappingText`: a multiline `UILabel` with the same system text styles, weights, alignment and semantic colours. It measures the proposed width, rounds fitting dimensions up to avoid fractional glyph clipping, and follows SwiftUI’s text size, appearance and reading direction. Settings symbols, sheet detents, card/tab geometry, actions and the exact pink remain. Button accessibility names remain localized; the Health action also has a rendered-pixel regression check for its dark label on white.
+
+`ClippingRegressionUITests` runs the four affected screens at both sizes without filtering findings. The broader survey restarts Home before Settings because iOS 27 sometimes marks an offscreen Home child as hittable. This separates the screen audit from that stale scroll-node prediction.
+
+Verification: the full supporting-screen surveys pass at normal and largest text sizes with **zero clipping or hit-region findings**. Saved-workout navigation passes. The isolated award, Settings, Health and camera checks passed across focused runs; the final Health test also verifies visible button text at both sizes. Source review found no actionable regressions. The signed iPhone Release build succeeded. These results resolve the earlier clipping limitation; they do not claim that every category of accessibility audit or physical camera behavior has been retested.
+
+Installed and launched the Release update on James’s iPhone over the existing app, preserving its data and the repository’s signing settings.

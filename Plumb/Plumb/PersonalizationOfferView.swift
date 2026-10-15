@@ -11,12 +11,11 @@ struct PersonalizationOfferView: View {
                     .font(.largeTitle)
                     .foregroundStyle(DashboardStyle.accent)
                     .accessibilityHidden(true)
-                Text("Personalize with Health")
-                    .font(.title2.bold())
+                WrappingText(text: String(localized: "Personalize with Health"), style: .title2, weight: .bold)
                     .accessibilityAddTraits(.isHeader)
-                Text("Use heart rate, recovery, sleep, workouts, age, weight and height from Health to tailor rest times and suggest lighter days.")
-                Text("Data stays on this iPhone. Change access anytime in Options.")
-                    .foregroundStyle(HomeStyle.supportingText)
+                WrappingText(text: String(localized: "Use heart rate, recovery, sleep, workouts, age, weight and height from Health to tailor rest times and suggest lighter days."))
+                WrappingText(text: String(localized: "Data stays on this iPhone. Change access anytime in Options."),
+                             color: .secondaryLabel)
             }
             .frame(maxWidth: 600, alignment: .leading)
             .padding(24)
@@ -24,19 +23,20 @@ struct PersonalizationOfferView: View {
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: 4) {
                 Button { answer(true) } label: {
-                    Text("Continue")
-                        .foregroundStyle(HomeStyle.onAccent)
-                        .fixedSize(horizontal: false, vertical: true)
+                    WrappingText(text: String(localized: "Continue"), color: .black, alignment: .center)
                         .frame(maxWidth: .infinity, minHeight: 32)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(HomeStyle.filledAccent)
                 .controlSize(.large)
+                .accessibilityLabel("Continue")
                 .accessibilityIdentifier("offer.personalize")
                 Button { answer(false) } label: {
-                    Text("Later").frame(maxWidth: .infinity, minHeight: 44)
+                    WrappingText(text: String(localized: "Later"), alignment: .center)
+                        .frame(maxWidth: .infinity, minHeight: 44)
                         .contentShape(Rectangle())
                 }
+                    .accessibilityLabel("Later")
                     .accessibilityIdentifier("offer.later")
             }
             .padding(.horizontal, 24)

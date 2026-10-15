@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 
 /// Navigation regression checks, with optional screenshots for the design review.
 final class NativeUIReviewUITests: XCTestCase {
@@ -145,6 +146,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertTrue(app.buttons["offer.later"].isHittable)
         XCTAssertTrue(app.buttons["offer.personalize"].isHittable)
         XCTAssertEqual(app.buttons["offer.personalize"].label, "Continue")
+        assertHealthActionTextIsVisible(app.buttons["offer.personalize"])
         XCTAssertTrue(app.staticTexts["Personalize with Health"].exists)
         try save(name)
         app.scrollViews.firstMatch.swipeUp()
@@ -207,5 +209,34 @@ final class NativeUIReviewUITests: XCTestCase {
         // Let native navigation/material transitions settle before capturing.
         Thread.sleep(forTimeInterval: 2)
         try XCUIScreen.main.screenshot().pngRepresentation.write(to: url.appending(path: "\(name).png"))
+    }
+
+    /// Accessibility labels can exist even when a control renders white text on white.
+    @MainActor private func assertHealthActionTextIsVisible(_ button: XCUIElement) {
+        guard let image = button.screenshot().image.cgImage else {
+            XCTFail("Could not inspect the Health action's rendered label")
+            return
+        }
+        let width = image.width, height = image.height
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let rendered = pixels.withUnsafeMutableBytes { buffer in
+            guard let context = CGContext(data: buffer.baseAddress, width: width, height: height,
+                bitsPerComponent: 8, bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
+        XCTAssertTrue(rendered)
+        // Ignore the rounded corners; the centre must contain the dark, visible label.
+        var darkPixels = 0
+        for y in (height / 5)..<(height * 4 / 5) {
+            for x in (width / 5)..<(width * 4 / 5) {
+                let offset = (y * width + x) * 4
+                if pixels[offset] < 128 && pixels[offset + 1] < 128 && pixels[offset + 2] < 128 {
+                    darkPixels += 1
+                }
+            }
+        }
+        XCTAssertGreaterThan(darkPixels, 20, "The Health action needs a visibly contrasting label")
     }
 }
