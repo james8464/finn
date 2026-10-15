@@ -40,7 +40,8 @@ struct PlumbApp: App {
                             exerciseClassifier: ProcessInfo.processInfo.arguments
                                 .contains("-plumb-ui-demo-recognition") ? DemoExerciseClassifier() : nil,
                             preferences: PlumbPreferences(defaults: UserDefaults(
-                                suiteName: "PlumbDemo-\(UUID().uuidString)") ?? .standard,
+                                suiteName: Self.argument(after: "-plumb-ui-preferences-suite")
+                                    ?? "PlumbDemo-\(UUID().uuidString)") ?? .standard,
                                 handsFreeByDefault: ProcessInfo.processInfo.arguments
                                     .contains("-plumb-ui-hands-free")),
                             announcer: ProcessInfo.processInfo.arguments
@@ -50,7 +51,8 @@ struct PlumbApp: App {
                             // shows the welcome screens. Both for headless screenshots.
                             badgeStore: MemoryBadgeStore(ProcessInfo.processInfo.arguments
                                 .contains("-plumb-ui-badges-demo") ? BadgeDemo.sample : []),
-                            showsOnboarding: ProcessInfo.processInfo.arguments.contains("-plumb-ui-onboarding"))
+                            showsOnboarding: ProcessInfo.processInfo.arguments.contains("-plumb-ui-onboarding")
+                                ? true : Self.argument(after: "-plumb-ui-preferences-suite") == nil ? false : nil)
             } else if let path = Self.argument(after: "-plumb-video-file") {
                 ContentView(source: VideoFilePoseSource(url: URL(fileURLWithPath: path),
                                                         recordedPoses: Self.recordedPoses()),

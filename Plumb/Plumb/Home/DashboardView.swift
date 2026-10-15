@@ -146,6 +146,8 @@ struct DashboardView: View {
     let exercise: ExerciseKind
     /// Badges earned so far (`Badges/`), for the Awards card.
     var badges: [EarnedBadge] = []
+    let tryPlumb: () -> Void
+    let watchDemo: () -> Void
     let open: (HomeRoute) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .largeTitle) private var titleSize = 40.0
@@ -200,6 +202,8 @@ struct DashboardView: View {
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(DashboardStyle.lime)
                 }
+
+                tryPlumbCard
 
                 card(.lastWorkout, id: "home.lastSession") {
                     VStack(alignment: .leading, spacing: 8) {
@@ -268,6 +272,46 @@ struct DashboardView: View {
         }
         .scrollIndicators(.hidden)
         .foregroundStyle(.white)
+    }
+
+    /// A solid lime invitation to the real workout, with a separate illustrated preview.
+    private var tryPlumbCard: some View {
+        VStack(spacing: 0) {
+            Button(action: tryPlumb) {
+                HStack(spacing: 16) {
+                    Image(systemName: "viewfinder")
+                        .font(.title3)
+                        .frame(width: 48, height: 48)
+                        .background(.black.opacity(0.08), in: Circle())
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Try Plumb").font(.title3.bold())
+                        Text("Your first set starts here.")
+                            .font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "arrow.up.right").font(.headline).accessibilityHidden(true)
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PressableStyle())
+            .accessibilityHint("Opens workout setup for your first real set.")
+            .accessibilityIdentifier("home.tryPlumb")
+            Rectangle().fill(.black.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
+            Button(action: watchDemo) {
+                Label("Watch the demo", systemImage: "play.circle")
+                    .font(.subheadline.weight(.medium))
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(PressableStyle())
+            .accessibilityIdentifier("home.watchDemo")
+        }
+        .foregroundStyle(.black)
+        .background(DashboardStyle.lime, in: RoundedRectangle(cornerRadius: 24))
     }
 
     /// The Plumb+ banner, kept for 1.1 behind `DashboardFlags.showsPlumbPlusBanner`.

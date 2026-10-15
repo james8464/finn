@@ -4,13 +4,18 @@ The dashboard became Plumb's main screen on 15 October 2026. [DashboardView.swif
 
 | Destination | Current behavior |
 | --- | --- |
-| Home | Latest saved session, Sessions link, and account settings |
+| Home | Try Plumb opens Workout setup; Watch the demo replays the illustrated tour. Latest saved session, Sessions link, and account settings |
 | Coach | Conversation grounded in saved set summaries |
 | Workout | Exercise selection and capture flow |
-| Posture, Weights, Awards, Plumb+ | Clearly marked placeholders |
+| Posture | Saved sets and their observations |
+| Best set (formerly Weights) | Selected exercise history and maximum measured reps |
+| Awards | Earned badges |
+| Plumb+ | The legacy banner is hidden; offer selection is part of the onboarding preview |
 
 The tab bar uses native Liquid Glass, with opaque surfaces under Reduce Transparency. Reduce Motion removes selection animation; accessibility text sizes use one-column cards. The photo in [HomeBackdrop](../../Plumb/Plumb/Assets.xcassets/HomeBackdrop.imageset/home-backdrop.png) is decorative generated artwork, not workout footage. Debug preview data is visibly labeled and does not enter history.
 
 [Dashboard screenshot](screenshots/2026-10-14-home-dashboard.png) · [Tab-bar screenshot](screenshots/2026-10-14-liquid-glass-tab-bar.png)
 
 [Pull request 25](https://github.com/james8464/hackathon-project/pull/25) combined the dashboard with the existing Coach and Workout flows; its focused iOS 27 simulator run passed 400 tests. Physical-device layout and camera-flow checks remain outstanding.
+
+The 15 October [welcome and offer design](welcome-demo-paywall.md) adds a solid lime Try Plumb card above the glass metrics. It separates starting a real set from replaying the labelled demo.

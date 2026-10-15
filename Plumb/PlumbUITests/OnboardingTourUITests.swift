@@ -20,34 +20,23 @@ final class OnboardingTourUITests: XCTestCase {
         app.launch()
         let next = app.buttons["onboarding.continue"]
         XCTAssertTrue(next.waitForExistence(timeout: 8))
-        Thread.sleep(forTimeInterval: 0.8)
-        save("onboarding-1-objectif")
-        app.buttons["onboarding.goal.technique"].tap()
-        Thread.sleep(forTimeInterval: 0.5)
-        save("onboarding-1-objectif-choisi")
+        save("onboarding-1-welcome")
         next.tap()
-        Thread.sleep(forTimeInterval: 0.8)
-        app.buttons["onboarding.exercise.pushUp"].tap()
-        app.buttons["onboarding.exercise.bodyweightSquat"].tap()
-        Thread.sleep(forTimeInterval: 0.6)
-        save("onboarding-2-exercices")
+        XCTAssertTrue(app.otherElements["demo.capture"].waitForExistence(timeout: 5))
+        save("onboarding-2-demo-capture")
         next.tap()
-        Thread.sleep(forTimeInterval: 0.8)
-        app.buttons["onboarding.level.regular"].tap()
-        Thread.sleep(forTimeInterval: 0.5)
-        save("onboarding-3-niveau")
+        XCTAssertTrue(app.otherElements["demo.advice"].waitForExistence(timeout: 5))
+        save("onboarding-3-demo-advice")
         next.tap()
-        Thread.sleep(forTimeInterval: 0.8)
-        save("onboarding-4-voix")
+        XCTAssertTrue(app.buttons["paywall.free"].waitForExistence(timeout: 5))
+        save("onboarding-4-choose-coach")
+        let annual = app.buttons["paywall.annual"]
+        if !annual.isHittable { app.swipeUp() }
+        annual.tap()
+        save("onboarding-5-annual")
         next.tap()
-        Thread.sleep(forTimeInterval: 1.2)
-        save("onboarding-5-placement")
-        next.tap()
-        // The first favorite (push-up) is the exercise ready on the Workout tab.
-        app.openWorkoutTab()
-        XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
-        Thread.sleep(forTimeInterval: 1)
-        save("onboarding-6-apres-pompes-en-premier")
+        XCTAssertTrue(app.buttons["home.tryPlumb"].waitForExistence(timeout: 8))
+        save("onboarding-6-home")
     }
 
     @MainActor
@@ -78,6 +67,8 @@ final class OnboardingTourUITests: XCTestCase {
 
     @MainActor
     private func save(_ name: String) {
+        // Let the page/selection transition finish before freezing the design preview.
+        Thread.sleep(forTimeInterval: 0.3)
         let png = XCUIScreen.main.screenshot().pngRepresentation
         do { try png.write(to: folder.appending(path: "\(name).png")) }
         catch { XCTFail("Could not save \(name): \(error)") }

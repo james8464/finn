@@ -39,7 +39,7 @@ Use SF Symbols for interface actions where appropriate. Keep the app icon and br
 
 ## Voice and imagery
 
-Describe what Plumb can observe, then give one specific next step. Say “Your last two reps were shorter” rather than “Your form is wrong.” State tracking limits plainly and never imply injury prevention, diagnosis, or certainty from a single camera angle. Prefer real movement with full-body context, fine evidence traces, and restrained motion. Avoid synthetic athlete imagery, fake heatmaps, and decorative AI motifs.
+Describe what Plumb can observe, then give one specific next step. Say “Your last two reps were shorter” rather than “Your form is wrong.” State tracking limits plainly and never imply injury prevention, diagnosis, or certainty from a single camera angle. Prefer real movement with full-body context, fine evidence traces, and restrained motion. Outside explicitly labelled product demos, avoid synthetic athlete imagery, fake heatmaps, and decorative AI motifs. The 15 October onboarding uses a generated male athlete at the user’s request, labelled as an illustrated demo with sample counts and advice; see [onboarding notes](../docs/design/welcome-demo-paywall.md).
 
 ## Apple references
 
