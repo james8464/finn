@@ -199,8 +199,9 @@ struct OnboardingView: View {
         page(String(localized: "Where to put your iPhone"),
              String(localized: "This is what makes the counting work. Four things to check before each set.")) {
             VStack(alignment: .leading, spacing: 14) {
-                PlacementScene(kind: profile.favoriteExercises.first ?? .bodyweightSquat)
-                    .frame(height: 230)
+                // Always a standing figure: the point is the whole body in the frame.
+                PlacementScene(kind: .bodyweightSquat)
+                    .frame(height: 210)
                     .accessibilityIdentifier("onboarding.placementScene")
                 VStack(alignment: .leading, spacing: 12) {
                     placementRow("rectangle.portrait.and.arrow.right", String(localized: "From the side"),
@@ -344,10 +345,11 @@ struct PlacementScene: View {
                 }
                 HStack(alignment: .bottom) {
                     Spacer()
+                    // The figure's own floor (about 16 pt above its frame) sits on the scene's floor.
                     ExerciseFigureView(kind: kind)
-                        .frame(width: 150, height: 170)
+                        .frame(width: 150, height: 160)
                         .padding(.trailing, 12)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 18)
                 }
             }
             .padding(14)
