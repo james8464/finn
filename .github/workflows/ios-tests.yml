@@ -77,6 +77,7 @@ jobs:
             -collect-test-diagnostics never \
             -only-testing:FinnUITests/DashboardUITests/testProductionLaunchRendersAllTabsAndDestinations \
             CODE_SIGNING_ALLOWED=NO
+      - name: Replay generated workout videos through Vision
         if: always()
         run: tools/replay/test_generated_videos.sh
       - name: Test validation scorer
