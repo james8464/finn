@@ -134,7 +134,10 @@ final class CoachResponder {
 @MainActor
 enum FoundationModelsCoachPrompt {
     static func instructions(for context: CoachContext, language: CoachLanguage) -> String {
-        CoachInstructions.text(language: language) + "\n\nSaved sets, oldest first:\n" + context.promptText()
+        CoachInstructions.text(language: language)
+            // The first-launch answers (level, goal) set the tone; see `OnboardingProfile.coachNote`.
+            + (PlumbPreferences.app.onboardingProfile.coachNote.map { "\n\n" + $0 } ?? "")
+            + "\n\nSaved sets, oldest first:\n" + context.promptText()
     }
 
     /// The earlier turns as text, so a fresh session still knows the conversation. Kept short:

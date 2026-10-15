@@ -26,6 +26,11 @@ struct ContentView: View {
     @State private var selectedTab: HomeTab = .home
     /// What the camera does, shown once before iOS asks for it.
     @State private var showsCameraPrimer = false
+    /// The first-launch screens (`Onboarding/`), also replayed from Options.
+    @State private var showsOnboarding: Bool
+    /// Badges earned from the saved history (`Badges/`).
+    @State private var badges: BadgeLedger
+    private let preferences: PlumbPreferences
     /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
     @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 88
     /// Live advice during a set: about half the count's height, so a short phrase fits on one line.
@@ -63,7 +68,9 @@ struct ContentView: View {
                     announcer: (any LiveAnnouncing)? = nil,
                     fitness: (any FitnessWorkoutSaving)? = nil,
                     health: (any HealthReading)? = nil,
-                    connectsAccessories: Bool = false) {
+                    connectsAccessories: Bool = false,
+                    badgeStore: (any BadgeStoring)? = nil,
+                    showsOnboarding: Bool? = nil) {
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
                                                          narrator: narrator,
                                                          exerciseClassifier: exerciseClassifier,
@@ -72,6 +79,10 @@ struct ContentView: View {
                                                          fitness: fitness,
                                                          health: health))
         self.connectsAccessories = connectsAccessories
+        self.preferences = preferences
+        _badges = State(initialValue: BadgeLedger(store: badgeStore ?? LocalBadgeStore()))
+        // Demo and recorded input skip the welcome unless asked for it (`-plumb-ui-onboarding`).
+        _showsOnboarding = State(initialValue: showsOnboarding ?? !preferences.onboardingCompleted)
     }
 
     /// Demo or recorded input, marked as such on the watch too.
@@ -108,6 +119,7 @@ struct ContentView: View {
                 switch arguments[index + 1] {
                 case "coach": route = .coach
                 case "options": route = .options
+                case "awards": route = .awards
                 default: break
                 }
             }
@@ -151,6 +163,18 @@ struct ContentView: View {
                 Task { await model.answerPersonalizationOffer(personalize: personalize) }
             }
             .presentationDetents([.medium, .large])
+        }
+        .fullScreenCover(isPresented: $showsOnboarding) {
+            OnboardingView(preferences: preferences) { profile in
+                // The answers take effect now, not at the next launch.
+                model.speaksLive = profile.speaksLive
+                if let first = profile.favoriteExercises.first { model.selectedExercise = first }
+                showsOnboarding = false
+            }
+        }
+        // Badges follow the saved history: checked at launch and after every saved set.
+        .onChange(of: model.history, initial: true) { _, history in
+            badges.update(history: history)
         }
         .task {
             liveActivity.attach(to: model, demoInput: usesSyntheticInput)
@@ -198,7 +222,10 @@ struct ContentView: View {
                  : "Its measured set summaries will be removed from this iPhone.")
         }
         .alert("Delete all local data?", isPresented: $deleteAllRequested) {
-            Button("Delete all data", role: .destructive) { model.deleteAllData() }
+            Button("Delete all data", role: .destructive) {
+                model.deleteAllData()
+                badges.reset()
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text(model.leavesHealthWorkouts
@@ -239,7 +266,8 @@ struct ContentView: View {
         Group {
             switch selectedTab {
             case .home:
-                DashboardView(history: model.history, exercise: model.selectedExercise) { route = $0 }
+                DashboardView(history: model.history, exercise: model.selectedExercise,
+                              badges: badges.earned) { route = $0 }
             case .workout:
                 workoutSetup
             case .coach:
@@ -274,7 +302,7 @@ struct ContentView: View {
         case .account: accountPage
         case .posture: UnfinishedPage(title: "Posture", symbol: "figure.walk")
         case .weights: UnfinishedPage(title: "Weights", symbol: "dumbbell")
-        case .awards: UnfinishedPage(title: "Awards", symbol: "trophy")
+        case .awards: BadgesView(ledger: badges)
         case .plus: UnfinishedPage(title: "Plumb+", symbol: "sparkles")
         }
     }
@@ -332,7 +360,7 @@ struct ContentView: View {
                     ExerciseChips(selection: Binding(
                         get: { model.selectedExercise },
                         set: { model.selectedExercise = $0 }
-                    ))
+                    ), order: preferences.exerciseOrder)
                     .padding(.horizontal, -20)
                     .contentMargins(.horizontal, 20, for: .scrollContent)
                     .accessibilityElement(children: .contain)
@@ -413,6 +441,9 @@ struct ContentView: View {
                     }
                     Button { route = .coach } label: {
                         Label("Coach", systemImage: "bubble.left.and.text.bubble.right")
+                    }
+                    Button { route = .awards } label: {
+                        Label("Awards", systemImage: "rosette")
                     }
                     Button { route = .options } label: {
                         Label("Options", systemImage: "slider.horizontal.3")
@@ -836,6 +867,17 @@ struct ContentView: View {
                     }
                 }
                 .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
+                    Text("The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your answers set the order of the exercises and how the coach talks to you.")
+                    Button("Replay the welcome") { showsOnboarding = true }
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(Color.primary)
+                        .frame(minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .accessibilityIdentifier("options.replayOnboarding")
+                }
+                .optionCard()
                 #if DEBUG
                 // Coach demo key and engine switch; absent from the Release build.
                 CoachDeveloperSection()
@@ -1117,6 +1159,9 @@ struct ContentView: View {
                 }
                 Text(resultTitle)
                     .font(.largeTitle.bold())
+                if !badges.justEarned.isEmpty {
+                    BadgeUnlockCard(badges: badges.justEarned) { route = .awards }
+                }
                 if model.endedEarly {
                     Text("The camera stopped during the set. Plumb reviewed the part it captured.")
                         .font(.footnote)

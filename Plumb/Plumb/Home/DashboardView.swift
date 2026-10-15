@@ -138,6 +138,8 @@ struct HomeTabBar: View {
 struct DashboardView: View {
     let history: [WorkoutSessionSummary]
     let exercise: ExerciseKind
+    /// Badges earned so far (`Badges/`), for the Awards card.
+    var badges: [EarnedBadge] = []
     let open: (HomeRoute) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .largeTitle) private var titleSize = 40.0
@@ -234,11 +236,8 @@ struct DashboardView: View {
                         .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
                     }
                     card(.awards, id: "home.awards") {
-                        VStack(alignment: .leading) {
-                            heading("Awards")
-                            Spacer(minLength: 100)
-                        }
-                        .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
+                        AwardsCardContent(badges: badges, heading: heading("Awards"))
+                            .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
                     }
                 }
 

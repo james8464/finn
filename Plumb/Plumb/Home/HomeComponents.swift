@@ -39,13 +39,15 @@ extension ExerciseKind {
 /// accessibility text sizes the chips become one menu, which never runs off the screen.
 struct ExerciseChips: View {
     @Binding var selection: ExerciseKind
+    /// The order of the chips: the exercises picked at the first launch come first.
+    var order: [ExerciseKind] = ExerciseKind.allCases
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         if dynamicTypeSize.isAccessibilitySize {
             Menu {
                 Picker("Exercise", selection: $selection.animation(HomeStyle.spring)) {
-                    ForEach(ExerciseKind.allCases, id: \.self) { kind in
+                    ForEach(order, id: \.self) { kind in
                         Text(kind.definition.copy.name).tag(kind)
                     }
                 }
@@ -67,7 +69,7 @@ struct ExerciseChips: View {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal) {
                     HStack(spacing: 8) {
-                        ForEach(ExerciseKind.allCases, id: \.self) { kind in
+                        ForEach(order, id: \.self) { kind in
                             chip(kind).id(kind)
                         }
                     }
