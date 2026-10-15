@@ -31,6 +31,9 @@ final class CoachConversation {
     /// Which engine would answer the next question.
     var engineKind: CoachEngineKind { responder.currentEngineKind }
 
+    /// Why no model answers, when none does: a sentence the person can act on.
+    var engineNote: String? { responder.unavailableReason }
+
     /// The saved sets changed (a new set, a deletion): the coach reads them again.
     func refresh(history: [WorkoutSessionSummary]) {
         context = CoachContext.make(history: history)

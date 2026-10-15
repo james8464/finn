@@ -1,5 +1,6 @@
 import Foundation
 import FoundationModels
+import os
 
 /// Where an answer came from, shown discreetly under the conversation.
 nonisolated enum CoachEngineKind: String, Equatable, Sendable {
@@ -47,6 +48,8 @@ nonisolated struct CoachMessage: Identifiable, Equatable, Sendable {
 protocol CoachEngine: AnyObject {
     var kind: CoachEngineKind { get }
     var available: Bool { get }
+    /// Why this engine cannot answer right now, as one sentence the person can act on; nil when it can.
+    var unavailableReason: String? { get }
     /// Selects relevant saved-set labels for `question`; the returned text is never displayed.
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String
@@ -75,6 +78,41 @@ final class CoachEngineSelector {
     func current() -> (any CoachEngine)? {
         engines.first { $0.available }
     }
+
+    /// When no engine can answer: the first reason an engine gives, logged for the Xcode console.
+    func unavailableReason() -> String? {
+        guard current() == nil else { return nil }
+        return engines.compactMap(\.unavailableReason).first
+    }
+}
+
+extension CoachEngine {
+    var unavailableReason: String? { nil }
+}
+
+/// Reads why Foundation Models cannot run, once per check, and says what to do about it.
+@MainActor
+enum CoachModelAvailability {
+    static let log = Logger(subsystem: "com.finlearn.plumb", category: "coach")
+
+    static func reason(for availability: SystemLanguageModel.Availability, engine: String) -> String? {
+        switch availability {
+        case .available:
+            return nil
+        case .unavailable(let reason):
+            log.notice("\(engine, privacy: .public) unavailable: \(String(describing: reason), privacy: .public)")
+            switch reason {
+            case .deviceNotEligible:
+                return String(localized: "This iPhone cannot run Apple Intelligence, so the coach answers from Plumb's records only.")
+            case .appleIntelligenceNotEnabled:
+                return String(localized: "Turn on Apple Intelligence in Settings > Apple Intelligence & Siri, and the coach will pick the sets for you.")
+            case .modelNotReady:
+                return String(localized: "Apple Intelligence is still downloading its model. Until then the coach answers from Plumb's records only.")
+            @unknown default:
+                return String(localized: "No language model is available right now, so the coach answers from Plumb's records only.")
+            }
+        }
+    }
 }
 
 /// Runs one turn: the model selects at most two saved sets, then Plumb renders recorded facts.
@@ -95,6 +133,9 @@ final class CoachResponder {
     var currentEngineKind: CoachEngineKind {
         selector.current()?.kind ?? .fallback
     }
+
+    /// Why no model answers, when none does.
+    var unavailableReason: String? { selector.unavailableReason() }
 
     func answer(_ question: String, context: CoachContext, history: [CoachMessage]) async -> CoachMessage {
         let fallback = CoachMessage(role: .coach,
@@ -164,6 +205,10 @@ final class OnDeviceCoachEngine: CoachEngine {
         return false
     }
 
+    var unavailableReason: String? {
+        CoachModelAvailability.reason(for: SystemLanguageModel.default.availability, engine: "On-device model")
+    }
+
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String {
         let session = LanguageModelSession(model: SystemLanguageModel.default,
@@ -182,6 +227,15 @@ final class PrivateCloudComputeCoachEngine: CoachEngine {
     var available: Bool {
         if case .available = model.availability { return true }
         return false
+    }
+
+    /// PCC logs its own reason; the sentence for the person comes from the on-device model, whose
+    /// reason (Apple Intelligence off, model downloading) is the one they can act on.
+    var unavailableReason: String? {
+        if case .unavailable(let reason) = model.availability {
+            CoachModelAvailability.log.notice("Private Cloud Compute unavailable: \(String(describing: reason), privacy: .public)")
+        }
+        return CoachModelAvailability.reason(for: SystemLanguageModel.default.availability, engine: "On-device model")
     }
 
     func reply(to question: String, context: CoachContext, history: [CoachMessage],

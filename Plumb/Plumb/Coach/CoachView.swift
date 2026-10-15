@@ -97,7 +97,8 @@ struct CoachView: View {
 
     private var engineLine: String {
         switch conversation.engineKind {
-        case .fallback: String(localized: "No language model available. The coach repeats what Plumb saved.")
+        case .fallback: conversation.engineNote
+            ?? String(localized: "No language model available. The coach answers from Plumb's records only.")
         case .onDevice: String(localized: "Apple Intelligence chose the sets; the details come from Plumb's records.")
         case .privateCloudCompute: String(localized: "Apple Private Cloud Compute chose the sets; the details come from Plumb's records.")
         case .claudeDemo: String(localized: "Debug demo: Claude chose the sets; the details come from Plumb's records.")

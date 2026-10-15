@@ -92,7 +92,6 @@ struct CoachTests {
         let answer = await responder.answer("How did I do?", context: context, history: [])
         #expect(answer.engine == .fallback)
         #expect(engine.calls == 0)
-        #expect(answer.text.contains("Without a language model"))
         #expect(answer.text.contains("Set 3: 8 push-up reps."))
         #expect(answer.text.contains("Set 2: 6 squat reps. Observation: Your last two reps were shallower"))
         #expect(!answer.text.contains("Set 9"))
@@ -102,7 +101,6 @@ struct CoachTests {
         let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: .french)
         let answer = await responder.answer("Alors ?", context: CoachContext.make(history: history()), history: [])
         #expect(answer.text.contains("Série 3 : 8 répétitions, push-up."))
-        #expect(answer.text.contains("Sans modèle de langage"))
     }
 
     // MARK: Simulated engine

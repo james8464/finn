@@ -1165,6 +1165,16 @@
         }
       }
     },
+    "Apple Intelligence is still downloading its model. Until then the coach answers from Plumb's records only." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence télécharge encore son modèle. En attendant, le coach répond seulement d'après les enregistrements de Plumb."
+          }
+        }
+      }
+    },
     "Apple Private Cloud Compute" : {
       "localizations" : {
         "fr" : {
@@ -3764,12 +3774,32 @@
         }
       }
     },
+    "No language model available. The coach answers from Plumb's records only." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun modèle de langage disponible. Le coach répond seulement d'après les enregistrements de Plumb."
+          }
+        }
+      }
+    },
     "No language model available. The coach repeats what Plumb saved." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun modèle de langage disponible. Le coach répète ce que Plumb a enregistré."
+          }
+        }
+      }
+    },
+    "No language model is available right now, so the coach answers from Plumb's records only." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun modèle de langage n'est disponible pour l'instant : le coach répond seulement d'après les enregistrements de Plumb."
           }
         }
       }
@@ -6188,6 +6218,16 @@
         }
       }
     },
+    "This iPhone cannot run Apple Intelligence, so the coach answers from Plumb's records only." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cet iPhone ne peut pas faire tourner Apple Intelligence : le coach répond seulement d'après les enregistrements de Plumb."
+          }
+        }
+      }
+    },
     "This is a camera measurement, not a full technique assessment." : {
       "localizations" : {
         "fr" : {
@@ -6384,6 +6424,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tourne-toi un peu, de profil"
+          }
+        }
+      }
+    },
+    "Turn on Apple Intelligence in Settings > Apple Intelligence & Siri, and the coach will pick the sets for you." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active Apple Intelligence dans Réglages > Apple Intelligence et Siri : le coach choisira les séries pour toi."
           }
         }
       }
@@ -7252,6 +7302,16 @@
         }
       }
     },
+    "camera-measured %1$@ %2$@ than the previous set" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ que sur la série précédente, d'après la caméra"
+          }
+        }
+      }
+    },
     "camera-observed elbow bend" : {
       "localizations" : {
         "fr" : {
@@ -7558,6 +7618,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "muscle up"
+          }
+        }
+      }
+    },
+    "no clear %@ change against the previous set" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pas de changement net de %@ par rapport à la série précédente"
           }
         }
       }
