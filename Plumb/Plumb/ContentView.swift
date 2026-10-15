@@ -1628,6 +1628,109 @@ extension ContentView {
         .accessibilityIdentifier("result.depthChart")
     }
 
+    /// Per exercise since the install: sessions, reps and the best set. Measured, nothing else.
+    private func exerciseTotals(_ sessions: [WorkoutSessionSummary]) -> some View {
+        let kinds = ExerciseKind.allCases.filter { kind in sessions.contains { $0.sets.contains { $0.exercise == kind } } }
+        return VStack(alignment: .leading, spacing: 12) {
+            Text("Since you started")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            ForEach(kinds, id: \.self) { kind in
+                let withKind = sessions.filter { $0.sets.contains { $0.exercise == kind } }
+                let sets = withKind.flatMap(\.sets).filter { $0.exercise == kind }
+                let reps = sets.reduce(0) { $0 + $1.analysis.reps.count }
+                let best = sets.map { $0.analysis.reps.count }.max() ?? 0
+                HStack(alignment: .firstTextBaseline) {
+                    Text(kind.definition.copy.name)
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Text("\(withKind.count) sessions · \(reps) reps · best \(best)")
+                        .font(.subheadline)
+                        .monospacedDigit()
+                        .foregroundStyle(PlumbStyle.supportingText)
+                }
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .padding(.vertical, 4)
+        .accessibilityIdentifier("stats.totals")
+    }
+
+    /// Sessions per week over the last eight weeks: regularity, as bars.
+    private func weeklyChart(_ sessions: [WorkoutSessionSummary]) -> some View {
+        let calendar = Calendar.current
+        let thisWeek = calendar.dateInterval(of: .weekOfYear, for: .now)?.start ?? .now
+        let weeks: [Date] = (0..<8).reversed().compactMap { calendar.date(byAdding: .weekOfYear, value: -$0, to: thisWeek) }
+        let counts = weeks.map { start -> (Date, Int) in
+            let end = calendar.date(byAdding: .weekOfYear, value: 1, to: start) ?? start
+            return (start, sessions.filter { $0.startedAt >= start && $0.startedAt < end }.count)
+        }
+        let spoken: String = counts.map { week, count -> String in
+            "\(week.formatted(date: .abbreviated, time: .omitted)): \(count)"
+        }.joined(separator: "; ")
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("Sessions per week")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            Chart(counts, id: \.0) { week, count in
+                BarMark(x: .value("Week", week, unit: .weekOfYear), y: .value("Sessions", count))
+                    .foregroundStyle(week == thisWeek ? Color.white : Color.white.opacity(0.35))
+                    .cornerRadius(4)
+            }
+            .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) }
+            .chartXAxis { AxisMarks(values: .stride(by: .weekOfYear, count: 2)) { _ in AxisValueLabel(format: .dateTime.day().month(.abbreviated)) } }
+            .frame(height: 120)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Sessions per week")
+            .accessibilityValue(spoken)
+        }
+        .padding(.vertical, 4)
+        .accessibilityIdentifier("stats.weekly")
+    }
+
+    /// For each exercise measured in two or more sessions: the median range per session, as a line.
+    @ViewBuilder private func rangeTrend(_ sessions: [WorkoutSessionSummary]) -> some View {
+        let kinds = ExerciseKind.allCases.filter { kind in
+            sessions.filter { $0.sets.contains { $0.exercise == kind } }.count >= 2
+        }
+        ForEach(kinds, id: \.self) { kind in
+            let definition = kind.definition
+            let points: [(Date, Double)] = sessions.compactMap { session in
+                let ranges = session.sets.filter { $0.exercise == kind }
+                    .flatMap { $0.analysis.reps.map(\.relativeRange) }.sorted()
+                guard !ranges.isEmpty else { return nil }
+                return (session.startedAt, ranges[ranges.count / 2])
+            }.sorted { $0.0 < $1.0 }
+            let spoken: String = points.map { day, range -> String in
+                "\(day.formatted(date: .abbreviated, time: .omitted)): \(definition.accessibleRange(range))"
+            }.joined(separator: "; ")
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("\(definition.copy.name): \(definition.copy.rangeNoun) per session")
+                        .font(.headline)
+                        .accessibilityAddTraits(.isHeader)
+                    Chart(Array(points.enumerated()), id: \.offset) { _, point in
+                        LineMark(x: .value("Date", point.0), y: .value("Range", point.1))
+                            .foregroundStyle(.white)
+                            .interpolationMethod(.monotone)
+                        PointMark(x: .value("Date", point.0), y: .value("Range", point.1))
+                            .foregroundStyle(.white)
+                    }
+                    .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) }
+                    .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) }
+                    .frame(height: 120)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(definition.copy.name), \(definition.copy.rangeNoun) per session")
+                    .accessibilityValue(spoken)
+                    Text("Median of the measured reps of each session.")
+                        .font(.footnote)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                }
+                .padding(.vertical, 4)
+            }
+        }
+    }
+
     /// Reps per session for each exercise, above the saved sessions. Only with two or more sessions.
     @ViewBuilder private func historyChart(_ sessions: [WorkoutSessionSummary]) -> some View {
         let points: [(exercise: ExerciseKind, date: Date, reps: Int)] = sessions.flatMap { session in
@@ -1637,6 +1740,10 @@ extension ContentView {
         }
         let kinds = Dictionary(grouping: points, by: \.exercise).filter { $0.value.count >= 2 }.keys
         let shown = points.filter { kinds.contains($0.exercise) }.sorted { $0.date < $1.date }
+        let spoken: String = shown.map { point -> String in
+            let day = point.date.formatted(date: .abbreviated, time: .omitted)
+            return "\(point.exercise.chipName), \(day), \(point.reps) reps"
+        }.joined(separator: "; ")
         if !shown.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Reps per session")
@@ -1649,17 +1756,15 @@ extension ContentView {
                     PointMark(x: .value("Date", point.date), y: .value("Reps", point.reps))
                         .foregroundStyle(by: .value("Exercise", point.exercise.chipName))
                 }
-                .chartForegroundStyleScale(range: [Color.primary, Color.primary.opacity(0.55),
-                                                   Color.primary.opacity(0.3), Color.primary.opacity(0.18),
-                                                   Color.primary.opacity(0.12), Color.primary.opacity(0.08)])
+                .chartForegroundStyleScale(range: [Color.white, Color.white.opacity(0.6),
+                                                   Color.white.opacity(0.4), Color.white.opacity(0.28),
+                                                   Color.white.opacity(0.2), Color.white.opacity(0.14)])
                 .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) }
                 .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) }
                 .frame(height: 160)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Reps per session")
-                .accessibilityValue(shown.map {
-                    "\($0.exercise.chipName), \($0.date.formatted(date: .abbreviated, time: .omitted)), \($0.reps) reps"
-                }.joined(separator: "; "))
+                .accessibilityValue(spoken)
             }
             .padding(.vertical, 6)
             .accessibilityIdentifier("history.chart")
@@ -1803,8 +1908,15 @@ extension ContentView {
                     .padding(.vertical, 24)
                 }
             } else {
+                if exercise == nil {
+                    Section { exerciseTotals(sessions) }
+                }
                 if sessions.count >= 2 {
                     Section { historyChart(sessions) }
+                    if exercise == nil {
+                        Section { weeklyChart(sessions) }
+                        rangeTrend(sessions)
+                    }
                 }
                 Section("Saved sessions") {
                     ForEach(sessions) { session in

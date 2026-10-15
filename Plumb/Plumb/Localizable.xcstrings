@@ -333,6 +333,16 @@
         }
       }
     },
+    "%@: %@ per session" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : %@ par séance"
+          }
+        }
+      }
+    },
     "%lld" : {
       "localizations" : {
         "fr" : {
@@ -698,6 +708,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld séances cette semaine"
+          }
+        }
+      }
+    },
+    "%lld sessions · %lld reps · best %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séances · %lld répétitions · record %lld"
           }
         }
       }
@@ -3483,6 +3503,16 @@
         }
       }
     },
+    "Median of the measured reps of each session." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Médiane des répétitions mesurées de chaque séance."
+          }
+        }
+      }
+    },
     "More" : {
       "localizations" : {
         "fr" : {
@@ -5246,6 +5276,16 @@
         }
       }
     },
+    "Sessions per week" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances par semaine"
+          }
+        }
+      }
+    },
     "Set %lld" : {
       "localizations" : {
         "fr" : {
@@ -5568,6 +5608,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Profil, face ou dos"
+          }
+        }
+      }
+    },
+    "Since you started" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depuis le début"
           }
         }
       }
