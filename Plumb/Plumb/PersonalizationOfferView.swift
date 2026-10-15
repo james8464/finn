@@ -9,14 +9,14 @@ struct PersonalizationOfferView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Image(systemName: "heart.text.square")
                     .font(.largeTitle)
-                    .foregroundStyle(.pink)
+                    .foregroundStyle(DashboardStyle.accent)
                     .accessibilityHidden(true)
-                Text("Make Plumb more personal?")
+                Text("Personalize with Health")
                     .font(.title2.bold())
                     .accessibilityAddTraits(.isHeader)
                 Text("Use heart rate, recovery, sleep, workouts, age, weight and height from Health to tailor rest times and suggest lighter days.")
-                Text("Your data stays on this iPhone. Each tip explains what it uses. Turn this off anytime in Options.")
-                    .foregroundStyle(.secondary)
+                Text("Data stays on this iPhone. Change access anytime in Options.")
+                    .foregroundStyle(HomeStyle.supportingText)
             }
             .frame(maxWidth: 600, alignment: .leading)
             .padding(24)
@@ -24,14 +24,19 @@ struct PersonalizationOfferView: View {
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: 4) {
                 Button { answer(true) } label: {
-                    Text("Yes, personalize").frame(maxWidth: .infinity, minHeight: 32)
+                    Text("Continue")
+                        .foregroundStyle(HomeStyle.onAccent)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, minHeight: 32)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(HomeStyle.filledAccent)
                 .controlSize(.large)
                 .accessibilityIdentifier("offer.personalize")
-                Button("Later") { answer(false) }
-                    .frame(maxWidth: .infinity, minHeight: 44)
+                Button { answer(false) } label: {
+                    Text("Later").frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
                     .accessibilityIdentifier("offer.later")
             }
             .padding(.horizontal, 24)

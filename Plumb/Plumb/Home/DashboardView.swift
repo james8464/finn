@@ -37,6 +37,10 @@ struct DashboardView: View {
     let open: (HomeRoute) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .largeTitle) private var titleSize = 40.0
+    @ScaledMetric(relativeTo: .largeTitle) private var durationSize = 44.0
+    @ScaledMetric(relativeTo: .largeTitle) private var metricSize = 32.0
+    @ScaledMetric(relativeTo: .body) private var scoreSize = 26.0
+    @ScaledMetric(relativeTo: .body) private var detailSize = 11.0
 
     // Reference values are available only in explicitly labelled design previews.
     private var isPreview: Bool {
@@ -69,6 +73,7 @@ struct DashboardView: View {
                 HStack {
                     Text("Home")
                         .font(.system(size: titleSize, weight: .bold))
+                        .fixedSize(horizontal: false, vertical: true)
                         .accessibilityAddTraits(.isHeader)
                     Spacer()
                     Button { open(.account) } label: {
@@ -115,7 +120,8 @@ struct DashboardView: View {
                             Text(isPreview ? "Oct 13, 2026" : history.first.map {
                                 $0.startedAt.formatted(date: .abbreviated, time: .omitted)
                             } ?? "No workouts yet")
-                            .font(.system(size: 10))
+                            .font(.system(size: detailSize))
+                            .fixedSize(horizontal: false, vertical: true)
                             .foregroundStyle(DashboardStyle.secondary)
                         }
                     }
@@ -238,7 +244,7 @@ struct DashboardView: View {
     private var durationLabel: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(duration)
-                .font(.system(size: 44, weight: .bold))
+                .font(.system(size: durationSize, weight: .bold))
                 .monospacedDigit()
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
@@ -248,6 +254,12 @@ struct DashboardView: View {
 
     private var scoreRing: some View {
         VStack(spacing: 5) {
+            if dynamicTypeSize.isAccessibilitySize {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(isPreview ? "78" : "—").font(.title.bold())
+                    Text("/ 100").font(.caption).foregroundStyle(DashboardStyle.secondary)
+                }
+            } else {
             ZStack {
                 Circle().stroke(.white.opacity(0.13), lineWidth: 10)
                 if isPreview {
@@ -256,13 +268,15 @@ struct DashboardView: View {
                         .rotationEffect(.degrees(-90))
                 }
                 VStack(spacing: 0) {
-                    Text(isPreview ? "78" : "—").font(.system(size: 26, weight: .bold))
+                    Text(isPreview ? "78" : "—").font(.system(size: scoreSize, weight: .bold))
                     Text("/ 100").font(.caption).foregroundStyle(DashboardStyle.secondary)
                 }
             }
             .frame(width: 96, height: 96)
             .padding(5)
-            Text("Avg. posture score").font(.system(size: 11)).foregroundStyle(DashboardStyle.secondary)
+            }
+            Text("Avg. posture score").font(.system(size: detailSize)).foregroundStyle(DashboardStyle.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(isPreview ? "Sample average posture score, 78 out of 100" : "Posture score not available yet")
@@ -274,7 +288,7 @@ struct DashboardView: View {
             Text(subtitle).font(.footnote).foregroundStyle(DashboardStyle.secondary)
             Text(LocalizedStringKey(label)).font(.footnote).foregroundStyle(DashboardStyle.secondary).padding(.top, 7)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(value).font(.system(size: 32, weight: .bold)).foregroundStyle(DashboardStyle.accent)
+                Text(value).font(.system(size: metricSize, weight: .bold)).foregroundStyle(DashboardStyle.accent)
                 if let unit { Text(unit).font(.subheadline).foregroundStyle(DashboardStyle.secondary) }
             }
             miniatureChart.padding(.top, 3)
@@ -296,13 +310,19 @@ struct DashboardView: View {
                 }
             }
             .frame(height: 38)
-            HStack(spacing: 0) {
+            // The empty real-data charts have no time series to label. Hours belong
+            // only to the explicitly marked sample preview.
+            if isPreview { HStack(spacing: 0) {
                 ForEach(["12 AM", "6 AM", "12 PM", "6 PM"], id: \.self) { time in
-                    Text(time).font(.system(size: 9)).frame(maxWidth: .infinity, alignment: .leading)
+                    Text(time).font(.system(size: detailSize))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .foregroundStyle(DashboardStyle.secondary)
+            }
         }
+        .frame(minHeight: 54, alignment: .top)
         .accessibilityHidden(true)
     }
 

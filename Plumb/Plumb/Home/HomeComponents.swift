@@ -200,14 +200,18 @@ struct HomeCard<Content: View>: View {
 struct PrimaryActionLabel: View {
     let title: LocalizedStringKey
     var symbol = "arrow.right"
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
+        let shape = typeSize.isAccessibilitySize
+            ? AnyShape(RoundedRectangle(cornerRadius: 24, style: .continuous)) : AnyShape(Capsule())
         HStack(spacing: 12) {
             Text(title)
                 .font(.headline)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: symbol)
-                .font(.headline)
+                .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(Color.primary)
                 .frame(width: 44, height: 44)
                 .background(Color(uiColor: .systemBackground), in: Circle())
@@ -218,8 +222,8 @@ struct PrimaryActionLabel: View {
         .padding(.vertical, 8)
         .frame(minHeight: 60)
         .foregroundStyle(Color(uiColor: .systemBackground))
-        .background(Color.primary, in: Capsule())
-        .contentShape(Capsule())
+        .background(Color.primary, in: shape)
+        .contentShape(shape)
     }
 }
 
@@ -244,6 +248,7 @@ struct CameraPrimer: View {
     let onContinue: () -> Void
     let onPrivacy: () -> Void
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(spacing: 0) {
@@ -271,9 +276,12 @@ struct CameraPrimer: View {
                 .buttonStyle(PressableStyle())
                 .accessibilityHint("iOS then asks for camera access")
                 .accessibilityIdentifier("primer.continue")
-                HStack(spacing: 24) {
-                    Button("Not now") { dismiss() }
-                    Button("Privacy details", action: onPrivacy)
+                let layout = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(spacing: 4))
+                    : AnyLayout(HStackLayout(spacing: 24))
+                layout {
+                    Button { dismiss() } label: { Text("Not now").frame(minHeight: 44) }
+                    Button(action: onPrivacy) { Text("Privacy details").frame(minHeight: 44) }
                         .accessibilityIdentifier("primer.privacy")
                 }
                 .font(.subheadline.weight(.medium))
@@ -290,7 +298,7 @@ struct CameraPrimer: View {
     private func primerRow(_ symbol: String, _ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: symbol)
-                .font(.title3)
+                .font(.system(size: 20))
                 .frame(width: 32)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {

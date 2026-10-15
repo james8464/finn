@@ -58,9 +58,6 @@ struct ContentView: View {
     @ScaledMetric(relativeTo: .body) private var demoLabelSize = 12.0
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") }
     private var isVideoFileInput: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-video-file") }
-    private var usesTestDarkAppearance: Bool {
-        ProcessInfo.processInfo.arguments.contains("-plumb-ui-dark")
-    }
     private var isValidationMode: Bool { ProcessInfo.processInfo.arguments.contains("-plumb-validation") }
     private var isCaptureStage: Bool {
         switch model.stage {
@@ -117,6 +114,11 @@ struct ContentView: View {
             if model.stage != .ready {
                 NavigationStack {
                     sessionContent
+                        .safeAreaInset(edge: .top, spacing: 0) {
+                            #if DEBUG
+                            if isDemo && !isCaptureStage && !isErrorStage { demoIndicator }
+                            #endif
+                        }
                         .navigationDestination(item: $sessionRoute) { destinationPage($0) }
                 }
                 .background(HomeStyle.background)
@@ -135,19 +137,17 @@ struct ContentView: View {
             case "privacy": route = .privacy
             case "awards": route = .awards
             case "health": model.showsPersonalizationOffer = true
+            case "camera-primer":
+                selectedTab = .workout
+                showsCameraPrimer = true
             default: break
             }
         }
         #endif
-        .safeAreaInset(edge: .top, spacing: 0) {
-            #if DEBUG
-            if isDemo && !isCaptureStage && !isErrorStage { demoIndicator }
-            #endif
-        }
         .tint(HomeStyle.accent)
-        #if DEBUG
-        .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
-        #endif
+        // Apply the approved dark appearance at the presentation root too, so sheets,
+        // onboarding and set results use the same palette as the tabs.
+        .preferredColorScheme(.dark)
         // The phone stands a few steps away and nobody touches it: keep the screen on while the
         // camera is open, or Auto-Lock interrupts framing and throws the set away.
         .onChange(of: model.stage, initial: true) { _, stage in
@@ -283,6 +283,8 @@ struct ContentView: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(.yellow, in: Capsule())
+            .frame(maxWidth: .infinity)
+            .background(HomeStyle.background)
             .accessibilityHidden(true)
     }
     #endif
@@ -303,6 +305,11 @@ struct ContentView: View {
                 ForEach(HomeTab.allCases, id: \.self) { tab in
                     NavigationStack {
                         tabContent(tab)
+                            .safeAreaInset(edge: .top, spacing: 0) {
+                                #if DEBUG
+                                if isDemo { demoIndicator }
+                                #endif
+                            }
                             .navigationDestination(item: Binding(
                                 get: { tabRoutes[tab] },
                                 set: { tabRoutes[tab] = $0 }
@@ -350,7 +357,16 @@ struct ContentView: View {
         }
     }
 
-    @ViewBuilder private func destinationPage(_ destination: HomeRoute) -> some View {
+    private func destinationPage(_ destination: HomeRoute) -> some View {
+        destinationContent(destination)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                #if DEBUG
+                if isDemo { demoIndicator }
+                #endif
+            }
+    }
+
+    @ViewBuilder private func destinationContent(_ destination: HomeRoute) -> some View {
         switch destination {
         case .history: historyPage
         case .options: optionsPage
@@ -383,12 +399,15 @@ struct ContentView: View {
             Section {
                 NavigationLink { optionsPage } label: {
                     Label("Options", systemImage: "slider.horizontal.3")
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 NavigationLink { historyPage } label: {
                     Label("History", systemImage: "clock.arrow.circlepath")
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 NavigationLink { privacyPage } label: {
                     Label("Privacy", systemImage: "lock")
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             Section("Account") {
@@ -530,7 +549,7 @@ struct ContentView: View {
                 showsCameraPrimer = false
                 route = .privacy
             })
-            .presentationDetents([.fraction(0.62), .large])
+            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.fraction(0.62), .large])
             .presentationDragIndicator(.visible)
             .presentationBackground(Color(uiColor: .systemBackground))
         }
@@ -793,7 +812,7 @@ struct ContentView: View {
     private func privacyFact(_ symbol: String, _ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: symbol)
-                .font(.title3)
+                .font(.system(size: 20))
                 .frame(width: 30)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
@@ -1044,6 +1063,7 @@ struct ContentView: View {
                 if model.stage == .framing {
                     Text("\u{00A0}\(captureCopy.framingPrompt)\u{00A0}")
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                         .accessibilityLabel(captureCopy.framingPrompt)
                     if let focus = model.captureFocus {
                         Text("Focus: \(focus.focus)")

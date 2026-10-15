@@ -46,21 +46,50 @@ struct OnboardingView: View {
     // MARK: Chrome
 
     private var progress: some View {
-        HStack {
-            Button { withAnimation(reduceMotion ? nil : HomeStyle.spring) { step -= 1 } } label: {
+        Group {
+            if typeSize.isAccessibilitySize {
+                VStack(spacing: 4) {
+                    HStack {
+                        backButton
+                        Spacer()
+                        skipAllButton
+                    }
+                    Text("\(step + 1) of \(Self.stepCount)")
+                        .font(.footnote).monospacedDigit().foregroundStyle(.secondary)
+                }
+            } else {
+                HStack {
+                    backButton
+                    Spacer()
+                    Text("\(step + 1) of \(Self.stepCount)")
+                        .font(.subheadline).monospacedDigit().foregroundStyle(.secondary)
+                    Spacer()
+                    skipAllButton
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private var backButton: some View {
+        Button { withAnimation(reduceMotion ? nil : HomeStyle.spring) { step -= 1 } } label: {
+            if typeSize.isAccessibilitySize {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 17, weight: .semibold))
+                    .frame(width: 44, height: 44)
+            } else {
                 Label("Back", systemImage: "chevron.left")
                     .frame(minHeight: 44)
             }
-            .disabled(step == 0)
-            .opacity(step == 0 ? 0 : 1)
-            Spacer()
-            Text("\(step + 1) of \(Self.stepCount)")
-                .font(.subheadline).monospacedDigit().foregroundStyle(.secondary)
-            Spacer()
-            Button("Not now", action: finish).frame(minHeight: 44)
-                .accessibilityIdentifier("onboarding.finish")
         }
-        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Back")
+        .disabled(step == 0)
+        .opacity(step == 0 ? 0 : 1)
+    }
+
+    private var skipAllButton: some View {
+        Button(action: finish) { Text("Not now").frame(minHeight: 44) }
+            .accessibilityIdentifier("onboarding.finish")
     }
 
     private var isLast: Bool { step == Self.stepCount - 1 }
@@ -73,8 +102,12 @@ struct OnboardingView: View {
             }
             .buttonStyle(PressableStyle())
             .accessibilityIdentifier("onboarding.continue")
-            Button(isLast ? "Skip this" : "Skip") {
+            Button {
                 if isLast { finish() } else { withAnimation(reduceMotion ? nil : HomeStyle.spring) { step += 1 } }
+            } label: {
+                Text(isLast ? "Skip this" : "Skip")
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .font(.subheadline.weight(.medium))
             .foregroundStyle(HomeStyle.supportingText)
@@ -119,11 +152,11 @@ struct OnboardingView: View {
     }
 
     private var goalPage: some View {
-        page(String(localized: "What brings you here?"),
-             String(localized: "Choose a focus for your set notes. You can change this later.")) {
+        page(String(localized: "Training goal"),
+             String(localized: "Choose a focus for set feedback.")) {
             VStack(spacing: 10) {
                 ForEach(TrainingGoal.allCases, id: \.self) { goal in
-                    ChoiceCard(title: goal.title, detail: goal.detail, symbol: goal.symbol,
+                    ChoiceCard(title: goal.title, detail: nil, symbol: goal.symbol,
                                selected: profile.goal == goal) {
                         profile.goal = profile.goal == goal ? nil : goal
                     }
@@ -134,8 +167,8 @@ struct OnboardingView: View {
     }
 
     private var exercisesPage: some View {
-        page(String(localized: "Which exercises?"),
-             String(localized: "They come first on your screen. The first one is ready when you open Plumb.")) {
+        page(String(localized: "Exercises"),
+             String(localized: "Favorites appear first in Workout.")) {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: 10) {
                 ForEach(ExerciseKind.allCases, id: \.self) { kind in
                     ExerciseTile(kind: kind,
@@ -154,8 +187,8 @@ struct OnboardingView: View {
     }
 
     private var levelPage: some View {
-        page(String(localized: "How often do you train?"),
-             String(localized: "This changes how Plumb talks to you, not what it measures.")) {
+        page(String(localized: "Training experience"),
+             String(localized: "Adjusts the detail in set feedback.")) {
             VStack(spacing: 10) {
                 ForEach(TrainingLevel.allCases, id: \.self) { level in
                     ChoiceCard(title: level.title, detail: level.detail, symbol: nil,
@@ -169,29 +202,28 @@ struct OnboardingView: View {
     }
 
     private var voicePage: some View {
-        page(String(localized: "A voice during the set?"),
-             String(localized: "Your phone stands a few steps away. Plumb can count out loud so you never look at the screen.")) {
+        page(String(localized: "Spoken feedback"),
+             String(localized: "Hear the countdown, rep count and live observations.")) {
             VStack(alignment: .leading, spacing: 14) {
                 Toggle(isOn: $profile.speaksLive) {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Say reps aloud").font(.headline)
-                        Text("The countdown, each rep, and one alert when a rep is clearly faster or shorter.")
-                            .font(.subheadline)
-                            .foregroundStyle(HomeStyle.supportingText)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .tint(Color(uiColor: .systemGreen))
                 .accessibilityIdentifier("onboarding.speaksLive")
                 .optionCard()
-                HStack(alignment: .top, spacing: 14) {
+                let layout = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14))
+                    : AnyLayout(HStackLayout(alignment: .top, spacing: 14))
+                layout {
                     Image(systemName: "airpods.pro")
-                        .font(.title2)
+                        .font(.system(size: 22))
                         .frame(width: 32)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("AirPods or any headphones").font(.headline)
-                        Text("When they are connected, Plumb speaks there. Otherwise it uses the iPhone speaker. You can change this in Options.")
+                        Text("Headphones").font(.headline)
+                        Text("Audio plays through connected headphones or the iPhone speaker.")
                             .font(.subheadline)
                             .foregroundStyle(HomeStyle.supportingText)
                             .fixedSize(horizontal: false, vertical: true)
@@ -203,8 +235,8 @@ struct OnboardingView: View {
     }
 
     private var placementPage: some View {
-        page(String(localized: "Where to put your iPhone"),
-             String(localized: "This is what makes the counting work. Four things to check before each set.")) {
+        page(String(localized: "Camera setup"),
+             String(localized: "Keep the phone upright on a stable support.")) {
             VStack(alignment: .leading, spacing: 14) {
                 // Always a standing figure: the point is the whole body in the frame.
                 PlacementScene(kind: .bodyweightSquat)
@@ -214,7 +246,7 @@ struct OnboardingView: View {
                     placementRow("rectangle.portrait.and.arrow.right", String(localized: "From the side"),
                                  String(localized: "Your profile faces the camera. From the front, Plumb still counts your reps, but posture advice needs your side."))
                     placementRow("arrow.up.and.down", String(localized: "At hip height"),
-                                 String(localized: "Use a stable support. Keep the phone upright, with the camera near hip height."))
+                                 String(localized: "Place the camera near hip height."))
                     placementRow("figure.walk", String(localized: "A few steps away"),
                                  String(localized: "Two to three meters. Walk back to your iPhone to end the set."))
                     placementRow("person.crop.rectangle", String(localized: "Whole body in the frame"),
@@ -232,7 +264,7 @@ struct OnboardingView: View {
     private func placementRow(_ symbol: String, _ title: String, _ detail: String) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: symbol)
-                .font(.title3)
+                .font(.system(size: 20))
                 .frame(width: 28)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
@@ -250,7 +282,7 @@ struct OnboardingView: View {
 /// One answer: a card that fills when chosen.
 private struct ChoiceCard: View {
     let title: String
-    let detail: String
+    let detail: String?
     let symbol: String?
     let selected: Bool
     let tap: () -> Void
@@ -260,22 +292,23 @@ private struct ChoiceCard: View {
             HStack(alignment: .top, spacing: 14) {
                 if let symbol {
                     Image(systemName: symbol)
-                        .font(.title3)
+                        .font(.system(size: 20))
                         .frame(width: 28)
                         .padding(.top, 1)
                         .accessibilityHidden(true)
                 }
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title).font(.headline)
-                    Text(detail)
+                    if let detail { Text(detail)
                         .font(.subheadline)
                         .opacity(0.78)
                         .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
                 Spacer(minLength: 0)
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(selected ? HomeStyle.accent : Color(uiColor: .secondaryLabel))
-                    .font(.title3)
+                    .font(.system(size: 20))
                     .accessibilityHidden(true)
             }
             .padding(16)
@@ -295,6 +328,7 @@ private struct ExerciseTile: View {
     let kind: ExerciseKind
     let rank: Int?
     let tap: () -> Void
+    @ScaledMetric(relativeTo: .footnote) private var rankSize = 26.0
 
     var body: some View {
         Button(action: tap) {
@@ -306,7 +340,7 @@ private struct ExerciseTile: View {
                         Text("\(rank)")
                             .font(.footnote.weight(.bold))
                             .foregroundStyle(.black)
-                            .frame(width: 26, height: 26)
+                            .frame(width: rankSize, height: rankSize)
                             .background(.white, in: Circle())
                             .padding(6)
                             .transition(.scale.combined(with: .opacity))
@@ -408,7 +442,9 @@ struct PlacementScene: View {
                        style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [2, 6]))
 
         // The distance, written under the floor.
-        let text = Text("2 to 3 m").font(.caption.weight(.semibold)).foregroundStyle(white.opacity(0.8))
+        // Illustration labels share fixed geometry; the accessible description and
+        // placement instructions below provide the scalable text.
+        let text = Text("2 to 3 m").font(.system(size: 12, weight: .semibold)).foregroundStyle(white.opacity(0.8))
         context.draw(context.resolve(text), at: CGPoint(x: (phone.maxX + size.width - 150) / 2, y: floorY + 16))
         var arrow = Path()
         arrow.move(to: CGPoint(x: phone.maxX + 6, y: floorY + 16))
@@ -418,7 +454,7 @@ struct PlacementScene: View {
         context.stroke(arrow, with: .color(white.opacity(0.4)), lineWidth: 1)
 
         // "Side view" label at the top left.
-        let label = Text("Side view · hip height").font(.footnote.weight(.semibold)).foregroundStyle(white)
+        let label = Text("Side view · hip height").font(.system(size: 13, weight: .semibold)).foregroundStyle(white)
         context.draw(context.resolve(label), at: CGPoint(x: 14, y: 12), anchor: .topLeading)
     }
 }

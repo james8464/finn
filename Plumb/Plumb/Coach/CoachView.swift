@@ -54,7 +54,9 @@ struct CoachView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 6) {
                 HStack(spacing: 10) {
-                    TextField("Ask about your sets", text: $draft, axis: .vertical)
+                    TextField("Ask about your sets", text: $draft,
+                              prompt: Text("Ask about your sets").foregroundStyle(HomeStyle.supportingText),
+                              axis: .vertical)
                         .lineLimit(1...4)
                         .accessibilityLabel("Ask about your sets")
                         .textFieldStyle(.plain)
@@ -81,6 +83,7 @@ struct CoachView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("coach.engine")
@@ -104,7 +107,7 @@ struct CoachView: View {
         .sheet(isPresented: $showsSource) {
             NavigationStack {
                 List {
-                    Section("How this answer is made") {
+                    Section("Source") {
                         Text(engineLine)
                         if let note = conversation.engineNote { Text(note).foregroundStyle(.secondary) }
                     }
@@ -114,7 +117,7 @@ struct CoachView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showsSource = false } } }
             }
-            .presentationDetents([.medium, .large])
+            .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         }
         .onAppear { conversation.refresh(history: history) }
     }
@@ -158,7 +161,7 @@ struct CoachView: View {
                     .font(.body)
                     .foregroundStyle(isCoach ? Color.primary : HomeStyle.onAccent)
                     .fixedSize(horizontal: false, vertical: true)
-                if isCoach, let engine = message.engine {
+                if isCoach, !history.isEmpty, let engine = message.engine {
                     Text(engine.label)
                         .font(.caption)
                         .foregroundStyle(HomeStyle.supportingText)

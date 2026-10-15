@@ -168,3 +168,17 @@ The phone build exposed deprecated preview renderer calls and two isolation warn
 The signed Release build succeeded. Twenty-four targeted tests passed on the physical iPhone, covering real receiver enqueue/detach/reattach and metadata isolation, skeleton alignment/rotation and Siri report behavior. The project warnings identified in this pass are cleared. Xcode’s metadata-extraction notice for a target without AppIntents remains a tool notice.
 
 Installed the Release app over the existing `com.jamesdurup.plumbtestoct` app and launched it successfully. Existing application data and repository signing settings were preserved. An obsolete `com.james8464.Plumb.uitests.xctrunner` test helper was removed to free a personal-signing slot; the older Plumb application was kept.
+
+## Whole-app legibility review
+
+Preserved Théophile’s cards, four tabs, charcoal Home and exact `#FF2D92` accent. Home captions now scale, empty charts omit invented time axes, and award descriptions can wrap. Onboarding and the illustrated demo use shorter labels and fewer repeated explanations; French translations cover the new copy.
+
+Sheets, onboarding and results now inherit the app’s dark appearance. Health’s Continue label has an explicit contrasting foreground; its privacy note and Coach’s input prompt use the tested semantic secondary-label colour. Camera instructions, primary actions, exercise rankings, demo timer and sheet content adapt at the largest text size. Decorative icons stay within their columns. About Coach and secondary sheet actions have actual 44-point touch regions. DEBUG demo labels occupy their own space instead of covering navigation titles.
+
+The survey captured 84 screen states across Home details, awards, settings, privacy, Health, camera setup, all five onboarding pages, both demo pages, four tabs, framing, capture, results, saved sessions and camera errors at normal and largest text sizes. Follow-up tests scroll long pages to their final controls. Demo captures and laptop previews use isolated synthetic input; they do not establish camera measurement accuracy or live Coach/Health integration.
+
+**Audit limitation:** the broader structural scan reported predictive clipping on some fully visible native rows and sheet labels. It was not repeated in full after the final targeted fixes. Findings remain unsuppressed in `InterfaceAccessibilityUITests`; screenshots and scrolling checks are separate evidence, not a claim that every automated accessibility audit passes. The palette test checks the actual brand/secondary-label combinations against stable dark surfaces, not every material or system control.
+
+To repeat the manual survey, set `TEST_RUNNER_PLUMB_CAPTURE_DIR` when running `InterfaceAccessibilityUITests`. Add `TEST_RUNNER_PLUMB_FULL_ACCESSIBILITY_AUDIT=1` for contrast and Dynamic Type diagnostics. Capture tours skip without an output directory; the Home text-scaling regression and palette test run normally.
+
+Final verification: 7 unit tests and 9 UI tests passed. After the last Health/Coach colour adjustments, the palette, Health actions at both text sizes and native destination tour passed again. Simulator and signed iPhone Release builds succeeded. Installed and launched over the existing iPhone app without erasing its container. The laptop preview runs in Device Hub on the dedicated **Plumb Accessibility Review** simulator using `-plumb-ui-demo`.

@@ -20,6 +20,7 @@ final class NativeUIReviewUITests: XCTestCase {
         try save("history-empty")
         app.selectTab("Coach")
         XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
+        XCTAssertGreaterThanOrEqual(app.buttons["coach.engine"].frame.height, 44)
         try save("coach")
         app.buttons["coach.engine"].tap()
         XCTAssertTrue(app.navigationBars["About Coach"].waitForExistence(timeout: 3))
@@ -134,17 +135,68 @@ final class NativeUIReviewUITests: XCTestCase {
 
     @MainActor
     func testHealthOfferAtLargestText() throws {
+        for (size, name) in [("UICTContentSizeCategoryL", "health-offer"),
+                             ("UICTContentSizeCategoryAccessibilityXXXL", "health-offer-largest-text")] {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-plumb-open", "health",
-                               "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+                               "-UIPreferredContentSizeCategoryName", size]
         app.launch()
         XCTAssertTrue(app.buttons["offer.later"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.buttons["offer.later"].isHittable)
         XCTAssertTrue(app.buttons["offer.personalize"].isHittable)
-        XCTAssertTrue(app.staticTexts["Make Plumb more personal?"].exists)
-        try save("health-offer-largest-text")
+        XCTAssertEqual(app.buttons["offer.personalize"].label, "Continue")
+        XCTAssertTrue(app.staticTexts["Personalize with Health"].exists)
+        try save(name)
+        app.scrollViews.firstMatch.swipeUp()
+        try save(name + "-bottom")
         app.buttons["offer.later"].tap()
         XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 3))
+        app.terminate()
+        }
+    }
+
+    @MainActor
+    func testCameraPrimerActionsAtBothTextSizes() throws {
+        for (size, name) in [("UICTContentSizeCategoryL", "camera-primer"),
+                             ("UICTContentSizeCategoryAccessibilityXXXL", "camera-primer-largest-text")] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-plumb-ui-demo", "-plumb-open", "camera-primer",
+                                   "-UIPreferredContentSizeCategoryName", size]
+            app.launch()
+            XCTAssertTrue(app.buttons["primer.continue"].waitForExistence(timeout: 8))
+            XCTAssertTrue(app.buttons["primer.continue"].isHittable)
+            XCTAssertTrue(app.buttons["primer.privacy"].isHittable)
+            try save(name)
+            app.scrollViews.firstMatch.swipeUp()
+            try save(name + "-bottom")
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    func testLargeTextLongPagesReachTheirLastControls() throws {
+        let app = XCUIApplication()
+        let arguments = ["-plumb-ui-demo", "-UIPreferredContentSizeCategoryName",
+                         "UICTContentSizeCategoryAccessibilityXXXL", "-plumb-open"]
+        app.launchArguments = arguments + ["privacy"]
+        app.launch()
+        let policy = app.links["Full privacy policy"]
+        XCTAssertTrue(policy.waitForExistence(timeout: 8))
+        for _ in 0..<24 where !policy.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        XCTAssertTrue(policy.isHittable)
+        try save("privacy-largest-text-end")
+        app.terminate()
+        app.launchArguments = arguments + ["options"]
+        app.launch()
+        let replay = app.buttons["options.replayOnboarding"]
+        XCTAssertTrue(replay.waitForExistence(timeout: 8))
+        for _ in 0..<24 where !replay.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        XCTAssertTrue(replay.isHittable)
+        try save("options-largest-text-end")
+        let data = app.buttons["Health data"]
+        for _ in 0..<12 where !data.isHittable { app.scrollViews.firstMatch.swipeDown() }
+        data.tap()
+        try save("health-data-largest-text")
     }
 
     @MainActor
@@ -153,7 +205,7 @@ final class NativeUIReviewUITests: XCTestCase {
         let url = URL(fileURLWithPath: directory, isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         // Let native navigation/material transitions settle before capturing.
-        Thread.sleep(forTimeInterval: 0.5)
+        Thread.sleep(forTimeInterval: 2)
         try XCUIScreen.main.screenshot().pngRepresentation.write(to: url.appending(path: "\(name).png"))
     }
 }

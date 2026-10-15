@@ -14,7 +14,8 @@ struct PlumbDemoView: View {
                 IntroBrand()
                 Spacer()
                 Button { dismiss() } label: {
-                    Image(systemName: "xmark").frame(width: 44, height: 44)
+                    Image(systemName: "xmark").font(.system(size: 17, weight: .semibold))
+                        .frame(width: 44, height: 44)
                 }
                 .accessibilityLabel("Close demo")
                 .accessibilityIdentifier("demo.close")
@@ -30,7 +31,7 @@ struct PlumbDemoView: View {
             }
             .scrollIndicators(.hidden)
             VStack(spacing: 10) {
-                IntroAction(title: showsAdvice ? "Try my first set" : "See Plumb’s advice") {
+                IntroAction(title: showsAdvice ? "Start a set" : "View set review") {
                     if showsAdvice {
                         startWorkout()
                     } else {
@@ -59,28 +60,28 @@ struct PlumbDemoView: View {
 
 struct DemoStoryPage: View {
     let showsAdvice: Bool
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            IntroHeading(eyebrow: showsAdvice ? "02 / A LITTLE GUIDANCE" : "01 / SEE YOUR MOVEMENT",
-                         title: showsAdvice ? "One insight.\nA better next set." : "You move.\nPlumb follows.",
-                         subtitle: showsAdvice
-                            ? "One observation, and something to try next."
-                            : "Your reps and movement, together in one simple view.")
+            IntroHeading(eyebrow: showsAdvice ? "02 / REVIEW" : "01 / REPS",
+                         title: showsAdvice ? "Set review" : "Rep counting")
             if !showsAdvice {
                 DemoCameraCard(showsAdvice: false)
             }
             if showsAdvice {
-                HStack(spacing: 16) {
+                let layout = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
+                    : AnyLayout(HStackLayout(spacing: 16))
+                layout {
                     Image("DemoAthlete")
                         .resizable().scaledToFill()
                         .frame(width: 88, height: 112).clipped()
                         .clipShape(RoundedRectangle(cornerRadius: 18))
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("DEMO · SET REVIEWED").font(.caption2.weight(.semibold))
-                            .foregroundStyle(DashboardStyle.accent)
                         Text("6 squat reps").font(.title2.bold())
+                            .fixedSize(horizontal: false, vertical: true)
                         Text("00:18 · Example session").font(.caption)
                             .foregroundStyle(DashboardStyle.secondary)
                     }
@@ -90,13 +91,8 @@ struct DemoStoryPage: View {
                 .background(Color(white: 0.10), in: RoundedRectangle(cornerRadius: 24))
                 .accessibilityElement(children: .combine)
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Label("Plumb’s advice", systemImage: "text.bubble.fill")
-                            .font(.subheadline.weight(.semibold))
-                        Spacer()
-                        Text("EXAMPLE").font(.caption2.weight(.semibold))
-                            .foregroundStyle(DashboardStyle.accent)
-                    }
+                    Label("Observation", systemImage: "text.bubble.fill")
+                        .font(.subheadline.weight(.semibold))
                     Text("Your last two reps were shorter.").font(.title3.weight(.semibold))
                     Text("Try slowing down and matching the depth of your first reps on the next set.")
                         .font(.subheadline).foregroundStyle(DashboardStyle.secondary)
@@ -111,6 +107,7 @@ struct DemoStoryPage: View {
             }
             Text("Illustrated demo · sample reps and advice")
                 .font(.caption).foregroundStyle(DashboardStyle.secondary)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity)
         }
         .accessibilityElement(children: .contain)
@@ -123,6 +120,7 @@ struct DemoCameraCard: View {
     let showsAdvice: Bool
     var welcome = false
     @ScaledMetric(relativeTo: .largeTitle) private var countSize = 48.0
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         ZStack {
@@ -152,7 +150,10 @@ struct DemoCameraCard: View {
                         .background(DashboardStyle.accent, in: Capsule())
                 }
                 Spacer()
-                HStack(alignment: .bottom) {
+                let layout = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+                    : AnyLayout(HStackLayout(alignment: .bottom))
+                layout {
                     if welcome {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("A coach in your corner.").font(.title3.bold())
@@ -167,6 +168,7 @@ struct DemoCameraCard: View {
                         Spacer()
                         Label(showsAdvice ? "Reviewed" : "00:18", systemImage: showsAdvice ? "checkmark.circle" : "timer")
                             .font(.caption.weight(.medium)).monospacedDigit()
+                            .fixedSize(horizontal: false, vertical: true)
                             .padding(10).background(.black.opacity(0.5), in: Capsule())
                     }
                 }
@@ -180,7 +182,7 @@ struct DemoCameraCard: View {
                     .accessibilityHidden(true)
             }
         }
-        .frame(height: welcome ? 300 : showsAdvice ? 260 : 350)
+        .frame(height: typeSize.isAccessibilitySize ? 480 : welcome ? 300 : showsAdvice ? 260 : 350)
         .clipShape(RoundedRectangle(cornerRadius: 28))
         .overlay(RoundedRectangle(cornerRadius: 28).strokeBorder(.white.opacity(0.17), lineWidth: 1))
         .accessibilityElement(children: .ignore)

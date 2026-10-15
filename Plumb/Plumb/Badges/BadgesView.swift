@@ -61,7 +61,7 @@ struct BadgeRow: View {
         HStack(alignment: .top, spacing: 14) {
             BadgeMark(kind: kind, earned: earned != nil)
             VStack(alignment: .leading, spacing: 4) {
-                Text(kind.title).font(.headline)
+                Text(kind.title).font(.headline).fixedSize(horizontal: false, vertical: true)
                 Text(earned?.detail ?? kind.rule)
                     .font(.subheadline).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -122,7 +122,6 @@ struct AwardsCardContent<Heading: View>: View {
                     : "\(badges.count) badges · latest: \(badges.last!.kind.title)"))
                 .font(.footnote)
                 .foregroundStyle(DashboardStyle.secondary)
-                .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .combine)
@@ -172,6 +171,7 @@ struct BadgeDetailView: View {
     let kind: BadgeKind
     let earned: EarnedBadge?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         ScrollView {
@@ -182,6 +182,7 @@ struct BadgeDetailView: View {
                 Text(kind.title)
                     .font(.title.bold())
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                 if let earned {
                     Text(earned.detail)
@@ -191,6 +192,8 @@ struct BadgeDetailView: View {
                     Text(earned.earnedAt.formatted(.dateTime.day().month(.wide).year().hour().minute()))
                         .font(.footnote)
                         .foregroundStyle(HomeStyle.supportingText)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                 } else {
                     Text(kind.rule)
                         .font(.body)
@@ -211,7 +214,7 @@ struct BadgeDetailView: View {
         .frame(maxWidth: .infinity)
         }
         .background(HomeStyle.background)
-        .presentationDetents([.medium, .large])
+        .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         .presentationDragIndicator(.visible)
         .presentationBackground(HomeStyle.background)
         .accessibilityIdentifier("badges.detail")

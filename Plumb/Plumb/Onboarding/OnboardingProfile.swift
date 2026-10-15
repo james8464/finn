@@ -51,9 +51,9 @@ nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
 
     var detail: String {
         switch self {
-        case .new: String(localized: "Plumb explains each cue and keeps it to one thing.")
-        case .regular: String(localized: "Short cues, with the numbers behind them.")
-        case .experienced: String(localized: "Numbers first: range, tempo, comparison with your last set.")
+        case .new: String(localized: "Explain each cue.")
+        case .regular: String(localized: "Brief cues with measurements.")
+        case .experienced: String(localized: "Range, tempo and set comparisons.")
         }
     }
 }

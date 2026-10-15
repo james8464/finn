@@ -992,6 +992,26 @@
         }
       }
     },
+    "01 / REPS" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "01 / RÉPÉTITIONS"
+          }
+        }
+      }
+    },
+    "02 / REVIEW" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "02 / BILAN"
+          }
+        }
+      }
+    },
     "1 %@ rep" : {
       "localizations" : {
         "fr" : {
@@ -1231,6 +1251,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Activité"
+          }
+        }
+      }
+    },
+    "Adjusts the detail in set feedback." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adapte le niveau de détail des retours sur les séries."
           }
         }
       }
@@ -1607,6 +1637,16 @@
         }
       }
     },
+    "Audio plays through connected headphones or the iPhone speaker." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le son passe par les écouteurs connectés ou le haut-parleur de l’iPhone."
+          }
+        }
+      }
+    },
     "Avg. posture score" : {
       "localizations" : {
         "fr" : {
@@ -1737,6 +1777,16 @@
         }
       }
     },
+    "Brief cues with measurements." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseils brefs avec les mesures."
+          }
+        }
+      }
+    },
     "Camera" : {
       "localizations" : {
         "fr" : {
@@ -1823,6 +1873,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Confidentialité de la caméra"
+          }
+        }
+      }
+    },
+    "Camera setup" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Placement de la caméra"
           }
         }
       }
@@ -2013,6 +2073,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Choose a focus for set feedback." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez un objectif pour les retours sur vos séries."
           }
         }
       }
@@ -2283,6 +2353,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "APERÇU DESIGN · DONNÉES D’EXEMPLE"
+          }
+        }
+      }
+    },
+    "Data stays on this iPhone. Change access anytime in Options." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données restent sur cet iPhone. Modifiez l’accès dans Options à tout moment."
           }
         }
       }
@@ -2696,6 +2776,16 @@
         }
       }
     },
+    "Exercises" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercices"
+          }
+        }
+      }
+    },
     "Experimental on-device estimate. Uses your selection when uncertain." : {
       "localizations" : {
         "en" : {
@@ -2708,6 +2798,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Estimation expérimentale sur cet iPhone. Votre sélection est utilisée en cas d’incertitude."
+          }
+        }
+      }
+    },
+    "Explain each cue." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expliquer chaque conseil."
           }
         }
       }
@@ -2748,6 +2848,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plus rapide que tes premières répétitions"
+          }
+        }
+      }
+    },
+    "Favorites appear first in Workout." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les favoris apparaissent en premier dans Séance."
           }
         }
       }
@@ -3142,6 +3252,16 @@
         }
       }
     },
+    "Headphones" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écouteurs"
+          }
+        }
+      }
+    },
     "Headphones connected. Turn on Say reps aloud in Options to hear each rep." : {
       "localizations" : {
         "fr" : {
@@ -3194,6 +3314,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Santé garde ces entraînements selon tes réglages Santé. Effacer l’historique dans Plumb ne les supprime pas : supprime-les dans l’app Santé."
+          }
+        }
+      }
+    },
+    "Hear the countdown, rep count and live observations." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écoutez le compte à rebours, les répétitions et les observations en direct."
           }
         }
       }
@@ -3579,6 +3709,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Garde le rythme de tes premières répétitions."
+          }
+        }
+      }
+    },
+    "Keep the phone upright on a stable support." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Placez l’iPhone à la verticale sur un support stable."
           }
         }
       }
@@ -4637,6 +4777,16 @@
         }
       }
     },
+    "Observation" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observation"
+          }
+        }
+      }
+    },
     "Observation marked not relevant." : {
       "localizations" : {
         "fr" : {
@@ -4931,6 +5081,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choisi, numéro %lld"
+          }
+        }
+      }
+    },
+    "Place the camera near hip height." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Placez la caméra à hauteur des hanches."
           }
         }
       }
@@ -5488,6 +5648,16 @@
         }
       }
     },
+    "Range, tempo and set comparisons." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amplitude, rythme et comparaison des séries."
+          }
+        }
+      }
+    },
     "Reach the same depth on every rep. Plumb needs %@ to count one." : {
       "localizations" : {
         "fr" : {
@@ -5666,6 +5836,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Répétition %1$lld, %2$@ secondes, %3$@ %4$@"
+          }
+        }
+      }
+    },
+    "Rep counting" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comptage des répétitions"
           }
         }
       }
@@ -6250,6 +6430,16 @@
         }
       }
     },
+    "Set review" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilan de série"
+          }
+        }
+      }
+    },
     "Set reviewed" : {
       "localizations" : {
         "fr" : {
@@ -6592,6 +6782,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sommeil"
+          }
+        }
+      }
+    },
+    "Source" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
+          }
+        }
+      }
+    },
+    "Spoken feedback" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retours vocaux"
           }
         }
       }
@@ -7284,6 +7494,26 @@
         }
       }
     },
+    "Training experience" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expérience d’entraînement"
+          }
+        }
+      }
+    },
+    "Training goal" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif d’entraînement"
+          }
+        }
+      }
+    },
     "Try a pace you can keep consistent." : {
       "localizations" : {
         "fr" : {
@@ -7580,6 +7810,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voir les objectifs"
+          }
+        }
+      }
+    },
+    "View set review" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir le bilan"
           }
         }
       }
