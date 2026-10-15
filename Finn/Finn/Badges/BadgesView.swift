@@ -143,8 +143,9 @@ struct BadgeUnlockCard: View {
                         .font(.headline).foregroundStyle(HomeStyle.accent)
                     ForEach(badges) { badge in
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(badge.kind.title).font(.headline)
-                            Text(badge.detail).font(.subheadline).foregroundStyle(AppPageStyle.secondaryText)
+                            WrappingText(text: badge.kind.title, style: .headline)
+                            WrappingText(text: badge.detail, style: .subheadline,
+                                         color: .label.withAlphaComponent(0.72))
                         }
                     }
                     Label("View awards", systemImage: "chevron.right").font(.subheadline)

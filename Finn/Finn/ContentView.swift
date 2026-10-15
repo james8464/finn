@@ -247,13 +247,13 @@ struct ContentView: View {
                 set: { _ in }
             )) {
                 NavigationStack {
-                    sessionContent
-                        .safeAreaInset(edge: .top, spacing: 0) {
-                            #if DEBUG
-                            if isDemo && !isCaptureStage && !isErrorStage { demoIndicator }
-                            #endif
-                        }
-                        .navigationDestination(item: $sessionRoute) { destinationPage($0) }
+                    VStack(spacing: 0) {
+                        #if DEBUG
+                        if isDemo && !isCaptureStage && !isErrorStage { demoIndicator }
+                        #endif
+                        sessionContent
+                    }
+                    .navigationDestination(item: $sessionRoute) { destinationPage($0) }
                 }
                 .background(HomeStyle.background)
                 .preferredColorScheme(.dark)
@@ -319,13 +319,15 @@ struct ContentView: View {
     private var demoIndicator: some View {
         Text("DEMO INPUT")
             .font(.system(size: demoLabelSize, weight: .bold))
-            .foregroundStyle(.black)
+            .foregroundStyle(.yellow)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(.yellow, in: Capsule())
+            .background(.black, in: Capsule())
+            .overlay(Capsule().strokeBorder(.yellow, lineWidth: 1).accessibilityHidden(true))
+            .accessibilityIdentifier("debug.demoInput")
+
             .frame(maxWidth: .infinity)
             .background(HomeStyle.background)
-            .accessibilityHidden(true)
     }
     #endif
 
@@ -346,11 +348,11 @@ struct ContentView: View {
                     NavigationStack {
                         tabContent(tab)
                             .accessibilityHidden(model.stage != .ready)
+                            #if DEBUG
                             .safeAreaInset(edge: .top, spacing: 0) {
-                                #if DEBUG
                                 if isDemo { demoIndicator }
-                                #endif
                             }
+                            #endif
                             .navigationDestination(item: Binding(
                                 get: { tabRoutes[tab] },
                                 set: { tabRoutes[tab] = $0 }
@@ -401,11 +403,11 @@ struct ContentView: View {
 
     private func destinationPage(_ destination: HomeRoute) -> some View {
         destinationContent(destination)
+            #if DEBUG
             .safeAreaInset(edge: .top, spacing: 0) {
-                #if DEBUG
                 if isDemo { demoIndicator }
-                #endif
             }
+            #endif
     }
 
     @ViewBuilder private func destinationContent(_ destination: HomeRoute) -> some View {
@@ -1389,10 +1391,10 @@ struct ContentView: View {
                                     .font(.largeTitle.bold()).monospacedDigit()
                                 Text("measured reps").font(.headline).foregroundStyle(.primary)
                             }
-                            .accessibilityRepresentation {
-                                Text("\(analysis.reps.count) measured reps")
-                                    .font(.headline).foregroundStyle(.primary)
-                            }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityAddTraits(.isStaticText)
+                            .accessibilityLabel("\(analysis.reps.count) measured reps")
+
                         }
                         .modifier(AppSurface())
                         if analysis.reps.count >= 2 {
@@ -1449,11 +1451,9 @@ struct ContentView: View {
                                     .font(.body)
                                     .foregroundStyle(FinnStyle.supportingText)
                             } else {
-                                Text(cue.observation)
-                                    .font(.title3.weight(.semibold))
-                                Text("Observed in \(FormChecks.list(cue.repNumbers)).")
-                                    .font(.subheadline)
-                                    .foregroundStyle(FinnStyle.supportingText)
+                                WrappingText(text: cue.observation, style: .title3, weight: .semibold)
+                                WrappingText(text: String(localized: "Observed in \(FormChecks.list(cue.repNumbers))."),
+                                             style: .subheadline, color: .label.withAlphaComponent(0.72))
                                 nextAction(cue.nextAction)
                                     .padding(.top, 4)
                                 if let spokenText = SpokenObservation.text(for: analysis, cue: cue) {
@@ -1561,6 +1561,7 @@ struct ContentView: View {
             .frame(maxWidth: .infinity)
         }
         .clipped()
+
             VStack(spacing: 8) {
                 if dynamicTypeSize.isAccessibilitySize {
                     Button {
@@ -1587,6 +1588,7 @@ struct ContentView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
             .background(AppPageStyle.background)
+
         }
         .background(AppPageStyle.background)
         .navigationTitle("Set summary")
@@ -1602,11 +1604,18 @@ struct ContentView: View {
             }
             if !dynamicTypeSize.isAccessibilitySize {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button {
                         observationSpeaker.stop()
                         Task { await model.finishSession() }
+                    } label: {
+                        WrappingText(text: String(localized: "Done"), weight: .semibold, alignment: .center)
+                            .fixedSize()
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
-                    .font(.body.weight(.semibold))
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Done")
+                    .accessibilityIdentifier("result.done")
                 }
             }
         }
@@ -1715,11 +1724,9 @@ struct ContentView: View {
 
     private func nextAction(_ text: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Next set")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(FinnStyle.supportingText)
-            Text(text)
-                .font(.body)
+            WrappingText(text: String(localized: "Next set"), style: .subheadline,
+                         weight: .semibold, color: .label.withAlphaComponent(0.72))
+            WrappingText(text: text)
         }
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -1737,6 +1744,8 @@ struct ContentView: View {
                         width: .ratio(0.6))
                     .foregroundStyle(highlighted.contains(rep.number) ? AppPageStyle.tint : Color(uiColor: .secondaryLabel))
                     .cornerRadius(5)
+                    .accessibilityLabel("Rep \(rep.number)")
+                    .accessibilityValue(definition.accessibleRange(rep.relativeRange))
             }
             .chartYAxis(.hidden)
             .chartXAxis {
@@ -1749,14 +1758,12 @@ struct ContentView: View {
             .chartXScale(domain: reps.map { String($0.number) })
             .chartYScale(domain: 0...1.2)
             .frame(height: 120)
-            .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(noun) per rep")
-            .accessibilityValue(reps.map { "rep \($0.number), \(definition.accessibleRange($0.relativeRange))" }
-                .joined(separator: "; "))
         }
         .modifier(AppSurface())
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("result.depthChart")
+
     }
 
     @ViewBuilder private func statsSections(_ sessions: [WorkoutSessionSummary]) -> some View {

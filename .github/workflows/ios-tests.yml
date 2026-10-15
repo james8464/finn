@@ -62,7 +62,21 @@ jobs:
               print("::error title={}::{}".format(name, failure.get("failureText", "").replace("\n", " ")))
               print(json.dumps(failure, indent=2))
           PY
-      - name: Replay generated workout videos through Vision
+      - name: Check Release startup and navigation
+        if: always()
+        run: |
+          xcodebuild test \
+            -project Finn/Finn.xcodeproj \
+            -scheme Finn \
+            -configuration Release \
+            -destination "platform=iOS Simulator,id=$DEVICE_ID" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            -resultBundlePath "$RUNNER_TEMP/Finn-Release.xcresult" \
+            -parallel-testing-enabled NO \
+            -jobs 2 \
+            -collect-test-diagnostics never \
+            -only-testing:FinnUITests/DashboardUITests/testProductionLaunchRendersAllTabsAndDestinations \
+            CODE_SIGNING_ALLOWED=NO
         if: always()
         run: tools/replay/test_generated_videos.sh
       - name: Test validation scorer
@@ -73,5 +87,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: finn-test-report
-          path: ${{ runner.temp }}/Finn.xcresult
+          path: |
+            ${{ runner.temp }}/Finn.xcresult
+            ${{ runner.temp }}/Finn-Release.xcresult
           if-no-files-found: ignore

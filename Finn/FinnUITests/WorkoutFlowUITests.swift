@@ -319,19 +319,11 @@ final class WorkoutFlowUITests: XCTestCase {
     /// bundle's summary otherwise reduces to "Contrast failed"
     @MainActor
     private func audit(_ app: XCUIApplication, at screen: String) throws {
-        let resultVisible = app.navigationBars["Set summary"].exists
-        let viewport = resultVisible ? app.scrollViews.firstMatch.frame : .zero
-        let resultTextLabels = resultVisible ? Set(app.scrollViews.firstMatch.staticTexts.allElementsBoundByIndex.map(\.label)) : Set<String>()
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = screen
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
         try app.performAccessibilityAudit { issue in
-            // iOS 27's contrast audit crops offscreen result text at its unscrolled frame,
-            // sampling the fixed action instead. Only exempt text outside the viewport;
-            // audit it again after scrolling it into view below.
-            if resultVisible, issue.auditType == .contrast,
-               let element = issue.element, element.elementType == .staticText,
-               resultTextLabels.contains(element.label), !viewport.insetBy(dx: -1, dy: -1).contains(element.frame) {
-                print("Offscreen result text deferred: \(element.label)")
-                return true
-            }
             let element = issue.element.map {
                 "\($0.elementType.rawValue) '\($0.label)' id '\($0.identifier)' at \($0.frame)"
             } ?? "no element"
@@ -362,14 +354,7 @@ final class WorkoutFlowUITests: XCTestCase {
         try audit(app, at: #function)
         app.buttons["Done"].tap()
         app.openFromHome("History")
-        // the Debug-only yellow demo badge triggers a false image-contrast result
-        // when the audit crops its glyphs. Empty History still receives a full audit.
-        try app.performAccessibilityAudit(for: [
-            .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
-        ]) { issue in
-            print("Accessibility: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
-            return false
-        }
+        try audit(app, at: "saved history")
     }
 
     @MainActor
