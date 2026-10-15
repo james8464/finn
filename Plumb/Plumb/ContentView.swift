@@ -19,8 +19,6 @@ struct ContentView: View {
     @State private var accessories = AccessoryMonitor()
     /// The set in progress on the Lock Screen and in the Dynamic Island (`Widgets/SetLiveActivity.swift`).
     @State private var liveActivity = SetLiveActivity()
-    /// The blurred room behind the first screen: the live camera, once the person has allowed it.
-    @State private var ambientCamera = AmbientCamera()
     /// True for the live camera, and for demo input only behind `-plumb-watch-demo`.
     private let connectsAccessories: Bool
     @State private var deleteCandidate: UUID?
@@ -235,8 +233,6 @@ extension ContentView {
         // camera is open, or Auto-Lock interrupts framing and throws the set away.
         .onChange(of: model.stage, initial: true) { _, stage in
             UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(stage)
-            // The blurred room behind the first screen and the result; never with demo input.
-            if !usesSyntheticInput && (stage == .ready || stage == .result) { ambientCamera.start() }
         }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
         // Siri or a shortcut asked for a set or the history; a set in progress is never interrupted.
@@ -372,17 +368,14 @@ extension ContentView {
         }
     }
 
-    /// Opens the camera for the chosen exercise: the primer first if iOS has not asked yet, and the
-    /// ambient preview is let go of before the measuring source takes the camera.
+    /// Opens the camera for the chosen exercise: the primer first if iOS has not asked yet. The
+    /// camera runs only from here to the end of the set, never behind the first screen.
     private func startSet() {
         if !usesSyntheticInput && CameraPermission.notAskedYet {
             showsCameraPrimer = true
             return
         }
-        Task {
-            await ambientCamera.stop()
-            await model.startPreview()
-        }
+        Task { await model.startPreview() }
     }
 
     /// Carries out what Siri asked ("Start a squat set in Plumb", "Show my history in Plumb") once the
@@ -412,14 +405,10 @@ extension ContentView {
     // MARK: - First screen
 
     /// One title, one button. The exercise changes by touching the title or swiping sideways;
-    /// everything else waits behind the icon in the corner.
+    /// the settings wait behind the icon in the corner. The camera stays off until Start.
     private var home: some View {
         ZStack {
-            if usesSyntheticInput {
-                PlumbBackdrop()
-            } else {
-                AmbientCameraBackdrop(camera: ambientCamera)
-            }
+            PlumbBackdrop()
             VStack(spacing: 0) {
                 exerciseTitle
                     .padding(.top, 64)
@@ -2114,14 +2103,14 @@ extension ContentView {
                     .buttonStyle(.glassProminent)
                     .tint(.white)
                     Button("Try again") {
-                        Task { await model.cancel(); await ambientCamera.stop(); await model.startPreview() }
+                        Task { await model.cancel(); await model.startPreview() }
                     }
                     .buttonStyle(.plain)
                     .frame(minHeight: 44)
                     .contentShape(Rectangle())
                 } else {
                     Button {
-                        Task { await model.cancel(); await ambientCamera.stop(); await model.startPreview() }
+                        Task { await model.cancel(); await model.startPreview() }
                     } label: {
                         Text("Try again")
                             .font(.headline)
