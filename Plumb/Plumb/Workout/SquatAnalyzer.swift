@@ -43,6 +43,10 @@ nonisolated enum ExerciseAnalyzer {
     /// at 35% the counts matched an independent dip count; at 45% reps were counted twice.
     /// The next rep is then measured from wherever the person tops out, never from the end of this one.
     static let repEndShareOfDepth = 0.35
+    /// A movement that came back up by this share of its depth and then goes down again (by the
+    /// exercise's `leaveTop`) is over at the turn, without counting; the next one starts there.
+    /// Below it, the rise is a stall on the way down and the rep goes on.
+    static let turnShareOfDepth = 0.6
 
     /// Whether 3D camera-angle estimates in the frames may reject the set.
     enum ViewCheckPolicy: Equatable {
@@ -53,7 +57,8 @@ nonisolated enum ExerciseAnalyzer {
     private enum Phase {
         case top
         case descending(start: TimeInterval, peak: Double, peakIndex: Int)
-        case ascending(start: TimeInterval, peak: Double, peakIndex: Int)
+        /// `rise`: the highest point (least travel) reached on the way up so far.
+        case ascending(start: TimeInterval, peak: Double, peakIndex: Int, rise: Double, riseTime: TimeInterval)
     }
 
     private struct Sample {
@@ -250,7 +255,8 @@ nonisolated enum ExerciseAnalyzer {
                 diagnostics.deepest = max(diagnostics.deepest, updatedPeak - localTop)
                 if updatedPeak - localTop >= phases.reachBottom &&
                     updatedPeak - distance >= phases.returnFromBottom {
-                    phase = .ascending(start: start, peak: updatedPeak, peakIndex: updatedPeakIndex)
+                    phase = .ascending(start: start, peak: updatedPeak, peakIndex: updatedPeakIndex,
+                                       rise: distance, riseTime: sample.time)
                 } else if distance <= localTop + phases.backAtTop {
                     // Came back up without reaching the bottom: a shallow movement.
                     diagnostics.shallow += 1
@@ -261,12 +267,14 @@ nonisolated enum ExerciseAnalyzer {
                 } else {
                     phase = .descending(start: start, peak: updatedPeak, peakIndex: updatedPeakIndex)
                 }
-            case .ascending(let start, let lastPeak, let lastPeakIndex):
+            case .ascending(let start, let lastPeak, let lastPeakIndex, let lastRise, let lastRiseTime):
                 // A pause or wobble on the way down can look like the way up; the rep's depth is
                 // still its deepest point, and its posture is read there.
                 let peak = max(lastPeak, distance)
                 let peakIndex = distance > lastPeak ? index : lastPeakIndex
                 let depth = peak - localTop
+                let rise = min(lastRise, distance)
+                let riseTime = distance < lastRise ? sample.time : lastRiseTime
                 if distance <= localTop + max(phases.backAtTop, depth * repEndShareOfDepth) {
                     let duration = sample.time - start
                     if (phases.minimumDuration...phases.maximumDuration).contains(duration) {
@@ -285,8 +293,20 @@ nonisolated enum ExerciseAnalyzer {
                     lastTopTime = sample.time
                     localTop = distance
                     phase = .top
+                } else if peak - rise >= depth * turnShareOfDepth, distance - rise >= phases.leaveTop {
+                    // Came most of the way back up, then went down again by a rep's opening travel
+                    // before reaching the top: the movement so far did not come back, so it is not
+                    // a rep, and the next one is measured from where the person turned. Before,
+                    // the rep stayed open and every later dip merged into it: twelve fast push-ups
+                    // whose tops sat below the opening plank gave one 6.7 s rep (15 October). A
+                    // stall with a small rise on the way down comes back up less than this share
+                    // and still deepens the same rep.
+                    diagnostics.incomplete += 1
+                    lastTopTime = riseTime
+                    localTop = rise
+                    phase = .descending(start: riseTime, peak: distance, peakIndex: index)
                 } else {
-                    phase = .ascending(start: start, peak: peak, peakIndex: peakIndex)
+                    phase = .ascending(start: start, peak: peak, peakIndex: peakIndex, rise: rise, riseTime: riseTime)
                 }
             }
         }
@@ -644,6 +664,8 @@ nonisolated struct MovementDiagnostics: Equatable, Sendable {
     var deepestShallow = 0.0
     /// Full movements that were faster or slower than the rep window.
     var outsideTempo = 0
+    /// Movements that went down again before coming back up far enough to end a rep.
+    var incomplete = 0
     /// The set ended partway through a movement.
     var unfinished = false
     /// Median 3D deviation from side-on when it was above the side-view limit but the set was
@@ -673,6 +695,9 @@ nonisolated struct MovementDiagnostics: Equatable, Sendable {
         }
         if outsideTempo > 0 {
             parts.append("\(outsideTempo) \(outsideTempo == 1 ? "movement was" : "movements were") faster than \(String(format: "%.1f", definition.phases.minimumDuration)) s or slower than \(String(format: "%.0f", definition.phases.maximumDuration)) s.")
+        }
+        if incomplete > 0 {
+            parts.append("\(incomplete) \(incomplete == 1 ? "movement" : "movements") went down again before coming back up far enough to count.")
         }
         if unfinished {
             parts.append("The last movement did not come back to the starting position.")

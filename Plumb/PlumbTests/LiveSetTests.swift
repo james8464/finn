@@ -310,12 +310,12 @@ nonisolated struct LiveSetMonitorTests {
         #expect(result.monitor.sawFasterRep)
     }
 
-    /// Fast push-ups whose tops sit below the opening plank (Guilhem, 15 October: the live count
+    /// Fast push-ups at the edge of the depth a rep needs (Guilhem, 15 October: the live count
     /// reached 29, the result 18). Measured over the whole set, a movement said as a rep early can
     /// stop counting later. The live count is the analysis of the set so far, so it ends on what
     /// the result says, comes down when it must, and never says a number twice.
     @Test func theLiveCountIsTheWholeSetAnalysisAndNeverSaysANumberTwice() {
-        let frames = fastPushUps(plank: 3, reps: 12, cycle: 0.55, topBend: 25, bottomBend: 85)
+        let frames = fastPushUps(plank: 3, reps: 12, cycle: 0.55, topBend: 35, bottomBend: 85)
         let result = run(frames, definition: .pushUp)
         guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .pushUp, viewCheck: .ignore) else {
             Issue.record("Expected a measured set")
@@ -331,7 +331,8 @@ nonisolated struct LiveSetMonitorTests {
             if case .repCountRevised(let count) = event { return count }
             return nil
         }
-        #expect(!revised.isEmpty, "this trace is one where the whole-set analysis takes reps back")
+        // Since the turn rule (`ExerciseAnalyzer.turnShareOfDepth`) this trace no longer takes a
+        // rep back; when the analysis does, the revised count is never above what was said.
         #expect(revised.allSatisfy { $0 <= said.count })
         // A revised count is shown, not spoken.
         #expect(LiveSetEvent.phrase(for: [.repCountRevised(3)], definition: .pushUp) == nil)
@@ -340,7 +341,7 @@ nonisolated struct LiveSetMonitorTests {
 
     /// Push-ups at about 0.5 s a cycle, all complete: every one is said and every one is in the result.
     @Test func fastCompletePushUpsAreCountedLiveAndInTheResult() {
-        let frames = fastPushUps(plank: 2, reps: 20, cycle: 0.5, topBend: 20, bottomBend: 80)
+        let frames = fastPushUps(plank: 2, reps: 20, cycle: 0.5, topBend: 0, bottomBend: 80)
         let result = run(frames, definition: .pushUp)
         guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .pushUp, viewCheck: .ignore) else {
             Issue.record("Expected a measured set")

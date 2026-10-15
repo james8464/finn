@@ -330,7 +330,7 @@ nonisolated struct ExerciseAnalyzerTests {
         let cycle = 0.5
         while time < 2 + 20 * cycle {
             let phase = (time - 2).truncatingRemainder(dividingBy: cycle) / cycle
-            frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: 20 + 60 * (1 - cos(2 * .pi * phase)) / 2,
+            frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: 80 * (1 - cos(2 * .pi * phase)) / 2,
                                                     wristX: 0.62, wristY: 0.86))
             time += CaptureTraces.step
         }
@@ -339,6 +339,33 @@ nonisolated struct ExerciseAnalyzerTests {
         #expect(analysis.reps.count == 20)
         #expect(diagnostics?.outsideTempo == 0)
         #expect(analysis.reps.allSatisfy { $0.duration >= ExerciseDefinition.minimumPushUpDuration })
+    }
+
+    /// Twelve fast push-ups whose tops sit 25° below the opening plank: the first never comes back
+    /// up to the plank, and once the person dips again it is over, not a rep. Every later push-up
+    /// is measured from where they turned and counts. Before, that first rep stayed open and all
+    /// twelve merged into one 6.7 s rep (15 October).
+    @Test func aDipBeforeReachingTheTopEndsTheMovementWithoutSwallowingTheNextReps() throws {
+        var frames: [PoseFrame] = []
+        var time = 0.0
+        func add(_ bend: Double) {
+            frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: bend, wristX: 0.62, wristY: 0.86))
+            time += CaptureTraces.step
+        }
+        while time < 3 { add(0) }
+        let cycle = 0.55
+        while time < 3 + 12 * cycle {
+            let phase = (time - 3).truncatingRemainder(dividingBy: cycle) / cycle
+            add(25 + 60 * (1 - cos(2 * .pi * phase)) / 2)
+        }
+        while time < 3 + 12 * cycle + 2 { add(25) }
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: .pushUp, viewCheck: .ignore)
+        let analysis = try measured(outcome)
+        #expect(analysis.reps.count == 11)
+        #expect(analysis.reps.allSatisfy { $0.duration < 1.5 })
+        #expect(diagnostics?.incomplete == 1)
+        let text = try #require(diagnostics?.explanation(for: .pushUp, counted: 11))
+        #expect(text.contains("1 movement went down again before coming back up far enough to count."))
     }
 
     private func measured(_ outcome: AnalysisOutcome) throws -> SetAnalysis {
