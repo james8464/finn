@@ -109,6 +109,7 @@ Project for October 2026 Build Challenge: Unaite, MWM, Apple & ⌘+F.
 - `Design/README.md`: brand theme, colors, typography, icon, live Figma guide
 - `docs/design/iphone-experience-review.md`: iPhone interface decisions tied to Apple guidance + Design Award examples
 - `docs/design/apple-watch-and-airpods.md`: Watch/AirPods per exercise, iPhone-Watch messages, device testing, not-done
+- `docs/design/apple-hig-agent-reference.md`: local, searchable Apple HIG page index and design checks for agents
 - `planning.md`: experience, scoped MVP, technical approach, privacy, validation, timeline
 - `docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`: task-by-task plan for first real iPhone squat session
 - `docs/validation/squat-v1-protocol.md`: consent, physical-device test, annotation, claim gates
