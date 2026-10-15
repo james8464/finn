@@ -395,6 +395,16 @@
         }
       }
     },
+    "%lld days in a row" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld jours d’affilée"
+          }
+        }
+      }
+    },
     "%lld measured reps" : {
       "comment" : "Siri, rep count",
       "localizations" : {
@@ -662,6 +672,26 @@
         }
       }
     },
+    "%lld reps this week, %lld last week." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld répétitions cette semaine, %lld la semaine dernière."
+          }
+        }
+      }
+    },
+    "%lld sessions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séances"
+          }
+        }
+      }
+    },
     "%lld sessions recorded." : {
       "localizations" : {
         "en" : {
@@ -852,6 +882,16 @@
         }
       }
     },
+    "1 day in a row" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 jour d’affilée"
+          }
+        }
+      }
+    },
     "1 measured rep" : {
       "comment" : "Siri, rep count",
       "localizations" : {
@@ -869,6 +909,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 répétition"
+          }
+        }
+      }
+    },
+    "1 session" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 séance"
           }
         }
       }
@@ -1375,6 +1425,36 @@
         }
       }
     },
+    "Awards · %lld badges" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récompenses · %lld badges"
+          }
+        }
+      }
+    },
+    "Awards · 1 badge" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récompenses · 1 badge"
+          }
+        }
+      }
+    },
+    "Awards · your first badge is one set away" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récompenses · ton premier badge est à une série"
+          }
+        }
+      }
+    },
     "Back" : {
       "localizations" : {
         "fr" : {
@@ -1401,6 +1481,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dépasse ton plus grand nombre de répétitions sur cet exercice. Il faut une série d’avant à battre."
+          }
+        }
+      }
+    },
+    "Best set" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meilleure série"
           }
         }
       }
@@ -1681,6 +1771,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Claude Sonnet (démo debug)"
+          }
+        }
+      }
+    },
+    "Clean reps per session" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions propres par séance"
           }
         }
       }
@@ -2418,6 +2518,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les images sont analysées sur cet iPhone, puis effacées. Rien n’est enregistré."
+          }
+        }
+      }
+    },
+    "From %lld sessions: " : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D’après %lld séances : "
           }
         }
       }
@@ -3221,6 +3331,16 @@
         }
       }
     },
+    "Last 12 weeks, one square per day." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 dernières semaines, un carré par jour."
+          }
+        }
+      }
+    },
     "Last Set" : {
       "localizations" : {
         "fr" : {
@@ -3824,6 +3944,16 @@
         }
       }
     },
+    "No session yet." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune séance pour l’instant."
+          }
+        }
+      }
+    },
     "No sessions recorded." : {
       "localizations" : {
         "fr" : {
@@ -4053,6 +4183,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une seule vue de caméra ne peut pas juger toute ta technique ni éviter une blessure."
+          }
+        }
+      }
+    },
+    "One more session and the curve starts here." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encore une séance et la courbe commence ici."
           }
         }
       }
@@ -4936,6 +5076,16 @@
         }
       }
     },
+    "Reps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions"
+          }
+        }
+      }
+    },
     "Reps counted" : {
       "localizations" : {
         "fr" : {
@@ -4962,6 +5112,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Répétitions par séance"
+          }
+        }
+      }
+    },
+    "Reps, records, regularity and the shape of every rep will appear here, all measured by the camera." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions, records, régularité et forme de chaque répétition apparaîtront ici, tous mesurés par la caméra."
           }
         }
       }
@@ -5306,6 +5466,16 @@
         }
       }
     },
+    "Sessions" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances"
+          }
+        }
+      }
+    },
     "Sessions per week" : {
       "localizations" : {
         "fr" : {
@@ -5588,6 +5758,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Affichée à côté de ta récupération, pour suivre ta forme cardio."
+          }
+        }
+      }
+    },
+    "Shows the sessions behind this number" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Montre les séances derrière ce chiffre"
           }
         }
       }
@@ -6128,6 +6308,16 @@
         }
       }
     },
+    "The share of reps the observation did not name." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La part des répétitions que l’observation n’a pas nommées."
+          }
+        }
+      }
+    },
     "There was no clear camera-measured %@ change between sets." : {
       "localizations" : {
         "fr" : {
@@ -6304,6 +6494,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buste penché en avant"
+          }
+        }
+      }
+    },
+    "Train again next week and the two weeks compare here." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entraîne-toi encore la semaine prochaine et les deux semaines se comparent ici."
           }
         }
       }
@@ -7129,6 +7329,16 @@
         }
       }
     },
+    "Your numbers start with one set." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes chiffres commencent avec une série."
+          }
+        }
+      }
+    },
     "Your phone stands a few steps away. Plumb can count out loud so you never look at the screen." : {
       "localizations" : {
         "fr" : {
@@ -7768,6 +7978,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "la répétition %lld"
+          }
+        }
+      }
+    },
+    "reps against last week" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "de répétitions par rapport à la semaine dernière"
+          }
+        }
+      }
+    },
+    "reps since you started" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions depuis le début"
+          }
+        }
+      }
+    },
+    "reps this week" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions cette semaine"
           }
         }
       }

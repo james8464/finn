@@ -135,9 +135,6 @@ struct ContentView: View {
             Tab(String(localized: "Coach"), systemImage: "bubble.left.and.text.bubble.right", value: AppTab.coach) {
                 NavigationStack { CoachView(history: model.history) }
             }
-            Tab(String(localized: "Awards"), systemImage: "rosette", value: AppTab.awards) {
-                NavigationStack { BadgesView(ledger: badges) }
-            }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .sensoryFeedback(.selection, trigger: tab)
@@ -209,7 +206,7 @@ struct ContentView: View {
                 switch arguments[index + 1] {
                 case "coach": tab = .coach
                 case "options": route = .options
-                case "awards": tab = .awards
+                case "awards": route = .awards
                 case "history": tab = .stats
                 default: break
                 }
@@ -427,17 +424,31 @@ extension ContentView {
                     .padding(.bottom, 4)
                 if let progressLine {
                     Button { tab = .stats } label: {
-                        Text(progressLine)
-                            .font(.subheadline.weight(.medium))
-                            .monospacedDigit()
-                            .foregroundStyle(Color.primary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 24)
-                            .frame(minHeight: 44)
-                            .contentShape(Rectangle())
+                        HStack(spacing: 14) {
+                            Text(progressLine)
+                                .font(.subheadline.weight(.medium))
+                                .monospacedDigit()
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 0)
+                            Sparkline(values: recentRepsPerSession)
+                                .frame(width: 72, height: 28)
+                            Image(systemName: "chevron.right")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(PlumbStyle.supportingText)
+                                .accessibilityHidden(true)
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 14)
+                        .frame(maxWidth: .infinity)
+                        .plumbGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), interactive: true)
+                        .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Opens your history")
+                    .buttonStyle(PressableStyle())
+                    .padding(.horizontal, 24)
+                    .padding(.top, 10)
+                    .accessibilityHint("Opens your stats")
                     .accessibilityIdentifier("home.progress")
                 }
                 // Said where the decision is made: before the camera opens.
@@ -567,6 +578,15 @@ extension ContentView {
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .plumbGlass(in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    /// Reps per session for the chosen exercise, the last eight, oldest first.
+    private var recentRepsPerSession: [Int] {
+        let kind = model.selectedExercise
+        return model.history.sorted { $0.startedAt < $1.startedAt }.compactMap { session in
+            let reps = session.sets.filter { $0.exercise == kind }.reduce(0) { $0 + $1.analysis.reps.count }
+            return reps > 0 ? reps : nil
+        }.suffix(8).map { $0 }
     }
 
     /// "3 sessions this week · best 27 push-ups": measured, never estimated.
@@ -1393,7 +1413,7 @@ extension ContentView {
             if !badges.justEarned.isEmpty {
                 BadgeUnlockCard(badges: badges.justEarned) {
                     Task { await model.cancel() }
-                    tab = .awards
+                    tab = .stats
                 }
                     .padding(.top, 12)
             }
@@ -1615,6 +1635,65 @@ extension ContentView {
                 .joined(separator: "; "))
         }
         .accessibilityIdentifier("result.depthChart")
+    }
+
+    /// The Stats tab, top to bottom: the headline, the week, the quality, one card per exercise,
+    /// the awards. Everything comes from the saved sessions.
+    @ViewBuilder private func statsSections(_ sessions: [WorkoutSessionSummary]) -> some View {
+        let summary = StatsSummary(sessions: sessions)
+        let trend = summary.weekTrend
+        Section {
+            MeasuredFigure(value: "\(summary.totalReps)", label: "reps since you started", sources: sessions) {
+                HStack(spacing: 16) {
+                    Label(summary.streakDays == 1 ? String(localized: "1 day in a row")
+                          : String(localized: "\(summary.streakDays) days in a row"), systemImage: "flame")
+                    Label(sessions.count == 1 ? String(localized: "1 session")
+                          : String(localized: "\(sessions.count) sessions"), systemImage: "calendar")
+                }
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.white)
+                RegularityCalendar(days: summary.dailyReps)
+                    .padding(.top, 4)
+            }
+        }
+        Section {
+            let change = trend.change.map { Int(($0 * 100).rounded()) }
+            MeasuredFigure(value: change.map { ($0 >= 0 ? "+" : "") + "\($0) %" } ?? "\(trend.thisWeek)",
+                           label: change == nil ? "reps this week" : "reps against last week",
+                           sources: sessions.filter { Calendar.current.isDate($0.startedAt, equalTo: .now, toGranularity: .weekOfYear) }) {
+                Text(change == nil ? String(localized: "Train again next week and the two weeks compare here.")
+                     : String(localized: "\(trend.thisWeek) reps this week, \(trend.lastWeek) last week."))
+                    .font(.footnote)
+                    .foregroundStyle(PlumbStyle.supportingText)
+            }
+        }
+        let quality = summary.qualityPerSession
+        if quality.count >= 2 {
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Clean reps per session")
+                        .font(.headline)
+                        .accessibilityAddTraits(.isHeader)
+                    QualityChart(points: quality)
+                    Text("The share of reps the observation did not name.")
+                        .font(.footnote)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        ForEach(summary.exercises, id: \.kind) { facts in
+            Section { ExerciseStatsCard(facts: facts) }
+        }
+        Section {
+            NavigationLink { BadgesView(ledger: badges) } label: {
+                Label(badges.count == 0 ? String(localized: "Awards · your first badge is one set away")
+                      : (badges.count == 1 ? String(localized: "Awards · 1 badge") : String(localized: "Awards · \(badges.count) badges")),
+                      systemImage: "rosette")
+                    .frame(minHeight: 44)
+            }
+            .accessibilityIdentifier("stats.awards")
+        }
     }
 
     /// Per exercise since the install: sessions, reps and the best set. Measured, nothing else.
@@ -1879,6 +1958,20 @@ extension ContentView {
                     Button("Try again") { model.retryHistory() }
                 }
             } else if sessions.isEmpty {
+                if exercise == nil {
+                    Section {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Your numbers start with one set.")
+                                .font(.title3.weight(.semibold))
+                            Text("Reps, records, regularity and the shape of every rep will appear here, all measured by the camera.")
+                                .font(.subheadline)
+                                .foregroundStyle(PlumbStyle.supportingText)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.vertical, 6)
+                        .accessibilityIdentifier("stats.empty")
+                    }
+                }
                 Section {
                     VStack(spacing: 10) {
                         Image(systemName: "clock.arrow.circlepath")
@@ -1898,14 +1991,7 @@ extension ContentView {
                 }
             } else {
                 if exercise == nil {
-                    Section { exerciseTotals(sessions) }
-                }
-                if sessions.count >= 2 {
-                    Section { historyChart(sessions) }
-                    if exercise == nil {
-                        Section { weeklyChart(sessions) }
-                        rangeTrend(sessions)
-                    }
+                    statsSections(sessions)
                 }
                 Section("Saved sessions") {
                     ForEach(sessions) { session in

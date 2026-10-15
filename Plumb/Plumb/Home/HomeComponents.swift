@@ -241,7 +241,7 @@ struct CameraPrimer: View {
 
 /// The four tabs of the app.
 enum AppTab: Hashable {
-    case workout, stats, coach, awards
+    case workout, stats, coach
 }
 
 /// The six exercises, large, each with its moving figure: touch one and the first screen follows.

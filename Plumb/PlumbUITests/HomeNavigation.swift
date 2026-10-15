@@ -35,11 +35,16 @@ extension XCUIApplication {
     /// Privacy sit behind the icon at the top right.
     @MainActor
     func openFromHome(_ page: String) {
-        let tabName = ["History": "Stats", "Stats": "Stats", "Coach": "Coach", "Awards": "Awards"][page]
+        let tabName = ["History": "Stats", "Stats": "Stats", "Coach": "Coach", "Awards": "Stats"][page]
         if let tabName {
             let tab = tabBars.buttons[tabName]
             XCTAssertTrue(tab.waitForExistence(timeout: 5), "The \(tabName) tab is missing")
             tab.tap()
+            if page == "Awards" {
+                let link = buttons["stats.awards"]
+                XCTAssertTrue(link.waitForExistence(timeout: 5), "The Awards link is missing from Stats")
+                link.tap()
+            }
             return
         }
         let more = buttons["home.more"]
