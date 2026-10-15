@@ -17,7 +17,7 @@ enum HomeStyle {
 
 /// The secondary pages reachable from the first screen.
 enum HomeRoute: Hashable {
-    case history, options, privacy
+    case history, options, privacy, coach
 }
 
 extension ExerciseKind {

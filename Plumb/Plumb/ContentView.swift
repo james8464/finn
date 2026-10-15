@@ -302,6 +302,9 @@ struct ContentView: View {
                     Button { route = .history } label: {
                         Label("History", systemImage: "clock.arrow.circlepath")
                     }
+                    Button { route = .coach } label: {
+                        Label("Coach", systemImage: "bubble.left.and.text.bubble.right")
+                    }
                     Button { route = .options } label: {
                         Label("Options", systemImage: "slider.horizontal.3")
                     }
@@ -319,8 +322,22 @@ struct ContentView: View {
             case .history: historyPage
             case .options: optionsPage
             case .privacy: privacyPage
+            case .coach: CoachView(history: model.history)
             }
         }
+        #if DEBUG
+        // `-plumb-open coach` or `-plumb-open options` lands on that page, for headless screenshots.
+        .onAppear {
+            let arguments = ProcessInfo.processInfo.arguments
+            guard route == nil, let index = arguments.firstIndex(of: "-plumb-open"),
+                  arguments.indices.contains(index + 1) else { return }
+            switch arguments[index + 1] {
+            case "coach": route = .coach
+            case "options": route = .options
+            default: break
+            }
+        }
+        #endif
         .sheet(isPresented: $showsCameraPrimer) {
             CameraPrimer(onContinue: {
                 showsCameraPrimer = false
@@ -731,6 +748,11 @@ struct ContentView: View {
                     }
                 }
                 .optionCard()
+                #if DEBUG
+                // Coach demo key and engine switch; absent from the Release build.
+                CoachDeveloperSection()
+                    .optionCard()
+                #endif
             }
             .font(.subheadline)
             .foregroundStyle(PlumbStyle.supportingText)
