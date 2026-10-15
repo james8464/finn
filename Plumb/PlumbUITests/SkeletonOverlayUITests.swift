@@ -89,9 +89,10 @@ final class SkeletonOverlayUITests: XCTestCase {
     }
 
     /// Vision may infer an ankle behind an obstruction. The saved pose file includes person-mask
-    /// corroboration and must lead the normal workout flow to ask for a retake.
+    /// corroboration: framing says the ankle is not clear, and the side rubric does not measure the
+    /// set. Since 15 October the squats are still counted from the hips, without posture advice.
     @MainActor
-    func testVideoWithHiddenFeetRequestsRetake() throws {
+    func testVideoWithHiddenFeetIsCountedFromTheHips() throws {
         let environment = ProcessInfo.processInfo.environment
         guard let video = environment["PLUMB_VIDEO_OCCLUDED_FILE"],
               let poses = environment["PLUMB_VIDEO_OCCLUDED_POSES"] else {
@@ -108,9 +109,10 @@ final class SkeletonOverlayUITests: XCTestCase {
         app.buttons["Start set"].tap()
         Thread.sleep(forTimeInterval: 12)
         app.buttons["Stop set"].tap()
-        XCTAssertTrue(app.staticTexts["Couldn’t assess this set"].waitForExistence(timeout: 15))
-        XCTAssertFalse(app.staticTexts["6 measured reps"].exists)
-        attachScreenshot(named: "Covered feet request a retake")
+        let outcome = app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "measured reps")).firstMatch
+        XCTAssertTrue(outcome.waitForExistence(timeout: 15))
+        XCTAssertFalse(app.staticTexts["Couldn’t assess this set"].exists)
+        attachScreenshot(named: "Covered feet counted from the hips")
     }
 
     @MainActor

@@ -205,7 +205,7 @@ struct OnboardingView: View {
                     .accessibilityIdentifier("onboarding.placementScene")
                 VStack(alignment: .leading, spacing: 12) {
                     placementRow("rectangle.portrait.and.arrow.right", String(localized: "From the side"),
-                                 String(localized: "Your profile faces the camera. Plumb refuses a set filmed from the front."))
+                                 String(localized: "Your profile faces the camera. From the front, Plumb still counts your reps, but posture advice needs your side."))
                     placementRow("arrow.up.and.down", String(localized: "At hip height"),
                                  String(localized: "Lean it against a bottle, a shoe or a bag, on the floor or a low bench."))
                     placementRow("figure.walk", String(localized: "A few steps away"),

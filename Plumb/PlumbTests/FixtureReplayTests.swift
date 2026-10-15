@@ -28,11 +28,17 @@ nonisolated struct FixtureReplayTests {
         #expect(analysis.reps.count == 6)
     }
 
-    @Test(.enabled(if: available)) func coveredFeetAreStillRefused() throws {
+    /// Covered feet never reach the side rubric, which reads the hip against the ankle: no depth in
+    /// leg lengths and no posture advice. The hips still show each squat (since 15 October).
+    @Test(.enabled(if: available)) func coveredFeetAreCountedFromTheHipsWithoutAdvice() throws {
         let frames = try poses("squat-feet-hidden-poses.json")
-        guard case .insufficientView = ExerciseAnalyzer.analyze(frames, as: .squat) else {
-            Issue.record("Covered feet must be refused")
+        #expect(EvidenceGate.assess(SetWindow.active(frames, requirement: .squat), requirement: .squat).isRejected)
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .squat) else {
+            Issue.record("Covered feet: the squats are counted from the hips")
             return
         }
+        #expect(analysis.reps.count == 6)
+        #expect(analysis.rubricVersion == ExerciseDefinition.squatTrunk.rubricVersion)
+        #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
     }
 }

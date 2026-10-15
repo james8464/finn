@@ -39,7 +39,9 @@ print("{}: {}, {} reps, {} frames; live {} reps, cues {}, hands-free start {}".f
 check_result "synthetic squat" "squat-six-reps.mp4" measured 6
 check_result "standing still" "standing-no-reps.mp4" retake 0
 check_result "lower body hidden" "squat-lower-body-hidden.mp4" retake 0
-check_result "feet hidden" "squat-feet-hidden.mp4" retake 0
+# Covered feet: the side rubric refuses the set (no ankle), and since 15 October the hips still
+# count its six squats, without posture advice (squat-trunk-v1).
+check_result "feet hidden" "squat-feet-hidden.mp4" measured 6
 check_result "dim light" "squat-dim.mp4" measured 6
 check_result "farther phone" "squat-far.mp4" measured 6
 # At 30% size Vision finds the squat joints in only about 62% of frames. Keep the retake:

@@ -21,7 +21,10 @@ import Foundation
 /// `lock()` keeps it on the same person for the whole set: if they are hidden, frames have no
 /// athlete until they reappear, and the evidence gate decides whether the gap was too long. After
 /// `reacquireAfter` without a match, a lone person of about the athlete's size is taken as the
-/// athlete again (they changed pose while Vision missed them); with several people it waits.
+/// athlete again (they changed pose while Vision missed them); with several people it waits. Close
+/// to where the athlete was last seen at first. Once the picture has been empty since the loss and
+/// `relocateAfter` has passed, anywhere in it: the athlete stepped out of view and came back at
+/// another place. Someone who stayed in view while the athlete was hidden is never taken this way.
 nonisolated struct AthleteTracker {
     struct Box: Equatable {
         /// Centre and diagonal in pixel proportions (y scaled by the frame's height / width).
@@ -60,8 +63,12 @@ nonisolated struct AthleteTracker {
     /// During a set, a lone person this much smaller or larger than the athlete is not picked up as
     /// them after a loss.
     static let reacquireSizeRange = 0.5...2.0
-    /// ...and must overlap where the athlete was last seen, widened by this share of their size.
+    /// ...and must overlap where the athlete was last seen, widened by this share of their size...
     static let reacquireMargin = 0.25
+    /// ...until they have been out of view this long. Before, an athlete who stepped out of the
+    /// picture and came back a metre to the side was never followed again: the rest of the set had
+    /// no athlete, and only a new set started counting.
+    static let relocateAfter: TimeInterval = 2.0
     /// Two candidates this close in distance could be swapped; the frame then has no athlete.
     static let ambiguityMargin = 0.05
 
@@ -78,6 +85,8 @@ nonisolated struct AthleteTracker {
     private var followedSince = -Double.infinity
     /// Since when someone else has been clearly more prominent than the current person.
     private var challengedSince: TimeInterval?
+    /// Nobody at all was in view at some point since the athlete was last matched.
+    private var emptiedSinceLoss = false
 
     var isTracking: Bool { !memory.isEmpty }
 
@@ -125,6 +134,7 @@ nonisolated struct AthleteTracker {
                 lastOthers = boxes.indices.filter { $0 != chosen }.compactMap { boxes[$0] }
                 return chosen
             }
+            if boxes.allSatisfy({ $0 == nil }) { emptiedSinceLoss = true }
             if time - lastMatchTime < Self.reacquireAfter { return nil }
             if isLocked {
                 // During a set, pick the athlete up again only when they are clearly the one person
@@ -132,9 +142,10 @@ nonisolated struct AthleteTracker {
                 // from Vision for a moment and bring them back far from where they were last seen;
                 // before, every remaining frame of the set then had no athlete.
                 let candidates = boxes.indices.filter { boxes[$0] != nil }
+                let relocated = emptiedSinceLoss && time - lastMatchTime >= Self.relocateAfter
                 guard candidates.count == 1, let box = boxes[candidates[0]], size > 0,
                       Self.reacquireSizeRange.contains(box.size / size),
-                      let lastBox, box.overlaps(lastBox, margin: Self.reacquireMargin),
+                      let lastBox, relocated || box.overlaps(lastBox, margin: Self.reacquireMargin),
                       !lastOthers.contains(where: { hypot($0.x - box.x, $0.y - box.y) <= Self.reacquireMargin * size })
                 else { return nil }
                 forget()
@@ -156,6 +167,7 @@ nonisolated struct AthleteTracker {
         lastOthers = []
         lastMatchTime = -.infinity
         challengedSince = nil
+        emptiedSinceLoss = false
     }
 
     /// Median distance, in person sizes, between a candidate's clear joints and where the
@@ -193,6 +205,7 @@ nonisolated struct AthleteTracker {
             }
         }
         lastMatchTime = time
+        emptiedSinceLoss = false
     }
 
     /// How far the athlete may appear to move, in person sizes, after `elapsed` seconds unseen.

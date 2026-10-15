@@ -787,7 +787,7 @@ struct ContentView: View {
                     .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.checkCameraAngle")
-                    Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. It only refuses a set when you clearly face the camera, or face away, for several seconds. If it asks you to turn while your side already faces the camera, switch this off.")
+                    Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. When you clearly face the camera, or face away, it still counts your reps but gives no posture advice. If it asks you to turn while your side already faces the camera, switch this off.")
                 }
                 .optionCard()
                 VStack(alignment: .leading, spacing: 10) {

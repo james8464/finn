@@ -2,18 +2,19 @@ import Foundation
 import simd
 
 /// Camera-angle check from Vision 3D body pose (`VNDetectHumanBodyPose3DRequest`). It never
-/// stops a set from being counted unless the person was clearly facing the camera (or facing
-/// away) for several seconds. Between a side view and that, it only says to turn a little.
-/// When no 3D estimate is available, it does not decide, and the 2D visibility rules apply alone.
+/// stops a set from being counted: away from a side view the reps are counted without posture
+/// advice, and the framing screen and the result say to turn. Until 15 October a person facing
+/// the camera for several seconds had the whole set refused. When no 3D estimate is available,
+/// it does not decide, and the 2D visibility rules apply alone.
 nonisolated enum ViewCheck {
     /// Largest median deviation from a true profile still treated as a side view. Above it, the
     /// framing screen and the result suggest turning a little; the set is still measured.
     static let maximumSideDeviationDegrees = 30.0
-    /// From this median deviation a set counts as filmed from the front. Measured on 150 public
+    /// From this median deviation a set counts as filmed from the front (said so in the result). Measured on 150 public
     /// gym videos (Mendeley, 12 October 2026): video medians were 85° for front views (all 50 at
     /// 75° or more), 48° for diagonal views, and 21° for side views (none at 75°).
     static let clearlyFrontDegrees = 75.0
-    /// A front view refuses the set only when its estimates span at least this long.
+    /// A set counts as filmed from the front only when its estimates span at least this long.
     static let minimumFrontDuration: TimeInterval = 3
     /// Fewer 3D estimates than this over a set means the check could not run.
     static let minimumSetEstimates = 4
@@ -24,7 +25,7 @@ nonisolated enum ViewCheck {
         case matches(medianDeviation: Double, estimates: Int)
         /// Not side-on, but not clearly and lastingly frontal either: measured, with a suggestion.
         case angled(medianDeviation: Double, estimates: Int)
-        /// Clearly frontal for at least `minimumFrontDuration`: the set is refused.
+        /// Clearly frontal for at least `minimumFrontDuration`: counted, without posture advice.
         case mismatch(medianDeviation: Double, estimates: Int)
         case unavailable
 

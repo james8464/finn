@@ -922,7 +922,8 @@ struct ChosenExerciseTests {
         #expect(hint.contains("choose Push-up"))
     }
 
-    @Test func aSquatRefusedForHiddenFeetSuggestsNoOtherExercise() async throws {
+    /// Hidden feet: the squats are counted from the hips, and no other exercise is suggested.
+    @Test func aSquatWithHiddenFeetSuggestsNoOtherExercise() async throws {
         let source = TestPoseSource()
         let defaults = try #require(UserDefaults(suiteName: "PlumbChosen-\(UUID())"))
         let model = WorkoutSessionModel(source: source, preferences: PlumbPreferences(defaults: defaults))
@@ -934,10 +935,12 @@ struct ChosenExerciseTests {
                                             ankleX: 0.51, legs: true, ankle: false))
         }
         await model.endSet()
-        guard case .insufficientView = model.result else {
-            Issue.record("Expected a refusal without ankles, got \(String(describing: model.result))")
+        guard case .measured(let analysis, let cue) = model.result else {
+            Issue.record("Expected the squats to be counted from the hips, got \(String(describing: model.result))")
             return
         }
+        #expect(analysis.reps.count == 6)
+        #expect(cue == nil)
         #expect(model.retakeHint?.contains("Plumb counted") != true)
     }
 }

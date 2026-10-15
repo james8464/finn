@@ -64,25 +64,28 @@ struct ViewCheckTests {
         #expect(!ViewCheck.previewAsksToTurn([10, 85, 20], expected: .side))
     }
 
-    @Test func analyzerRefusesAFrontViewForEveryExercise() {
+    /// A jury tries the app facing the phone: the reps count, the posture advice (a side-view
+    /// measure) is left out and the result says to turn. Until 15 October the set was refused.
+    @Test func aFrontViewIsCountedWithoutPostureForEveryExercise() throws {
         let traces: [(ExerciseDefinition, [PoseFrame])] = [
             (.squat, squatTrace()),
             (.staticLunge, lungeTrace(reps: 6)), (.stiffLegDeadlift, hingeTrace(reps: 5)),
         ]
         for (definition, trace) in traces {
             let front = withDeviation(trace, 85)
-            guard case .insufficientView(let reason) = ExerciseAnalyzer.analyze(front, as: definition) else {
-                Issue.record("\(definition.kind) should refuse a front view")
-                continue
-            }
-            #expect(reason.hasPrefix(ExpectedView.side.wrongViewMessage))
-            #expect(reason.contains("85°"))
-            guard case .analyzed(let ignored) = ExerciseAnalyzer.analyze(front, as: definition, viewCheck: .ignore)
+            let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(front, as: definition)
+            guard case .analyzed(let analysis) = outcome,
+                  case .analyzed(let ignored) = ExerciseAnalyzer.analyze(front, as: definition, viewCheck: .ignore)
             else {
-                Issue.record("\(definition.kind) should measure when the check is off")
+                Issue.record("\(definition.kind) should count a front view")
                 continue
             }
-            #expect(!ignored.reps.isEmpty)
+            #expect(analysis.reps.count == ignored.reps.count)
+            #expect(!analysis.reps.isEmpty)
+            #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
+            #expect(CueSelector.select(from: analysis, exercise: definition)?.kind != definition.posture.cueKind)
+            let note = try #require(diagnostics?.explanation(for: definition, counted: analysis.reps.count))
+            #expect(note.contains("from the front"))
         }
     }
 
@@ -171,8 +174,9 @@ struct ViewCheckSessionTests {
 
     /// The person walks to their spot with their back to the phone (read as front-on), then stands
     /// side-on and still while 3D estimates stop: a hot phone skips them, and Vision 3D measures only
-    /// the person closest to the camera. The old front readings lapse, so the turn tip clears and the
-    /// hands-free set starts; before, they stayed and "Turn your side to the camera" was said forever.
+    /// the person closest to the camera. The hands-free set starts; before, the front readings
+    /// stayed and "Turn your side to the camera" was said forever. Since 15 October a front view
+    /// does not hold the start back at all.
     @Test func oldFrontReadingsLapseWhenEstimatesStop() async throws {
         let defaults = try #require(UserDefaults(suiteName: "PlumbViewCheckStale-\(UUID().uuidString)"))
         let source = AngleRecordingSource()
@@ -189,7 +193,25 @@ struct ViewCheckSessionTests {
         }
         for _ in 0..<500 where model.stage != .capturing { try await Task.sleep(for: .milliseconds(10)) }
         #expect(model.stage == .capturing)
-        #expect(model.previewDeviations.count < ViewCheck.minimumPreviewEstimates)
+        await model.cancel()
+    }
+
+    /// A person facing the phone, still and in view, starts a hands-free set like a person side-on.
+    /// Until 15 October a front view never started: the framing screen kept asking to turn.
+    @Test func aFrontViewStartsAHandsFreeSet() async throws {
+        let defaults = try #require(UserDefaults(suiteName: "PlumbViewCheckFrontStart-\(UUID().uuidString)"))
+        let source = AngleRecordingSource()
+        let model = WorkoutSessionModel(source: source, exerciseClassifier: nil,
+                                        preferences: PlumbPreferences(defaults: defaults, handsFreeByDefault: true))
+        model.handsFreeCountdown = 0
+        await model.startPreview()
+        for frame in withDeviation(CaptureTraces.squats(reps: 0, from: 0, standing: 6), 85, every: 2) {
+            source.emit(frame)
+            if model.stage == .capturing { break }
+            await Task.yield()
+        }
+        for _ in 0..<500 where model.stage != .capturing { try await Task.sleep(for: .milliseconds(10)) }
+        #expect(model.stage == .capturing)
         await model.cancel()
     }
 
@@ -203,15 +225,17 @@ struct ViewCheckSessionTests {
         await model.cancel()
     }
 
-    @Test func frontViewSetIsRefusedUnlessTheCheckIsOff() async throws {
+    @Test func aFrontViewSetIsMeasuredWithoutAdvice() async throws {
         let (model, source) = makeModel()
         await capture(model, source, withDeviation(CaptureTraces.squats(reps: 6, from: 0), 75), exercise: .bodyweightSquat)
-        #expect({
-            if case .insufficientView(let reason) = model.result { return reason.hasPrefix(ExpectedView.side.wrongViewMessage) }
-            return false
-        }())
+        guard case .measured(let front, let cue) = model.result else {
+            Issue.record("A front view is counted, not refused")
+            return
+        }
+        #expect(front.reps.count == 6)
+        #expect(cue == nil)
         #expect(model.lastViewVerdict == .mismatch(medianDeviation: 75, estimates: 46))
-        #expect(model.currentSession == nil)
+        #expect(model.movementNote?.contains("from the front") == true)
 
         model.checksCameraAngle = false
         #expect(source.cameraAngleSettings.last == false)

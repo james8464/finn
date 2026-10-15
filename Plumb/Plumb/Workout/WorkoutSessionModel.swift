@@ -564,20 +564,15 @@ final class WorkoutSessionModel {
         case .insufficientView(let reason):
             result = .insufficientView(reason)
             retakeHint = Self.otherExerciseHint(in: frames, chosen: exercise, refusedFrames: setFrames)
-                ?? Self.retakeHint(for: setFrames, definition: definition,
-                                   viewRefused: lastViewVerdict.isMismatch && checksCameraAngle)
+                ?? Self.retakeHint(for: setFrames, definition: definition)
         case .failed(let reason):
             result = .failed(reason)
         }
     }
 
     /// The general retake advice fits a refusal for joints Plumb could not see; other refusals
-    /// already say what to change, and a 3D view refusal points to its switch.
-    private static func retakeHint(for frames: [PoseFrame], definition: ExerciseDefinition,
-                                   viewRefused: Bool) -> String? {
-        if viewRefused {
-            return "If your side already faces the camera, turn off Check the camera angle in Options."
-        }
+    /// already say what to change. The camera angle no longer refuses a set.
+    private static func retakeHint(for frames: [PoseFrame], definition: ExerciseDefinition) -> String? {
         switch EvidenceGate.assess(frames, requirement: definition.evidence) {
         case .reject(.missingJoints), .reject(.lowConfidence): return definition.copy.retakeHint
         default: return nil
@@ -643,10 +638,9 @@ final class WorkoutSessionModel {
     private func updateHandsFreeStart(with frame: PoseFrame) {
         guard handsFree, handsFreeTask == nil else { return }
         let progress = startReadiness.update(with: frame, definition: captureExercise.definition)
-        // A slight angle only earns a tip, as for a set started by hand; a clear front view does not start.
-        let clearlyFront = previewDeviations.count >= ViewCheck.minimumPreviewEstimates
-            && previewDeviations.sorted()[previewDeviations.count / 2] >= ViewCheck.clearlyFrontDegrees
-        let placed = previewLandmarksVisible && !(checksCameraAngle && clearlyFront)
+        // Any view starts the set: an angle, even a front view, only earns a tip to turn, and the
+        // reps are counted without posture advice. A front view used to never start hands-free.
+        let placed = previewLandmarksVisible
         handsFreeProgress = placed ? progress : 0
         sayWhyNotReady(frame, placed: placed)
         guard placed, startReadiness.isReady else { return }
