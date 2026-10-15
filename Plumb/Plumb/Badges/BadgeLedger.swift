@@ -60,14 +60,19 @@ final class BadgeLedger {
     func has(_ kind: BadgeKind) -> Bool { earned.contains { $0.kind == kind } }
 
     /// Compares the history with what was already given and keeps the new ones. Returns them.
+    /// Only the badges that `celebrating`, the set just saved, earned itself go to `justEarned`;
+    /// the rest (at launch, after an update or an import, or a record set by an older set) are
+    /// written down quietly. A set that earned nothing shows nothing, even if the launch found
+    /// badges in the history.
     @discardableResult
-    func update(history: [WorkoutSessionSummary], calendar: Calendar = .current) -> [EarnedBadge] {
+    func update(history: [WorkoutSessionSummary], calendar: Calendar = .current,
+                celebrating setID: UUID? = nil) -> [EarnedBadge] {
         let supported = BadgeRules.evaluate(history: history, calendar: calendar)
         let fresh = supported.filter { badge in !earned.contains { $0.kind == badge.kind } }
+        justEarned = fresh.filter { $0.setID != nil && $0.setID == setID }
         guard !fresh.isEmpty else { return [] }
         earned.append(contentsOf: fresh)
         earned.sort { $0.earnedAt < $1.earnedAt }
-        justEarned = fresh
         try? store.save(earned)
         return fresh
     }

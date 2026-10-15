@@ -943,4 +943,46 @@ struct ChosenExerciseTests {
         #expect(cue == nil)
         #expect(model.retakeHint?.contains("Plumb counted") != true)
     }
+
+    /// Push-ups filmed from the front, the phone on the floor (15 October): counted, and the result
+    /// says Plumb checks push-up form from the side only. The range observation, read from an elbow
+    /// angle the view bent, must not follow below it. From the side, the same reps get it.
+    @Test func frontOnPushUpsGetNoRangeAdviceEvenWhenTheRangeShrinks() async throws {
+        func measure(deviation: Double?) async throws -> (cue: Cue?, reps: Int, notes: [String]) {
+            let source = TestPoseSource()
+            let defaults = try #require(UserDefaults(suiteName: "PlumbFront-\(UUID())"))
+            let model = WorkoutSessionModel(source: source, preferences: PlumbPreferences(defaults: defaults))
+            model.recognizesExercise = false
+            model.selectedExercise = .pushUp
+            await model.startPreview()
+            await model.beginSet(countdown: 0)
+            var time = 0.0
+            for rep in 0..<6 {
+                let depth = rep < 2 ? 90.0 : 55.0
+                var t = 0.0
+                while t < 2.0 {
+                    let bend = depth * (1 - cos(2 * .pi * t / 2.0)) / 2
+                    let pose = CaptureTraces.pushUpFrame(time: time, elbowBend: bend, wristX: 0.62, wristY: 0.86)
+                    source.emit(PoseFrame(time: pose.time, subjectCount: 1, joints: pose.joints,
+                                          profileDeviationDegrees: deviation, athleteTracking: .tracked))
+                    t += CaptureTraces.step
+                    time += CaptureTraces.step
+                }
+            }
+            await model.endSet()
+            guard case .measured(let analysis, let cue) = model.result else {
+                Issue.record("Expected the push-ups to be counted, got \(String(describing: model.result))")
+                return (nil, 0, [])
+            }
+            return (cue, analysis.reps.count, model.formNotes)
+        }
+        // From the side the same reps get advice (the shallow reps trip the depth check first).
+        let side = try await measure(deviation: nil)
+        #expect(side.reps == 6)
+        #expect(side.cue != nil)
+        let front = try await measure(deviation: 84)
+        #expect(front.reps == 6)
+        #expect(front.cue == nil)
+        #expect(front.notes.first?.hasPrefix("Plumb checks push-up form from the side only.") == true)
+    }
 }

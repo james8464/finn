@@ -41,8 +41,8 @@ struct ContentView: View {
     @State private var badges: BadgeLedger
     private let preferences: PlumbPreferences
     /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
-    @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 88
-    /// Live advice during a set: about half the count's height, so a short phrase fits on one line.
+    @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 64
+    /// Live advice during a set: a short order that fits on one line and reads from three metres.
     @ScaledMetric(relativeTo: .largeTitle) private var liveCueSize: CGFloat = 44
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
@@ -175,9 +175,10 @@ struct ContentView: View {
                 showsOnboarding = false
             }
         }
-        // Badges follow the saved history: checked at launch and after every saved set.
+        // Badges follow the saved history: checked at launch and after every saved set. Only the set
+        // just saved is celebrated; at launch (`lastSavedSetID` nil) the history's badges are recorded quietly.
         .onChange(of: model.history, initial: true) { _, history in
-            badges.update(history: history)
+            badges.update(history: history, celebrating: model.lastSavedSetID)
         }
         .task {
             liveActivity.attach(to: model, demoInput: usesSyntheticInput)
@@ -983,14 +984,23 @@ struct ContentView: View {
                         .background(.yellow, in: Capsule())
                 }
                 #endif
-                status
-                if accessories.status.isConnected(.appleWatch) {
-                    Label("Apple Watch connected", systemImage: "applewatch")
-                        .font(.footnote.weight(.semibold))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(.black.opacity(0.68), in: Capsule())
-                        .accessibilityIdentifier("capture.watch")
+                if model.stage == .capturing {
+                    // During the set, everything to read sits at the top, under the status bar: the
+                    // count in the corner and the advice banner across. The person fills the middle
+                    // of the picture, and on 15 October the banner and the count, drawn there, hid the
+                    // upper body and the skeleton of a push-up filmed from the floor.
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(spacing: 8) {
+                            status
+                            watchLabel
+                        }
+                        Spacer(minLength: 0)
+                        liveCount
+                    }
+                    liveCue
+                } else {
+                    status
+                    watchLabel
                 }
                 #if DEBUG
                 if isValidationMode && model.stage == .framing {
@@ -1025,12 +1035,9 @@ struct ContentView: View {
                             .frame(minWidth: 160, minHeight: 32)
                     }
                         .buttonStyle(.borderedProminent)
-                .tint(HomeStyle.filledAccent)
                         .controlSize(.large)
                         .tint(.white)
                 } else if model.stage == .capturing {
-                    liveCue
-                    liveCount
                     if let startedAt = model.captureStartedAt {
                         TimelineView(.periodic(from: startedAt, by: 1)) { timeline in
                             let seconds = max(0, Int(timeline.date.timeIntervalSince(startedAt)))
@@ -1052,7 +1059,6 @@ struct ContentView: View {
                             .frame(minWidth: 160, minHeight: 32)
                     }
                         .buttonStyle(.borderedProminent)
-                .tint(HomeStyle.filledAccent)
                         .controlSize(.large)
                         .tint(.red)
                 } else if case .countdown(let count) = model.stage {
@@ -1074,6 +1080,17 @@ struct ContentView: View {
             .padding(24)
         }
         .toolbar(.hidden, for: .navigationBar)
+    }
+
+    @ViewBuilder private var watchLabel: some View {
+        if accessories.status.isConnected(.appleWatch) {
+            Label("Apple Watch connected", systemImage: "applewatch")
+                .font(.footnote.weight(.semibold))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(.black.opacity(0.68), in: Capsule())
+                .accessibilityIdentifier("capture.watch")
+        }
     }
 
     /// While framing hands-free: what to do, and how long until the set starts by itself.
@@ -1100,8 +1117,8 @@ struct ContentView: View {
     }
 
     /// The latest live advice, such as "Sit lower", in large dark type on white so it reads from two or
-    /// three metres away. It always takes the same place, above the count, and the slot stays empty
-    /// until there is something to say, so the count never moves.
+    /// three metres away. It always takes the same place, at the top of the screen under the count
+    /// row, and the slot stays empty until there is something to say, so nothing moves.
     private var liveCue: some View {
         Text(model.liveCaption ?? " ")
             .font(.system(size: liveCueSize, weight: .bold, design: .default))
@@ -1119,7 +1136,8 @@ struct ContentView: View {
             .accessibilityIdentifier("capture.liveCaption")
     }
 
-    /// The reps counted so far, readable from where the person stands.
+    /// The reps counted so far, readable from where the person stands, in the top corner of the
+    /// picture where it covers no one.
     private var liveCount: some View {
         VStack(spacing: 0) {
             Text("\(model.liveRepCount)")
@@ -1768,7 +1786,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                .tint(HomeStyle.filledAccent)
+                    .tint(HomeStyle.filledAccent)
                     Button("Try again") {
                         Task { await model.cancel(); await model.startPreview() }
                     }
@@ -1784,7 +1802,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                .tint(HomeStyle.filledAccent)
+                    .tint(HomeStyle.filledAccent)
                 }
                 // The first screen, with History, Options, Privacy and an open session's Finish
                 // session, stays reachable while the camera cannot be used.

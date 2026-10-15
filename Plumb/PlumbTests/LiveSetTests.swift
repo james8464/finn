@@ -267,7 +267,7 @@ nonisolated struct LiveSetMonitorTests {
             return false
         }
         #expect(faster.count == 1)
-        #expect(faster.first?.spoken(for: .squat) == "Faster than your first reps")
+        #expect(faster.first?.spoken(for: .squat) == "Slow down")
     }
 
     @Test func aRepMuchShorterThanTheFirstOnesIsSaid() {
@@ -287,8 +287,55 @@ nonisolated struct LiveSetMonitorTests {
             return nil
         }
         #expect(shorter.first == 3)
-        #expect(LiveSetEvent.shorterThanFirstReps(rep: 3).spoken(for: .squat) == "Range is shorter")
-        #expect(LiveSetEvent.shorterThanFirstReps(rep: 3).spoken(for: .pushUp) == "Elbow bend is smaller")
+        #expect(LiveSetEvent.shorterThanFirstReps(rep: 3).spoken(for: .squat) == "Sit lower")
+        #expect(LiveSetEvent.shorterThanFirstReps(rep: 3).spoken(for: .pushUp) == "Go lower")
+    }
+
+    /// A live cue is an order understood mid-effort, never a reading: "Elbow bend is smaller" told
+    /// the athlete nothing to do (15 October).
+    @Test func liveCuesAreShortOrders() {
+        var cues: [String] = []
+        for kind in ExerciseKind.allCases {
+            cues.append(LiveSetEvent.shorterThanFirstReps(rep: 3).spoken(for: kind.definition))
+            cues.append(LiveSetEvent.fasterThanFirstReps(rep: 3).spoken(for: kind.definition))
+        }
+        cues += FormCheck.allCases.map(\.liveCue)
+        for cue in cues {
+            #expect(cue.split(separator: " ").count <= 3, "\(cue)")
+            #expect(!cue.contains(" is ") && !cue.hasPrefix("Your") && !cue.contains("than"), "\(cue)")
+        }
+    }
+
+    /// Push-ups filmed from the front, the phone on the floor (15 October): the elbow angle the
+    /// camera reads is bent by the view, and the result says it gives no form advice. The live
+    /// range cue must not say otherwise; from the side, the same shrinking reps get it.
+    @Test func aShorterRepFilmedFromTheFrontGetsNoRangeCue() {
+        func pushUps(deviation: Double?) -> [PoseFrame] {
+            var frames: [PoseFrame] = []
+            var time = 0.0
+            for rep in 0..<6 {
+                let depth = rep < 2 ? 90.0 : 55.0
+                var t = 0.0
+                while t < 2.0 {
+                    let bend = depth * (1 - cos(2 * .pi * t / 2.0)) / 2
+                    let pose = CaptureTraces.pushUpFrame(time: time, elbowBend: bend, wristX: 0.62, wristY: 0.86)
+                    frames.append(PoseFrame(time: pose.time, subjectCount: 1, joints: pose.joints,
+                                            profileDeviationDegrees: deviation, athleteTracking: .tracked))
+                    t += CaptureTraces.step
+                    time += CaptureTraces.step
+                }
+            }
+            return frames
+        }
+        func shorterCues(_ frames: [PoseFrame]) -> [Int] {
+            run(frames, definition: .pushUp).events.compactMap { event -> Int? in
+                if case .shorterThanFirstReps(let rep) = event { return rep }
+                return nil
+            }
+        }
+        #expect(run(pushUps(deviation: 84), definition: .pushUp).monitor.countedReps == 6)
+        #expect(shorterCues(pushUps(deviation: 84)).isEmpty)
+        #expect(shorterCues(pushUps(deviation: nil)).first == 3)
     }
 
     /// Tired late in a set, a rep can be both quicker and shallower than the first ones. It gets one
