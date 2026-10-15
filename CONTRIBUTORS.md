@@ -1,6 +1,6 @@
 # Contributors
 
-Plumb was built by the following team members:
+Finn was built by the following team members:
 
 - **James Durup** — Product, design, and leadership
 - **Klaus** — Core implementation
@@ -8,4 +8,4 @@ Plumb was built by the following team members:
 - **Guilhem** — Release and submission
 - **Codex** — Code assistance and review
 
-Thank you for building Plumb.
+Thank you for building Finn.

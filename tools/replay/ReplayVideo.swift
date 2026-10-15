@@ -188,7 +188,7 @@ enum ReplayVideo {
             throw Failure.noVideoTrack
         }
         let orientation = orientation(of: try await track.load(.preferredTransform))
-        let margin = Double(ProcessInfo.processInfo.environment["PLUMB_REPLAY_MARGIN"] ?? "") ?? 0
+        let margin = Double(ProcessInfo.processInfo.environment["FINN_REPLAY_MARGIN"] ?? "") ?? 0
         let context = CIContext()
         let reader = try AVAssetReader(asset: asset)
         let output = AVAssetReaderTrackOutput(

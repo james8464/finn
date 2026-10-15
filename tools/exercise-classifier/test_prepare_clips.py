@@ -30,7 +30,7 @@ class NamingTests(unittest.TestCase):
                 parse_take(Path(name))
 
     def test_exercise_labels_match_the_app(self):
-        source = (REPO_ROOT / "Plumb/Plumb/Workout/ExerciseDefinition.swift").read_text()
+        source = (REPO_ROOT / "Finn/Finn/Workout/ExerciseDefinition.swift").read_text()
         for label in LABELS[:4]:
             self.assertIn(f'classifierLabel: "{label}"', source)
 
@@ -63,7 +63,7 @@ class PlanTests(unittest.TestCase):
     def test_output_inside_repository_is_refused(self):
         with self.assertRaisesRegex(PrepareError, "inside the repository"):
             ensure_outside_repo(REPO_ROOT / "clips")
-        ensure_outside_repo(Path(tempfile.gettempdir()) / "plumb-clips")
+        ensure_outside_repo(Path(tempfile.gettempdir()) / "finn-clips")
 
 
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs ffmpeg")

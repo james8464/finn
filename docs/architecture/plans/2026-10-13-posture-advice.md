@@ -8,7 +8,7 @@
 
 **Tech Stack:** Swift, Swift Testing, Vision pose frames, SwiftUI result view.
 
-**Spec:** README.md, “Plumb idea” and “Current state,” updated 13 October 2026.
+**Spec:** README.md, “Finn idea” and “Current state,” updated 13 October 2026.
 
 ## Tasks
 

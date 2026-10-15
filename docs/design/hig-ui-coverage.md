@@ -1,6 +1,6 @@
 # HIG coverage for the UI redesign
 
-15 October 2026. All 173 indexed pages were retrieved successfully. “Detailed” identifies the guidance used directly for this implementation; “Topic review” identifies inventory and recommendation screening, including platforms and technologies Plumb does not implement. It does not claim a manual full-text reading of every article.
+15 October 2026. All 173 indexed pages were retrieved successfully. “Detailed” identifies the guidance used directly for this implementation; “Topic review” identifies inventory and recommendation screening, including platforms and technologies Finn does not implement. It does not claim a manual full-text reading of every article.
 
 | Page | Review | Application |
 |---|---|---|

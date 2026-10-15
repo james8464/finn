@@ -1,6 +1,6 @@
-# Plumb product brief
+# Finn product brief
 
-Plumb helps people training alone see how a camera-visible movement changed during a set. The first audience is a self-directed iPhone user doing basic strength exercises at home or in a gym. The current loop is **choose an exercise → frame the body → count a set → review one supported observation or a retake reason → try again**. No account or accessory is required. [README](../../README.md) owns the current build status.
+Finn helps people training alone see how a camera-visible movement changed during a set. The first audience is a self-directed iPhone user doing basic strength exercises at home or in a gym. The current loop is **choose an exercise → frame the body → count a set → review one supported observation or a retake reason → try again**. No account or accessory is required. [README](../../README.md) owns the current build status.
 
 ## Result boundaries
 
@@ -12,7 +12,7 @@ Plumb helps people training alone see how a camera-visible movement changed duri
 | Retake | The view or movement could not support a measured result. Explain what to change. |
 | Analysis failure | A capture or processing problem occurred. Offer retry without interpreting the movement. |
 
-A single camera cannot assess force, pain, load, or every joint. Plumb must not certify safe technique or diagnose a condition. New technique cues need labeled sets and qualified review before release.
+A single camera cannot assess force, pain, load, or every joint. Finn must not certify safe technique or diagnose a condition. New technique cues need labeled sets and qualified review before release.
 
 ## Sequence
 
@@ -22,4 +22,4 @@ A single camera cannot assess force, pain, load, or every joint. Plumb must not 
 
 Use native Apple controls and accessible text. Camera and Health permissions belong at the moment of use. Video remains local and unsaved. Generative language can explain measured facts with a deterministic fallback; it cannot invent coaching evidence.
 
-For positioning and research, see the [rationale](rationale.md), [market research](market-research.md), and [running note](running-stride.md). The [earlier build plan](../../planning.md) records technical choices; release copy must describe the signed, validated build.
+For positioning and research, see the [rationale](rationale.md) and [market research](market-research.md). The [earlier build plan](../../planning.md) records technical choices; release copy must describe the signed, validated build.

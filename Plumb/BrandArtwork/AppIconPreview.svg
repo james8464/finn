@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <title>Plumb icon flat study: monogram inside open camera corners</title>
-  <rect width="1024" height="1024" fill="#FFFFFF"/>
-  <g fill="none" stroke="#141414" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M210 320V210H320"/>
-    <path d="M720 810H810V720"/>
-  </g>
-  <path d="M390 713V325H507C588 325 634 371 634 439C634 507 588 553 507 553H390" fill="none" stroke="#141414" stroke-width="61" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>

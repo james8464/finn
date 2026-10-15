@@ -4,7 +4,7 @@
 //   extract-poses <videos folder> <output folder>
 //
 // Folder layout: <exercise>/<quality>/<file>.mp4 (the Mendeley side-view layout). Built by
-// build.sh together with Plumb/Plumb/Workout/WorkoutModels.swift.
+// build.sh together with Finn/Finn/Workout/WorkoutModels.swift.
 
 import AVFoundation
 import Foundation
@@ -18,7 +18,7 @@ struct PoseRecording: Codable {
     let frames: [PoseFrame]
 }
 
-/// Folder exercise name to classifier label: the two exercises Plumb supports keep their label,
+/// Folder exercise name to classifier label: the two exercises Finn supports keep their label,
 /// every other exercise in the dataset is "other".
 func label(forExercise exercise: String) -> String {
     switch exercise {

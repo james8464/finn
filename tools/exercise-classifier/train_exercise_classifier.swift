@@ -1,4 +1,4 @@
-// Trains Plumb's exercise classifier with Create ML on a Mac (Apple silicon, Xcode installed).
+// Trains Finn's exercise classifier with Create ML on a Mac (Apple silicon, Xcode installed).
 //
 //   xcrun swift tools/exercise-classifier/train_exercise_classifier.swift <dataset> <output.mlmodel>
 //       [--iterations 80] [--frame-rate 15] [--window 30]
@@ -6,7 +6,7 @@
 // <dataset> is the folder written by prepare_clips.py: train/<label>/*.mov and, when a
 // participant was held out, validation/<label>/*.mov. The model learns from Vision body-pose
 // sequences extracted from the clips, not from the pixels. The frame rate and window must match
-// what the app feeds it: Plumb samples poses at about 15 frames per second, so the defaults
+// what the app feeds it: Finn samples poses at about 15 frames per second, so the defaults
 // give two-second windows. Both values are stored in the model's metadata, which the app reads.
 
 import CoreML
@@ -128,20 +128,20 @@ print(classifier.validationMetrics.confusionDataFrame.description)
 
 let trainedAt = ISO8601DateFormatter().string(from: Date())
 let metadata = MLModelMetadata(
-    author: "Plumb team",
-    shortDescription: "Recognizes Plumb exercises from Vision body-pose windows. Trained \(trainedAt) "
+    author: "Finn team",
+    shortDescription: "Recognizes Finn exercises from Vision body-pose windows. Trained \(trainedAt) "
         + "on \(trainCounts.values.reduce(0, +)) clips; validation accuracy "
         + String(format: "%.3f", validationAccuracy) + " on \(validationLabel). Not a technique judge.",
     version: "1",
     additional: [
-        "plumb.targetFrameRate": String(options.frameRate),
-        "plumb.predictionWindow": String(options.window),
-        "plumb.labels": trainCounts.keys.sorted().joined(separator: ","),
-        "plumb.trainedAt": trainedAt,
-        "plumb.trainingClips": trainCounts.sorted { $0.key < $1.key }
+        "finn.targetFrameRate": String(options.frameRate),
+        "finn.predictionWindow": String(options.window),
+        "finn.labels": trainCounts.keys.sorted().joined(separator: ","),
+        "finn.trainedAt": trainedAt,
+        "finn.trainingClips": trainCounts.sorted { $0.key < $1.key }
             .map { "\($0.key)=\($0.value)" }.joined(separator: ","),
-        "plumb.validation": validationLabel,
-        "plumb.validationAccuracy": String(format: "%.3f", validationAccuracy),
+        "finn.validation": validationLabel,
+        "finn.validationAccuracy": String(format: "%.3f", validationAccuracy),
     ]
 )
 
@@ -167,4 +167,4 @@ if let data = try? JSONSerialization.data(withJSONObject: report, options: [.pre
     try? data.write(to: reportURL)
 }
 print("Wrote \(options.output.path) and \(reportURL.lastPathComponent).")
-print("To ship it, copy the .mlmodel to Plumb/Plumb/PlumbExerciseClassifier.mlmodel and rebuild.")
+print("To ship it, copy the .mlmodel to Finn/Finn/FinnExerciseClassifier.mlmodel and rebuild.")

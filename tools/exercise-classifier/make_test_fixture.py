@@ -1,4 +1,4 @@
-"""Build the constant-output Core ML fixture used by PlumbTests.
+"""Build the constant-output Core ML fixture used by FinnTests.
 
 The fixture is NOT a trained model and says nothing about recognition accuracy. It has the
 interface of a Create ML action classifier (a "poses" input of shape [window, 3, 18], a "label"
@@ -18,7 +18,7 @@ from coremltools.models.neural_network import NeuralNetworkBuilder
 LABELS = ["none", "other", "push_up", "squat", "static_lunge", "stiff_leg_deadlift"]
 WINDOW = 30
 OUTPUT = (Path(__file__).resolve().parents[2]
-          / "Plumb/PlumbTests/Fixtures/ConstantPushUpClassifierFixture.mlmodel")
+          / "Finn/FinnTests/Fixtures/ConstantPushUpClassifierFixture.mlmodel")
 
 
 def build() -> MLModel:
@@ -40,9 +40,9 @@ def build() -> MLModel:
                              prediction_blob="labelProbabilities")
     spec = builder.spec
     spec.description.metadata.shortDescription = (
-        "Test fixture with constant output. Never trained; not a Plumb exercise model.")
-    spec.description.metadata.userDefined["plumb.targetFrameRate"] = "15.0"
-    spec.description.metadata.userDefined["plumb.predictionWindow"] = str(WINDOW)
+        "Test fixture with constant output. Never trained; not a Finn exercise model.")
+    spec.description.metadata.userDefined["finn.targetFrameRate"] = "15.0"
+    spec.description.metadata.userDefined["finn.predictionWindow"] = str(WINDOW)
     return MLModel(spec)
 
 

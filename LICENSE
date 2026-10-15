@@ -1,4 +1,4 @@
-Plumb Proprietary License
+Finn Proprietary License
 
 Copyright (c) 2026 James Durup, Klaus, Theophile and Guilhem (the "Project Members").
 All Rights Reserved.
@@ -90,7 +90,7 @@ between you and the Project Members.
    i. Use the Software, or anything you learn from it, to build, benchmark, market,
       improve or compete with any product or service of the Project Members;
    j. Claim ownership of, or authorship of, the Software or any part of it, or use
-      the names "Plumb", the Project Members' names, or any related logo, mark,
+      the names "Finn", the Project Members' names, or any related logo, mark,
       icon, domain or trade dress, except for factual statements that the Project
       Members own it;
    k. Imply sponsorship, endorsement, affiliation or approval by the Project Members;
@@ -119,7 +119,7 @@ between you and the Project Members.
    5.1 The Software is licensed, not sold. The Project Members retain all right,
        title and interest in and to the Software, including all copyrights, patent
        rights (no patent licence is granted), trademark and service-mark rights in
-       "Plumb" and related identifiers, database rights, sui generis rights,
+       "Finn" and related identifiers, database rights, sui generis rights,
        confidential know-how and trade secrets, and all goodwill arising from them.
 
    5.2 The Software and this repository are made public by choice; that choice does
@@ -139,8 +139,8 @@ between you and the Project Members.
    This License cannot and does not relicense third-party components or platform
    software, including without limitation: the Apple software, frameworks, SDKs and
    documentation used to build and run the Software, and the binary components
-   under "Plumb/Vendor/" (for example the Spark components exported by MWM),
-   including any files under "Plumb/Vendor/Spark/". Those remain governed solely by
+   under "Finn/Vendor/" (for example the Spark components exported by MWM),
+   including any files under "Finn/Vendor/Spark/". Those remain governed solely by
    their own respective licences and by Apple's terms. Your use of them is
    subject to those terms and to this License in respect of everything else.
 

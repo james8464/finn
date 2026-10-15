@@ -1,5 +1,7 @@
 # Native UI verification — 15 October 2026
 
+Historical screenshots below link to their original commit. Current Finn captures are in [the refreshed set](screenshots/finn).
+
 ## Scope
 
 The redesign replaces the photo/glass dashboard with native tabs and semantic surfaces. It updates Workout, camera controls, results, History, Coach, onboarding, awards, Health prompts, widgets, Live Activities and Watch controls. Measurement rules and saved data formats are unchanged by this work.
@@ -36,10 +38,10 @@ The UI checks were run in focused batches, not as one complete UI-suite run. Set
 
 ### Initial captures
 
-- [Summary](screenshots/2026-10-15-native-ui/summary.png) — normal launch, empty history.
-- [Workout](screenshots/2026-10-15-native-ui/workout.png) — normal launch, camera not opened.
-- [Large-text dark result](screenshots/2026-10-15-native-ui/result-large-text-dark-demo.png) — labelled synthetic input, from the passing final accessibility run.
-- [Small widget](screenshots/2026-10-15-native-ui/widget-preview.png) — rendered preview.
+- [Summary](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-native-ui/summary.png) — normal launch, empty history.
+- [Workout](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-native-ui/workout.png) — normal launch, camera not opened.
+- [Large-text dark result](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-native-ui/result-large-text-dark-demo.png) — labelled synthetic input, from the passing final accessibility run.
+- [Small widget](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-native-ui/widget-preview.png) — rendered preview.
 
 The screen review also covered dark appearance, maximum text size with the Coach keyboard, the expanded Health sheet, French navigation, settings, privacy and awards. The yellow demo marker is a Debug annotation and is absent from Release.
 
@@ -47,9 +49,9 @@ The screen tours use explicitly labelled synthetic input. Widget and Live Activi
 
 ## Reproduce
 
-Use the `Plumb` scheme with Xcode 27 and an iOS 27 iPhone simulator. Run `PlumbTests`, `DashboardUITests`, `NativeUIReviewUITests`, the onboarding tour, the demo set tour, and the setup/privacy/large-text accessibility audits in `WorkoutFlowUITests`.
+Use the `Finn` scheme with Xcode 27 and an iOS 27 iPhone simulator. Run `FinnTests`, `DashboardUITests`, `NativeUIReviewUITests`, the onboarding tour, the demo set tour, and the setup/privacy/large-text accessibility audits in `WorkoutFlowUITests`.
 
-Set `TEST_RUNNER_PLUMB_CAPTURE_DIR` for screen-tour PNGs and `TEST_RUNNER_PLUMB_WIDGET_RENDERS` for extension previews. Use `-collect-test-diagnostics never` if simulator failure diagnostics stall after a test run. Full test logs are local review artifacts, not committed build products.
+Set `TEST_RUNNER_FINN_CAPTURE_DIR` for screen-tour PNGs and `TEST_RUNNER_FINN_WIDGET_RENDERS` for extension previews. Use `-collect-test-diagnostics never` if simulator failure diagnostics stall after a test run. Full test logs are local review artifacts, not committed build products.
 
 ## Monochrome widget refinement
 
@@ -69,14 +71,14 @@ The earlier 468-test run belongs to the initial native pass; it was not repeated
 
 ### Current captures
 
-- [Summary](screenshots/2026-10-15-monochrome/summary.png) — normal launch.
-- [Workout](screenshots/2026-10-15-monochrome/workout.png) — normal launch.
-- [Saved activity](screenshots/2026-10-15-monochrome/summary-saved-demo.png) — labelled synthetic workout.
-- [Dark Summary](screenshots/2026-10-15-monochrome/summary-dark-demo.png).
-- [French Summary](screenshots/2026-10-15-monochrome/summary-french-demo.png).
-- [Largest-text Workout](screenshots/2026-10-15-monochrome/workout-largest-text-demo.png).
-- [Dark result with larger text](screenshots/2026-10-15-monochrome/result-large-text-dark-demo.png).
-- [Largest-text Coach with keyboard](screenshots/2026-10-15-monochrome/coach-largest-text-keyboard-demo.png).
+- [Summary](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-monochrome/summary.png) — normal launch.
+- [Workout](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-monochrome/workout.png) — normal launch.
+- [Saved activity](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-monochrome/summary-saved-demo.png) — labelled synthetic workout.
+- [Dark Summary](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-monochrome/summary-dark-demo.png).
+- [French Summary](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-monochrome/summary-french-demo.png).
+- [Largest-text Workout](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-monochrome/workout-largest-text-demo.png).
+- [Dark result with larger text](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-monochrome/result-large-text-dark-demo.png).
+- [Largest-text Coach with keyboard](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-monochrome/coach-largest-text-keyboard-demo.png).
 
 Keep this work on `ui/apple-native-revamp`, with PR 26 draft. Main and teammates' worktrees are unchanged by this refinement.
 
@@ -88,7 +90,7 @@ The custom bar retains the underlying TabView and independent navigation stacks.
 
 Measurement/storage logic and localization entries are unchanged. The original backdrop matches the source branch byte for byte; display treatment is applied in SwiftUI. Other branches, main and worktrees remain untouched.
 
-Current screenshots: [Home, light](screenshots/2026-10-15-theophile-hybrid/home-light.png), [Home, dark](screenshots/2026-10-15-theophile-hybrid/home-dark.png), [Workout with largest text](screenshots/2026-10-15-theophile-hybrid/workout-largest-text-demo.png), [Coach keyboard](screenshots/2026-10-15-theophile-hybrid/coach-largest-text-keyboard-demo.png). Screenshots marked demo use synthetic input.
+Current screenshots: [Home, light](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-theophile-hybrid/home-light.png), [Home, dark](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-theophile-hybrid/home-dark.png), [Workout with largest text](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-theophile-hybrid/workout-largest-text-demo.png), [Coach keyboard](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-theophile-hybrid/coach-largest-text-keyboard-demo.png). Screenshots marked demo use synthetic input.
 
 ### Hybrid verification status
 
@@ -118,9 +120,9 @@ The exact design requirement applies to the normal appearance; accessibility lay
 
 The final three-test run passed: tab Dynamic Type audit, full setup audit with the opaque accessibility surface, and largest-text Workout/Coach controls (including draft preservation and keyboard return). Signed iPhone Release build passed.
 
-Captures: [Home](screenshots/2026-10-15-theophile-original/home.png), [largest-text Workout](screenshots/2026-10-15-theophile-original/workout-largest-text-demo.png), [Coach keyboard](screenshots/2026-10-15-theophile-original/coach-largest-text-keyboard-demo.png), [largest-text Home audit capture](screenshots/2026-10-15-theophile-original/home-largest-text-audit-demo.png). Demo-labelled captures use synthetic input.
+Captures: [Home](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-theophile-original/home.png), [largest-text Workout](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-theophile-original/workout-largest-text-demo.png), [Coach keyboard](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-theophile-original/coach-largest-text-keyboard-demo.png), [largest-text Home audit capture](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-theophile-original/home-largest-text-audit-demo.png). Demo-labelled captures use synthetic input.
 
-Installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; unlock it and open Plumb. Repository signing settings remain unchanged.
+Installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; unlock it and open Finn. Repository signing settings remain unchanged.
 
 ## Minimal background and accessibility fixes
 
@@ -133,9 +135,9 @@ James requested a plain charcoal Home background while retaining Théophile’s 
 
 No data, storage, camera or service behavior changed. Review found no functional regressions. Repository signing remains unchanged; the personal-team Release build succeeded.
 
-Captures: [Home](screenshots/2026-10-15-minimal-background/home-demo.png) and [largest-text Home](screenshots/2026-10-15-minimal-background/home-largest-text-demo.png). Both show explicitly labelled synthetic input; the installed Release app does not.
+Captures: [Home](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-minimal-background/home-demo.png) and [largest-text Home](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-minimal-background/home-largest-text-demo.png). Both show explicitly labelled synthetic input; the installed Release app does not.
 
-The update installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; opening Plumb after unlocking uses this update.
+The update installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; opening Finn after unlocking uses this update.
 
 The largest-text Home checks passed with both normal and synthetic input, including Workout/Coach controls and return to Home. The destinations tour also passed. The combined audit/keyboard test encountered long simulator animation-idle waits and the pre-existing keyboard `Invalid frame dimension` runtime warning; all its assertions passed. These are separate from the resolved contrast/clipping audit findings.
 
@@ -155,7 +157,7 @@ Verification: 15 Coach tests passed. The final saved-workout/statistics/award-sh
 
 The Options audit identified the DEBUG-only DEMO INPUT badge’s explicit text-size cap. It now uses body-scaled 12-point text with no cap. The subsequent runner terminated during bootstrap, and the dedicated simulator then remained in Booting; the final badge audit could not be completed. This is an unresolved verification limitation, not a claimed passing audit. Production Options content and toggle assertions passed before that badge finding. No findings were filtered out to obtain a pass.
 
-Captures: [Home](screenshots/2026-10-15-pink/home-demo.png), [statistics](screenshots/2026-10-15-pink/statistics-demo.png), [award detail](screenshots/2026-10-15-pink/award-detail-demo.png). These explicitly show synthetic input. The Home capture precedes the minor selected-capsule background darkening; its accent value and borderless widgets match the final code.
+Captures: [Home](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-pink/home-demo.png), [statistics](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-pink/statistics-demo.png), [award detail](https://github.com/james8464/finn/blob/f76e01098d5f7727de16c245a939faf2bb32fe40/docs/design/screenshots/2026-10-15-pink/award-detail-demo.png). These explicitly show synthetic input. The Home capture precedes the minor selected-capsule background darkening; its accent value and borderless widgets match the final code.
 
 The final generic iOS Simulator build succeeded for the committed source. The remaining verification limitation is the DEBUG badge audit rerun described above; the simulator would not finish booting. Main is published with that limitation documented.
 
@@ -167,7 +169,7 @@ The phone build exposed deprecated preview renderer calls and two isolation warn
 
 The signed Release build succeeded. Twenty-four targeted tests passed on the physical iPhone, covering real receiver enqueue/detach/reattach and metadata isolation, skeleton alignment/rotation and Siri report behavior. The project warnings identified in this pass are cleared. Xcode’s metadata-extraction notice for a target without AppIntents remains a tool notice.
 
-Installed the Release app over the existing `com.jamesdurup.plumbtestoct` app and launched it successfully. Existing application data and repository signing settings were preserved. An obsolete `com.james8464.Plumb.uitests.xctrunner` test helper was removed to free a personal-signing slot; the older Plumb application was kept.
+Installed the Release app over the existing `com.jamesdurup.finntestoct` app and launched it successfully. Existing application data and repository signing settings were preserved. An obsolete `com.james8464.Finn.uitests.xctrunner` test helper was removed to free a personal-signing slot; the older Finn application was kept.
 
 ## Whole-app legibility review
 
@@ -179,9 +181,9 @@ The survey captured 84 screen states across Home details, awards, settings, priv
 
 **Earlier audit limitation, resolved in the clipping follow-up below:** the broader structural scan reported predictive clipping on some fully visible native rows and sheet labels. Findings remain unsuppressed in `InterfaceAccessibilityUITests`. The palette test checks the actual brand/secondary-label combinations against stable dark surfaces, not every material or system control.
 
-To repeat the manual survey, set `TEST_RUNNER_PLUMB_CAPTURE_DIR` when running `InterfaceAccessibilityUITests`. Add `TEST_RUNNER_PLUMB_FULL_ACCESSIBILITY_AUDIT=1` for contrast and Dynamic Type diagnostics. Capture tours skip without an output directory; the Home text-scaling regression and palette test run normally.
+To repeat the manual survey, set `TEST_RUNNER_FINN_CAPTURE_DIR` when running `InterfaceAccessibilityUITests`. Add `TEST_RUNNER_FINN_FULL_ACCESSIBILITY_AUDIT=1` for contrast and Dynamic Type diagnostics. Capture tours skip without an output directory; the Home text-scaling regression and palette test run normally.
 
-Final verification: 7 unit tests and 9 UI tests passed. After the last Health/Coach colour adjustments, the palette, Health actions at both text sizes and native destination tour passed again. Simulator and signed iPhone Release builds succeeded. Installed and launched over the existing iPhone app without erasing its container. The laptop preview runs in Device Hub on the dedicated **Plumb Accessibility Review** simulator using `-plumb-ui-demo`.
+Final verification: 7 unit tests and 9 UI tests passed. After the last Health/Coach colour adjustments, the palette, Health actions at both text sizes and native destination tour passed again. Simulator and signed iPhone Release builds succeeded. Installed and launched over the existing iPhone app without erasing its container. The laptop preview runs in Device Hub on the dedicated **Finn Accessibility Review** simulator using `-finn-ui-demo`.
 
 ## Clipping follow-up
 

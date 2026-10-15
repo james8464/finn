@@ -1,12 +1,12 @@
-# Why Plumb
+# Why Finn
 
-**Updated 13 October 2026 — product rationale, not a claim of proven demand.** The [README](../../README.md) defines Plumb's intended iPhone + Apple Watch coaching experience. The current iPhone-only build has four side-view strength flows and local comparison; timely live correction, Watch integration, and treadmill running remain future work. Real-camera and expert validation are still pending.
+**Updated 13 October 2026 — product rationale, not a claim of proven demand.** The [README](../../README.md) defines Finn's intended iPhone + Apple Watch coaching experience. The current iPhone-only build has four side-view strength flows and local comparison; timely live correction, Watch integration, and treadmill running remain future work. Real-camera and expert validation are still pending.
 
 ## 1. The problem worth solving
 
 Independent strength training has a feedback gap. People can follow an exercise video, count their sets, and log weight, but they often cannot tell whether their own movement changed during the set. A phone recording contains the evidence, yet the person must frame it, replay it, interpret it, and decide what to try next. A human trainer can provide richer feedback but is not present at every session.
 
-The narrow first job for Plumb is therefore **turn a live-analyzed set into one useful next-set experiment**. The app does not save that video. Its first value is clarity and continuity, not a claim to know the single correct technique for every body.
+The narrow first job for Finn is therefore **turn a live-analyzed set into one useful next-set experiment**. The app does not save that video. Its first value is clarity and continuity, not a claim to know the single correct technique for every body.
 
 ## 2. Why this approach
 
@@ -25,15 +25,15 @@ The product loop is designed for behavior change: **see a signal → receive one
 
 This ecosystem story is credible only if the first iPhone-only loop works. The current prototype must remain useful without accessories; the intended full product centers on the iPhone + Watch pair.
 
-## 4. What makes Plumb distinct enough to test
+## 4. What makes Finn distinct enough to test
 
-The market already has strength classes, rep tracking, specialist camera feedback, running gait analysis, and coach video review. Plumb's first position to test is **personal, evidence-linked movement feedback for short strength sets, available from an iPhone without new hardware**. Treadmill running could extend that idea to a continuous session, but needs its own gait rubric, safe setup, and expert validation. Its restraint is part of the product: exercise-specific support, one cue, low-confidence abstention, and visible comparison with the next set.
+The market already has strength classes, rep tracking, specialist camera feedback, running gait analysis, and coach video review. Finn's first position to test is **personal, evidence-linked movement feedback for short strength sets, available from an iPhone without new hardware**. Treadmill running could extend that idea to a continuous session, but needs its own gait rubric, safe setup, and expert validation. Its restraint is part of the product: exercise-specific support, one cue, low-confidence abstention, and visible comparison with the next set.
 
 This is a positioning hypothesis, not an uncontested category. Competitor features change; [market research](market-research.md) records current primary-source comparisons and questions that need user interviews.
 
 ## 5. Trust is a product requirement
 
-A camera can miss a foot, confuse a joint, or see only one plane of movement. A low-confidence or incomplete observation must not become a confident instruction. The first automated cues should be reviewed by qualified trainers or movement specialists and tested against labeled sets from varied people and settings. Plumb should not imply that a particular angle, depth, or tempo is medically safe for everyone.
+A camera can miss a foot, confuse a joint, or see only one plane of movement. A low-confidence or incomplete observation must not become a confident instruction. The first automated cues should be reviewed by qualified trainers or movement specialists and tested against labeled sets from varied people and settings. Finn should not imply that a particular angle, depth, or tempo is medically safe for everyone.
 
 The privacy model is equally central: video analysis on device without saving workout footage, user-initiated text-summary sharing, and contextual HealthKit permission when a Watch feature exists. Health and fitness data must not be sold or used to target advertising. Product copy should explain what the camera can observe, what it cannot, and why a particular cue appeared.
 

@@ -1,18 +1,18 @@
-# Plumb — product and build plan
+# Finn — product and build plan
 
 **Historical plan, 13 October 2026.** This records the challenge-era design, technical choices, validation gates, and decisions. The [README](README.md) owns current feature status; some implementation statements below are superseded. The [product brief](docs/product/brief.md) holds current result boundaries and sequence.
 
 ## 1. Product thesis
 
-**One line:** Plumb uses an iPhone camera to observe movement and return one clear, evidence-linked observation the person can try in the next set or session.
+**One line:** Finn uses an iPhone camera to observe movement and return one clear, evidence-linked observation the person can try in the next set or session.
 
-**Promise:** Better form, one set at a time. The goal is useful feedback during solo training without a specialist camera or a constant human coach. Plumb does not promise perfect technique, injury prevention, medical assessment, or a replacement for a qualified trainer.
+**Promise:** Better form, one set at a time. The goal is useful feedback during solo training without a specialist camera or a constant human coach. Finn does not promise perfect technique, injury prevention, medical assessment, or a replacement for a qualified trainer.
 
 **First audience:** self-directed people doing basic strength exercises at home or in a gym. They know the exercise they intend to do but cannot easily see their own movement. Beginners need simple setup and respectful language; more experienced users want objective comparisons over time. Treadmill runners are a prospective adjacent audience after a running-specific observation has been validated.
 
-**Validation partners:** qualified trainers can review the accuracy and usefulness of Plumb's cues. The README does not scope a trainer product or account.
+**Validation partners:** qualified trainers can review the accuracy and usefulness of Finn's cues. The README does not scope a trainer product or account.
 
-**Core insight:** a generic exercise video tells a person what form should look like; Plumb shows what their own last set looked like and suggests a single next action. The value is the loop: **capture → observe → understand → try again → compare**.
+**Core insight:** a generic exercise video tells a person what form should look like; Finn shows what their own last set looked like and suggests a single next action. The value is the loop: **capture → observe → understand → try again → compare**.
 
 ### Design principles
 
@@ -29,15 +29,15 @@
 ### Primary journey
 
 1. Choose an exercise and read a short setup card: phone on a stable surface, side view, entire body and equipment in frame, enough light, clear floor.
-2. Grant camera access when starting capture. Plumb shows whether the joints required for the chosen exercise stay visible. Its 3D viewpoint check can suggest turning; a clearly frontal view is counted without posture advice. Actual camera suitability still needs physical-device validation. It never starts analysis silently.
+2. Grant camera access when starting capture. Finn shows whether the joints required for the chosen exercise stay visible. Its 3D viewpoint check can suggest turning; a clearly frontal view is counted without posture advice. Actual camera suitability still needs physical-device validation. It never starts analysis silently.
 3. Tap or use a short countdown to start. The current build analyses a live frame stream on the iPhone without saving a video.
-4. After the set, Plumb displays measured rep count and at most one supported observation, or explains that no clear pattern was found or why to retake. Supporting rep details remain available. This is not a judgment of perfect overall form.
+4. After the set, Finn displays measured rep count and at most one supported observation, or explains that no clear pattern was found or why to retake. Supporting rep details remain available. This is not a judgment of perfect overall form.
 5. The person chooses **Try this next set**, **Not relevant**, or **Retake**. A follow-up set can show whether the same observed pattern changed; the current camera view does not display an in-set coaching reminder.
 6. In the intended paired experience, Apple Watch contributes rep timing, effort context, controls, and discreet haptics; live cues need validation before release. The current iPhone build can speak post-set observations through the system audio output, including paired AirPods.
 
 ### Example: bodyweight squat
 
-A side-view capture detects six reps. The last two have a shorter camera-observed range than the first two. Plumb says: “Your range became shorter in the last two reps.” Its next action is “Choose a range you can repeat on each rep.” The result identifies reps 5–6 and can show the measured range. It does **not** claim the user's squat is unsafe, diagnose mobility, or issue a universal depth target. If the feet or hips are obscured, it asks for a better view and a retake.
+A side-view capture detects six reps. The last two have a shorter camera-observed range than the first two. Finn says: “Your range became shorter in the last two reps.” Its next action is “Choose a range you can repeat on each rep.” The result identifies reps 5–6 and can show the measured range. It does **not** claim the user's squat is unsafe, diagnose mobility, or issue a universal depth target. If the feet or hips are obscured, it asks for a better view and a retake.
 
 ### What each device contributes
 
@@ -50,7 +50,7 @@ A side-view capture detects six reps. The last two have a shorter camera-observe
 | Apple TV | Proposed living-room display for iPhone-observed workouts | Separate display and privacy design; no current app |
 | Apple Intelligence-capable device | Optional Foundation Models wording of structured observations | Availability check and deterministic text fallback |
 
-The Watch's heart rate describes effort context; it cannot prove whether a rep has good form. A watchOS prototype can use timestamped accelerometer motion to test whether rep boundaries and tempo improve when camera evidence is weak. That requires synchronization, paired-device tests, and a measured advantage over iPhone-only analysis before it becomes a product claim. AirPods currently carry a cue; a future head-motion check must prove that it detects a useful exercise-specific pattern before Plumb interprets it as compensatory movement. This distinction must remain clear in product copy.
+The Watch's heart rate describes effort context; it cannot prove whether a rep has good form. A watchOS prototype can use timestamped accelerometer motion to test whether rep boundaries and tempo improve when camera evidence is weak. That requires synchronization, paired-device tests, and a measured advantage over iPhone-only analysis before it becomes a product claim. AirPods currently carry a cue; a future head-motion check must prove that it detects a useful exercise-specific pattern before Finn interprets it as compensatory movement. This distinction must remain clear in product copy.
 
 ## 3. Scope and priorities
 
@@ -136,7 +136,7 @@ The fuller observation contract should include exercise, assessed viewpoint, inv
 
 ### Initial exercise rubric to validate
 
-| Exercise | Observable signal | What Plumb may say | What it must not infer |
+| Exercise | Observable signal | What Finn may say | What it must not infer |
 | --- | --- | --- | --- |
 | Side-view squat | Rep count, range consistency, and torso tilt at the bottom | “Your torso tilted farther from upright in the last two reps.” | Joint health, strength, safe load, universal depth standard |
 | Side-view push-up | Rep count, elbow-bend consistency, and hip alignment relative to the body line | “Your hips sat lower relative to your shoulder-to-ankle line in the last two reps.” | Cause of pain, exact muscle activation, proof of a straight body line |
@@ -182,7 +182,7 @@ The README calls for monetization and customer acquisition to be designed into t
 
 The first acquisition hypothesis is a useful shareable *result*, not a social feed: a person can share a text summary of what changed between two sets. This does not require a trainer workflow or uploaded footage.
 
-**Differentiation to test:** iPhone-only entry, evidence-linked cues, personal set-to-set comparisons, local processing, and an eventual iPhone + Watch loop with timely corrections. AirPods audio is an optional delivery route. Competitors already offer form feedback or video review; the claim is a focused combination and user experience, not that Plumb invented camera coaching.
+**Differentiation to test:** iPhone-only entry, evidence-linked cues, personal set-to-set comparisons, local processing, and an eventual iPhone + Watch loop with timely corrections. AirPods audio is an optional delivery route. Competitors already offer form feedback or video review; the claim is a focused combination and user experience, not that Finn invented camera coaching.
 
 ## 6. Validation and success measures
 
@@ -191,7 +191,7 @@ The first acquisition hypothesis is a useful shareable *result*, not a social fe
 - Interview at least 6 self-directed lifters and 3 qualified trainers about camera setup, cue usefulness, and willingness to retake a set.
 - Record at least 30 consenting test sets across varied participants and settings for the first exercise; annotate rep boundaries and whether each proposed cue is visible. This is a minimum learning set, not a claim of statistical validation.
 - Review every initial cue with a qualified trainer or movement specialist and document disagreements.
-- Compare Plumb's rep count and cue labels against human annotations. Break results down by lighting, actual camera viewpoint, occlusion, body size, and device. Count every measured result on a specialist-labeled unsuitable view; reporting only rejected bad views would hide false confidence.
+- Compare Finn's rep count and cue labels against human annotations. Break results down by lighting, actual camera viewpoint, occlusion, body size, and device. Count every measured result on a specialist-labeled unsuitable view; reporting only rejected bad views would hide false confidence.
 - Run a usability test: can a first-time user set up the phone, complete a set, understand the cue, and try it again without help?
 
 ### Internal gates
@@ -208,17 +208,17 @@ These thresholds are proposed release gates, not measured performance. No cue is
 
 ### Test protocol and interpretation
 
-Before analyzing performance, freeze the first squat rubric and annotate the same test sets independently. Record camera distance and height, orientation, device, lighting, clothing visibility, rep count, and why a candidate cue was accepted or rejected. Split the collection by participant so tuning on one person's motion does not inflate the apparent result on their other sets. Report **coverage** (how often Plumb emits a cue) next to **precision** (how often an emitted cue is supported); suppressing every cue can look precise while providing no value.
+Before analyzing performance, freeze the first squat rubric and annotate the same test sets independently. Record camera distance and height, orientation, device, lighting, clothing visibility, rep count, and why a candidate cue was accepted or rejected. Split the collection by participant so tuning on one person's motion does not inflate the apparent result on their other sets. Report **coverage** (how often Finn emits a cue) next to **precision** (how often an emitted cue is supported); suppressing every cue can look precise while providing no value.
 
 For the next-set loop, measure whether the user understands the evidence, whether the proposed action is feasible, and whether the named metric changes on the next attempt. A metric changing is not proof of safer movement. Ask users what they disagreed with and keep a path to mark a cue irrelevant. Review failure examples with a qualified movement specialist before adding new cue categories. Document every threshold change against the frozen test set; if the test set is used for tuning, collect a new holdout before claiming the gate was met.
 
 ## 7. Challenge timeline and release gate
 
-**10–12 October:** finalize the Plumb concept and brand, stabilize the iPhone project, implement camera setup and one squat analysis loop, then test on a real phone. **13–14 October:** annotate test sets, tune confidence gates, rehearse the set-to-set demo, and add a grounded Foundation Models recap only if the core loop holds. **15–16 October:** present the working path at the Build Challenge, upload a release candidate through App Store Connect if signing and account access are ready, and complete truthful listing/privacy/review materials. The [challenge brief](https://luma.com/cmdf-bc2) asks for a working product, a monetization path, and a build submitted through App Store Connect. Upload, App Review approval, and public release are separate states; release claims require the safety, privacy, accessibility, and device checks appropriate to the shipped feature set.
+**10–12 October:** finalize the Finn concept and brand, stabilize the iPhone project, implement camera setup and one squat analysis loop, then test on a real phone. **13–14 October:** annotate test sets, tune confidence gates, rehearse the set-to-set demo, and add a grounded Foundation Models recap only if the core loop holds. **15–16 October:** present the working path at the Build Challenge, upload a release candidate through App Store Connect if signing and account access are ready, and complete truthful listing/privacy/review materials. The [challenge brief](https://luma.com/cmdf-bc2) asks for a working product, a monetization path, and a build submitted through App Store Connect. Upload, App Review approval, and public release are separate states; release claims require the safety, privacy, accessibility, and device checks appropriate to the shipped feature set.
 
 ### Demo script
 
-1. Show the Plumb mark and the setup card: phone at side view, whole body visible.
+1. Show the Finn mark and the setup card: phone at side view, whole body visible.
 2. Capture a short squat set on a physical iPhone, or clearly introduce a recorded fallback.
 3. Show detected reps, evidence for one cue, and why it was chosen.
 4. Repeat a set and show a change in the observed metric.
@@ -244,7 +244,7 @@ The repository now includes a simulator-tested camera-to-result flow, local set 
 
 ## 9. Decision log
 
-- **10 October 2026:** The team selected Plumb's workout-technique concept. The iPhone camera is the required sensor; Watch and AirPods were scoped as optional for the first prototype. Post-set feedback is the first dependable product experience, with live coaching reserved for validation.
+- **10 October 2026:** The team selected Finn's workout-technique concept. The iPhone camera is the required sensor; Watch and AirPods were scoped as optional for the first prototype. Post-set feedback is the first dependable product experience, with live coaching reserved for validation.
 - **11 October 2026:** The monochrome icon adopted a custom rounded P within open camera corners. The mark suggests alignment and camera feedback without prescribing a particular exercise pose.
 - **11 October 2026:** For the first camera-to-cue build, keep the Xcode project's iOS 27.0 deployment target and support iPhone first. An iPad experience requires its own design and validation before the target includes iPad.
 - **13 October 2026:** Team feedback makes the first useful iPhone result and a quiet native interface the immediate priority. Apple Watch is the next device prototype; Apple TV, a second iPhone, widgets, and Live Activities need a demonstrated benefit before implementation. Treadmill running joins the intended product scope but requires a separate, expert-reviewed gait rubric. Keep the working name until the team agrees on another. Favor Apple's on-device pose capabilities and replayable validation over training a new model without a labeled dataset. An external movement engine can be evaluated when an actual interface and sample output arrive.

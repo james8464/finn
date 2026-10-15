@@ -1,6 +1,6 @@
-# Plumb — market and competitor research
+# Finn — market and competitor research
 
-**Research snapshot: 10 October 2026; product scope updated 13 October.** This is a source-backed map of alternatives and a validation plan, not a proven market-size estimate. Product claims below are based on official product or support pages as viewed for this reset; features and prices can change. The new Plumb concept has not yet been tested with customers.
+**Research snapshot: 10 October 2026; product scope updated 13 October.** This is a source-backed map of alternatives and a validation plan, not a proven market-size estimate. Product claims below are based on official product or support pages as viewed for this reset; features and prices can change. The new Finn concept has not yet been tested with customers.
 
 ## 1. The job to be done
 
@@ -21,25 +21,25 @@ Qualified trainers are validation reviewers, not a separate product audience in 
 
 ### A. Do nothing, mirror, or record a phone video
 
-This is the true baseline. It is free and flexible, and a phone video preserves the original movement. It asks the person to know what to look for, find time to review, and remember the last set. Plumb must beat this on setup plus interpretation, not just produce a colorful score.
+This is the true baseline. It is free and flexible, and a phone video preserves the original movement. It asks the person to know what to look for, find time to review, and remember the last set. Finn must beat this on setup plus interpretation, not just produce a colorful score.
 
-**Validation task:** time a person from deciding to film to choosing a concrete next-set adjustment, with and without Plumb. Ask whether the cue matched what they could see themselves.
+**Validation task:** time a person from deciding to film to choosing a concrete next-set adjustment, with and without Finn. Ask whether the cue matched what they could see themselves.
 
 ### B. In-person trainer or trusted training partner
 
-Human coaching can consider pain, goals, equipment, fatigue, prior history, and a full 3D view. Plumb cannot claim equivalent judgment from a single camera. The opportunity is a useful, limited observation between human sessions.
+Human coaching can consider pain, goals, equipment, fatigue, prior history, and a full 3D view. Finn cannot claim equivalent judgment from a single camera. The opportunity is a useful, limited observation between human sessions.
 
-**Validation task:** have qualified trainers independently review the same sets and rate the visibility, correctness, and usefulness of Plumb's proposed cues. Record disagreements and the context the camera missed.
+**Validation task:** have qualified trainers independently review the same sets and rate the visibility, correctness, and usefulness of Finn's proposed cues. Record disagreements and the context the camera missed.
 
 ## 3. Product comparison from primary sources
 
-| Alternative | What its own materials describe | Implication for Plumb | Source |
+| Alternative | What its own materials describe | Implication for Finn | Source |
 | --- | --- | --- | --- |
-| **Tempo** | 3D motion tracking, rep counting, range-of-motion and on-screen form cues within its class experience. Tempo says cues are selective, not shown for every mistake. | Form feedback is an existing category. Plumb should test an iPhone-only, short-set workflow without a dedicated class or hardware setup. | [Tempo support](https://support.tempo.fit/support/solutions/articles/151000154714-3d-tempo-vision-form-feedback) |
-| **Ochy** | A short side/back phone video produces running gait analysis and progress comparisons. | Camera-based technique analysis already exists in running. Plumb's first focus is foundational strength sets and an immediate second-set loop. | [Ochy for runners](https://www.ochy.io/runners) |
-| **OnForm** | Coaches capture, mark up, voice-over, and share athlete videos for remote review. | Human review and video annotation are strong substitutes. Plumb's limited camera observation should be evaluated against them. | [OnForm knowledge base](https://support.onform.com/article/94-what-is-onform) |
-| **Peloton Guide** | Its Movement Tracker detects participation in movements during classes; Peloton support states it does not count reps or provide form correction. | Do not conflate movement recognition with technique advice. Plumb's narrow claim requires direct evidence for each cue. | [Peloton support](https://support.onepeloton.com/s/article/Peloton-Hardware-Movement-Tracker?language=en_CA) |
-| **Apple Fitness+** | Guided strength and other classes, personalized plans, and real-time metrics from Watch or compatible heart-rate devices. | Plumb is about a person's own movement in an unscripted set, not competing on class production or workout catalog. | [Apple Fitness+](https://www.apple.com/apple-fitness-plus/) |
+| **Tempo** | 3D motion tracking, rep counting, range-of-motion and on-screen form cues within its class experience. Tempo says cues are selective, not shown for every mistake. | Form feedback is an existing category. Finn should test an iPhone-only, short-set workflow without a dedicated class or hardware setup. | [Tempo support](https://support.tempo.fit/support/solutions/articles/151000154714-3d-tempo-vision-form-feedback) |
+| **Ochy** | A short side/back phone video produces running gait analysis and progress comparisons. | Camera-based technique analysis already exists in running. Finn's first focus is foundational strength sets and an immediate second-set loop. | [Ochy for runners](https://www.ochy.io/runners) |
+| **OnForm** | Coaches capture, mark up, voice-over, and share athlete videos for remote review. | Human review and video annotation are strong substitutes. Finn's limited camera observation should be evaluated against them. | [OnForm knowledge base](https://support.onform.com/article/94-what-is-onform) |
+| **Peloton Guide** | Its Movement Tracker detects participation in movements during classes; Peloton support states it does not count reps or provide form correction. | Do not conflate movement recognition with technique advice. Finn's narrow claim requires direct evidence for each cue. | [Peloton support](https://support.onepeloton.com/s/article/Peloton-Hardware-Movement-Tracker?language=en_CA) |
+| **Apple Fitness+** | Guided strength and other classes, personalized plans, and real-time metrics from Watch or compatible heart-rate devices. | Finn is about a person's own movement in an unscripted set, not competing on class production or workout catalog. | [Apple Fitness+](https://www.apple.com/apple-fitness-plus/) |
 
 **Important qualification:** these are descriptions of specific products and pages, not a complete feature audit or independent accuracy test. Some products may add features or offer versions with different capabilities. Recheck before public comparative marketing.
 
@@ -49,15 +49,15 @@ Human coaching can consider pain, goals, equipment, fatigue, prior history, and 
 
 **For:** first, people who practice strength exercises alone and want a useful observation from their own set. Treadmill runners are a separate prospective segment to research, with a continuous-session job rather than a rep-by-rep set.
 
-**Plumb provides:** a camera-based, evidence-linked cue and a way to compare the next set.
+**Finn provides:** a camera-based, evidence-linked cue and a way to compare the next set.
 
-**Unlike:** a tutorial library, a raw video recorder, or a generic AI chat response, Plumb begins with measured motion from the user's actual set and can decline to comment when the camera cannot support a claim.
+**Unlike:** a tutorial library, a raw video recorder, or a generic AI chat response, Finn begins with measured motion from the user's actual set and can decline to comment when the camera cannot support a claim.
 
 This is a proposed wedge, not a statement that competitors lack evidence, privacy, or technique features. The best position may change after interviewing users and trainers.
 
-**Running expansion test:** Interview treadmill runners about phone placement, filming comfort, and what they already get from a watch or gait app. Observe whether a side or rear phone view is safe and consistent in real gyms. Compare any proposed observation with a qualified coach's judgment and the actual camera evidence before describing Plumb as a running coach. Ochy remains a relevant alternative; Plumb has no running analysis today.
+**Running expansion test:** Interview treadmill runners about phone placement, filming comfort, and what they already get from a watch or gait app. Observe whether a side or rear phone view is safe and consistent in real gyms. Compare any proposed observation with a qualified coach's judgment and the actual camera evidence before describing Finn as a running coach. Ochy remains a relevant alternative; Finn has no running analysis today.
 
-### Reasons someone might choose Plumb
+### Reasons someone might choose Finn
 
 1. They can start with their existing iPhone.
 2. One cue is less cognitively demanding than reviewing an entire video.
@@ -76,11 +76,11 @@ This is a proposed wedge, not a statement that competitors lack evidence, privac
 
 These objections should be tested before expanding the product.
 
-### The choice Plumb has to win
+### The choice Finn has to win
 
-The first competitor is the user's existing phone camera. Plumb adds setup guidance, automatic review, and a post-set cue, but also asks for framing time, permission, battery, and trust. A convincing test should compare the **whole task**—from placing the phone to deciding what to change—rather than comparing the quality of a finished cue with an unreviewed clip. If setup takes longer than the saved review time, the product may be most useful to a narrower group of deliberate trainees.
+The first competitor is the user's existing phone camera. Finn adds setup guidance, automatic review, and a post-set cue, but also asks for framing time, permission, battery, and trust. A convincing test should compare the **whole task**—from placing the phone to deciding what to change—rather than comparing the quality of a finished cue with an unreviewed clip. If setup takes longer than the saved review time, the product may be most useful to a narrower group of deliberate trainees.
 
-An in-person trainer remains the benchmark for contextual judgment. The more credible position is a result that helps the person notice a limited visible pattern between coached sessions. Plumb should never imply that an automated rule outranks the person who knows the athlete's constraints.
+An in-person trainer remains the benchmark for contextual judgment. The more credible position is a result that helps the person notice a limited visible pattern between coached sessions. Finn should never imply that an automated rule outranks the person who knows the athlete's constraints.
 
 ## 5. Technology opportunity and constraint
 
@@ -101,7 +101,7 @@ The README asks the team to design monetization and customer acquisition, but do
 - Can a person get a useful result on the first session?
 - What proportion tries a second set after a cue?
 - Does the cue agree with qualified human review?
-- How often does Plumb abstain because visibility is poor, and is the retake guidance helpful?
+- How often does Finn abstain because visibility is poor, and is the retake guidance helpful?
 - How many people return in a week without reminders?
 - Would they pay for the value they already experienced? What benefit, if any, creates willingness to pay?
 
@@ -166,9 +166,9 @@ The first release decision needs both **accuracy and usefulness**. The [product 
 
 | Claim | Current status | Evidence needed |
 | --- | --- | --- |
-| “Plumb counts squat reps accurately.” | Unproven | Labeled, diverse physical-device test sets |
-| “Plumb helps improve technique.” | Hypothesis | User behavior and expert-reviewed before/after observations |
-| “Plumb prevents injury.” | Do not claim | Outside the intended scope; medical-level evidence would be required |
+| “Finn counts squat reps accurately.” | Unproven | Labeled, diverse physical-device test sets |
+| “Finn helps improve technique.” | Hypothesis | User behavior and expert-reviewed before/after observations |
+| “Finn prevents injury.” | Do not claim | Outside the intended scope; medical-level evidence would be required |
 | “Works live.” | Future possibility | Latency, reliability, and distraction tests |
 | “Private by default.” | Design requirement | Verified local data flow and retention implementation |
 | “Works across the Apple ecosystem.” | Roadmap | Real Watch/HealthKit and audio integration tested on devices |

@@ -1,6 +1,6 @@
-# Plumb replay and capture design
+# Finn replay and capture design
 
-Plumb needs repeatable testing without asking someone to exercise on every run. The simulator must cover the same setup, capture, analysis, and result flow for each supported exercise. A separate Mac command must accept a saved, consented or licensed workout video, run Apple's Vision body-pose request on its frames, and score those poses with Plumb's production exercise analyzer. This distinguishes repeatable functional tests from real-video validation.
+Finn needs repeatable testing without asking someone to exercise on every run. The simulator must cover the same setup, capture, analysis, and result flow for each supported exercise. A separate Mac command must accept a saved, consented or licensed workout video, run Apple's Vision body-pose request on its frames, and score those poses with Finn's production exercise analyzer. This distinguishes repeatable functional tests from real-video validation.
 
 ## Simulator fixtures
 
@@ -8,7 +8,7 @@ Keep deterministic pose traces in a Debug-only fixture source. The source follow
 
 ## Saved-video replay
 
-A macOS command reads an existing video upright with AVFoundation, samples at Plumb's 15 fps analysis rate, runs `VNDetectHumanBodyPoseRequest`, and writes the same `PoseFrame` JSON shape used by the app. It prints a machine-readable outcome from Plumb's exercise analyzer. Video and generated poses stay outside Git. Re-running the command on the same file is deterministic enough to compare analyzer revisions, while actual camera framing, thermal behavior, and 3D pose still require a physical iPhone.
+A macOS command reads an existing video upright with AVFoundation, samples at Finn's 15 fps analysis rate, runs `VNDetectHumanBodyPoseRequest`, and writes the same `PoseFrame` JSON shape used by the app. It prints a machine-readable outcome from Finn's exercise analyzer. Video and generated poses stay outside Git. Re-running the command on the same file is deterministic enough to compare analyzer revisions, while actual camera framing, thermal behavior, and 3D pose still require a physical iPhone.
 
 ## Capture UI
 

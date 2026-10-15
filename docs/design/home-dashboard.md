@@ -1,8 +1,8 @@
-# Plumb interface
+# Finn interface
 
-James requested Théophile’s original design on 15 October 2026, superseding the monochrome hybrid. Restore the source design from [design/visuals-tabs at c0ffdff](https://github.com/james8464/hackathon-project/tree/c0ffdff).
+James requested Théophile’s original design on 15 October 2026, superseding the monochrome hybrid. Restore the source design from [design/visuals-tabs at c0ffdff](https://github.com/james8464/finn/tree/c0ffdff).
 
-- Home uses the minimalist charcoal background (James’s subsequent request), pink Try Plumb/demo card, glass Last workout, Posture, Best set, Sessions and Awards cards, and scrolling Home/account header.
+- Home uses the minimalist charcoal background (James’s subsequent request), pink Try Finn/demo card, glass Last workout, Posture, Best set, Sessions and Awards cards, and scrolling Home/account header.
 - Home widgets have no outline. Use the exact sRGB Figma `brand/pink/selection` (`#FF2D92`), with black text on filled pink. Keep useful labels and measured facts; omit motivational headings and repeated explanatory subtitles.
 
 The glass bar contains Home, Posture, Coach and Workout (+), with the original symbols, spacing, selection capsule and default label size. Stable dark fills and a subtle selection gradient retain the glass outline while keeping label contrast predictable.
