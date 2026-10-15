@@ -8,6 +8,7 @@ final class SkeletonOverlayUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo"]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let skeleton = app.descendants(matching: .any)["camera.skeleton"]
@@ -25,6 +26,7 @@ final class SkeletonOverlayUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo"]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
@@ -58,6 +60,7 @@ final class SkeletonOverlayUITests: XCTestCase {
             app.launchArguments += ["-plumb-video-poses", poses]
         }
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         let skeleton = app.descendants(matching: .any)["camera.skeleton"]
         XCTAssertTrue(skeleton.waitForExistence(timeout: 10))
@@ -97,6 +100,7 @@ final class SkeletonOverlayUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-video-file", video, "-plumb-video-poses", poses]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["camera.skeleton"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Ankle not clear: step back or add light"].waitForExistence(timeout: 4))

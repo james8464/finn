@@ -7,6 +7,7 @@
 > - **Today (iPhone only):** 6 exercises (4 side-view: squat, push-up, lunge, stiff-leg deadlift; pull-ups & muscle-ups any view) with live rep counting + limited evidence-linked posture/range advice after sets. Hands-free sets with live count on screen and audio (AirPods/speaker). Most frequent pattern shown before each set. Optional Apple Health workout saving (written, unit-tested, unbuilt/untested on iPhone). Optional Personalize with Health: reads HR, recovery, sleep, activity, age, weight, height to suggest lighter days, adapt rest, show set HR from Watch; each tip names its data.
 > - **In build, not on watch:** Watch companion mirrors iPhone count, taps wrist per rep (target `PlumbWatch`, embedded since 13 Oct).
 > - **Not built:** Watch wrist-motion, Apple TV, AirPods head tracking, widgets, Live Activities.
+> - **Home (15 Oct):** photographic dashboard and glass tab bar; Workout keeps the existing set flow, Coach opens the saved-set conversation.
 
 ## Rules for AI agents & contributors
 
@@ -46,7 +47,7 @@ _Updated 13 October 2026._
 ### What the app does
 
 - **6 exercises:** 4 side-view (bodyweight squat, push-up, static lunge, stiff-leg deadlift). Pull-ups & bar muscle-ups from side/front/back: rep counts when shoulders rise >½ arm length (above hands for muscle-up); result shows chin vs hands, straight arms at hang, body swing. Synthetic tests + 1 real 2-rep clip only.
-- **First screen (new 13 Oct):** dark card draws chosen exercise as camera sees it; chips switch exercise in 1 tap; **Start a set** opens camera. History, Options, Privacy in More menu; line above button opens Privacy. First time: short sheet explains camera before iOS asks access. Post-session: card shows last session + observation. Drawing is illustration, not tracking.
+- **Home dashboard (new 15 Oct):** photographic Home screen with glass cards and Home, Posture, Coach, Workout tabs. Last workout and Sessions open saved history; Account settings links to Options, History and Privacy. Workout retains the animated exercise setup, exercise chips and **Start a set** flow. Coach opens the saved-set conversation; Posture, Weights, Awards and Plumb+ show “Not made yet.”
 - **Hands-free sets (new 13 Oct, on by default, toggle in Options):** phone stands a few steps away. Countdown starts when you hold still in position (plank for push-ups); set ends when you walk back or stop moving after reps. Only set measured, not walk to/from spot. Start/Stop still work. Screen stays on while camera open; auto-closes after 3 min no set, or 1 min no person in view; announces when nobody seen.
 - **Before set:** live camera + tracked skeleton, unclear joint ("Ankle not clear"), framing tips (spoken hands-free).
 - **During set:** rep count large on screen + spoken via AirPods/headphones/speaker; exercise named ("5 push-ups"); choice persists across launches. One alert for rep clearly faster/shorter than first reps. If set refused for chosen exercise's joints but clearly shows another exercise's reps, result says so ("Plumb counted 5 push-ups, but Squat was chosen").
