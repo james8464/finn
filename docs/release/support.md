@@ -3,30 +3,38 @@
 **Published URL:** https://james8464.github.io/hackathon-project/support.html
 
 - **Public contact:** jamesdurup@icloud.com
-- **Current iPhone build:** iOS 27 or later; side-view bodyweight squat, push-up, static lunge, and stiff-leg deadlift. Physical-device and expert validation remain open. Treadmill running is planned, not available.
+- **Current iPhone build:** iOS 27 or later, with an optional Apple Watch app (watchOS 10 or later). Six exercises: bodyweight squat, push-up, static lunge and stiff-leg deadlift from the side; pull-ups and bar muscle-ups from the side, the front or the back.
 
-## Set up an exercise review
+## Set up a set
 
-Place the iPhone upright at about hip height, a few steps away. Keep your head and feet visible, turn sideways, and use even lighting. Pick the exercise, tap **Start a set**, allow camera access, then **Start set**. Tap **Stop set** after the set. If Plumb cannot see enough of the movement, move the phone back and retake the set.
+Stand the iPhone upright at about hip height, a few steps away, with your whole body in the frame. Turn sideways for the four side-view exercises. Pick the exercise, tap **Start a set** and allow camera access. Hold still in position for a moment: Plumb counts down and starts the set by itself, says each rep, and ends the set when you walk back to the phone or stop moving. **Start set** and **Stop set** work too. Hands-free can be turned off in Options.
 
 ## What the result means
 
-The rep count, movement range, and any posture observation are camera-based estimates from one view. A cue is shown only when Plumb's current evidence rules support it. Posture cues describe a change across your own reps; they do not grade ideal form or certify safety. Plumb may suggest turning the phone or refuse a clearly frontal view, but that check is not a guarantee that every measured view is suitable. Follow the side-view setup. Stop exercising if you feel pain and seek qualified advice where appropriate.
+The rep count and any observation are camera-based estimates from one view. Plumb shows at most one observation per set, only when the evidence supports it: a shorter range toward the end, a rep clearly faster than your first ones, or a change in torso tilt, hip alignment or knee bend compared with your own first reps. It does not grade ideal form or certify safety. When the joints were clear in only part of the set, the result keeps the reps and says which joint it could not see, with no advice. When the view is too weak, Plumb asks you to move the phone or turn, and says why. Stop exercising if you feel pain and seek qualified advice.
 
-Plumb needs at least four measured reps before it can show an observation. A measured set may still have no cue when there is no clear, camera-supported pattern. You can mark an observation **Not relevant** if it does not fit your set.
+Tap **Listen to observation** to hear the result. Mark an observation **Not relevant** if it does not fit your set. Before each set, Plumb names the pattern that came back most often in your recent sets of that exercise.
 
-When an observation appears, tap **Listen to observation** to hear the measured rep count, observation, and next action. Tap **Stop speaking** to end playback. Sound uses your current iPhone audio output, including paired headphones; playback never starts automatically.
+## Apple Watch
+
+Open Plumb on your watch while the iPhone camera is open: the watch shows the exercise, the live count and the observations, taps your wrist on each rep, and can start or stop the set. The watch does not measure your movement; it needs the iPhone.
+
+## Apple Health
+
+Both options are off until you turn them on in Options. **Save workouts to Apple Fitness** writes each finished session to Health as a strength training workout, with its time, sets and reps, never calories or heart rate. **Personalize with Health** lets Plumb read heart rate, sleep, recent activity, age, weight and height on your iPhone to suggest a lighter day or a longer rest; nothing is stored or sent.
 
 ## Privacy and deletion
 
-Plumb does not save a workout movie. Set summaries are saved in the app's local storage and may be included in your iPhone's device backup if enabled. After a measured set, **Share summary** opens the iOS Share Sheet with text only; if two compatible sets exist, it includes their measured range-change direction. You choose where the text goes. Open **History** and tap a session to review its measured sets and rep details. Tap **Delete** to remove one session, or **Delete all local data** to remove all saved sessions and recovery backups from the app. See the [privacy policy](privacy-policy.md).
+Plumb does not save a workout movie. Set summaries stay in the app's local storage and may be included in a device backup. Open **History** to delete one session or **Delete all local data**. Deleting in Plumb does not remove workouts already saved to Health; delete those in the Health app. See the [privacy policy](privacy-policy.md).
 
 ## Troubleshooting
 
 - **Camera denied:** open iOS Settings for Plumb and allow Camera.
 - **Camera unavailable:** close another app using the camera and try again.
-- **No measured result:** improve lighting, keep only one person in view, and keep the joints needed for your chosen exercise visible.
-- **History temporarily unavailable or deletion unfinished:** unlock your iPhone and tap **Try again**. If a result says it could not confirm saving, keep Plumb open until retry succeeds; unsaved work and pending deletion retries are lost if the app terminates. **Recover history** appears only for a confirmed damaged file and moves that file to a local backup.
-- **Apple Intelligence note unavailable:** the app shows a reviewed comparison note on unsupported or unready devices.
+- **The set never starts hands-free:** hold still for two seconds with your whole body in view, or tap **Start set**.
+- **No measured result:** improve lighting, keep one person in view, and keep the joints needed for your exercise visible.
+- **No sound:** check the ringer switch and the volume; Plumb uses your headphones when they are connected.
+- **Watch shows a waiting screen:** open Plumb on the iPhone and start a set; the watch follows the iPhone.
+- **History temporarily unavailable:** unlock your iPhone and tap **Try again**.
 
 For help, contact jamesdurup@icloud.com.

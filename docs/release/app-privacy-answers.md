@@ -1,8 +1,37 @@
-# Plumb 1.0 App Privacy answers — source-backed draft
+# Plumb 1.0 App Privacy answers
 
-**Re-audited against the 13 October 2026 iPhone source and development-signed Release archive, with the optional Apple Health workout saving added on 13 October (branch `claude/adoring-wozniak-u81oz1`, not in that archive); App Store distribution export pending. Not entered or published in App Store Connect.** Recheck the exact uploaded build before the Account Holder, Admin, or App Manager saves and publishes these answers.
+**Checked 15 October 2026 against `main` at d8f1503 (`com.finlearn.plumb`, team 2FN6Y5NHS5) and the Release archive built that afternoon, plus the coach described for branch `claude/coach`.** Not yet entered in App Store Connect.
 
-## Proposed App Store Connect selection
+## What to click tonight
+
+App Store Connect > Plumb > App Privacy:
+
+1. **Privacy Policy URL:** https://james8464.github.io/hackathon-project/privacy.html
+2. **Data collection:** choose **No, we do not collect data from this app**, then **Publish**.
+
+Export compliance, asked when you attach the build: **No**, the app does not use encryption (the only network traffic is Apple's Foundation Models framework reaching Private Cloud Compute inside iOS, with the OS's own TLS, which Apple lists as exempt). To stop the question on every upload, the project needs, in `Plumb/Plumb.xcodeproj/project.pbxproj`, the line `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;` in the four build-settings blocks (Plumb Debug and Release, PlumbWatch Debug and Release). Only the person who owns `project.pbxproj` adds it.
+
+Why the label stays Data Not Collected, feature by feature:
+
+| Feature | Leaves the iPhone? | Label |
+| --- | --- | --- |
+| Camera, pose points, rep count | No; processed in memory on the device | not collected |
+| Set summaries, patterns, coach conversation | No; local Application Support files, deleted in History | not collected |
+| Health reading (Personalize with Health) and Health writing (Save workouts to Apple Fitness) | No; HealthKit store on the same iPhone, Plumb never reads it back for itself | not collected; the Health & Fitness data type stays unselected |
+| Spoken reps | No microphone, no recording | nothing to declare |
+| Apple Watch mirror | iPhone to paired watch over Apple's Watch Connectivity, nothing to a server | not collected |
+| Reword comparison | On-device Foundation Models only | not collected |
+| Coach (branch `claude/coach`) | The question and the set summaries (exercise, reps, date, observation) go to Apple's Private Cloud Compute through the Foundation Models framework when the device supports Apple Intelligence; Apple states the requests are not stored and are used only for the request; the developer never receives them | not collected under Apple's definition (data transmitted off device is "collected" only when the developer or a partner can access it beyond servicing the request; and "you are not responsible for disclosing data collected by Apple", [App privacy details](https://developer.apple.com/app-store/app-privacy-details/)). Disclosed anyway in the privacy policy, section "Coach", and in the review notes |
+
+The privacy manifest (`Plumb/Plumb/PrivacyInfo.xcprivacy`) matches: no tracking, no tracking domains, no collected data types, and required-reason declarations for UserDefaults (CA92.1) and system boot time (35F9.1). The coach adds no required-reason API.
+
+### Coach: what the team must do before the server model answers
+
+The Private Cloud Compute model is not open to every app. On 15 October Apple's page [Accessing Private Cloud Compute](https://developer.apple.com/private-cloud-compute) lists three conditions: the developer is enrolled in the App Store Small Business Program, has fewer than 2 million first-time downloads across its apps, and has the Private Cloud Compute entitlement assigned to the account, requested through the form that page links to ([developer forum answer](https://developer.apple.com/forums/thread/829539)). Installs through TestFlight or ad hoc do not count. Until the entitlement is granted to team 2FN6Y5NHS5, the server model reports itself unavailable and the coach falls back to the on-device model, then to the fixed text, which is what the code does. The build can be submitted without it. Apple's page says nothing about an extra App Store Connect declaration; the WWDC26 session [319](https://developer.apple.com/videos/play/wwdc2026/319/) says Private Cloud Compute "is designed with end-to-end privacy in mind, ensuring that user data is never stored", that requests "are counted with your user's iCloud account" and that "each user gets a daily limit". The Claude engine in the repository is compiled in Debug only and is absent from the Release binary (checked with `strings` on the archive); a Release build that included it would need a third-party-partner row in this table and a new privacy policy.
+
+## Source audit of 13 October (still valid for the archive of 15 October)
+
+### Proposed App Store Connect selection
 
 Choose **“No, we do not collect data from this app”** for the current Plumb 1.0 build, if the final upload retains the data flows below. Apple defines collection as transmitting data off the device so the developer or a third-party partner can access it beyond servicing a request. Apple says on-device-only processing is not collected for this label. This is an inference from [Apple's App Privacy Details definitions](https://developer.apple.com/app-store/app-privacy-details/) and the current code, not a published App Store answer.
 
@@ -21,7 +50,7 @@ Choose **“No, we do not collect data from this app”** for the current Plumb 
 
 The app currently has no account, analytics, advertising, support form, cloud sync, microphone capture, or third-party SDK. A 13 October source search found no `URLSession`, `URLRequest`, Network framework connection, web view, or upload path. The Xcode project has no package dependency; its only entitlements are HealthKit on the iPhone and the watch (`Plumb/Plumb.entitlements`, `Plumb/PlumbWatch.entitlements`, no clinical records), used to write workouts and, when the person opts in, to read the types above. The development-signed Release archive of 13 October, built before HealthKit was added, passed `verify-archive.sh`: it excludes the Debug-only demo, video-file input, and validation paths. This source and binary check cannot establish what a future App Store upload will contain.
 
-### Why Apple Health workouts are not "collected"
+#### Why Apple Health workouts are not "collected"
 
 Writing a workout to HealthKit does not change the proposed answer. Apple's definition of *collect* is "transmitting data off the device in a way that allows you and/or your third-party partners to access it for a period longer than what is necessary to service the transmitted request in real time", and it states that "data that is processed only on device is not 'collected'" ([App Privacy Details](https://developer.apple.com/app-store/app-privacy-details/)). Plumb's workout goes from the app to the Health store on the same iPhone; Plumb has no server and never reads it back, so neither the team nor a third-party partner can access it. If Health syncs it through iCloud, that is Apple's processing under the person's Health settings, and Apple says developers "are not responsible for disclosing data collected by Apple". The **Health & Fitness** data types (which name the HealthKit API) apply only to data the app collects in that sense, so they stay unselected. This must be revisited if Plumb ever reads Health data and sends anything derived from it off the device. The privacy manifest's empty collected-data list stays correct; HealthKit is not a required-reason API.
 
@@ -29,7 +58,7 @@ Apple separately requires every HealthKit app to have a privacy policy, not to u
 
 Local Application Support data may enter an iPhone backup if the person enables backup. Plumb neither operates nor accesses that backup; the [privacy policy draft](privacy-policy.md) explains this. Apple's App Privacy guidance says developers are not responsible for disclosing data collected by Apple itself. Confirm this treatment against the final Apple account configuration before publishing the label.
 
-## Required final checks
+### Required final checks
 
 1. Inspect the exact signed 1.0 upload for added SDKs, network calls, analytics, crash reporting, remote model use, or changed storage. Change the answer if any developer or third-party partner gains off-device access to fitness, camera, usage, or diagnostic data.
 2. Verify normal and offline physical-iPhone behavior, including the optional Foundation Models fallback. A simulator source audit does not prove physical-device network behavior.

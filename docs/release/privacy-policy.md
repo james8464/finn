@@ -2,7 +2,7 @@
 
 **Published URL:** https://james8464.github.io/hackathon-project/privacy.html
 
-**Effective date:** 13 October 2026. This policy describes the current iPhone release candidate; recheck the final signed upload before App Store submission.
+**Effective date:** 15 October 2026. This policy describes the current iPhone release candidate; recheck the final signed upload before App Store submission.
 
 - **Publisher:** James Durup
 - **Contact:** jamesdurup@icloud.com
@@ -22,6 +22,10 @@ You can open **History** to delete a saved session or choose **Delete all local 
 ## Optional Apple Intelligence wording
 
 When available on your device, the app can ask Apple's on-device Foundation Models framework to reword an already measured comparison after you tap **Reword comparison**. It receives only the two derived set measurements, comparison direction, cue category, and referenced rep numbers. Plumb accepts only approved comparison wording with the supplied rep references and shows reviewed fallback wording if generation is unavailable, late, or inconsistent. This feature does not send camera images or raw pose traces to the model and Plumb does not operate an AI server.
+
+## Coach (optional, Apple Intelligence)
+
+When you ask the coach a question, Plumb builds the context from your saved set summaries only: exercise, reps, date and the observation of each set. No image, video or pose point is included. The question and that context go through Apple's Foundation Models framework, which is part of iOS. On an iPhone that supports Apple Intelligence and has a connection, Apple's server model answers from [Private Cloud Compute](https://security.apple.com/documentation/private-cloud-compute/), Apple's service designed so that requests are not stored and cannot be read by Apple staff; requests are counted against your iCloud account and may be subject to a daily limit set by Apple. Otherwise the model on your iPhone answers, and when neither is available the coach shows a fixed text. Plumb has no server and uses no third-party model provider. Your conversation with the coach stays on your iPhone and is deleted with your other local data.
 
 ## Spoken reps and observations
 
@@ -49,7 +53,7 @@ Nothing Plumb reads from Health leaves your devices through Plumb, and we cannot
 
 ## Accounts, analytics, and sharing
 
-The current release candidate has no account, advertising SDK, third-party analytics, cloud sync, or in-app purchase flow. Its HealthKit uses are the optional workout saving and the optional Personalize with Health reading above, both on your devices only. It does not ask for microphone access. Plumb does not record which Share Sheet destination you choose or upload the summary to a Plumb server. If these practices change in a later version, this policy and the App Store privacy answers must be updated before release.
+The current release candidate has no account, advertising SDK, third-party analytics, cloud sync, or in-app purchase flow. Its HealthKit uses are the optional workout saving and the optional Personalize with Health reading above, both on your devices only. It does not ask for microphone access. The only data that leaves your iPhone through Plumb is a coach request handled by Apple, described above. Plumb does not record which Share Sheet destination you choose or upload the summary to a Plumb server. If these practices change in a later version, this policy and the App Store privacy answers must be updated before release.
 
 ## Your choices and contact
 
