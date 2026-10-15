@@ -2,13 +2,13 @@ import Foundation
 import FoundationModels
 import os
 
-/// Where an answer came from, shown discreetly under the conversation.
+/// where an answer came from, shown discreetly under the conversation
 nonisolated enum CoachEngineKind: String, Equatable, Sendable {
-    /// Apple's server model on Private Cloud Compute, through Foundation Models (iOS 27).
+    /// Apple's server model on Private Cloud Compute, through Foundation Models (iOS 27)
     case privateCloudCompute
-    /// The on-device Apple Intelligence model.
+    /// the on-device Apple Intelligence model
     case onDevice
-    /// Fixed sentences from the saved observations; no model ran.
+    /// fixed sentences from the saved observations; no model ran
     case fallback
     /// Claude Sonnet through the Anthropic API. Debug builds only.
     case claudeDemo
@@ -32,7 +32,7 @@ nonisolated struct CoachMessage: Identifiable, Equatable, Sendable {
     let id: UUID
     let role: Role
     let text: String
-    /// Set on coach messages only.
+    /// set on coach messages only
     let engine: CoachEngineKind?
 
     init(id: UUID = UUID(), role: Role, text: String, engine: CoachEngineKind? = nil) {
@@ -43,19 +43,19 @@ nonisolated struct CoachMessage: Identifiable, Equatable, Sendable {
     }
 }
 
-/// A language model the coach can talk through. `available` is checked before every use.
+/// a language model the coach can talk through. `available` is checked before every use
 @MainActor
 protocol CoachEngine: AnyObject {
     var kind: CoachEngineKind { get }
     var available: Bool { get }
-    /// Why this engine cannot answer right now, as one sentence the person can act on; nil when it can.
+    /// why this engine cannot answer right now, as one sentence the person can act on; nil when it can
     var unavailableReason: String? { get }
-    /// Selects relevant saved-set labels for `question`; the returned text is never displayed.
+    /// selects relevant saved-set labels for `question`; the returned text is never displayed
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String
 }
 
-/// Picks the engine for a turn: the first available one in order, or nil for the fixed text.
+/// picks the engine for a turn: the first available one in order, or nil for the fixed text
 @MainActor
 final class CoachEngineSelector {
     private let engines: [any CoachEngine]
@@ -64,8 +64,8 @@ final class CoachEngineSelector {
         self.engines = engines
     }
 
-    /// The order the product asks for: Private Cloud Compute, then the on-device model.
-    /// In Debug, `extra` goes first (the Claude demo) when the person turned it on.
+    /// the order the product asks for: Private Cloud Compute, then the on-device model
+    /// in Debug, `extra` goes first (the Claude demo) when the person turned it on
     static func standard(extra: [any CoachEngine] = []) -> CoachEngineSelector {
         var engines: [any CoachEngine] = extra
         if #available(iOS 27, *) {
@@ -79,7 +79,7 @@ final class CoachEngineSelector {
         engines.first { $0.available }
     }
 
-    /// When no engine can answer: the first reason an engine gives, logged for the Xcode console.
+    /// when no engine can answer: the first reason an engine gives, logged for the Xcode console
     func unavailableReason() -> String? {
         guard current() == nil else { return nil }
         return engines.compactMap(\.unavailableReason).first
@@ -90,7 +90,7 @@ extension CoachEngine {
     var unavailableReason: String? { nil }
 }
 
-/// Reads why Foundation Models cannot run, once per check, and says what to do about it.
+/// reads why Foundation Models cannot run, once per check, and says what to do about it
 @MainActor
 enum CoachModelAvailability {
     static let log = Logger(subsystem: "ai.mwm.build.challenge.team.08", category: "coach")
@@ -115,8 +115,8 @@ enum CoachModelAvailability {
     }
 }
 
-/// Runs one turn: the model selects at most two saved sets, then Finn renders recorded facts.
-/// Invalid selections, errors and timeouts use fixed text. No model-authored advice is displayed.
+/// runs one turn: the model selects at most two saved sets, then Finn renders recorded facts
+/// invalid selections, errors and timeouts use fixed text. No model-authored advice is displayed.
 @MainActor
 final class CoachResponder {
     private let selector: CoachEngineSelector
@@ -134,7 +134,7 @@ final class CoachResponder {
         selector.current()?.kind ?? .fallback
     }
 
-    /// Why no model answers, when none does.
+    /// why no model answers, when none does
     var unavailableReason: String? { selector.unavailableReason() }
 
     func answer(_ question: String, context: CoachContext, history: [CoachMessage]) async -> CoachMessage {
@@ -179,17 +179,17 @@ final class CoachResponder {
     }
 }
 
-/// Shared by the two Foundation Models engines: instructions, the context, then the turn.
+/// shared by the two Foundation Models engines: instructions, the context, then the turn
 @MainActor
 enum FoundationModelsCoachPrompt {
     static func instructions(language: CoachLanguage) -> String {
-        // Instructions contain only trusted app rules. Saved observations and onboarding answers
-        // are data in the prompt, never higher-priority instructions to the model.
+        // instructions contain only trusted app rules. Saved observations and onboarding answers
+        // are data in the prompt, never higher-priority instructions to the model
         CoachInstructions.text(language: language)
     }
 
-    /// The earlier turns as text, so a fresh session still knows the conversation. Kept short:
-    /// the on-device model has a small window.
+    /// the earlier turns as text, so a fresh session still knows the conversation. Kept short:
+    /// the on-device model has a small window
     static func prompt(question: String, context: CoachContext, history: [CoachMessage]) -> String {
         var sections: [String] = []
         if let note = FinnPreferences.app.onboardingProfile.coachNote {
@@ -256,7 +256,7 @@ final class PrivateCloudComputeCoachEngine: CoachEngine {
     }
 
     /// PCC logs its own reason; the sentence for the person comes from the on-device model, whose
-    /// reason (Apple Intelligence off, model downloading) is the one they can act on.
+    /// reason (Apple Intelligence off, model downloading) is the one they can act on
     var unavailableReason: String? {
         if case .unavailable(let reason) = model.availability {
             CoachModelAvailability.log.notice("Private Cloud Compute unavailable: \(String(describing: reason), privacy: .public)")

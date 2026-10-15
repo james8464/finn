@@ -33,10 +33,10 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
     func requestAuthorization() async -> FitnessAuthorization {
         guard HKHealthStore.isHealthDataAvailable() else { return .unavailable }
         do {
-            // Share workouts only; nothing to read.
+// share workouts only; nothing to read.
             try await store.requestAuthorization(toShare: [HKObjectType.workoutType()], read: [])
         } catch {
-            // Fails without the entitlement or usage description, or when Health is restricted.
+// fails without the entitlement or usage description, or when Health is restricted.
             // The status read below then reports what Finn may do.
         }
         return authorization
@@ -78,7 +78,7 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
     private static func metadata(for workout: FitnessWorkout) -> [String: Any] {
         var metadata: [String: Any] = [
             HKMetadataKeyIndoorWorkout: NSNumber(value: workout.isIndoor),
-            // One workout per session: HealthKit replaces an object with the same sync identifier only
+// one workout per session: HealthKit replaces an object with the same sync identifier only
             // when the new sync version is greater.
             HKMetadataKeySyncIdentifier: NSString(string: workout.syncIdentifier),
             HKMetadataKeySyncVersion: NSNumber(value: FitnessWorkout.syncVersion),

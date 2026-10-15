@@ -83,11 +83,11 @@ nonisolated enum ExerciseAnalyzer {
     static func analyzeWithDiagnostics(_ frames: [PoseFrame], as definition: ExerciseDefinition,
                                        viewCheck: ViewCheckPolicy = .enforce, trimsToSet: Bool = true)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
-        // Walking to the spot and back to the phone is not part of the set, for either count: the
+// walking to the spot and back to the phone is not part of the set, for either count: the
         // replay tool then gives what the iPhone gives, which trims before calling.
         let frames = trimsToSet ? SetWindow.active(frames, requirement: definition.evidence) : frames
         let sideView = analyzeSideView(frames, as: definition, viewCheck: viewCheck)
-        // The push-up rubric reads the elbow, which needs a side view with the whole arm in the
+// the push-up rubric reads the elbow, which needs a side view with the whole arm in the
         // picture. Filmed from the front, or close enough to cut the arm off, the shoulders still
         // show how many times the person went down. The squat rubric reads the hip against the
         // ankle on one side; with the phone low, the feet at the picture's edge, the athlete turning
@@ -118,7 +118,7 @@ nonisolated enum ExerciseAnalyzer {
                                         viewCheck: ViewCheckPolicy)
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?) {
         let side: BodySide
-        // A set whose joints were clear in 65 to 80% of it is measured from its clear reps only.
+// a set whose joints were clear in 65 to 80% of it is measured from its clear reps only.
         var partial: PartialVisibility?
         switch EvidenceGate.assess(frames, requirement: definition.evidence) {
         case .usable(let acceptedSide): side = acceptedSide
@@ -132,11 +132,11 @@ nonisolated enum ExerciseAnalyzer {
             side = partlySeenSide
             partial = visibility
         }
-        // Without 3D estimates (simulator, older devices, switched off) this check does not run.
+// without 3D estimates (simulator, older devices, switched off) this check does not run.
         // Only a clearly frontal view held for several seconds refuses the set; an angled one is
         // measured and the result suggests turning a little.
         var angledView: Double?
-        // Push-ups are accepted from any view, but hip sag is a side-view measure: from the front
+// push-ups are accepted from any view, but hip sag is a side-view measure: from the front
         // or at an angle the count stands and the posture advice is left out, with no tip to turn.
         var postureFromSide = true
         if viewCheck == .enforce, definition.kind == .pushUp, definition.expectedView == .any {
@@ -145,7 +145,7 @@ nonisolated enum ExerciseAnalyzer {
             case .matches, .unavailable: break
             }
         }
-        // A front view no longer refuses the set: hip travel reads the same from the front, and a
+// a front view no longer refuses the set: hip travel reads the same from the front, and a
         // jury trying the app faces the phone. Only the posture advice, a side-view measure, is left out.
         if viewCheck == .enforce {
             switch ViewCheck.assess(frames, expected: definition.expectedView) {
@@ -173,7 +173,7 @@ nonisolated enum ExerciseAnalyzer {
             return (.insufficientView(definition.copy.keepJointsVisible), nil)
         }
 
-        // The top of the movement is where the person spends the set's highest (squat) or most
+// the top of the movement is where the person spends the set's highest (squat) or most
         // open (bend) moments, measured over the whole set rather than its first frames.
         let baseline: Double
         let travel: (Double) -> Double
@@ -186,7 +186,7 @@ nonisolated enum ExerciseAnalyzer {
             }
             travel = { max(0, ($0 - baseline) / standingLength) }
         case .verticalRise:
-            // The rest position is the hang: shoulders at their lowest, an arm's length below the
+// the rest position is the hang: shoulders at their lowest, an arm's length below the
             // hands. The hands hold the bar, so their height is one value for the set; the frames
             // where Vision misses them (often, with the bar near the top of the picture) still count.
             baseline = percentile(samples.map(\.value), 0.9)
@@ -204,7 +204,7 @@ nonisolated enum ExerciseAnalyzer {
             }
             travel = { max(0, baseline - $0) }
         case .shoulderDrop:
-            // The top is where the shoulders sit highest. A set that barely moves them (a person
+// the top is where the shoulders sit highest. A set that barely moves them (a person
             // standing, or Vision's jitter) never reaches the amplitude of a squat.
             baseline = percentile(samples.map(\.value), 0.1)
             guard percentile(samples.map(\.value), 0.9) - baseline > definition.minimumBodyScale else {
@@ -222,7 +222,7 @@ nonisolated enum ExerciseAnalyzer {
 
         let phases = definition.phases
         var phase: Phase = .top
-        // Every threshold is measured from the local top: the highest (most open) point since the
+// every threshold is measured from the local top: the highest (most open) point since the
         // previous rep ended. In a run of continuous reps the person may not come all the way back
         // to the set's top, and on a real phone that top drifts by a few percent during a set.
         // A set that opens partway down a rep (it started during the countdown) measures that first
@@ -235,7 +235,7 @@ nonisolated enum ExerciseAnalyzer {
         for (index, sample) in samples.enumerated() {
             let distance = travel(smoothed[index])
             if let restartAfterGap, index > 0, sample.time - samples[index - 1].time > restartAfterGap {
-                // The athlete was out of view: what they did meanwhile is unknown.
+// the athlete was out of view: what they did meanwhile is unknown.
                 phase = .top
                 localTop = distance
                 lastTopTime = sample.time
@@ -259,7 +259,7 @@ nonisolated enum ExerciseAnalyzer {
                     phase = .ascending(start: start, peak: updatedPeak, peakIndex: updatedPeakIndex,
                                        rise: distance, riseTime: sample.time)
                 } else if distance <= localTop + phases.backAtTop {
-                    // Came back up without reaching the bottom: a shallow movement.
+// came back up without reaching the bottom: a shallow movement.
                     diagnostics.shallow += 1
                     diagnostics.deepestShallow = max(diagnostics.deepestShallow, updatedPeak - localTop)
                     lastTopTime = sample.time
@@ -269,7 +269,7 @@ nonisolated enum ExerciseAnalyzer {
                     phase = .descending(start: start, peak: updatedPeak, peakIndex: updatedPeakIndex)
                 }
             case .ascending(let start, let lastPeak, let lastPeakIndex, let lastRise, let lastRiseTime):
-                // A pause or wobble on the way down can look like the way up; the rep's depth is
+// a pause or wobble on the way down can look like the way up; the rep's depth is
                 // still its deepest point, and its posture is read there.
                 let peak = max(lastPeak, distance)
                 let peakIndex = distance > lastPeak ? index : lastPeakIndex
@@ -295,7 +295,7 @@ nonisolated enum ExerciseAnalyzer {
                     localTop = distance
                     phase = .top
                 } else if peak - rise >= depth * turnShareOfDepth, distance - rise >= phases.leaveTop {
-                    // Came most of the way back up, then went down again by a rep's opening travel
+// came most of the way back up, then went down again by a rep's opening travel
                     // before reaching the top: the movement so far did not come back, so it is not
                     // a rep, and the next one is measured from where the person turned. Before,
                     // the rep stayed open and every later dip merged into it: twelve fast push-ups
@@ -314,7 +314,7 @@ nonisolated enum ExerciseAnalyzer {
         if case .top = phase {} else { diagnostics.unfinished = true }
 
         if let partial {
-            // Only reps whose own frames show the joints often enough count; they are numbered again.
+// only reps whose own frames show the joints often enough count; they are numbered again.
             let clear = reps.filter {
                 EvidenceGate.isClear(frames, requirement: definition.evidence, side: side,
                                      from: $0.startTime, to: $0.endTime)
@@ -358,7 +358,7 @@ nonisolated enum ExerciseAnalyzer {
         let travel = percentile(values, 0.9) - percentile(values, 0.1)
         var definition = ExerciseDefinition.pushUpShoulders
         guard travel > definition.minimumBodyScale, handsStayPlanted(frames, shoulderTravel: travel) else { return nil }
-        // A push-up is the same movement a metre or four metres from the phone, only smaller in the
+// a push-up is the same movement a metre or four metres from the phone, only smaller in the
         // picture: the rep phases follow the set's own travel.
         definition = definition.withPhases(RepPhases(
             leaveTop: travel * 0.2, reachBottom: travel * 0.55, returnFromBottom: travel * 0.15,
@@ -404,7 +404,7 @@ nonisolated enum ExerciseAnalyzer {
         let travel = percentile(values, 0.9) - percentile(values, 0.1)
         var definition = ExerciseDefinition.squatTrunk
         guard travel > definition.minimumBodyScale else { return nil }
-        // The same squat is a larger share of the torso seen from below than from the side: the
+// the same squat is a larger share of the torso seen from below than from the side: the
         // phases follow the set's own travel, never under the definition's floor.
         let floor = definition.phases
         definition = definition.withPhases(RepPhases(
@@ -492,7 +492,7 @@ nonisolated enum ExerciseAnalyzer {
             }
             previous = (frame.time, x)
         }
-        // Hidden feet cannot establish whether the phone moved; the torso checks still apply.
+// hidden feet cannot establish whether the phone moved; the torso checks still apply.
         guard steps.count >= frames.count / 2 else { return true }
         return percentile(steps, 0.9) <= maximumHipFallbackAnkleStep
     }
@@ -517,7 +517,7 @@ nonisolated enum ExerciseAnalyzer {
     /// usual distance above them; a gap of at most `EvidenceRubric.maximumTrackingGap` is bridged,
     /// as the rep passes through it. Longer gaps stay empty. Vision loses the shoulders at the
     /// bottom of a push-up, where the head leaves the picture or the arms hide them, so a gap that
-    /// starts and ends well below the top is filled with a dip toward the deepest seen position
+    /// starts and ends well below the top is filled with a dip towards the deepest seen position
     /// instead of a straight line, which would flatten the rep out of existence.
     private static func shoulderSamples(_ frames: [PoseFrame]) -> [Sample] {
         func clear(_ frame: PoseFrame, _ joint: BodyJoint) -> JointPoint? {
@@ -654,14 +654,14 @@ nonisolated enum ExerciseAnalyzer {
             return Sample(time: frame.time, value: joint.y, scale: reference.y,
                           confidence: min(joint.confidence, reference.confidence), posture: posture)
         case .verticalRise(let jointRole, let referenceRole):
-            // The reference (the hands on the bar) is optional per frame: `scale` holds its height or NaN.
+// the reference (the hands on the bar) is optional per frame: `scale` holds its height or NaN.
             guard let joint = confidentPoint(jointRole, in: frame, side: side) else { return nil }
             let reference = confidentPoint(referenceRole, in: frame, side: side)
                 ?? confidentPoint(referenceRole, in: frame, side: side == .left ? .right : .left)
             return Sample(time: frame.time, value: joint.y, scale: reference?.y ?? .nan,
                           confidence: joint.confidence, posture: posture)
         case .shoulderDrop:
-            // Built over the whole set by `shoulderSamples`: it needs the nose offset and the gaps.
+// built over the whole set by `shoulderSamples`: it needs the nose offset and the gaps.
             return nil
         case .jointBend(let fromRole, let vertexRole, let toRole):
             guard let from = confidentPoint(fromRole, in: frame, side: side),
@@ -708,7 +708,7 @@ nonisolated enum ExerciseAnalyzer {
                                     aspectRatio: frame.aspectRatio) else { return nil }
             return 180 - angle
         case .pullUp, .muscleUp:
-            // Swing at the top: how far the hips sit forward or back of the shoulders, in torso lengths.
+// swing at the top: how far the hips sit forward or back of the shoulders, in torso lengths.
             guard let shoulder = point(.shoulder), let hip = point(.hip) else { return nil }
             let torso = hypot(shoulder.x - hip.x, (shoulder.y - hip.y) * frame.aspectRatio)
             guard torso >= 0.05 else { return nil }

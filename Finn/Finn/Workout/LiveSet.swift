@@ -26,7 +26,7 @@ nonisolated struct StartReadiness: Equatable {
     @discardableResult
     mutating func update(with frame: PoseFrame, definition: ExerciseDefinition) -> Double {
         let requirement = definition.evidence
-        // Once a side is followed, a frame where it is unclear is a miss, not a switch to the far
+// once a side is followed, a frame where it is unclear is a miss, not a switch to the far
         // side, which restarted the hold. Before that, the side seen with more confidence is tried
         // first, and each side is checked for the starting position, not only for visibility.
         let sides = side.map { [$0] } ?? Self.sidesByConfidence(frame, requirement: requirement)
@@ -205,7 +205,7 @@ nonisolated struct LiveSetMonitor {
         lastAnalysisTime = last.time
         var events: [LiveSetEvent] = []
         analysisAccepted = false
-        // One pass gives both the set's frames and where the athlete is in each, for the count and
+// one pass gives both the set's frames and where the athlete is in each, for the count and
         // the stop; this runs over the whole set so far every 0.4 s.
         let layout = SetWindow.layout(frames, requirement: definition.evidence)
         let set = layout.range.map { Array(frames[$0]) } ?? frames
@@ -220,7 +220,7 @@ nonisolated struct LiveSetMonitor {
             latestDiagnostics = diagnostics
             rangeAdviceFromSide = diagnostics?.partialVisibility == nil && diagnostics?.countedFromShoulders != true
                 && Self.seenFromTheSide(set)
-            // The count is the analysis of the whole set so far, the same the result makes at the
+// the count is the analysis of the whole set so far, the same the result makes at the
             // end. Measured over a longer set, a movement said as a rep can stop counting (on
             // 15 October, fast push-ups: the top the set is measured from settled lower as the set
             // went on, and reps measured from it became too fast or too shallow). The count used
@@ -254,23 +254,23 @@ nonisolated struct LiveSetMonitor {
     /// `spots` is `SetWindow.spots(frames, ...)`, worked out only when needed.
     private func shouldStop(_ frames: [PoseFrame], spots makeSpots: @autoclosure () -> [SetWindow.Spot]?) -> Bool {
         guard let last = frames.last else { return false }
-        // Idle only by a measurement that accepts the set and sees the person at the top, for longer
+// idle only by a measurement that accepts the set and sees the person at the top, for longer
         // than the slowest rep may take: a refusal after a gap, or a slow rep under way, is not idleness.
         let idleLimit = max(Self.idleAfter, definition.phases.maximumDuration + 2)
         if countedReps > 0, analysisAccepted, !midMovement, let lastRep = reps.last,
            last.time - lastRep.endTime >= idleLimit {
             return true
         }
-        // Away from the spot, not merely with a joint unclear at it (`SetWindow.spots`).
+// away from the spot, not merely with a joint unclear at it (`SetWindow.spots`).
         guard let spots = makeSpots() else { return false }
         guard let lastIndex = spots.lastIndex(where: \.isAtSpot) else { return countedReps > 0 }
         let gone = last.time - frames[lastIndex].time
-        // Seen walking off: two seconds. Only hidden (someone in front, Vision missing them): longer
+// seen walking off: two seconds. Only hidden (someone in front, Vision missing them): longer
         // than the gap the evidence gate allows for a person passing in front, so it does not end a
         // set the gate would measure.
         let seenLeaving = spots[(lastIndex + 1)...].contains(.away)
         guard countedReps > 0 else {
-            // No rep counted (every movement too shallow, or the person changed their mind): the set
+// no rep counted (every movement too shallow, or the person changed their mind): the set
             // still ends when the athlete, after standing at their spot for a set's minimum length,
             // is seen walking away. Never for being unseen, which getting down into a push-up can
             // cause, and never while walking in and out without stopping at the spot.

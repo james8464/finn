@@ -48,7 +48,7 @@ struct BadgeRulesTests {
     @Test func threeDaysNeedThreeDistinctDaysWithinAWeek() {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "UTC")!
-        // Three sets on one day: no.
+// three sets on one day: no.
         let sameDay = history([set(reps: 5, at: 0), set(reps: 5, at: 3600), set(reps: 5, at: 7200)])
         #expect(!kinds(BadgeRules.evaluate(history: sameDay, calendar: calendar)).contains(.threeDaysInAWeek))
         // Three days spread over nine days: no.
@@ -104,7 +104,7 @@ struct BadgeRulesTests {
 
     @Test func longerRangeFollowsTheComparisonRules() {
         let session = UUID()
-        // Same session, same side, enough reps, +25%: yes.
+// same session, same side, enough reps, +25%: yes.
         let longer = history([set(reps: 5, range: 0.40, at: 0, session: session),
                               set(reps: 5, range: 0.50, at: 300, session: session)])
         let badge = BadgeRules.evaluate(history: longer).first { $0.kind == .longerRange(.bodyweightSquat) }

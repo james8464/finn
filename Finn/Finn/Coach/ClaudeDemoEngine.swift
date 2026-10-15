@@ -4,8 +4,8 @@ import Security
 
 // Debug builds only. Nothing in this file exists in the App Store build: no key, no endpoint.
 
-/// The demo API key, kept in this iPhone's Keychain and nowhere else. The person pastes it once in
-/// Options > Developer.
+/// the demo API key, kept in this iPhone's Keychain and nowhere else. The person pastes it once in
+/// Options > Developer
 nonisolated enum CoachDemoKeyStore {
     private static let service = "ai.mwm.build.challenge.team.08.coach-demo"
     private static let account = "anthropic"
@@ -46,13 +46,13 @@ nonisolated enum CoachDemoKeyStore {
     static var hasKey: Bool { load() != nil }
 }
 
-/// Debug-only options for the coach demo.
+/// debug-only options for the coach demo
 nonisolated struct CoachDemoPreferences {
     static let usesClaudeKey = "finn.coach.usesClaudeDemo"
     let defaults: UserDefaults
 
-    /// On by default: with a key in the Keychain, the demo answers through Claude Sonnet, and the
-    /// switch in Options > Developer goes back to Foundation Models.
+    /// on by default: with a key in the Keychain, the demo answers through Claude Sonnet, and the
+    /// switch in Options > Developer goes back to Foundation Models
     var usesClaude: Bool {
         get { defaults.object(forKey: Self.usesClaudeKey) as? Bool ?? true }
         nonmutating set { defaults.set(newValue, forKey: Self.usesClaudeKey) }
@@ -104,7 +104,7 @@ final class ClaudeDemoCoachEngine: CoachEngine {
         var messages: [[String: String]] = history.suffix(10).map { message in
             ["role": message.role == .person ? "user" : "assistant", "content": message.text]
         }
-        // The API wants alternating roles starting with the person; the coach's opening line is dropped.
+        // the API wants alternating roles starting with the person; the coach's opening line is dropped
         if messages.first?["role"] == "assistant" { messages.removeFirst() }
         messages.append(["role": "user", "content": FoundationModelsCoachPrompt.prompt(
             question: question, context: context, history: [])])

@@ -1,4 +1,4 @@
-// Trains Finn's exercise classifier with Create ML on a Mac (Apple silicon, Xcode installed).
+// trains Finn's exercise classifier with Create ML on a Mac (Apple silicon, Xcode installed).
 //
 //   xcrun swift tools/exercise-classifier/train_exercise_classifier.swift <dataset> <output.mlmodel>
 //       [--iterations 80] [--frame-rate 15] [--window 30]

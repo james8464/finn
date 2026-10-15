@@ -3,8 +3,8 @@ import Foundation
 import Observation
 import os
 
-/// What the Live Activity should do as the session model moves. Pure, so it is unit-tested without
-/// ActivityKit: the activity exists exactly while the stage is `.capturing`.
+/// what the Live Activity should do as the session model moves. Pure, so it is unit-tested without
+/// activityKit: the activity exists exactly while the stage is `.capturing`
 nonisolated enum SetLiveActivityRules {
     enum Step: Equatable {
         case none
@@ -25,7 +25,7 @@ nonisolated enum SetLiveActivityRules {
     }
 }
 
-/// Starts a Live Activity when a set starts, counts its reps, and ends it when the set ends. It
+/// starts a Live Activity when a set starts, counts its reps, and ends it when the set ends. It
 /// follows the session model with Observation, like the watch does, so the model knows nothing
 /// about ActivityKit. Everything is local: no push token is requested.
 @MainActor
@@ -37,8 +37,8 @@ final class SetLiveActivity {
     private var lastReps = -1
     private var lastStage: WorkoutStage?
 
-    /// Follows `model` for the app's lifetime. Any activity left from an earlier run (the app was
-    /// killed mid-set) is ended first, so the Lock Screen never shows a set that is not running.
+    /// follows `model` for the app's lifetime. Any activity left from an earlier run (the app was
+    /// killed mid-set) is ended first, so the Lock Screen never shows a set that is not running
     func attach(to model: WorkoutSessionModel, demoInput: Bool) {
         guard self.model == nil else { return }
         self.model = model
@@ -83,8 +83,8 @@ final class SetLiveActivity {
     }
 
     #if DEBUG
-    /// A sample activity for simulator screenshots (`-finn-ui-live-activity-sample`), labeled DEMO.
-    /// Never a real count: it stands for no set.
+    /// a sample activity for simulator screenshots (`-finn-ui-live-activity-sample`), labelled DEMO
+    /// never a real count: it stands for no set
     func showSample() {
         guard ActivityAuthorizationInfo().areActivitiesEnabled, activity == nil else { return }
         let attributes = FinnSetActivityAttributes(exerciseName: "Squat", startedAt: .now.addingTimeInterval(-48),

@@ -7,7 +7,7 @@ nonisolated protocol AngleWindowClassifying: AnyObject {
     func classify(_ features: PoseWindowFeatures) throws -> ClassifierPrediction
 }
 
-/// Recognizes the exercise from Vision's 2D joint angles with hand-written rules: which joint
+/// Recognises the exercise from Vision's 2D joint angles with hand-written rules: which joint
 /// bends (elbow, knee, hip), by how much, and how the torso is tilted (horizontal for a push-up,
 /// upright for a squat or lunge, tipping forward for a stiff-leg deadlift). It needs no training
 /// data. Its thresholds are starting values checked on synthetic and public side-view clips only.

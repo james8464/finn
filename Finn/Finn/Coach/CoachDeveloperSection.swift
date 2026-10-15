@@ -1,8 +1,8 @@
 #if DEBUG
 import SwiftUI
 
-/// Options > Developer, Debug builds only: paste the demo API key once, choose the engine.
-/// The key goes to the Keychain of this iPhone and is never shown again.
+/// Options > Developer, Debug builds only: paste the demo API key once, choose the engine
+/// the key goes to the Keychain of this iPhone and is never shown again
 struct CoachDeveloperSection: View {
     @State private var pastedKey = ""
     @State private var hasKey = CoachDemoKeyStore.hasKey

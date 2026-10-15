@@ -2,8 +2,8 @@ import Foundation
 import HealthKit
 import Observation
 
-/// A temporary HealthKit workout keeps local rhythm haptics available with the wrist lowered.
-/// No heart-rate samples are requested, and the workout is discarded when capture ends.
+/// a temporary HealthKit workout keeps local rhythm haptics available with the wrist lowered
+/// no heart-rate samples are requested, and the workout is discarded when capture ends
 @Observable
 @MainActor
 final class RhythmWorkoutSession {

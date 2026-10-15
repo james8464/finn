@@ -23,7 +23,7 @@ nonisolated enum SpokenLanguage {
 }
 
 nonisolated extension JointRole {
-    /// The joint's name as shown and said, capitalized: "Hip", "Hanche".
+    /// The joint's name as shown and said, capitalised: "Hip", "Hanche".
     var localizedName: String {
         switch self {
         case .shoulder: String(localized: "Shoulder")

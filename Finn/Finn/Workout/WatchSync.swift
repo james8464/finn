@@ -42,7 +42,7 @@ nonisolated enum WatchSyncRules {
             wristControls: false,
             handsFree: handsFree,
             demoInput: demoInput,
-            // Demo input films nobody, so there is no heart rate to pair with it.
+// demo input films nobody, so there is no heart rate to pair with it.
             measuresHeartRate: measuresHeartRate && !demoInput)
         switch watchStage {
         case .countdown:
@@ -121,7 +121,7 @@ final class WatchSync {
         let state = withObservationTracking {
             Self.state(of: model, demoInput: demoInput)
         } onChange: { [weak self] in
-            // Called before the change lands; read the new values on the next turn.
+// called before the change lands; read the new values on the next turn.
             Task { @MainActor [weak self] in self?.follow() }
         }
         publish(state)

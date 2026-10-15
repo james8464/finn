@@ -1,7 +1,7 @@
 import Charts
 import SwiftUI
 
-/// Numbers and curves drawn from the saved sessions. Every value is measured by the camera; nothing
+/// numbers and curves drawn from the saved sessions. Every value is measured by the camera; nothing
 /// is estimated. Each section answers one question and says which sessions it rests on.
 nonisolated struct StatsSummary {
     let sessions: [WorkoutSessionSummary]
@@ -9,7 +9,7 @@ nonisolated struct StatsSummary {
 
     var totalReps: Int { sessions.flatMap(\.sets).reduce(0) { $0 + $1.analysis.reps.count } }
 
-    /// Days in a row with a session, counting today or yesterday as the start.
+    /// days in a row with a session, counting today or yesterday as the start
     var streakDays: Int {
         let days = Set(sessions.map { calendar.startOfDay(for: $0.startedAt) })
         guard !days.isEmpty else { return 0 }
@@ -27,7 +27,7 @@ nonisolated struct StatsSummary {
         return streak
     }
 
-    /// Reps per day over the last 12 weeks, oldest first, for the regularity calendar.
+    /// reps per day over the last 12 weeks, oldest first, for the regularity calendar
     var dailyReps: [(day: Date, reps: Int)] {
         let today = calendar.startOfDay(for: .now)
         let weekStart = calendar.dateInterval(of: .weekOfYear, for: today)?.start ?? today
@@ -47,7 +47,7 @@ nonisolated struct StatsSummary {
         return days
     }
 
-    /// This week's reps against last week's, as a share; nil without a previous week.
+    /// this week's reps against last week's, as a share; nil without a previous week
     var weekTrend: (thisWeek: Int, lastWeek: Int, change: Double?) {
         let today = Date.now
         let thisWeek = sessions.filter { calendar.isDate($0.startedAt, equalTo: today, toGranularity: .weekOfYear) }
@@ -58,8 +58,8 @@ nonisolated struct StatsSummary {
         return (a, b, b > 0 ? Double(a - b) / Double(b) : nil)
     }
 
-    /// Per session: the share of reps the observation did not name. A set without an observation
-    /// counts all its reps as clean.
+    /// per session: the share of reps the observation did not name. A set without an observation
+    /// counts all its reps as clean
     var qualityPerSession: [(date: Date, share: Double)] {
         sessions.compactMap { session in
             let reps = session.sets.reduce(0) { $0 + $1.analysis.reps.count }
@@ -78,11 +78,11 @@ nonisolated struct StatsSummary {
         let reps: Int
         let bestSet: Int
         let bestSetDate: Date?
-        /// Mean rep time in seconds.
+        /// mean rep time in seconds
         let tempo: Double
-        /// Median range of all measured reps, in the exercise's unit.
+        /// median range of all measured reps, in the exercise's unit
         let medianRange: Double
-        /// Reps per session, oldest first.
+        /// reps per session, oldest first
         let repsPerSession: [(date: Date, reps: Int)]
     }
 
@@ -109,7 +109,7 @@ nonisolated struct StatsSummary {
     var exercises: [ExerciseFacts] { ExerciseKind.allCases.compactMap(facts(for:)) }
 }
 
-/// A number that says where it comes from: tap it and the sessions behind it unfold.
+/// a number that says where it comes from: tap it and the sessions behind it unfold
 struct MeasuredFigure<Content: View>: View {
     let value: String
     let label: LocalizedStringKey
@@ -154,7 +154,7 @@ struct MeasuredFigure<Content: View>: View {
     }
 }
 
-/// Twelve weeks of days: a square per day, brighter with more reps.
+/// twelve weeks of days: a square per day, brighter with more reps
 struct RegularityCalendar: View {
     let days: [(day: Date, reps: Int)]
 
@@ -183,7 +183,7 @@ struct RegularityCalendar: View {
     }
 }
 
-/// The share of clean reps per session, as a line between 0 and 100 %.
+/// the share of clean reps per session, as a line between 0 and 100 %
 struct QualityChart: View {
     let points: [(date: Date, share: Double)]
 
@@ -206,7 +206,7 @@ struct QualityChart: View {
     }
 }
 
-/// One exercise: its records, tempo, range and curve.
+/// one exercise: its records, tempo, range and curve
 struct ExerciseStatsCard: View {
     let facts: StatsSummary.ExerciseFacts
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -266,7 +266,7 @@ struct ExerciseStatsCard: View {
     }
 }
 
-/// The small curve on the first screen's progress card: reps per session, the last eight.
+/// the small curve on the first screen's progress card: reps per session, the last eight
 struct Sparkline: View {
     let values: [Int]
 

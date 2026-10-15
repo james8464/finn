@@ -54,8 +54,8 @@ struct HomeTabBar: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.dynamicTypeSize) private var typeSize
-    // Caption2 plateaus at smaller sizes. Body scaling preserves 11pt at default
-    // while responding at every content size; the original normal-size layout is unchanged.
+    // caption2 plateaus at smaller sizes. Body scaling preserves 11pt at default
+    // while responding at every content size; the original normal-size layout is unchanged
     @ScaledMetric(relativeTo: .body) private var labelSize = 11.0
     @ScaledMetric(relativeTo: .body) private var tabHeight = 64.0
     @Namespace private var glassSelection
@@ -78,7 +78,7 @@ struct HomeTabBar: View {
                 .accessibilityHidden(true)
             }
         .padding(4)
-        // Stable charcoal surfaces retain the glass outline without variable contrast
+        // stable charcoal surfaces retain the glass outline without variable contrast
         // beneath small labels. The selection still moves between tabs.
         .modifier(DashboardGlass(radius: 48, stableBackdrop: true))
         .animation(reduceMotion ? nil : .spring(duration: 0.28, bounce: 0.12), value: selection)
@@ -97,7 +97,7 @@ struct HomeTabBar: View {
         LazyVGrid(columns: tabColumns, spacing: 0) {
             ForEach(HomeTab.allCases, id: \.self) { tab in
                 Button {
-                    // Animate only the bar. Changing pages should respond immediately.
+                    // animate only the bar. Changing pages should respond immediately.
                     selection = tab
                 } label: {
                     let layout = typeSize.isAccessibilitySize

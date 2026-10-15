@@ -1,24 +1,24 @@
 import AVFoundation
 import SwiftUI
 
-/// Shared semantic colours. Content surfaces stay opaque; system bars provide materials.
+/// shared semantic colours. Content surfaces stay opaque; system bars provide materials.
 enum HomeStyle {
     static let background = Color(uiColor: .systemBackground)
     static let accent = Color.primary
-    /// Monochrome actions invert with the system appearance.
+    /// monochrome actions invert with the system appearance
     static let filledAccent = Color.primary
     static let onAccent = Color(uiColor: .systemBackground)
     static let card = Color(uiColor: .secondarySystemBackground)
     static let supportingText = Color(uiColor: .secondaryLabel)
-    /// The camera card is dark in both appearances, like the camera view it stands for.
+    /// the camera card is dark in both appearances, like the camera view it stands for
     static let cameraTop = Color(white: 0.11)
     static let cameraBottom = Color(white: 0.05)
-    /// Supporting text on the camera card, solid so its contrast does not depend on what is behind.
+    /// supporting text on the camera card, solid so its contrast does not depend on what is behind
     static let cameraSecondaryText = Color(white: 0.8)
     static let spring = Animation.spring(response: 0.45, dampingFraction: 0.86)
 }
 
-/// A small category marker shared by dashboard widgets and supporting pages.
+/// a small category marker shared by dashboard widgets and supporting pages
 struct HomeSymbol: View {
     let name: String
     var color: Color = HomeStyle.accent
@@ -35,7 +35,7 @@ struct HomeSymbol: View {
     }
 }
 
-/// Quiet separation from the canvas; content remains opaque and readable.
+/// quiet separation from the canvas; content remains opaque and readable
 struct HomeSurface: ViewModifier {
     var radius: CGFloat = 20
 
@@ -44,14 +44,14 @@ struct HomeSurface: ViewModifier {
     }
 }
 
-/// The secondary pages reachable from the first screen.
+/// the secondary pages reachable from the first screen
 enum HomeRoute: Hashable {
     case history, options, privacy, coach
     case account, lastWorkout, posture, weights, awards, plus
 }
 
 extension ExerciseKind {
-    /// The name on the exercise chips, as short as it can be.
+    /// the name on the exercise chips, as short as it can be
     nonisolated var chipName: String {
         switch self {
         case .bodyweightSquat: String(localized: "Squat")
@@ -64,11 +64,11 @@ extension ExerciseKind {
     }
 }
 
-/// One chip per exercise. The selected one is filled; VoiceOver reads the full exercise name. At
-/// accessibility text sizes the chips become one menu, which never runs off the screen.
+/// one chip per exercise. The selected one is filled; VoiceOver reads the full exercise name. At
+/// accessibility text sizes the chips become one menu, which never runs off the screen
 struct ExerciseChips: View {
     @Binding var selection: ExerciseKind
-    /// The order of the chips: the exercises picked at the first launch come first.
+    /// the order of the chips: the exercises picked at the first launch come first
     var order: [ExerciseKind] = ExerciseKind.allCases
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -105,7 +105,7 @@ struct ExerciseChips: View {
                     }
                 }
                 .scrollIndicators(.hidden)
-                // The chosen exercise is kept across launches: bring its chip into view.
+                // the chosen exercise is kept across launches: bring its chip into view
                 .onAppear { proxy.scrollTo(selection, anchor: .center) }
                 .onChange(of: selection) { _, kind in
                     withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(kind, anchor: .center) }
@@ -135,11 +135,11 @@ struct ExerciseChips: View {
     }
 }
 
-/// The dark card at the top of the first screen: the chosen exercise drawn as Finn's camera sees
-/// it, its name, and where to put the phone.
+/// the dark card at the top of the first screen: the chosen exercise drawn as Finn's camera sees
+/// it, its name, and where to put the phone
 struct ExerciseHeroCard: View {
     let kind: ExerciseKind
-    /// Shorter once there is a last session to show below it.
+    /// shorter once there is a last session to show below it
     var compact = false
     @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 340
 
@@ -184,7 +184,7 @@ struct ExerciseHeroCard: View {
     }
 }
 
-/// A light card on the grouped background, for the focus, the last session and status lines.
+/// a light card on the grouped background, for the focus, the last session and status lines
 struct HomeCard<Content: View>: View {
     @ViewBuilder var content: Content
 
@@ -196,7 +196,7 @@ struct HomeCard<Content: View>: View {
     }
 }
 
-/// The one filled action of a screen: a full-width pill with its arrow in a circle of its own.
+/// the one filled action of a screen: a full-width pill with its arrow in a circle of its own
 struct PrimaryActionLabel: View {
     let title: LocalizedStringResource
     var symbol = "arrow.right"
@@ -226,7 +226,7 @@ struct PrimaryActionLabel: View {
     }
 }
 
-/// Presses in slightly, like a physical key.
+/// presses in slightly, like a physical key
 struct PressableStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     func makeBody(configuration: Configuration) -> some View {
@@ -237,12 +237,12 @@ struct PressableStyle: ButtonStyle {
     }
 }
 
-/// Whether iOS has yet to ask for the camera, so Finn can say what the camera is for first.
+/// whether iOS has yet to ask for the camera, so Finn can say what the camera is for first
 enum CameraPermission {
     static var notAskedYet: Bool { AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined }
 }
 
-/// Shown once, before iOS asks for the camera: what Finn does with it, in three lines.
+/// shown once, before iOS asks for the camera: what Finn does with it, in three lines
 struct CameraPrimer: View {
     let onContinue: () -> Void
     let onPrivacy: () -> Void
@@ -317,7 +317,7 @@ struct CameraPrimer: View {
 }
 
 extension View {
-    /// A group of settings on its own rounded card, as on the first screen.
+    /// a group of settings on its own rounded card, as on the first screen
     func optionCard() -> some View {
         padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)

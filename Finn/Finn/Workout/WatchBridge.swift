@@ -46,7 +46,7 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         guard isStarted else { return }
         let session = WCSession.default
         guard session.activationState == .activated, session.isPaired else { return }
-        // Keep the latest screen even while the watch is reachable: a live message can be lost
+// keep the latest screen even while the watch is reachable: a live message can be lost
         // when either app moves between foreground and background. Context replaces older states.
         Self.keepForLater(state, on: session)
         if session.isReachable { Self.sendLive(state, on: session) }
@@ -55,7 +55,7 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     private func update(_ new: WatchConnection) {
         guard new != connection else { return }
         connection = new
-        // A watch that just opened Finn, or a session that just activated, gets the current screen.
+// a watch that just opened Finn, or a session that just activated, gets the current screen.
         if let current = sync?.current { deliver(current) }
     }
 
@@ -90,7 +90,7 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
 
     nonisolated func sessionDidDeactivate(_ session: WCSession) {
-        // The person switched to another watch: start a session with that one.
+// the person switched to another watch: start a session with that one.
         WCSession.default.activate()
     }
 

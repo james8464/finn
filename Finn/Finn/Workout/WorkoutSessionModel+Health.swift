@@ -6,7 +6,7 @@ extension WorkoutSessionModel {
     /// Health can be read on this device, for live camera sessions only.
     var offersHealthPersonalization: Bool { health?.isAvailable ?? false }
 
-    /// Turns personalization on or off from Options or the offer. Turning it on shows Health's sheet
+    /// turns personalisation on or off from Options or the offer. Turning it on shows Health's sheet
     /// for the types not answered yet, then reads them.
     func setPersonalizesWithHealth(_ isOn: Bool) async {
         personalizesWithHealth = isOn
@@ -23,7 +23,7 @@ extension WorkoutSessionModel {
     func refreshHealth() async {
         guard personalizesWithHealth, let health, health.isAvailable else { return }
         let snapshot = await health.snapshot(now: currentDate())
-        // The person may have turned the option off while Health was read.
+// the person may have turned the option off while Health was read.
         guard personalizesWithHealth else { return }
         healthSnapshot = snapshot
     }
@@ -35,11 +35,11 @@ extension WorkoutSessionModel {
         if personalize { await setPersonalizesWithHealth(true) }
     }
 
-    /// After the first measured live set, offer personalization once.
+    /// after the first measured live set, offer personalisation once.
     func offerPersonalizationIfDue() {
         guard offersHealthPersonalization, !personalizesWithHealth,
               !preferences.personalizationOffered else { return }
-        // Counted as asked as soon as it shows: closing it with a swipe means "Later".
+// counted as asked as soon as it shows: closing it with a swipe means "Later".
         preferences.personalizationOffered = true
         showsPersonalizationOffer = true
     }

@@ -1,7 +1,7 @@
 import XCTest
 
 final class SkeletonOverlayUITests: XCTestCase {
-    /// The Debug demo feed has hips, knees, and ankles but no picture. It checks that the
+    /// the Debug demo feed has hips, knees, and ankles but no picture. It checks that the
     /// skeleton and the knee angle appear during a set, not that they line up with a body.
     @MainActor
     func testDemoSetShowsTheSkeletonWithTheKneeAngle() {
@@ -20,7 +20,7 @@ final class SkeletonOverlayUITests: XCTestCase {
         XCTAssertEqual(XCTWaiter().wait(for: [gone], timeout: 8), .completed)
     }
 
-    /// The demo set's reps shrink after the fourth, so the result has a deepest and a shallowest rep.
+    /// the demo set's reps shrink after the fourth, so the result has a deepest and a shallowest rep
     @MainActor
     func testResultDrawsTheDeepestAndShallowestRep() {
         let app = XCUIApplication()
@@ -42,7 +42,7 @@ final class SkeletonOverlayUITests: XCTestCase {
         attachScreenshot(named: "Deepest and shallowest rep")
     }
 
-    /// Plays a side-view squat video on the camera screen. It runs when the test runner
+    /// plays a side-view squat video on the camera screen. It runs when the test runner
     /// is given a file, including the repository's synthetic exercise fixture:
     /// `TEST_RUNNER_FINN_VIDEO_FILE=/path/to/video.mp4 xcodebuild test …`. Vision body pose does
     /// not run on the simulator, so also pass `TEST_RUNNER_FINN_VIDEO_POSES`, poses recorded from
@@ -73,7 +73,7 @@ final class SkeletonOverlayUITests: XCTestCase {
         attachScreenshot(named: "Mid-set with skeleton")
         Thread.sleep(forTimeInterval: seconds / 2)
         stop.tap()
-        // Measured or refused, the result must say something.
+        // measured or refused, the result must say something
         let outcome = app.staticTexts.matching(NSPredicate(
             format: "label ENDSWITH %@ OR label == %@", "measured reps", "Couldn’t assess this set")).firstMatch
         XCTAssertTrue(outcome.waitForExistence(timeout: 15))
@@ -89,7 +89,7 @@ final class SkeletonOverlayUITests: XCTestCase {
     }
 
     /// Vision may infer an ankle behind an obstruction. The saved pose file includes person-mask
-    /// corroboration: framing says the ankle is not clear, and the side rubric does not measure the
+    /// corroboration: framing says the ankle isn't clear, and the side rubric doesn't measure the
     /// set. Since 15 October the squats are still counted from the hips, without posture advice.
     @MainActor
     func testVideoWithHiddenFeetIsCountedFromTheHips() throws {

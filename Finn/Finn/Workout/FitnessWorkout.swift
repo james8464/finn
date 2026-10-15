@@ -42,7 +42,7 @@ nonisolated struct FitnessWorkout: Equatable, Sendable {
     let start: Date
     let end: Date
     /// Breaks between two sets beyond `longestRest`, saved as pause and resume events so they do not
-    /// count as workout time (Apple counts an iPhone workout's duration toward the Exercise ring).
+    /// count as workout time (Apple counts an iPhone workout's duration towards the Exercise ring).
     let pauses: [DateInterval]
     /// Measured sets: sets with at least one measured rep.
     let setCount: Int

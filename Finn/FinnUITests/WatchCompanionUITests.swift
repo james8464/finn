@@ -1,7 +1,7 @@
 import XCTest
 
 final class WatchCompanionUITests: XCTestCase {
-    /// Keeps each stage visible long enough for a paired Watch simulator screenshot.
+    /// keeps each stage visible long enough for a paired Watch simulator screenshot
     @MainActor
     func testDemoSetMirrorsToPairedWatch() {
         let app = XCUIApplication()

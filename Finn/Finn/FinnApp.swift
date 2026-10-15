@@ -9,7 +9,7 @@ struct FinnApp: App {
         return arguments[index + 1]
     }
 
-    /// Demo and video input stay off the watch unless this flag asks for it, to try the watch app in
+    /// demo and video input stay off the watch unless this flag asks for it, to try the watch app in
     /// a paired simulator. The watch then shows DEMO INPUT.
     private static var mirrorsDemoOnWatch: Bool {
         ProcessInfo.processInfo.arguments.contains("-finn-watch-demo")
@@ -67,8 +67,8 @@ struct FinnApp: App {
                             connectsAccessories: true)
             }
             #else
-            // Only live camera sessions can reach Apple Health; demo and recorded input never do.
-            // The widget shows only what this store saves.
+            // only live camera sessions can reach Apple Health; demo and recorded input never do
+            // the widget shows only what this store saves
             ContentView(source: CameraPoseSource.live(),
                         store: WidgetSharingSessionStore(base: LocalSessionStore()),
                         preferences: .app, announcer: LiveAnnouncer(),

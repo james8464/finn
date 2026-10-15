@@ -2,7 +2,7 @@ import Foundation
 import WidgetKit
 
 nonisolated extension LastSetSnapshot {
-    /// The most recent set in `sessions`, for the widget. Nil when no set is saved.
+    /// the most recent set in `sessions`, for the widget. Nil when no set is saved.
     static func latest(in sessions: [WorkoutSessionSummary]) -> LastSetSnapshot? {
         guard let set = sessions.flatMap(\.sets).max(by: { $0.capturedAt < $1.capturedAt }) else {
             return nil
@@ -15,10 +15,10 @@ nonisolated extension LastSetSnapshot {
     }
 }
 
-/// The app's session store, with the widget kept in step: after every write to the local history,
+/// the app's session store, with the widget kept in step: after every write to the local history,
 /// the latest saved set goes to the App Group and the widget reloads. The widget therefore never
 /// shows a set the history does not have. Demo and recorded input use their own store and never
-/// pass through here.
+/// pass through here
 nonisolated struct WidgetSharingSessionStore: SessionStoring {
     private let base: any SessionStoring
     private let shared: SharedSetStore?
@@ -54,7 +54,7 @@ nonisolated struct WidgetSharingSessionStore: SessionStoring {
         return backup
     }
 
-    /// Rereads the history after a write, so the widget shows what is saved rather than what was
+    /// rereads the history after a write, so the widget shows what is saved rather than what was
     /// about to be. A history that cannot be read leaves the widget empty rather than stale.
     private func publish() {
         guard let shared else { return }

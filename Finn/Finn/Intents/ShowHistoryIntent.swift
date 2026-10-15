@@ -1,6 +1,6 @@
 import AppIntents
 
-/// "Show my history in Finn": opens the app on the History screen.
+/// "Show my history in Finn": opens the app on the History screen
 struct ShowHistoryIntent: AppIntent {
     static let title: LocalizedStringResource = "Show My History"
     static let description = IntentDescription("Opens Finn on your saved sessions.", categoryName: "Sets")

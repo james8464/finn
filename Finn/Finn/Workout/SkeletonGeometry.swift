@@ -93,7 +93,7 @@ nonisolated struct SkeletonGeometry: Equatable {
                       width: width, height: height)
     }
 
-    /// A normalized point (top-left origin) placed in `rect`, flipped left to right when the
+    /// A normalised point (top-left origin) placed in `rect`, flipped left to right when the
     /// picture is shown mirrored.
     static func viewPoint(x: Double, y: Double, in rect: CGRect, mirrored: Bool) -> CGPoint {
         CGPoint(x: rect.minX + (mirrored ? 1 - x : x) * rect.width, y: rect.minY + y * rect.height)

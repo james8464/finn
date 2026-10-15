@@ -31,7 +31,7 @@ final class WorkoutFeedback {
         default: return
         }
         guard let url = Bundle.main.url(forResource: name, withExtension: "wav") else { return }
-        // Ambient respects Silent Mode and mixes with music already playing.
+// ambient respects Silent Mode and mixes with music already playing.
         try? AVAudioSession.sharedInstance().setCategory(.ambient, options: .mixWithOthers)
         player = try? AVAudioPlayer(contentsOf: url)
         player?.volume = 0.7

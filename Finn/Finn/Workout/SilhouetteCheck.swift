@@ -52,7 +52,7 @@ nonisolated enum SilhouetteCheck {
         let ys = reference.map(\.y)
         let bodyWidth = (xs.max() ?? 0) - (xs.min() ?? 0)
         let bodyHeight = (ys.max() ?? 0) - (ys.min() ?? 0)
-        // In normalized units on each axis, so a non-square mask keeps the same physical radius.
+// in normalised units on each axis, so a non-square mask keeps the same physical radius.
         let radiusX = max(Int((radiusShareOfBody * hypot(bodyWidth, bodyHeight) * Double(mask.width)).rounded(.up)),
                           minimumRadiusPixels)
         let radiusY = max(Int((radiusShareOfBody * hypot(bodyWidth, bodyHeight) * Double(mask.height)).rounded(.up)),

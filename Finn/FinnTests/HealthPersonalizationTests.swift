@@ -162,7 +162,7 @@ struct HealthSessionTests {
         #expect(setup.health.requests == 1)
         #expect(setup.model.readinessNote?.basis == "From your sleep in Health.")
 
-        // The watch sends its heart rate while the next set runs.
+// the watch sends its heart rate while the next set runs.
         await setup.model.startPreview()
         await setup.model.beginSet(countdown: 0)
         setup.model.receiveHeartRate(118, at: setup.clock.date)
@@ -176,7 +176,7 @@ struct HealthSessionTests {
         #expect(texts.contains { $0.hasPrefix("Rest about 2 min before your next set, since your night was short.") })
         #expect(texts.contains("Each squat moved about 60 kg, roughly 85% of your weight."))
 
-        // Turned off in Options: nothing personal is shown and no heart rate is kept.
+// turned off in Options: nothing personal is shown and no heart rate is kept.
         await setup.model.setPersonalizesWithHealth(false)
         #expect(setup.model.resultHealthNotes.isEmpty)
         #expect(setup.model.readinessNote == nil)

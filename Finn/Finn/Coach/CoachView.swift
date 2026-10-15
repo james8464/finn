@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A conversation grounded in the saved sets, with source details one tap away.
+/// a conversation grounded in the saved sets, with source details one tap away
 struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var draft = ""

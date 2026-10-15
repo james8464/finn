@@ -16,15 +16,15 @@ struct ContentView: View {
     @State private var model: WorkoutSessionModel
     @State private var observationSpeaker = ObservationSpeaker()
     @State private var workoutFeedback = WorkoutFeedback()
-    /// Headphones and a paired Apple Watch; idle unless `connectsAccessories`.
+    /// headphones and a paired Apple Watch; idle unless `connectsAccessories`
     @State private var accessories = AccessoryMonitor()
-    /// The set in progress on the Lock Screen and in the Dynamic Island (`Widgets/SetLiveActivity.swift`).
+    /// the set in progress on the Lock Screen and in the Dynamic Island (`Widgets/SetLiveActivity.swift`)
     @State private var liveActivity = SetLiveActivity()
-    /// True for the live camera, and for demo input only behind `-finn-watch-demo`.
+    /// true for the live camera, and for demo input only behind `-finn-watch-demo`
     private let connectsAccessories: Bool
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
-    /// History, Options or Privacy, opened from the first screen.
+    /// history, Options or Privacy, opened from the first screen
     @State private var tabRoutes: [HomeTab: HomeRoute] = [:]
     @State private var sessionRoute: HomeRoute?
     private var route: HomeRoute? {
@@ -40,16 +40,16 @@ struct ContentView: View {
     #if DEBUG
     @State private var didRunWatchAutoDemo = false
     #endif
-    /// What the camera does, shown once before iOS asks for it.
+    /// what the camera does, shown once before iOS asks for it
     @State private var showsCameraPrimer = false
-    /// The first-launch screens (`Onboarding/`), also replayed from Options.
+    /// the first-launch screens (`Onboarding/`), also replayed from Options
     @State private var showsOnboarding: Bool
-    /// Badges earned from the saved history (`Badges/`).
+    /// badges earned from the saved history (`Badges/`)
     @State private var badges: BadgeLedger
     private let preferences: FinnPreferences
-    /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
+    /// the live rep count, large enough to read from a few steps away, scaled with Dynamic Type
     @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 64
-    /// Live advice during a set: a short order that fits on one line and reads from three metres.
+    /// live advice during a set: a short order that fits on one line and reads from three metres
     @ScaledMetric(relativeTo: .largeTitle) private var liveCueSize: CGFloat = 44
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
@@ -95,11 +95,11 @@ struct ContentView: View {
         self.connectsAccessories = connectsAccessories
         self.preferences = preferences
         _badges = State(initialValue: BadgeLedger(store: badgeStore ?? LocalBadgeStore()))
-        // Demo and recorded input skip the welcome unless asked for it (`-finn-ui-onboarding`).
+        // demo and recorded input skip the welcome unless asked for it (`-finn-ui-onboarding`)
         _showsOnboarding = State(initialValue: showsOnboarding ?? !preferences.onboardingCompleted)
     }
 
-    /// Demo or recorded input, marked as such on the watch too.
+    /// demo or recorded input, marked as such on the watch too
     private var usesSyntheticInput: Bool {
         #if DEBUG
         return isDemo || isVideoFileInput
@@ -110,7 +110,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Keep each tab's navigation and Coach draft alive while a set is on screen.
+            // keep each tab's navigation and Coach draft alive while a set is on screen
             setup
                 .opacity(model.stage == .ready ? 1 : 0)
                 .allowsHitTesting(model.stage == .ready)
@@ -149,11 +149,11 @@ struct ContentView: View {
         }
         #endif
         .tint(HomeStyle.accent)
-        // Apply the approved dark appearance at the presentation root too, so sheets,
-        // onboarding and set results use the same palette as the tabs.
+        // apply the approved dark appearance at the presentation root too, so sheets,
+        // onboarding and set results use the same palette as the tabs
         .preferredColorScheme(.dark)
-        // The phone stands a few steps away and nobody touches it: keep the screen on while the
-        // camera is open, or Auto-Lock interrupts framing and throws the set away.
+        // the phone stands a few steps away and nobody touches it: keep the screen on while the
+        // camera is open, or Auto-Lock interrupts framing and throws the set away
         .onChange(of: model.stage, initial: true) { _, stage in
             UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(stage)
             if stage == .ready { sessionRoute = nil }
@@ -183,10 +183,10 @@ struct ContentView: View {
             }
         }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
-        // Siri or a shortcut asked for a set or the history; a set in progress is never interrupted.
+        // Siri or a shortcut asked for a set or the history; a set in progress is never interrupted
         .onChange(of: SiriLaunchRequests.shared.pending, initial: true) { _, _ in applySiriRequest() }
         .onChange(of: model.stage) { _, _ in applySiriRequest() }
-        // Personalize with Health: read again whenever the first screen shows.
+        // personalize with Health: read again whenever the first screen shows
         .task(id: model.stage == .ready) {
             if model.stage == .ready { await model.refreshHealth() }
         }
@@ -201,7 +201,7 @@ struct ContentView: View {
         }
         .fullScreenCover(isPresented: $showsOnboarding) {
             OnboardingView(preferences: preferences) { profile in
-                // The answers take effect now, not at the next launch.
+                // the answers take effect now, not at the next launch
                 model.speaksLive = profile.speaksLive
                 if let first = profile.favoriteExercises.first { model.selectedExercise = first }
                 showsOnboarding = false
@@ -213,8 +213,8 @@ struct ContentView: View {
                 selectedTab = .workout
             }
         }
-        // Badges follow the saved history: checked at launch and after every saved set. Only the set
-        // just saved is celebrated; at launch (`lastSavedSetID` nil) the history's badges are recorded quietly.
+        // badges follow the saved history: checked at launch and after every saved set. Only the set
+        // just saved is celebrated; at launch (`lastSavedSetID` nil) the history's badges are recorded quietly
         .onChange(of: model.history, initial: true) { _, history in
             badges.update(history: history, celebrating: model.lastSavedSetID)
         }
@@ -240,7 +240,7 @@ struct ContentView: View {
             guard connectsAccessories else { return }
             accessories.start(model: model, demoInput: usesSyntheticInput)
         }
-        // The home screen widget opens the camera on its exercise (`finn://start-set`).
+        // the home screen widget opens the camera on its exercise (`finn://start-set`)
         .onOpenURL { url in
             guard let link = FinnDeepLink(url), case .startSet(let key) = link,
                   model.stage == .ready || model.stage == .result else { return }
@@ -258,7 +258,7 @@ struct ContentView: View {
             if phase == .active && model.historyIssue == .unavailable {
                 model.retryHistory()
             }
-            // The person may have allowed or turned off Finn in Health settings meanwhile.
+            // the person may have allowed or turned off Finn in Health settings meanwhile
             if phase == .active { model.refreshFitnessAccess() }
         }
         .confirmationDialog("Delete this session?", isPresented: Binding(
@@ -270,7 +270,7 @@ struct ContentView: View {
                 deleteCandidate = nil
             }
         } message: {
-            // Finn never deletes Health data: say so where the person decides.
+            // Finn never deletes Health data: say so where the person decides
             Text(deleteCandidateLeavesHealthWorkout
                  ? "Its measured set summaries will be removed from this iPhone. The workout saved to Apple Health stays there; you can delete it in the Health app."
                  : "Its measured set summaries will be removed from this iPhone.")
@@ -290,8 +290,8 @@ struct ContentView: View {
         }
     }
 
-    /// Carries out what Siri asked ("Start a squat set in Finn", "Show my history in Finn") once the
-    /// model can take it; otherwise the request waits for the next stage change.
+    /// carries out what Siri asked ("Start a squat set in Finn", "Show my history in Finn") once the
+    /// model can take it; otherwise the request waits for the next stage change
     private func applySiriRequest() {
         guard let request = SiriLaunchRequests.shared.pending,
               SiriLaunchRequests.canApply(request, at: model.stage) else { return }
@@ -311,7 +311,7 @@ struct ContentView: View {
         }
     }
 
-    /// Whether the session about to be deleted has a workout in Apple Health, which stays there.
+    /// whether the session about to be deleted has a workout in Apple Health, which stays there
     private var deleteCandidateLeavesHealthWorkout: Bool {
         guard let id = deleteCandidate else { return false }
         return model.leavesHealthWorkout(forSession: id)
@@ -428,8 +428,8 @@ struct ContentView: View {
         case .posture: PostureGuideView(history: model.history, initialExercise: model.selectedExercise)
         case .weights: historyList(title: "Best set", exercise: model.selectedExercise)
         case .awards: BadgesView(ledger: badges)
-        // The subscription does not exist yet (1.1): the banner is hidden, and its route lands on
-        // the account page rather than on a placeholder.
+        // the subscription does not exist yet (1.1): the banner is hidden, and its route lands on
+        // the account page rather than on a placeholder
         case .plus: accountPage
         }
     }
@@ -483,11 +483,11 @@ struct ContentView: View {
     private var workoutSetup: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                // After Done: whether the session reached Apple Fitness.
+                // after Done: whether the session reached Apple Fitness
                 if let save = model.fitnessSave {
                     HomeCard { fitnessStatus(save) }
                 }
-                // Framing that went on with no set (or nobody in view) closed the camera by itself.
+                // framing that went on with no set (or nobody in view) closed the camera by itself
                 if let note = model.framingClosedNote {
                     HomeCard {
                         Text(note)
@@ -497,7 +497,7 @@ struct ContentView: View {
                     }
                     .accessibilityIdentifier("setup.framingClosed")
                 }
-                // Cancel, or the app going to the background during a set, comes back here without Done.
+                // cancel, or the app going to the background during a set, comes back here without Done
                 if let open = model.unfinishedSession {
                     HomeCard { unfinishedSessionLine(open) }
                 }
@@ -512,7 +512,7 @@ struct ContentView: View {
                 .accessibilityIdentifier("setup.exercise")
                 ExerciseHeroCard(kind: model.selectedExercise, compact: !model.history.isEmpty)
                 accessoryNotes
-                // Personalize with Health: a line adapted to the person, with the data it rests on.
+                // personalize with Health: a line adapted to the person, with the data it rests on
                 if let note = model.readinessNote {
                     HomeCard { healthNote(note) }
                         .accessibilityIdentifier("setup.healthReadiness")
@@ -546,7 +546,7 @@ struct ContentView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 4) {
-                // Said where the decision is made: before the camera opens.
+                // said where the decision is made: before the camera opens
                 Button { route = .privacy } label: {
                     Label("Camera privacy", systemImage: "lock.fill")
                         .font(.footnote)
@@ -616,7 +616,7 @@ struct ContentView: View {
         }
     }
 
-    /// The latest saved session, with what Finn noticed in it, opening History.
+    /// the latest saved session, with what Finn noticed in it, opening History
     private func lastSessionCard(_ session: WorkoutSessionSummary) -> some View {
         let reps = session.sets.reduce(0) { $0 + $1.analysis.reps.count }
         var names: [String] = []
@@ -630,7 +630,7 @@ struct ContentView: View {
             if Calendar.current.isDateInYesterday(session.startedAt) { return String(localized: "Yesterday, \(time)") }
             return session.startedAt.formatted(.dateTime.day().month(.abbreviated).hour().minute())
         }()
-        // The latest observation the person kept, word for word.
+        // the latest observation the person kept, word for word
         let note = session.sets.last(where: { $0.cue != nil && $0.cueResponse != .notRelevant })?.cue?.observation
         return Button { route = .history } label: {
             HomeCard {
@@ -668,7 +668,7 @@ struct ContentView: View {
         .accessibilityIdentifier("home.lastSession")
     }
 
-    /// One short line about the latest save to Apple Health, with Try again when it can help.
+    /// one short line about the latest save to Apple Health, with Try again when it can help
     private func fitnessStatus(_ save: FitnessSaveReport) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Label(save.status.text, systemImage: Self.fitnessSymbol(save.status))
@@ -685,7 +685,7 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// The session still open on the first screen, with a way to end it as Done does.
+    /// the session still open on the first screen, with a way to end it as Done does
     private func unfinishedSessionLine(_ session: WorkoutSessionSummary) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(session.sets.count == 1 ? "Session in progress · 1 measured set"
@@ -715,7 +715,7 @@ struct ContentView: View {
         }
     }
 
-    /// Under the Apple Fitness switch: why it is off for demo input, or what Health allows.
+    /// under the Apple Fitness switch: why it is off for demo input, or what Health allows
     private var fitnessOptionNote: String? {
         guard model.offersFitness else { return String(localized: "Demo and recorded input are never saved to Apple Health.") }
         guard model.savesToFitness else { return nil }
@@ -726,7 +726,7 @@ struct ContentView: View {
         }
     }
 
-    /// In a saved session: saved to Fitness, or a way to save it when the option is on.
+    /// in a saved session: saved to Fitness, or a way to save it when the option is on
     @ViewBuilder private func fitnessHistoryLine(_ session: WorkoutSessionSummary) -> some View {
         if let record = model.fitnessRecord(forSession: session.id) {
             Label("Saved to Fitness on \(record.savedAt.formatted(date: .abbreviated, time: .shortened))",
@@ -741,7 +741,7 @@ struct ContentView: View {
                         .font(.subheadline)
                 }
                 if model.canSaveToFitness(session) {
-                    // Saving the session still open on the first screen finishes it.
+                    // saving the session still open on the first screen finishes it
                     Button(model.unfinishedSession?.id == session.id ? "Finish session and save to Fitness"
                            : "Save to Fitness") { Task { await model.saveToFitness(sessionID: session.id) } }
                         .frame(minHeight: 44, alignment: .leading)
@@ -760,7 +760,7 @@ struct ContentView: View {
         }
     }
 
-    /// A personalized line and, under it, the Health data it rests on.
+    /// a personalised line and, under it, the Health data it rests on
     private func healthNote(_ note: HealthNote) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(note.text)
@@ -773,7 +773,7 @@ struct ContentView: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// What connected headphones or a paired Apple Watch add to the chosen exercise, one line each.
+    /// what connected headphones or a paired Apple Watch add to the chosen exercise, one line each
     @ViewBuilder private var accessoryNotes: some View {
         let lines = AccessoryGuide.setupLines(for: model.selectedExercise, status: accessories.status,
                                               speaksLive: model.speaksLive)
@@ -869,7 +869,7 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.large)
     }
 
-    /// One plain fact at the top of Privacy.
+    /// one plain fact at the top of Privacy
     private func privacyFact(_ symbol: String, _ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: symbol)
@@ -1066,7 +1066,7 @@ struct ContentView: View {
                         get: { model.savesToFitness },
                         set: { isOn in
                             model.savesToFitness = isOn
-                            // Permission in context: Health asks when the person turns this on.
+                            // permission in context: Health asks when the person turns this on
                             if isOn { Task { await model.requestFitnessAccess() } }
                         }
                     ))
@@ -1088,7 +1088,7 @@ struct ContentView: View {
                     Text("Personalize with Health").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Use my Health data", isOn: Binding(
                         get: { model.personalizesWithHealth },
-                        // Permission in context: Health asks for each type when the person turns this on.
+                        // permission in context: Health asks for each type when the person turns this on
                         set: { isOn in Task { await model.setPersonalizesWithHealth(isOn) } }
                     ))
                     .font(.body)
@@ -1127,7 +1127,7 @@ struct ContentView: View {
                 }
                 .optionCard()
                 #if DEBUG
-                // Coach demo key and engine switch; absent from the Release build.
+                // coach demo key and engine switch; absent from the Release build
                 CoachDeveloperSection()
                     .optionCard()
                 #endif
@@ -1157,7 +1157,7 @@ struct ContentView: View {
                 .font(.subheadline)
                 .accessibilityIdentifier("result.recognition")
         case .uncertain:
-            // Not sure: the person's own choice was used, as they expect. Nothing to add.
+            // not sure: the person's own choice was used, as they expect. Nothing to add.
             EmptyView()
         }
     }
@@ -1183,10 +1183,10 @@ struct ContentView: View {
                 }
                 #endif
                 if model.stage == .capturing {
-                    // During the set, everything to read sits at the top, under the status bar: the
+                    // during the set, everything to read sits at the top, under the status bar: the
                     // count in the corner and the advice banner across. The person fills the middle
                     // of the picture, and on 15 October the banner and the count, drawn there, hid the
-                    // upper body and the skeleton of a push-up filmed from the floor.
+                    // upper body and the skeleton of a push-up filmed from the floor
                     if dynamicTypeSize.isAccessibilitySize {
                         status.frame(maxWidth: .infinity, alignment: .leading)
                         HStack(alignment: .top) {
@@ -1301,10 +1301,10 @@ struct ContentView: View {
         }
     }
 
-    /// While framing hands-free: what to do, and how long until the set starts by itself.
+    /// while framing hands-free: what to do, and how long until the set starts by itself
     private var handsFreeHint: some View {
         let holding = model.handsFreeProgress > 0
-        // Not `livePose`, which is new on every frame and made this whole view redraw with it.
+        // not `livePose`, which is new on every frame and made this whole view redraw with it
         let seen = model.athleteInView
         return VStack(spacing: 8) {
             Text(holding ? "Hold still. The set starts by itself."
@@ -1324,9 +1324,9 @@ struct ContentView: View {
         .accessibilityIdentifier("capture.handsFree")
     }
 
-    /// The latest live advice, such as "Sit lower", in large dark type on white so it reads from two or
+    /// the latest live advice, such as "Sit lower", in large dark type on white so it reads from two or
     /// three metres away. It always takes the same place, at the top of the screen under the count
-    /// row, and the slot stays empty until there is something to say, so nothing moves.
+    /// row, and the slot stays empty until there is something to say, so nothing moves
     private var liveCue: some View {
         Text(model.liveCaption ?? " ")
             .font(.system(size: liveCueSize, weight: .bold, design: .default))
@@ -1344,8 +1344,8 @@ struct ContentView: View {
             .accessibilityIdentifier("capture.liveCaption")
     }
 
-    /// The reps counted so far, readable from where the person stands, in the top corner of the
-    /// picture where it covers no one.
+    /// the reps counted so far, readable from where the person stands, in the top corner of the
+    /// picture where it covers no one
     private var liveCount: some View {
         VStack(spacing: 0) {
             Text("\(model.liveRepCount)")
@@ -1355,13 +1355,13 @@ struct ContentView: View {
                 .lineLimit(1)
                 .contentTransition(.numericText())
                 .animation(reduceMotion ? nil : .snappy, value: model.liveRepCount)
-            // The exercise being measured, such as "push-ups", so a wrong choice shows before the reps
-            // are done (13 October: push-ups filmed while Squat was chosen counted nothing).
+            // the exercise being measured, such as "push-ups", so a wrong choice shows before the reps
+            // are done (13 October: push-ups filmed while Squat was chosen counted nothing)
             Text(captureCopy.name.lowercased() + (model.liveRepCount == 1 ? "" : "s"))
                 .font(.headline)
         }
-        // A dark backing keeps the white count readable over a bright camera image, like the other
-        // labels drawn over the feed (the full accessibility audit checks this contrast).
+        // a dark backing keeps the white count readable over a bright camera image, like the other
+        // labels drawn over the feed (the full accessibility audit checks this contrast)
         .padding(.horizontal, 24)
         .padding(.vertical, 8)
         .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 20))
@@ -1384,7 +1384,7 @@ struct ContentView: View {
                 case .adjustPosition:
                     Image(systemName: "viewfinder")
                     if let joint = model.unclearJoint {
-                        // Théophile: say which joint is unclear instead of guessing.
+                        // théophile: say which joint is unclear instead of guessing
                         Text("\(joint.localizedName) not clear: step back or add light")
                     } else {
                         Text(captureCopy.showJoints)
@@ -1401,7 +1401,7 @@ struct ContentView: View {
                 Text("Get ready")
             }
         }
-        // Hands-free, the person reads it from their spot a few steps away.
+        // hands-free, the person reads it from their spot a few steps away
         .font(model.handsFree ? .title3.weight(.semibold) : .subheadline.weight(.semibold))
         .fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, 14)
@@ -1411,8 +1411,8 @@ struct ContentView: View {
     }
 
     private var result: some View {
-        // The action bar sits over the end of the scroll view, as in #10: a bar below it clips the
-        // last visible line, which the large-text audit reports as clipped text.
+        // the action bar sits over the end of the scroll view, as in #10: a bar below it clips the
+        // last visible line, which the large-text audit reports as clipped text
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text(resultTitle)
@@ -1566,8 +1566,8 @@ struct ContentView: View {
                         .font(.subheadline)
                         .accessibilityIdentifier("result.shareSummary")
                         .accessibilityHint("Shares the measured summary without video")
-                        // Last on the result, as in #10: higher up, the cards sat behind the bottom
-                        // button on a short result and the contrast audit measured them through it.
+                        // last on the result, as in #10: higher up, the cards sat behind the bottom
+                        // button on a short result and the contrast audit measured them through it
                         if let extremes = model.repExtremes {
                             Divider().padding(.vertical, 12)
                             repExtremesView(extremes)
@@ -1579,7 +1579,7 @@ struct ContentView: View {
                             Text(hint)
                                 .foregroundStyle(FinnStyle.supportingText)
                         }
-                        // Changing an option here keeps the session, so the next set still compares.
+                        // changing an option here keeps the session, so the next set still compares
                         NavigationLink("Options") { optionsPage }
                             .frame(minHeight: 44, alignment: .leading)
                             .accessibilityIdentifier("result.options")
@@ -1681,7 +1681,7 @@ struct ContentView: View {
     }
     #endif
 
-    /// The set's deepest and shallowest reps side by side, drawn from their pose points.
+    /// the set's deepest and shallowest reps side by side, drawn from their pose points
     private func repExtremesView(_ extremes: RepExtremes) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Deepest and shallowest rep")
@@ -1717,8 +1717,8 @@ struct ContentView: View {
             }
             .frame(height: 180)
             .accessibilityHidden(true)
-            // Only the text is the accessibility element, so its contrast is judged against the card,
-            // not against the lines of the drawing above it.
+            // only the text is the accessibility element, so its contrast is judged against the card,
+            // not against the lines of the drawing above it
             VStack(alignment: .leading, spacing: 6) {
                 Text("\(title) · rep \(snapshot.number)")
                     .font(.subheadline.weight(.semibold))
@@ -1860,7 +1860,7 @@ struct ContentView: View {
 
     private var historyPage: some View { historyList(title: "History", exercise: nil) }
 
-    /// The saved sessions, every one or only those with a set of `exercise`.
+    /// the saved sessions, every one or only those with a set of `exercise`
     private func historyList(title: LocalizedStringKey, exercise: ExerciseKind?) -> some View {
         let sessions = exercise.map { kind in
             model.history.filter { $0.sets.contains { $0.exercise == kind } }
@@ -2115,8 +2115,8 @@ struct ContentView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(HomeStyle.filledAccent)
                 }
-                // The first screen, with History, Options, Privacy and an open session's Finish
-                // session, stays reachable while the camera cannot be used.
+                // the first screen, with History, Options, Privacy and an open session's Finish
+                // session, stays reachable while the camera cannot be used
                 Button("Back") {
                     Task { await model.cancel() }
                 }

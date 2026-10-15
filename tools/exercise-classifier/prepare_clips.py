@@ -19,7 +19,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
-# Folder names the Create ML classifier learns. The four exercise labels must match
+# folder names the Create ML classifier learns. The four exercise labels must match
 # `classifierLabel` in Finn/Finn/Workout/ExerciseDefinition.swift.
 EXERCISE_LABELS = ("squat", "push_up", "static_lunge", "stiff_leg_deadlift")
 LABELS = EXERCISE_LABELS + ("other", "none")

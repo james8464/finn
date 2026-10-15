@@ -47,7 +47,7 @@ nonisolated struct IntentsTests {
         let older = set(.pushUp, reps: 12, minutesAgo: 60 * 24)
         let latest = set(.pullUp, reps: 5, minutesAgo: 20, observation: "Chin passed the hands on 4 of 5 reps.")
         let middle = set(.bodyweightSquat, reps: 9, minutesAgo: 30)
-        // Sessions are listed newest first in the app, but the report must not rely on that.
+// sessions are listed newest first in the app, but the report must not rely on that.
         let report = LastSetReport.latest(in: sessions([older], [middle, latest]))
         #expect(report?.exercise == .pullUp)
         #expect(report?.reps == 5)

@@ -2,7 +2,7 @@
 import Foundation
 
 /// Debug-only generator of side-view 2D pose sequences for tests and for training the angle
-/// classifier. A stick figure with randomized proportions moves through simple joint-angle
+/// classifier. A stick figure with randomised proportions moves through simple joint-angle
 /// trajectories; the camera adds yaw, framing, jitter, dropped joints, and weaker far-side
 /// confidence. It is a stand-in for real recordings, not a model of real movement.
 nonisolated enum SyntheticExerciseMotion {
@@ -31,7 +31,7 @@ nonisolated enum SyntheticExerciseMotion {
         let dropRate = Double.random(in: settings.dropRate, using: &rng)
         let schedule = Schedule(duration: duration, repDepth: settings.repDepth, using: &rng)
 
-        // Fit the whole movement in a portrait 720 × 1280 frame before sampling it.
+// fit the whole movement in a portrait 720 × 1280 frame before sampling it.
         var poses: [(TimeInterval, Skeleton)] = []
         var time = 0.0
         while time <= duration {
@@ -50,7 +50,7 @@ nonisolated enum SyntheticExerciseMotion {
 
         return projected.map { time, points in
             var joints: [BodyJoint: JointPoint] = [:]
-            // Dictionary iteration is randomized between processes. Keep the seeded generator's
+// dictionary iteration is randomised between processes. Keep the seeded generator's
             // joint dropout and jitter reproducible across simulator runs.
             for joint in BodyJoint.allCases {
                 guard let point = points[joint] else { continue }
@@ -69,7 +69,7 @@ nonisolated enum SyntheticExerciseMotion {
 
     // MARK: Body and camera
 
-    /// World coordinates in meters: x forward, y up, z toward the camera-facing side.
+    /// World coordinates in metres: x forward, y up, z towards the camera-facing side.
     typealias Skeleton = [BodyJoint: (x: Double, y: Double, z: Double)]
 
     struct Body {
@@ -94,7 +94,7 @@ nonisolated enum SyntheticExerciseMotion {
 
         func project(_ skeleton: Skeleton) -> [BodyJoint: (x: Double, y: Double)] {
             skeleton.mapValues { point in
-                // The near side has positive z; mirror z so the chosen side faces the camera.
+// the near side has positive z; mirror z so the chosen side faces the camera.
                 let z = nearSide == .left ? point.z : -point.z
                 return (x: facing * (point.x * cos(yaw) + z * sin(yaw)), y: point.y)
             }
@@ -128,7 +128,7 @@ nonisolated enum SyntheticExerciseMotion {
         case other(kind: Int)
         case none(arms: Double, plank: Bool)
         /// Hanging from a bar: the shoulders rise by `top` arm lengths at full depth (pull-up about
-        /// 0.85, muscle-up about 1.8), and the hips swing forward and back by `swing` meters.
+        /// 0.85, muscle-up about 1.8), and the hips swing forward and back by `swing` metres.
         case hang(top: Double, swing: Double)
 
         init<G: RandomNumberGenerator>(label: String, using rng: inout G) {
@@ -190,7 +190,7 @@ nonisolated enum SyntheticExerciseMotion {
                 let hip = along(knee, b.thigh, degrees: -(kneeBend * 0.4 + 14 * s))
                 let shoulder = along(hip, b.torso, degrees: maximumLean * s)
                 legs(&sk, b, near: (ankle, knee, hip), far: (ankle, knee, hip))
-                // Arms hang straight down from the shoulders.
+// arms hang straight down from the shoulders.
                 let elbow = (shoulder.0, shoulder.1 - b.upperArm)
                 let wrist = (shoulder.0, shoulder.1 - b.upperArm - b.forearm)
                 put(&sk, .leftShoulder, .rightShoulder, shoulder, b.shoulderWidth)
@@ -203,7 +203,7 @@ nonisolated enum SyntheticExerciseMotion {
                 let bar = b.ankleHeight + b.shin + b.thigh + b.torso + arm + 0.3
                 let wrist = (0.0, bar)
                 let rise = top * arm * s
-                // From the hang the shoulders rise straight up toward the bar, then over it.
+// from the hang the shoulders rise straight up towards the bar, then over it.
                 let shoulder = (-0.04 + (rise > arm ? 0.12 * min(1, (rise - arm) / (0.6 * arm)) : 0),
                                 bar - arm + rise)
                 let elbow = knee(from: wrist, to: shoulder, first: b.forearm, second: b.upperArm,
@@ -266,12 +266,12 @@ nonisolated enum SyntheticExerciseMotion {
 
         // MARK: Geometry helpers
 
-        /// The point `length` away from `origin`, `degrees` from vertical toward +x.
+        /// The point `length` away from `origin`, `degrees` from vertical towards +x.
         private func along(_ origin: (Double, Double), _ length: Double, degrees: Double) -> (Double, Double) {
             (origin.0 + length * sin(degrees * .pi / 180), origin.1 + length * cos(degrees * .pi / 180))
         }
 
-        /// Middle joint of a two-segment chain from `start` to `end`, bending toward +x or -x.
+        /// Middle joint of a two-segment chain from `start` to `end`, bending towards +x or -x.
         static func knee(from start: (Double, Double), to end: (Double, Double),
                          first: Double, second: Double, bendForward: Bool) -> (Double, Double) {
             let dx = end.0 - start.0, dy = end.1 - start.1
@@ -302,7 +302,7 @@ nonisolated enum SyntheticExerciseMotion {
 
         private func trunkAndArms(_ sk: inout Skeleton, _ b: Body, hip: (Double, Double),
                                   shoulder: (Double, Double), upperArm: Double, elbowBend: Double) {
-            // Arm angles are measured from straight down, positive toward +x.
+// arm angles are measured from straight down, positive towards +x.
             let elbow = (shoulder.0 + b.upperArm * sin(upperArm * .pi / 180),
                          shoulder.1 - b.upperArm * cos(upperArm * .pi / 180))
             let forearm = upperArm + elbowBend

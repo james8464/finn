@@ -48,7 +48,7 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertGreaterThan(nextSet.frame.midY, app.frame.height * 0.7)
     }
 
-    /// Hands-free capture explains how the set starts and shows the reps counted so far.
+    /// hands-free capture explains how the set starts and shows the reps counted so far
     @MainActor
     func testHandsFreeShowsHintAndCountsRepsLive() {
         let app = XCUIApplication()
@@ -98,7 +98,7 @@ final class WorkoutFlowUITests: XCTestCase {
         }
         let displayedSeconds = Double(parts[0] * 60 + parts[1])
         let timeSinceRestart = ProcessInfo.processInfo.systemUptime - restartTappedAt
-        // Querying the UI can take several seconds on CI; compare against the new tap's clock.
+        // querying the UI can take several seconds on CI; compare against the new tap's clock
         XCTAssertLessThanOrEqual(displayedSeconds, timeSinceRestart + 1,
                                  "The next set's timer should start from its own Start tap")
     }
@@ -167,7 +167,7 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(
             format: "label BEGINSWITH %@", "Finn reads Health only if you turn on Personalize with Health")).firstMatch.exists)
         XCTAssertTrue(app.staticTexts["Optional audio"].exists)
-        // XCTest refuses identifier queries longer than 128 characters, so match the start.
+        // XCTest refuses identifier queries longer than 128 characters, so match the start
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(
             format: "label BEGINSWITH %@", "Finn says the countdown, each rep, and short live observations")).firstMatch.exists)
         XCTAssertTrue(app.staticTexts["Optional explanation"].exists)
@@ -219,7 +219,7 @@ final class WorkoutFlowUITests: XCTestCase {
             "Optional explanation",
             "On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.",
         ]
-        // Each entry is the start of a sentence: XCTest refuses identifier queries over 128 characters.
+        // each entry is the start of a sentence: XCTest refuses identifier queries over 128 characters
         for copy in visibleCopy {
             XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", copy)).firstMatch.exists,
                           "Privacy text is missing from accessibility: \(copy)")
@@ -243,14 +243,14 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launch()
         app.openWorkoutTab()
         app.buttons["Start a set"].tap()
-        // Finn says what the camera does before iOS asks for it.
+        // Finn says what the camera does before iOS asks for it
         let primer = app.buttons["primer.continue"]
         XCTAssertTrue(primer.waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["What the camera does"].exists)
         primer.tap()
 
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        // The alert follows the simulator's language.
+        // the alert follows the simulator's language
         let deny = springboard.buttons.matching(NSPredicate(
             format: "(label CONTAINS[c] %@ AND label CONTAINS[c] %@) OR label ==[c] %@",
             "Don", "Allow", "Ne pas autoriser")
@@ -324,8 +324,8 @@ final class WorkoutFlowUITests: XCTestCase {
         try audit(app, at: "result")
     }
 
-    /// A full audit that fails with the screen and the element of each issue, which the result
-    /// bundle's summary otherwise reduces to "Contrast failed".
+    /// a full audit that fails with the screen and the element of each issue, which the result
+    /// bundle's summary otherwise reduces to "Contrast failed"
     @MainActor
     private func audit(_ app: XCUIApplication, at screen: String) throws {
         try app.performAccessibilityAudit { issue in
@@ -360,7 +360,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Done"].tap()
         app.openFromHome("History")
         XCTAssertTrue(app.staticTexts["Saved sessions"].waitForExistence(timeout: 5))
-        // The Debug-only yellow demo badge triggers a false image-contrast result
+        // the Debug-only yellow demo badge triggers a false image-contrast result
         // when the audit crops its glyphs. Empty History still receives a full audit.
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
@@ -473,7 +473,7 @@ final class WorkoutFlowUITests: XCTestCase {
         capture(app, name: "Comparison")
         app.buttons["How range is measured"].tap()
         XCTAssertTrue(methodText.exists)
-        // With the form-check notes above it, the button sits under the bottom bar until scrolled.
+        // with the form-check notes above it, the button sits under the bottom bar until scrolled
         app.swipeUp()
         app.buttons["Reword comparison"].tap()
         XCTAssertTrue(app.staticTexts["Camera-measured range was longer in your second set."]
@@ -522,7 +522,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launch()
         app.openWorkoutTab()
         capture(app, name: "Large text dark setup")
-        // The image sampler repeatedly flags a cropped edge of the Debug-only
+        // the image sampler repeatedly flags a cropped edge of the Debug-only
         // yellow demo label despite black text on yellow. Keep structural audits.
         try auditLargeTextDemo(app)
         app.buttons["Start a set"].tap()
@@ -539,12 +539,12 @@ final class WorkoutFlowUITests: XCTestCase {
 
     @MainActor
     private func auditLargeTextDemo(_ app: XCUIApplication) throws {
-        // Fails with the element of each issue, which the result bundle's summary otherwise reduces
-        // to "Text clipped".
+        // fails with the element of each issue, which the result bundle's summary otherwise reduces
+        // to "Text clipped"
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ]) { issue in
-            // The noninteractive Debug marker is deliberately capped; it is absent in Release.
+            // the noninteractive Debug marker is deliberately capped; it's absent in Release
             if issue.element?.label == "DEMO INPUT" { return true }
             let element = issue.element.map {
                 "\($0.elementType.rawValue) '\($0.label)' id '\($0.identifier)' at \($0.frame)"

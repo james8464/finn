@@ -118,7 +118,7 @@ private struct AppleGeneratedRecap {
 @MainActor
 private final class AppleRecapGenerator: RecapGenerating {
     var available: Bool {
-        // The instructions and the accepted sentences are English; other languages keep the template.
+// the instructions and the accepted sentences are English; other languages keep the template.
         guard SpokenLanguage.appLanguage == "en" else { return false }
         if case .available = SystemLanguageModel.default.availability { return true }
         return false

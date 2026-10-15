@@ -1,6 +1,6 @@
 import Foundation
 
-/// Saved measurements only. The illustrated movement has no camera data to compare joint by joint.
+/// saved measurements only. The illustrated movement has no camera data to compare joint by joint.
 nonisolated struct PostureGuideEvidence {
     let latest: SetSummary?
     let measurements: [FormMeasurement]
@@ -61,7 +61,7 @@ nonisolated enum PostureGuideSteps {
 }
 
 nonisolated extension FormCheck {
-    /// A short visible target for a measured check; these are guides, not clinical limits.
+    /// a short visible target for a measured check; these are guides, not clinical limits
     var guidePoint: String {
         switch self {
         case .pushUpHipsSag, .pushUpHipsPike: String(localized: "Shoulders, hips and heels aligned")

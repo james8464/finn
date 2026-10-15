@@ -19,7 +19,7 @@ nonisolated struct StartReadinessTests {
     }
 
     @Test func aPushUpStartsFromAPlankNotFromStanding() {
-        // Standing with the arms down: shoulder, elbow and wrist clear and still.
+// standing with the arms down: shoulder, elbow and wrist clear and still.
         var readiness = StartReadiness()
         var time = 0.0
         while time < 2.5 {
@@ -167,7 +167,7 @@ nonisolated struct LiveSetMonitorTests {
             Issue.record("Expected the set to end once the athlete walked away")
             return
         }
-        // Out of position from about 14.3 s; the set ends about two seconds later, not during the reps.
+// out of position from about 14.3 s; the set ends about two seconds later, not during the reps.
         #expect(stoppedAt > 15.5 && stoppedAt < 17.0)
     }
 
@@ -182,10 +182,10 @@ nonisolated struct LiveSetMonitorTests {
     /// Someone walks between the phone and the athlete for 2.5 s mid-set: the evidence gate allows
     /// that gap, so hands-free must not end the set.
     @Test func aPasserByHidingTheAthleteDoesNotEndTheSet() {
-        // Eight reps, so 2.5 s hidden keeps the 80% coverage the gate needs.
+// eight reps, so 2.5 s hidden keeps the 80% coverage the gate needs.
         let frames = CaptureTraces.squats(reps: 8, from: 0).map { frame -> PoseFrame in
             guard frame.time > 5.0 && frame.time < 7.5 else { return frame }
-            // The passer-by stands where the athlete is.
+// the passer-by stands where the athlete is.
             let passerBy = CaptureTraces.frame(time: frame.time, hipY: 0.42, ankleX: 0.53, legs: true).joints
             return PoseFrame(time: frame.time, subjectCount: 1, joints: [:], athleteTracking: .hidden,
                              bystanders: [passerBy])
@@ -202,7 +202,7 @@ nonisolated struct LiveSetMonitorTests {
         var frames: [PoseFrame] = []
         var time = 0.0
         while time <= 34.0 {
-            // An 8.5 s cycle: 6.5 s down and up, 2 s standing.
+// an 8.5 s cycle: 6.5 s down and up, 2 s standing.
             let cycle = time.truncatingRemainder(dividingBy: 8.5)
             let phase = cycle < 6.5 ? cycle / 6.5 : 0
             let hipY = 0.42 + 0.20 * (1 - cos(2 * .pi * phase)) / 2
@@ -253,7 +253,7 @@ nonisolated struct LiveSetMonitorTests {
     }
 
     @Test func aRepMuchFasterThanTheFirstOnesIsSaidOnce() {
-        // Three 2 s reps, then three 1 s reps.
+// three 2 s reps, then three 1 s reps.
         var frames = CaptureTraces.squats(reps: 3, from: 0)
         var time = 6.0 + CaptureTraces.step
         while time <= 9.0 {
@@ -271,7 +271,7 @@ nonisolated struct LiveSetMonitorTests {
     }
 
     @Test func aRepMuchShorterThanTheFirstOnesIsSaid() {
-        // Two deep reps, then shallower ones (hips 0.20 down, then 0.15).
+// two deep reps, then shallower ones (hips 0.20 down, then 0.15).
         var frames: [PoseFrame] = []
         var time = 0.0
         while time <= 10.0 {
@@ -378,7 +378,7 @@ nonisolated struct LiveSetMonitorTests {
             if case .repCountRevised(let count) = event { return count }
             return nil
         }
-        // Since the turn rule (`ExerciseAnalyzer.turnShareOfDepth`) this trace no longer takes a
+// since the turn rule (`ExerciseAnalyzer.turnShareOfDepth`) this trace no longer takes a
         // rep back; when the analysis does, the revised count is never above what was said.
         #expect(revised.allSatisfy { $0 <= said.count })
         // A revised count is shown, not spoken.

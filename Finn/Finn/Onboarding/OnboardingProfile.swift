@@ -1,6 +1,6 @@
 import Foundation
 
-/// What the person wants from Finn, asked once at the first launch.
+/// what the person wants from Finn, asked once at the first launch
 nonisolated enum TrainingGoal: String, Codable, CaseIterable, Sendable {
     case technique
     case consistency
@@ -35,8 +35,8 @@ nonisolated enum TrainingGoal: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// How used to these exercises the person is. Helps the coach select relevant saved sets;
-/// it never changes what Finn measures.
+/// how used to these exercises the person is. Helps the coach select relevant saved sets;
+/// it never changes what Finn measures
 nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
     case new
     case regular
@@ -59,20 +59,20 @@ nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// The answers of the first launch, read from and written to `FinnPreferences`.
+/// the answers of the first launch, read from and written to `FinnPreferences`
 nonisolated struct OnboardingProfile: Equatable, Sendable {
     var goal: TrainingGoal?
     var level: TrainingLevel?
-    /// Exercises the person picked, in the order of the picker. Empty means no preference.
+    /// exercises the person picked, in the order of the picker. Empty means no preference.
     var favoriteExercises: [ExerciseKind] = []
     var speaksLive = true
 
-    /// The exercises in the order the first screen shows them: favorites first, then the rest.
+    /// the exercises in the order the first screen shows them: favourites first, then the rest
     var exerciseOrder: [ExerciseKind] {
         favoriteExercises + ExerciseKind.allCases.filter { !favoriteExercises.contains($0) }
     }
 
-    /// Selection hints added to the coach prompt. The model still returns set labels only.
+    /// selection hints added to the coach prompt. The model still returns set labels only.
     var coachNote: String? {
         var parts: [String] = []
         switch level {
@@ -98,7 +98,7 @@ extension FinnPreferences {
     static let trainingLevelKey = "finn.trainingLevel"
     static let favoriteExercisesKey = "finn.favoriteExercises"
 
-    /// True once the person finished or skipped the first-launch screens.
+    /// true once the person finished or skipped the first-launch screens
     var onboardingCompleted: Bool {
         get { defaults.bool(forKey: Self.onboardingCompletedKey) }
         nonmutating set { defaults.set(newValue, forKey: Self.onboardingCompletedKey) }
@@ -114,19 +114,19 @@ extension FinnPreferences {
         nonmutating set { defaults.set(newValue?.rawValue, forKey: Self.trainingLevelKey) }
     }
 
-    /// The exercises picked at the first launch, in order. Unknown values from a later build are dropped.
+    /// the exercises picked at the first launch, in order. Unknown values from a later build are dropped.
     var favoriteExercises: [ExerciseKind] {
         get { (defaults.stringArray(forKey: Self.favoriteExercisesKey) ?? []).compactMap(ExerciseKind.init(rawValue:)) }
         nonmutating set { defaults.set(newValue.map(\.rawValue), forKey: Self.favoriteExercisesKey) }
     }
 
-    /// The whole profile at once.
+    /// the whole profile at once
     var onboardingProfile: OnboardingProfile {
         OnboardingProfile(goal: trainingGoal, level: trainingLevel,
                           favoriteExercises: favoriteExercises, speaksLive: speaksLive)
     }
 
-    /// Writes every answer, marks the onboarding done, and makes the first favorite the chosen exercise.
+    /// writes every answer, marks the onboarding done, and makes the first favourite the chosen exercise
     func apply(_ profile: OnboardingProfile) {
         trainingGoal = profile.goal
         trainingLevel = profile.level
@@ -136,11 +136,11 @@ extension FinnPreferences {
         onboardingCompleted = true
     }
 
-    /// The order of the exercise chips on the first screen.
+    /// the order of the exercise chips on the first screen
     var exerciseOrder: [ExerciseKind] { onboardingProfile.exerciseOrder }
 
-    /// Erases Finn's saved choices when the person deletes all local app data. HealthKit grants
-    /// live in iOS and must still be managed in Health settings.
+    /// erases Finn's saved choices when the person deletes all local app data. HealthKit grants
+    /// live in iOS and must still be managed in Health settings
     func resetLocalChoices() {
         for key in [Self.onboardingCompletedKey, Self.trainingGoalKey, Self.trainingLevelKey,
                     Self.favoriteExercisesKey, Self.recognizesExerciseKey, Self.usesTrainedModelKey,

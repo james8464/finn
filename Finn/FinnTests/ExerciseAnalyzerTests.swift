@@ -32,7 +32,7 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func realisticConfidenceSquatIsCounted() throws {
-        // Real side-view video gives the hip about 0.5 confidence; v2's 0.6 floor refused it.
+// real side-view video gives the hip about 0.5 confidence; v2's 0.6 floor refused it.
         var generator = SplitMix64(seed: 77)
         let frames = (0...120).map { index -> PoseFrame in
             let hipY = 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
@@ -151,7 +151,7 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func angleUsesImageAspectRatio() throws {
-        // A right angle in pixels on a 720 × 1280 portrait frame.
+// a right angle in pixels on a 720 × 1280 portrait frame.
         let aspect = 1280.0 / 720.0
         let shoulder = JointPoint(x: 0.5, y: 0.5 - 0.1 / aspect, confidence: 1)
         let elbow = JointPoint(x: 0.5, y: 0.5, confidence: 1)
@@ -389,7 +389,7 @@ nonisolated func pushUpTrace(reps: Int, startTime: Double = 0, bend: Double = 90
         let depth = repIndex >= reps - 2 ? (lateBend ?? bend) : bend
         let phase = Double(index % 20) / 20
         let elbowAngle = (170 - depth * (1 - cos(2 * .pi * phase)) / 2) * .pi / 180
-        // Positions in width units, then y divided by the aspect ratio for normalized coordinates.
+// positions in width units, then y divided by the aspect ratio for normalised coordinates.
         let wrist = (x: 0.30, y: 0.80)
         let elbow = (x: wrist.x, y: wrist.y - 0.14)
         let shoulder = (x: elbow.x + 0.14 * sin(elbowAngle), y: elbow.y + 0.14 * cos(elbowAngle))
@@ -466,7 +466,7 @@ nonisolated private func randomSquatTrace(using generator: inout SplitMix64) -> 
     let reps = Int.random(in: 0...8, using: &generator)
     let framesPerRep = Int.random(in: 8...40, using: &generator)
     let step = [0.0667, 0.1, 0.125].randomElement(using: &generator)!
-    // Each disturbance is present in only some traces, so many sets still reach the rep counter.
+// each disturbance is present in only some traces, so many sets still reach the rep counter.
     func sometimes(_ chance: Double, _ value: () -> Double) -> Double {
         Double.random(in: 0..<1, using: &generator) < chance ? value() : 0
     }
@@ -518,7 +518,7 @@ nonisolated struct SplitMix64: RandomNumberGenerator {
 
 // MARK: - Frozen squat-side-v2
 
-/// Verbatim copy of the squat-only analyzer and evidence gate at commit 41f4ff3, with its
+/// Verbatim copy of the squat-only analyser and evidence gate at commit 41f4ff3, with its
 /// constants written out. The generic engine must reproduce it exactly for the squat.
 private enum FrozenSquatV2 {
     private enum Phase {

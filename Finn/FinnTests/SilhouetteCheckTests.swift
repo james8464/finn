@@ -3,7 +3,7 @@ import Testing
 @testable import Finn
 
 nonisolated struct SilhouetteCheckTests {
-    /// A side-view standing person, normalized coordinates (top-left origin).
+    /// A side-view standing person, normalised coordinates (top-left origin).
     private let joints: [BodyJoint: JointPoint] = [
         .leftShoulder: JointPoint(x: 0.50, y: 0.30, confidence: 0.6),
         .leftHip: JointPoint(x: 0.50, y: 0.55, confidence: 0.6),
@@ -34,14 +34,14 @@ nonisolated struct SilhouetteCheckTests {
     }
 
     @Test func anAnkleJustPastTheMasksThinEdgeStillCounts() {
-        // Fast masks lose the last few pixels of a foot: the silhouette stops 1.5% of the frame
+// fast masks lose the last few pixels of a foot: the silhouette stops 1.5% of the frame
         // above the ankle point. The first version (two mask pixels) rejected this visible ankle.
         let verdict = SilhouetteCheck.verdict(for: joints, mask: mask(bottom: 0.865))
         #expect(verdict == .checked(supported: Set(joints.keys)))
     }
 
     @Test func anAnkleUnderACoverIsRejected() {
-        // Like tools/replay/fixtures/squat-feet-hidden.mp4: everything below 78% of the height is
+// like tools/replay/fixtures/squat-feet-hidden.mp4: everything below 78% of the height is
         // covered, about 6% of the frame above the ankle.
         let verdict = SilhouetteCheck.verdict(for: joints, mask: mask(bottom: 0.78))
         #expect(verdict == .checked(supported: [.leftShoulder, .leftHip, .leftKnee]))

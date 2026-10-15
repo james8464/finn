@@ -3,15 +3,15 @@ import AVFoundation
 @MainActor
 protocol PoseStreaming: AnyObject {
     var previewSession: AVCaptureSession { get }
-    /// The frames shown on the camera screen, the same ones the analysis receives.
+    /// the frames shown on the camera screen, the same ones the analysis receives
     var previewFeed: PreviewFeed? { get }
     var endedAtLimit: Bool { get }
     func prepareForSet() async
     func start() async throws -> AsyncStream<PoseFrame>
     func stop() async
-    /// Allows a source to prepare exercise-specific input. Live camera sources ignore this.
+    /// allows a source to prepare exercise-specific input. Live camera sources ignore this.
     func configure(for exercise: ExerciseKind)
-    /// Turns Vision 3D camera-angle estimates on or off for the frames that follow.
+    /// turns Vision 3D camera-angle estimates on or off for the frames that follow
     func setCameraAngleEstimation(_ enabled: Bool)
 }
 
@@ -30,12 +30,12 @@ protocol CameraCaptureDriving: AnyObject {
     func start() async throws -> AsyncStream<PoseFrame>
     func stop() async
     func setCameraAngleEstimation(_ enabled: Bool)
-    /// Where every captured frame is sent for display.
+    /// where every captured frame is sent for display
     var previewSink: PreviewFrameSink? { get }
     var cameraDevice: AVCaptureDevice? { get }
-    /// Rotates captured frames so the person stands upright in them.
+    /// rotates captured frames so the person stands upright in them
     func setCaptureRotation(_ degrees: Double)
-    /// Keeps the analysis on the person it follows now, for the whole set.
+    /// keeps the analysis on the person it follows now, for the whole set
     func lockAthlete()
 }
 
@@ -87,7 +87,7 @@ final class CameraPoseSource: PoseStreaming {
         self.setDurationLimitSeconds = Double(components.seconds)
             + Double(components.attoseconds) / 1e18
         if let sink = driver.previewSink {
-            // The front camera is shown like a mirror.
+            // the front camera is shown like a mirror
             let feed = PreviewFeed(isMirrored: true, device: driver.cameraDevice, sink: sink)
             feed.onCaptureRotation = { [weak driver] degrees in driver?.setCaptureRotation(degrees) }
             previewFeed = feed
@@ -138,8 +138,8 @@ final class CameraPoseSource: PoseStreaming {
             throw CameraSourceError.unavailable
         }
 
-        // Upright from the first frame: how this camera is mounted and how the phone is held, before
-        // the camera screen's own rotation coordinator takes over.
+        // upright from the first frame: how this camera is mounted and how the phone is held, before
+        // the camera screen's own rotation coordinator takes over
         if let device = driver.cameraDevice {
             driver.setCaptureRotation(AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
                 .videoRotationAngleForHorizonLevelCapture)

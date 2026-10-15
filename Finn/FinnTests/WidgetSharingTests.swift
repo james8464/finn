@@ -77,7 +77,7 @@ struct WidgetSharingTests {
         #expect(shared.read()?.exerciseName == "Squat")
         #expect(reloads.count == 1)
 
-        // Saving the same session again (a cue dismissed) changes nothing for the widget.
+// saving the same session again (a cue dismissed) changes nothing for the widget.
         try store.save(WorkoutSessionSummary(id: id, startedAt: date, sets: [set(sessionID: id, at: date, reps: 6)]))
         #expect(reloads.count == 1)
 
@@ -154,7 +154,7 @@ struct WidgetSharingTests {
         let now = Date(timeIntervalSince1970: 1_800_000_000)
         let snapshot = LastSetSnapshot(exerciseName: "Squat", exerciseKey: "bodyweightSquat", reps: 12,
                                        capturedAt: now.addingTimeInterval(-40 * 60), partlyVisible: false)
-        // The activity's clock counts from the real present: a fixed date would render hours of set.
+// the activity's clock counts from the real present: a fixed date would render hours of set.
         let attributes = FinnSetActivityAttributes(exerciseName: "Squat", startedAt: Date.now.addingTimeInterval(-48),
                                                     demoInput: false)
         let state = FinnSetActivityAttributes.ContentState(reps: 7)

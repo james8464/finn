@@ -2,7 +2,7 @@ import AppIntents
 import SwiftUI
 
 /// "How did my last set go in Finn": answers from the saved history without opening the app. Siri
-/// reads one sentence and shows a card; both come from `LastSetReport`, never from a guess.
+/// reads one sentence and shows a card; both come from `LastSetReport`, never from a guess
 struct LastSetIntent: AppIntent {
     static let title: LocalizedStringResource = "How Did My Last Set Go"
     static let description = IntentDescription(
@@ -15,8 +15,8 @@ struct LastSetIntent: AppIntent {
         return .result(dialog: IntentDialog("\(dialog)"), view: LastSetSnippet(content: content))
     }
 
-    /// The spoken sentence and the card content for what the store holds. Pure apart from reading
-    /// the store, so tests cover the empty, unreadable and recorded cases.
+    /// the spoken sentence and the card content for what the store holds. Pure apart from reading
+    /// the store, so tests cover the empty, unreadable and recorded cases
     nonisolated static func answer(from store: any SessionStoring,
                                    now: Date = Date()) -> (String, LastSetSnippet.Content) {
         let sessions: [WorkoutSessionSummary]

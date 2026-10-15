@@ -7,11 +7,11 @@ nonisolated enum ExerciseRecognition: Equatable {
     case notAttempted
     /// Enough confident windows agreed on one supported exercise.
     case recognized(ExerciseKind, agreement: Double)
-    /// The windows disagreed, were not confident, or favored "other" or "none".
+    /// The windows disagreed, were not confident, or favoured "other" or "none".
     case uncertain
 }
 
-/// Which recognizer the app uses, in order of preference.
+/// Which recogniser the app uses, in order of preference.
 nonisolated enum RecognitionMethod: Equatable {
     /// A Create ML action classifier on Vision keypoint sequences.
     case keypointModel

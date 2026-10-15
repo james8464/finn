@@ -1,6 +1,6 @@
 import Foundation
 
-/// The facts that must match before two form readings can describe a trend.
+/// the facts that must match before two form readings can describe a trend
 nonisolated private struct FormHistoryKey: Hashable {
     let exercise: String
     let side: String
@@ -17,30 +17,30 @@ nonisolated private struct FormHistoryKey: Hashable {
     }
 }
 
-/// One saved set, reduced to what the coach may talk about. Every field comes from the local
-/// history; nothing here is measured or guessed by the coach itself.
+/// one saved set, reduced to what the coach may talk about. Every field comes from the local
+/// history; nothing here is measured or guessed by the coach itself
 nonisolated struct CoachSetFact: Equatable, Identifiable, Sendable {
-    /// Position in the context, oldest first, so "Set 3" means the same thing to the model,
+    /// position in the context, oldest first, so "Set 3" means the same thing to the model,
     /// the validator and the person. Starts at 1.
     let number: Int
     let id: UUID
     let exerciseName: String
     let repCount: Int
     let capturedAt: Date
-    /// The one observation Finn kept for this set, with its suggested next action.
+    /// the one observation Finn kept for this set, with its suggested next action
     let observation: String?
-    /// What the set showed, in the words of the result screen.
+    /// what the set showed, in the words of the result screen
     let issues: [String]
-    /// Comparison with the previous compatible set of the same session, when there was one.
+    /// comparison with the previous compatible set of the same session, when there was one
     let comparison: String?
     let partlyVisible: Bool
-    /// The one thing to do next, from the same observation, on its own for the advice answers.
+    /// the one thing to do next, from the same observation, on its own for the advice answers
     var nextAction: String? = nil
 
     var label: String { "Set \(number)" }
 }
 
-/// The last sets of the local history, as text the coach engines receive and the fallback reads.
+/// the last sets of the local history, as text the coach engines receive and the fallback reads
 nonisolated struct CoachContext: Equatable, Sendable {
     static let defaultLimit = 8
 
@@ -50,7 +50,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
     var knownNumbers: Set<Int> { Set(facts.map(\.number)) }
     var latest: CoachSetFact? { facts.last }
 
-    /// Builds the context from the saved sessions, keeping the `limit` most recent sets.
+    /// builds the context from the saved sessions, keeping the `limit` most recent sets
     static func make(history: [WorkoutSessionSummary], limit: Int = defaultLimit,
                      now: Date = .now) -> CoachContext {
         struct Pending {
@@ -106,7 +106,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
         return CoachContext(facts: facts)
     }
 
-    /// One whole sentence fragment per language, so French never mixes with English words.
+    /// one whole sentence fragment per language, so French never mixes with English words
     private static func describe(_ comparison: Comparison, exercise: ExerciseKind) -> String {
         let copy = exercise.definition.copy
         switch comparison.rangeDirection {
@@ -119,7 +119,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
         }
     }
 
-    /// The context as the model reads it: one line per set, oldest first.
+    /// the context as the model reads it: one line per set, oldest first
     func promptText(calendar: Calendar = .current, timeZone: TimeZone = .current) -> String {
         guard !facts.isEmpty else { return "No saved sets." }
         var formatter = Date.FormatStyle(date: .abbreviated, time: .shortened)
@@ -136,7 +136,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
     }
 }
 
-/// The language the coach speaks: the app's, from the device locale. English unless French.
+/// the language the coach speaks: the app's, from the device locale. English unless French.
 nonisolated enum CoachLanguage: Equatable, Sendable {
     case english
     case french
@@ -150,7 +150,7 @@ nonisolated enum CoachLanguage: Equatable, Sendable {
         }
     }
 
-    /// How a set is named in an answer, so the person and the validator agree.
+    /// how a set is named in an answer, so the person and the validator agree
     var setWord: String {
         switch self {
         case .english: "Set"
@@ -160,7 +160,7 @@ nonisolated enum CoachLanguage: Equatable, Sendable {
     }
 }
 
-/// The rules every engine receives. The coach rewords measured facts; it never measures.
+/// the rules every engine receives. The coach rewords measured facts; it never measures.
 nonisolated enum CoachInstructions {
     static func text(language: CoachLanguage) -> String {
         switch language {
@@ -190,9 +190,9 @@ nonisolated enum CoachInstructions {
         """
 }
 
-/// Sentences built from the saved observations, used when no language model can run. It reads
+/// sentences built from the saved observations, used when no language model can run. It reads
 /// the question for its intent (advice for next time, progress, one set, or a recap) and answers
-/// from the recorded facts only; it never invents.
+/// from the recorded facts only; it never invents
 nonisolated enum CoachFallback {
     static func noRelevantAnswer(language: CoachLanguage) -> String {
         switch language {
@@ -202,7 +202,7 @@ nonisolated enum CoachFallback {
         }
     }
 
-    /// What the person is asking for, guessed from a few words. Recap when nothing matches.
+    /// what the person is asking for, guessed from a few words. Recap when nothing matches.
     enum Intent: Equatable {
         case advice, progress, set(Int), recap
     }
@@ -256,7 +256,7 @@ nonisolated enum CoachFallback {
         }
     }
 
-    /// For each exercise, the latest recorded next action and the sets that showed it.
+    /// for each exercise, the latest recorded next action and the sets that showed it
     static func advice(context: CoachContext, language: CoachLanguage) -> String {
         var lines: [String] = []
         var seen: Set<String> = []
@@ -295,7 +295,7 @@ nonisolated enum CoachFallback {
         return lines.joined(separator: " ")
     }
 
-    /// Per exercise, reps on the first and the last recorded set, and the last camera comparison.
+    /// per exercise, reps on the first and the last recorded set, and the last camera comparison
     static func progress(context: CoachContext, language: CoachLanguage) -> String {
         var lines: [String] = []
         var seen: Set<String> = []
@@ -330,7 +330,7 @@ nonisolated enum CoachFallback {
         return lines.joined(separator: " ")
     }
 
-    /// "set 3", "sets 2 and 3", "sets 6 to 8", or "sets 2, 5 and 8".
+    /// "set 3", "sets 2 and 3", "sets 6 to 8", or "sets 2, 5 and 8"
     static func setList(_ numbers: [Int], language: CoachLanguage) -> String {
         let sorted = Array(Set(numbers)).sorted()
         let word = language.setWord.lowercased()
@@ -350,7 +350,7 @@ nonisolated enum CoachFallback {
         return "\(plural) \(head) \(and) \(last)"
     }
 
-    /// The opening line shown before the person asks anything.
+    /// the opening line shown before the person asks anything
     static func opening(context: CoachContext, language: CoachLanguage = .current()) -> String {
         guard let latest = context.latest else {
             return switch language {
@@ -414,8 +414,8 @@ nonisolated enum CoachFallback {
     }
 }
 
-/// Accepts only set labels from a model. The app renders the recorded facts itself; model prose
-/// never reaches the user because checking arbitrary advice for factual support is unreliable.
+/// accepts only set labels from a model. The app renders the recorded facts itself; model prose
+/// never reaches the user because checking arbitrary advice for factual support is unreliable
 nonisolated enum CoachAnswerCheck {
     static func referencedSetNumbers(in text: String) -> Set<Int> {
         var numbers: Set<Int> = []

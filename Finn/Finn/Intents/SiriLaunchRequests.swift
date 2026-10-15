@@ -1,16 +1,16 @@
 import Observation
 
-/// What Siri or a shortcut asked the app to do once it is in front. An intent that opens the app
+/// what Siri or a shortcut asked the app to do once it is in front. An intent that opens the app
 /// runs before the first screen can act, so it leaves its request here and `ContentView` picks it
-/// up when the model is ready for it (first screen or result, never during a set).
+/// up when the model is ready for it (first screen or result, never during a set)
 @Observable
 final class SiriLaunchRequests {
     static let shared = SiriLaunchRequests()
 
     enum Request: Equatable {
-        /// "Start a squat set in Finn": choose the exercise and open the camera.
+        /// "Start a squat set in Finn": choose the exercise and open the camera
         case startSet(ExerciseKind)
-        /// "Show my history in Finn".
+        /// "Show my history in Finn"
         case showHistory
     }
 
@@ -20,8 +20,8 @@ final class SiriLaunchRequests {
         self.pending = pending
     }
 
-    /// Whether `request` can be carried out at `stage`: a set in progress is never interrupted by
-    /// Siri, and History opens from the first screen only. Pure, so tests cover it.
+    /// whether `request` can be carried out at `stage`: a set in progress is never interrupted by
+    /// siri, and History opens from the first screen only. Pure, so tests cover it.
     nonisolated static func canApply(_ request: Request, at stage: WorkoutStage) -> Bool {
         switch request {
         case .startSet: return stage == .ready || stage == .result

@@ -46,7 +46,7 @@ struct AngleRuleRecognitionTests {
             PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints.filter { $0.key != farAnkle },
                       aspectRatio: frame.aspectRatio)
         }
-        // With one ankle left, the stance is unknown and a squat cannot be told from a lunge.
+// with one ankle left, the stance is unknown and a squat cannot be told from a lunge.
         let features = PoseWindowFeatureExtractor.windows(frames).compactMap(PoseWindowFeatureExtractor.features)
         #expect(features.allSatisfy { $0.stance == -1 })
         #expect(AngleRecognizer.recognize(frames, using: AngleRuleClassifier()) == .uncertain)

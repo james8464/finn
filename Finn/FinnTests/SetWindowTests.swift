@@ -6,7 +6,7 @@ import Testing
 nonisolated struct SetWindowTests {
     @Test func walkingInAndOutNoLongerRefusesTheSet() {
         let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0)
-        // Before the set window, these frames were refused: the legs were out of view for over a second.
+// before the set window, these frames were refused: the legs were out of view for over a second.
         #expect(EvidenceGate.assess(capture, requirement: .squat).isRejected)
 
         guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(capture, as: .squat) else {
@@ -39,7 +39,7 @@ nonisolated struct SetWindowTests {
     }
 
     @Test func noTimeInPositionKeepsTheWholeCaptureSoTheGateExplainsIt() {
-        // Legs never in view: nothing to trim to, and the refusal still names the missing joints.
+// legs never in view: nothing to trim to, and the refusal still names the missing joints.
         let capture = (0..<150).map { index in
             CaptureTraces.frame(time: Double(index) * CaptureTraces.step, hipY: 0.42, ankleX: 0.51, legs: false)
         }
@@ -48,19 +48,19 @@ nonisolated struct SetWindowTests {
     }
 
     @Test func aBriefMomentInPositionIsNotASet() {
-        // In position for one second only: shorter than a set, so nothing is trimmed.
+// in position for one second only: shorter than a set, so nothing is trimmed.
         let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 0, from: 2.0, standing: 1.0) + CaptureTraces.walkOut(from: 3.0)
         #expect(SetWindow.activeRange(capture, requirement: .squat) == nil)
     }
 
     @Test func aGapInsideTheSetStillCounts() {
         var capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0)
-        // Legs hidden for 1.5 s in the middle of the set.
+// legs hidden for 1.5 s in the middle of the set.
         capture = capture.map { frame in
             guard frame.time > 7.0 && frame.time < 8.5 else { return frame }
             return CaptureTraces.frame(time: frame.time, hipY: frame.joints[.leftHip]?.y ?? 0.42, ankleX: 0.51, legs: false)
         }
-        // The side rubric still refuses it; the hips, seen throughout, count the six squats.
+// the side rubric still refuses it; the hips, seen throughout, count the six squats.
         #expect(EvidenceGate.assess(SetWindow.active(capture, requirement: .squat), requirement: .squat).isRejected)
         #expect(Self.hipCount(capture) == 6)
     }
@@ -123,7 +123,7 @@ nonisolated struct SetWindowTests {
     }
 
     @Test func pushUpGettingDownAndStandingUpIsTrimmed() {
-        // Walk in standing (wrists by the hips), get down, six push-ups, stand up and leave.
+// walk in standing (wrists by the hips), get down, six push-ups, stand up and leave.
         var capture: [PoseFrame] = []
         var time = 0.0
         while time < 2.0 {
@@ -207,7 +207,7 @@ nonisolated enum CaptureTraces {
         return frames
     }
 
-    /// Walking back toward the phone: the feet slide across the frame, then the legs leave the picture.
+    /// Walking back towards the phone: the feet slide across the frame, then the legs leave the picture.
     static func walkOut(from start: Double, duration: Double = 2.5) -> [PoseFrame] {
         var frames: [PoseFrame] = []
         var time = step

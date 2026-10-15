@@ -95,7 +95,7 @@ struct WorkoutSessionModelTests {
         for frame in CaptureTraces.squats(reps: 0, from: 0, standing: 2.0) { source.emit(frame) }
         try await waitUntil { model.stage == .capturing }
 
-        // The camera keeps sending frames after the athlete leaves; the set ends about 2 s later.
+// the camera keeps sending frames after the athlete leaves; the set ends about 2 s later.
         for frame in CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0, duration: 4.0) {
             source.emit(frame)
         }
@@ -120,7 +120,7 @@ struct WorkoutSessionModelTests {
         let store = LocalSessionStore(url: directory.appending(path: "sessions.json"))
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source, store: store)
-        // Six full reps with a shallow dip (0.06 of the frame, under the 0.15 leg-length bottom) after each.
+// six full reps with a shallow dip (0.06 of the frame, under the 0.15 leg-length bottom) after each
         let frames = (0...(6 * 30)).map { index -> PoseFrame in
             let phase = Double(index % 30) / 30
             let full = phase < 2.0 / 3 ? 0.20 * (1 - cos(2 * .pi * phase * 1.5)) / 2 : 0
@@ -167,7 +167,7 @@ struct WorkoutSessionModelTests {
         for frame in frames { source.emit(frame) }
         try await waitUntil { model.frameCount == frames.count }
         await model.endSet()
-        // The live count may still be one rep behind when Stop is tapped right after the last rep.
+// the live count may still be one rep behind when Stop is tapped right after the last rep.
         #expect((5...6).contains(model.liveRepCount))
         #expect(announcer.phrases.isEmpty)
     }
@@ -412,7 +412,7 @@ struct WorkoutSessionModelTests {
             let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
             await model.startPreview()
             await model.beginSet(countdown: 0)
-            // Six 2 s reps, cut at the bottom of the sixth.
+// six 2 s reps, cut at the bottom of the sixth.
             let frames = CaptureTraces.squats(reps: 6, from: 0).filter { $0.time <= 11.0 }
             for frame in frames { source.emit(frame) }
             try await waitUntil { model.frameCount == frames.count }
@@ -495,7 +495,7 @@ struct WorkoutSessionModelTests {
     @Test func retakeAdviceMatchesTheReason() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
-        // Legs never in view: the general advice about keeping the joints visible applies.
+// legs never in view: the general advice about keeping the joints visible applies.
         await model.startPreview()
         await model.beginSet(countdown: 0)
         for index in 0...40 {
@@ -889,7 +889,7 @@ struct ChosenExerciseTests {
         let relaunched = WorkoutSessionModel(source: TestPoseSource(), preferences: preferences)
         #expect(relaunched.selectedExercise == .pushUp)
 
-        // Tests and demo input keep starting on the squat.
+// tests and demo input keep starting on the squat.
         let plain = FinnPreferences(defaults: defaults)
         #expect(WorkoutSessionModel(source: TestPoseSource(), preferences: plain).selectedExercise == .bodyweightSquat)
     }
@@ -976,7 +976,7 @@ struct ChosenExerciseTests {
             }
             return (cue, analysis.reps.count, model.formNotes)
         }
-        // From the side the same reps get advice (the shallow reps trip the depth check first).
+// from the side the same reps get advice (the shallow reps trip the depth check first).
         let side = try await measure(deviation: nil)
         #expect(side.reps == 6)
         #expect(side.cue != nil)

@@ -8,7 +8,7 @@ struct FormChecksTests {
     // MARK: Geometry
 
     @Test func segmentsReadAnglesAndBodyLine() {
-        // A plank seen from the side, elbow bent square, hip 0.05 below the shoulder-ankle line.
+// a plank seen from the side, elbow bent square, hip 0.05 below the shoulder-ankle line.
         let frame = PoseFrame(time: 0, subjectCount: 1, joints: [
             .leftWrist: point(0.30, 0.80), .leftElbow: point(0.30, 0.66), .leftShoulder: point(0.44, 0.66),
             .leftHip: point(0.64, 0.71), .leftKnee: point(0.79, 0.70), .leftAnkle: point(0.94, 0.66),
@@ -18,7 +18,7 @@ struct FormChecksTests {
         #expect((body.hipOffsetFromBodyLine ?? 0) > 0.2)
         #expect((body.torsoTilt ?? 0) > 70)
 
-        // Standing tall: torso and shins upright, knee straight, thigh far above level.
+// standing tall: torso and shins upright, knee straight, thigh far above level.
         let standing = BodySegments(frame: squatFrame(depth: 0, thighAtBottom: 0, extraLean: 0, time: 0), side: .left)
         #expect((standing.kneeAngle ?? 0) > 175)
         #expect((standing.torsoTilt ?? 90) < 1)
@@ -53,7 +53,7 @@ struct FormChecksTests {
     }
 
     @Test func oneShallowSquatIsNotAdvice() throws {
-        // Only the fourth rep stays high: a fault on one rep is not a pattern.
+// only the fourth rep stays high: a fault on one rep is not a pattern.
         let frames = squats(thighAtBottom: -5, extraLean: 5, faultyRep: 3, faultyThigh: 45)
         #expect(try reviewed(frames, .squat).findings.isEmpty)
     }
@@ -177,7 +177,7 @@ struct FormChecksTests {
         let cleanFrames = pushUps(sag: 0, bottomElbow: 85)
         var cleanEvents: [LiveSetEvent] = []
         for end in cleanFrames.indices { cleanEvents += clean.update(with: Array(cleanFrames[...end])) }
-        // The live count analyzes every 0.4 s of frames; the trace ends before the last rep is read.
+// the live count analyses every 0.4 s of frames; the trace ends before the last rep is read.
         #expect(clean.countedReps >= 5)
         #expect(!cleanEvents.contains { if case .formFault = $0 { true } else { false } })
     }
@@ -298,7 +298,7 @@ struct FormChecksTests {
             let s = (1 - cos(2 * .pi * Double(index % 25) / 25)) / 2
             let ankle = (0.50, 0.90)
             let hip = (0.50, 0.55)
-            // The knee moves forward until the hip-knee-ankle angle has closed by `kneeBend`.
+// the knee moves forward until the hip-knee-ankle angle has closed by `kneeBend`.
             let knee = (0.50 + 0.175 * tan(kneeBend / 2 * s * .pi / 180), 0.725)
             let tilt = (5 + (torsoAtBottom - 5) * s) * .pi / 180
             let shoulder = (hip.0 + 0.3 * sin(tilt), hip.1 - 0.3 * cos(tilt))

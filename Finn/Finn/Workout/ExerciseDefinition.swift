@@ -29,7 +29,7 @@ nonisolated enum MovementSignal: Equatable, Sendable {
 /// The camera view a rubric was written for. Other views make its 2D measurements unreliable.
 nonisolated enum ExpectedView: String, Equatable, Sendable {
     case side
-    /// Pull-ups and muscle-ups: the shoulders' rise toward the hands reads the same from the
+    /// Pull-ups and muscle-ups: the shoulders' rise towards the hands reads the same from the
     /// side, the front or the back, so the 3D check never asks to turn.
     case any
 

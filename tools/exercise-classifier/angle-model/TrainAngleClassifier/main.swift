@@ -1,11 +1,11 @@
-// Trains Finn's joint-angle exercise classifier with Create ML and reports held-out accuracy.
+// trains Finn's joint-angle exercise classifier with Create ML and reports held-out accuracy.
 //
 //   train-angle-classifier <poses folder> <output folder> [--synthetic-per-class 250]
 //
 // Training rows are PoseWindowFeatures (the app's own code, compiled in by build.sh) computed
 // from two sources: pose JSON files written by extract-poses from real videos, and synthetic
 // side-view sequences from SyntheticExerciseMotion. Real videos are split by participant, so no
-// held-out person appears in training. The rule-based recognizer is scored on the same sets.
+// held-out person appears in training. The rule-based recogniser is scored on the same sets.
 
 import CoreML
 import CreateML
@@ -87,7 +87,7 @@ for file in files {
 }
 var droppedDuplicates: [String] = []
 for group in realByFingerprint.values.sorted(by: { $0[0].0.source < $1[0].0.source }) {
-    // Keep one copy; when a group spans both splits, keep it in training and drop the test copies.
+// keep one copy; when a group spans both splits, keep it in training and drop the test copies.
     let kept = group.first { !$0.1 } ?? group[0]
     droppedDuplicates += group.filter { $0.0.source != kept.0.source }.map(\.0.source)
     recordings.append(Recording(id: kept.0.source, label: kept.0.label, origin: "real", test: kept.1,
@@ -142,7 +142,7 @@ func predict(_ features: PoseWindowFeatures) -> (String, Double) {
 /// Same vote as the app (ExerciseRecognizer.decide): a supported exercise needs 60% of windows at
 /// 0.8 confidence or more; anything else is "uncertain".
 func decide(_ predictions: [(String, Double)]) -> String {
-    // No measurable window: Vision lost the body, so no recognizer can decide ("uncertain" in the app).
+    // no measurable window: Vision lost the body, so no recogniser can decide ("uncertain" in the app).
     if predictions.isEmpty { return "no pose" }
     var votes: [String: Int] = [:]
     for (label, confidence) in predictions where confidence >= 0.8 { votes[label, default: 0] += 1 }
@@ -207,7 +207,7 @@ for origin in ["real", "synthetic"] {
                        "setConfusion": setTally.confusion, "ruleSetConfusion": ruleSetTally.confusion]
 }
 
-// Rules need no training, so every real recording is a fair test for them.
+// rules need no training, so every real recording is a fair test for them.
 var allRealRules = Tally()
 for recording in recordings where recording.origin == "real" {
     let rules = recording.windows.map { (AngleRules.label(for: $0) ?? "unknown", 1.0) }

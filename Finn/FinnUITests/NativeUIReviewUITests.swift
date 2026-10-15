@@ -1,7 +1,7 @@
 import XCTest
 import UIKit
 
-/// Navigation regression checks, with optional screenshots for the design review.
+/// navigation regression checks, with optional screenshots for the design review
 final class NativeUIReviewUITests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = false }
 
@@ -206,12 +206,12 @@ final class NativeUIReviewUITests: XCTestCase {
         guard let directory = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] else { return }
         let url = URL(fileURLWithPath: directory, isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-        // Let native navigation/material transitions settle before capturing.
+        // let native navigation/material transitions settle before capturing
         Thread.sleep(forTimeInterval: 2)
         try XCUIScreen.main.screenshot().pngRepresentation.write(to: url.appending(path: "\(name).png"))
     }
 
-    /// Accessibility labels can exist even when a control renders white text on white.
+    /// accessibility labels can exist even when a control renders white text on white
     @MainActor private func assertHealthActionTextIsVisible(_ button: XCUIElement) {
         guard let image = button.screenshot().image.cgImage else {
             XCTFail("Could not inspect the Health action's rendered label")
@@ -227,7 +227,7 @@ final class NativeUIReviewUITests: XCTestCase {
             return true
         }
         XCTAssertTrue(rendered)
-        // Ignore the rounded corners; the centre must contain the dark, visible label.
+        // ignore the rounded corners; the centre must contain the dark, visible label
         var darkPixels = 0
         for y in (height / 5)..<(height * 4 / 5) {
             for x in (width / 5)..<(width * 4 / 5) {

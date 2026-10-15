@@ -2,32 +2,32 @@ import CoreML
 import CoreVideo
 import Vision
 
-/// Runs Vision on one upright, unmirrored frame and returns the pose record Finn keeps: the
-/// athlete's joints, picked and followed by `AthleteTracker`, and everyone else as bystanders.
-/// The camera and the Debug video-file source share it, so both analyze frames the same way.
-/// Not thread-safe: call it from one queue.
+/// runs Vision on one upright, unmirrored frame and returns the pose record Finn keeps: the
+/// athlete's joints, picked and followed by `AthleteTracker`, and everyone else as bystanders
+/// the camera and the Debug video-file source share it, so both analyse frames the same way
+/// not thread-safe: call it from one queue
 nonisolated final class PoseFrameAnalyzer {
-    /// Frames are analyzed 15 times per second. The millisecond of slack keeps every other frame
-    /// of a 30 fps stream: their timestamps differ by a hair less than 1/15 s.
+    /// frames are analysed 15 times per second. The millisecond of slack keeps every other frame
+    /// of a 30 fps stream: their timestamps differ by a hair less than 1/15 s
     static let minimumInterval = 1.0 / 15 - 0.001
-    /// Runs every Nth analyzed frame (about 4 per second at 15 fps) to bound the extra cost.
+    /// runs every Nth analysed frame (about 4 per second at 15 fps) to bound the extra cost
     static let cameraAngleInterval = 4
-    /// Pose confidence can remain high when Vision guesses a hidden joint. Check the person
-    /// silhouette on every third analyzed frame; missing evidence then fails the 80% view gate.
+    /// pose confidence can remain high when Vision guesses a hidden joint. Check the person
+    /// silhouette on every third analysed frame; missing evidence then fails the 80% view gate
     static let silhouetteInterval = 3
-    // The 3D request is stateful, so it is reused across frames.
+    // the 3D request is stateful, so it is reused across frames
     private let poseRequest3D = VNDetectHumanBodyPose3DRequest()
     private let sequenceHandler = VNSequenceRequestHandler()
     private var analyzedFrames = 0
     private var tracker = AthleteTracker()
-    /// Joints the latest silhouette check found off the person, kept out of the two frames until the
+    /// joints the latest silhouette check found off the person, kept out of the two frames until the
     /// next check. Only refuted joints are carried: a joint the check never saw is not removed.
     private var lastRefutedJoints: Set<BodyJoint> = []
 
-    /// Keep following the current athlete until `releaseAthlete()`; called when a set starts.
+    /// keep following the current athlete until `releaseAthlete()`; called when a set starts
     func lockAthlete() { tracker.lock() }
 
-    /// Pick the most prominent person again on the next frame.
+    /// pick the most prominent person again on the next frame
     func releaseAthlete() {
         tracker.reset()
         lastRefutedJoints = []
@@ -54,7 +54,7 @@ nonisolated final class PoseFrameAnalyzer {
         var joints: [BodyJoint: JointPoint] = [:]
         var keypoints: [Float]?
         if let athlete {
-            // The same 18-point layout Create ML extracts from training clips.
+            // the same 18-point layout Create ML extracts from training clips
             if let array = try? observations[athlete].keypointsMultiArray() {
                 let values = MLShapedArray<Float>(converting: array).scalars
                 keypoints = values.count == ExerciseRecognizer.keypointCount ? values : nil
@@ -67,12 +67,12 @@ nonisolated final class PoseFrameAnalyzer {
                     lastRefutedJoints = Set(joints.keys).subtracting(supported)
                     joints = joints.filter { supported.contains($0.key) }
                 case .unavailable:
-                    // No usable mask: keep Vision's 2D evidence, as before the silhouette check.
+                    // no usable mask: keep Vision's 2D evidence, as before the silhouette check
                     lastRefutedJoints = []
                 }
             } else if !lastRefutedJoints.isEmpty {
-                // Carry a negative mask verdict through the two frames between checks. Otherwise
-                // framing can alternate between "visible" and "move the phone" over covered feet.
+                // carry a negative mask verdict through the two frames between checks. Otherwise
+                // framing can alternate between "visible" and "move the phone" over covered feet
                 joints = joints.filter { !lastRefutedJoints.contains($0.key) }
             }
         } else if verifySilhouette {
@@ -93,10 +93,10 @@ nonisolated final class PoseFrameAnalyzer {
     /// Vision's fast person mask for the image the handler holds, nil when the request fails (the
     /// joints then keep their 2D evidence, as with no mask). Asked only once an athlete is found:
     /// performed with every body-pose request, it was made and thrown away in an empty room and
-    /// while the athlete was hidden.
+    /// while the athlete was hidden
     private static func segmentation(of handler: VNImageRequestHandler) -> CVPixelBuffer? {
-        // Use a fresh request for each sample. Reusing one lagged behind the next pose in video
-        // replay, causing clear joints to be rejected after a movement transition.
+        // use a fresh request for each sample. Reusing one lagged behind the next pose in video
+        // replay, causing clear joints to be rejected after a movement transition
         let request = VNGeneratePersonSegmentationRequest()
         request.qualityLevel = .fast
         request.outputPixelFormat = kCVPixelFormatType_OneComponent8
@@ -104,7 +104,7 @@ nonisolated final class PoseFrameAnalyzer {
         return request.results?.first?.pixelBuffer
     }
 
-    /// Copies Vision's one-byte person mask; nil when there is none or it has another format.
+    /// copies Vision's one-byte person mask; nil when there is none or it has another format
     private static func personMask(_ buffer: CVPixelBuffer?) -> PersonMask? {
         guard let buffer, CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_OneComponent8,
               CVPixelBufferLockBaseAddress(buffer, .readOnly) == kCVReturnSuccess else { return nil }
@@ -125,7 +125,7 @@ nonisolated final class PoseFrameAnalyzer {
         return PersonMask(width: width, height: height, pixels: pixels)
     }
 
-    /// Vision's points use a bottom-left origin; Finn's use top-left, like the screen.
+    /// Vision's points use a bottom-left origin; Finn's use top-left, like the screen
     static func joints(of observation: VNHumanBodyPoseObservation) -> [BodyJoint: JointPoint] {
         let mapping: [(BodyJoint, VNHumanBodyPoseObservation.JointName)] = [
             (.leftHip, .leftHip), (.leftKnee, .leftKnee), (.leftAnkle, .leftAnkle),
@@ -146,13 +146,13 @@ nonisolated final class PoseFrameAnalyzer {
         return joints
     }
 
-    /// Profile deviation from Vision 3D pose, or nil when the request fails, the hips are not
+    /// profile deviation from Vision 3D pose, or nil when the request fails, the hips are not
     /// estimated, or the 3D body Vision chose is not the athlete (its root falls outside the
     /// athlete's 2D joints). Vision gives each joint relative to the body's root, in the body's
-    /// own axes, and `cameraOriginMatrix` takes those into the camera's frame.
+    /// own axes, and `cameraOriginMatrix` takes those into the camera's frame
     /// `cameraRelativePosition` only shifts them by the root's position without turning them, so
     /// the body always looked square to the camera: every set read as filmed from the front
-    /// (74 to 89° on 50 side-view videos).
+    /// (74 to 89° on 50 side-view videos)
     private func cameraAngle(in pixelBuffer: CVPixelBuffer, athlete: [BodyJoint: JointPoint]) -> Double? {
         guard (try? sequenceHandler.perform([poseRequest3D], on: pixelBuffer, orientation: .up)) != nil,
               let body = poseRequest3D.results?.first,

@@ -70,7 +70,7 @@ nonisolated struct SquatAnalyzerTests {
             for index in 0..<30 {
                 let phase = Double(index) / 30
                 var drop = 0.20 * (1 - cos(2 * .pi * phase)) / 2
-                // Reps 5 and 6 stall about halfway down and rise a little before going on.
+// reps 5 and 6 stall about halfway down and rise a little before going on.
                 if rep >= 4 && index >= 8 && index < 12 { drop = 0.13 - 0.02 * Double(index - 8) }
                 frames.append(frame(time: time, hipY: 0.42 + drop))
                 time += 0.1

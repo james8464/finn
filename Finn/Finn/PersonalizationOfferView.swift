@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Optional Health access, offered after the first camera-measured set.
+/// optional Health access, offered after the first camera-measured set
 struct PersonalizationOfferView: View {
     let answer: (Bool) -> Void
 
