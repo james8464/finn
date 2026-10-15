@@ -1,9 +1,12 @@
 import SwiftUI
 
-/// A plain conversation with the coach about the saved sets. Kept simple so it can be dressed later.
+/// A conversation grounded in the saved sets, with source details one tap away.
 struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var draft = ""
+    @State private var showsSource = false
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var fieldFocused: Bool
     private let history: [WorkoutSessionSummary]
 
@@ -22,6 +25,12 @@ struct CoachView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
+                        if conversation.messages.count == 1 {
+                            Label("Your set notes", systemImage: "text.bubble")
+                                .font(.title2.bold())
+                                .padding(.bottom, 8)
+                                .accessibilityAddTraits(.isHeader)
+                        }
                         ForEach(conversation.messages) { message in
                             bubble(message)
                                 .id(message.id)
@@ -46,7 +55,7 @@ struct CoachView: View {
                 .scrollDismissesKeyboard(.interactively)
                 .onChange(of: conversation.messages.count) { _, _ in
                     guard let last = conversation.messages.last else { return }
-                    withAnimation(HomeStyle.spring) { proxy.scrollTo(last.id, anchor: .bottom) }
+                    withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
             }
             Divider()
@@ -54,6 +63,7 @@ struct CoachView: View {
                 HStack(spacing: 10) {
                     TextField("Ask about your sets", text: $draft, axis: .vertical)
                         .lineLimit(1...4)
+                        .accessibilityLabel("Ask about your sets")
                         .textFieldStyle(.plain)
                         .focused($fieldFocused)
                         .submitLabel(.send)
@@ -64,18 +74,24 @@ struct CoachView: View {
                         .accessibilityIdentifier("coach.field")
                     Button(action: send) {
                         Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 30))
+                            .font(.title)
+                            .frame(width: 44, height: 44)
                             .symbolRenderingMode(.hierarchical)
                     }
                     .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty || conversation.isAnswering)
                     .accessibilityLabel("Send")
                     .accessibilityIdentifier("coach.send")
                 }
-                Text(engineLine)
-                    .font(.caption2)
-                    .foregroundStyle(HomeStyle.supportingText)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityIdentifier("coach.engine")
+                Button { showsSource = true } label: {
+                    Label(typeSize.isAccessibilitySize ? "About Coach" : "Based on your saved sets", systemImage: "info.circle")
+                        .fixedSize(horizontal: false, vertical: true)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("coach.engine")
+                .accessibilityHint("Explains how the Coach chooses its answer")
             }
             .padding(.horizontal, 20)
             .padding(.top, 10)
@@ -83,7 +99,19 @@ struct CoachView: View {
         }
         .background(HomeStyle.background.ignoresSafeArea())
         .navigationTitle("Coach")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitleDisplayMode(.large)
+        .sheet(isPresented: $showsSource) {
+            NavigationStack {
+                List {
+                    Section("How this answer is made") { Text(engineLine) }
+                    Section { Text("Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique.") }
+                }
+                .navigationTitle("About Coach")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showsSource = false } } }
+            }
+            .presentationDetents([.medium, .large])
+        }
         .onAppear { conversation.refresh(history: history) }
     }
 
@@ -105,9 +133,10 @@ struct CoachView: View {
                 } label: {
                     Text(question)
                         .font(.subheadline)
+                        .frame(minHeight: 44, alignment: .leading)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 9)
-                        .background(HomeStyle.card, in: Capsule())
+                        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 14))
                 }
                 .buttonStyle(.plain)
             }
@@ -123,17 +152,17 @@ struct CoachView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(message.text)
                     .font(.body)
-                    .foregroundStyle(isCoach ? Color.primary : Color(uiColor: .systemBackground))
+                    .foregroundStyle(isCoach ? Color.primary : Color.white)
                     .fixedSize(horizontal: false, vertical: true)
                 if isCoach, let engine = message.engine {
                     Text(engine.label)
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundStyle(HomeStyle.supportingText)
                 }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(isCoach ? HomeStyle.card : Color.primary,
+            .background(isCoach ? HomeStyle.card : HomeStyle.filledAccent,
                         in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             if isCoach { Spacer(minLength: 40) }
         }

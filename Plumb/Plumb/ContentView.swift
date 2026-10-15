@@ -3,14 +3,15 @@ import UIKit
 
 private enum PlumbStyle {
     static let ink = Color.primary
-    static let supportingText = Color.primary.opacity(0.72)
-    static let primaryButtonText = Color(uiColor: .systemBackground)
+    static let supportingText = Color(uiColor: .secondaryLabel)
+    static let primaryButtonText = Color.white
 }
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var model: WorkoutSessionModel
     @State private var observationSpeaker = ObservationSpeaker()
     /// Headphones and a paired Apple Watch; idle unless `connectsAccessories`.
@@ -22,7 +23,15 @@ struct ContentView: View {
     @State private var deleteCandidate: UUID?
     @State private var deleteAllRequested = false
     /// History, Options or Privacy, opened from the first screen.
-    @State private var route: HomeRoute?
+    @State private var tabRoutes: [HomeTab: HomeRoute] = [:]
+    @State private var sessionRoute: HomeRoute?
+    private var route: HomeRoute? {
+        get { model.stage == .ready ? tabRoutes[selectedTab] : sessionRoute }
+        nonmutating set {
+            if model.stage == .ready { tabRoutes[selectedTab] = newValue }
+            else { sessionRoute = newValue }
+        }
+    }
     @State private var selectedTab: HomeTab = .home
     /// What the camera does, shown once before iOS asks for it.
     @State private var showsCameraPrimer = false
@@ -95,50 +104,43 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                switch model.stage {
-                case .ready: setup
-                case .openingCamera: ProgressView("Opening camera")
-                case .framing, .countdown, .capturing, .analyzing: capture
-                case .result: result
-                case .error(let issue): failure(issue)
+        ZStack {
+            // Keep each tab's navigation and Coach draft alive while a set is on screen.
+            setup
+                .opacity(model.stage == .ready ? 1 : 0)
+                .allowsHitTesting(model.stage == .ready)
+                .accessibilityHidden(model.stage != .ready)
+            if model.stage != .ready {
+                NavigationStack {
+                    sessionContent
+                        .navigationDestination(item: $sessionRoute) { destinationPage($0) }
                 }
+                .background(HomeStyle.background)
             }
-            .navigationTitle("Plumb")
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .navigationDestination(item: $route) { destination in
-                destinationPage(destination)
-                    .toolbar(.visible, for: .navigationBar)
+        }
+        #if DEBUG
+        .onAppear {
+            let arguments = ProcessInfo.processInfo.arguments
+            guard route == nil, let index = arguments.firstIndex(of: "-plumb-open"),
+                  arguments.indices.contains(index + 1) else { return }
+            switch arguments[index + 1] {
+            case "coach": selectedTab = .coach
+            case "workout": selectedTab = .workout
+            case "history": selectedTab = .history
+            case "options": route = .options
+            case "privacy": route = .privacy
+            case "awards": route = .awards
+            case "health": model.showsPersonalizationOffer = true
+            default: break
             }
+        }
+        #endif
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             #if DEBUG
-            .onAppear {
-                let arguments = ProcessInfo.processInfo.arguments
-                guard route == nil, let index = arguments.firstIndex(of: "-plumb-open"),
-                      arguments.indices.contains(index + 1) else { return }
-                switch arguments[index + 1] {
-                case "coach": route = .coach
-                case "options": route = .options
-                case "awards": route = .awards
-                default: break
-                }
-            }
+            if isDemo && !isCaptureStage && !isErrorStage { demoIndicator }
             #endif
         }
-        .overlay(alignment: .top) {
-            #if DEBUG
-            if isDemo && !isCaptureStage && !isErrorStage {
-                Text("DEMO INPUT")
-                    .font(.caption.bold())
-                    .foregroundStyle(.black)
-                    .padding(6)
-                    .background(.yellow, in: Capsule())
-                    .padding(.top, 6)
-                    .accessibilityHidden(true)
-            }
-            #endif
-        }
-        .tint(PlumbStyle.ink)
+        .tint(HomeStyle.accent)
         #if DEBUG
         .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
         #endif
@@ -146,6 +148,7 @@ struct ContentView: View {
         // camera is open, or Auto-Lock interrupts framing and throws the set away.
         .onChange(of: model.stage, initial: true) { _, stage in
             UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(stage)
+            if stage == .ready { sessionRoute = nil }
         }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
         // Siri or a shortcut asked for a set or the history; a set in progress is never interrupted.
@@ -162,7 +165,7 @@ struct ContentView: View {
             PersonalizationOfferView { personalize in
                 Task { await model.answerPersonalizationOffer(personalize: personalize) }
             }
-            .presentationDetents([.medium, .large])
+            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         }
         .fullScreenCover(isPresented: $showsOnboarding) {
             OnboardingView(preferences: preferences) { profile in
@@ -261,30 +264,67 @@ struct ContentView: View {
         return model.leavesHealthWorkout(forSession: id)
     }
 
-    /// Keep the existing camera setup intact inside the Workout tab.
+    #if DEBUG
+    private var demoIndicator: some View {
+        Text("DEMO INPUT")
+            .font(.caption.bold())
+            .dynamicTypeSize(...DynamicTypeSize.large)
+            .foregroundStyle(.black)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(.yellow, in: Capsule())
+            .accessibilityHidden(true)
+    }
+    #endif
+
+    @ViewBuilder private var sessionContent: some View {
+        switch model.stage {
+        case .ready: EmptyView()
+        case .openingCamera: ProgressView("Opening camera")
+        case .framing, .countdown, .capturing, .analyzing: capture
+        case .result: result
+        case .error(let issue): failure(issue)
+        }
+    }
+
     private var setup: some View {
-        Group {
-            switch selectedTab {
-            case .home:
-                DashboardView(history: model.history, exercise: model.selectedExercise,
-                              badges: badges.earned) { route = $0 }
-            case .workout:
-                workoutSetup
-            case .coach:
-                CoachView(history: model.history)
-            case .posture:
-                // The sets Plumb measured, with what it noticed in each: posture lives in the history.
-                historyList(title: "Posture", exercise: nil)
-                    .scrollContentBackground(.hidden)
+        TabView(selection: $selectedTab) {
+            ForEach(HomeTab.allCases, id: \.self) { tab in
+                NavigationStack {
+                    tabContent(tab)
+                        .navigationDestination(item: Binding(
+                            get: { tabRoutes[tab] },
+                            set: { tabRoutes[tab] = $0 }
+                        )) { destinationPage($0) }
+                        .toolbar {
+                            if tab != .workout {
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    Button { route = .account } label: {
+                                        Label("Settings", systemImage: "gearshape")
+                                    }
+                                    .accessibilityIdentifier("home.account")
+                                }
+                            }
+                        }
+                }
+                .tabItem {
+                    Label(LocalizedStringKey(tab.rawValue), systemImage: tab.symbol)
+                        .accessibilityIdentifier(tab.identifier)
+                }
+                .tag(tab)
             }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            HomeTabBar(selection: $selectedTab)
+    }
+
+    @ViewBuilder private func tabContent(_ tab: HomeTab) -> some View {
+        switch tab {
+        case .home:
+            DashboardView(history: model.history, exercise: model.selectedExercise,
+                          badges: badges.earned, startWorkout: { selectedTab = .workout }) { route = $0 }
+        case .workout: workoutSetup
+        case .history: historyPage
+        case .coach: CoachView(history: model.history)
         }
-        .background { HomeBackdrop() }
-        .toolbar(selectedTab == .workout || selectedTab == .posture ? .visible : .hidden, for: .navigationBar)
-        .environment(\.colorScheme, .dark)
-        .preferredColorScheme(.dark)
     }
 
     @ViewBuilder private func destinationPage(_ destination: HomeRoute) -> some View {
@@ -314,7 +354,7 @@ struct ContentView: View {
     private var accountPage: some View {
         List {
             Section {
-                Label("Your Plumb", systemImage: "person.crop.circle")
+                Label("Plumb", systemImage: "figure.strengthtraining.functional")
                     .font(.title2.weight(.semibold))
                     .padding(.vertical, 8)
                 Text("Your workouts are stored on this iPhone.")
@@ -332,11 +372,11 @@ struct ContentView: View {
                 }
             }
             Section("Account") {
-                Text("Plumb needs no account: there is no server, nothing to sign in to, and nothing to sync.")
+                Text("No account is needed. Plumb keeps your saved workouts on this iPhone.")
                     .foregroundStyle(.secondary)
             }
         }
-        .navigationTitle("Account settings")
+        .navigationTitle("Settings")
         .toolbarTitleDisplayMode(.inline)
     }
 
@@ -410,9 +450,9 @@ struct ContentView: View {
             VStack(spacing: 4) {
                 // Said where the decision is made: before the camera opens.
                 Button { route = .privacy } label: {
-                    Label("Analyzed on this iPhone. No video is saved.", systemImage: "lock.fill")
+                    Label(dynamicTypeSize.isAccessibilitySize ? "Camera privacy" : "Analyzed on this iPhone. No video is saved.", systemImage: "lock.fill")
                         .font(.footnote)
-                        .foregroundStyle(HomeStyle.supportingText)
+                        .foregroundStyle(Color.primary)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .contentShape(Rectangle())
@@ -437,7 +477,8 @@ struct ContentView: View {
             .padding(.bottom, 8)
         }
         .background(HomeStyle.background.ignoresSafeArea())
-        .navigationSubtitle("Find your line.")
+        .navigationTitle("Workout")
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
@@ -720,8 +761,11 @@ struct ContentView: View {
             .font(.body)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
+            .frame(maxWidth: 680)
+            .frame(maxWidth: .infinity)
         }
         .scrollIndicators(.hidden)
+        .background(HomeStyle.background)
         .navigationTitle("Privacy")
         .navigationBarTitleDisplayMode(.large)
     }
@@ -977,9 +1021,11 @@ struct ContentView: View {
                         handsFreeHint
                     }
                     Button { Task { await model.beginSet() } } label: {
-                        Text("Start set").foregroundStyle(.black)
+                        Label("Start set", systemImage: "play.fill").foregroundStyle(.black)
+                            .frame(minWidth: 160, minHeight: 32)
                     }
                         .buttonStyle(.borderedProminent)
+                .tint(HomeStyle.filledAccent)
                         .controlSize(.large)
                         .tint(.white)
                 } else if model.stage == .capturing {
@@ -1002,11 +1048,13 @@ struct ContentView: View {
                         let tappedAt = ContinuousClock.now
                         Task { await model.endSet(tappedAt: tappedAt) }
                     } label: {
-                        Text("Stop set").foregroundStyle(.black)
+                        Label("Stop set", systemImage: "stop.fill").foregroundStyle(.white)
+                            .frame(minWidth: 160, minHeight: 32)
                     }
                         .buttonStyle(.borderedProminent)
+                .tint(HomeStyle.filledAccent)
                         .controlSize(.large)
-                        .tint(.white)
+                        .tint(.red)
                 } else if case .countdown(let count) = model.stage {
                     Text("\(count)")
                         .font(.system(size: 72, weight: .semibold, design: .rounded))
@@ -1056,7 +1104,7 @@ struct ContentView: View {
     /// until there is something to say, so the count never moves.
     private var liveCue: some View {
         Text(model.liveCaption ?? " ")
-            .font(.system(size: liveCueSize, weight: .heavy, design: .rounded))
+            .font(.system(size: liveCueSize, weight: .bold, design: .default))
             .multilineTextAlignment(.center)
             .lineLimit(2)
             .minimumScaleFactor(0.6)
@@ -1066,7 +1114,7 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, minHeight: liveCueSize * 1.6)
             .background(.white, in: RoundedRectangle(cornerRadius: 22))
             .opacity(model.liveCaption == nil ? 0 : 1)
-            .animation(.snappy, value: model.liveCaption)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: model.liveCaption)
             .accessibilityHidden(model.liveCaption == nil)
             .accessibilityIdentifier("capture.liveCaption")
     }
@@ -1080,7 +1128,7 @@ struct ContentView: View {
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
                 .contentTransition(.numericText())
-                .animation(.snappy, value: model.liveRepCount)
+                .animation(reduceMotion ? nil : .snappy, value: model.liveRepCount)
             // The exercise being measured, such as "push-ups", so a wrong choice shows before the reps
             // are done (13 October: push-ups filmed while Squat was chosen counted nothing).
             Text(captureCopy.name.lowercased() + (model.liveRepCount == 1 ? "" : "s"))
@@ -1140,33 +1188,9 @@ struct ContentView: View {
         // last visible line, which the large-text audit reports as clipped text.
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    // Back to the first screen without ending the session (Done does that): the exercise
-                    // picker, Options and History are there, and the next set still joins this session.
-                    // Up here, not in the bottom bar, so the bar over the scroll view stays one button high.
-                    Button("Back") {
-                        observationSpeaker.stop()
-                        Task { await model.cancel() }
-                    }
-                    .buttonStyle(.plain)
-                    .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
-                    .accessibilityHint("Returns to the first screen to change the exercise or options. This session stays open.")
-                    .accessibilityIdentifier("result.back")
-                    Spacer()
-                    Button("Done") {
-                        observationSpeaker.stop()
-                        Task { await model.finishSession() }
-                    }
-                    .buttonStyle(.plain)
-                    .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
-                }
                 Text(resultTitle)
                     .font(.largeTitle.bold())
-                if !badges.justEarned.isEmpty {
-                    BadgeUnlockCard(badges: badges.justEarned) { route = .awards }
-                }
+                    .accessibilityAddTraits(.isHeader)
                 if model.endedEarly {
                     Text("The camera stopped during the set. Plumb reviewed the part it captured.")
                         .font(.footnote)
@@ -1188,10 +1212,16 @@ struct ContentView: View {
                 if let result = model.result {
                     switch result {
                     case .measured(let analysis, let cue):
-                        Text("\(analysis.reps.count) measured reps")
-                            .font(.subheadline)
-                            .monospacedDigit()
-                            .foregroundStyle(PlumbStyle.supportingText)
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            Text("\(analysis.reps.count)")
+                                .font(.largeTitle.bold()).monospacedDigit()
+                            Text("measured reps").font(.headline).foregroundStyle(.secondary)
+                        }
+                        .padding(20)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 20))
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("\(analysis.reps.count) measured reps")
                         recognitionNote
                         if let note = model.movementNote {
                             Text(note)
@@ -1324,6 +1354,9 @@ struct ContentView: View {
                         Text("Camera capture stopped before the set was complete.")
                     }
                 }
+                if !badges.justEarned.isEmpty {
+                    BadgeUnlockCard(badges: badges.justEarned) { route = .awards }
+                }
                 #if DEBUG
                 if isValidationMode, let milliseconds = model.lastStopToResultMilliseconds {
                     Text("Validation timing · Stop to result: \(milliseconds) ms")
@@ -1342,6 +1375,8 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .padding(.vertical, 24)
+            .frame(maxWidth: 680)
+            .frame(maxWidth: .infinity)
         }
         .safeAreaInset(edge: .bottom) {
             Button {
@@ -1353,12 +1388,32 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity)
             }
                 .buttonStyle(.borderedProminent)
+                .tint(HomeStyle.filledAccent)
                 .controlSize(.large)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
                 .background(.bar)
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .background(HomeStyle.background)
+        .navigationTitle("Set summary")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Back", systemImage: "chevron.left") {
+                    observationSpeaker.stop()
+                    Task { await model.cancel() }
+                }
+                .accessibilityHint("Change exercise or options while keeping this session open.")
+                .accessibilityIdentifier("result.back")
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Done") {
+                    observationSpeaker.stop()
+                    Task { await model.finishSession() }
+                }
+                .font(.body.weight(.semibold))
+            }
+        }
         .onDisappear { observationSpeaker.stop() }
     }
 
@@ -1383,7 +1438,10 @@ struct ContentView: View {
             Text("Deepest and shallowest rep")
                 .font(.headline)
                 .accessibilityAddTraits(.isHeader)
-            HStack(alignment: .top, spacing: 12) {
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+                : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
+            layout {
                 repSnapshotView(extremes.deepest, title: String(localized: "Deepest"))
                 repSnapshotView(extremes.shallowest, title: String(localized: "Shallowest"))
             }
@@ -1473,7 +1531,7 @@ struct ContentView: View {
     private var historyPage: some View { historyList(title: "History", exercise: nil) }
 
     /// The saved sessions, every one or only those with a set of `exercise`.
-    private func historyList(title: String, exercise: ExerciseKind?) -> some View {
+    private func historyList(title: LocalizedStringKey, exercise: ExerciseKind?) -> some View {
         let sessions = exercise.map { kind in
             model.history.filter { $0.sets.contains { $0.exercise == kind } }
         } ?? model.history
@@ -1602,7 +1660,9 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
+        .background(HomeStyle.background)
         .navigationTitle("Session")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func comparisonView(_ comparison: Comparison) -> some View {
@@ -1708,6 +1768,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
+                .tint(HomeStyle.filledAccent)
                     Button("Try again") {
                         Task { await model.cancel(); await model.startPreview() }
                     }
@@ -1723,6 +1784,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
+                .tint(HomeStyle.filledAccent)
                 }
                 // The first screen, with History, Options, Privacy and an open session's Finish
                 // session, stays reachable while the camera cannot be used.

@@ -1,12 +1,14 @@
 import AVFoundation
 import SwiftUI
 
-/// Colors of the first screen. Plumb stays black and white: the dark camera card carries the screen,
-/// not an accent color.
+/// Shared semantic colours. Content surfaces stay opaque; system bars provide materials.
 enum HomeStyle {
-    static let background = Color(uiColor: .systemBackground)
-    static let card = Color(uiColor: .secondarySystemBackground)
-    static let supportingText = Color.primary.opacity(0.72)
+    static let background = Color(uiColor: .systemGroupedBackground)
+    static let accent = Color(uiColor: .systemBlue)
+    /// A deeper blue keeps white action labels legible in both appearances.
+    static let filledAccent = Color(red: 0.0, green: 0.35, blue: 0.75)
+    static let card = Color(uiColor: .secondarySystemGroupedBackground)
+    static let supportingText = Color(uiColor: .secondaryLabel)
     /// The camera card is dark in both appearances, like the camera view it stands for.
     static let cameraTop = Color(white: 0.11)
     static let cameraBottom = Color(white: 0.05)
@@ -42,11 +44,12 @@ struct ExerciseChips: View {
     /// The order of the chips: the exercises picked at the first launch come first.
     var order: [ExerciseKind] = ExerciseKind.allCases
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         if dynamicTypeSize.isAccessibilitySize {
             Menu {
-                Picker("Exercise", selection: $selection.animation(HomeStyle.spring)) {
+                Picker("Exercise", selection: $selection.animation(reduceMotion ? nil : HomeStyle.spring)) {
                     ForEach(order, id: \.self) { kind in
                         Text(kind.definition.copy.name).tag(kind)
                     }
@@ -78,7 +81,7 @@ struct ExerciseChips: View {
                 // The chosen exercise is kept across launches: bring its chip into view.
                 .onAppear { proxy.scrollTo(selection, anchor: .center) }
                 .onChange(of: selection) { _, kind in
-                    withAnimation(HomeStyle.spring) { proxy.scrollTo(kind, anchor: .center) }
+                    withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(kind, anchor: .center) }
                 }
             }
             .sensoryFeedback(.selection, trigger: selection)
@@ -88,14 +91,14 @@ struct ExerciseChips: View {
     private func chip(_ kind: ExerciseKind) -> some View {
         let selected = kind == selection
         return Button {
-            withAnimation(HomeStyle.spring) { selection = kind }
+            withAnimation(reduceMotion ? nil : HomeStyle.spring) { selection = kind }
         } label: {
             Text(kind.chipName)
                 .font(.subheadline.weight(.semibold))
                 .padding(.horizontal, 15)
                 .frame(minHeight: 44)
-                .foregroundStyle(selected ? Color(uiColor: .systemBackground) : Color.primary)
-                .background(selected ? Color.primary : HomeStyle.card, in: Capsule())
+                .foregroundStyle(selected ? Color.white : Color.primary)
+                .background(selected ? HomeStyle.filledAccent : HomeStyle.card, in: Capsule())
                 .contentShape(Capsule())
         }
         .buttonStyle(PressableStyle())
@@ -111,7 +114,7 @@ struct ExerciseHeroCard: View {
     let kind: ExerciseKind
     /// Shorter once there is a last session to show below it.
     var compact = false
-    @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 340
+    @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 190
 
     var body: some View {
         let copy = kind.definition.copy
@@ -126,10 +129,10 @@ struct ExerciseHeroCard: View {
                                     : "Filmed from the side, the front or the back")
             ExerciseFigureView(kind: kind)
                 .frame(maxWidth: .infinity)
-                .frame(height: min(compact ? figureHeight * 0.62 : figureHeight, 400))
+                .frame(height: min(compact ? figureHeight * 0.62 : figureHeight, 220))
                 .padding(.vertical, 12)
                 .id(kind)
-                .transition(.blurReplace)
+                .transition(.opacity)
             Text(copy.name)
                 .font(.title3.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
@@ -143,10 +146,10 @@ struct ExerciseHeroCard: View {
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom], startPoint: .top, endPoint: .bottom),
-            in: RoundedRectangle(cornerRadius: 32, style: .continuous)
+            HomeStyle.cameraBottom,
+            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
         )
-        .overlay(RoundedRectangle(cornerRadius: 32, style: .continuous)
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
             .strokeBorder(.white.opacity(0.08), lineWidth: 1))
         .environment(\.colorScheme, .dark)
         .accessibilityElement(children: .combine)
@@ -162,34 +165,25 @@ struct HomeCard<Content: View>: View {
         content
             .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
-/// The one filled action of a screen: a full-width pill with its arrow in a circle of its own.
+/// A consistent, clearly labelled primary action across setup, permissions and onboarding.
 struct PrimaryActionLabel: View {
     let title: LocalizedStringKey
     var symbol = "arrow.right"
 
     var body: some View {
-        HStack(spacing: 12) {
-            Text(title)
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Image(systemName: symbol)
-                .font(.headline)
-                .foregroundStyle(Color.primary)
-                .frame(width: 44, height: 44)
-                .background(Color(uiColor: .systemBackground), in: Circle())
-                .accessibilityHidden(true)
-        }
-        .padding(.leading, 24)
-        .padding(.trailing, 8)
-        .padding(.vertical, 8)
-        .frame(minHeight: 60)
-        .foregroundStyle(Color(uiColor: .systemBackground))
-        .background(Color.primary, in: Capsule())
-        .contentShape(Capsule())
+        Label(title, systemImage: symbol)
+            .font(.headline)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .foregroundStyle(.white)
+            .background(HomeStyle.filledAccent, in: RoundedRectangle(cornerRadius: 16))
+            .contentShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -198,7 +192,7 @@ struct PressableStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.985 : 1)
             .opacity(configuration.isPressed ? 0.9 : 1)
             .animation(reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
     }
@@ -254,7 +248,7 @@ struct CameraPrimer: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
         }
-        .tint(.primary)
+        .tint(HomeStyle.accent)
     }
 
     private func primerRow(_ symbol: String, _ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
@@ -280,6 +274,6 @@ extension View {
     func optionCard() -> some View {
         padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }

@@ -525,6 +525,8 @@ final class WorkoutFlowUITests: XCTestCase {
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ]) { issue in
+            // The noninteractive Debug marker is deliberately capped; it is absent in Release.
+            if issue.element?.label == "DEMO INPUT" { return true }
             let element = issue.element.map {
                 "\($0.elementType.rawValue) '\($0.label)' id '\($0.identifier)' at \($0.frame)"
             } ?? "no element"

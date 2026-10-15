@@ -1,16 +1,14 @@
-# Home dashboard
+# Native interface
 
-The dashboard became Plumb's main screen on 15 October 2026. [DashboardView.swift](../../Plumb/Plumb/Home/DashboardView.swift) shows recent activity and routes people to their next set. The [Workout flow](iphone-experience-review.md) keeps its exercise picker and camera setup.
+Plumb uses four system tabs: Summary, Workout, History and Coach. Each keeps its own navigation state. Settings is available in the toolbar; Workout also has a menu for related screens.
 
-| Destination | Current behavior |
-| --- | --- |
-| Home | Latest saved session, Sessions link, and account settings |
-| Coach | Conversation grounded in saved set summaries |
-| Workout | Exercise selection and capture flow |
-| Posture, Weights, Awards, Plumb+ | Clearly marked placeholders |
+- **Summary:** saved-session totals, recent workout, most measured reps for the selected exercise, and awards. Empty states explain the next step.
+- **Workout:** exercise selection, illustrated camera placement, relevant saved observations, and Start a set.
+- **History:** saved measurements, session details and deletion controls.
+- **Coach:** a conversation grounded in saved sets, with source information one tap away.
 
-The tab bar uses native Liquid Glass, with opaque surfaces under Reduce Transparency. Reduce Motion removes selection animation; accessibility text sizes use one-column cards. The photo in [HomeBackdrop](../../Plumb/Plumb/Assets.xcassets/HomeBackdrop.imageset/home-backdrop.png) is decorative generated artwork, not workout footage. Debug preview data is visibly labeled and does not enter history.
+Use system text styles, semantic grouped backgrounds and a single blue action accent. Reserve system glass for navigation and controls. Show real measurements; avoid decorative charts, unimplemented feature cards and generated photo backdrops. Keep camera controls legible over live footage.
 
-[Dashboard screenshot](screenshots/2026-10-14-home-dashboard.png) · [Tab-bar screenshot](screenshots/2026-10-14-liquid-glass-tab-bar.png)
+[Research and design decisions](../architecture/specs/2026-10-15-native-ui-design.md) · [HIG coverage](hig-ui-coverage.md) · [Verification](native-ui-verification.md) · [Implementation plan](../architecture/plans/2026-10-15-native-ui.md)
 
-[Pull request 25](https://github.com/james8464/hackathon-project/pull/25) combined the dashboard with the existing Coach and Workout flows; its focused iOS 27 simulator run passed 400 tests. Physical-device layout and camera-flow checks remain outstanding.
+The earlier photo dashboard is preserved in Git history and [PR 25](https://github.com/james8464/hackathon-project/pull/25). Its screenshots describe that version, not the current interface.

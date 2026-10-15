@@ -3,7 +3,7 @@ import WidgetKit
 
 /// The views of the home screen widget and the Live Activity. They live with the app's sources so
 /// unit tests can render them to images; the extension declares the widgets around them.
-/// Monochrome like the app: labels in the primary color, the system background behind.
+/// Semantic surfaces and one accent match the app while adapting to widget rendering modes.
 
 // MARK: - Last set widget
 
@@ -39,9 +39,11 @@ struct LastSetWidgetView: View {
                     .font(.system(size: 44, weight: .semibold, design: .rounded))
                     .monospacedDigit()
                     .minimumScaleFactor(0.6)
-                Text(snapshot.exerciseName)
+                exerciseLabel(snapshot)
                     .font(.headline)
-                Text(Self.when(snapshot.capturedAt, now: now))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                Text(snapshot.partlyVisible ? String(localized: "Partly visible · \(Self.when(snapshot.capturedAt, now: now))") : Self.when(snapshot.capturedAt, now: now))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -66,7 +68,7 @@ struct LastSetWidgetView: View {
                         Text("\(snapshot.reps)")
                             .font(.system(size: 44, weight: .semibold, design: .rounded))
                             .monospacedDigit()
-                        Text(snapshot.exerciseName)
+                        exerciseLabel(snapshot)
                             .font(.headline)
                     }
                     HStack(spacing: 0) {
@@ -93,18 +95,24 @@ struct LastSetWidgetView: View {
                         .font(.footnote.weight(.semibold))
                         .multilineTextAlignment(.center)
                 }
-                .foregroundStyle(Color(uiColor: .systemBackground))
+                .foregroundStyle(.white)
                 .frame(width: 92)
                 .frame(maxHeight: .infinity)
-                .background(Color.primary, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .background(Color.blue, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .widgetAccentable()
             }
             .accessibilityLabel("Start a set in Plumb")
         }
     }
 
+    private func exerciseLabel(_ snapshot: LastSetSnapshot) -> Text {
+        if snapshot.reps == 1 { Text("rep · \(snapshot.exerciseName)") }
+        else { Text("reps · \(snapshot.exerciseName)") }
+    }
+
     private var header: some View {
         HStack(spacing: 4) {
-            Image(systemName: "scope")
+            Image(systemName: "figure.strengthtraining.functional")
                 .font(.caption.weight(.semibold))
             Text("Last set")
                 .font(.caption.weight(.semibold))
@@ -134,14 +142,14 @@ struct SetActivityLockScreenView: View {
         HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
-                    Image(systemName: "scope")
+                    Image(systemName: "figure.strengthtraining.functional")
                     Text("Plumb · \(attributes.exerciseName)")
                     if attributes.demoInput { DemoTag() }
                 }
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 Text(state.reps == 1 ? "1 rep" : "\(state.reps) reps")
-                    .font(.system(size: 34, weight: .semibold, design: .rounded))
+                    .font(.largeTitle.weight(.semibold))
                     .monospacedDigit()
                     .contentTransition(.numericText())
             }
@@ -167,7 +175,7 @@ struct SetActivityCompactLeading: View {
     let state: PlumbSetActivityAttributes.ContentState
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: "scope")
+            Image(systemName: "figure.strengthtraining.functional")
             Text("\(state.reps)")
                 .monospacedDigit()
                 .contentTransition(.numericText())

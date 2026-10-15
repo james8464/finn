@@ -5,7 +5,7 @@ The root [README](../README.md) owns current build status. [Planning](../plannin
 | Area | Start here |
 | --- | --- |
 | Product | [Brief](product/brief.md), [user needs](product/user-needs.md), [market research](product/market-research.md), [rationale](product/rationale.md), [pitch](product/pitch.md) |
-| Design | [Brand](../Design/README.md), [Home dashboard](design/home-dashboard.md), [Workout flow](design/iphone-experience-review.md), [Watch and AirPods](design/apple-watch-and-airpods.md), [Apple HIG reference](design/apple-hig-agent-reference.md) |
+| Design | [Brand](../Design/README.md), [Native interface](design/home-dashboard.md), [research](architecture/specs/2026-10-15-native-ui-design.md), [HIG coverage](design/hig-ui-coverage.md), [Workout flow](design/iphone-experience-review.md), [Watch and AirPods](design/apple-watch-and-airpods.md), [Apple HIG reference](design/apple-hig-agent-reference.md) |
 | Validation | [Protocol](validation/squat-v1-protocol.md), [results](validation/squat-v1-results.md), [exercise rules](validation/exercise-rules-v1.md), [form checks](validation/form-checks-v1.md), [device run](validation/physical-iphone-run.md), [replay guide](../tools/replay/README.md) |
 | Release | [Submission](release/app-store-submission.md), [listing](release/listing-copy.md), [privacy answers](release/app-privacy-answers.md), [screenshots](release/screenshots/README.md) |
 | Architecture | [Decisions & plans](architecture/) |

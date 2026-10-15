@@ -23,6 +23,12 @@ final class CoachConversation {
     convenience init(history: [WorkoutSessionSummary]) {
         var extra: [any CoachEngine] = []
         #if DEBUG
+        // Synthetic UI tours must not call a live model service. An unsigned iOS 27
+        // simulator can advertise PCC as available, then trap inside FoundationModels.
+        if ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo") {
+            self.init(history: history, responder: CoachResponder(selector: CoachEngineSelector(engines: [])))
+            return
+        }
         extra.append(ClaudeDemoCoachEngine())
         #endif
         self.init(history: history, responder: CoachResponder(selector: .standard(extra: extra)))

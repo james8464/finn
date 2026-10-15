@@ -4,19 +4,22 @@ extension XCUIApplication {
     /// A fresh simulator shows the welcome screens first; tests that want the app itself skip them.
     @MainActor
     func skipOnboardingIfShown() {
-        let skip = buttons["onboarding.skip"]
+        let skip = buttons["onboarding.finish"]
         guard skip.waitForExistence(timeout: 2) else { return }
-        for _ in 0..<6 where skip.exists {
-            skip.tap()
-            Thread.sleep(forTimeInterval: 0.4)
-        }
+        skip.tap()
+        XCTAssertTrue(tabBars.firstMatch.waitForExistence(timeout: 8))
     }
 
     @MainActor
     func openWorkoutTab() {
         skipOnboardingIfShown()
-        let tab = buttons["tab.workout"]
-        XCTAssertTrue(tab.waitForExistence(timeout: 5))
+        selectTab("Workout")
+    }
+
+    @MainActor
+    func selectTab(_ title: String) {
+        let tab = tabBars.buttons[title]
+        XCTAssertTrue(tab.waitForExistence(timeout: 8), "Missing native tab: \(title)")
         tab.tap()
     }
 

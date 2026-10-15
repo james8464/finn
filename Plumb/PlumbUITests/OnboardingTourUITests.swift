@@ -6,7 +6,7 @@ final class OnboardingTourUITests: XCTestCase {
     private var folder: URL!
 
     override func setUpWithError() throws {
-        continueAfterFailure = true
+        continueAfterFailure = false
         let path = ProcessInfo.processInfo.environment["PLUMB_CAPTURE_DIR"]
         try XCTSkipIf(path == nil, "Set TEST_RUNNER_PLUMB_CAPTURE_DIR to save the tour.")
         folder = URL(fileURLWithPath: path!, isDirectory: true)
@@ -55,11 +55,14 @@ final class OnboardingTourUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-plumb-ui-badges-demo"]
         app.launch()
-        XCTAssertTrue(app.buttons["home.awards"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.tabBars.buttons["Summary"].waitForExistence(timeout: 8))
+        let awards = app.buttons["home.awards"]
+        for _ in 0..<4 where !awards.isHittable { app.swipeUp() }
+        XCTAssertTrue(awards.isHittable)
         Thread.sleep(forTimeInterval: 1)
         save("accueil-carte-awards")
         app.buttons["home.awards"].tap()
-        XCTAssertTrue(app.staticTexts["badges.count"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "badges.summary").firstMatch.waitForExistence(timeout: 5))
         Thread.sleep(forTimeInterval: 0.8)
         save("badges-1-haut")
         app.swipeUp()
@@ -70,8 +73,7 @@ final class OnboardingTourUITests: XCTestCase {
         let empty = XCUIApplication()
         empty.launchArguments = ["-plumb-ui-demo", "-plumb-open", "awards"]
         empty.launch()
-        XCTAssertTrue(empty.otherElements["badges.empty"].waitForExistence(timeout: 8)
-                      || empty.staticTexts["Your first badge is one set away."].waitForExistence(timeout: 2))
+        XCTAssertTrue(empty.descendants(matching: .any).matching(identifier: "badges.empty").firstMatch.waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 0.8)
         save("badges-0-vide")
     }
