@@ -9,7 +9,7 @@ App Store Connect > Plumb > App Privacy:
 1. **Privacy Policy URL:** https://james8464.github.io/hackathon-project/privacy.html
 2. **Data collection:** choose **No, we do not collect data from this app**, then **Publish**.
 
-Export compliance, asked when you attach the build: **No**, the app does not use encryption (the only network traffic is Apple's Foundation Models framework reaching Private Cloud Compute inside iOS, with the OS's own TLS, which Apple lists as exempt). To stop the question on every upload, the project needs, in `Plumb/Plumb.xcodeproj/project.pbxproj`, the line `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;` in the four build-settings blocks (Plumb Debug and Release, PlumbWatch Debug and Release). Only the person who owns `project.pbxproj` adds it.
+Export compliance, asked when you attach the build: the project declares `ITSAppUsesNonExemptEncryption = NO` for the app, watch and widget targets. Verify the exact signed archive and answer App Store Connect's export question from that build. Plumb does not add its own encryption; the Apple Foundation Models framework may use iOS networking for Private Cloud Compute.
 
 Why the label stays Data Not Collected, feature by feature:
 
