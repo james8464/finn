@@ -27,7 +27,7 @@ final class HeartRateSession: NSObject {
         let heartRate = HKQuantityType(.heartRate)
         try? await store.requestAuthorization(toShare: [HKObjectType.workoutType()], read: [heartRate])
         guard store.authorizationStatus(for: HKObjectType.workoutType()) == .sharingAuthorized else {
-            problem = "Allow Plumb in Health on your iPhone to see your heart rate here."
+            problem = String(localized: "Allow Plumb in Health on your iPhone to see your heart rate here.")
             return
         }
         let configuration = HKWorkoutConfiguration()
@@ -46,7 +46,7 @@ final class HeartRateSession: NSObject {
             isRunning = true
             problem = nil
         } catch {
-            problem = "Heart rate is not available right now."
+            problem = String(localized: "Heart rate is not available right now.")
             session?.end()
             session = nil
             builder = nil

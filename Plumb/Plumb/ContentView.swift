@@ -483,11 +483,11 @@ struct ContentView: View {
         for set in session.sets where !names.contains(set.exercise.definition.copy.name) {
             names.append(set.exercise.definition.copy.name)
         }
-        let sets = session.sets.count == 1 ? "1 set" : "\(session.sets.count) sets"
+        let sets = String(localized: "\(session.sets.count) sets")
         let when: String = {
             let time = session.startedAt.formatted(date: .omitted, time: .shortened)
-            if Calendar.current.isDateInToday(session.startedAt) { return "Today, \(time)" }
-            if Calendar.current.isDateInYesterday(session.startedAt) { return "Yesterday, \(time)" }
+            if Calendar.current.isDateInToday(session.startedAt) { return String(localized: "Today, \(time)") }
+            if Calendar.current.isDateInYesterday(session.startedAt) { return String(localized: "Yesterday, \(time)") }
             return session.startedAt.formatted(.dateTime.day().month(.abbreviated).hour().minute())
         }()
         // The latest observation the person kept, word for word.
@@ -577,11 +577,11 @@ struct ContentView: View {
 
     /// Under the Apple Fitness switch: why it is off for demo input, or what Health allows.
     private var fitnessOptionNote: String? {
-        guard model.offersFitness else { return "Demo and recorded input are never saved to Apple Health." }
+        guard model.offersFitness else { return String(localized: "Demo and recorded input are never saved to Apple Health.") }
         guard model.savesToFitness else { return nil }
         switch model.fitnessAccess {
-        case .denied: return "Health doesn’t let Plumb save workouts. \(FitnessSaveStatus.needsPermission.text)."
-        case .unavailable: return "\(FitnessSaveStatus.unavailable.text)."
+        case .denied: return String(localized: "Health doesn’t let Plumb save workouts. \(FitnessSaveStatus.needsPermission.text).")
+        case .unavailable: return FitnessSaveStatus.unavailable.text + "."
         case .authorized, .notDetermined: return nil
         }
     }
@@ -727,7 +727,7 @@ struct ContentView: View {
     }
 
     /// One plain fact at the top of Privacy.
-    private func privacyFact(_ symbol: String, _ title: String, _ detail: String) -> some View {
+    private func privacyFact(_ symbol: String, _ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: symbol)
                 .font(.title3)
@@ -1111,7 +1111,7 @@ struct ContentView: View {
                     Image(systemName: "viewfinder")
                     if let joint = model.unclearJoint {
                         // Théophile: say which joint is unclear instead of guessing.
-                        Text("\(joint.rawValue.capitalized) not clear: step back or add light")
+                        Text("\(joint.localizedName) not clear: step back or add light")
                     } else {
                         Text(captureCopy.showJoints)
                     }
@@ -1384,8 +1384,8 @@ struct ContentView: View {
                 .font(.headline)
                 .accessibilityAddTraits(.isHeader)
             HStack(alignment: .top, spacing: 12) {
-                repSnapshotView(extremes.deepest, title: "Deepest")
-                repSnapshotView(extremes.shallowest, title: "Shallowest")
+                repSnapshotView(extremes.deepest, title: String(localized: "Deepest"))
+                repSnapshotView(extremes.shallowest, title: String(localized: "Shallowest"))
             }
             Text("Drawn from the pose points of each rep’s lowest moment. No image is kept.")
                 .font(.footnote)
@@ -1428,7 +1428,7 @@ struct ContentView: View {
         .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
     }
 
-    private func comparisonGapText(_ gap: ComparisonGap) -> String {
+    private func comparisonGapText(_ gap: ComparisonGap) -> LocalizedStringKey {
         switch gap {
         case .differentExercise:
             "Plumb compares sets of the same exercise. Do another set of this exercise to compare."
@@ -1443,7 +1443,7 @@ struct ContentView: View {
         }
     }
 
-    private var resultTitle: String {
+    private var resultTitle: LocalizedStringKey {
         switch model.result {
         case .measured: "Set reviewed"
         case .insufficientView: "Couldn’t assess this set"
@@ -1453,7 +1453,7 @@ struct ContentView: View {
         }
     }
 
-    private var retakeLabel: String {
+    private var retakeLabel: LocalizedStringKey {
         if case .insufficientView = model.result { return "Retake set" }
         if case .measured(_, let cue) = model.result, cue != nil { return "Try this next set" }
         return "Try another set"
@@ -1643,7 +1643,7 @@ struct ContentView: View {
         .padding(.vertical, 12)
     }
 
-    private func comparisonMetric(_ title: String, range: Double, duration: Double,
+    private func comparisonMetric(_ title: LocalizedStringKey, range: Double, duration: Double,
                                   exercise: ExerciseKind) -> some View {
         let definition = exercise.definition
         let noun = definition.copy.rangeNoun

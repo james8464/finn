@@ -10,7 +10,7 @@ nonisolated enum Accessory: String, CaseIterable, Equatable, Sendable {
     var name: String {
         switch self {
         case .appleWatch: "Apple Watch"
-        case .headphones: "AirPods or headphones"
+        case .headphones: String(localized: "AirPods or headphones")
         }
     }
 }
@@ -54,7 +54,7 @@ nonisolated enum AccessoryRoles {
             // The hands are planted on the floor: the wrist can feel a tap but not press a button.
             return AccessoryRole(accessory: .appleWatch, exercise: exercise, isRequired: false,
                                  features: [.seeRepCount, .feelRepTaps],
-                                 limitation: "Your hands stay on the floor, so the set starts and stops from the iPhone or hands-free.")
+                                 limitation: String(localized: "Your hands stay on the floor, so the set starts and stops from the iPhone or hands-free."))
         case .appleWatch:
             return AccessoryRole(accessory: .appleWatch, exercise: exercise, isRequired: false,
                                  features: [.seeRepCount, .feelRepTaps, .startStopFromWrist], limitation: nil)
@@ -114,8 +114,8 @@ nonisolated enum AccessoryGuide {
         guard status.headphonesConnected else { return nil }
         // The route says Bluetooth or wired headphones, not which model, so the line does not say AirPods.
         return AccessoryLine(accessory: .headphones, text: speaksLive
-            ? "Headphones connected: you will hear each rep."
-            : "Headphones connected. Turn on Say reps aloud in Options to hear each rep.")
+            ? String(localized: "Headphones connected: you will hear each rep.")
+            : String(localized: "Headphones connected. Turn on Say reps aloud in Options to hear each rep."))
     }
 
     static func watchLine(for exercise: ExerciseKind, status: AccessoryStatus) -> AccessoryLine? {
@@ -123,15 +123,15 @@ nonisolated enum AccessoryGuide {
         guard watch.isPaired else { return nil }
         guard watch.isAppInstalled else {
             return AccessoryLine(accessory: .appleWatch,
-                                 text: "Apple Watch: install Plumb on your watch to see reps on your wrist.")
+                                 text: String(localized: "Apple Watch: install Plumb on your watch to see reps on your wrist."))
         }
         let fromWrist = AccessoryRoles.role(of: .appleWatch, for: exercise).offers(.startStopFromWrist)
         let text: String
         switch (watch.isReachable, fromWrist) {
-        case (true, true): text = "Apple Watch connected: see each rep and start sets from your wrist."
-        case (true, false): text = "Apple Watch connected: see each rep and feel a tap on your wrist."
-        case (false, true): text = "Apple Watch: open Plumb on your watch to see reps and start sets from your wrist."
-        case (false, false): text = "Apple Watch: open Plumb on your watch to see reps and feel a tap on each one."
+        case (true, true): text = String(localized: "Apple Watch connected: see each rep and start sets from your wrist.")
+        case (true, false): text = String(localized: "Apple Watch connected: see each rep and feel a tap on your wrist.")
+        case (false, true): text = String(localized: "Apple Watch: open Plumb on your watch to see reps and start sets from your wrist.")
+        case (false, false): text = String(localized: "Apple Watch: open Plumb on your watch to see reps and feel a tap on each one.")
         }
         return AccessoryLine(accessory: .appleWatch, text: text)
     }

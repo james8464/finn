@@ -7,23 +7,23 @@ nonisolated enum SetShareSummary {
         let copy = exercise.definition.copy
         let count = analysis.reps.count
         var lines = [
-            "Plumb \(copy.shareNoun) \(comparison == nil ? "set" : "sets")",
-            "\(comparison == nil ? "" : "Latest set: ")\(count) measured \(count == 1 ? "rep" : "reps")"
+            comparison == nil ? String(localized: "Plumb \(copy.shareNoun) set") : String(localized: "Plumb \(copy.shareNoun) sets"),
+            comparison == nil ? String(localized: "\(count) measured reps") : String(localized: "Latest set: \(count) measured reps")
         ]
         if cueDismissed {
-            lines.append("No observation shared.")
+            lines.append(String(localized: "No observation shared."))
         } else if let cue {
-            lines.append("Observation: \(cue.observation)")
-            lines.append("Try next: \(cue.nextAction)")
+            lines.append(String(localized: "Observation: \(cue.observation)"))
+            lines.append(String(localized: "Try next: \(cue.nextAction)"))
         } else {
-            lines.append("No clear observation in this set.")
+            lines.append(String(localized: "No clear observation in this set."))
         }
         if let comparison {
-            lines.append("Compared with the previous set: \(statement(for: comparison.rangeDirection, exercise: exercise))")
-            lines.append("This comparison describes one camera-visible measure, not overall technique or safety.")
+            lines.append(String(localized: "Compared with the previous set: \(statement(for: comparison.rangeDirection, exercise: exercise))"))
+            lines.append(String(localized: "This comparison describes one camera-visible measure, not overall technique or safety."))
         }
-        lines.append("Measured from one side camera view; not a full technique assessment.")
-        lines.append("No video is included.")
+        lines.append(String(localized: "Measured from one side camera view; not a full technique assessment."))
+        lines.append(String(localized: "No video is included."))
         return lines.joined(separator: "\n")
     }
 
@@ -31,9 +31,9 @@ nonisolated enum SetShareSummary {
     static func statement(for direction: RangeDirection, exercise: ExerciseKind) -> String {
         let copy = exercise.definition.copy
         switch direction {
-        case .longer: return "Camera-measured \(copy.rangeNoun) was \(copy.moreRange) in set 2."
-        case .shorter: return "Camera-measured \(copy.rangeNoun) was \(copy.lessRange) in set 2."
-        case .noClearChange: return "No clear measured \(copy.rangeNoun) change between sets."
+        case .longer: return String(localized: "Camera-measured \(copy.rangeNoun) was \(copy.moreRange) in set 2.")
+        case .shorter: return String(localized: "Camera-measured \(copy.rangeNoun) was \(copy.lessRange) in set 2.")
+        case .noClearChange: return String(localized: "No clear measured \(copy.rangeNoun) change between sets.")
         }
     }
 }

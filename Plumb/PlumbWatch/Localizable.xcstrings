@@ -1,0 +1,226 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
+    "%lld bpm" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld bpm"
+          }
+        }
+      }
+    },
+    "Allow Plumb in Health on your iPhone to see your heart rate here." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autorise Plumb dans Santé sur ton iPhone pour voir ta fréquence cardiaque ici."
+          }
+        }
+      }
+    },
+    "DEMO INPUT" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SOURCE DÉMO"
+          }
+        }
+      }
+    },
+    "Get in position" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mets-toi en place"
+          }
+        }
+      }
+    },
+    "Heart rate %lld beats per minute" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence cardiaque : %lld battements par minute"
+          }
+        }
+      }
+    },
+    "Heart rate is not available right now." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence cardiaque indisponible pour l’instant."
+          }
+        }
+      }
+    },
+    "Open Plumb on your iPhone to start a set." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre Plumb sur ton iPhone pour lancer une série."
+          }
+        }
+      }
+    },
+    "Open Plumb on your iPhone, then try again." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre Plumb sur ton iPhone, puis réessaie."
+          }
+        }
+      }
+    },
+    "Reps counted" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions comptées"
+          }
+        }
+      }
+    },
+    "Reviewing" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse en cours"
+          }
+        }
+      }
+    },
+    "Set running" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série en cours"
+          }
+        }
+      }
+    },
+    "Set up the camera on your iPhone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prépare la caméra sur ton iPhone."
+          }
+        }
+      }
+    },
+    "Start set" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrer"
+          }
+        }
+      }
+    },
+    "Start the set on your iPhone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lance la série sur ton iPhone."
+          }
+        }
+      }
+    },
+    "Starting in %lld" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Début dans %lld"
+          }
+        }
+      }
+    },
+    "Stop set" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêter"
+          }
+        }
+      }
+    },
+    "The set starts once you hold still." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La série démarre dès que tu restes immobile."
+          }
+        }
+      }
+    },
+    "Then start the set." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puis lance la série."
+          }
+        }
+      }
+    },
+    "Your iPhone didn’t get that. Try again, or use the iPhone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton iPhone n’a pas reçu l’ordre. Réessaie, ou passe par l’iPhone."
+          }
+        }
+      }
+    },
+    "rep" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétition"
+          }
+        }
+      }
+    },
+    "reps" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "répétitions"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

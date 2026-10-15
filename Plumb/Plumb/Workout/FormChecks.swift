@@ -156,85 +156,85 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
     /// What was checked, for "Plumb couldn't check your ...".
     var subject: String {
         switch self {
-        case .pushUpHipsSag, .pushUpHipsPike: "body line"
-        case .pushUpDepth: "push-up depth"
-        case .squatChestDrop: "chest position"
-        case .squatDepth: "squat depth"
-        case .lungeTorsoLean: "torso position"
-        case .lungeFrontKnee: "front knee bend"
-        case .deadliftKneeBend: "knee bend"
-        case .deadliftHinge: "hip hinge"
+        case .pushUpHipsSag, .pushUpHipsPike: String(localized: "body line")
+        case .pushUpDepth: String(localized: "push-up depth")
+        case .squatChestDrop: String(localized: "chest position")
+        case .squatDepth: String(localized: "squat depth")
+        case .lungeTorsoLean: String(localized: "torso position")
+        case .lungeFrontKnee: String(localized: "front knee bend")
+        case .deadliftKneeBend: String(localized: "knee bend")
+        case .deadliftHinge: String(localized: "hip hinge")
         }
     }
 
     /// The pattern in a few words, for the most frequent pattern.
     var title: String {
         switch self {
-        case .pushUpHipsSag: "Hips sagging below your body line"
-        case .pushUpHipsPike: "Hips raised above your body line"
-        case .pushUpDepth: "Elbows not bending to 90°"
-        case .squatChestDrop: "Chest dropping forward at the bottom"
-        case .squatDepth: "Hips staying above your knees"
-        case .lungeTorsoLean: "Torso leaning forward"
-        case .lungeFrontKnee: "Front knee not bending to 90°"
-        case .deadliftKneeBend: "Knees bending like a squat"
-        case .deadliftHinge: "Hinge stopping early"
+        case .pushUpHipsSag: String(localized: "Hips sagging below your body line")
+        case .pushUpHipsPike: String(localized: "Hips raised above your body line")
+        case .pushUpDepth: String(localized: "Elbows not bending to 90°")
+        case .squatChestDrop: String(localized: "Chest dropping forward at the bottom")
+        case .squatDepth: String(localized: "Hips staying above your knees")
+        case .lungeTorsoLean: String(localized: "Torso leaning forward")
+        case .lungeFrontKnee: String(localized: "Front knee not bending to 90°")
+        case .deadliftKneeBend: String(localized: "Knees bending like a squat")
+        case .deadliftHinge: String(localized: "Hinge stopping early")
         }
     }
 
     /// The sentence on the result, with the reps that showed it and the typical reading.
     func observation(reps: [Int], typical: Double) -> String {
-        let inReps = "in \(FormChecks.list(reps))"
+        let inReps = String(localized: "in \(FormChecks.list(reps))")
         let degrees = Int(typical.rounded())
         let share = Int((abs(typical) * 100).rounded())
         return switch self {
         case .pushUpHipsSag:
-            "Your hips sagged below the line from your shoulders to your ankles \(inReps), by about \(share)% of your torso length."
+            String(localized: "Your hips sagged below the line from your shoulders to your ankles \(inReps), by about \(share)% of your torso length.")
         case .pushUpHipsPike:
-            "Your hips rose above the line from your shoulders to your ankles \(inReps), by about \(share)% of your torso length."
+            String(localized: "Your hips rose above the line from your shoulders to your ankles \(inReps), by about \(share)% of your torso length.")
         case .pushUpDepth:
-            "Your elbows stayed at about \(degrees)° at the bottom \(inReps). A full push-up brings them to about 90°."
+            String(localized: "Your elbows stayed at about \(degrees)° at the bottom \(inReps). A full push-up brings them to about 90°.")
         case .squatChestDrop:
-            "Your chest dropped forward at the bottom \(inReps): your torso leaned about \(degrees)° more than your shins."
+            String(localized: "Your chest dropped forward at the bottom \(inReps): your torso leaned about \(degrees)° more than your shins.")
         case .squatDepth:
-            "Your hips stayed above your knees at the bottom \(inReps): your thighs were about \(degrees)° above level."
+            String(localized: "Your hips stayed above your knees at the bottom \(inReps): your thighs were about \(degrees)° above level.")
         case .lungeTorsoLean:
-            "Your torso leaned about \(degrees)° forward at the bottom \(inReps)."
+            String(localized: "Your torso leaned about \(degrees)° forward at the bottom \(inReps).")
         case .lungeFrontKnee:
-            "Your front knee stayed at about \(degrees)° at the bottom \(inReps). A full lunge brings it near 90°."
+            String(localized: "Your front knee stayed at about \(degrees)° at the bottom \(inReps). A full lunge brings it near 90°.")
         case .deadliftKneeBend:
-            "Your knees bent about \(degrees)° at the bottom of the hinge \(inReps), more like a squat than a stiff-leg deadlift."
+            String(localized: "Your knees bent about \(degrees)° at the bottom of the hinge \(inReps), more like a squat than a stiff-leg deadlift.")
         case .deadliftHinge:
-            "Your torso stopped at about \(degrees)° from upright \(inReps), early in the hinge."
+            String(localized: "Your torso stopped at about \(degrees)° from upright \(inReps), early in the hinge.")
         }
     }
 
     var nextAction: String {
         switch self {
-        case .pushUpHipsSag: "Squeeze your glutes and brace your stomach so your body stays one straight line."
-        case .pushUpHipsPike: "Lower your hips until your shoulders, hips and ankles line up."
-        case .pushUpDepth: "Lower your chest until your elbows reach about 90°, or do fewer reps you can take all the way down."
-        case .squatChestDrop: "Keep your chest up: aim for a torso about as tilted as your shins."
-        case .squatDepth: "If it feels comfortable, sit a little lower, toward knee height."
-        case .lungeTorsoLean: "Stay tall: keep your shoulders over your hips as you lower."
-        case .lungeFrontKnee: "Lower your back knee toward the floor until your front thigh is close to level."
-        case .deadliftKneeBend: "Keep a slight, fixed bend in your knees and push your hips back instead."
-        case .deadliftHinge: "Push your hips farther back and let your torso lower more, as far as feels comfortable."
+        case .pushUpHipsSag: String(localized: "Squeeze your glutes and brace your stomach so your body stays one straight line.")
+        case .pushUpHipsPike: String(localized: "Lower your hips until your shoulders, hips and ankles line up.")
+        case .pushUpDepth: String(localized: "Lower your chest until your elbows reach about 90°, or do fewer reps you can take all the way down.")
+        case .squatChestDrop: String(localized: "Keep your chest up: aim for a torso about as tilted as your shins.")
+        case .squatDepth: String(localized: "If it feels comfortable, sit a little lower, toward knee height.")
+        case .lungeTorsoLean: String(localized: "Stay tall: keep your shoulders over your hips as you lower.")
+        case .lungeFrontKnee: String(localized: "Lower your back knee toward the floor until your front thigh is close to level.")
+        case .deadliftKneeBend: String(localized: "Keep a slight, fixed bend in your knees and push your hips back instead.")
+        case .deadliftHinge: String(localized: "Push your hips farther back and let your torso lower more, as far as feels comfortable.")
         }
     }
 
     /// A few words to show and say during the set, readable from a few steps away.
     var liveCue: String {
         switch self {
-        case .pushUpHipsSag: "Lift your hips"
-        case .pushUpHipsPike: "Lower your hips"
-        case .pushUpDepth: "Go lower"
-        case .squatChestDrop: "Chest up"
-        case .squatDepth: "Sit lower"
-        case .lungeTorsoLean: "Stay tall"
-        case .lungeFrontKnee: "Go lower"
-        case .deadliftKneeBend: "Straighter knees"
-        case .deadliftHinge: "Hips further back"
+        case .pushUpHipsSag: String(localized: "Lift your hips")
+        case .pushUpHipsPike: String(localized: "Lower your hips")
+        case .pushUpDepth: String(localized: "Go lower")
+        case .squatChestDrop: String(localized: "Chest up")
+        case .squatDepth: String(localized: "Sit lower")
+        case .lungeTorsoLean: String(localized: "Stay tall")
+        case .lungeFrontKnee: String(localized: "Go lower")
+        case .deadliftKneeBend: String(localized: "Straighter knees")
+        case .deadliftHinge: String(localized: "Hips further back")
         }
     }
 
@@ -327,7 +327,7 @@ nonisolated enum FormChecks {
                 // Exercises filmed only from the side already get "turn a little" from the analysis.
                 guard definition.expectedView == .any else { return FormReview() }
                 return FormReview(notes: [
-                    "Plumb checks \(definition.copy.shareNoun) form from the side only. It saw you about \(Int(deviation.rounded()))° from side-on, so it gives no form advice for this set.",
+                    String(localized: "Plumb checks \(definition.copy.shareNoun) form from the side only. It saw you about \(Int(deviation.rounded()))° from side-on, so it gives no form advice for this set."),
                 ])
             case .matches, .unavailable:
                 break
@@ -387,7 +387,7 @@ nonisolated enum FormChecks {
                 BodySegments(frame: frame, side: side).kneeAngle != nil
             }
             if legSeen {
-                return "Plumb couldn’t check your front knee bend: it saw only your back leg clearly. Turn so your front leg is nearer the phone."
+                return String(localized: "Plumb couldn’t check your front knee bend: it saw only your back leg clearly. Turn so your front leg is nearer the phone.")
             }
         }
         let weakest = check.joints.min { first, second in
@@ -395,9 +395,9 @@ nonisolated enum FormChecks {
                 < clearCount(second, in: bottoms, side: side, minimum: check.minimumConfidence)
         } ?? check.joints[0]
         if clearCount(weakest, in: bottoms, side: side, minimum: check.minimumConfidence) * 2 > bottoms.count {
-            return "Plumb couldn’t check your \(check.subject) from this camera position. Keep your side square to the phone."
+            return String(localized: "Plumb couldn’t check your \(check.subject) from this camera position. Keep your side square to the phone.")
         }
-        return "Plumb couldn’t check your \(check.subject): your \(weakest.rawValue) wasn’t clear enough at the bottom of the reps."
+        return String(localized: "Plumb couldn’t check your \(check.subject): your \(weakest.localizedName.lowercased()) wasn’t clear enough at the bottom of the reps.")
     }
 
     private static func clearCount(_ role: JointRole, in frames: [PoseFrame], side: BodySide,
@@ -426,8 +426,8 @@ nonisolated enum FormChecks {
             if judged.count * 2 >= total {
                 let missed = judged.filter { !$0.1 }.map(\.0)
                 sentences.append(missed.isEmpty
-                    ? "Chin above your hands in all \(judged.count) reps Plumb could check."
-                    : "Chin above your hands in \(judged.count - missed.count) of \(judged.count) reps; not in \(list(missed)).")
+                    ? String(localized: "Chin above your hands in all \(judged.count) reps Plumb could check.")
+                    : String(localized: "Chin above your hands in \(judged.count - missed.count) of \(judged.count) reps; not in \(list(missed))."))
             }
         }
 
@@ -447,13 +447,13 @@ nonisolated enum FormChecks {
         if starts.count * 2 >= total {
             let bent = starts.filter { $0.1 < straightArmDegrees }.map(\.0)
             sentences.append(bent.isEmpty
-                ? "Arms straight at the start of every rep."
-                : "Arms not fully straight at the start of \(list(bent)).")
+                ? String(localized: "Arms straight at the start of every rep.")
+                : String(localized: "Arms not fully straight at the start of \(list(bent))."))
         }
 
         // Swing: how far the hips travel forward and back during the set.
         if let swing = swing(frames, side: side), swing >= swingShare {
-            sentences.append("Your hips swung about \(Int((swing * 100).rounded()))% of your arm length forward and back. A still body makes each rep count the same.")
+            sentences.append(String(localized: "Your hips swung about \(Int((swing * 100).rounded()))% of your arm length forward and back. A still body makes each rep count the same."))
         }
         return sentences
     }
@@ -499,8 +499,8 @@ nonisolated enum FormChecks {
 
     /// "rep 2", "rep 2 and rep 5", "rep 2, rep 3 and rep 5".
     static func list(_ reps: [Int]) -> String {
-        let names = reps.map { "rep \($0)" }
-        guard names.count > 1 else { return names.first ?? "" }
-        return names.dropLast().joined(separator: ", ") + " and " + (names.last ?? "")
+        let names = reps.map { String(localized: "rep \($0)") }
+        guard let last = names.last, names.count > 1 else { return names.first ?? "" }
+        return String(localized: "\(names.dropLast().joined(separator: ", ")) and \(last)")
     }
 }

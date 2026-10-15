@@ -22,34 +22,34 @@ nonisolated enum HealthReadType: String, CaseIterable, Equatable, Sendable {
 
     var title: String {
         switch self {
-        case .heartRate: "Heart rate"
-        case .restingHeartRate: "Resting heart rate"
-        case .heartRateVariability: "Heart rate variability"
-        case .vo2Max: "Cardio fitness (VO2 max)"
-        case .workouts: "Workouts"
-        case .activeEnergy: "Active energy"
-        case .steps: "Steps"
-        case .sleep: "Sleep"
-        case .age: "Age"
-        case .weight: "Weight"
-        case .height: "Height"
+        case .heartRate: String(localized: "Heart rate")
+        case .restingHeartRate: String(localized: "Resting heart rate")
+        case .heartRateVariability: String(localized: "Heart rate variability")
+        case .vo2Max: String(localized: "Cardio fitness (VO2 max)")
+        case .workouts: String(localized: "Workouts")
+        case .activeEnergy: String(localized: "Active energy")
+        case .steps: String(localized: "Steps")
+        case .sleep: String(localized: "Sleep")
+        case .age: String(localized: "Age")
+        case .weight: String(localized: "Weight")
+        case .height: String(localized: "Height")
         }
     }
 
     /// What Plumb does with it, in one sentence.
     var use: String {
         switch self {
-        case .heartRate: "Shows your heart rate during a set and how fast it comes down while you rest."
-        case .restingHeartRate: "Compared with your own weekly average to see whether you seem less recovered."
-        case .heartRateVariability: "Compared with your own weekly average, as a second sign of recovery."
-        case .vo2Max: "Shown next to your recovery so you can follow your cardio fitness."
-        case .workouts: "Spots a long workout yesterday, to suggest an easier day."
-        case .activeEnergy: "Spots a much busier day than usual yesterday."
-        case .steps: "Spots a day with far more walking than usual yesterday."
-        case .sleep: "Spots a short night, to suggest a lighter session."
-        case .age: "Estimates your maximum heart rate, to say how hard a set was."
-        case .weight: "Estimates the load of each rep, such as the weight a push-up lifts."
-        case .height: "Turns squat depth into centimeters."
+        case .heartRate: String(localized: "Shows your heart rate during a set and how fast it comes down while you rest.")
+        case .restingHeartRate: String(localized: "Compared with your own weekly average to see whether you seem less recovered.")
+        case .heartRateVariability: String(localized: "Compared with your own weekly average, as a second sign of recovery.")
+        case .vo2Max: String(localized: "Shown next to your recovery so you can follow your cardio fitness.")
+        case .workouts: String(localized: "Spots a long workout yesterday, to suggest an easier day.")
+        case .activeEnergy: String(localized: "Spots a much busier day than usual yesterday.")
+        case .steps: String(localized: "Spots a day with far more walking than usual yesterday.")
+        case .sleep: String(localized: "Spots a short night, to suggest a lighter session.")
+        case .age: String(localized: "Estimates your maximum heart rate, to say how hard a set was.")
+        case .weight: String(localized: "Estimates the load of each rep, such as the weight a push-up lifts.")
+        case .height: String(localized: "Turns squat depth into centimeters.")
         }
     }
 }
@@ -133,14 +133,14 @@ nonisolated enum HealthCoach {
         if let today = health.restingHeartRate, let usual = health.restingHeartRateBaseline,
            today - usual >= restingHeartRateRise {
             return HealthNote(
-                text: "You seem less recovered than usual: your resting heart rate is \(bpm(today)), against \(bpm(usual)) on average this week.",
-                basis: "From your resting heart rate in Health.")
+                text: String(localized: "You seem less recovered than usual: your resting heart rate is \(bpm(today)), against \(bpm(usual)) on average this week."),
+                basis: String(localized: "From your resting heart rate in Health."))
         }
         if let today = health.heartRateVariability, let usual = health.heartRateVariabilityBaseline,
            usual > 0, today <= usual * variabilityDrop {
             return HealthNote(
-                text: "You seem less recovered than usual: your heart rate variability is \(Int(today.rounded())) ms, against \(Int(usual.rounded())) ms on average this week.",
-                basis: "From your heart rate variability in Health.")
+                text: String(localized: "You seem less recovered than usual: your heart rate variability is \(Int(today.rounded())) ms, against \(Int(usual.rounded())) ms on average this week."),
+                basis: Self.variabilityBasis)
         }
         return nil
     }
@@ -148,26 +148,26 @@ nonisolated enum HealthCoach {
     /// Before the first set of the day: a lighter session after a short night or a heavy day.
     static func readiness(_ health: HealthSnapshot) -> HealthNote? {
         if let recovery = recoveryNote(health) {
-            return HealthNote(text: recovery.text + " A lighter session today?", basis: recovery.basis)
+            return HealthNote(text: recovery.text + String(localized: " A lighter session today?"), basis: recovery.basis)
         }
         if let sleep = health.sleepLastNight, sleep > 0, sleep < shortNight {
-            return HealthNote(text: "Lighter session today? You slept \(duration(sleep)) last night.",
-                              basis: "From your sleep in Health.")
+            return HealthNote(text: String(localized: "Lighter session today? You slept \(duration(sleep)) last night."),
+                              basis: String(localized: "From your sleep in Health."))
         }
         let minutes = health.workoutsYesterday.reduce(0) { $0 + $1.minutes }
         if minutes >= heavyWorkoutMinutes {
-            return HealthNote(text: "Yesterday looked heavy, with \(Int(minutes.rounded())) minutes of workouts. A lighter session today could help you recover.",
-                              basis: "From your workouts in Health.")
+            return HealthNote(text: String(localized: "Yesterday looked heavy, with \(Int(minutes.rounded())) minutes of workouts. A lighter session today could help you recover."),
+                              basis: String(localized: "From your workouts in Health."))
         }
         if let energy = health.activeEnergyYesterday, let usual = health.activeEnergyBaseline, usual > 0,
            energy >= usual * busyDayFactor {
-            return HealthNote(text: "Yesterday was much busier than usual: \(Int(energy.rounded())) kcal of active energy, against \(Int(usual.rounded())) on a usual day. Go easier if you feel it.",
-                              basis: "From your active energy in Health.")
+            return HealthNote(text: String(localized: "Yesterday was much busier than usual: \(Int(energy.rounded())) kcal of active energy, against \(Int(usual.rounded())) on a usual day. Go easier if you feel it."),
+                              basis: String(localized: "From your active energy in Health."))
         }
         if let steps = health.stepsYesterday, let usual = health.stepsBaseline, usual >= 3000,
            steps >= usual * busyDayFactor {
-            return HealthNote(text: "You walked far more than usual yesterday: \(Int(steps.rounded())) steps, against \(Int(usual.rounded())) on a usual day. Go easier if your legs feel it.",
-                              basis: "From your steps in Health.")
+            return HealthNote(text: String(localized: "You walked far more than usual yesterday: \(Int(steps.rounded())) steps, against \(Int(usual.rounded())) on a usual day. Go easier if your legs feel it."),
+                              basis: String(localized: "From your steps in Health."))
         }
         return nil
     }
@@ -178,43 +178,44 @@ nonisolated enum HealthCoach {
         var seconds = baseRest
         var reasons: [String] = []
         var bases: [String] = []
+        let restingBasis = String(localized: "resting heart rate")
         if let health {
             if let recovery = recoveryNote(health) {
                 seconds += longerRest
-                reasons.append("you seem less recovered than usual")
-                bases.append(recovery.basis.contains("variability") ? "heart rate variability" : "resting heart rate")
+                reasons.append(String(localized: "you seem less recovered than usual"))
+                bases.append(recovery.basis == Self.variabilityBasis ? String(localized: "heart rate variability") : restingBasis)
             }
             if let sleep = health.sleepLastNight, sleep > 0, sleep < shortNight {
                 seconds += longerRest
-                reasons.append("your night was short")
-                bases.append("sleep")
+                reasons.append(String(localized: "your night was short"))
+                bases.append(String(localized: "sleep"))
             }
         }
         seconds = min(seconds, maximumRest)
-        var text = "Rest about \(restText(seconds)) before your next set"
-        text += reasons.isEmpty ? "." : ", since " + reasons.joined(separator: " and ") + "."
+        var text = String(localized: "Rest about \(restText(seconds)) before your next set")
+        text += reasons.isEmpty ? "." : String(localized: ", since \(list(reasons)).")
         if let setHeartRate, let resting = health?.restingHeartRate ?? health?.restingHeartRateBaseline,
            Double(setHeartRate.peak) > resting + 10 {
             let target = Int((resting + 0.4 * (Double(setHeartRate.peak) - resting)).rounded())
-            text += " Or wait until your heart rate is back under \(target) bpm"
-            text += currentHeartRate.map { " (now \($0))." } ?? "."
-            bases.insert("heart rate from your Apple Watch", at: 0)
-            if !bases.contains("resting heart rate") { bases.append("resting heart rate") }
+            text += String(localized: " Or wait until your heart rate is back under \(target) bpm")
+            text += currentHeartRate.map { String(localized: " (now \($0)).") } ?? "."
+            bases.insert(String(localized: "heart rate from your Apple Watch"), at: 0)
+            if !bases.contains(restingBasis) { bases.append(restingBasis) }
         }
         guard !bases.isEmpty else { return nil }
-        return HealthNote(text: text, basis: "From your " + list(bases) + " in Health.")
+        return HealthNote(text: text, basis: String(localized: "From your \(list(bases)) in Health."))
     }
 
     /// How hard the set was for the heart, with the age-based maximum when the age is known.
     static func heartRateLine(_ heartRate: SetHeartRate, age: Int?) -> HealthNote {
-        var text = "Heart rate during the set: \(heartRate.average) bpm on average, peak \(heartRate.peak)"
-        var basis = "From your Apple Watch."
+        var text = String(localized: "Heart rate during the set: \(heartRate.average) bpm on average, peak \(heartRate.peak)")
+        var basis = String(localized: "From your Apple Watch.")
         if let age, age >= 13, age <= 100 {
             // Tanaka's estimate, 208 − 0.7 × age: a rough population figure, not a measured maximum.
             let maximum = 208 - 0.7 * Double(age)
             let share = Int((Double(heartRate.peak) / maximum * 100).rounded())
-            text += ", about \(share)% of the usual maximum at your age"
-            basis = "From your Apple Watch and your age in Health."
+            text += String(localized: ", about \(share)% of the usual maximum at your age")
+            basis = String(localized: "From your Apple Watch and your age in Health.")
         }
         return HealthNote(text: text + ".", basis: basis)
     }
@@ -235,8 +236,8 @@ nonisolated enum HealthCoach {
         guard let weight, weight >= 25, weight <= 300, let share = bodyWeightShare(for: exercise) else { return nil }
         let noun = exercise.definition.copy.name.lowercased()
         return HealthNote(
-            text: "Each \(noun) moved about \(Int((weight * share).rounded())) kg, roughly \(Int((share * 100).rounded()))% of your weight.",
-            basis: "From your weight in Health.")
+            text: String(localized: "Each \(noun) moved about \(Int((weight * share).rounded())) kg, roughly \(Int((share * 100).rounded()))% of your weight."),
+            basis: String(localized: "From your weight in Health."))
     }
 
     /// The deepest squat in centimeters: the hip drop is measured as a share of the standing hip
@@ -245,15 +246,15 @@ nonisolated enum HealthCoach {
         guard exercise == .bodyweightSquat, let deepestRange, deepestRange > 0,
               let height, height >= 1.2, height <= 2.3 else { return nil }
         let centimeters = Int((deepestRange * 0.48 * height * 100).rounded())
-        return HealthNote(text: "Your hips went down about \(centimeters) cm on your deepest squat.",
-                          basis: "From your height in Health.")
+        return HealthNote(text: String(localized: "Your hips went down about \(centimeters) cm on your deepest squat."),
+                          basis: String(localized: "From your height in Health."))
     }
 
     /// The person's cardio fitness, shown as a number to follow, not a judgment.
     static func fitnessLine(_ health: HealthSnapshot) -> HealthNote? {
         guard let vo2 = health.vo2Max, vo2 > 10, vo2 < 90 else { return nil }
-        return HealthNote(text: String(format: "Cardio fitness: VO2 max %.1f.", vo2),
-                          basis: "From your cardio fitness in Health.")
+        return HealthNote(text: String(localized: "Cardio fitness: VO2 max \(vo2.formatted(.number.precision(.fractionLength(1))))."),
+                          basis: String(localized: "From your cardio fitness in Health."))
     }
 
     /// Total time asleep in `intervals`, counting overlapping records from several sources once.
@@ -273,6 +274,8 @@ nonisolated enum HealthCoach {
         return total
     }
 
+    static let variabilityBasis = String(localized: "From your heart rate variability in Health.")
+
     static func bpm(_ value: Double) -> String { "\(Int(value.rounded())) bpm" }
 
     static func duration(_ seconds: TimeInterval) -> String {
@@ -288,7 +291,7 @@ nonisolated enum HealthCoach {
         switch items.count {
         case 0: ""
         case 1: items[0]
-        default: items.dropLast().joined(separator: ", ") + " and " + items[items.count - 1]
+        default: String(localized: "\(items.dropLast().joined(separator: ", ")) and \(items[items.count - 1])")
         }
     }
 }

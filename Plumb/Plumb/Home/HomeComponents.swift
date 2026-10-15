@@ -25,12 +25,12 @@ extension ExerciseKind {
     /// The name on the exercise chips, as short as it can be.
     var chipName: String {
         switch self {
-        case .bodyweightSquat: "Squat"
-        case .pushUp: "Push-up"
-        case .staticLunge: "Lunge"
-        case .stiffLegDeadlift: "Deadlift"
-        case .pullUp: "Pull-up"
-        case .muscleUp: "Muscle-up"
+        case .bodyweightSquat: String(localized: "Squat")
+        case .pushUp: String(localized: "Push-up")
+        case .staticLunge: String(localized: "Lunge")
+        case .stiffLegDeadlift: String(localized: "Deadlift")
+        case .pullUp: String(localized: "Pull-up")
+        case .muscleUp: String(localized: "Muscle-up")
         }
     }
 }
@@ -168,7 +168,7 @@ struct HomeCard<Content: View>: View {
 
 /// The one filled action of a screen: a full-width pill with its arrow in a circle of its own.
 struct PrimaryActionLabel: View {
-    let title: String
+    let title: LocalizedStringKey
     var symbol = "arrow.right"
 
     var body: some View {
@@ -257,7 +257,7 @@ struct CameraPrimer: View {
         .tint(.primary)
     }
 
-    private func primerRow(_ symbol: String, _ title: String, _ detail: String) -> some View {
+    private func primerRow(_ symbol: String, _ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: symbol)
                 .font(.title3)

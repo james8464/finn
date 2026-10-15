@@ -70,9 +70,9 @@ final class ComparisonNarrator {
         let copy = comparison.exercise.definition.copy
         let text: String
         switch comparison.rangeDirection {
-        case .longer: text = "Camera-measured \(copy.rangeNoun) was \(copy.moreRange) in your second set."
-        case .shorter: text = "Camera-measured \(copy.rangeNoun) was \(copy.lessRange) in your second set."
-        case .noClearChange: text = "There was no clear camera-measured \(copy.rangeNoun) change between sets."
+        case .longer: text = String(localized: "Camera-measured \(copy.rangeNoun) was \(copy.moreRange) in your second set.")
+        case .shorter: text = String(localized: "Camera-measured \(copy.rangeNoun) was \(copy.lessRange) in your second set.")
+        case .noClearChange: text = String(localized: "There was no clear camera-measured \(copy.rangeNoun) change between sets.")
         }
         return Recap(text: text, evidenceRepNumbers: comparison.cueRepNumbers,
                      source: .template, facts: comparison)
@@ -118,6 +118,8 @@ private struct AppleGeneratedRecap {
 @MainActor
 private final class AppleRecapGenerator: RecapGenerating {
     var available: Bool {
+        // The instructions and the accepted sentences are English; other languages keep the template.
+        guard SpokenLanguage.appLanguage == "en" else { return false }
         if case .available = SystemLanguageModel.default.availability { return true }
         return false
     }

@@ -100,7 +100,7 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
     func spoken(for definition: ExerciseDefinition) -> String {
         switch self {
         case .repCounted(let count): "\(count)"
-        case .fasterThanFirstReps: "Faster than your first reps"
+        case .fasterThanFirstReps: String(localized: "Faster than your first reps")
         case .shorterThanFirstReps: definition.copy.liveShorterCue
         case .formFault(let check, _): check.liveCue
         }

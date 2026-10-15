@@ -97,8 +97,8 @@ struct WatchSetView: View {
     }
 
     private func framingHint(for state: WatchState) -> String {
-        if state.handsFree { return "The set starts once you hold still." }
-        return state.wristControls ? "Then start the set." : "Start the set on your iPhone."
+        if state.handsFree { return String(localized: "The set starts once you hold still.") }
+        return state.wristControls ? String(localized: "Then start the set.") : String(localized: "Start the set on your iPhone.")
     }
 
     private func repCount(_ reps: Int) -> some View {
@@ -117,7 +117,7 @@ struct WatchSetView: View {
         .accessibilityValue("\(reps)")
     }
 
-    private func command(_ title: String, _ command: WatchCommand) -> some View {
+    private func command(_ title: LocalizedStringKey, _ command: WatchCommand) -> some View {
         Button(title) { link.send(command) }
             .buttonStyle(.borderedProminent)
             .disabled(!link.isPhoneReachable)

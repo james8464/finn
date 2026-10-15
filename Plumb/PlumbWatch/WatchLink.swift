@@ -35,7 +35,7 @@ final class WatchLink: NSObject, WCSessionDelegate {
     func send(_ command: WatchCommand) {
         let session = WCSession.default
         guard session.activationState == .activated, session.isReachable else {
-            notice = "Open Plumb on your iPhone, then try again."
+            notice = String(localized: "Open Plumb on your iPhone, then try again.")
             return
         }
         notice = nil
@@ -61,7 +61,7 @@ final class WatchLink: NSObject, WCSessionDelegate {
     }
 
     private func commandFailed() {
-        notice = "Your iPhone didn’t get that. Try again, or use the iPhone."
+        notice = String(localized: "Your iPhone didn’t get that. Try again, or use the iPhone.")
     }
 
     private static func play(_ haptic: WatchHaptic) {

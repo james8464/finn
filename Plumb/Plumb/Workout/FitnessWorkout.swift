@@ -179,11 +179,11 @@ nonisolated enum FitnessSaveStatus: Equatable, Sendable {
 
     var text: String {
         switch self {
-        case .saving: "Saving to Fitness…"
-        case .saved: "Saved to Fitness"
-        case .failed: "Couldn’t save to Fitness"
-        case .needsPermission: "Allow Plumb in Health settings"
-        case .unavailable: "Apple Health isn’t available on this iPhone"
+        case .saving: String(localized: "Saving to Fitness…")
+        case .saved: String(localized: "Saved to Fitness")
+        case .failed: String(localized: "Couldn’t save to Fitness")
+        case .needsPermission: String(localized: "Allow Plumb in Health settings")
+        case .unavailable: String(localized: "Apple Health isn’t available on this iPhone")
         }
     }
 

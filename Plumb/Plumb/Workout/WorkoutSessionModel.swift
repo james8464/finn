@@ -26,19 +26,19 @@ nonisolated enum CameraIssue: Equatable {
 
     var title: String {
         switch self {
-        case .permissionDenied: "Camera access needed"
-        case .unavailable: "Camera unavailable"
-        case .interrupted: "Camera interrupted"
-        case .startFailed: "Couldn’t start camera"
+        case .permissionDenied: String(localized: "Camera access needed")
+        case .unavailable: String(localized: "Camera unavailable")
+        case .interrupted: String(localized: "Camera interrupted")
+        case .startFailed: String(localized: "Couldn’t start camera")
         }
     }
 
     var message: String {
         switch self {
-        case .permissionDenied: "Allow camera access in Settings."
-        case .unavailable: "The camera is unavailable right now. Try again in a moment."
-        case .interrupted: "Camera capture stopped. Try again."
-        case .startFailed: "Try again in a moment."
+        case .permissionDenied: String(localized: "Allow camera access in Settings.")
+        case .unavailable: String(localized: "The camera is unavailable right now. Try again in a moment.")
+        case .interrupted: String(localized: "Camera capture stopped. Try again.")
+        case .startFailed: String(localized: "Try again in a moment.")
         }
     }
 
@@ -463,7 +463,7 @@ final class WorkoutSessionModel {
         setHeartRateReadings = []
         setHeartRate = nil
         stage = .capturing
-        if countdown > 0 { say("Go") }
+        if countdown > 0 { say(String(localized: "Go")) }
     }
 
     func endSet(tappedAt: ContinuousClock.Instant = ContinuousClock.now) async {
@@ -607,8 +607,9 @@ final class WorkoutSessionModel {
         }
         guard let best else { return nil }
         let name = best.kind.definition.copy.name
-        return "Plumb counted \(best.reps) \(name.lowercased())s in this set, but \(chosen.definition.copy.name) was chosen. "
-            + "If you did \(name.lowercased())s, choose \(name) on the first screen and retake the set."
+        let lowercased = name.lowercased(), chosenName = chosen.definition.copy.name
+        return String(localized: "Plumb counted \(best.reps) \(lowercased)s in this set, but \(chosenName) was chosen. ")
+            + String(localized: "If you did \(lowercased)s, choose \(name) on the first screen and retake the set.")
     }
 
     private func updateFramingStatus(with frame: PoseFrame) {
@@ -668,11 +669,11 @@ final class WorkoutSessionModel {
               frame.time - lastFramingSpeech >= Self.framingSpeechInterval else { return }
         let phrase: String
         if framingStatus == .turnToExpectedView {
-            phrase = "Turn your side to the camera"
+            phrase = String(localized: "Turn your side to the camera")
         } else if let joint = unclearJoint {
-            phrase = "\(joint.rawValue.capitalized) not clear. Step back or add light"
+            phrase = String(localized: "\(joint.localizedName) not clear. Step back or add light")
         } else {
-            phrase = "Show your whole body"
+            phrase = String(localized: "Show your whole body")
         }
         lastFramingSpeech = frame.time
         say(phrase)
@@ -703,16 +704,16 @@ final class WorkoutSessionModel {
         let nobodyFor = nobodySeenSince.map { frame.time - $0 } ?? 0
         let note: String?
         if frame.time - since >= Self.framingLimit {
-            note = "Plumb closed the camera after 3 minutes without a set."
+            note = String(localized: "Plumb closed the camera after 3 minutes without a set.")
         } else if nobodyFor >= Self.nobodySeenLimit {
-            note = "Plumb closed the camera after a minute without seeing anyone."
+            note = String(localized: "Plumb closed the camera after a minute without seeing anyone.")
         } else {
             note = nil
         }
         if let note {
             framingCloseTask = Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.say("Camera closed")
+                self.say(String(localized: "Camera closed"))
                 self.framingClosedNote = note
                 await self.cancel()
                 self.framingCloseTask = nil
@@ -722,7 +723,7 @@ final class WorkoutSessionModel {
         guard handsFree, nobodyFor >= Self.nobodySeenDelay,
               frame.time - lastFramingSpeech >= Self.framingSpeechInterval else { return }
         lastFramingSpeech = frame.time
-        say("Plumb can’t see you. Step into view or add light")
+        say(String(localized: "Plumb can’t see you. Step into view or add light"))
     }
 
     /// Counts reps while the set runs, says them and any live observation, and ends a hands-free
@@ -753,11 +754,11 @@ final class WorkoutSessionModel {
     private func announceResult() {
         switch result {
         case .measured(let analysis, _):
-            let count = analysis.reps.count == 1 ? "1 rep measured" : "\(analysis.reps.count) reps measured"
+            let count = String(localized: "\(analysis.reps.count) reps measured")
             // One phrase: the person may still be exercising and should know why the set ended.
-            say(endedAtLimit ? "2-minute limit reached. \(count)" : count)
+            say(endedAtLimit ? String(localized: "2-minute limit reached. \(count)") : count)
         case .insufficientView, .failed:
-            say("Plumb couldn’t measure this set. The reason is on screen.")
+            say(String(localized: "Plumb couldn’t measure this set. The reason is on screen."))
         case .interrupted, nil:
             break
         }

@@ -26,13 +26,13 @@ nonisolated enum WatchSyncRules {
         switch result {
         case .measured(let analysis, let cue):
             let count = analysis.reps.count
-            let reps = count == 1 ? "1 rep measured." : "\(count) reps measured."
+            let reps = String(localized: "\(count) reps measured.")
             guard let cue, !cueDismissed else { return reps }
             return "\(reps) \(cue.observation)"
         case .insufficientView, .failed:
-            return "Plumb couldn’t measure this set. The reason is on your iPhone."
+            return String(localized: "Plumb couldn’t measure this set. The reason is on your iPhone.")
         case .interrupted:
-            return "The set stopped before it was complete."
+            return String(localized: "The set stopped before it was complete.")
         case nil:
             return nil
         }

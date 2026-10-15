@@ -61,7 +61,7 @@ struct OnboardingView: View {
     private var actions: some View {
         VStack(spacing: 2) {
             Button(action: advance) {
-                PrimaryActionLabel(title: isLast ? String(localized: "Start") : String(localized: "Continue"),
+                PrimaryActionLabel(title: isLast ? "Start" : "Continue",
                                    symbol: isLast ? "checkmark" : "arrow.right")
             }
             .buttonStyle(PressableStyle())

@@ -113,7 +113,7 @@ struct HomeTabBar: View {
                             }
                             .frame(height: 28)
                             .accessibilityHidden(true)
-                        Text(tab.rawValue)
+                        Text(LocalizedStringKey(tab.rawValue))
                             .font(.caption2.weight(selection == tab ? .medium : .regular))
                     }
                     .foregroundStyle(selection == tab ? DashboardStyle.lime : DashboardStyle.secondary)

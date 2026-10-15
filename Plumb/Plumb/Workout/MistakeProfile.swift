@@ -63,15 +63,15 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     /// The pattern, in a few words.
     func title(for definition: ExerciseDefinition) -> String {
         switch self {
-        case .shallowMovements: "Movements too shallow to count"
-        case .outsideTempo: "Movements too fast or too slow to count"
-        case .unfinishedLastRep: "Last movement not finished"
-        case .rangeDropped: "\(definition.copy.rangeNoun.prefix(1).uppercased() + definition.copy.rangeNoun.dropFirst()) "
-            + "\(definition.copy.lessRange) at the end of the set"
+        case .shallowMovements: String(localized: "Movements too shallow to count")
+        case .outsideTempo: String(localized: "Movements too fast or too slow to count")
+        case .unfinishedLastRep: String(localized: "Last movement not finished")
+        case .rangeDropped:
+            String(localized: "\(definition.copy.rangeNoun.prefix(1).uppercased() + definition.copy.rangeNoun.dropFirst()) \(definition.copy.lessRange) at the end of the set")
         case .postureChanged: definition.posture.title
-        case .spedUp: "Reps faster than your first ones"
-        case .angledView: "Filmed at an angle"
-        case .partlyVisible: "Joints not always in view"
+        case .spedUp: String(localized: "Reps faster than your first ones")
+        case .angledView: String(localized: "Filmed at an angle")
+        case .partlyVisible: String(localized: "Joints not always in view")
         case .pushUpHipsSag, .pushUpHipsPike, .pushUpDepth, .squatChestDrop, .squatDepth, .lungeTorsoLean,
              .lungeFrontKnee, .deadliftKneeBend, .deadliftHinge:
             formCheck?.title ?? ""
@@ -82,16 +82,15 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     func focus(for definition: ExerciseDefinition) -> String {
         switch self {
         case .shallowMovements:
-            "Reach the same depth on every rep. Plumb needs \(definition.formattedDepth(definition.phases.reachBottom)) to count one."
+            String(localized: "Reach the same depth on every rep. Plumb needs \(definition.formattedDepth(definition.phases.reachBottom)) to count one.")
         case .outsideTempo:
-            String(format: "Keep each rep between %.1f and %.0f seconds.",
-                   definition.phases.minimumDuration, definition.phases.maximumDuration)
-        case .unfinishedLastRep: "Come back to your starting position before the set ends."
+            String(localized: "Keep each rep between \(definition.phases.minimumDuration.formatted(.number.precision(.fractionLength(1)))) and \(definition.phases.maximumDuration.formatted(.number.precision(.fractionLength(0)))) seconds.")
+        case .unfinishedLastRep: String(localized: "Come back to your starting position before the set ends.")
         case .rangeDropped: definition.copy.nextAction
         case .postureChanged: definition.posture.nextAction
-        case .spedUp: "Keep the pace of your first reps."
-        case .angledView: "Turn so your side faces the camera."
-        case .partlyVisible: "Keep your whole body in view, with even light."
+        case .spedUp: String(localized: "Keep the pace of your first reps.")
+        case .angledView: String(localized: "Turn so your side faces the camera.")
+        case .partlyVisible: String(localized: "Keep your whole body in view, with even light.")
         case .pushUpHipsSag, .pushUpHipsPike, .pushUpDepth, .squatChestDrop, .squatDepth, .lungeTorsoLean,
              .lungeFrontKnee, .deadliftKneeBend, .deadliftHinge:
             formCheck?.nextAction ?? ""
@@ -143,7 +142,7 @@ nonisolated struct MistakeProfile: Equatable, Sendable {
     /// For example "Movements too shallow to count in 3 of your last 5 squat sets."
     var summary: String {
         let definition = exercise.definition
-        return "\(issue.title(for: definition)) in \(sets) of your last \(outOf) \(definition.copy.shareNoun) sets."
+        return String(localized: "\(issue.title(for: definition)) in \(sets) of your last \(outOf) \(definition.copy.shareNoun) sets.")
     }
 
     var focus: String { issue.focus(for: exercise.definition) }

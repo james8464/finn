@@ -36,7 +36,7 @@ nonisolated enum ExpectedView: String, Equatable, Sendable {
     /// Framing prompt when Vision 3D pose sees the person from another angle.
     var turnPrompt: String {
         switch self {
-        case .side: "Turn a little: side to the camera"
+        case .side: String(localized: "Turn a little: side to the camera")
         case .any: ""
         }
     }
@@ -44,7 +44,7 @@ nonisolated enum ExpectedView: String, Equatable, Sendable {
     /// Retake reason when the 3D estimates show the person clearly facing the camera for several seconds.
     var wrongViewMessage: String {
         switch self {
-        case .side: "This exercise needs a side view. Turn so your side faces the camera, then try again."
+        case .side: String(localized: "This exercise needs a side view. Turn so your side faces the camera, then try again.")
         case .any: ""
         }
     }
@@ -116,7 +116,8 @@ nonisolated struct ExerciseCopy: Equatable, Sendable {
     /// Said during a set when a rep's range is clearly shorter than the first reps, such as
     /// "Range is shorter" or "Elbow bend is smaller".
     var liveShorterCue: String {
-        rangeNoun.prefix(1).uppercased() + rangeNoun.dropFirst() + " is \(lessRange)"
+        let noun = rangeNoun.prefix(1).uppercased() + rangeNoun.dropFirst()
+        return String(localized: "\(noun) is \(lessRange)")
     }
 }
 
@@ -192,13 +193,19 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
         case (_, .shoulderDrop) where kind == .bodyweightSquat:
             return "hips \(Int((value * 100).rounded()))% of your torso length down"
         case (_, .shoulderDrop):
-            return "shoulders \(Int((value * 100).rounded()))% of the picture width down"
+            return String(localized: "shoulders \(Int((value * 100).rounded()))% of the picture width down")
         case (.bodyLengthFraction, .verticalRise):
-            return "shoulders up \(Int((value * 100).rounded()))% of your arm length"
+            return String(localized: "shoulders up \(Int((value * 100).rounded()))% of your arm length")
         case (.bodyLengthFraction, _):
-            return "hips \(Int((value * 100).rounded()))% of your leg length down"
+            return String(localized: "hips \(Int((value * 100).rounded()))% of your leg length down")
         case (.degrees, .jointBend(_, let vertex, _)):
-            return "\(vertex.rawValue) bent \(Int(value.rounded()))°"
+            let degrees = Int(value.rounded())
+            switch vertex {
+            case .elbow: return String(localized: "elbow bent \(degrees)°")
+            case .knee: return String(localized: "knee bent \(degrees)°")
+            case .hip: return String(localized: "hip bent \(degrees)°")
+            default: return "\(vertex.rawValue) bent \(degrees)°"
+            }
         case (.degrees, _):
             return "\(Int(value.rounded()))°"
         }
@@ -207,7 +214,7 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
     func accessibleRange(_ value: Double) -> String {
         switch rangeUnit {
         case .bodyLengthFraction: value.formatted(.number.precision(.fractionLength(2)))
-        case .degrees: value.formatted(.number.precision(.fractionLength(0))) + " degrees"
+        case .degrees: value.formatted(.number.precision(.fractionLength(0))) + String(localized: " degrees")
         }
     }
 }
@@ -238,32 +245,32 @@ nonisolated extension ExerciseDefinition {
         classifierLabel: "squat",
         posture: PostureRule(
             cueKind: .torsoTiltIncreased, minimumIncrease: 12,
-            observation: "Your torso tilted farther from upright in the last two reps.",
-            nextAction: "Try keeping your torso angle similar from rep to rep."
+            observation: String(localized: "Your torso tilted farther from upright in the last two reps."),
+            nextAction: String(localized: "Try keeping your torso angle similar from rep to rep.")
         ),
         copy: ExerciseCopy(
-            name: "Squat",
-            shareNoun: "squat",
-            setupTitle: "Squat check",
-            placementTitle: "Place your iPhone",
-            placementDetail: "At hip height, a few steps away.",
-            stanceTitle: "Stand sideways",
-            stanceDetail: "Keep your whole body in view.",
-            framingPrompt: "Stand sideways. Show head to toe.",
-            checkingVisibility: "Checking leg visibility",
-            showJoints: "Show hip, knee and ankle",
-            jointsVisible: "Hip, knee and ankle visible",
-            keepJointsVisible: "Keep your hip and ankle visible for the whole set.",
-            bodyTooSmall: "Your legs look too small to measure. Move the phone closer, keeping your whole body in view.",
-            retakeHint: "Move the phone farther back and keep your hip, knee, and ankle visible.",
-            noCompleteReps: "No complete squat repetitions were measured. Try another set with your full body in view.",
-            rangeNoun: "range",
-            moreRange: "longer",
-            lessRange: "shorter",
-            observation: "Your range became shorter in the last two reps.",
-            nextAction: "Choose a range you can repeat on each rep.",
-            rangeExplanation: "Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view.",
-            rangeAccessibilityName: "relative camera-observed range"
+            name: String(localized: "Squat"),
+            shareNoun: String(localized: "squat"),
+            setupTitle: String(localized: "Squat check"),
+            placementTitle: String(localized: "Place your iPhone"),
+            placementDetail: String(localized: "At hip height, a few steps away."),
+            stanceTitle: String(localized: "Stand sideways"),
+            stanceDetail: String(localized: "Keep your whole body in view."),
+            framingPrompt: String(localized: "Stand sideways. Show head to toe."),
+            checkingVisibility: String(localized: "Checking leg visibility"),
+            showJoints: String(localized: "Show hip, knee and ankle"),
+            jointsVisible: String(localized: "Hip, knee and ankle visible"),
+            keepJointsVisible: String(localized: "Keep your hip and ankle visible for the whole set."),
+            bodyTooSmall: String(localized: "Your legs look too small to measure. Move the phone closer, keeping your whole body in view."),
+            retakeHint: String(localized: "Move the phone farther back and keep your hip, knee, and ankle visible."),
+            noCompleteReps: String(localized: "No complete squat repetitions were measured. Try another set with your full body in view."),
+            rangeNoun: String(localized: "range"),
+            moreRange: String(localized: "longer"),
+            lessRange: String(localized: "shorter"),
+            observation: String(localized: "Your range became shorter in the last two reps."),
+            nextAction: String(localized: "Choose a range you can repeat on each rep."),
+            rangeExplanation: String(localized: "Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view."),
+            rangeAccessibilityName: String(localized: "relative camera-observed range")
         )
     )
 
@@ -282,32 +289,32 @@ nonisolated extension ExerciseDefinition {
         classifierLabel: "push_up",
         posture: PostureRule(
             cueKind: .hipDropIncreased, minimumIncrease: 0.06,
-            observation: "Your hips sat lower relative to your shoulder-to-ankle line in the last two reps.",
-            nextAction: "Try keeping your hips aligned with your shoulders and ankles."
+            observation: String(localized: "Your hips sat lower relative to your shoulder-to-ankle line in the last two reps."),
+            nextAction: String(localized: "Try keeping your hips aligned with your shoulders and ankles.")
         ),
         copy: ExerciseCopy(
-            name: "Push-up",
-            shareNoun: "push-up",
-            setupTitle: "Push-up check",
-            placementTitle: "Place your iPhone low",
-            placementDetail: "On the floor or a low step, a few steps away.",
-            stanceTitle: "Face the phone or turn sideways",
-            stanceDetail: "Front or side both work. Start at the top, with your arms straight.",
-            framingPrompt: "Face the phone or turn sideways. Keep your upper body and hands in view.",
-            checkingVisibility: "Checking shoulder and hand visibility",
-            showJoints: "Show your shoulders and hands",
-            jointsVisible: "Shoulders and hands visible",
-            keepJointsVisible: "Keep your shoulders and hands visible for the whole set.",
-            bodyTooSmall: "Plumb couldn’t measure your movement. Keep your shoulders and hands in view and move the phone a little closer.",
-            retakeHint: "Face the phone or turn sideways, with your shoulders and hands visible.",
-            noCompleteReps: "No complete push-up repetitions were measured. Start at the top with your arms straight and keep your whole body in view.",
-            rangeNoun: "elbow bend",
-            moreRange: "greater",
-            lessRange: "smaller",
-            observation: "Your elbow bend became smaller in the last two reps.",
-            nextAction: "Keep your elbow bend similar from rep to rep.",
-            rangeExplanation: "Elbow bend is how much your elbow angle closed from the starting position, as seen by the camera. Use it only to compare your own sets from the same view.",
-            rangeAccessibilityName: "camera-observed elbow bend"
+            name: String(localized: "Push-up"),
+            shareNoun: String(localized: "push-up"),
+            setupTitle: String(localized: "Push-up check"),
+            placementTitle: String(localized: "Place your iPhone low"),
+            placementDetail: String(localized: "On the floor or a low step, a few steps away."),
+            stanceTitle: String(localized: "Face the phone or turn sideways"),
+            stanceDetail: String(localized: "Front or side both work. Start at the top, with your arms straight."),
+            framingPrompt: String(localized: "Face the phone or turn sideways. Keep your upper body and hands in view."),
+            checkingVisibility: String(localized: "Checking shoulder and hand visibility"),
+            showJoints: String(localized: "Show your shoulders and hands"),
+            jointsVisible: String(localized: "Shoulders and hands visible"),
+            keepJointsVisible: String(localized: "Keep your shoulders and hands visible for the whole set."),
+            bodyTooSmall: String(localized: "Plumb couldn’t measure your movement. Keep your shoulders and hands in view and move the phone a little closer."),
+            retakeHint: String(localized: "Face the phone or turn sideways, with your shoulders and hands visible."),
+            noCompleteReps: String(localized: "No complete push-up repetitions were measured. Start at the top with your arms straight and keep your whole body in view."),
+            rangeNoun: String(localized: "elbow bend"),
+            moreRange: String(localized: "greater"),
+            lessRange: String(localized: "smaller"),
+            observation: String(localized: "Your elbow bend became smaller in the last two reps."),
+            nextAction: String(localized: "Keep your elbow bend similar from rep to rep."),
+            rangeExplanation: String(localized: "Elbow bend is how much your elbow angle closed from the starting position, as seen by the camera. Use it only to compare your own sets from the same view."),
+            rangeAccessibilityName: String(localized: "camera-observed elbow bend")
         )
     )
 
@@ -381,32 +388,32 @@ nonisolated extension ExerciseDefinition {
         classifierLabel: "static_lunge",
         posture: PostureRule(
             cueKind: .torsoTiltIncreased, minimumIncrease: 12,
-            observation: "Your torso tilted farther from upright in the last two reps.",
-            nextAction: "Try keeping your torso angle similar from rep to rep."
+            observation: String(localized: "Your torso tilted farther from upright in the last two reps."),
+            nextAction: String(localized: "Try keeping your torso angle similar from rep to rep.")
         ),
         copy: ExerciseCopy(
-            name: "Static lunge",
-            shareNoun: "lunge",
-            setupTitle: "Lunge check",
-            placementTitle: "Place your iPhone",
-            placementDetail: "At hip height, a few steps away.",
-            stanceTitle: "Stand sideways in a split stance",
-            stanceDetail: "Keep both feet planted and the same front leg for each set.",
-            framingPrompt: "Stand sideways. Show head to toe.",
-            checkingVisibility: "Checking leg visibility",
-            showJoints: "Show hip, knee and ankle",
-            jointsVisible: "Hip, knee and ankle visible",
-            keepJointsVisible: "Keep your hip, knee and ankle visible for the whole set.",
-            bodyTooSmall: "Plumb couldn’t measure your knee angle. Keep your side to the camera and your whole body in view.",
-            retakeHint: "Move the phone farther back and keep your hip, knee, and ankle visible.",
-            noCompleteReps: "No complete lunge repetitions were measured. Start standing tall in your split stance and keep your whole body in view.",
-            rangeNoun: "knee bend",
-            moreRange: "greater",
-            lessRange: "smaller",
-            observation: "Your knee bend became smaller in the last two reps.",
-            nextAction: "Keep your knee bend similar from rep to rep.",
-            rangeExplanation: "Knee bend is how much the knee angle on the side facing the camera closed from the starting position. Use it only to compare your own sets from the same view and front leg.",
-            rangeAccessibilityName: "camera-observed knee bend"
+            name: String(localized: "Static lunge"),
+            shareNoun: String(localized: "lunge"),
+            setupTitle: String(localized: "Lunge check"),
+            placementTitle: String(localized: "Place your iPhone"),
+            placementDetail: String(localized: "At hip height, a few steps away."),
+            stanceTitle: String(localized: "Stand sideways in a split stance"),
+            stanceDetail: String(localized: "Keep both feet planted and the same front leg for each set."),
+            framingPrompt: String(localized: "Stand sideways. Show head to toe."),
+            checkingVisibility: String(localized: "Checking leg visibility"),
+            showJoints: String(localized: "Show hip, knee and ankle"),
+            jointsVisible: String(localized: "Hip, knee and ankle visible"),
+            keepJointsVisible: String(localized: "Keep your hip, knee and ankle visible for the whole set."),
+            bodyTooSmall: String(localized: "Plumb couldn’t measure your knee angle. Keep your side to the camera and your whole body in view."),
+            retakeHint: String(localized: "Move the phone farther back and keep your hip, knee, and ankle visible."),
+            noCompleteReps: String(localized: "No complete lunge repetitions were measured. Start standing tall in your split stance and keep your whole body in view."),
+            rangeNoun: String(localized: "knee bend"),
+            moreRange: String(localized: "greater"),
+            lessRange: String(localized: "smaller"),
+            observation: String(localized: "Your knee bend became smaller in the last two reps."),
+            nextAction: String(localized: "Keep your knee bend similar from rep to rep."),
+            rangeExplanation: String(localized: "Knee bend is how much the knee angle on the side facing the camera closed from the starting position. Use it only to compare your own sets from the same view and front leg."),
+            rangeAccessibilityName: String(localized: "camera-observed knee bend")
         )
     )
 
@@ -425,32 +432,32 @@ nonisolated extension ExerciseDefinition {
         classifierLabel: "stiff_leg_deadlift",
         posture: PostureRule(
             cueKind: .kneeBendIncreased, minimumIncrease: 12,
-            observation: "Your knees bent more during the last two hinges.",
-            nextAction: "Try keeping a comfortable, similar knee bend through each hinge."
+            observation: String(localized: "Your knees bent more during the last two hinges."),
+            nextAction: String(localized: "Try keeping a comfortable, similar knee bend through each hinge.")
         ),
         copy: ExerciseCopy(
-            name: "Stiff-leg deadlift",
-            shareNoun: "stiff-leg deadlift",
-            setupTitle: "Deadlift check",
-            placementTitle: "Place your iPhone",
-            placementDetail: "At hip height, a few steps away.",
-            stanceTitle: "Stand sideways",
-            stanceDetail: "Start standing tall, with your whole body in view.",
-            framingPrompt: "Stand sideways. Show head to toe.",
-            checkingVisibility: "Checking body visibility",
-            showJoints: "Show shoulder, hip, knee and ankle",
-            jointsVisible: "Shoulder, hip, knee and ankle visible",
-            keepJointsVisible: "Keep your shoulder, hip and knee visible for the whole set.",
-            bodyTooSmall: "Plumb couldn’t measure your hip angle. Keep your side to the camera and your whole body in view.",
-            retakeHint: "Move the phone farther back and keep your shoulder, hip, knee, and ankle visible.",
-            noCompleteReps: "No complete stiff-leg deadlift repetitions were measured. Start standing tall and keep your whole body in view.",
-            rangeNoun: "hip hinge",
-            moreRange: "greater",
-            lessRange: "smaller",
-            observation: "Your hip hinge became smaller in the last two reps.",
-            nextAction: "Keep your hip hinge similar from rep to rep.",
-            rangeExplanation: "Hip hinge is how much the angle between your torso and thigh closed from the starting position, as seen by the camera. Use it only to compare your own sets from the same view.",
-            rangeAccessibilityName: "camera-observed hip hinge"
+            name: String(localized: "Stiff-leg deadlift"),
+            shareNoun: String(localized: "stiff-leg deadlift"),
+            setupTitle: String(localized: "Deadlift check"),
+            placementTitle: String(localized: "Place your iPhone"),
+            placementDetail: String(localized: "At hip height, a few steps away."),
+            stanceTitle: String(localized: "Stand sideways"),
+            stanceDetail: String(localized: "Start standing tall, with your whole body in view."),
+            framingPrompt: String(localized: "Stand sideways. Show head to toe."),
+            checkingVisibility: String(localized: "Checking body visibility"),
+            showJoints: String(localized: "Show shoulder, hip, knee and ankle"),
+            jointsVisible: String(localized: "Shoulder, hip, knee and ankle visible"),
+            keepJointsVisible: String(localized: "Keep your shoulder, hip and knee visible for the whole set."),
+            bodyTooSmall: String(localized: "Plumb couldn’t measure your hip angle. Keep your side to the camera and your whole body in view."),
+            retakeHint: String(localized: "Move the phone farther back and keep your shoulder, hip, knee, and ankle visible."),
+            noCompleteReps: String(localized: "No complete stiff-leg deadlift repetitions were measured. Start standing tall and keep your whole body in view."),
+            rangeNoun: String(localized: "hip hinge"),
+            moreRange: String(localized: "greater"),
+            lessRange: String(localized: "smaller"),
+            observation: String(localized: "Your hip hinge became smaller in the last two reps."),
+            nextAction: String(localized: "Keep your hip hinge similar from rep to rep."),
+            rangeExplanation: String(localized: "Hip hinge is how much the angle between your torso and thigh closed from the starting position, as seen by the camera. Use it only to compare your own sets from the same view."),
+            rangeAccessibilityName: String(localized: "camera-observed hip hinge")
         )
     )
 
@@ -471,32 +478,32 @@ nonisolated extension ExerciseDefinition {
         classifierLabel: "pull_up",
         posture: PostureRule(
             cueKind: .swingIncreased, minimumIncrease: 0.15,
-            observation: "Your body swung more at the top of the last two reps.",
-            nextAction: "Try keeping your legs still under you on each pull."
+            observation: String(localized: "Your body swung more at the top of the last two reps."),
+            nextAction: String(localized: "Try keeping your legs still under you on each pull.")
         ),
         copy: ExerciseCopy(
-            name: "Pull-up",
-            shareNoun: "pull-up",
-            setupTitle: "Pull-up check",
-            placementTitle: "Place your iPhone",
-            placementDetail: "At chest height, a few steps from the bar, with your hands and feet in view.",
-            stanceTitle: "Start from a hang",
-            stanceDetail: "Straight arms, hands on the bar. Side, front or back to the phone all work.",
-            framingPrompt: "Show hands to feet.",
-            checkingVisibility: "Checking arm visibility",
-            showJoints: "Show shoulders, hips and hands",
-            jointsVisible: "Shoulders and hips visible",
-            keepJointsVisible: "Keep your shoulders, hips and hands in view for the whole set.",
-            bodyTooSmall: "Plumb couldn’t measure your arm length. Move the phone a little closer, with the bar in view.",
-            retakeHint: "Keep your hands, shoulders and hips in view, from the side, the front or the back.",
-            noCompleteReps: "No complete pull-ups were measured. Start from a hang with straight arms and pull until your chin passes your hands.",
-            rangeNoun: "pull height",
-            moreRange: "higher",
-            lessRange: "lower",
-            observation: "Your pulls got lower in the last two reps.",
-            nextAction: "Try a pace you can keep consistent.",
-            rangeExplanation: "Pull height is how far your shoulders rose from the hang, as a share of your arm length, as seen by the camera. Use it only to compare your own sets from the same view.",
-            rangeAccessibilityName: "camera-observed pull height"
+            name: String(localized: "Pull-up"),
+            shareNoun: String(localized: "pull-up"),
+            setupTitle: String(localized: "Pull-up check"),
+            placementTitle: String(localized: "Place your iPhone"),
+            placementDetail: String(localized: "At chest height, a few steps from the bar, with your hands and feet in view."),
+            stanceTitle: String(localized: "Start from a hang"),
+            stanceDetail: String(localized: "Straight arms, hands on the bar. Side, front or back to the phone all work."),
+            framingPrompt: String(localized: "Show hands to feet."),
+            checkingVisibility: String(localized: "Checking arm visibility"),
+            showJoints: String(localized: "Show shoulders, hips and hands"),
+            jointsVisible: String(localized: "Shoulders and hips visible"),
+            keepJointsVisible: String(localized: "Keep your shoulders, hips and hands in view for the whole set."),
+            bodyTooSmall: String(localized: "Plumb couldn’t measure your arm length. Move the phone a little closer, with the bar in view."),
+            retakeHint: String(localized: "Keep your hands, shoulders and hips in view, from the side, the front or the back."),
+            noCompleteReps: String(localized: "No complete pull-ups were measured. Start from a hang with straight arms and pull until your chin passes your hands."),
+            rangeNoun: String(localized: "pull height"),
+            moreRange: String(localized: "higher"),
+            lessRange: String(localized: "lower"),
+            observation: String(localized: "Your pulls got lower in the last two reps."),
+            nextAction: String(localized: "Try a pace you can keep consistent."),
+            rangeExplanation: String(localized: "Pull height is how far your shoulders rose from the hang, as a share of your arm length, as seen by the camera. Use it only to compare your own sets from the same view."),
+            rangeAccessibilityName: String(localized: "camera-observed pull height")
         )
     )
 
@@ -516,32 +523,32 @@ nonisolated extension ExerciseDefinition {
         classifierLabel: "muscle_up",
         posture: PostureRule(
             cueKind: .swingIncreased, minimumIncrease: 0.15,
-            observation: "Your body swung more at the top of the last two reps.",
-            nextAction: "Try keeping your legs still under you on each pull."
+            observation: String(localized: "Your body swung more at the top of the last two reps."),
+            nextAction: String(localized: "Try keeping your legs still under you on each pull.")
         ),
         copy: ExerciseCopy(
-            name: "Muscle-up",
-            shareNoun: "muscle-up",
-            setupTitle: "Muscle-up check",
-            placementTitle: "Place your iPhone",
-            placementDetail: "At chest height, a few steps from the bar, with the space above it in view.",
-            stanceTitle: "Start from a hang",
-            stanceDetail: "Straight arms, hands on the bar. Keep the space above the bar in view.",
-            framingPrompt: "Show the bar, the space above it and your feet.",
-            checkingVisibility: "Checking arm visibility",
-            showJoints: "Show shoulders, hips and hands",
-            jointsVisible: "Shoulders and hips visible",
-            keepJointsVisible: "Keep your shoulders, hips and hands in view for the whole set.",
-            bodyTooSmall: "Plumb couldn’t measure your arm length. Move the phone a little further back, with the bar and the space above it in view.",
-            retakeHint: "Keep your hands, shoulders and hips in view above and below the bar.",
-            noCompleteReps: "No complete muscle-ups were measured: your shoulders did not get above your hands. If you meant pull-ups, choose Pull-up.",
-            rangeNoun: "rise",
-            moreRange: "higher",
-            lessRange: "lower",
-            observation: "Your rise got lower in the last two reps.",
-            nextAction: "Try a pace you can keep consistent.",
-            rangeExplanation: "Rise is how far your shoulders went up from the hang, as a share of your arm length, as seen by the camera. Above 100% your shoulders are above your hands.",
-            rangeAccessibilityName: "camera-observed rise"
+            name: String(localized: "Muscle-up"),
+            shareNoun: String(localized: "muscle-up"),
+            setupTitle: String(localized: "Muscle-up check"),
+            placementTitle: String(localized: "Place your iPhone"),
+            placementDetail: String(localized: "At chest height, a few steps from the bar, with the space above it in view."),
+            stanceTitle: String(localized: "Start from a hang"),
+            stanceDetail: String(localized: "Straight arms, hands on the bar. Keep the space above the bar in view."),
+            framingPrompt: String(localized: "Show the bar, the space above it and your feet."),
+            checkingVisibility: String(localized: "Checking arm visibility"),
+            showJoints: String(localized: "Show shoulders, hips and hands"),
+            jointsVisible: String(localized: "Shoulders and hips visible"),
+            keepJointsVisible: String(localized: "Keep your shoulders, hips and hands in view for the whole set."),
+            bodyTooSmall: String(localized: "Plumb couldn’t measure your arm length. Move the phone a little further back, with the bar and the space above it in view."),
+            retakeHint: String(localized: "Keep your hands, shoulders and hips in view above and below the bar."),
+            noCompleteReps: String(localized: "No complete muscle-ups were measured: your shoulders did not get above your hands. If you meant pull-ups, choose Pull-up."),
+            rangeNoun: String(localized: "rise"),
+            moreRange: String(localized: "higher"),
+            lessRange: String(localized: "lower"),
+            observation: String(localized: "Your rise got lower in the last two reps."),
+            nextAction: String(localized: "Try a pace you can keep consistent."),
+            rangeExplanation: String(localized: "Rise is how far your shoulders went up from the hang, as a share of your arm length, as seen by the camera. Above 100% your shoulders are above your hands."),
+            rangeAccessibilityName: String(localized: "camera-observed rise")
         )
     )
 }

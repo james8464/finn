@@ -5,7 +5,7 @@ import Observation
 nonisolated enum SpokenObservation {
     static func text(for analysis: SetAnalysis, cue: Cue?) -> String? {
         guard let cue else { return nil }
-        return "\(analysis.reps.count) measured reps. \(cue.observation) \(cue.nextAction)"
+        return String(localized: "\(analysis.reps.count) measured reps. \(cue.observation) \(cue.nextAction)")
     }
 }
 
@@ -27,6 +27,7 @@ final class ObservationSpeaker: NSObject, AVSpeechSynthesizerDelegate {
     func speak(_ text: String) {
         stop()
         let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = SpokenLanguage.voice
         currentUtteranceID = ObjectIdentifier(utterance)
         isSpeaking = true
         synthesizer.speak(utterance)
@@ -81,6 +82,7 @@ final class LiveAnnouncer: NSObject, LiveAnnouncing, AVSpeechSynthesizerDelegate
             queued = 0
         }
         let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = SpokenLanguage.voice
         utterance.rate = min(AVSpeechUtteranceMaximumSpeechRate, AVSpeechUtteranceDefaultSpeechRate * 1.1)
         queued += 1
         synthesizer.speak(utterance)
