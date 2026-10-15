@@ -8,6 +8,7 @@ final class CameraAngleUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-front-view"]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
@@ -46,6 +47,7 @@ final class CameraAngleUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-front-view", "-plumb-validation"]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
@@ -65,6 +67,7 @@ final class CameraAngleUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-front-view"]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Push-up"].tap()
         app.buttons["Start a set"].tap()
         XCTAssertTrue(app.staticTexts["Checking shoulder and hand visibility"].waitForExistence(timeout: 5))

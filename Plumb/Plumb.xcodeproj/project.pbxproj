@@ -37,14 +37,12 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		1A14378730755F9000CFBBF6 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
+			dstSubfolder = Product;
 			files = (
 				1A14378830755F9000CFBBF6 /* PlumbWatch.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -216,8 +214,6 @@
 				1A14378630755F9000CFBBF6 /* Resources */,
 			);
 			buildRules = (
-			);
-			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
 				1A14378130755F9000CFBBF6 /* PlumbWatch */,
@@ -472,11 +468,11 @@
 				DEVELOPMENT_TEAM = Z29CKRV8C9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Only after you turn on Personalize with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plumb saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
@@ -508,11 +504,11 @@
 				DEVELOPMENT_TEAM = Z29CKRV8C9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Only after you turn on Personalize with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plumb saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;

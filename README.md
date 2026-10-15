@@ -1,12 +1,13 @@
 # Plumb
 
-> **TL;DR · 13 October 2026**
+> **TL;DR · 14 October 2026**
 >
 > - **This file is the source of truth. Keep it true.**
 > - **Idea:** a fitness coach on iPhone + Apple Watch that aims to check every rep and give appropriate, actionable advice on posture and execution. Track your progress and your workouts.
 > - **Today we have:** iPhone only, six exercises (four filmed from the side, pull-ups and muscle-ups from any view) with rep counting and limited, evidence-linked posture or range advice after a set; hands-free sets with the live rep count on screen and in your ears (AirPods or speaker); your most frequent pattern before each set; optional saving of each finished session to Apple Health as a workout, so it shows in the Fitness app (written and unit-tested, not yet built in Xcode or tried on an iPhone). Optional Personalize with Health (13 October): with the person's permission, Plumb reads heart rate, recovery, sleep, recent activity, age, weight and height on the iPhone to suggest lighter days, adapt rest and show the set's heart rate from Apple Watch; each tip names its data.
 > - **In the build, not yet tried on a watch:** an Apple Watch companion that mirrors the iPhone's count and taps the wrist on each rep (target `PlumbWatch`, embedded in the iPhone app since 13 October).
 > - **Not built yet:** Apple Watch wrist-motion measurement, Apple TV, AirPods head tracking, widgets, Live Activities.
+> - **Home menu (14 October):** a photographic dashboard with glass cards, a floating Home / Posture / Coach / Workout Liquid Glass tab bar, and account settings. Workout keeps the existing animated exercise setup; Last workout and Sessions open saved history. Unfinished features say “Not made yet.”
 
 ## Rules for AI agents and contributors
 
@@ -41,14 +42,14 @@ We are building the Plumb idea. Keep in mind:
 
 ## Current state
 
-_Updated 13 October 2026._
+_Updated 14 October 2026._
 
 **In one sentence:** an iPhone-only app that analyzes one selected exercise at a time from the side, counts reps live and says them, and gives at most one supported posture or range observation after the set. It has not yet been tested on a real iPhone with real people.
 
 **What the app does**
 
 - Four exercises filmed from the side: bodyweight squat, push-up, static lunge, stiff-leg deadlift. Pull-ups and bar muscle-ups from the side, the front or the back: reps count when the shoulders rise more than half an arm length (above the hands for a muscle-up), and the result says whether the chin passed the hands, whether the arms were straight at the hang, and how much the body swung. These two have synthetic tests and one real two-rep clip only.
-- First screen (new on 13 October): a dark card draws the chosen exercise as the camera sees it, chips switch exercise in one tap, and one **Start a set** button opens the camera. History, Options and Privacy sit in a More menu; the line above the button opens Privacy. The first time, a short sheet says what the camera does before iOS asks for access. After a session, a card shows the last session and its observation. The drawing is an illustration, not tracking.
+- First screen (updated 14 October): a dark photographic Home dashboard with translucent cards and lime accents, matching the supplied Plumb reference. Last workout opens the latest saved session and uses the existing workout-duration calculation; Sessions opens History. The figure button opens Account settings, with working Options, History and Privacy links. Home, Posture, Coach and Workout tabs are tappable; Coach, Posture, Weights, Awards and Plumb+ show “Not made yet.” Scores and weights remain empty because they are not measured. A Debug-only `-plumb-dashboard-preview` launch argument displays labelled sample values for design review. The Workout tab preserves the animated exercise illustration, exercise chips, camera primer, **Start a set**, Health status and More menu. The drawing is an illustration, not tracking. See [dashboard implementation notes](docs/design/home-dashboard.md).
 - Hands-free sets (new on 13 October, on by default, switch in Options): the phone stands a few steps away. The countdown starts once you hold still in position (a plank for push-ups); the set ends when you walk back to the phone or stop moving after your reps. Only the set is measured, not the walk to your spot and back. Start set and Stop set still work. The screen stays on while the camera is open; the camera screen closes by itself after 3 minutes without a set, or a minute without anyone in view, and hands-free Plumb says when it sees nobody.
 - Before the set: live camera view with the tracked skeleton, the joint Plumb cannot see clearly ("Ankle not clear"), and framing tips, said aloud hands-free.
 - During the set: the reps counted so far, large on screen and said aloud through AirPods or other headphones when connected, otherwise the speaker; a rep clearly faster or shorter than your first reps of the set is pointed out once. The count names the exercise being measured ("5 push-ups"), and the app keeps the chosen exercise across launches. When a set is refused for the chosen exercise's joints but clearly shows reps of another one, the result says so ("Plumb counted 5 push-ups in this set, but Squat was chosen").

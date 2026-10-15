@@ -23,6 +23,7 @@ final class ScreenTourUITests: XCTestCase {
         let app = XCUIApplication()
         app.resetAuthorizationStatus(for: .camera)
         app.launch()
+        app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 1)
         save("01-premier-lancement-accueil")
@@ -53,6 +54,7 @@ final class ScreenTourUITests: XCTestCase {
         let dark = XCUIApplication()
         dark.launchArguments = ["-plumb-ui-dark"]
         dark.launch()
+        dark.openWorkoutTab()
         XCTAssertTrue(dark.buttons["home.start"].waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 1)
         save("05-accueil-sombre")
@@ -60,6 +62,7 @@ final class ScreenTourUITests: XCTestCase {
 
         let app = XCUIApplication()
         app.launch()
+        app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         app.buttons["Push-up"].tap()
         Thread.sleep(forTimeInterval: 1.2)
@@ -85,6 +88,7 @@ final class ScreenTourUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo"]
         app.launch()
+        app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         app.buttons["home.start"].tap()
         XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 8))
@@ -113,6 +117,7 @@ final class ScreenTourUITests: XCTestCase {
     func test4OptionsPrivacyHistory() {
         let app = XCUIApplication()
         app.launch()
+        app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         open(app, "Options")
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))

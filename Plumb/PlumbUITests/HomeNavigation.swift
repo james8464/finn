@@ -1,6 +1,13 @@
 import XCTest
 
 extension XCUIApplication {
+    @MainActor
+    func openWorkoutTab() {
+        let tab = buttons["tab.workout"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 5))
+        tab.tap()
+    }
+
     /// Opens History, Options or Privacy from the More menu of the first screen.
     @MainActor
     func openFromHome(_ page: String) {
