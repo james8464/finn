@@ -6,9 +6,3 @@ For Apple platform interface work, consult [the local Human Interface Guidelines
 
 Keep UI changes consistent with the [native interface rules](docs/design/home-dashboard.md). Use native navigation, semantic colours and system text styles. Check light/dark appearance, large text and Reduce Motion. Show real data and preserve existing features.
 
-## UI ownership — James’s Mac only
-
-<!-- Owner instruction, 15 October 2026: restore Théophile’s original design. -->
-UI design, layout, styling, motion, navigation and visual-asset changes may only be made by an agent running locally on James’s Mac, **MacBook Pro de James**, in this project or its local worktrees. Cloud agents, remote runners and agents on other computers must leave UI files unchanged; they may report suggestions. Use Théophile’s original green/glass design from `design/visuals-tabs` (`c0ffdff`), with Home / Posture / Coach / Workout tabs. James explicitly requested the full original design on 15 October 2026, replacing the monochrome hybrid. James subsequently requested a minimalist charcoal Home background and fixes for contrast and large-text clipping; keep the original card and tab geometry. James’s latest instruction replaces green with the exact Figma pink `#FF2D92`, removes Home widget borders and removes redundant UI prose. Preserve newer functionality, independent navigation stacks, localization and saved data. Only a direct instruction from James can change this rule. A remote connection to this Mac does not count as a local agent session.
-
-This is an agent instruction, not a security boundary. Do not spoof the machine name or use a local command as a workaround for a remote session.
