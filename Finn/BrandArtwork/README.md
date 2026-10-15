@@ -19,9 +19,13 @@ The direction follows [Apple’s app-icon HIG](https://developer.apple.com/desig
 
 ## Opening motion
 
-`FinnStartupView` reads saved sessions and badges off the main thread. The three original F plates settle by 10 points over 0.48 seconds, staggered by at most 90 ms. The mark occupies roughly 80 × 87 points at the centre of a black screen.
+The F draws itself: its stem rises (0–0.34 s), the upper arm extends (0.26–0.58 s), then the pink bar extends (0.38–0.68 s). Rounded ends retain their shape as each plate grows. Quintic interpolation gives each movement zero velocity and acceleration at both ends. The finished geometry matches the icon exactly, at roughly 80 × 87 points.
 
-James requested a one-second presentation: the plates settle, hold until 0.76 seconds, then fade over 0.24 seconds. Local data loads concurrently and navigation mounts underneath. If storage takes longer, the settled mark stays until content is ready. Health and network requests do not hold startup. Returning from the background preserves navigation and does not repeat the animation. Reduce Motion keeps the same timing with a static mark and fade. VoiceOver receives one loading label; covered content is inaccessible until revealed.
+James requested a one-second presentation: draw, hold until 0.8 seconds, then fade over 0.2 seconds. `FinnStartupView` loads saved sessions and badges concurrently, off the main thread, and mounts navigation underneath. If storage takes longer, the settled mark stays until content is ready. Health and network requests do not hold startup. Returning from the background preserves navigation and does not repeat the animation. Reduce Motion uses the finished mark and fade. VoiceOver receives one loading label; covered content is inaccessible until revealed.
+
+`FinnLogoMotionFrame` renders vectors at the display’s animation cadence. `LaunchMotion.mp4` is a 120-frame, one-second export from that same renderer; `LaunchMotion.png` shows selected frames. These are review artifacts, not bundled playback assets.
+
+The app opts into [higher ProMotion refresh rates](https://developer.apple.com/documentation/bundleresources/information-property-list/cadisableminimumframedurationonphone); iOS still chooses the actual cadence for the device and power state.
 
 The system launch screen is plain black. Motion runs in SwiftUI after launch; see Apple’s [launching](https://developer.apple.com/design/human-interface-guidelines/launching), [loading](https://developer.apple.com/design/human-interface-guidelines/loading) and [motion](https://developer.apple.com/design/human-interface-guidelines/motion) guidance. Launch a Debug build with `-finn-launch-preview` for a Replay button using the production timing; add `-finn-launch-reduce-motion` for its static variant. Native navigation mounts without an insertion animation before the logo fades away.
 

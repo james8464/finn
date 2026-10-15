@@ -51,7 +51,7 @@ struct FinnStartupView: View {
     }
 }
 
-/// shared by live startup and the replay preview: 760 ms presentation + 240 ms fade
+/// shared by live startup and the replay preview: 800 ms presentation + 200 ms fade
 private struct FinnLaunchCover: View {
     let readyToReveal: Bool
     var previewReducesMotion = false
@@ -65,11 +65,11 @@ private struct FinnLaunchCover: View {
             .task(id: readyToReveal) {
                 guard readyToReveal else { return }
                 do {
-                    try await ContinuousClock().sleep(until: startedAt.advanced(by: .milliseconds(760)))
+                    try await ContinuousClock().sleep(until: startedAt.advanced(by: .milliseconds(800)))
                     try Task.checkCancellation()
                 } catch { return }
                 // never animate insertion of the native navigation underneath this cover
-                withAnimation(.easeOut(duration: 0.24), completionCriteria: .removed) {
+                withAnimation(.easeOut(duration: 0.20), completionCriteria: .removed) {
                     isVisible = false
                 } completion: {
                     onFinished()
@@ -114,7 +114,7 @@ struct FinnLaunchPreview: View {
 }
 #endif
 
-/// the icon's three plates settle along its forward slant, then hold still
+/// Draw the F at the display's frame cadence; Reduce Motion keeps the finished mark still.
 struct FinnLaunchMark: View {
     var previewReducesMotion = false
     @Environment(\.accessibilityReduceMotion) private var systemReducesMotion
@@ -125,12 +125,8 @@ struct FinnLaunchMark: View {
     var body: some View {
         TimelineView(.animation(paused: reduceMotion || scenePhase != .active)) { context in
             let elapsed = max(0, context.date.timeIntervalSince(startedAt))
-            ZStack {
-                plate(.crown, elapsed: elapsed, delay: 0, colour: Color(red: 245/255, green: 247/255, blue: 250/255))
-                plate(.middle, elapsed: elapsed, delay: 0.055, colour: Color(red: 1, green: 45/255, blue: 146/255))
-                plate(.stem, elapsed: elapsed, delay: 0.09, colour: Color(red: 198/255, green: 204/255, blue: 213/255))
-            }
-            .frame(width: 156, height: 156)
+            FinnLogoMotionFrame(elapsed: elapsed, reducesMotion: reduceMotion)
+                .frame(width: 156, height: 156)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black)
@@ -139,12 +135,4 @@ struct FinnLaunchMark: View {
         .accessibilityIdentifier("launch.loading")
     }
 
-    private func plate(_ plate: FinnLogoPlate, elapsed: TimeInterval,
-                       delay: TimeInterval, colour: Color) -> some View {
-        let progress = reduceMotion ? 1 : min(1, max(0, (elapsed - delay) / 0.48))
-        let remaining = pow(1 - progress, 3)
-        return plate.fill(colour)
-            .offset(x: -3 * remaining, y: 10 * remaining)
-            .opacity(1 - 0.7 * remaining)
-    }
 }
