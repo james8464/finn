@@ -1,6 +1,6 @@
 # Plumb App Store submission track
 
-**Status on 15 October 2026: the team recorded a signed Release archive of `main` at d8f1503; no App Store Connect upload has been verified.** Newer Coach, Shortcuts, widget and UI commits require a fresh archive and review. The challenge asks for a build submitted through App Store Connect by Friday 16 October, 14:00. The submission steps are in [`marche-a-suivre-15-octobre.md`](marche-a-suivre-15-octobre.md); the listing texts in [`app-store-fiche.md`](app-store-fiche.md); the privacy answers in [`app-privacy-answers.md`](app-privacy-answers.md); the screenshots in [`screenshots/`](screenshots/README.md).
+**Status on 15 October 2026: the team recorded a signed Release archive of `main` at d8f1503; no App Store Connect upload has been verified.** Newer Coach, Shortcuts, widget, form-check and UI commits require a fresh archive and review. The challenge asks for a build submitted through App Store Connect by Friday 16 October, 14:00. The submission steps are in [`marche-a-suivre-15-octobre.md`](marche-a-suivre-15-octobre.md); the listing texts in [`app-store-fiche.md`](app-store-fiche.md); the privacy answers in [`app-privacy-answers.md`](app-privacy-answers.md); the screenshots in [`screenshots/`](screenshots/README.md).
 
 ## Checked on 15 October (archive `xcodebuild archive`, Release, generic iOS device)
 
@@ -19,7 +19,7 @@ The bundle ID row reflects the current Xcode project. The older archive needs to
 | Debug-only code | `strings` on the Release binary finds none of the demo, video-file or validation markers |
 | Public pages | support and privacy pages answered HTTP 200 on 15 October; `site/` changes in this branch go live only after the manual **Publish Plumb support pages** workflow runs from `main` |
 
-The local iPhone 16 Pro Max (iOS 27.0.1) installed and launched a temporary James-team Debug build of d8f1503 on 15 October. Automated UI testing allowed Camera and opened its live preview, which correctly asked for the missing hip, knee and ankle while the phone faced a ceiling. This verifies launch, permission and preview only; it is not a real exercise or a FinLearn-signed build.
+The local iPhone 16 Pro Max (iOS 27.0.1) installed and launched a temporary James-team Debug build of d8f1503 on 15 October. Automated UI testing allowed Camera and opened its live preview, which correctly asked for the missing hip, knee and ankle while the phone faced a ceiling. A newer development-signed build with Coach, widgets, the dashboard and form checks also installed and launched; a repeat camera UI test did not complete because Xcode could not create the test runner's runtime profile folder on the phone. These checks do not validate a real exercise or a FinLearn-signed build.
 
 Still open: a physical-iPhone run of the final FinLearn build with real sets, the Apple Watch on a real watch, the French interface (`claude/fr`) if it ships, the Coach on device, the Private Cloud Compute entitlement for its server model (see the privacy answers), and three real-set screenshots (set in progress, result, home after a set).
 

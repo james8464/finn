@@ -194,6 +194,14 @@ nonisolated enum CoachInstructions {
 /// the question for its intent (advice for next time, progress, one set, or a recap) and answers
 /// from the recorded facts only; it never invents.
 nonisolated enum CoachFallback {
+    static func noRelevantAnswer(language: CoachLanguage) -> String {
+        switch language {
+        case .english: "Plumb didn't measure that in these saved sets. I can only comment on recorded reps and observations."
+        case .french: "Plumb n'a pas mesuré cela dans ces séries. Je peux seulement commenter les répétitions et observations enregistrées."
+        case .spanish: "Plumb no midió eso en estas series guardadas. Solo puedo comentar las repeticiones y observaciones registradas."
+        }
+    }
+
     /// What the person is asking for, guessed from a few words. Recap when nothing matches.
     enum Intent: Equatable {
         case advice, progress, set(Int), recap

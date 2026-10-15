@@ -145,6 +145,11 @@ final class CoachResponder {
         let generated = await withTimeout { [language] in
             try await engine.reply(to: question, context: context, history: history, language: language)
         }
+        if generated?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == "NONE" {
+            return CoachMessage(role: .coach,
+                                text: CoachFallback.noRelevantAnswer(language: language),
+                                engine: .fallback)
+        }
         guard let generated, let selected = CoachAnswerCheck.selectedFacts(in: generated, for: context)
         else { return fallback }
         let recordedAnswer = selected.map { CoachFallback.summary(of: $0, language: language) }
