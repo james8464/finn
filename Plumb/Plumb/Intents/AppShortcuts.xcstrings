@@ -1,0 +1,61 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Start a ${exercise} set in ${applicationName}" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Lance une série de ${exercise} dans ${applicationName}" } }
+      }
+    },
+    "Start ${exercise} in ${applicationName}" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Démarre ${exercise} dans ${applicationName}" } }
+      }
+    },
+    "Start a set in ${applicationName}" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Lance une série dans ${applicationName}" } }
+      }
+    },
+    "Start a set with ${applicationName}" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Démarre une série avec ${applicationName}" } }
+      }
+    },
+    "How did my last set go in ${applicationName}" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Comment s'est passée ma dernière série dans ${applicationName}" } }
+      }
+    },
+    "How was my last set in ${applicationName}" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "C'était comment ma dernière série dans ${applicationName}" } }
+      }
+    },
+    "What was my last set in ${applicationName}" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Quelle était ma dernière série dans ${applicationName}" } }
+      }
+    },
+    "${applicationName} last set" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "${applicationName} dernière série" } }
+      }
+    },
+    "Show my history in ${applicationName}" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Montre mon historique dans ${applicationName}" } }
+      }
+    },
+    "Show my ${applicationName} history" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Montre mon historique ${applicationName}" } }
+      }
+    },
+    "Open ${applicationName} history" : {
+      "localizations" : {
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Ouvre l'historique ${applicationName}" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
