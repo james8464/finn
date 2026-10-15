@@ -41,7 +41,7 @@ Expected results on the current macOS Vision path: six measured reps for the ori
 | [Mirrored](fixtures/squat-mirrored.mp4) | Opposite facing direction | Six measured reps since `squat-side-v7`; before, a retake with required joints clear in about 71% of frames, below the 80% gate |
 | [Dim](fixtures/squat-dim.mp4) | Lower light and saturation | 6 measured reps |
 | [Farther](fixtures/squat-far.mp4) | Person at 60% of original size | 6 measured reps |
-| [Too far](fixtures/squat-too-far.mp4) | Person at 30% of original size | Six measured reps since the reliability pass of 13 October (a retake before, for unclear joints) |
+| [Too far](fixtures/squat-too-far.mp4) | Person at 30% of original size | Retake: required squat joints are visible in about 62% of frames, below the 80% advice gate |
 | [Slower](fixtures/squat-slow.mp4) | Longer rep duration | 6 measured reps |
 | [Overexposed](fixtures/squat-overexposed.mp4) | Bright exposure and flatter contrast | 6 measured reps |
 | [Warm indoor](fixtures/squat-warm-indoor.mp4) | Warmer color balance | 6 measured reps |

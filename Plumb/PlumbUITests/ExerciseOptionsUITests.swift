@@ -30,6 +30,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         let squat = app.buttons["Squat"]
         XCTAssertTrue(squat.waitForExistence(timeout: 5))
         XCTAssertTrue(squat.isSelected)
+        XCTAssertTrue(squat.isHittable, "The selected exercise must be visible on first launch")
         let pushUp = app.buttons["Push-up"]
         pushUp.tap()
         XCTAssertTrue(pushUp.isSelected)
