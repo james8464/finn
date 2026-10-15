@@ -19,6 +19,42 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.tryFinn"].isHittable)
     }
 
+    /// TEMPORARY with `FinnFirstTryTrigger.swift`: Try Finn shows the placeholder, then the coach card.
+    @MainActor
+    func testTryFinnSwitchesToCoachCard() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-finn-ui-demo"]
+        app.launch()
+        XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 8))
+        app.buttons["home.tryFinn"].tap()
+        // The placeholder shows for under a second: too brief to assert on reliably.
+        let coach = app.buttons["home.finnCoach"]
+        XCTAssertTrue(coach.waitForExistence(timeout: 5))
+        XCTAssertTrue(coach.label.hasPrefix("Finn: your next workout, "), coach.label)
+        XCTAssertFalse(app.buttons["home.watchDemo"].exists)
+        coach.tap()
+        XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 3))
+    }
+
+    /// Replay onboarding, in the profile, starts again from the welcome screens, then Try Finn.
+    @MainActor
+    func testReplayOnboardingStartsFromTheBeginning() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-finn-ui-demo"]
+        app.launch()
+        XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 8))
+        app.buttons["home.tryFinn"].tap()
+        XCTAssertTrue(app.buttons["home.finnCoach"].waitForExistence(timeout: 5))
+        app.buttons["home.account"].tap()
+        let replay = app.buttons["account.replayOnboarding"]
+        XCTAssertTrue(replay.waitForExistence(timeout: 3))
+        replay.tap()
+        let finish = app.buttons["onboarding.finish"]
+        XCTAssertTrue(finish.waitForExistence(timeout: 3))
+        finish.tap()
+        XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 5))
+    }
+
     @MainActor
     func testRestoredDemoNeverWritesHistory() {
         let app = XCUIApplication()

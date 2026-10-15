@@ -19,6 +19,17 @@ enum DashboardStyle {
     /// Figma brand/pink/selection, node 68:12: #FF2D92 (sRGB).
     static let accent = Color(.sRGB, red: 1, green: 45.0 / 255, blue: 146.0 / 255, opacity: 1)
     static let secondary = Color.white.opacity(0.7)
+    /// The solid pink Finn card.
+    static let finnCardRadius: CGFloat = 24
+    /// The glass cards (`DashboardGlass`).
+    static let cardRadius: CGFloat = 15
+    /// Between Home cards, and inside the Finn outline.
+    static let cardSpacing: CGFloat = 10
+    /// The coach card's see-through pink, from its top corner to its bottom one.
+    static let coachFillTop = 0.55
+    static let coachFillBottom = 0.3
+    /// The pink outline around the Finn and Last workout cards: frames them without shouting.
+    static let outlineOpacity = 0.4
 }
 
 /// What the 1.0 build hides. The Finn+ banner waits for the subscription (1.1): App Store rule
@@ -32,10 +43,17 @@ struct DashboardView: View {
     let exercise: ExerciseKind
     /// Badges earned so far (`Badges/`), for the Awards card.
     var badges: [EarnedBadge] = []
-    let tryFinn: () -> Void
+    /// Off: the pink card invites to try Finn. On: Finn, the coach, gives the next workout.
+    @Binding var hasTriedFinn: Bool
+    /// Opens workout setup, from the coach card.
+    let startWorkout: () -> Void
     let watchDemo: () -> Void
     let open: (HomeRoute) -> Void
+    @State private var showsFirstTry = false
+    @State private var nextWorkout = NextWorkout.sample()
+    @State private var quoteIndex = FinnQuotes.next(after: nil)
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric(relativeTo: .largeTitle) private var titleSize = 40.0
     @ScaledMetric(relativeTo: .largeTitle) private var durationSize = 44.0
     @ScaledMetric(relativeTo: .largeTitle) private var metricSize = 32.0
@@ -73,7 +91,7 @@ struct DashboardView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 10) {
+            VStack(spacing: DashboardStyle.cardSpacing) {
                 HStack {
                     Text("Home")
                         .font(.system(size: titleSize, weight: .bold))
@@ -98,44 +116,11 @@ struct DashboardView: View {
                         .foregroundStyle(DashboardStyle.accent)
                 }
 
-                tryFinnCard
+                finnOutline
 
-                card(.lastWorkout, id: "home.lastSession") {
-                    VStack(alignment: .leading, spacing: 8) {
-                        if dynamicTypeSize.isAccessibilitySize {
-                            // Avoid measuring a discarded horizontal layout at large text sizes.
-                            VStack(alignment: .leading, spacing: 16) {
-                                heading("Last workout")
-                                durationLabel
-                                setCountRing
-                            }
-                        } else {
-                            HStack(alignment: .top, spacing: 16) {
-                                VStack(alignment: .leading, spacing: 28) {
-                                    heading("Last workout")
-                                    durationLabel
-                                }
-                                Spacer(minLength: 0)
-                                setCountRing.padding(.top, 10)
-                            }
-                        }
-                        HStack {
-                            Spacer()
-                            Group {
-                                if isPreview { Text("Oct 13, 2026") }
-                                else if let last = history.first {
-                                    Text(last.startedAt.formatted(date: .abbreviated, time: .omitted))
-                                } else { Text("No workouts yet") }
-                            }
-                            .font(.system(size: detailSize))
-                            .fixedSize(horizontal: false, vertical: true)
-                            .foregroundStyle(DashboardStyle.secondary)
-                        }
-                    }
-                }
-
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10),
-                                         count: dynamicTypeSize.isAccessibilitySize ? 1 : 2), spacing: 10) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: DashboardStyle.cardSpacing),
+                                         count: dynamicTypeSize.isAccessibilitySize ? 1 : 2),
+                          spacing: DashboardStyle.cardSpacing) {
                     card(.posture, id: "home.posture") {
                         VStack(alignment: .leading, spacing: 7) {
                             heading("Posture")
@@ -191,12 +176,84 @@ struct DashboardView: View {
         .scrollIndicators(.hidden)
         .foregroundStyle(.white)
         .background { HomeBackdrop() }
+        // A new line from Finn each time Home appears, never the same one twice in a row.
+        .onAppear { quoteIndex = FinnQuotes.next(after: quoteIndex) }
+        .finnFirstTryTrigger(isPresented: $showsFirstTry, hasTriedFinn: $hasTriedFinn)
     }
 
-    /// A solid brand-colour invitation to the real workout, with a separate illustrated preview.
+    /// The Finn card and Last workout in one light pink outline. Its corners are concentric with
+    /// both cards: each outline radius is the card radius plus the padding.
+    private var finnOutline: some View {
+        let padding = DashboardStyle.cardSpacing
+        let top = DashboardStyle.finnCardRadius + padding, bottom = DashboardStyle.cardRadius + padding
+        return VStack(spacing: DashboardStyle.cardSpacing) {
+            Group {
+                if hasTriedFinn {
+                    FinnCoachCard(workout: nextWorkout, quote: quote, action: startWorkout)
+                        .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
+                } else {
+                    tryFinnCard.transition(.opacity)
+                }
+            }
+            lastWorkoutCard
+        }
+        .padding(padding)
+        .overlay {
+            UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
+                                   bottomTrailingRadius: bottom, topTrailingRadius: top, style: .continuous)
+                .strokeBorder(DashboardStyle.accent.opacity(DashboardStyle.outlineOpacity), lineWidth: 1)
+                .accessibilityHidden(true)
+        }
+    }
+
+    private var quote: String {
+        let quotes = FinnQuotes.all
+        return quotes[quoteIndex % quotes.count]
+    }
+
+    private var lastWorkoutCard: some View {
+        card(.lastWorkout, id: "home.lastSession") {
+            VStack(alignment: .leading, spacing: 8) {
+                if dynamicTypeSize.isAccessibilitySize {
+                    // Avoid measuring a discarded horizontal layout at large text sizes.
+                    VStack(alignment: .leading, spacing: 16) {
+                        heading("Last workout")
+                        durationLabel
+                        setCountRing
+                    }
+                } else {
+                    HStack(alignment: .top, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 28) {
+                            heading("Last workout")
+                            durationLabel
+                        }
+                        Spacer(minLength: 0)
+                        setCountRing.padding(.top, 10)
+                    }
+                }
+                HStack {
+                    Spacer()
+                    Group {
+                        if isPreview { Text("Oct 13, 2026") }
+                        else if let last = history.first {
+                            Text(last.startedAt.formatted(date: .abbreviated, time: .omitted))
+                        } else { Text("No workouts yet") }
+                    }
+                    .font(.system(size: detailSize))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .foregroundStyle(DashboardStyle.secondary)
+                }
+            }
+        }
+    }
+
+    /// A solid brand-colour invitation to try Finn, with a separate illustrated preview.
     private var tryFinnCard: some View {
         VStack(spacing: 0) {
-            Button(action: tryFinn) {
+            // TEMPORARY: opens the first-try placeholder (`FinnFirstTryTrigger.swift`).
+            Button {
+                withTransaction(\.disablesAnimations, reduceMotion) { showsFirstTry = true }
+            } label: {
                 HStack(spacing: 16) {
                     if !dynamicTypeSize.isAccessibilitySize {
                         Image(systemName: "viewfinder")
@@ -218,7 +275,6 @@ struct DashboardView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(PressableStyle())
-            .accessibilityHint("Opens workout setup for your first real set.")
             .accessibilityIdentifier("home.tryFinn")
             Rectangle().fill(.black.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
             Button(action: watchDemo) {
@@ -232,7 +288,8 @@ struct DashboardView: View {
             .accessibilityIdentifier("home.watchDemo")
         }
         .foregroundStyle(.black)
-        .background(DashboardStyle.accent, in: RoundedRectangle(cornerRadius: 24))
+        .background(DashboardStyle.accent,
+                    in: RoundedRectangle(cornerRadius: DashboardStyle.finnCardRadius, style: .continuous))
     }
 
     /// The Finn+ banner, kept for 1.1 behind `DashboardFlags.showsFinnPlusBanner`.
@@ -350,9 +407,23 @@ struct DashboardView: View {
         Button { open(route) } label: {
             content().padding(14).frame(maxWidth: .infinity, alignment: .leading)
                 .modifier(DashboardGlass(showsBorder: false))
-                .contentShape(RoundedRectangle(cornerRadius: 15))
+                .contentShape(RoundedRectangle(cornerRadius: DashboardStyle.cardRadius))
         }
         .buttonStyle(PressableStyle())
         .accessibilityIdentifier(id)
     }
+}
+
+#Preview("Try Finn") {
+    @Previewable @State var hasTriedFinn = false
+    DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
+                  startWorkout: {}, watchDemo: {}, open: { _ in })
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Coach") {
+    @Previewable @State var hasTriedFinn = true
+    DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
+                  startWorkout: {}, watchDemo: {}, open: { _ in })
+        .preferredColorScheme(.dark)
 }

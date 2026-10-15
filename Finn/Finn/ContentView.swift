@@ -37,6 +37,8 @@ struct ContentView: View {
     @State private var selectedTab: HomeTab = .home
     @State private var keyboardVisible = false
     @State private var showsFinnDemo = false
+    /// TEMPORARY with `FinnFirstTryTrigger.swift`: whether Home shows the coach card.
+    @AppStorage(FinnFirstTry.key, store: FinnFirstTry.defaults) private var hasTriedFinn = false
     #if DEBUG
     @State private var didRunWatchAutoDemo = false
     #endif
@@ -391,7 +393,8 @@ struct ContentView: View {
         switch tab {
         case .home:
             DashboardView(history: model.history, exercise: model.selectedExercise,
-                          badges: badges.earned, tryFinn: { selectedTab = .workout },
+                          badges: badges.earned, hasTriedFinn: $hasTriedFinn,
+                          startWorkout: { selectedTab = .workout },
                           watchDemo: { showsFinnDemo = true }) { destination in
                 if destination == .posture { selectedTab = .posture }
                 else { route = destination }
@@ -434,6 +437,19 @@ struct ContentView: View {
         }
     }
 
+    /// Plays the first-run experience again from its very start, as on a first launch: the welcome
+    /// screens, then Home with Try Finn, then the one-time Health offer after a set. Every first-run
+    /// step resets here, so a new onboarding step adds its reset here too. Saved sets, answers and
+    /// settings are kept.
+    private func replayOnboarding() {
+        preferences.onboardingCompleted = false
+        preferences.personalizationOffered = false
+        hasTriedFinn = false // TEMPORARY with `FinnFirstTryTrigger.swift`.
+        tabRoutes = [:]
+        selectedTab = .home
+        showsOnboarding = true
+    }
+
     private var accountPage: some View {
         List {
             Section {
@@ -466,9 +482,10 @@ struct ContentView: View {
                     }
                     .accessibilityLabel("Privacy")
                 }
-                Button { showsOnboarding = true } label: {
-                    Label("Replay the welcome", systemImage: "arrow.counterclockwise")
+                Button(action: replayOnboarding) {
+                    Label("Replay onboarding", systemImage: "arrow.counterclockwise")
                 }
+                .accessibilityHint("Starts again from the welcome screens. Your sets and settings are kept.")
                 .accessibilityIdentifier("account.replayOnboarding")
             }
             Section("Account") {
@@ -1118,7 +1135,7 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Text("The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your choices set exercise order and help Coach select relevant saved sets.")
-                    Button("Replay the welcome") { showsOnboarding = true }
+                    Button("Replay the welcome", action: replayOnboarding)
                         .font(.body.weight(.medium))
                         .foregroundStyle(Color.primary)
                         .frame(minHeight: 44, alignment: .leading)
