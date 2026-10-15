@@ -74,7 +74,7 @@ final class InterfaceAccessibilityUITests: XCTestCase {
             app.swipeUp()
             try check(app, "\(prefix)-10-privacy-\(index)")
         }
-        app.selectTab("Posture")
+        app.selectTab("Progress")
         try check(app, "\(prefix)-11-posture")
         app.selectTab("Coach")
         try check(app, "\(prefix)-12-coach")
@@ -144,7 +144,7 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         app.scrollViews.firstMatch.swipeUp()
         try check(app, "\(prefix)-34-result-end")
         app.buttons["Done"].tap()
-        app.selectTab("Posture")
+        app.selectTab("Progress")
         try check(app, "\(prefix)-35-history")
         let session = app.buttons["history.session"].firstMatch
         for _ in 0..<8 where !session.isHittable { app.swipeUp() }

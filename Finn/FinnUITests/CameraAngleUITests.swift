@@ -33,6 +33,8 @@ final class CameraAngleUITests: XCTestCase {
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ])
         app.navigationBars.buttons.element(boundBy: 0).tap()
+        // Options opens from the Workout tab's root: setup is one Launch workout away
+        app.launchWorkoutIfNeeded()
 
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()

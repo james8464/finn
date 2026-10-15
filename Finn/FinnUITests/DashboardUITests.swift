@@ -87,8 +87,8 @@ final class DashboardUITests: XCTestCase {
         app.navigationBars.buttons.element(boundBy: 0).tap()
         app.selectTab("Coach")
         XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
-        app.selectTab("Posture")
-        XCTAssertTrue(app.navigationBars["Posture"].waitForExistence(timeout: 3))
+        app.selectTab("Progress")
+        XCTAssertTrue(app.navigationBars["Progress"].waitForExistence(timeout: 3))
         app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["Squat"].exists)
@@ -118,9 +118,9 @@ final class DashboardUITests: XCTestCase {
         let card = app.buttons["home.posture"]
         XCTAssertTrue(card.waitForExistence(timeout: 8))
         card.tap()
-        XCTAssertTrue(app.buttons["tab.posture"].isSelected)
-        XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["posture.exercise.pushUp"].exists)
+        XCTAssertTrue(app.buttons["tab.progress"].isSelected)
+        XCTAssertTrue(app.descendants(matching: .any)["posture.guide"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["progress.exercise.pushUp"].exists)
         let image = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         image.name = "Posture guide"
         image.lifetime = .keepAlways
@@ -153,7 +153,7 @@ final class DashboardUITests: XCTestCase {
             app.launch()
             XCTAssertTrue(app.staticTexts[tryLabel].waitForExistence(timeout: 8), language)
             app.buttons["home.posture"].tap()
-            XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 3), language)
+            XCTAssertTrue(app.descendants(matching: .any)["posture.guide"].waitForExistence(timeout: 3), language)
             app.openWorkoutTab()
             XCTAssertEqual(app.buttons["home.start"].label, startLabel, language)
             app.terminate()

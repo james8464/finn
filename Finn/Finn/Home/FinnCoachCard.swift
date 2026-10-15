@@ -61,6 +61,68 @@ enum FinnQuotes {
     }
 }
 
+/// the next workout and Finn's current line, held once in `ContentView` so the Home and Workout
+/// cards always say the same thing
+struct FinnCoachMessage: Equatable {
+    var workout = NextWorkout.sample()
+    var quoteIndex = FinnQuotes.next(after: nil)
+
+    var quote: String {
+        let quotes = FinnQuotes.all
+        return quotes[quoteIndex % quotes.count]
+    }
+
+    /// a new line, never the same one twice in a row
+    mutating func nextQuote() { quoteIndex = FinnQuotes.next(after: quoteIndex) }
+}
+
+/// Finn's neon glass: see-through pink, brighter at the top, with a bright pink edge and a soft glow,
+/// and white text, since black would fall to 2.5:1 on it. Increase Contrast and Reduce Transparency
+/// get the solid pink with black text (6:1)
+struct FinnCardSurface: ViewModifier {
+    var fillTop = DashboardStyle.coachFillTop
+    var fillBottom = DashboardStyle.coachFillBottom
+    var glow = 0.5
+    var glowRadius: CGFloat = 14
+    var edgeWidth: CGFloat = 1.5
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(isSolid ? .black : .white)
+            .background { surface }
+            .contentShape(RoundedRectangle(cornerRadius: DashboardStyle.finnCardRadius, style: .continuous))
+    }
+
+    private var isSolid: Bool { reduceTransparency || contrast == .increased }
+
+    @ViewBuilder private var surface: some View {
+        let shape = RoundedRectangle(cornerRadius: DashboardStyle.finnCardRadius, style: .continuous)
+        if isSolid {
+            shape.fill(DashboardStyle.accent)
+        } else {
+            shape.fill(LinearGradient(colors: [DashboardStyle.accent.opacity(fillTop),
+                                               DashboardStyle.accent.opacity(fillBottom)],
+                                      startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay { shape.strokeBorder(DashboardStyle.accent, lineWidth: edgeWidth) }
+                .shadow(color: DashboardStyle.accent.opacity(glow), radius: glowRadius)
+        }
+    }
+}
+
+/// Finn's monogram in a 48-point badge: who speaks on the coach card and the Try Finn card
+struct FinnBadge: View {
+    var body: some View {
+        Text(verbatim: "F")
+            .font(.title2.bold())
+            .fontDesign(.rounded)
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            .frame(width: 48, height: 48)
+            .background(.black.opacity(0.08), in: Circle())
+    }
+}
+
 /// The pink Home card once the person has tried Finn: Finn, the coach, gives the next
 /// workout and one line of encouragement. The F badge says who is talking.
 struct FinnCoachCard: View {
@@ -68,8 +130,6 @@ struct FinnCoachCard: View {
     let quote: String
     let action: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.colorSchemeContrast) private var contrast
 
     var body: some View {
         Button(action: action) {
@@ -87,33 +147,13 @@ struct FinnCoachCard: View {
             .padding(.top, 12)
             .padding(.bottom, 16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .foregroundStyle(isSolid ? .black : .white)
-            .background { surface }
-            .contentShape(RoundedRectangle(cornerRadius: DashboardStyle.finnCardRadius, style: .continuous))
+            .modifier(FinnCardSurface())
         }
         .buttonStyle(PressableStyle())
         // One element: who speaks, the workout, then the line.
         .accessibilityLabel(spokenLabel)
         .accessibilityHint("Opens workout setup.")
         .accessibilityIdentifier("home.finnCoach")
-    }
-
-    /// Increase Contrast and Reduce Transparency get the solid pink with black text (6:1).
-    private var isSolid: Bool { reduceTransparency || contrast == .increased }
-
-    /// Neon glass: see-through pink, brighter at the top, with a bright pink edge and a soft glow.
-    /// White text, since black would fall to 2.5:1 on it.
-    @ViewBuilder private var surface: some View {
-        let shape = RoundedRectangle(cornerRadius: DashboardStyle.finnCardRadius, style: .continuous)
-        if isSolid {
-            shape.fill(DashboardStyle.accent)
-        } else {
-            shape.fill(LinearGradient(colors: [DashboardStyle.accent.opacity(DashboardStyle.coachFillTop),
-                                               DashboardStyle.accent.opacity(DashboardStyle.coachFillBottom)],
-                                      startPoint: .topLeading, endPoint: .bottomTrailing))
-                .overlay { shape.strokeBorder(DashboardStyle.accent, lineWidth: 1.5) }
-                .shadow(color: DashboardStyle.accent.opacity(0.5), radius: 14)
-        }
     }
 
     /// Badge and title side by side; stacked at accessibility sizes, where the arrow is dropped.
@@ -133,15 +173,7 @@ struct FinnCoachCard: View {
         }
     }
 
-    /// Finn's monogram in the same 48-point badge as the Try Finn card.
-    private var badge: some View {
-        Text(verbatim: "F")
-            .font(.title2.bold())
-            .fontDesign(.rounded)
-            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-            .frame(width: 48, height: 48)
-            .background(.black.opacity(0.08), in: Circle())
-    }
+    private var badge: some View { FinnBadge() }
 
     private var title: some View {
         Text("Your next workout")

@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum HomeTab: String, CaseIterable {
-    case home = "Home", posture = "Posture", coach = "Coach", workout = "Workout"
+    case home = "Home", progress = "Progress", coach = "Coach", workout = "Workout"
 
     var identifier: String { "tab.\(rawValue.lowercased())" }
 
@@ -9,8 +9,8 @@ enum HomeTab: String, CaseIterable {
         switch self {
         case .home: "house.fill"
         case .coach: "person"
-        case .posture: "figure.run"
-        case .workout: "plus"
+        case .progress: "figure.run"
+        case .workout: "dumbbell"
         }
     }
 }
@@ -28,6 +28,9 @@ enum DashboardStyle {
     /// The coach card's see-through pink, from its top corner to its bottom one.
     static let coachFillTop = 0.55
     static let coachFillBottom = 0.3
+    /// Try Finn wears the same neon glass, brighter: a denser pink, a wider edge and a stronger glow
+    static let tryFinnSurface = FinnCardSurface(fillTop: 0.8, fillBottom: 0.5, glow: 0.75, glowRadius: 20,
+                                                edgeWidth: 2)
     /// The pink outline around the Finn and Last workout cards: frames them without shouting.
     static let outlineOpacity = 0.4
 }
@@ -45,13 +48,13 @@ struct DashboardView: View {
     var badges: [EarnedBadge] = []
     /// Off: the pink card invites to try Finn. On: Finn, the coach, gives the next workout.
     @Binding var hasTriedFinn: Bool
-    /// Opens workout setup, from the coach card.
+    /// the next workout and Finn's line, shared with the Workout tab
+    @Binding var coachMessage: FinnCoachMessage
+    /// opens workout setup, from the coach card
     let startWorkout: () -> Void
     let watchDemo: () -> Void
     let open: (HomeRoute) -> Void
     @State private var showsFirstTry = false
-    @State private var nextWorkout = NextWorkout.sample()
-    @State private var quoteIndex = FinnQuotes.next(after: nil)
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric(relativeTo: .largeTitle) private var titleSize = 40.0
@@ -177,7 +180,7 @@ struct DashboardView: View {
         .foregroundStyle(.white)
         .background { HomeBackdrop() }
         // A new line from Finn each time Home appears, never the same one twice in a row.
-        .onAppear { quoteIndex = FinnQuotes.next(after: quoteIndex) }
+        .onAppear { coachMessage.nextQuote() }
         .finnFirstTryTrigger(isPresented: $showsFirstTry, hasTriedFinn: $hasTriedFinn)
     }
 
@@ -189,7 +192,7 @@ struct DashboardView: View {
         return VStack(spacing: DashboardStyle.cardSpacing) {
             Group {
                 if hasTriedFinn {
-                    FinnCoachCard(workout: nextWorkout, quote: quote, action: startWorkout)
+                    FinnCoachCard(workout: coachMessage.workout, quote: coachMessage.quote, action: startWorkout)
                         .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
                 } else {
                     tryFinnCard.transition(.opacity)
@@ -204,11 +207,6 @@ struct DashboardView: View {
                 .strokeBorder(DashboardStyle.accent.opacity(DashboardStyle.outlineOpacity), lineWidth: 1)
                 .accessibilityHidden(true)
         }
-    }
-
-    private var quote: String {
-        let quotes = FinnQuotes.all
-        return quotes[quoteIndex % quotes.count]
     }
 
     private var lastWorkoutCard: some View {
@@ -256,10 +254,7 @@ struct DashboardView: View {
             } label: {
                 HStack(spacing: 16) {
                     if !dynamicTypeSize.isAccessibilitySize {
-                        Image(systemName: "viewfinder")
-                            .font(.title3)
-                            .frame(width: 48, height: 48)
-                            .background(.black.opacity(0.08), in: Circle())
+                        FinnBadge()
                             .accessibilityHidden(true)
                     }
                     VStack(alignment: .leading, spacing: 5) {
@@ -287,9 +282,7 @@ struct DashboardView: View {
             .buttonStyle(PressableStyle())
             .accessibilityIdentifier("home.watchDemo")
         }
-        .foregroundStyle(.black)
-        .background(DashboardStyle.accent,
-                    in: RoundedRectangle(cornerRadius: DashboardStyle.finnCardRadius, style: .continuous))
+        .modifier(DashboardStyle.tryFinnSurface)
     }
 
     /// the Finn+ banner, kept for 1.1 behind `DashboardFlags.showsFinnPlusBanner`
@@ -417,13 +410,13 @@ struct DashboardView: View {
 #Preview("Try Finn") {
     @Previewable @State var hasTriedFinn = false
     DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
-                  startWorkout: {}, watchDemo: {}, open: { _ in })
+                  coachMessage: .constant(FinnCoachMessage()), startWorkout: {}, watchDemo: {}, open: { _ in })
         .preferredColorScheme(.dark)
 }
 
 #Preview("Coach") {
     @Previewable @State var hasTriedFinn = true
     DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
-                  startWorkout: {}, watchDemo: {}, open: { _ in })
+                  coachMessage: .constant(FinnCoachMessage()), startWorkout: {}, watchDemo: {}, open: { _ in })
         .preferredColorScheme(.dark)
 }

@@ -8,6 +8,14 @@ private enum FinnStyle {
     static let primaryButtonText = HomeStyle.onAccent
 }
 
+/// builds its content in its own body, so a pushed page follows the observable model it reads: a
+/// navigation destination's closure is not run again when the model changes
+private struct LiveContent<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View { content() }
+}
+
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
@@ -39,11 +47,18 @@ struct ContentView: View {
     @State private var showsFinnDemo = false
     /// TEMPORARY with `FinnFirstTryTrigger.swift`: whether Home shows the coach card.
     @AppStorage(FinnFirstTry.key, store: FinnFirstTry.defaults) private var hasTriedFinn = false
+    /// the next workout and Finn's line, the one source for the Home and Workout cards
+    @State private var coachMessage = FinnCoachMessage()
+    /// the Progress tab's section and exercise, so Home's Posture card can open them
+    @State private var progressSection: ProgressSection = .posture
+    @State private var progressExercise: ExerciseKind?
     #if DEBUG
     @State private var didRunWatchAutoDemo = false
     #endif
     /// what the camera does, shown once before iOS asks for it
     @State private var showsCameraPrimer = false
+    /// camera privacy, pushed over workout setup so Back returns to it
+    @State private var showsSetupPrivacy = false
     /// the first-launch screens (`Onboarding/`), also replayed from Options
     @State private var showsOnboarding: Bool
     /// badges earned from the saved history (`Badges/`)
@@ -137,6 +152,7 @@ struct ContentView: View {
                   arguments.indices.contains(index + 1) else { return }
             switch arguments[index + 1] {
             case "coach": selectedTab = .coach
+            case "progress": selectedTab = .progress
             case "workout": selectedTab = .workout
             case "history": route = .history
             case "options": route = .options
@@ -144,7 +160,7 @@ struct ContentView: View {
             case "awards": route = .awards
             case "health": model.showsPersonalizationOffer = true
             case "camera-primer":
-                selectedTab = .workout
+                openWorkoutSetup()
                 showsCameraPrimer = true
             default: break
             }
@@ -212,7 +228,7 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showsFinnDemo) {
             FinnDemoView {
                 showsFinnDemo = false
-                selectedTab = .workout
+                openWorkoutSetup()
             }
         }
         // badges follow the saved history: checked at launch and after every saved set. Only the set
@@ -379,6 +395,19 @@ struct ContentView: View {
             }
         }
         .background(Color(white: 0.035).ignoresSafeArea())
+        // the camera primer, from workout setup, Siri or the widget, whichever tab is showing
+        .sheet(isPresented: $showsCameraPrimer) {
+            CameraPrimer(onContinue: {
+                showsCameraPrimer = false
+                Task { await model.startPreview() }
+            }, onPrivacy: {
+                showsCameraPrimer = false
+                if route == .launchWorkout { showsSetupPrivacy = true } else { route = .privacy }
+            })
+            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.fraction(0.62), .large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color(uiColor: .systemBackground))
+        }
         .environment(\.colorScheme, .dark)
         .preferredColorScheme(.dark)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
@@ -393,16 +422,37 @@ struct ContentView: View {
         switch tab {
         case .home:
             DashboardView(history: model.history, exercise: model.selectedExercise,
-                          badges: badges.earned, hasTriedFinn: $hasTriedFinn,
-                          startWorkout: { selectedTab = .workout },
+                          badges: badges.earned, hasTriedFinn: $hasTriedFinn, coachMessage: $coachMessage,
+                          startWorkout: openWorkoutSetup,
                           watchDemo: { showsFinnDemo = true }) { destination in
-                if destination == .posture { selectedTab = .posture }
+                if destination == .posture { openPostureProgress() }
                 else { route = destination }
             }
-        case .workout: workoutSetup
-        case .posture: PostureGuideView(history: model.history, initialExercise: model.selectedExercise)
+        case .workout: workoutHome
+        case .progress: progressPage
         case .coach: CoachView(history: model.history)
         }
+    }
+
+    private var progressPage: some View {
+        ProgressTabView(history: model.history, section: $progressSection, exercise: Binding(
+            get: { progressExercise ?? model.selectedExercise },
+            set: { progressExercise = $0 }
+        ))
+    }
+
+    /// the Workout tab with its selection step open, where Home's coach card and the demo lead
+    private func openWorkoutSetup() {
+        selectedTab = .workout
+        tabRoutes[.workout] = .launchWorkout
+    }
+
+    /// Home's Posture card: always the Progress tab's Posture section, on the exercise the card shows
+    private func openPostureProgress() {
+        progressSection = .posture
+        progressExercise = model.selectedExercise
+        tabRoutes[.progress] = nil
+        selectedTab = .progress
     }
 
     private func destinationPage(_ destination: HomeRoute) -> some View {
@@ -428,7 +478,17 @@ struct ContentView: View {
                     .navigationTitle("Last workout")
             }
         case .account: accountPage
-        case .posture: PostureGuideView(history: model.history, initialExercise: model.selectedExercise)
+        // pushed pages that follow the model: built in their own body (`LiveContent`)
+        case .launchWorkout: LiveContent { workoutSetup }
+        case .session(let id):
+            LiveContent {
+                if let session = model.history.first(where: { $0.id == id }) {
+                    historyDetail(session)
+                } else {
+                    ContentUnavailableView("No workouts yet", systemImage: "figure.strengthtraining.functional")
+                }
+            }
+        case .posture: LiveContent { progressPage }
         case .weights: historyList(title: "Best set", exercise: model.selectedExercise)
         case .awards: BadgesView(ledger: badges)
         // the subscription does not exist yet (1.1): the banner is hidden, and its route lands on
@@ -552,9 +612,6 @@ struct ContentView: View {
                     .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("setup.focus")
                 }
-                if let last = model.history.first {
-                    lastSessionCard(last)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
@@ -564,7 +621,7 @@ struct ContentView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 4) {
                 // said where the decision is made: before the camera opens
-                Button { route = .privacy } label: {
+                Button { showsSetupPrivacy = true } label: {
                     Label("Camera privacy", systemImage: "lock.fill")
                         .font(.footnote)
                         .foregroundStyle(Color.primary)
@@ -593,96 +650,41 @@ struct ContentView: View {
             .background(HomeStyle.background)
         }
         .background(HomeStyle.background.ignoresSafeArea())
-        .navigationTitle("Workout")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button { route = .history } label: {
-                        Label("History", systemImage: "clock.arrow.circlepath")
-                    }
-                    Button { route = .coach } label: {
-                        Label("Coach", systemImage: "bubble.left.and.text.bubble.right")
-                    }
-                    Button { route = .awards } label: {
-                        Label("Awards", systemImage: "rosette")
-                    }
-                    Button { route = .options } label: {
-                        Label("Options", systemImage: "slider.horizontal.3")
-                    }
-                    Button { route = .privacy } label: {
-                        Label("Privacy", systemImage: "lock")
-                    }
-                } label: {
-                    Label("More", systemImage: "ellipsis")
-                }
-                .accessibilityIdentifier("home.more")
-            }
-        }
-        .sheet(isPresented: $showsCameraPrimer) {
-            CameraPrimer(onContinue: {
-                showsCameraPrimer = false
-                Task { await model.startPreview() }
-            }, onPrivacy: {
-                showsCameraPrimer = false
-                route = .privacy
-            })
-            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.fraction(0.62), .large])
-            .presentationDragIndicator(.visible)
-            .presentationBackground(Color(uiColor: .systemBackground))
-        }
+        .navigationTitle("Launch workout")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $showsSetupPrivacy) { privacyPage }
     }
 
-    /// the latest saved session, with what Finn noticed in it, opening History
-    private func lastSessionCard(_ session: WorkoutSessionSummary) -> some View {
-        let reps = session.sets.reduce(0) { $0 + $1.analysis.reps.count }
-        var names: [String] = []
-        for set in session.sets where !names.contains(set.exercise.definition.copy.name) {
-            names.append(set.exercise.definition.copy.name)
-        }
-        let sets = String(localized: "\(session.sets.count) sets")
-        let when: String = {
-            let time = session.startedAt.formatted(date: .omitted, time: .shortened)
-            if Calendar.current.isDateInToday(session.startedAt) { return String(localized: "Today, \(time)") }
-            if Calendar.current.isDateInYesterday(session.startedAt) { return String(localized: "Yesterday, \(time)") }
-            return session.startedAt.formatted(.dateTime.day().month(.abbreviated).hour().minute())
-        }()
-        // the latest observation the person kept, word for word
-        let note = session.sets.last(where: { $0.cue != nil && $0.cueResponse != .notRelevant })?.cue?.observation
-        return Button { route = .history } label: {
-            HomeCard {
-                HStack(alignment: .top, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Last session")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(HomeStyle.supportingText)
-                        Text("\(names.joined(separator: ", ")) · \(reps) reps")
-                            .font(.headline)
-                            .monospacedDigit()
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text("\(when) · \(sets)")
-                            .font(.subheadline)
-                            .foregroundStyle(HomeStyle.supportingText)
-                        if let note {
-                            Label(note, systemImage: "text.quote")
-                                .font(.subheadline)
-                                .padding(.top, 6)
-                                .fixedSize(horizontal: false, vertical: true)
+    /// the Workout tab: the next workout, previous sessions, and Launch workout for the setup above
+    private var workoutHome: some View {
+        WorkoutTabView(message: coachMessage, history: model.history,
+                       savedToFitness: { model.fitnessRecord(forSession: $0.id) != nil },
+                       openSession: { route = .session($0.id) },
+                       launch: { route = .launchWorkout })
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button { route = .history } label: {
+                            Label("History", systemImage: "clock.arrow.circlepath")
                         }
+                        Button { route = .coach } label: {
+                            Label("Coach", systemImage: "bubble.left.and.text.bubble.right")
+                        }
+                        Button { route = .awards } label: {
+                            Label("Awards", systemImage: "rosette")
+                        }
+                        Button { route = .options } label: {
+                            Label("Options", systemImage: "slider.horizontal.3")
+                        }
+                        Button { route = .privacy } label: {
+                            Label("Privacy", systemImage: "lock")
+                        }
+                    } label: {
+                        Label("More", systemImage: "ellipsis")
                     }
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(HomeStyle.supportingText)
-                        .padding(.top, 2)
-                        .accessibilityHidden(true)
+                    .accessibilityIdentifier("home.more")
                 }
             }
-        }
-        .buttonStyle(PressableStyle())
-        .accessibilityElement(children: .combine)
-        .accessibilityHint("Opens your history")
-        .accessibilityIdentifier("home.lastSession")
     }
 
     /// one short line about the latest save to Apple Health, with Try again when it can help

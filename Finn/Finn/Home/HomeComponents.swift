@@ -48,6 +48,8 @@ struct HomeSurface: ViewModifier {
 enum HomeRoute: Hashable {
     case history, options, privacy, coach
     case account, lastWorkout, posture, weights, awards, plus
+    /// the selection step before a workout, and one saved session
+    case launchWorkout, session(UUID)
 }
 
 extension ExerciseKind {
