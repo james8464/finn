@@ -34,15 +34,37 @@ The comprehensive simulator candidate ran 582 tests: 565 passed, 16 failed and o
 
 Python validation passed 24 checks with one optional classifier check skipped. Sixteen recorded-video variants and the feet-hidden framing guard passed. These exercise the real Vision analysis path, including refusal/recovery behavior, without writing synthetic workouts to Health.
 
-### Final dark-only candidate
+### Initial dark-only candidate (superseded)
 
 Source commit `ea7259a` includes the latest main comment cleanup. A token comparison confirmed that merging that cleanup introduced no non-comment Swift changes. Other agents’ ongoing icon and backend branches remain separate.
 
 `/tmp/Finn-ui-dark-final.xcresult` ran **22 tests: 20 passed, 2 failed**, on the reserved iPhone 18 Pro Max / iOS 27 simulator. Its system appearance was set to **light**. The supporting-page matrix checked rendered background pixels and passed for Workout, Options, Privacy, Coach, Awards, History and Posture. All six screen tours passed. Also passed: nested navigation through camera presentation, camera primer at both text sizes, largest-text controls and Coach keyboard, Reduce Motion, visible measured chart bars, unique preferences, complete privacy disclosures, camera-denial recovery, large-text workout audit, both Privacy audits, and setup/Reduce Transparency audits.
 
-The two remaining failures are `testCaptureAndResultAccessibilityAudits` and `testComparisonAndSavedHistoryAccessibilityAudits`, both contrast audits. Failure crops show the black-on-yellow Debug DEMO INPUT banner together with the entire navigation header, and a white result sentence partially behind that header after scrolling. The audit also reports an unnamed SwiftUI node with no element bounds; its exact target remains unresolved. Actual result screenshots were inspected and are readable, but this is **not an all-green accessibility run**. These failures are retained, without adding blanket exclusions. The Debug banner is absent from Release. Largest-text result checks and the rendered-chart regression passed.
+That run’s two failures were `testCaptureAndResultAccessibilityAudits` and `testComparisonAndSavedHistoryAccessibilityAudits`, both contrast audits. Failure crops show the black-on-yellow Debug DEMO INPUT banner together with the entire navigation header, and a white result sentence partially behind that header after scrolling. The audit also reports an unnamed SwiftUI node with no element bounds; it was subsequently isolated to the toolbar Done button (see the follow-up below). Actual result screenshots were inspected and are readable, but this is **not an all-green accessibility run**. These historical failures are retained. Both now pass without audit exclusions, as recorded below. The Debug banner is absent from Release. Largest-text result checks and the rendered-chart regression passed.
 
 Failures and complete issue descriptions are retained in `/tmp/finn-dark-final-audits`. Representative crops are saved alongside the review screenshots. Earlier candidates remain in their local result bundles. The full baseline’s 501 unit tests and replay evidence remain applicable to the unchanged workout logic; this final run specifically exercises the changed interface.
+
+### Contrast and Release follow-up — 16 October
+
+Source `98a8f33` resolves both result audits. A temporary component-isolation run identified the previously unnamed node as the toolbar **Done** button. It now uses a measured native text label and a 44-point hit region. The synthetic-input banner has yellow text on black and its own layout row. Result guidance and earned-badge detail use the existing measured text component, preventing incorrect clipped-text bounds. The chart now retains native chart accessibility with a label and measured value for each rep.
+
+The temporary diagnostic test and all isolation flags were removed. The offscreen-result contrast exemption was removed, and saved history now receives the full accessibility audit, including contrast.
+
+`/tmp/Finn-contrast-toolbar-fix.xcresult`: **5/5 passed**, zero failures:
+
+- Capture/result full audit, including after scrolling.
+- Comparison and saved-history full audits.
+- Largest-text setup/capture/result audits.
+- Rendered measured-chart bars.
+- Production launch and navigation across all tabs, Options and Privacy.
+
+The coordinated icon session also found and verified a Release-only blank-tab bug on the physical iPhone: an empty `safeAreaInset` remained when its Debug contents were compiled out. This branch applies the same narrow fix by guarding the complete modifier. The result presentation uses a real content row instead of that inset.
+
+`/tmp/Finn-release-navigation-final.xcresult`: **1/1 passed**, running the production launch/navigation test against an optimised Release simulator build. The `Finn-ReleaseSmoke` shared scheme contains only UI tests so it does not require Debug test hooks in the production module. CI now runs this Release check in addition to the full Debug suite, video replays and validation tests. Superseded runs are cancelled by branch concurrency.
+
+The updated unsigned archive `/tmp/Finn-contrast-release.xcarchive` built successfully and passed `verify-archive.sh`, including exclusion of Debug/demo code and privacy/Health purpose-text checks. `ScreenTourUITests.test3SetPathWithDemoInput` also passed in `/tmp/Finn-contrast-screens.xcresult`; affected result/history captures and three screenshot references in the editable Figma export were refreshed and integrity-checked.
+
+Passing captures are retained at `/tmp/finn-contrast-passing-screens`; the result, scrolled result and saved-history screenshots were inspected. Current CI status is available on [PR #33](https://github.com/james8464/finn/pull/33/checks). No changes were merged into main.
 
 ### Release archive
 

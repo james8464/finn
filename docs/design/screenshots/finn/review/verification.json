@@ -8,5 +8,20 @@
     "passed": 20,
     "failed": 2
   },
-  "resultBundle": "/tmp/Finn-ui-dark-final.xcresult"
+  "resultBundle": "/tmp/Finn-ui-dark-final.xcresult",
+  "contrastFollowUp": {
+    "sourceCommit": "98a8f33",
+    "targetedTests": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    "releaseNavigation": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "resultBundle": "/tmp/Finn-contrast-toolbar-fix.xcresult",
+    "releaseResultBundle": "/tmp/Finn-release-navigation-final.xcresult"
+  }
 }
