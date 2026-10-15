@@ -989,13 +989,22 @@ struct ContentView: View {
                     // count in the corner and the advice banner across. The person fills the middle
                     // of the picture, and on 15 October the banner and the count, drawn there, hid the
                     // upper body and the skeleton of a push-up filmed from the floor.
-                    HStack(alignment: .top, spacing: 12) {
-                        VStack(spacing: 8) {
-                            status
+                    if dynamicTypeSize.isAccessibilitySize {
+                        status.frame(maxWidth: .infinity, alignment: .leading)
+                        HStack(alignment: .top) {
                             watchLabel
+                            Spacer(minLength: 0)
+                            liveCount
                         }
-                        Spacer(minLength: 0)
-                        liveCount
+                    } else {
+                        HStack(alignment: .top, spacing: 12) {
+                            VStack(spacing: 8) {
+                                status
+                                watchLabel
+                            }
+                            Spacer(minLength: 0)
+                            liveCount
+                        }
                     }
                     liveCue
                 } else {
@@ -1195,6 +1204,7 @@ struct ContentView: View {
         }
         // Hands-free, the person reads it from their spot a few steps away.
         .font(model.handsFree ? .title3.weight(.semibold) : .subheadline.weight(.semibold))
+        .fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(.black.opacity(0.68), in: Capsule())
@@ -1397,20 +1407,32 @@ struct ContentView: View {
             .frame(maxWidth: .infinity)
         }
         .safeAreaInset(edge: .bottom) {
-            Button {
-                observationSpeaker.stop()
-                Task { await model.startPreview() }
-            } label: {
-                Text(retakeLabel)
-                    .foregroundStyle(PlumbStyle.primaryButtonText)
-                    .frame(maxWidth: .infinity)
-            }
+            VStack(spacing: 8) {
+                if dynamicTypeSize.isAccessibilitySize {
+                    Button {
+                        observationSpeaker.stop()
+                        Task { await model.finishSession() }
+                    } label: {
+                        Text("Done").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                }
+                Button {
+                    observationSpeaker.stop()
+                    Task { await model.startPreview() }
+                } label: {
+                    Text(retakeLabel)
+                        .foregroundStyle(PlumbStyle.primaryButtonText)
+                        .frame(maxWidth: .infinity)
+                }
                 .buttonStyle(.borderedProminent)
                 .tint(HomeStyle.filledAccent)
                 .controlSize(.large)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(.bar)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(.bar)
         }
         .background(HomeStyle.background)
         .navigationTitle("Set summary")
@@ -1424,12 +1446,14 @@ struct ContentView: View {
                 .accessibilityHint("Change exercise or options while keeping this session open.")
                 .accessibilityIdentifier("result.back")
             }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Done") {
-                    observationSpeaker.stop()
-                    Task { await model.finishSession() }
+            if !dynamicTypeSize.isAccessibilitySize {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        observationSpeaker.stop()
+                        Task { await model.finishSession() }
+                    }
+                    .font(.body.weight(.semibold))
                 }
-                .font(.body.weight(.semibold))
             }
         }
         .onDisappear { observationSpeaker.stop() }

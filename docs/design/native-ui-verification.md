@@ -8,7 +8,7 @@ The redesign replaces the photo/glass dashboard with native tabs and semantic su
 
 ## Preservation
 
-The branch includes current main through `53e5646`: French localization, best-set filtered history, squat visibility recovery and live/final rep-count reconciliation, movement-turn handling and the architecture documentation reorganization. The alternative single-screen redesign in `53e5646` was resolved in favour of this native-tab design at James’s explicit request; its commit remains in history. The subsequent integration includes the front-view push-up cue and award-celebration fixes plus the shared English test scheme. Existing translations and plural rules are retained; new interface copy has French entries. Other worktrees and their uncommitted work were left intact.
+The branch includes current main through `81edb7d`: French localization, best-set filtered history, squat visibility recovery and live/final rep-count reconciliation, movement-turn handling and the architecture documentation reorganization. The alternative single-screen redesign in `53e5646` and its follow-up UI commits through `81edb7d` were resolved in favour of this native-tab design at James’s explicit request; its commit remains in history. The subsequent integration includes the front-view push-up cue and award-celebration fixes plus the shared English test scheme. Existing translations and plural rules are retained; new interface copy has French entries. Other worktrees and their uncommitted work were left intact.
 
 ## Review findings addressed
 
@@ -21,7 +21,27 @@ The branch includes current main through `53e5646`: French localization, best-se
 
 ## Evidence
 
-Final simulator results and representative captures are recorded here after the verification run.
+Verified on Xcode 27 / iOS 27, iPhone 18 Pro Max simulator:
+
+| Check | Result |
+|---|---|
+| Unit tests | 468 passed across 53 suites after integration of the upstream fixes |
+| Focused UI checks | 14 distinct checks passed across targeted review runs: four dashboard checks, four native-screen checks, two onboarding/award tours, one set tour and three accessibility audits |
+| Final accessibility rerun | Workout setup → framing → capture → result passed after adapting the camera header and Done action for large text |
+| Release build | Passed for the app, widget and embedded Watch targets; final layout changes compiled successfully |
+| Translation preservation | Every entry from main at `81edb7d` retained unchanged; 46 additional UI entries |
+| Motion and repository checks | Reduce Motion paths reviewed; local documentation links and whitespace checks passed |
+
+The UI checks were run in focused batches, not as one complete UI-suite run. Setup and Privacy received full accessibility audits. The synthetic large-text flow checks descriptions, Dynamic Type, hit regions, clipping and traits; it excludes image-contrast sampling and the Debug marker’s intentionally capped text. The final camera header gives status a separate row at accessibility sizes, and Done moves below the result so it can scale.
+
+### Representative captures
+
+- [Summary](screenshots/2026-10-15-native-ui/summary.png) — normal launch, empty history.
+- [Workout](screenshots/2026-10-15-native-ui/workout.png) — normal launch, camera not opened.
+- [Large-text dark result](screenshots/2026-10-15-native-ui/result-large-text-dark-demo.png) — labelled synthetic input, from the passing final accessibility run.
+- [Small widget](screenshots/2026-10-15-native-ui/widget-preview.png) — rendered preview.
+
+The screen review also covered dark appearance, maximum text size with the Coach keyboard, the expanded Health sheet, French navigation, settings, privacy and awards. The yellow demo marker is a Debug annotation and is absent from Release.
 
 The screen tours use explicitly labelled synthetic input. Widget and Live Activity captures are rendered previews. They are not evidence of camera accuracy, Health permission behaviour, physical Watch pairing or live model responses.
 
