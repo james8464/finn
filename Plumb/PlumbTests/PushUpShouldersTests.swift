@@ -50,7 +50,7 @@ nonisolated struct PushUpShouldersTests {
             return
         }
         #expect(analysis.reps.count == 8)
-        #expect(analysis.rubricVersion == "push-up-shoulders-v1")
+        #expect(analysis.rubricVersion == "push-up-shoulders-v2")
         #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
     }
 

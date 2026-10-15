@@ -274,15 +274,22 @@ nonisolated extension ExerciseDefinition {
         )
     )
 
+    /// The least a push-up may take, from leaving the top to being 65% of the way back up. A rep
+    /// is already required to bend the elbow 40° (or drop the shoulders 55% of the set's travel), which
+    /// Vision's jitter does not do; the tempo floor only has to reject a flicker. At 0.4 s, 15 of
+    /// Guilhem's fast push-ups on 15 October (about 0.65 s a cycle, so under 0.4 s measured this way)
+    /// were refused as "faster than 0.4 s" while the live count had said them.
+    static let minimumPushUpDuration: TimeInterval = 0.25
+
     /// Side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.
     static let pushUp = ExerciseDefinition(
         kind: .pushUp,
-        rubricVersion: "push-up-side-v6",
+        rubricVersion: "push-up-side-v7",
         expectedView: .any,
         evidence: EvidenceRequirement(joints: [.shoulder, .elbow, .wrist], anchor: .wrist),
         signal: .jointBend(from: .shoulder, vertex: .elbow, to: .wrist),
         phases: RepPhases(leaveTop: 25, reachBottom: 40, returnFromBottom: 10, backAtTop: 15,
-                          minimumDuration: 0.4, maximumDuration: 8.0),
+                          minimumDuration: minimumPushUpDuration, maximumDuration: 8.0),
         rangeUnit: .degrees,
         rangeDisplayScale: 120,
         minimumBodyScale: 0.03,
@@ -326,12 +333,12 @@ nonisolated extension ExerciseDefinition {
     /// Tuned on 3 real push-up sets (14 October 2026), a product hypothesis, not a validated standard.
     static let pushUpShoulders = ExerciseDefinition(
         kind: .pushUp,
-        rubricVersion: "push-up-shoulders-v1",
+        rubricVersion: "push-up-shoulders-v2",
         expectedView: .any,
         evidence: EvidenceRequirement(joints: [.shoulder], anchor: .wrist),
         signal: .shoulderDrop,
         phases: RepPhases(leaveTop: 0.03, reachBottom: 0.1, returnFromBottom: 0.03, backAtTop: 0.03,
-                          minimumDuration: 0.4, maximumDuration: 8.0),
+                          minimumDuration: minimumPushUpDuration, maximumDuration: 8.0),
         rangeUnit: .bodyLengthFraction,
         rangeDisplayScale: 0.6,
         minimumBodyScale: 0.06,

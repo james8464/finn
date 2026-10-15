@@ -11,7 +11,7 @@ The starting value comes from the whole set, not its first frames: the 10th perc
 | Exercise | Rubric | Signal on the camera-facing side | Must stay visible | Still joint | Leave top / reach bottom / back at top / return margin | Rep duration |
 | --- | --- | --- | --- | --- | --- | --- |
 | Bodyweight squat | `squat-side-v7` | Hip drop divided by standing hip-to-ankle height | hip, knee, ankle | ankle | 0.10 / 0.15 / 0.05 / 0.04 | 0.5 to 8 s |
-| Push-up | `push-up-side-v6` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.4 to 8 s |
+| Push-up | `push-up-side-v6` | Elbow angle closing (shoulder, elbow, wrist), degrees | shoulder, elbow, wrist | wrist | 25° / 40° / 15° / 10° | 0.25 to 8 s |
 | Static lunge | `static-lunge-side-v6` | Knee angle closing (hip, knee, ankle), degrees | hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.5 to 8 s |
 | Stiff-leg deadlift | `stiff-leg-deadlift-side-v6` | Hip angle closing (shoulder, hip, knee), degrees | shoulder, hip, knee, ankle | ankle | 20° / 35° / 15° / 10° | 0.6 to 10 s |
 | Pull-up (any view) | `pull-up-v1` | Shoulder rise from the hang over arm length (hang to hands) | shoulder, hip | wrist | 0.15 / 0.55 / 0.12 / 0.08 | 0.6 to 10 s |

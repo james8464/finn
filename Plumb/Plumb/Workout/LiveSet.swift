@@ -89,6 +89,10 @@ nonisolated struct StartReadiness: Equatable {
 nonisolated enum LiveSetEvent: Equatable, Sendable {
     /// A rep was counted; the total so far.
     case repCounted(Int)
+    /// The count changed without a new rep to say: the analysis of the whole set so far gave fewer
+    /// reps than said (a movement that no longer counts once the set's top settled), or reached
+    /// again a number already said. Shown, never spoken.
+    case repCountRevised(Int)
     /// This rep took clearly less time than the person's first reps.
     case fasterThanFirstReps(rep: Int)
     /// This rep's range was clearly shorter than the person's first reps.
@@ -100,6 +104,7 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
     func spoken(for definition: ExerciseDefinition) -> String {
         switch self {
         case .repCounted(let count): "\(count)"
+        case .repCountRevised: ""
         case .fasterThanFirstReps: String(localized: "Faster than your first reps")
         case .shorterThanFirstReps: definition.copy.liveShorterCue
         case .formFault(let check, _): check.liveCue
@@ -113,10 +118,10 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
         var count: String?
         var observations: [String] = []
         for event in events {
-            if case .repCounted = event {
-                count = event.spoken(for: definition)
-            } else {
-                observations.append(event.spoken(for: definition))
+            switch event {
+            case .repCounted: count = event.spoken(for: definition)
+            case .repCountRevised: break
+            default: observations.append(event.spoken(for: definition))
             }
         }
         let parts = (count.map { [$0] } ?? []) + observations
@@ -127,7 +132,7 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
     /// few words that are said.
     func caption(for definition: ExerciseDefinition) -> String? {
         switch self {
-        case .repCounted: nil
+        case .repCounted, .repCountRevised: nil
         case .fasterThanFirstReps, .shorterThanFirstReps, .formFault: spoken(for: definition)
         }
     }
@@ -157,7 +162,11 @@ nonisolated struct LiveSetMonitor {
 
     let definition: ExerciseDefinition
     private(set) var reps: [RepMetric] = []
+    /// The reps of the latest accepted analysis of the set so far: what the result would say if the
+    /// set ended now. It can go down (see `update`).
     private(set) var countedReps = 0
+    /// The highest count said aloud so far, so a number is never announced twice.
+    private var highestSaid = 0
     /// The set looks over (see `shouldStop`), as of the latest analysis.
     private(set) var isOver = false
     /// A rep was clearly faster than the first reps at least once.
@@ -201,11 +210,26 @@ nonisolated struct LiveSetMonitor {
             latestAnalysis = analysis
             latestFrames = set
             latestDiagnostics = diagnostics
-            // A later analysis can merge or split a rep at the set's edge; the count never goes back.
+            // The count is the analysis of the whole set so far, the same the result makes at the
+            // end. Measured over a longer set, a movement said as a rep can stop counting (on
+            // 15 October, fast push-ups: the top the set is measured from settled lower as the set
+            // went on, and reps measured from it became too fast or too shallow). The count used
+            // to keep every rep ever said: it reached 29 and froze there while the result gave 18.
+            // Now it follows the analysis, down as well as up, and a number already said is shown
+            // again without being spoken.
+            if reps.count < countedReps {
+                countedReps = reps.count
+                events.append(.repCountRevised(countedReps))
+            }
             while countedReps < reps.count {
                 countedReps += 1
-                events.append(.repCounted(countedReps))
-                events.append(contentsOf: cues(forRep: countedReps))
+                if countedReps > highestSaid {
+                    highestSaid = countedReps
+                    events.append(.repCounted(countedReps))
+                    events.append(contentsOf: cues(forRep: countedReps))
+                } else {
+                    events.append(.repCountRevised(countedReps))
+                }
             }
         }
         isOver = shouldStop(frames, spots: layout.spots)

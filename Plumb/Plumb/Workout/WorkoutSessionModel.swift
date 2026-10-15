@@ -539,6 +539,9 @@ final class WorkoutSessionModel {
                 return
             }
             movementNote = explanation
+            // The count the set ends on is the one shown: the live count can be one rep behind
+            // (a rep ended after its last analysis) and must never differ in the other direction.
+            liveRepCount = analysis.reps.count
             repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
             let review = FormChecks.review(analysis, frames: setFrames, definition: definition,
                                            viewCheck: checksCameraAngle ? .enforce : .ignore)
@@ -734,9 +737,10 @@ final class WorkoutSessionModel {
         liveMonitor = monitor
         let definition = monitor.definition
         for event in events {
-            if case .repCounted(let count) = event {
+            switch event {
+            case .repCounted(let count), .repCountRevised(let count):
                 liveRepCount = count
-            } else {
+            default:
                 liveCaption = event.caption(for: definition)
             }
             onLiveEvent?(event, definition.kind)
@@ -1043,7 +1047,11 @@ final class WorkoutSessionModel {
             || earlier.allSatisfy({ $0.analysis.reps.count < SetComparison.minimumReps }) {
             return .tooFewReps
         }
-        if earlier.allSatisfy({ $0.bodySide != latest.bodySide }) { return .differentSide }
+        // Which side the gate followed only matters for an exercise measured from the side. A
+        // push-up is accepted from any view: filmed from the front, the side is whichever arm Vision
+        // saw better, and a set was told its earlier sets "were filmed from your other side" (15 October).
+        if latest.exercise.definition.expectedView == .side,
+           earlier.allSatisfy({ $0.bodySide != latest.bodySide }) { return .differentSide }
         return .incompatibleSets
     }
 

@@ -169,7 +169,7 @@ nonisolated struct ExerciseAnalyzerTests {
     @Test func pushUpCountsSixElbowBendReps() throws {
         let analysis = try measured(ExerciseAnalyzer.analyze(pushUpTrace(reps: 6), as: .pushUp))
         #expect(analysis.reps.count == 6)
-        #expect(analysis.rubricVersion == "push-up-side-v6")
+        #expect(analysis.rubricVersion == "push-up-side-v7")
         #expect(analysis.reps.map(\.number) == [1, 2, 3, 4, 5, 6])
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 75 && $0.relativeRange < 95 })
         #expect(analysis.reps.allSatisfy { $0.duration > 1.0 && $0.duration < 2.1 })
@@ -316,6 +316,30 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     // MARK: Helpers
+
+    /// Guilhem's push-ups of 15 October ran about 0.65 s a cycle; 15 of them were refused as
+    /// "faster than 0.4 s" after the live count had said them. A full bend at that pace is a rep:
+    /// the tempo floor is 0.25 s, and the 40° bend keeps Vision's flicker out.
+    @Test func fastButCompletePushUpsAllCount() throws {
+        var frames: [PoseFrame] = []
+        var time = 0.0
+        while time < 2 {
+            frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: 0, wristX: 0.62, wristY: 0.86))
+            time += CaptureTraces.step
+        }
+        let cycle = 0.5
+        while time < 2 + 20 * cycle {
+            let phase = (time - 2).truncatingRemainder(dividingBy: cycle) / cycle
+            frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: 20 + 60 * (1 - cos(2 * .pi * phase)) / 2,
+                                                    wristX: 0.62, wristY: 0.86))
+            time += CaptureTraces.step
+        }
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: .pushUp, viewCheck: .ignore)
+        let analysis = try measured(outcome)
+        #expect(analysis.reps.count == 20)
+        #expect(diagnostics?.outsideTempo == 0)
+        #expect(analysis.reps.allSatisfy { $0.duration >= ExerciseDefinition.minimumPushUpDuration })
+    }
 
     private func measured(_ outcome: AnalysisOutcome) throws -> SetAnalysis {
         guard case .analyzed(let analysis) = outcome else {

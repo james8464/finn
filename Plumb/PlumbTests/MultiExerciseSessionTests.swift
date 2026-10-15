@@ -23,7 +23,7 @@ struct MultiExerciseSessionTests {
             Issue.record("Expected a measured push-up set, got \(String(describing: model.result))")
             return
         }
-        #expect(analysis.rubricVersion == "push-up-side-v6")
+        #expect(analysis.rubricVersion == "push-up-side-v7")
         #expect(analysis.reps.count == 6)
         #expect(model.resultExercise == .pushUp)
         #expect(try store.load().first?.sets.first?.exercise == .pushUp)
@@ -92,6 +92,44 @@ struct MultiExerciseSessionTests {
         #expect(comparison.rangeDirection == .shorter)
         #expect(comparison.firstSetID == model.currentSession?.sets.first?.id)
         #expect(model.comparisonGap == nil)
+    }
+
+    /// Two push-up sets, the arm Vision followed changing between them (a front view gives either):
+    /// the second set is compared with the first, never told it was filmed from the other side.
+    @Test func aPushUpSetIsNotToldItsEarlierSetsWereFilmedFromTheOtherSide() async throws {
+        let source = StubPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        model.selectedExercise = .pushUp
+        await capture(model, source, pushUps(reps: 6, bend: 80))
+        await capture(model, source, pushUps(reps: 6, bend: 60).map(mirrored))
+        let sides = model.currentSession?.sets.map(\.bodySide) ?? []
+        #expect(sides == [.left, .right])
+        #expect(model.comparisonGap != .differentSide)
+        #expect(model.comparison?.rangeDirection == .shorter)
+    }
+
+    /// Side-view push-ups at 15 fps: a 2 s plank, then 1.6 s reps to the given bend.
+    private func pushUps(reps: Int, bend: Double) -> [PoseFrame] {
+        var frames: [PoseFrame] = []
+        var time = 0.0
+        while time < 2 + Double(reps) * 1.6 {
+            let phase = time < 2 ? 0 : (time - 2).truncatingRemainder(dividingBy: 1.6) / 1.6
+            frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: bend * (1 - cos(2 * .pi * phase)) / 2,
+                                                    wristX: 0.62, wristY: 0.86))
+            time += CaptureTraces.step
+        }
+        return frames
+    }
+
+    /// The same pose seen from the other side: left joints become right ones, mirrored in x.
+    private func mirrored(_ frame: PoseFrame) -> PoseFrame {
+        let pairs: [BodyJoint: BodyJoint] = [.leftWrist: .rightWrist, .leftElbow: .rightElbow,
+                                             .leftShoulder: .rightShoulder, .leftHip: .rightHip]
+        var joints: [BodyJoint: JointPoint] = [:]
+        for (joint, point) in frame.joints {
+            joints[pairs[joint] ?? joint] = JointPoint(x: 1 - point.x, y: point.y, confidence: point.confidence)
+        }
+        return PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: joints, athleteTracking: .tracked)
     }
 
     @Test func noRepsMessageNamesTheSelectedExercise() async throws {

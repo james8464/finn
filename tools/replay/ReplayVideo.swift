@@ -14,6 +14,9 @@ enum ReplayVideo {
         let rubricVersion: String?
         /// Reps the hands-free live count reached, feeding the frames one by one as the camera does.
         let liveReps: Int
+        /// The highest number the live count showed at any moment: above `liveReps`, the person saw
+        /// a count come down during the set.
+        var liveMaxReps = 0
         /// Live cues other than the count, as they would be spoken.
         let liveCues: [String]
         /// When the live monitor would have ended the set by itself, if it did.
@@ -29,7 +32,8 @@ enum ReplayVideo {
     /// The hands-free path on the same frames: the start readiness, the live count and cues, and
     /// the automatic stop, as `WorkoutSessionModel` drives them during a capture.
     private static func followLive(_ poses: [PoseFrame], definition: ExerciseDefinition)
-        -> (reps: Int, cues: [String], stopAt: Double?, readyAt: Double?) {
+        -> (reps: Int, maxReps: Int, cues: [String], stopAt: Double?, readyAt: Double?) {
+        var maxReps = 0
         var readiness = StartReadiness()
         var monitor = LiveSetMonitor(definition: definition)
         var seen: [PoseFrame] = []
@@ -44,12 +48,14 @@ enum ReplayVideo {
             }
             seen.append(frame)
             for event in monitor.update(with: seen) {
-                if case .repCounted = event { continue }
-                cues.append(event.spoken(for: definition))
+                switch event {
+                case .repCounted(let count), .repCountRevised(let count): maxReps = max(maxReps, count)
+                default: cues.append(event.spoken(for: definition))
+                }
             }
             if stopAt == nil, monitor.isOver { stopAt = frame.time }
         }
-        return (monitor.countedReps, cues, stopAt, readyAt)
+        return (monitor.countedReps, maxReps, cues, stopAt, readyAt)
     }
 
     static func main() async {
@@ -127,6 +133,7 @@ enum ReplayVideo {
                             handsFreeReadyAt: live.readyAt)
         }
         var finalReport = report
+        finalReport.liveMaxReps = live.maxReps
         if case .analyzed(let analysis) = result, finalReport.status == "measured" {
             finalReport.repTimes = analysis.reps.map { [($0.startTime * 10).rounded() / 10, ($0.endTime * 10).rounded() / 10] }
         }

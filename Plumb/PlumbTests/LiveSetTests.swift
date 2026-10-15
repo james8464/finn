@@ -301,13 +301,73 @@ nonisolated struct LiveSetMonitorTests {
             switch event {
             case .fasterThanFirstReps(let rep), .shorterThanFirstReps(let rep), .formFault(_, let rep):
                 cuesPerRep[rep, default: 0] += 1
-            case .repCounted: break
+            case .repCounted, .repCountRevised: break
             }
         }
         #expect(result.monitor.countedReps == 6)
         #expect(!cuesPerRep.isEmpty)
         #expect(cuesPerRep.values.allSatisfy { $0 == 1 }, "\(cuesPerRep)")
         #expect(result.monitor.sawFasterRep)
+    }
+
+    /// Fast push-ups whose tops sit below the opening plank (Guilhem, 15 October: the live count
+    /// reached 29, the result 18). Measured over the whole set, a movement said as a rep early can
+    /// stop counting later. The live count is the analysis of the set so far, so it ends on what
+    /// the result says, comes down when it must, and never says a number twice.
+    @Test func theLiveCountIsTheWholeSetAnalysisAndNeverSaysANumberTwice() {
+        let frames = fastPushUps(plank: 3, reps: 12, cycle: 0.55, topBend: 25, bottomBend: 85)
+        let result = run(frames, definition: .pushUp)
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .pushUp, viewCheck: .ignore) else {
+            Issue.record("Expected a measured set")
+            return
+        }
+        #expect(result.monitor.countedReps == analysis.reps.count)
+        let said = result.events.compactMap { event -> Int? in
+            if case .repCounted(let count) = event { return count }
+            return nil
+        }
+        #expect(said == Array(1...max(1, said.count)))
+        let revised = result.events.compactMap { event -> Int? in
+            if case .repCountRevised(let count) = event { return count }
+            return nil
+        }
+        #expect(!revised.isEmpty, "this trace is one where the whole-set analysis takes reps back")
+        #expect(revised.allSatisfy { $0 <= said.count })
+        // A revised count is shown, not spoken.
+        #expect(LiveSetEvent.phrase(for: [.repCountRevised(3)], definition: .pushUp) == nil)
+        #expect(LiveSetEvent.repCountRevised(3).caption(for: .pushUp) == nil)
+    }
+
+    /// Push-ups at about 0.5 s a cycle, all complete: every one is said and every one is in the result.
+    @Test func fastCompletePushUpsAreCountedLiveAndInTheResult() {
+        let frames = fastPushUps(plank: 2, reps: 20, cycle: 0.5, topBend: 20, bottomBend: 80)
+        let result = run(frames, definition: .pushUp)
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .pushUp, viewCheck: .ignore) else {
+            Issue.record("Expected a measured set")
+            return
+        }
+        #expect(analysis.reps.count == 20)
+        #expect(result.monitor.countedReps == 20)
+    }
+
+    /// A plank, then reps whose top and bottom bends are given, at 15 fps, then the top held 2 s.
+    private func fastPushUps(plank: Double, reps: Int, cycle: Double, topBend: Double, bottomBend: Double)
+        -> [PoseFrame] {
+        var frames: [PoseFrame] = []
+        var time = 0.0
+        func add(_ bend: Double) {
+            frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: bend, wristX: 0.62, wristY: 0.86))
+            time += CaptureTraces.step
+        }
+        while time < plank { add(0) }
+        let start = time
+        while time < start + Double(reps) * cycle {
+            let phase = (time - start).truncatingRemainder(dividingBy: cycle) / cycle
+            add(topBend + (bottomBend - topBend) * (1 - cos(2 * .pi * phase)) / 2)
+        }
+        let end = time
+        while time < end + 2 { add(topBend) }
+        return frames
     }
 
     @Test func steadyRepsSayOnlyTheCount() {

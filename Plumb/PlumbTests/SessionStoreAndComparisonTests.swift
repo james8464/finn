@@ -161,9 +161,23 @@ struct SessionStoreAndComparisonTests {
             .appending(path: "sessions.json")
     }
 
+    /// A push-up is accepted from any view: filmed from the front, the side the gate followed is
+    /// whichever arm Vision saw better, so sides are not a key for comparing push-up sets. On
+    /// 15 October a front-view set was told its earlier sets "were filmed from your other side".
+    @Test func pushUpSetsCompareAcrossSidesButSquatSetsDoNot() {
+        let session = UUID()
+        let pushUp = ExerciseDefinition.pushUp.rubricVersion
+        let left = set(sessionID: session, range: 60, side: .left, rubric: pushUp, exercise: .pushUp)
+        let right = set(sessionID: session, range: 50, side: .right, rubric: pushUp, exercise: .pushUp)
+        #expect(SetComparison.compare(left, right)?.rangeDirection == .shorter)
+        let squatLeft = set(sessionID: session, range: 0.4, side: .left)
+        let squatRight = set(sessionID: session, range: 0.3, side: .right)
+        #expect(SetComparison.compare(squatLeft, squatRight) == nil)
+    }
+
     private func set(sessionID: UUID, range: Double, side: BodySide = .left,
                      view: CameraView = .side,
-                     rubric: String = SquatRubric.version) -> SetSummary {
+                     rubric: String = SquatRubric.version, exercise: ExerciseKind = .bodyweightSquat) -> SetSummary {
         let reps = (1...6).map { number in
             RepMetric(number: number, startTime: Double(number) * 2,
                       endTime: Double(number) * 2 + 1.5,
@@ -172,7 +186,7 @@ struct SessionStoreAndComparisonTests {
         return SetSummary(id: UUID(), sessionID: sessionID, capturedAt: .now,
                           bodySide: side,
                           analysis: SetAnalysis(reps: reps, confidence: 0.95, rubricVersion: rubric),
-                          cue: nil, cueResponse: .unanswered, cameraView: view)
+                          cue: nil, cueResponse: .unanswered, exercise: exercise, cameraView: view)
     }
 }
 

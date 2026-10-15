@@ -45,7 +45,9 @@ nonisolated enum SetComparison {
               first.id != second.id,
               first.exercise == second.exercise,
               first.cameraView == second.cameraView,
-              first.bodySide == second.bodySide,
+              // The side is a key only for an exercise measured from the side; a push-up, accepted
+              // from any view, compares across sides (filmed from the front, the side is arbitrary).
+              first.bodySide == second.bodySide || first.exercise.definition.expectedView != .side,
               first.analysis.rubricVersion == second.analysis.rubricVersion,
               first.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
               second.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
