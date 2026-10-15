@@ -4208,12 +4208,12 @@
         }
       }
     },
-    ", every joint clear, no pattern to correct." : {
+    ", with no pattern flagged by Plumb's current checks." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ", toutes les articulations visibles, rien à corriger."
+            "value" : ", sans écart signalé par les vérifications actuelles de Plumb."
           }
         },
         "en-US" : {
@@ -4741,12 +4741,12 @@
         }
       }
     },
-    "A fully visible set of %lld reps or more with no observation to correct." : {
+    "A measured set of %lld reps or more with no pattern flagged by Plumb's current checks." : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Une série entièrement visible de %lld répétitions ou plus, sans rien à corriger."
+            "value" : "Une série mesurée d’au moins %lld répétitions, sans écart signalé par les vérifications actuelles de Plumb."
           }
         },
         "en-US" : {
@@ -13757,12 +13757,12 @@
         }
       }
     },
-    "Nothing to fix" : {
+    "No flagged pattern" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rien à corriger"
+            "value" : "Aucun écart signalé"
           }
         },
         "en-US" : {
