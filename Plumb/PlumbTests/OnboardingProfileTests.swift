@@ -65,4 +65,33 @@ struct OnboardingProfileTests {
         let onlyGoal = OnboardingProfile(goal: .technique, level: nil)
         #expect(onlyGoal.coachNote == "Their goal is cleaner technique.")
     }
+
+    @Test func offerPreviewPersistsWithoutChangingPersonalizationOrCompletingTheTour() {
+        let prefs = preferences()
+        prefs.trainingGoal = .strength
+        prefs.favoriteExercises = [.pullUp]
+        let profile = prefs.onboardingProfile
+        #expect(prefs.coachPlanChoice == .free)
+        for plan in [CoachPlanChoice.monthly, .annual, .free] {
+            prefs.coachPlanChoice = plan
+            let reloaded = PlumbPreferences(defaults: prefs.defaults)
+            #expect(reloaded.coachPlanChoice == plan)
+            #expect(reloaded.onboardingProfile == profile)
+            #expect(!reloaded.onboardingCompleted)
+        }
+    }
+
+    @Test func completingTheNewTourKeepsExistingAnswers() {
+        let prefs = preferences()
+        prefs.apply(OnboardingProfile(goal: .strength, level: .experienced,
+                                      favoriteExercises: [.pullUp], speaksLive: false))
+        prefs.coachPlanChoice = .annual
+        prefs.apply(prefs.onboardingProfile)
+        #expect(prefs.trainingGoal == .strength)
+        #expect(prefs.trainingLevel == .experienced)
+        #expect(prefs.favoriteExercises == [.pullUp])
+        #expect(!prefs.speaksLive)
+        #expect(prefs.onboardingCompleted)
+        #expect(prefs.coachPlanChoice == .annual)
+    }
 }

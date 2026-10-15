@@ -28,6 +28,7 @@ struct ContentView: View {
     @State private var showsCameraPrimer = false
     /// The first-launch screens (`Onboarding/`), also replayed from Options.
     @State private var showsOnboarding: Bool
+    @State private var showsPlumbDemo = false
     /// Badges earned from the saved history (`Badges/`).
     @State private var badges: BadgeLedger
     private let preferences: PlumbPreferences
@@ -172,6 +173,12 @@ struct ContentView: View {
                 showsOnboarding = false
             }
         }
+        .fullScreenCover(isPresented: $showsPlumbDemo) {
+            PlumbDemoView {
+                showsPlumbDemo = false
+                selectedTab = .workout
+            }
+        }
         // Badges follow the saved history: checked at launch and after every saved set.
         .onChange(of: model.history, initial: true) { _, history in
             badges.update(history: history)
@@ -267,7 +274,8 @@ struct ContentView: View {
             switch selectedTab {
             case .home:
                 DashboardView(history: model.history, exercise: model.selectedExercise,
-                              badges: badges.earned) { route = $0 }
+                              badges: badges.earned, tryPlumb: { selectedTab = .workout },
+                              watchDemo: { showsPlumbDemo = true }) { route = $0 }
             case .workout:
                 workoutSetup
             case .coach:
@@ -874,7 +882,7 @@ struct ContentView: View {
                 .optionCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
-                    Text("The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your answers set the order of the exercises and how the coach talks to you.")
+                    Text("Meet Plumb, explore an illustrated set and its advice, and choose your coach. You can replay this tour any time.")
                     Button("Replay the welcome") { showsOnboarding = true }
                         .font(.body.weight(.medium))
                         .foregroundStyle(Color.primary)

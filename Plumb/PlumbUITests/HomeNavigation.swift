@@ -6,10 +6,11 @@ extension XCUIApplication {
     func skipOnboardingIfShown() {
         let skip = buttons["onboarding.skip"]
         guard skip.waitForExistence(timeout: 2) else { return }
-        for _ in 0..<6 where skip.exists {
-            skip.tap()
-            Thread.sleep(forTimeInterval: 0.4)
-        }
+        skip.tap()
+        // Skip now lands on the coach choice; Free remains selected by default.
+        let finish = buttons["onboarding.continue"]
+        XCTAssertTrue(finish.waitForExistence(timeout: 3))
+        finish.tap()
     }
 
     @MainActor
