@@ -6,6 +6,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
 
         let setup = app.buttons["Start a set"]
         XCTAssertTrue(setup.waitForExistence(timeout: 5))
@@ -28,6 +29,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-hands-free"]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["capture.handsFree"].waitForExistence(timeout: 5))
         app.buttons["Start set"].tap()
@@ -45,6 +47,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         XCTAssertFalse(app.staticTexts["capture.elapsed"].exists)
         app.buttons["Start set"].tap()
@@ -80,6 +83,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-plumb-ui-dark"]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         XCTAssertTrue(app.staticTexts["capture.elapsed"].waitForExistence(timeout: 6))
@@ -92,6 +96,7 @@ final class WorkoutFlowUITests: XCTestCase {
     func testSetupAccessibilityAudit() throws {
         let app = XCUIApplication()
         app.launch()
+        app.openWorkoutTab()
         XCTAssertTrue(app.buttons["Start a set"].waitForExistence(timeout: 5))
         try audit(app, at: "first screen")
     }
@@ -101,6 +106,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-dark")
         app.launch()
+        app.openWorkoutTab()
         XCTAssertTrue(app.buttons["Start a set"].waitForExistence(timeout: 5))
         try audit(app, at: "first screen, dark")
     }
@@ -109,6 +115,7 @@ final class WorkoutFlowUITests: XCTestCase {
     func testPrivacySummaryIsReachableFromSetup() {
         let app = XCUIApplication()
         app.launch()
+        app.openWorkoutTab()
         app.openFromHome("Privacy")
         XCTAssertTrue(app.navigationBars["Privacy"].exists)
         XCTAssertTrue(app.staticTexts["Camera"].exists)
@@ -133,6 +140,7 @@ final class WorkoutFlowUITests: XCTestCase {
     func testPrivacyScreenAccessibilityAudit() throws {
         let app = XCUIApplication()
         app.launch()
+        app.openWorkoutTab()
         app.openFromHome("Privacy")
         try auditPrivacy(app)
     }
@@ -142,6 +150,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-dark")
         app.launch()
+        app.openWorkoutTab()
         app.openFromHome("Privacy")
         try auditPrivacy(app)
     }
@@ -189,6 +198,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.resetAuthorizationStatus(for: .camera)
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         // Plumb says what the camera does before iOS asks for it.
         let primer = app.buttons["primer.continue"]
@@ -226,6 +236,7 @@ final class WorkoutFlowUITests: XCTestCase {
             "-plumb-ui-dark",
         ]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         XCTAssertTrue(app.staticTexts["Camera unavailable"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["The camera is unavailable right now. Try again in a moment."].exists)
@@ -240,6 +251,7 @@ final class WorkoutFlowUITests: XCTestCase {
     func testHistoryAccessibilityAudit() throws {
         let app = XCUIApplication()
         app.launch()
+        app.openWorkoutTab()
         app.openFromHome("History")
         app.buttons["Delete all local data"].tap()
         app.buttons["Delete all data"].tap()
@@ -252,6 +264,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         XCTAssertTrue(app.staticTexts["Checking leg visibility"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["Hip, knee and ankle visible"].exists)
@@ -286,6 +299,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         for setIndex in 1...2 {
             app.buttons["Start set"].tap()
@@ -315,6 +329,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
@@ -343,6 +358,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
         XCTAssertFalse(app.buttons["Listen to observation"].exists)
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
@@ -368,6 +384,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
 
         XCTAssertTrue(app.staticTexts["DEMO INPUT"].exists)
         capture(app, name: "Setup")
@@ -439,6 +456,7 @@ final class WorkoutFlowUITests: XCTestCase {
             "-plumb-ui-dark",
         ]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
@@ -457,6 +475,7 @@ final class WorkoutFlowUITests: XCTestCase {
             "-plumb-ui-dark",
         ]
         app.launch()
+        app.openWorkoutTab()
         capture(app, name: "Large text dark setup")
         // The image sampler repeatedly flags a cropped edge of the Debug-only
         // yellow demo label despite black text on yellow. Keep structural audits.
@@ -493,6 +512,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
@@ -511,6 +531,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-plumb-validation"]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]

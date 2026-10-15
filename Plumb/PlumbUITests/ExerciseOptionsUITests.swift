@@ -6,6 +6,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
         app.openFromHome("Options")
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
         // XCTest refuses identifier queries longer than 128 characters, so match the start.
@@ -25,6 +26,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
         let squat = app.buttons["Squat"]
         XCTAssertTrue(squat.waitForExistence(timeout: 5))
         XCTAssertTrue(squat.isSelected)
@@ -43,6 +45,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Push-up"].tap()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
@@ -60,6 +63,7 @@ final class ExerciseOptionsUITests: XCTestCase {
             let app = XCUIApplication()
             app.launchArguments.append("-plumb-ui-demo")
             app.launch()
+            app.openWorkoutTab()
                 app.buttons[exercise].tap()
             app.buttons["Start a set"].tap()
             app.buttons["Start set"].tap()
@@ -77,6 +81,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-missing-wrist"]
         app.launch()
+        app.openWorkoutTab()
         app.buttons["Push-up"].tap()
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
@@ -95,6 +100,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-recognition"]
         app.launch()
+        app.openWorkoutTab()
         app.openFromHome("Options")
         XCTAssertEqual(app.switches["options.recognizeExercise"].value as? String, "1")
         let toggle = app.switches["options.useTrainedModel"]

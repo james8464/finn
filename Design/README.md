@@ -14,6 +14,8 @@ The Figma guide is the identity reference for the iPhone app: purpose, mark, col
 
 ## Colour
 
+The Home dashboard follows the user-supplied 14 October screen reference: a dark amber photograph, translucent cards, white text and a lime (`#CCF759`) selection accent. This overrides the earlier monochrome guidance below for the dashboard and its tab bar. Existing workout, history and settings components retain their semantic colours. See [implementation notes](../docs/design/home-dashboard.md).
+
 | Token | Hex | Role |
 | --- | --- | --- |
 | Black | `#000000` | Light appearance labels and primary action |

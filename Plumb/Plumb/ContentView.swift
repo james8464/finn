@@ -21,6 +21,7 @@ struct ContentView: View {
     @State private var deleteAllRequested = false
     /// History, Options or Privacy, opened from the first screen.
     @State private var route: HomeRoute?
+    @State private var selectedTab: HomeTab = .home
     /// What the camera does, shown once before iOS asks for it.
     @State private var showsCameraPrimer = false
     /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
@@ -91,6 +92,22 @@ struct ContentView: View {
             }
             .navigationTitle("Plumb")
             .toolbarTitleDisplayMode(.inlineLarge)
+            .navigationDestination(item: $route) { destination in
+                destinationPage(destination)
+                    .toolbar(.visible, for: .navigationBar)
+            }
+            #if DEBUG
+            .onAppear {
+                let arguments = ProcessInfo.processInfo.arguments
+                guard route == nil, let index = arguments.firstIndex(of: "-plumb-open"),
+                      arguments.indices.contains(index + 1) else { return }
+                switch arguments[index + 1] {
+                case "coach": route = .coach
+                case "options": route = .options
+                default: break
+                }
+            }
+            #endif
         }
         .overlay(alignment: .top) {
             #if DEBUG
@@ -196,9 +213,80 @@ struct ContentView: View {
         return model.leavesHealthWorkout(forSession: id)
     }
 
-    /// The first screen: the chosen exercise drawn as the camera sees it, chips to change it, and
-    /// one action to start a set. History, options and privacy stay one tap away, out of the way.
+    /// Keep the existing camera setup intact inside the Workout tab.
     private var setup: some View {
+        Group {
+            switch selectedTab {
+            case .home:
+                DashboardView(history: model.history, exercise: model.selectedExercise) { route = $0 }
+            case .workout:
+                workoutSetup
+            case .coach:
+                CoachView(history: model.history)
+            case .posture:
+                UnfinishedPage(title: selectedTab.rawValue, symbol: selectedTab.symbol)
+            }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            HomeTabBar(selection: $selectedTab)
+        }
+        .background { HomeBackdrop() }
+        .toolbar(selectedTab == .workout ? .visible : .hidden, for: .navigationBar)
+        .environment(\.colorScheme, .dark)
+        .preferredColorScheme(.dark)
+    }
+
+    @ViewBuilder private func destinationPage(_ destination: HomeRoute) -> some View {
+        switch destination {
+        case .history: historyPage
+        case .options: optionsPage
+        case .privacy: privacyPage
+        case .coach: CoachView(history: model.history)
+        case .lastWorkout:
+            if let last = model.history.first {
+                historyDetail(last)
+            } else {
+                ContentUnavailableView("No workouts yet", systemImage: "figure.strengthtraining.functional",
+                                       description: Text("Start a set in the Workout tab. Your last workout will appear here."))
+                    .navigationTitle("Last workout")
+            }
+        case .account: accountPage
+        case .posture: UnfinishedPage(title: "Posture", symbol: "figure.walk")
+        case .weights: UnfinishedPage(title: "Weights", symbol: "dumbbell")
+        case .awards: UnfinishedPage(title: "Awards", symbol: "trophy")
+        case .plus: UnfinishedPage(title: "Plumb+", symbol: "sparkles")
+        }
+    }
+
+    private var accountPage: some View {
+        List {
+            Section {
+                Label("Your Plumb", systemImage: "person.crop.circle")
+                    .font(.title2.weight(.semibold))
+                    .padding(.vertical, 8)
+                Text("Your workouts are stored on this iPhone.")
+                    .foregroundStyle(.secondary)
+            }
+            Section {
+                NavigationLink { optionsPage } label: {
+                    Label("Options", systemImage: "slider.horizontal.3")
+                }
+                NavigationLink { historyPage } label: {
+                    Label("History", systemImage: "clock.arrow.circlepath")
+                }
+                NavigationLink { privacyPage } label: {
+                    Label("Privacy", systemImage: "lock")
+                }
+            }
+            Section("Account") {
+                Text("Not made yet").foregroundStyle(.secondary)
+            }
+        }
+        .navigationTitle("Account settings")
+        .toolbarTitleDisplayMode(.inline)
+    }
+
+    private var workoutSetup: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
@@ -317,27 +405,6 @@ struct ContentView: View {
                 .accessibilityIdentifier("home.more")
             }
         }
-        .navigationDestination(item: $route) { route in
-            switch route {
-            case .history: historyPage
-            case .options: optionsPage
-            case .privacy: privacyPage
-            case .coach: CoachView(history: model.history)
-            }
-        }
-        #if DEBUG
-        // `-plumb-open coach` or `-plumb-open options` lands on that page, for headless screenshots.
-        .onAppear {
-            let arguments = ProcessInfo.processInfo.arguments
-            guard route == nil, let index = arguments.firstIndex(of: "-plumb-open"),
-                  arguments.indices.contains(index + 1) else { return }
-            switch arguments[index + 1] {
-            case "coach": route = .coach
-            case "options": route = .options
-            default: break
-            }
-        }
-        #endif
         .sheet(isPresented: $showsCameraPrimer) {
             CameraPrimer(onContinue: {
                 showsCameraPrimer = false
