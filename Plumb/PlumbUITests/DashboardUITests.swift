@@ -2,6 +2,37 @@ import XCTest
 
 final class DashboardUITests: XCTestCase {
     @MainActor
+    func testSummaryTitleCollapsesAndScrollPositionSurvivesTabSwitch() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-plumb-ui-demo", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityM"]
+        app.launch()
+        let scroll = app.scrollViews["summary.scroll"]
+        XCTAssertTrue(scroll.waitForExistence(timeout: 8))
+        let title = app.navigationBars["Summary"].staticTexts["Summary"]
+        let expandedHeight = title.frame.height
+        scroll.swipeUp()
+        XCTAssertTrue(app.buttons["home.awards"].isHittable)
+        XCTAssertLessThan(title.frame.height, expandedHeight, "Native title must collapse while scrolling")
+        let position = app.buttons["home.awards"].frame.minY
+        let collapsedHeight = title.frame.height
+        let before = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        before.name = "summary-scrolled-before-tab-switch"
+        before.lifetime = .keepAlways
+        add(before)
+        app.selectTab("Workout")
+        app.selectTab("Summary")
+        let after = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        after.name = "summary-scrolled-after-tab-switch"
+        after.lifetime = .keepAlways
+        add(after)
+        XCTAssertEqual(title.frame.height, collapsedHeight, accuracy: 3)
+        XCTAssertEqual(app.buttons["home.awards"].frame.minY, position, accuracy: 3)
+        scroll.swipeDown()
+        scroll.swipeDown()
+        XCTAssertEqual(title.frame.height, expandedHeight, accuracy: 3)
+    }
+
+    @MainActor
     func testAllDashboardDestinationsAndTabs() {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -55,6 +86,21 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Summary"].waitForExistence(timeout: 5))
         app.selectTab("Summary")
         XCTAssertFalse(app.staticTexts["No workouts yet"].exists)
+        XCTAssertTrue((app.buttons["home.sessions"].value as? String)?.contains("reps in the last 7 days") == true)
+        let saved = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        saved.name = "summary-saved-workout"
+        saved.lifetime = .keepAlways
+        add(saved)
+        let title = app.navigationBars["Summary"].staticTexts["Summary"]
+        let expandedHeight = title.frame.height
+        app.scrollViews["summary.scroll"].swipeUp()
+        let collapsedHeight = title.frame.height
+        XCTAssertLessThan(collapsedHeight, expandedHeight)
+        let savedPosition = app.buttons["home.lastSession"].frame.minY
+        app.selectTab("Workout")
+        app.selectTab("Summary")
+        XCTAssertEqual(title.frame.height, collapsedHeight, accuracy: 3)
+        XCTAssertEqual(app.buttons["home.lastSession"].frame.minY, savedPosition, accuracy: 3)
         app.buttons["home.lastSession"].tap()
         XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
     }
@@ -88,6 +134,6 @@ final class DashboardUITests: XCTestCase {
         app.selectTab("Coach")
         XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
         app.selectTab("Summary")
-        XCTAssertTrue(app.buttons["home.lastSession"].exists)
+        XCTAssertTrue(app.buttons["home.awards"].exists)
     }
 }

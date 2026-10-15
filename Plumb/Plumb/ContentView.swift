@@ -4,7 +4,7 @@ import UIKit
 private enum PlumbStyle {
     static let ink = Color.primary
     static let supportingText = Color(uiColor: .secondaryLabel)
-    static let primaryButtonText = Color.white
+    static let primaryButtonText = HomeStyle.onAccent
 }
 
 struct ContentView: View {
@@ -382,72 +382,70 @@ struct ContentView: View {
     }
 
     private var workoutSetup: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    // After Done: whether the session reached Apple Fitness.
-                    if let save = model.fitnessSave {
-                        HomeCard { fitnessStatus(save) }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                // After Done: whether the session reached Apple Fitness.
+                if let save = model.fitnessSave {
+                    HomeCard { fitnessStatus(save) }
+                }
+                // Framing that went on with no set (or nobody in view) closed the camera by itself.
+                if let note = model.framingClosedNote {
+                    HomeCard {
+                        Text(note)
+                            .font(.subheadline)
+                            .foregroundStyle(HomeStyle.supportingText)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    // Framing that went on with no set (or nobody in view) closed the camera by itself.
-                    if let note = model.framingClosedNote {
-                        HomeCard {
-                            Text(note)
+                    .accessibilityIdentifier("setup.framingClosed")
+                }
+                // Cancel, or the app going to the background during a set, comes back here without Done.
+                if let open = model.unfinishedSession {
+                    HomeCard { unfinishedSessionLine(open) }
+                }
+                ExerciseChips(selection: Binding(
+                    get: { model.selectedExercise },
+                    set: { model.selectedExercise = $0 }
+                ), order: preferences.exerciseOrder)
+                .padding(.horizontal, -20)
+                .contentMargins(.horizontal, 20, for: .scrollContent)
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("Exercise")
+                .accessibilityIdentifier("setup.exercise")
+                ExerciseHeroCard(kind: model.selectedExercise, compact: !model.history.isEmpty)
+                accessoryNotes
+                // Personalize with Health: a line adapted to the person, with the data it rests on.
+                if let note = model.readinessNote {
+                    HomeCard { healthNote(note) }
+                        .accessibilityIdentifier("setup.healthReadiness")
+                }
+                if let focus = model.focus {
+                    HomeCard {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Label("Your focus", systemImage: "scope")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(HomeStyle.supportingText)
+                            Text(focus.focus)
+                                .font(.body.weight(.semibold))
+                                .fixedSize(horizontal: false, vertical: true)
+                            Text(focus.summary)
                                 .font(.subheadline)
                                 .foregroundStyle(HomeStyle.supportingText)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        .accessibilityIdentifier("setup.framingClosed")
                     }
-                    // Cancel, or the app going to the background during a set, comes back here without Done.
-                    if let open = model.unfinishedSession {
-                        HomeCard { unfinishedSessionLine(open) }
-                    }
-                    ExerciseChips(selection: Binding(
-                        get: { model.selectedExercise },
-                        set: { model.selectedExercise = $0 }
-                    ), order: preferences.exerciseOrder)
-                    .padding(.horizontal, -20)
-                    .contentMargins(.horizontal, 20, for: .scrollContent)
-                    .accessibilityElement(children: .contain)
-                    .accessibilityLabel("Exercise")
-                    .accessibilityIdentifier("setup.exercise")
-                    ExerciseHeroCard(kind: model.selectedExercise, compact: !model.history.isEmpty)
-                    accessoryNotes
-                    // Personalize with Health: a line adapted to the person, with the data it rests on.
-                    if let note = model.readinessNote {
-                        HomeCard { healthNote(note) }
-                            .accessibilityIdentifier("setup.healthReadiness")
-                    }
-                    if let focus = model.focus {
-                        HomeCard {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Label("Your focus", systemImage: "scope")
-                                    .font(.footnote.weight(.semibold))
-                                    .foregroundStyle(HomeStyle.supportingText)
-                                Text(focus.focus)
-                                    .font(.body.weight(.semibold))
-                                    .fixedSize(horizontal: false, vertical: true)
-                                Text(focus.summary)
-                                    .font(.subheadline)
-                                    .foregroundStyle(HomeStyle.supportingText)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                        .accessibilityElement(children: .combine)
-                        .accessibilityIdentifier("setup.focus")
-                    }
-                    if let last = model.history.first {
-                        lastSessionCard(last)
-                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("setup.focus")
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
-                .padding(.top, 4)
-                .padding(.bottom, 24)
+                if let last = model.history.first {
+                    lastSessionCard(last)
+                }
             }
-            .scrollIndicators(.hidden)
-            // The action sits below the scroll view, never over its text.
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 4)
+            .padding(.bottom, 24)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 4) {
                 // Said where the decision is made: before the camera opens.
                 Button { route = .privacy } label: {
@@ -476,6 +474,7 @@ struct ContentView: View {
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
+            .background(HomeStyle.background)
         }
         .background(HomeStyle.background.ignoresSafeArea())
         .navigationTitle("Workout")

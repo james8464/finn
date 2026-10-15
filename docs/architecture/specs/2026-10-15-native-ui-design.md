@@ -28,9 +28,9 @@ The captured Summary screen has a full-screen decorative gym image, translucent 
 ## Design rules
 
 - Native TabView with Summary, Workout, History and Coach. Each tab owns its navigation stack. Settings remains in the toolbar. Preserve existing destinations and data.
-- System grouped background; secondary grouped surfaces. No decorative backdrop, gradient borders or glass content cards. Native bars supply platform materials.
+- System background; secondary semantic surfaces. No decorative backdrop, gradient borders or glass content cards. Native bars supply platform materials.
 - System text styles. Bold numbers for measurements; regular body copy; secondary semantic text. No fixed small labels. Respect Dynamic Type and RTL.
-- System blue identifies actions and selection; filled actions use a deeper blue to keep white labels legible. Green is reserved for measured activity or success, red for destructive actions and stopping. Labels and symbols carry meaning independently of colour.
+- Monochrome actions and selection invert with system appearance. Green is reserved for measured activity or success, red for destructive actions and stopping. Labels and symbols carry meaning independently of colour.
 - Minimum 44-point action targets. Layouts stack at accessibility sizes, content scrolls, and bottom controls respect safe areas and the keyboard.
 - Short state transitions and numeric updates; Reduce Motion disables custom movement. System feedback for meaningful selections and completion only.
 - Summary shows a real latest session and totals from saved sets. The empty state offers the next useful action. Awards remain available, without fake scores or pressure.
@@ -52,7 +52,7 @@ Camera’s visible task and stable controls informed the capture screen. The pre
 
 ### Surfaces, colour and type
 
-Reminders demonstrates how system grouping can provide structure without a decorative backdrop. Plumb uses grouped semantic backgrounds, opaque content surfaces and a consistent spacing scale. System blue identifies actions; red identifies Stop and deletion; green remains the native toggle/success colour. Text and symbols also explain every state. System text styles establish hierarchy and adapt to Dynamic Type. The camera count is intentionally larger for viewing from a distance; the instructional illustration has a bounded height so enlarged text can still scroll into view.
+Reminders demonstrates how system grouping can provide structure without a decorative backdrop. Plumb uses semantic backgrounds, opaque content surfaces and a consistent spacing scale. Monochrome controls identify actions; red identifies Stop and deletion; green remains the native toggle/success colour. Text and symbols also explain every state. System text styles establish hierarchy and adapt to Dynamic Type. The camera count is intentionally larger for viewing from a distance; the instructional illustration has a bounded height so enlarged text can still scroll into view.
 
 ### Tone and evidence
 
@@ -69,3 +69,57 @@ The same hierarchy extends to Watch and widgets: exercise, count, time and the n
 ## Acceptance
 
 Build iPhone, widget and embedded Watch targets. Exercise navigation, set-to-result-to-history, Coach, onboarding and awards. Capture light/dark and accessibility text screens. Verify Reduce Motion handling and semantic colour use in code. Physical camera accuracy, real Watch pairing and third-party-app interaction testing remain outside this visual change.
+
+## Refinement requested after visual review
+
+James found the first native pass too flat and asked to restore the earlier dashboard’s widget concept. Keep this iteration isolated on `ui/apple-native-revamp`; do not merge it into main while teammates explore alternatives.
+
+- Build a composed Summary with an illustrated workout tile, a measured-activity widget, a recent-session card and compact Best set/Awards widgets. Use differentiated layouts tied to each measurement.
+- Use hierarchical SF Symbols, exercise drawings and quiet surface separation. Preserve real data, meaningful empty states, light/dark appearance and accessibility layouts.
+- Native large titles collapse on scroll and expand at the top. Make the primary scroll view the root content; keep actions and the Coach composer in safe-area insets.
+- Preserve tab position and navigation, show press/selection feedback, and keep keyboard submission consistent with the Send button’s enabled state. Respect Reduce Motion and Reduce Transparency.
+- Review screen behaviour as well as screenshots: scrolling, title transitions, selection, keyboard, sheets, capture, result actions, deletion and return navigation.
+
+### Visual comparison, 15 October refinement
+
+Inspected rendered screenshots in the browser, not just app descriptions:
+
+| Reference | Observed screen detail | Application to Plumb |
+| --- | --- | --- |
+| [Apple Fitness Summary](https://support.apple.com/en-ie/guide/iphone/iph4c34a8a95/ios) | A wide activity card, paired compact metrics and a photographic workout card. Different content has different composition. | An exercise-led workout card, weekly activity, compact Best set/Awards and a recent session. |
+| [Apple Health Highlights](https://support.apple.com/en-us/104997#progress) | Category symbol and colour, a short observation, then its supporting chart or measurements. | Clear category headings; measured reps and dates remain more prominent than decoration. |
+| [Apple Journal](https://apps.apple.com/us/app/journal/id6447391597) | Photos and maps make entries recognizable; compact insight cards sit above ordinary lists. | Use the selected exercise drawing as recognizable content. Settings and History retain native lists. |
+| [Gentler Streak, 2024 winner](https://developer.apple.com/news/?id=3m0ht22s) | Workout symbols, a distinctive illustration and a readable activity chart. Illustration supports the app's friendly purpose. | Plumb's own camera-pose illustration supplies identity. No borrowed mascot or unsupported readiness judgement. |
+| [Lumy, 2025 finalist](https://apps.apple.com/us/app/lumy/id908905093) | A large sun-path visual, small event rows and widgets whose visual forms reflect their data. | Give exercise imagery room; make activity charts functional and keep secondary information compact. Lumy is a finalist, not an ADA winner. |
+
+These are visual observations of published screens, not claims that we tested those apps' live interactions. Earlier research also covers Camera, Reminders and Tide Guide. Apple's [2025 award page](https://developer.apple.com/design/awards/2025/) confirms Lumy's finalist status.
+
+### Avoiding generic generated-interface defaults
+
+[Anthropic's frontend-design guidance](https://github.com/anthropics/skills/tree/main/skills/frontend-design) identifies repeated generated-design habits: interchangeable rounded cards, decorative gradients, uppercase eyebrow labels, and unnecessary entrance animations. This is practitioner guidance, not a validated way to detect AI authorship. Its web-specific typography advice does not justify replacing San Francisco in a native iOS app.
+
+For this pass:
+
+- Remove marketing headlines and repeated explanatory paragraphs.
+- Give each widget a reason to exist, a truthful state and one clear destination.
+- Use the exercise illustration, actual daily rep counts and earned awards as visual content.
+- Keep colour tied to actions or categories. Preserve semantic light/dark surfaces.
+- Use native navigation, selection feedback and press feedback; respect Reduce Motion.
+- Leave empty charts empty. No invented activity, progress rings, streaks or scores.
+- Verify native large-title collapse and expansion, tab-state retention, large text, French labels and keyboard-safe actions.
+
+Development stays on `ui/apple-native-revamp`; PR 26 is a draft. Main and teammates' UI branches remain independent.
+
+### Attention and copy pass
+
+James rejected “A week at a glance” as unnecessary. The revised hierarchy puts the workout action first, then measured activity. Removed the hero subtitle, the extra Coach heading and the empty Recent workout widget. Empty Summary has one short “No saved sets” message; Best set identifies its exercise and Awards offers “View milestones”. Privacy details remain at the camera decision and in Settings. Retain dates, units and source disclosures because they change how people interpret the data.
+
+[NN/G's comparative evaluation](https://www.nngroup.com/articles/ai-prototyping/) found weak grouping, competing styles and unnecessary emphasis on secondary content in generated prototypes. This supports checking attention and task relevance, beyond banning a particular colour or card shape. The evaluation concerns specific tools and scenarios, not all generated interfaces.
+
+### Final visual choice: monochrome
+
+After reviewing the coloured widgets, James preferred the earlier black-and-white Plumb screen. This supersedes the blue-accent exploration. Keep the larger white exercise drawing on black, strong system typography, grey secondary widgets and inverse capsule actions. Fitness informs the compact information layout; Plumb's camera-pose drawing provides its own visual identity. No stock photos, decorative shadows or multicolour dashboard tiles.
+
+Summary contains a static exercise illustration, seven-day rep chart, paired Best set/Awards widgets and a Recent workout card only when history exists. Workout retains the animated placement demonstration, disabled with Reduce Motion. Chart bars are centred on local calendar days; VoiceOver receives all seven values. Accessibility sizes stack widgets and chart content.
+
+Use native automatic title display on Summary. Forcing large-title mode caused the title to expand on tab return and shifted the content. Regression checks cover title collapse, expansion and scroll position after switching tabs at normal and accessibility text sizes. Workout actions and the Coach composer use safe-area insets. Coach rejects empty or concurrent submissions before clearing the draft.

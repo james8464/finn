@@ -21,44 +21,37 @@ struct CoachView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 12) {
-                        if conversation.messages.count == 1 {
-                            Label("Your set notes", systemImage: "text.bubble")
-                                .font(.title2.bold())
-                                .padding(.bottom, 8)
-                                .accessibilityAddTraits(.isHeader)
-                        }
-                        ForEach(conversation.messages) { message in
-                            bubble(message)
-                                .id(message.id)
-                        }
-                        if conversation.isAnswering {
-                            HStack(spacing: 8) {
-                                ProgressView()
-                                Text("Thinking")
-                                    .font(.subheadline)
-                                    .foregroundStyle(HomeStyle.supportingText)
-                            }
-                            .padding(.horizontal, 4)
-                            .id("thinking")
-                        }
-                        if conversation.messages.count == 1, !conversation.suggestedQuestions.isEmpty {
-                            suggestions
-                        }
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 12) {
+                    ForEach(conversation.messages) { message in
+                        bubble(message)
+                            .id(message.id)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    if conversation.isAnswering {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("Thinking")
+                                .font(.subheadline)
+                                .foregroundStyle(HomeStyle.supportingText)
+                        }
+                        .padding(.horizontal, 4)
+                        .id("thinking")
+                    }
+                    if conversation.messages.count == 1, !conversation.suggestedQuestions.isEmpty {
+                        suggestions
+                    }
                 }
-                .scrollDismissesKeyboard(.interactively)
-                .onChange(of: conversation.messages.count) { _, _ in
-                    guard let last = conversation.messages.last else { return }
-                    withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(last.id, anchor: .bottom) }
-                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
             }
-            Divider()
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: conversation.messages.count) { _, _ in
+                guard let last = conversation.messages.last else { return }
+                withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(last.id, anchor: .bottom) }
+            }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 6) {
                 HStack(spacing: 10) {
                     TextField("Ask about your sets", text: $draft, axis: .vertical)
@@ -78,7 +71,7 @@ struct CoachView: View {
                             .frame(width: 44, height: 44)
                             .symbolRenderingMode(.hierarchical)
                     }
-                    .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty || conversation.isAnswering)
+                    .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || conversation.isAnswering)
                     .accessibilityLabel("Send")
                     .accessibilityIdentifier("coach.send")
                 }
@@ -96,6 +89,7 @@ struct CoachView: View {
             .padding(.horizontal, 20)
             .padding(.top, 10)
             .padding(.bottom, 8)
+            .background(HomeStyle.background)
         }
         .background(HomeStyle.background.ignoresSafeArea())
         .navigationTitle("Coach")
@@ -152,7 +146,7 @@ struct CoachView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(message.text)
                     .font(.body)
-                    .foregroundStyle(isCoach ? Color.primary : Color.white)
+                    .foregroundStyle(isCoach ? Color.primary : HomeStyle.onAccent)
                     .fixedSize(horizontal: false, vertical: true)
                 if isCoach, let engine = message.engine {
                     Text(engine.label)
@@ -170,7 +164,8 @@ struct CoachView: View {
     }
 
     private func send() {
-        let text = draft
+        let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty, !conversation.isAnswering else { return }
         draft = ""
         Task { await conversation.send(text) }
     }

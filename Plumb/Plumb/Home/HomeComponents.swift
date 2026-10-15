@@ -3,11 +3,12 @@ import SwiftUI
 
 /// Shared semantic colours. Content surfaces stay opaque; system bars provide materials.
 enum HomeStyle {
-    static let background = Color(uiColor: .systemGroupedBackground)
-    static let accent = Color(uiColor: .systemBlue)
-    /// A deeper blue keeps white action labels legible in both appearances.
-    static let filledAccent = Color(red: 0.0, green: 0.35, blue: 0.75)
-    static let card = Color(uiColor: .secondarySystemGroupedBackground)
+    static let background = Color(uiColor: .systemBackground)
+    static let accent = Color.primary
+    /// Monochrome actions invert with the system appearance.
+    static let filledAccent = Color.primary
+    static let onAccent = Color(uiColor: .systemBackground)
+    static let card = Color(uiColor: .secondarySystemBackground)
     static let supportingText = Color(uiColor: .secondaryLabel)
     /// The camera card is dark in both appearances, like the camera view it stands for.
     static let cameraTop = Color(white: 0.11)
@@ -15,6 +16,36 @@ enum HomeStyle {
     /// Supporting text on the camera card, solid so its contrast does not depend on what is behind.
     static let cameraSecondaryText = Color(white: 0.8)
     static let spring = Animation.spring(response: 0.45, dampingFraction: 0.86)
+}
+
+/// A small category marker shared by dashboard widgets and supporting pages.
+struct HomeSymbol: View {
+    let name: String
+    var color: Color = HomeStyle.accent
+    var size: CGFloat = 40
+
+    var body: some View {
+        Image(systemName: name)
+            .font(.system(size: size * 0.48, weight: .semibold))
+            .symbolRenderingMode(.hierarchical)
+            .foregroundStyle(color)
+            .frame(width: size, height: size)
+            .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: size * 0.28))
+            .accessibilityHidden(true)
+    }
+}
+
+/// Quiet separation from the canvas; content remains opaque and readable.
+struct HomeSurface: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    var radius: CGFloat = 20
+
+    func body(content: Content) -> some View {
+        content
+            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: radius))
+            .overlay(RoundedRectangle(cornerRadius: radius)
+                .strokeBorder(Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.035), lineWidth: 0.5))
+    }
 }
 
 /// The secondary pages reachable from the first screen.
@@ -97,7 +128,7 @@ struct ExerciseChips: View {
                 .font(.subheadline.weight(.semibold))
                 .padding(.horizontal, 15)
                 .frame(minHeight: 44)
-                .foregroundStyle(selected ? Color.white : Color.primary)
+                .foregroundStyle(selected ? HomeStyle.onAccent : Color.primary)
                 .background(selected ? HomeStyle.filledAccent : HomeStyle.card, in: Capsule())
                 .contentShape(Capsule())
         }
@@ -165,7 +196,7 @@ struct HomeCard<Content: View>: View {
         content
             .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .modifier(HomeSurface())
     }
 }
 
@@ -175,15 +206,25 @@ struct PrimaryActionLabel: View {
     var symbol = "arrow.right"
 
     var body: some View {
-        Label(title, systemImage: symbol)
-            .font(.headline)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .frame(maxWidth: .infinity, minHeight: 54)
-            .foregroundStyle(.white)
-            .background(HomeStyle.filledAccent, in: RoundedRectangle(cornerRadius: 16))
-            .contentShape(RoundedRectangle(cornerRadius: 16))
+        HStack(spacing: 16) {
+            Text(title).font(.headline)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+            Image(systemName: symbol)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(HomeStyle.filledAccent)
+                .frame(width: 34, height: 34)
+                .background(HomeStyle.onAccent, in: Circle())
+                .accessibilityHidden(true)
+        }
+        .padding(.leading, 22)
+        .padding(.trailing, 12)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, minHeight: 58)
+        .foregroundStyle(HomeStyle.onAccent)
+        .background(HomeStyle.filledAccent, in: Capsule())
+        .contentShape(Capsule())
     }
 }
 
@@ -274,6 +315,6 @@ extension View {
     func optionCard() -> some View {
         padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .modifier(HomeSurface())
     }
 }

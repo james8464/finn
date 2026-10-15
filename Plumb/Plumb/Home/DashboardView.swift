@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 
 /// Stable destinations. Starting a set is an action inside Workout, never a tab action.
 enum HomeTab: String, CaseIterable {
@@ -23,6 +24,7 @@ enum HomeTab: String, CaseIterable {
     }
 }
 
+/// Content determines each widget's layout; all values come from saved measurements.
 struct DashboardView: View {
     let history: [WorkoutSessionSummary]
     let exercise: ExerciseKind
@@ -31,146 +33,220 @@ struct DashboardView: View {
     let open: (HomeRoute) -> Void
     @Environment(\.dynamicTypeSize) private var typeSize
 
-    private var sets: Int { history.reduce(0) { $0 + $1.sets.count } }
-    private var reps: Int { history.reduce(0) { $0 + $1.sets.reduce(0) { $0 + $1.analysis.reps.count } } }
-
     private var bestReps: Int? {
         history.flatMap(\.sets).filter { $0.exercise == exercise }.map { $0.analysis.reps.count }.max()
     }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
-                VStack(alignment: .leading, spacing: 16) {
-                    Label("ON THIS IPHONE", systemImage: "figure.strengthtraining.functional")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(HomeStyle.accent)
-                    Text(history.isEmpty ? "Your next set starts here." : "Make time for your next set.")
-                        .font(.title2.bold())
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(history.isEmpty
-                         ? "Choose an exercise. Plumb counts your reps and helps you review each set."
-                         : "Pick up with \(exercise.chipName.lowercased()), or choose another exercise.")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                    Button(action: startWorkout) {
-                        PrimaryActionLabel(title: "Choose a workout", symbol: "figure.strengthtraining.functional")
-                    }
-                    .buttonStyle(PressableStyle())
-                    .accessibilityIdentifier("summary.workout")
+            VStack(alignment: .leading, spacing: 16) {
+                workoutCard
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    activityCard(now: context.date)
                 }
-                .padding(20)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 20))
-
-                if !history.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        sectionTitle("Your activity")
-                        let layout = typeSize.isAccessibilitySize
-                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 20))
-                            : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
-                        layout {
-                            metric(history.count, label: "Sessions")
-                            metric(sets, label: "Sets")
-                            metric(reps, label: "Reps")
-                        }
-                        .padding(20)
-                        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 20))
-                    }
+                let layout = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
+                    : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
+                layout {
+                    bestSetCard
+                    awardsCard
                 }
-
-                VStack(alignment: .leading, spacing: 12) {
-                    sectionTitle("Recent workout")
-                    Button { open(.lastWorkout) } label: {
-                        HomeCard {
-                            HStack(alignment: .top, spacing: 14) {
-                                Image(systemName: "figure.strengthtraining.functional")
-                                    .font(.title2)
-                                    .foregroundStyle(HomeStyle.accent)
-                                    .accessibilityHidden(true)
-                                VStack(alignment: .leading, spacing: 6) {
-                                    if let last = history.first {
-                                        Text(last.sets.first?.exercise.definition.copy.name ?? "Workout")
-                                            .font(.headline)
-                                        Text("\(String(localized: "\(last.sets.count) sets")) · \(String(localized: "\(last.sets.reduce(0) { $0 + $1.analysis.reps.count }) reps"))")
-                                            .font(.subheadline)
-                                        Text(last.startedAt.formatted(date: .abbreviated, time: .shortened))
-                                            .font(.footnote).foregroundStyle(.secondary)
-                                    } else {
-                                        Text("No workouts yet").font(.headline)
-                                        Text("Your first finished session will appear here.")
-                                            .font(.subheadline).foregroundStyle(.secondary)
-                                    }
-                                }
-                                Spacer(minLength: 0)
-                                Image(systemName: "chevron.right").font(.footnote.weight(.semibold))
-                                    .foregroundStyle(.tertiary).accessibilityHidden(true)
-                            }
-                        }
-                    }
-                    .buttonStyle(PressableStyle())
-                    .accessibilityIdentifier("home.lastSession")
-                }
-
-                VStack(spacing: 0) {
-                    summaryRow("Best set", detail: bestReps.map { String(localized: "\(String(localized: "\($0) reps")) · \(exercise.chipName)") }
-                               ?? String(localized: "No \(exercise.chipName.lowercased()) sets saved yet."),
-                               symbol: "chart.bar", id: "home.weights") { open(.weights) }
-                    Divider().padding(.leading, 54)
-                    summaryRow("History", detail: String(localized: "All your saved sessions"), symbol: "clock.arrow.circlepath",
-                               id: "home.sessions") { open(.history) }
-                    Divider().padding(.leading, 54)
-                    summaryRow("Awards", detail: badges.isEmpty ? String(localized: "Discover your first milestone") : String(localized: "\(badges.count) earned"),
-                               symbol: "rosette", id: "home.awards") { open(.awards) }
-                }
-                .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 20))
-
-                Label("Camera frames stay on your iPhone. No video is saved.", systemImage: "lock.shield")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 4)
+                if !history.isEmpty { recentCard }
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
             .frame(maxWidth: 680)
             .frame(maxWidth: .infinity)
         }
+        .accessibilityIdentifier("summary.scroll")
         .background(HomeStyle.background)
         .navigationTitle("Summary")
     }
 
-    private func sectionTitle(_ text: LocalizedStringKey) -> some View {
-        Text(text).font(.title3.bold()).accessibilityAddTraits(.isHeader)
-    }
-
-    private func metric(_ value: Int, label: LocalizedStringKey) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value, format: .number).font(.largeTitle.bold()).monospacedDigit()
-            Text(label).font(.subheadline).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
-    }
-
-    private func summaryRow(_ title: LocalizedStringKey, detail: String, symbol: String,
-                            id: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 14) {
-                Image(systemName: symbol).font(.title3).foregroundStyle(HomeStyle.accent)
-                    .frame(width: 24).accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title).font(.headline)
-                    Text(detail).font(.subheadline).foregroundStyle(.secondary)
+    private var workoutCard: some View {
+        Button(action: startWorkout) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(exercise.definition.copy.name)
+                    .font(.title2.bold())
+                    .fixedSize(horizontal: false, vertical: true)
+                ExerciseFigureView(kind: exercise, animates: false)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: typeSize.isAccessibilitySize ? 160 : 190)
+                    .padding(.horizontal, 12)
+                    .accessibilityHidden(true)
+                HStack(spacing: 12) {
+                    Text("Choose a workout").font(.headline)
+                    Spacer(minLength: 0)
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.system(size: 32, weight: .regular))
+                        .accessibilityHidden(true)
                 }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right").font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary).accessibilityHidden(true)
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
-            .contentShape(Rectangle())
+            .padding(22)
+            .foregroundStyle(.white)
+            .background(HomeStyle.cameraBottom, in: RoundedRectangle(cornerRadius: 24))
+            .contentShape(RoundedRectangle(cornerRadius: 24))
         }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier(id)
+        .buttonStyle(PressableStyle())
+        .accessibilityIdentifier("summary.workout")
+    }
+
+    private func activityCard(now: Date) -> some View {
+        let days = DashboardActivityDay.recent(history: history, now: now)
+        let total = days.reduce(0) { $0 + $1.reps }
+        return Button { open(.history) } label: {
+            HomeCard {
+                VStack(alignment: .leading, spacing: 14) {
+                    cardHeading("Activity")
+                    if history.isEmpty {
+                        Text("No saved sets")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                            .padding(.vertical, 4)
+                    } else {
+                        let layout = typeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
+                            : AnyLayout(HStackLayout(alignment: .center, spacing: 20))
+                        layout {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                    Text(total, format: .number).font(.largeTitle.bold()).monospacedDigit()
+                                    Text("reps").font(.headline).foregroundStyle(.secondary)
+                                }
+                                Text("Last 7 days").font(.caption).foregroundStyle(.secondary)
+                            }
+                            activityChart(days)
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                }
+            }
+        }
+        .buttonStyle(PressableStyle())
+        .foregroundStyle(.primary)
+        .accessibilityIdentifier("home.sessions")
+        .accessibilityLabel(Text("Activity"))
+        .accessibilityValue(history.isEmpty ? String(localized: "No saved sets") :
+            String(localized: "\(total) reps in the last 7 days") + ". " + days.map {
+                $0.date.formatted(.dateTime.weekday(.wide)) + ": " + String(localized: "\($0.reps) reps")
+            }.joined(separator: ". "))
+        .accessibilityHint("All your saved sessions")
+    }
+
+    private func activityChart(_ days: [DashboardActivityDay]) -> some View {
+        Chart(days) { day in
+            BarMark(x: .value("Day", day.date.formatted(.dateTime.weekday(.wide))),
+                    y: .value("Reps", day.reps), width: .ratio(0.5))
+                .cornerRadius(3)
+                .foregroundStyle(HomeStyle.accent)
+                .accessibilityLabel(day.date.formatted(date: .complete, time: .omitted))
+                .accessibilityValue(String(localized: "\(day.reps) reps"))
+        }
+        .chartYScale(domain: 0...max(days.map(\.reps).max() ?? 0, 1))
+        .chartYAxis(.hidden)
+        .chartXAxis {
+            AxisMarks { value in
+                AxisValueLabel {
+                    if days.indices.contains(value.index) {
+                        Text(days[value.index].date.formatted(.dateTime.weekday(.narrow)))
+                    }
+                }
+            }
+        }
+        .frame(height: 88)
+        .accessibilityHidden(true)
+        .accessibilityIdentifier("summary.activityChart")
+    }
+
+    private var bestSetCard: some View {
+        Button { open(.weights) } label: {
+            HomeCard {
+                VStack(alignment: .leading, spacing: 14) {
+                    cardHeading("Best set")
+                    if let bestReps {
+                        Text("\(bestReps) reps").font(.title2.bold()).monospacedDigit()
+                    } else {
+                        Text("—").font(.largeTitle.bold())
+                            .accessibilityHidden(true)
+                    }
+                    Text(exercise.chipName).font(.subheadline).foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
+            }
+        }
+        .buttonStyle(PressableStyle())
+        .foregroundStyle(.primary)
+        .accessibilityIdentifier("home.weights")
+        .accessibilityValue(bestReps == nil ? String(localized: "No saved sets") : "")
+    }
+
+    private var awardsCard: some View {
+        Button { open(.awards) } label: {
+            HomeCard {
+                VStack(alignment: .leading, spacing: 14) {
+                    cardHeading("Awards")
+                    Image(systemName: badges.isEmpty ? "rosette" : "medal.fill")
+                        .font(.system(size: 34, weight: .regular))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.primary)
+                        .accessibilityHidden(true)
+                    Text(badges.isEmpty ? "View milestones" : "\(badges.count) earned")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
+            }
+        }
+        .buttonStyle(PressableStyle())
+        .foregroundStyle(.primary)
+        .accessibilityIdentifier("home.awards")
+    }
+
+    private var recentCard: some View {
+        Button { open(.lastWorkout) } label: {
+            HomeCard {
+                VStack(alignment: .leading, spacing: 16) {
+                    cardHeading("Recent workout")
+                    if let last = history.first {
+                        HStack(alignment: .top, spacing: 12) {
+                            HomeSymbol(name: "figure.strengthtraining.functional", size: 48)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(last.sets.first?.exercise.definition.copy.name ?? String(localized: "Workout"))
+                                    .font(.headline)
+                                Text(last.startedAt.formatted(date: .abbreviated, time: .shortened))
+                                    .font(.subheadline).foregroundStyle(.secondary)
+                            }
+                        }
+                        Divider()
+                        let layout = typeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
+                            : AnyLayout(HStackLayout(spacing: 24))
+                        layout {
+                            Label("\(last.sets.count) sets", systemImage: "square.stack.3d.up")
+                            Label("\(last.sets.reduce(0) { $0 + $1.analysis.reps.count }) reps", systemImage: "repeat")
+                        }
+                        .font(.subheadline.weight(.medium))
+                    } else {
+                        Text("No workouts yet").font(.headline)
+                        Text("Your first finished session will appear here.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+        .buttonStyle(PressableStyle())
+        .foregroundStyle(.primary)
+        .accessibilityIdentifier("home.lastSession")
+    }
+
+    private func cardHeading(_ title: LocalizedStringKey) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(title).foregroundStyle(.primary)
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right").font(.caption2.weight(.semibold))
+                .foregroundStyle(.tertiary).accessibilityHidden(true)
+        }
+        .font(.headline)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
