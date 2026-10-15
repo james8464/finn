@@ -49,7 +49,6 @@ struct ContentView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var homeTitleSize: CGFloat = 50
     @ScaledMetric(relativeTo: .largeTitle) private var resultCountSize: CGFloat = 104
     @ScaledMetric(relativeTo: .largeTitle) private var startButtonSize: CGFloat = 132
-    @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 230
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -196,7 +195,8 @@ struct ContentView: View {
             }
             .navigationTitle("")
             .toolbarTitleDisplayMode(.inline)
-            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+            .toolbarBackground(Color.black, for: .navigationBar)
+            .toolbarBackgroundVisibility(isCaptureStage ? .visible : .hidden, for: .navigationBar)
             .toolbar { rootToolbar }
             .navigationDestination(item: $route) { destination in
                 destinationPage(destination)
@@ -368,19 +368,19 @@ extension ContentView {
                 .accessibilityIdentifier("home.exercises")
             }
 
-        case .framing, .countdown, .openingCamera:
+        case .openingCamera:
             ToolbarItem(placement: .topBarLeading) {
-                Button("Cancel") { Task { await model.cancel() } }
-            }
-        case .capturing:
-            ToolbarItem(placement: .topBarLeading) {
-                Button("Stop set") {
-                    let tappedAt = ContinuousClock.now
-                    Task { await model.endSet(tappedAt: tappedAt) }
+                Button { Task { await model.cancel() } } label: {
+                    Text("Cancel")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .frame(minHeight: 44)
+                        .background(.black, in: Capsule())
                 }
-                .accessibilityIdentifier("capture.stop")
+                .buttonStyle(.plain)
             }
-        case .analyzing, .error:
+        case .framing, .countdown, .capturing, .analyzing, .error:
             ToolbarItem(placement: .topBarLeading) { EmptyView() }
         }
     }
@@ -433,55 +433,66 @@ extension ContentView {
             } else {
                 AmbientCameraBackdrop(camera: ambientCamera)
             }
-            VStack(spacing: 0) {
-                exerciseTitle
-                    .padding(.top, 64)
-                homeNotes
-                Spacer(minLength: 16)
-                // One slow, well-done rep of the chosen exercise, seen as the camera will see it.
-                ExerciseFigureView(kind: model.selectedExercise, lineColor: .white)
-                    .frame(maxWidth: 360)
-                    .frame(height: figureHeight)
-                    .id(model.selectedExercise)
-                    .transition(.blurReplace)
-                    .padding(.horizontal, 24)
-                    .accessibilityIdentifier("home.figure")
-                Spacer(minLength: 16)
-                startButton
-                    .padding(.bottom, 4)
-                if let progressLine {
-                    Button { tab = .stats } label: {
-                        Text(progressLine)
-                            .font(.subheadline.weight(.medium))
-                            .monospacedDigit()
-                            .foregroundStyle(Color.primary)
-                            .multilineTextAlignment(.center)
+            GeometryReader { viewport in
+                ScrollView {
+                    VStack(spacing: 0) {
+                        exerciseTitle
+                            .padding(.top, 64)
+                        homeNotes
+                        Spacer(minLength: dynamicTypeSize.isAccessibilitySize ? 16 : max(16, viewport.size.height * 0.12))
+                        // One slow, well-done rep of the chosen exercise, seen as the camera will see it.
+                        ExerciseFigureView(kind: model.selectedExercise, lineColor: .white)
+                            .frame(maxWidth: 360)
+                            // The drawing is decoration, not text. Keep room for the action and privacy
+                            // line when Accessibility text sizes make the title much taller.
+                            .frame(height: dynamicTypeSize.isAccessibilitySize ? 120 : 230)
+                            .id(model.selectedExercise)
+                            .transition(.blurReplace)
                             .padding(.horizontal, 24)
-                            .frame(minHeight: 44)
-                            .contentShape(Rectangle())
+                            .accessibilityIdentifier("home.figure")
+                        Spacer(minLength: 16)
+                        startButton
+                            .padding(.bottom, 4)
+                        if let progressLine {
+                            Button { tab = .stats } label: {
+                                Text(progressLine)
+                                    .font(.subheadline.weight(.medium))
+                                    .monospacedDigit()
+                                    .foregroundStyle(Color.primary)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 24)
+                                    .frame(minHeight: 44)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Opens your history")
+                            .accessibilityIdentifier("home.progress")
+                        }
+                        // Said where the decision is made: before the camera opens.
+                        Button { route = .privacy } label: {
+                            Text("Analyzed on this iPhone. No video is saved.")
+                                .font(.footnote)
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .background(.black, in: Capsule())
+                        .accessibilityHint("Shows what Plumb keeps and what it never records")
+                        .accessibilityIdentifier("home.privacy")
+                        .padding(.horizontal, 24)
+                        // The glass bars float over the content: keep the actions clear of the tab bar.
+                        .padding(.bottom, 84)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Opens your history")
-                    .accessibilityIdentifier("home.progress")
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: viewport.size.height)
                 }
-                // Said where the decision is made: before the camera opens.
-                Button { route = .privacy } label: {
-                    Text("Analyzed on this iPhone. No video is saved.")
-                        .font(.footnote)
-                        .foregroundStyle(PlumbStyle.supportingText)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityHint("Shows what Plumb keeps and what it never records")
-                .accessibilityIdentifier("home.privacy")
-                .padding(.horizontal, 24)
-                // The glass bars float over the content: keep the actions clear of the tab bar.
-                .padding(.bottom, 84)
+                .scrollIndicators(.hidden)
             }
         }
-        .gesture(exerciseSwipe)
+        .simultaneousGesture(exerciseSwipe)
         .sensoryFeedback(.selection, trigger: model.selectedExercise)
         .sensoryFeedback(.impact(weight: .medium), trigger: model.stage == .openingCamera)
         .sheet(isPresented: $showsCameraPrimer) {
@@ -1083,6 +1094,7 @@ extension ContentView {
             CameraFeedView(model: model)
                 .ignoresSafeArea()
             VStack(spacing: 12) {
+                captureTopBar
                 captureMarks
                 if model.stage == .capturing {
                     liveCount
@@ -1098,18 +1110,15 @@ extension ContentView {
         }
         .sensoryFeedback(.impact(weight: .light), trigger: model.liveRepCount)
         .sensoryFeedback(.warning, trigger: model.liveCaption) { _, new in new != nil }
-        .toolbar {
+        .safeAreaInset(edge: .bottom) {
             if model.stage == .framing {
-                ToolbarItem(placement: .bottomBar) {
-                    Button { Task { await model.beginSet() } } label: {
-                        Text("Start set")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .tint(.white)
-                    .accessibilityIdentifier("capture.start")
+                Button { Task { await model.beginSet() } } label: {
+                    PrimaryActionLabel(title: "Start set")
                 }
+                .buttonStyle(PressableStyle())
+                .accessibilityIdentifier("capture.start")
+                .padding(.horizontal, 20)
+                .padding(.bottom, 12)
             }
         }
         .overlay {
@@ -1130,6 +1139,41 @@ extension ContentView {
             if let caption { AccessibilityNotification.Announcement(caption).post() }
         }
         .toolbar(.hidden, for: .navigationBar)
+    }
+
+    @ViewBuilder private var captureTopBar: some View {
+        HStack {
+            switch model.stage {
+            case .framing, .countdown:
+                Button { Task { await model.cancel() } } label: {
+                    Text("Cancel")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16)
+                        .frame(minHeight: 44)
+                        .background(.black, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("capture.cancel")
+            case .capturing:
+                Button {
+                    let tappedAt = ContinuousClock.now
+                    Task { await model.endSet(tappedAt: tappedAt) }
+                } label: {
+                    Text("Stop set")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16)
+                        .frame(minHeight: 44)
+                        .background(.black, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("capture.stop")
+            default:
+                EmptyView()
+            }
+            Spacer(minLength: 0)
+        }
     }
 
     /// The small marks that say what is connected; the way out lives in the bar above.
@@ -1186,7 +1230,7 @@ extension ContentView {
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
             .frame(maxWidth: .infinity)
-            .plumbGlass(in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .background(.black, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         case .capturing:
             liveCue
         case .analyzing:
@@ -1194,7 +1238,7 @@ extension ContentView {
                 .foregroundStyle(Color.primary)
                 .padding(20)
                 .frame(maxWidth: .infinity)
-                .plumbGlass(in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .background(.black, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         default:
             EmptyView()
         }
@@ -1235,7 +1279,7 @@ extension ContentView {
             .padding(.horizontal, 24)
             .padding(.vertical, 22)
             .frame(maxWidth: .infinity, minHeight: liveCueSize * 2.2)
-            .plumbGlass(in: RoundedRectangle(cornerRadius: 32, style: .continuous))
+            .background(.black, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
             .opacity(model.liveCaption == nil ? 0 : 1)
             .animation(reduceMotion ? nil : .snappy, value: model.liveCaption)
             .accessibilityHidden(model.liveCaption == nil)
@@ -1248,6 +1292,7 @@ extension ContentView {
             VStack(spacing: -6) {
                 Text("\(model.liveRepCount)")
                     .font(.system(size: liveCountSize, weight: .bold, design: .default))
+                    .foregroundColor(.white)
                     .tracking(-liveCountSize * 0.04)
                     .monospacedDigit()
                     .minimumScaleFactor(0.4)
@@ -1260,11 +1305,11 @@ extension ContentView {
                     .font(.headline)
                     .foregroundStyle(PlumbStyle.supportingText)
             }
-            .foregroundStyle(Color.primary)
+            .foregroundStyle(.white)
             .padding(.horizontal, 28)
             .padding(.top, 2)
             .padding(.bottom, 12)
-            .plumbGlass(in: RoundedRectangle(cornerRadius: 40, style: .continuous))
+            .background(.black, in: RoundedRectangle(cornerRadius: 40, style: .continuous))
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Reps counted")
             .accessibilityValue("\(model.liveRepCount)")
@@ -1326,7 +1371,7 @@ extension ContentView {
         .multilineTextAlignment(.center)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .plumbGlass(in: Capsule())
+        .background(.black, in: Capsule())
         .accessibilityElement(children: .combine)
     }
 
@@ -1346,13 +1391,40 @@ extension ContentView {
         // Opens tall so nothing is cut at any text size; a pull down shows the room behind it.
         .presentationDetents([.fraction(0.62), .large], selection: $resultDetent)
         .presentationDragIndicator(.visible)
-        .presentationBackground(.thinMaterial)
+        .presentationBackground(HomeStyle.background)
         .sensoryFeedback(.success, trigger: model.stage == .result)
     }
 
     private var resultContent: some View {
         ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Button { resultPage = .coach } label: {
+                            Label("Ask Plumb", systemImage: "bubble.left.and.text.bubble.right")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 16)
+                                .frame(minHeight: 44)
+                                .background(.black, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Opens the coach with this set's facts")
+                        .accessibilityIdentifier("result.coach")
+                        Spacer(minLength: 8)
+                        Button {
+                            observationSpeaker.stop()
+                            Task { await model.finishSession() }
+                        } label: {
+                            Text("Done")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 16)
+                                .frame(minHeight: 44)
+                                .background(.black, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Ends this session")
+                    }
                     resultHero
                     resultDetails
                     #if DEBUG
@@ -1376,38 +1448,20 @@ extension ContentView {
                 .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
-        .navigationTitle("")
-        .toolbarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button { resultPage = .coach } label: {
-                    Label("Ask Plumb", systemImage: "bubble.left.and.text.bubble.right")
-                }
-                .accessibilityHint("Opens the coach with this set's facts")
-                .accessibilityIdentifier("result.coach")
+        .safeAreaInset(edge: .bottom) {
+            Button {
+                observationSpeaker.stop()
+                startSet()
+            } label: {
+                PrimaryActionLabel(title: retakeLabel)
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                // Ends the session: the next set starts a new one, and Fitness gets this one.
-                Button("Done") {
-                    observationSpeaker.stop()
-                    Task { await model.finishSession() }
-                }
-                .accessibilityHint("Ends this session")
-            }
-            ToolbarItem(placement: .bottomBar) {
-                Button {
-                    observationSpeaker.stop()
-                    startSet()
-                } label: {
-                    Text(retakeLabel)
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                }
-                .buttonStyle(.glassProminent)
-                .tint(.white)
-                .accessibilityIdentifier("result.next")
-            }
+            .buttonStyle(PressableStyle())
+            .accessibilityIdentifier("result.next")
+            .padding(.horizontal, 20)
+            .padding(.bottom, 12)
+            .background(HomeStyle.background)
         }
+        .toolbar(.hidden, for: .navigationBar)
         .onDisappear { observationSpeaker.stop() }
         .sheet(isPresented: Binding(
             get: { model.showsPersonalizationOffer },
@@ -1655,7 +1709,7 @@ extension ContentView {
         case .angled(let median, let count):
             return "median \(Int(median.rounded()))° from profile, \(count) estimates, measured with a turn tip"
         case .mismatch(let median, let count):
-            return "median \(Int(median.rounded()))° from profile, \(count) estimates, refused"
+            return "median \(Int(median.rounded()))° from profile, \(count) estimates, measured without form advice"
         }
     }
     #endif
@@ -2172,6 +2226,7 @@ extension ContentView {
                     } label: {
                         Text("Open Settings")
                             .font(.headline)
+                            .foregroundStyle(.black)
                             .frame(maxWidth: .infinity, minHeight: 50)
                     }
                     .buttonStyle(.glassProminent)
@@ -2188,6 +2243,7 @@ extension ContentView {
                     } label: {
                         Text("Try again")
                             .font(.headline)
+                            .foregroundStyle(.black)
                             .frame(maxWidth: .infinity, minHeight: 50)
                     }
                     .buttonStyle(.glassProminent)

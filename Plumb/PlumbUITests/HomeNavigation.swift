@@ -31,9 +31,22 @@ extension XCUIApplication {
         Thread.sleep(forTimeInterval: 0.5)
     }
 
-    /// Opens History, Coach, Awards, Options or Privacy from the sheet behind the first screen's icon.
+    /// Opens the primary tabs or the two pages in the first screen's More menu.
     @MainActor
     func openFromHome(_ page: String) {
+        let tabIdentifier: String?
+        switch page {
+        case "History", "Stats": tabIdentifier = "chart.xyaxis.line"
+        case "Coach": tabIdentifier = "bubble.left.and.text.bubble.right"
+        case "Awards": tabIdentifier = "rosette"
+        default: tabIdentifier = nil
+        }
+        if let tabIdentifier {
+            let tab = tabBars.buttons[tabIdentifier]
+            XCTAssertTrue(tab.waitForExistence(timeout: 5), "The \(page) tab is missing")
+            tab.tap()
+            return
+        }
         let more = buttons["home.more"]
         XCTAssertTrue(more.waitForExistence(timeout: 5), "The first screen's More button is missing")
         more.tap()

@@ -1,20 +1,25 @@
 import XCTest
 
-/// The first screen: one title, one Start button, and every other page behind the one icon.
+/// The first screen, primary tabs, and the More menu.
 final class HomeUITests: XCTestCase {
     @MainActor
-    func testEveryPageOpensFromTheMoreSheetAndComesBack() {
+    func testEveryPageOpensFromItsTabOrMoreMenuAndComesBack() {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo"]
         app.launch()
         app.openHome()
-        XCTAssertFalse(app.tabBars.firstMatch.exists, "The first screen has no tab bar")
-        for (page, check) in [("History", "History"), ("Coach", "Coach"), ("Awards", "Awards"),
-                              ("Options", "Options"), ("Privacy", "Privacy")] {
+        XCTAssertTrue(app.tabBars.firstMatch.exists, "The primary tabs are missing")
+        for page in ["Stats", "Coach", "Awards"] {
             app.openFromHome(page)
-            XCTAssertTrue(app.navigationBars[check].waitForExistence(timeout: 5), page)
+            XCTAssertTrue(app.navigationBars[page].waitForExistence(timeout: 5), page)
             if page == "Coach" { XCTAssertTrue(app.textFields["coach.field"].exists) }
+            app.tabBars.buttons["figure.strengthtraining.functional"].tap()
+            XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 5), "Back from \(page)")
+        }
+        for page in ["Options", "Privacy"] {
+            app.openFromHome(page)
+            XCTAssertTrue(app.navigationBars[page].waitForExistence(timeout: 5), page)
             app.navigationBars.buttons.element(boundBy: 0).tap()
             XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 5), "Back from \(page)")
         }
@@ -65,5 +70,25 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.more"].isHittable)
         app.openFromHome("Coach")
         XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
+    }
+
+    @MainActor
+    func testHomeAndNavigationInAllSupportedLanguages() {
+        for (code, start, awards, options) in [
+            ("en-GB", "Start a set", "Awards", "Options"),
+            ("en-US", "Start a set", "Awards", "Options"),
+            ("fr", "Commencer une série", "Récompenses", "Options"),
+            ("es", "Inicia una serie", "Premios", "Opciones"),
+        ] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-plumb-ui-demo", "-AppleLanguages", "(\(code))"]
+            app.launch()
+            XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8), code)
+            XCTAssertEqual(app.buttons["home.start"].label, start, code)
+            XCTAssertEqual(app.tabBars.buttons["rosette"].label, awards, code)
+            app.buttons["home.more"].tap()
+            XCTAssertTrue(app.buttons[options].waitForExistence(timeout: 3), code)
+            app.terminate()
+        }
     }
 }

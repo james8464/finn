@@ -170,13 +170,24 @@ struct ExerciseFigureView: View {
     /// Seconds for one rep, down and up.
     private let period = 3.2
 
+    private var pausesForAutomatedDemo: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo")
+        #else
+        false
+        #endif
+    }
+
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { timeline in
+        TimelineView(.animation(minimumInterval: 1 / 30,
+                                paused: reduceMotion || pausesForAutomatedDemo)) { timeline in
             let seconds = timeline.date.timeIntervalSinceReferenceDate
             // Down slowly, hold, then back up; still at the bottom when motion is reduced.
-            let phase = reduceMotion ? 0.85 : (1 - cos(2 * .pi * seconds / period)) / 2
+            let phase = reduceMotion || pausesForAutomatedDemo ? 0.85
+                : (1 - cos(2 * .pi * seconds / period)) / 2
             // The plumb bob sways a little, like a real one.
-            let sway = reduceMotion ? 0 : sin(2 * .pi * seconds / 2.6) * 1.2
+            let sway = reduceMotion || pausesForAutomatedDemo ? 0
+                : sin(2 * .pi * seconds / 2.6) * 1.2
             Canvas { context, size in
                 draw(in: &context, size: size, phase: phase, swayDegrees: sway)
             }

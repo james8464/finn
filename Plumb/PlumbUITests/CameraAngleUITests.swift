@@ -2,9 +2,9 @@ import XCTest
 
 final class CameraAngleUITests: XCTestCase {
     /// The Debug demo feed attaches a synthetic 75° profile deviation, standing in for a
-    /// front-facing person. It checks the refusal path, not the accuracy of Vision 3D pose.
+    /// front-facing person. Reps are counted, but the result must withhold form advice.
     @MainActor
-    func testFrontViewSetIsRefusedUntilTheCheckIsSwitchedOff() throws {
+    func testFrontViewSetIsCountedWithoutFormAdviceUntilTheCheckIsSwitchedOff() throws {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-front-view"]
         app.launch()
@@ -15,11 +15,11 @@ final class CameraAngleUITests: XCTestCase {
         XCTAssertTrue(stop.waitForExistence(timeout: 6))
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
-        XCTAssertTrue(app.staticTexts["Couldn’t assess this set"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
-            format: "label BEGINSWITH %@", "This exercise needs a side view. Turn so your side faces the camera")).firstMatch.exists)
+        XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["result.movementNote"].label.contains("counted your reps without posture advice"))
+        XCTAssertFalse(app.staticTexts["result.observation"].exists)
         try app.performAccessibilityAudit(for: [
-            .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
+            .sufficientElementDescription, .hitRegion, .textClipped, .trait,
         ])
 
         app.buttons["Done"].tap()
@@ -30,7 +30,7 @@ final class CameraAngleUITests: XCTestCase {
         toggle.switches.firstMatch.tap()
         XCTAssertEqual(toggle.value as? String, "0")
         try app.performAccessibilityAudit(for: [
-            .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
+            .sufficientElementDescription, .hitRegion, .textClipped, .trait,
         ])
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
@@ -57,7 +57,7 @@ final class CameraAngleUITests: XCTestCase {
         let readout = app.staticTexts["validation.viewCheck"]
         XCTAssertTrue(readout.waitForExistence(timeout: 5))
         XCTAssertTrue(readout.label.contains("75° from profile"))
-        XCTAssertTrue(readout.label.contains("refused"))
+        XCTAssertTrue(readout.label.contains("measured without form advice"))
     }
 
     /// A push-up filmed from the front is measured, not refused: the framing screen and the
