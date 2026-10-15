@@ -1,28 +1,46 @@
 import AVFoundation
 import SwiftUI
 
-/// Colors of the first screen. Plumb stays black and white: the dark camera card carries the screen,
-/// not an accent color.
+/// Colors of the app. Plumb is black on white (white on black at night): the camera carries the
+/// screen, not an accent color.
 enum HomeStyle {
     static let background = Color(uiColor: .systemBackground)
     static let card = Color(uiColor: .secondarySystemBackground)
     static let supportingText = Color.primary.opacity(0.72)
-    /// The camera card is dark in both appearances, like the camera view it stands for.
+    /// The placement drawing of the welcome is dark in both appearances, like the camera it stands for.
     static let cameraTop = Color(white: 0.11)
     static let cameraBottom = Color(white: 0.05)
-    /// Supporting text on the camera card, solid so its contrast does not depend on what is behind.
     static let cameraSecondaryText = Color(white: 0.8)
     static let spring = Animation.spring(response: 0.45, dampingFraction: 0.86)
 }
 
-/// The secondary pages reachable from the first screen.
-enum HomeRoute: Hashable {
-    case history, options, privacy, coach
-    case account, lastWorkout, posture, weights, awards, plus
+/// The pages behind the first screen's one icon.
+enum HomeRoute: Hashable, CaseIterable {
+    case history, coach, awards, options, privacy
+
+    var title: String {
+        switch self {
+        case .history: String(localized: "History")
+        case .coach: String(localized: "Coach")
+        case .awards: String(localized: "Awards")
+        case .options: String(localized: "Options")
+        case .privacy: String(localized: "Privacy")
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .history: "clock.arrow.circlepath"
+        case .coach: "bubble.left.and.text.bubble.right"
+        case .awards: "rosette"
+        case .options: "slider.horizontal.3"
+        case .privacy: "lock"
+        }
+    }
 }
 
 extension ExerciseKind {
-    /// The name on the exercise chips, as short as it can be.
+    /// The short name, for a menu row.
     var chipName: String {
         switch self {
         case .bodyweightSquat: String(localized: "Squat")
@@ -33,163 +51,71 @@ extension ExerciseKind {
         case .muscleUp: String(localized: "Muscle-up")
         }
     }
+
+    /// The name in a sentence: "Ready for squats?", "27 push-ups".
+    var pluralName: String {
+        switch self {
+        case .bodyweightSquat: String(localized: "squats")
+        case .pushUp: String(localized: "push-ups")
+        case .staticLunge: String(localized: "lunges")
+        case .stiffLegDeadlift: String(localized: "deadlifts")
+        case .pullUp: String(localized: "pull-ups")
+        case .muscleUp: String(localized: "muscle-ups")
+        }
+    }
 }
 
-/// One chip per exercise. The selected one is filled; VoiceOver reads the full exercise name. At
-/// accessibility text sizes the chips become one menu, which never runs off the screen.
-struct ExerciseChips: View {
-    @Binding var selection: ExerciseKind
-    /// The order of the chips: the exercises picked at the first launch come first.
-    var order: [ExerciseKind] = ExerciseKind.allCases
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+/// Liquid Glass behind a label, or a plain surface when the person has turned transparency off.
+struct PlumbGlass<S: Shape>: ViewModifier {
+    let shape: S
+    var prominent = false
+    var interactive = false
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
-    var body: some View {
-        if dynamicTypeSize.isAccessibilitySize {
-            Menu {
-                Picker("Exercise", selection: $selection.animation(HomeStyle.spring)) {
-                    ForEach(order, id: \.self) { kind in
-                        Text(kind.definition.copy.name).tag(kind)
-                    }
-                }
-            } label: {
-                HStack(spacing: 8) {
-                    Text(selection.definition.copy.name)
-                        .font(.headline)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.subheadline.weight(.semibold))
-                        .accessibilityHidden(true)
-                }
-                .padding(.horizontal, 18)
-                .frame(minHeight: 44)
-                .foregroundStyle(Color.primary)
-                .background(HomeStyle.card, in: Capsule())
-            }
-            .accessibilityLabel("Exercise: \(selection.definition.copy.name)")
+    func body(content: Content) -> some View {
+        if reduceTransparency {
+            content.background(prominent ? Color.primary : HomeStyle.background, in: shape)
+        } else if prominent {
+            content.glassEffect(.regular.tint(Color.primary).interactive(interactive), in: shape)
         } else {
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal) {
-                    HStack(spacing: 8) {
-                        ForEach(order, id: \.self) { kind in
-                            chip(kind).id(kind)
-                        }
-                    }
-                }
-                .scrollIndicators(.hidden)
-                // The chosen exercise is kept across launches: bring its chip into view.
-                .onAppear { proxy.scrollTo(selection, anchor: .center) }
-                .onChange(of: selection) { _, kind in
-                    withAnimation(HomeStyle.spring) { proxy.scrollTo(kind, anchor: .center) }
-                }
-            }
-            .sensoryFeedback(.selection, trigger: selection)
+            content.glassEffect(.regular.tint(HomeStyle.background.opacity(0.55)).interactive(interactive),
+                                in: shape)
         }
-    }
-
-    private func chip(_ kind: ExerciseKind) -> some View {
-        let selected = kind == selection
-        return Button {
-            withAnimation(HomeStyle.spring) { selection = kind }
-        } label: {
-            Text(kind.chipName)
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, 15)
-                .frame(minHeight: 44)
-                .foregroundStyle(selected ? Color(uiColor: .systemBackground) : Color.primary)
-                .background(selected ? Color.primary : HomeStyle.card, in: Capsule())
-                .contentShape(Capsule())
-        }
-        .buttonStyle(PressableStyle())
-        .accessibilityLabel(kind.definition.copy.name)
-        .accessibilityAddTraits(selected ? .isSelected : [])
-        .accessibilityIdentifier("exercise.\(kind.rawValue)")
     }
 }
 
-/// The dark card at the top of the first screen: the chosen exercise drawn as Plumb's camera sees
-/// it, its name, and where to put the phone.
-struct ExerciseHeroCard: View {
-    let kind: ExerciseKind
-    /// Shorter once there is a last session to show below it.
-    var compact = false
-    @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 340
-
-    var body: some View {
-        let copy = kind.definition.copy
-        VStack(alignment: .leading, spacing: 0) {
-            Label(kind.definition.expectedView == .side ? "Side view" : "Side, front or back",
-                  systemImage: "camera.viewfinder")
-                .font(.footnote.weight(.semibold))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(.white.opacity(0.12), in: Capsule())
-                .accessibilityLabel(kind.definition.expectedView == .side ? "Filmed from the side"
-                                    : "Filmed from the side, the front or the back")
-            ExerciseFigureView(kind: kind)
-                .frame(maxWidth: .infinity)
-                .frame(height: min(compact ? figureHeight * 0.62 : figureHeight, 400))
-                .padding(.vertical, 12)
-                .id(kind)
-                .transition(.blurReplace)
-            Text(copy.name)
-                .font(.title3.weight(.semibold))
-                .accessibilityAddTraits(.isHeader)
-            Text("\(copy.placementDetail) \(copy.stanceTitle).")
-                .font(.subheadline)
-                .foregroundStyle(HomeStyle.cameraSecondaryText)
-                .padding(.top, 2)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .foregroundStyle(.white)
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom], startPoint: .top, endPoint: .bottom),
-            in: RoundedRectangle(cornerRadius: 32, style: .continuous)
-        )
-        .overlay(RoundedRectangle(cornerRadius: 32, style: .continuous)
-            .strokeBorder(.white.opacity(0.08), lineWidth: 1))
-        .environment(\.colorScheme, .dark)
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("home.exercise")
+extension View {
+    /// A light glass surface, solid when transparency is reduced.
+    func plumbGlass<S: Shape>(in shape: S, interactive: Bool = false) -> some View {
+        modifier(PlumbGlass(shape: shape, interactive: interactive))
     }
-}
 
-/// A light card on the grouped background, for the focus, the last session and status lines.
-struct HomeCard<Content: View>: View {
-    @ViewBuilder var content: Content
+    /// The one filled surface of a screen: black glass (white at night).
+    func plumbProminentGlass<S: Shape>(in shape: S, interactive: Bool = false) -> some View {
+        modifier(PlumbGlass(shape: shape, prominent: true, interactive: interactive))
+    }
 
-    var body: some View {
-        content
-            .padding(18)
+    /// A group of settings on its own rounded card.
+    func optionCard() -> some View {
+        padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
 
-/// The one filled action of a screen: a full-width pill with its arrow in a circle of its own.
+/// The one filled action of a screen: a full-width black pill.
 struct PrimaryActionLabel: View {
     let title: LocalizedStringKey
-    var symbol = "arrow.right"
+    var symbol: String? = nil
 
     var body: some View {
-        HStack(spacing: 12) {
-            Text(title)
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Image(systemName: symbol)
-                .font(.headline)
-                .foregroundStyle(Color.primary)
-                .frame(width: 44, height: 44)
-                .background(Color(uiColor: .systemBackground), in: Circle())
-                .accessibilityHidden(true)
-        }
-        .padding(.leading, 24)
-        .padding(.trailing, 8)
-        .padding(.vertical, 8)
-        .frame(minHeight: 60)
-        .foregroundStyle(Color(uiColor: .systemBackground))
-        .background(Color.primary, in: Capsule())
-        .contentShape(Capsule())
+        Text(title)
+            .font(.headline)
+            .padding(.horizontal, 24)
+            .frame(maxWidth: .infinity, minHeight: 58)
+            .foregroundStyle(Color(uiColor: .systemBackground))
+            .background(Color.primary, in: Capsule())
+            .contentShape(Capsule())
     }
 }
 
@@ -275,11 +201,27 @@ struct CameraPrimer: View {
     }
 }
 
-extension View {
-    /// A group of settings on its own rounded card, as on the first screen.
-    func optionCard() -> some View {
-        padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+/// Everything that is not the next set, behind the first screen's one icon: a native list.
+struct MoreSheet: View {
+    let open: (HomeRoute) -> Void
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(HomeRoute.allCases, id: \.self) { route in
+                    Button { open(route) } label: {
+                        Label(route.title, systemImage: route.symbol)
+                            .frame(minHeight: 44)
+                    }
+                    .foregroundStyle(Color.primary)
+                    .accessibilityIdentifier("more.\(route)")
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle("Plumb")
+            .toolbarTitleDisplayMode(.inline)
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 }

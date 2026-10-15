@@ -49,28 +49,31 @@ struct CoachView: View {
                     withAnimation(HomeStyle.spring) { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
             }
-            Divider()
             VStack(spacing: 6) {
                 HStack(spacing: 10) {
-                    TextField("Ask about your sets", text: $draft, axis: .vertical)
+                    TextField("Ask Plumb", text: $draft, axis: .vertical)
                         .lineLimit(1...4)
                         .textFieldStyle(.plain)
                         .focused($fieldFocused)
                         .submitLabel(.send)
                         .onSubmit(send)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .padding(.leading, 18)
+                        .padding(.vertical, 14)
                         .accessibilityIdentifier("coach.field")
                     Button(action: send) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 30))
-                            .symbolRenderingMode(.hierarchical)
+                        Image(systemName: "arrow.up")
+                            .font(.body.weight(.bold))
+                            .foregroundStyle(Color(uiColor: .systemBackground))
+                            .frame(width: 36, height: 36)
+                            .background(Color.primary, in: Circle())
                     }
                     .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty || conversation.isAnswering)
+                    .opacity(draft.trimmingCharacters(in: .whitespaces).isEmpty ? 0.35 : 1)
+                    .padding(.trailing, 8)
                     .accessibilityLabel("Send")
                     .accessibilityIdentifier("coach.send")
                 }
+                .background(HomeStyle.card, in: Capsule())
                 Text(engineLine)
                     .font(.caption2)
                     .foregroundStyle(HomeStyle.supportingText)
@@ -104,10 +107,10 @@ struct CoachView: View {
                     send()
                 } label: {
                     Text(question)
-                        .font(.subheadline)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 9)
-                        .background(HomeStyle.card, in: Capsule())
+                        .font(.subheadline.weight(.medium))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 11)
+                        .overlay(Capsule().strokeBorder(Color.primary.opacity(0.18), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }
@@ -131,10 +134,10 @@ struct CoachView: View {
                         .foregroundStyle(HomeStyle.supportingText)
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
             .background(isCoach ? HomeStyle.card : Color.primary,
-                        in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             if isCoach { Spacer(minLength: 40) }
         }
         .accessibilityElement(children: .combine)

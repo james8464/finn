@@ -6,7 +6,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
-        app.openWorkoutTab()
+        app.openHome()
         app.openFromHome("Options")
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
         // XCTest refuses identifier queries longer than 128 characters, so match the start.
@@ -26,17 +26,10 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
-        app.openWorkoutTab()
-        let squat = app.buttons["Squat"]
-        XCTAssertTrue(squat.waitForExistence(timeout: 5))
-        XCTAssertTrue(squat.isSelected)
-        XCTAssertTrue(squat.isHittable, "The selected exercise must be visible on first launch")
-        let pushUp = app.buttons["Push-up"]
-        pushUp.tap()
-        XCTAssertTrue(pushUp.isSelected)
-        XCTAssertFalse(squat.isSelected)
-        XCTAssertTrue(app.descendants(matching: .any).matching(
-            NSPredicate(format: "label CONTAINS %@", "On the floor or a low step")).firstMatch.exists)
+        app.openHome()
+        XCTAssertTrue(app.staticTexts["Ready for squats?"].exists, "Squat is the exercise ready on first launch")
+        app.chooseExercise("Push-up")
+        XCTAssertTrue(app.staticTexts["Ready for push-ups?"].waitForExistence(timeout: 3))
         app.buttons["Start a set"].tap()
         XCTAssertTrue(app.staticTexts["Checking shoulder and hand visibility"].waitForExistence(timeout: 5))
     }
@@ -46,8 +39,8 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
-        app.openWorkoutTab()
-        app.buttons["Push-up"].tap()
+        app.openHome()
+        app.chooseExercise("Push-up")
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
@@ -68,8 +61,8 @@ final class ExerciseOptionsUITests: XCTestCase {
             let app = XCUIApplication()
             app.launchArguments.append("-plumb-ui-demo")
             app.launch()
-            app.openWorkoutTab()
-                app.buttons[exercise].tap()
+            app.openHome()
+                app.chooseExercise(exercise)
             app.buttons["Start a set"].tap()
             app.buttons["Start set"].tap()
             let stop = app.buttons["Stop set"]
@@ -86,8 +79,8 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-missing-wrist"]
         app.launch()
-        app.openWorkoutTab()
-        app.buttons["Push-up"].tap()
+        app.openHome()
+        app.chooseExercise("Push-up")
         app.buttons["Start a set"].tap()
         app.buttons["Start set"].tap()
         let stop = app.buttons["Stop set"]
@@ -105,7 +98,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-plumb-ui-demo", "-plumb-ui-demo-recognition"]
         app.launch()
-        app.openWorkoutTab()
+        app.openHome()
         app.openFromHome("Options")
         XCTAssertEqual(app.switches["options.recognizeExercise"].value as? String, "1")
         let toggle = app.switches["options.useTrainedModel"]

@@ -12,22 +12,33 @@ extension XCUIApplication {
         }
     }
 
+    /// The first screen: one title, one Start button.
     @MainActor
-    func openWorkoutTab() {
+    func openHome() {
         skipOnboardingIfShown()
-        let tab = buttons["tab.workout"]
-        XCTAssertTrue(tab.waitForExistence(timeout: 5))
-        tab.tap()
+        XCTAssertTrue(buttons["home.start"].waitForExistence(timeout: 5), "The first screen is missing")
     }
 
-    /// Opens History, Options or Privacy from the More menu of the first screen.
+    /// Picks an exercise from the menu behind the first screen's title.
+    @MainActor
+    func chooseExercise(_ name: String) {
+        let title = buttons["home.exercise"]
+        XCTAssertTrue(title.waitForExistence(timeout: 5), "The exercise title is missing")
+        title.tap()
+        let item = buttons[name].firstMatch
+        XCTAssertTrue(item.waitForExistence(timeout: 3), "\(name) is missing from the exercise menu")
+        item.tap()
+        Thread.sleep(forTimeInterval: 0.5)
+    }
+
+    /// Opens History, Coach, Awards, Options or Privacy from the sheet behind the first screen's icon.
     @MainActor
     func openFromHome(_ page: String) {
         let more = buttons["home.more"]
-        XCTAssertTrue(more.waitForExistence(timeout: 5), "The first screen's More menu is missing")
+        XCTAssertTrue(more.waitForExistence(timeout: 5), "The first screen's More button is missing")
         more.tap()
         let item = buttons[page].firstMatch
-        XCTAssertTrue(item.waitForExistence(timeout: 3), "\(page) is missing from the More menu")
+        XCTAssertTrue(item.waitForExistence(timeout: 3), "\(page) is missing from the More sheet")
         item.tap()
     }
 }

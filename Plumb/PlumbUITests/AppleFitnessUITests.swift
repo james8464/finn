@@ -8,7 +8,7 @@ final class AppleFitnessUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
         app.launch()
-        app.openWorkoutTab()
+        app.openHome()
         app.openFromHome("Options")
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Apple Fitness"].exists)

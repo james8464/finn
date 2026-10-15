@@ -23,7 +23,7 @@ final class ScreenTourUITests: XCTestCase {
         let app = XCUIApplication()
         app.resetAuthorizationStatus(for: .camera)
         app.launch()
-        app.openWorkoutTab()
+        app.openHome()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 1)
         save("01-premier-lancement-accueil")
@@ -54,7 +54,7 @@ final class ScreenTourUITests: XCTestCase {
         let dark = XCUIApplication()
         dark.launchArguments = ["-plumb-ui-dark"]
         dark.launch()
-        dark.openWorkoutTab()
+        dark.openHome()
         XCTAssertTrue(dark.buttons["home.start"].waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 1)
         save("05-accueil-sombre")
@@ -62,25 +62,23 @@ final class ScreenTourUITests: XCTestCase {
 
         let app = XCUIApplication()
         app.launch()
-        app.openWorkoutTab()
+        app.openHome()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
-        app.buttons["Push-up"].tap()
+        app.chooseExercise("Push-up")
         Thread.sleep(forTimeInterval: 1.2)
         save("06-choix-exercice-pompes")
-        app.buttons["Stiff-leg deadlift"].tap()
+        app.chooseExercise("Stiff-leg deadlift")
         Thread.sleep(forTimeInterval: 1.2)
         save("07-choix-exercice-souleve")
-        app.buttons["Static lunge"].tap()
+        app.chooseExercise("Static lunge")
         Thread.sleep(forTimeInterval: 1.2)
         save("07b-choix-exercice-fente")
-        let pullUp = app.buttons["Pull-up"]
-        if !pullUp.isHittable { app.buttons["Stiff-leg deadlift"].swipeLeft() }
-        pullUp.tap()
+        app.chooseExercise("Pull-up")
         Thread.sleep(forTimeInterval: 1.2)
         save("07d-choix-exercice-tractions")
         app.buttons["home.more"].tap()
         Thread.sleep(forTimeInterval: 0.8)
-        save("07c-menu-plus")
+        save("07c-feuille-plus")
     }
 
     @MainActor
@@ -88,7 +86,7 @@ final class ScreenTourUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo"]
         app.launch()
-        app.openWorkoutTab()
+        app.openHome()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         app.buttons["home.start"].tap()
         XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 8))
@@ -117,7 +115,7 @@ final class ScreenTourUITests: XCTestCase {
     func test4OptionsPrivacyHistory() {
         let app = XCUIApplication()
         app.launch()
-        app.openWorkoutTab()
+        app.openHome()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         open(app, "Options")
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
@@ -147,9 +145,9 @@ final class ScreenTourUITests: XCTestCase {
             let app = XCUIApplication()
             app.launchArguments = ["-plumb-ui-demo", "-plumb-ui-demo-form-fault"]
             app.launch()
-            app.openWorkoutTab()
+            app.openHome()
             XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
-            app.buttons[exercise].tap()
+            app.chooseExercise(exercise)
             app.buttons["home.start"].tap()
             XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 8))
             app.buttons["Start set"].tap()

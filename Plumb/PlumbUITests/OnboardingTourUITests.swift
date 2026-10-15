@@ -43,8 +43,8 @@ final class OnboardingTourUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.2)
         save("onboarding-5-placement")
         next.tap()
-        // The first favorite (push-up) is the exercise ready on the Workout tab.
-        app.openWorkoutTab()
+        // The first favorite (push-up) is the exercise ready on the first screen.
+        app.openHome()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 1)
         save("onboarding-6-apres-pompes-en-premier")
@@ -55,10 +55,8 @@ final class OnboardingTourUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-plumb-ui-badges-demo"]
         app.launch()
-        XCTAssertTrue(app.buttons["home.awards"].waitForExistence(timeout: 8))
-        Thread.sleep(forTimeInterval: 1)
-        save("accueil-carte-awards")
-        app.buttons["home.awards"].tap()
+        app.openHome()
+        app.openFromHome("Awards")
         XCTAssertTrue(app.staticTexts["badges.count"].waitForExistence(timeout: 5))
         Thread.sleep(forTimeInterval: 0.8)
         save("badges-1-haut")
