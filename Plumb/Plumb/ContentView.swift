@@ -422,7 +422,7 @@ extension ContentView {
             }
             VStack(spacing: 0) {
                 exerciseTitle
-                    .padding(.top, 40)
+                    .padding(.top, 64)
                 homeNotes
                 Spacer(minLength: 16)
                 // One slow, well-done rep of the chosen exercise, seen as the camera will see it.
@@ -464,7 +464,8 @@ extension ContentView {
                 .accessibilityHint("Shows what Plumb keeps and what it never records")
                 .accessibilityIdentifier("home.privacy")
                 .padding(.horizontal, 24)
-                .padding(.bottom, 2)
+                // The glass bars float over the content: keep the actions clear of the tab bar.
+                .padding(.bottom, 84)
             }
         }
         .gesture(exerciseSwipe)
