@@ -1225,6 +1225,16 @@
         }
       }
     },
+    "Ask Plumb" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demander à Plumb"
+          }
+        }
+      }
+    },
     "Ask about your sets" : {
       "localizations" : {
         "fr" : {
@@ -4630,6 +4640,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Descends aussi bas à chaque répétition. Pour en compter une, Plumb attend : %@."
+          }
+        }
+      }
+    },
+    "Ready for deadlifts?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt pour les soulevés de terre ?"
+          }
+        }
+      }
+    },
+    "Ready for lunges?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt pour les fentes ?"
+          }
+        }
+      }
+    },
+    "Ready for muscle-ups?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt pour les muscle-ups ?"
+          }
+        }
+      }
+    },
+    "Ready for pull-ups?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt pour les tractions ?"
+          }
+        }
+      }
+    },
+    "Ready for push-ups?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt pour les pompes ?"
+          }
+        }
+      }
+    },
+    "Ready for squats?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt pour les squats ?"
           }
         }
       }

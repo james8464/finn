@@ -52,7 +52,19 @@ extension ExerciseKind {
         }
     }
 
-    /// The name in a sentence: "Ready for squats?", "27 push-ups".
+    /// The first screen's title, one whole sentence so every language reads naturally.
+    var readyTitle: LocalizedStringKey {
+        switch self {
+        case .bodyweightSquat: "Ready for squats?"
+        case .pushUp: "Ready for push-ups?"
+        case .staticLunge: "Ready for lunges?"
+        case .stiffLegDeadlift: "Ready for deadlifts?"
+        case .pullUp: "Ready for pull-ups?"
+        case .muscleUp: "Ready for muscle-ups?"
+        }
+    }
+
+    /// The name in a sentence: "27 push-ups".
     var pluralName: String {
         switch self {
         case .bodyweightSquat: String(localized: "squats")

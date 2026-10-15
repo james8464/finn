@@ -133,10 +133,13 @@ struct ContentView: View {
                     failure(issue)
                 }
             }
-            .toolbar(.hidden, for: .navigationBar)
+            .navigationTitle("")
+            .toolbarTitleDisplayMode(.inline)
+            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+            .toolbar { rootToolbar }
             .navigationDestination(item: $route) { destination in
                 destinationPage(destination)
-                    .toolbar(.visible, for: .navigationBar)
+                    .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
             }
             #if DEBUG
             .onAppear {
@@ -199,13 +202,10 @@ struct ContentView: View {
             if model.stage == .ready { await model.refreshHealth() }
         }
         .sheet(isPresented: Binding(
-            get: { model.showsPersonalizationOffer },
+            get: { model.showsPersonalizationOffer && model.stage != .result },
             set: { if !$0 { model.showsPersonalizationOffer = false } }
         )) {
-            PersonalizationOfferView { personalize in
-                Task { await model.answerPersonalizationOffer(personalize: personalize) }
-            }
-            .presentationDetents([.medium, .large])
+            personalizationOffer
         }
         .fullScreenCover(isPresented: $showsOnboarding) {
             OnboardingView(preferences: preferences) { profile in
@@ -274,6 +274,44 @@ struct ContentView: View {
         }
     }
 
+    /// Asked once after the first measured set. Presented from the result sheet when it is up, or
+    /// from the first screen: two sheets on the same view would block each other (15 October, the
+    /// share sheet never came up and every button of the result looked disabled).
+    private var personalizationOffer: some View {
+        PersonalizationOfferView { personalize in
+            Task { await model.answerPersonalizationOffer(personalize: personalize) }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    /// The native bar: the one icon on the first screen, Cancel or Stop over the camera.
+    @ToolbarContentBuilder private var rootToolbar: some ToolbarContent {
+        switch model.stage {
+        case .ready, .result:
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showsMore = true } label: {
+                    Label("More", systemImage: "ellipsis")
+                }
+                .accessibilityHint("History, coach, awards, options and privacy")
+                .accessibilityIdentifier("home.more")
+            }
+        case .framing, .countdown, .openingCamera:
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Cancel") { Task { await model.cancel() } }
+            }
+        case .capturing:
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Stop set") {
+                    let tappedAt = ContinuousClock.now
+                    Task { await model.endSet(tappedAt: tappedAt) }
+                }
+                .accessibilityIdentifier("capture.stop")
+            }
+        case .analyzing, .error:
+            ToolbarItem(placement: .topBarLeading) { EmptyView() }
+        }
+    }
+
     /// Opens the camera for the chosen exercise: the primer first if iOS has not asked yet, and the
     /// ambient preview is let go of before the measuring source takes the camera.
     private func startSet() {
@@ -324,24 +362,8 @@ struct ContentView: View {
                 AmbientCameraBackdrop(camera: ambientCamera)
             }
             VStack(spacing: 0) {
-                HStack {
-                    Spacer()
-                    Button { showsMore = true } label: {
-                        Image(systemName: "ellipsis")
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(Color.primary)
-                            .frame(width: 44, height: 44)
-                            .plumbGlass(in: Circle(), interactive: true)
-                    }
-                    .buttonStyle(PressableStyle())
-                    .accessibilityLabel("More")
-                    .accessibilityHint("History, coach, awards, options and privacy")
-                    .accessibilityIdentifier("home.more")
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
                 exerciseTitle
-                    .padding(.top, 56)
+                    .padding(.top, 48)
                 homeNotes
                 Spacer()
                 startButton
@@ -373,6 +395,7 @@ struct ContentView: View {
         }
         .gesture(exerciseSwipe)
         .sensoryFeedback(.selection, trigger: model.selectedExercise)
+        .sensoryFeedback(.impact(weight: .medium), trigger: model.stage == .openingCamera)
         .sheet(isPresented: $showsCameraPrimer) {
             CameraPrimer(onContinue: {
                 showsCameraPrimer = false
@@ -399,8 +422,9 @@ struct ContentView: View {
                 }
             }
         } label: {
-            Text("Ready for \(model.selectedExercise.pluralName)?")
-                .font(.system(size: homeTitleSize, weight: .bold))
+            Text(model.selectedExercise.readyTitle)
+                .font(.system(size: homeTitleSize, weight: .bold, design: .default))
+                .tracking(-homeTitleSize * 0.03)
                 .multilineTextAlignment(.center)
                 .lineLimit(3)
                 .minimumScaleFactor(0.6)
@@ -455,7 +479,7 @@ struct ContentView: View {
     /// open, a Health note, the focus from earlier sets.
     @ViewBuilder private var homeNotes: some View {
         let hasNotes = model.fitnessSave != nil || model.framingClosedNote != nil
-            || model.unfinishedSession != nil || model.readinessNote != nil || model.focus != nil
+            || model.unfinishedSession != nil || model.readinessNote != nil
         if hasNotes {
             VStack(spacing: 8) {
                 if let save = model.fitnessSave {
@@ -475,14 +499,6 @@ struct ContentView: View {
                 if let note = model.readinessNote {
                     homeNote { healthNote(note) }
                         .accessibilityIdentifier("setup.healthReadiness")
-                }
-                if let focus = model.focus {
-                    homeNote {
-                        Text("Focus: \(focus.focus)")
-                            .font(.subheadline.weight(.semibold))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .accessibilityIdentifier("setup.focus")
                 }
             }
             .padding(.horizontal, 24)
@@ -510,15 +526,12 @@ struct ContentView: View {
         } else {
             what = String(localized: "\(reps) reps")
         }
-        let when: String
         if Calendar.current.isDateInToday(session.startedAt) {
-            when = String(localized: "Today")
+            return String(localized: "Today, \(what)")
         } else if Calendar.current.isDateInYesterday(session.startedAt) {
-            when = String(localized: "Yesterday")
-        } else {
-            when = session.startedAt.formatted(.dateTime.day().month(.abbreviated))
+            return String(localized: "Yesterday, \(what)")
         }
-        return "\(when), \(what)"
+        return "\(session.startedAt.formatted(.dateTime.day().month(.abbreviated))), \(what)"
     }
 
     @ViewBuilder private func destinationPage(_ destination: HomeRoute) -> some View {
@@ -925,7 +938,7 @@ struct ContentView: View {
             CameraFeedView(model: model)
                 .ignoresSafeArea()
             VStack(spacing: 12) {
-                captureTopRow
+                captureMarks
                 if model.stage == .capturing {
                     liveCount
                 } else if model.stage == .framing {
@@ -935,8 +948,24 @@ struct ContentView: View {
                 captureBottom
             }
             .padding(.horizontal, 20)
-            .padding(.top, 8)
+            .padding(.top, 4)
             .padding(.bottom, 12)
+        }
+        .sensoryFeedback(.impact(weight: .light), trigger: model.liveRepCount)
+        .sensoryFeedback(.warning, trigger: model.liveCaption) { _, new in new != nil }
+        .toolbar {
+            if model.stage == .framing {
+                ToolbarItem(placement: .bottomBar) {
+                    Button { Task { await model.beginSet() } } label: {
+                        Text("Start set")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(Color.primary)
+                    .accessibilityIdentifier("capture.start")
+                }
+            }
         }
         .overlay {
             if case .countdown(let count) = model.stage {
@@ -958,26 +987,9 @@ struct ContentView: View {
         .toolbar(.hidden, for: .navigationBar)
     }
 
-    /// The one discreet way out, and the small marks that say what is connected.
-    private var captureTopRow: some View {
+    /// The small marks that say what is connected; the way out lives in the bar above.
+    @ViewBuilder private var captureMarks: some View {
         HStack(spacing: 8) {
-            if model.stage == .capturing {
-                Button {
-                    let tappedAt = ContinuousClock.now
-                    Task { await model.endSet(tappedAt: tappedAt) }
-                } label: {
-                    captureSmallLabel("Stop set")
-                }
-                .buttonStyle(PressableStyle())
-                .accessibilityIdentifier("capture.stop")
-            } else if model.stage != .analyzing {
-                Button {
-                    Task { await model.cancel() }
-                } label: {
-                    captureSmallLabel("Cancel")
-                }
-                .buttonStyle(PressableStyle())
-            }
             Spacer()
             #if DEBUG
             if isDemo || isVideoFileInput {
@@ -1011,47 +1023,25 @@ struct ContentView: View {
         }
     }
 
-    private func captureSmallLabel(_ title: LocalizedStringKey) -> some View {
-        Text(title)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Color.primary)
-            .padding(.horizontal, 16)
-            .frame(minHeight: 44)
-            .plumbGlass(in: Capsule(), interactive: true)
-            .contentShape(Capsule())
-    }
-
     /// Under the count: the framing guidance before the set, the advice during it.
     @ViewBuilder private var captureBottom: some View {
         switch model.stage {
         case .framing:
-            VStack(spacing: 14) {
-                VStack(spacing: 10) {
-                    Text(captureCopy.framingPrompt)
-                        .font(.title3.weight(.semibold))
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                    if let focus = model.captureFocus {
-                        Text("Focus: \(focus.focus)")
-                            .font(.subheadline)
-                            .foregroundStyle(PlumbStyle.supportingText)
-                            .multilineTextAlignment(.center)
-                            .accessibilityIdentifier("capture.focus")
-                    }
-                    if model.handsFree {
-                        handsFreeHint
-                    }
+            // One line to read from the spot; the hands-free line only when it applies.
+            VStack(spacing: 10) {
+                Text(captureCopy.framingPrompt)
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                if model.handsFree {
+                    handsFreeHint
                 }
-                .foregroundStyle(Color.primary)
-                .padding(20)
-                .frame(maxWidth: .infinity)
-                .plumbGlass(in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                Button { Task { await model.beginSet() } } label: {
-                    PrimaryActionLabel(title: "Start set")
-                }
-                .buttonStyle(PressableStyle())
-                .accessibilityIdentifier("capture.start")
             }
+            .foregroundStyle(Color.primary)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity)
+            .plumbGlass(in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         case .capturing:
             liveCue
         case .analyzing:
@@ -1112,7 +1102,8 @@ struct ContentView: View {
         VStack(spacing: 2) {
             VStack(spacing: -6) {
                 Text("\(model.liveRepCount)")
-                    .font(.system(size: liveCountSize, weight: .bold))
+                    .font(.system(size: liveCountSize, weight: .bold, design: .default))
+                    .tracking(-liveCountSize * 0.04)
                     .monospacedDigit()
                     .minimumScaleFactor(0.4)
                     .lineLimit(1)
@@ -1204,6 +1195,17 @@ struct ContentView: View {
     }
 
     private var result: some View {
+        NavigationStack {
+            resultContent
+        }
+        // Opens tall so nothing is cut at any text size; a pull down shows the room behind it.
+        .presentationDetents([.fraction(0.62), .large], selection: $resultDetent)
+        .presentationDragIndicator(.visible)
+        .presentationBackground(HomeStyle.background)
+        .sensoryFeedback(.success, trigger: model.stage == .result)
+    }
+
+    private var resultContent: some View {
         ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     resultHero
@@ -1229,20 +1231,45 @@ struct ContentView: View {
                 .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
-        .safeAreaInset(edge: .bottom) {
-            Button {
-                observationSpeaker.stop()
-                startSet()
-            } label: {
-                PrimaryActionLabel(title: retakeLabel)
+        .navigationTitle("")
+        .toolbarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button { resultPage = .coach } label: {
+                    Label("Ask Plumb", systemImage: "bubble.left.and.text.bubble.right")
+                }
+                .accessibilityHint("Opens the coach with this set's facts")
+                .accessibilityIdentifier("result.coach")
             }
-            .buttonStyle(PressableStyle())
-            .padding(.horizontal, 24)
-            .padding(.vertical, 12)
-            .accessibilityIdentifier("result.next")
-            .background(.bar)
+            ToolbarItem(placement: .topBarTrailing) {
+                // Ends the session: the next set starts a new one, and Fitness gets this one.
+                Button("Done") {
+                    observationSpeaker.stop()
+                    Task { await model.finishSession() }
+                }
+                .accessibilityHint("Ends this session")
+            }
+            ToolbarItem(placement: .bottomBar) {
+                Button {
+                    observationSpeaker.stop()
+                    startSet()
+                } label: {
+                    Text(retakeLabel)
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.glassProminent)
+                .tint(Color.primary)
+                .accessibilityIdentifier("result.next")
+            }
         }
         .onDisappear { observationSpeaker.stop() }
+        .sheet(isPresented: Binding(
+            get: { model.showsPersonalizationOffer },
+            set: { if !$0 { model.showsPersonalizationOffer = false } }
+        )) {
+            personalizationOffer
+        }
         .sheet(item: $resultPage) { page in
             NavigationStack {
                 switch page {
@@ -1252,10 +1279,6 @@ struct ContentView: View {
                 }
             }
         }
-        // Opens tall so nothing is cut at any text size; a pull down shows the room behind it.
-        .presentationDetents([.fraction(0.62), .large], selection: $resultDetent)
-        .presentationDragIndicator(.visible)
-        .presentationBackground(HomeStyle.background)
     }
 
     private var isMeasuredResult: Bool {
@@ -1265,33 +1288,6 @@ struct ContentView: View {
 
     /// The number and one sentence, centered, large enough to read from the mat.
     @ViewBuilder private var resultHero: some View {
-        HStack {
-            Button { resultPage = .coach } label: {
-                Label("Ask Plumb", systemImage: "bubble.left.and.text.bubble.right")
-                    .font(.subheadline.weight(.medium))
-                    .padding(.trailing, 8)
-                    .frame(minHeight: 44)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("Opens the coach with this set's facts")
-            .accessibilityIdentifier("result.coach")
-            Spacer()
-            // Ends the session: the next set starts a new one, and Fitness gets this one.
-            Button {
-                observationSpeaker.stop()
-                Task { await model.finishSession() }
-            } label: {
-                Text("Done")
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.leading, 8)
-                    .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("Ends this session")
-        }
-        .padding(.top, 4)
         VStack(spacing: 4) {
             Text(resultTitle)
                 .font(isMeasuredResult ? .subheadline.weight(.semibold) : .title.bold())
@@ -1301,7 +1297,8 @@ struct ContentView: View {
                 .accessibilityAddTraits(.isHeader)
             if case .measured(let analysis, let cue) = model.result {
                 Text("\(analysis.reps.count)")
-                    .font(.system(size: resultCountSize, weight: .bold))
+                    .font(.system(size: resultCountSize, weight: .bold, design: .default))
+                    .tracking(-resultCountSize * 0.04)
                     .monospacedDigit()
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
@@ -1457,9 +1454,12 @@ struct ContentView: View {
                                                       comparison: model.comparison,
                                                       exercise: model.resultExercise)) {
                     Label("Share summary", systemImage: "square.and.arrow.up")
-                        .frame(minHeight: 44, alignment: .leading)
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, minHeight: 50)
                 }
-                .font(.subheadline)
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .tint(Color.primary)
                 .accessibilityIdentifier("result.shareSummary")
                 .accessibilityHint("Shares the measured summary without video")
                 // Last on the result, as in #10: higher up, the cards sat behind the bottom
@@ -1828,10 +1828,11 @@ struct ContentView: View {
                         if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
                     } label: {
                         Text("Open Settings")
-                            .foregroundStyle(PlumbStyle.primaryButtonText)
-                            .frame(maxWidth: .infinity)
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 50)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
+                    .tint(Color.primary)
                     Button("Try again") {
                         Task { await model.cancel(); await ambientCamera.stop(); await model.startPreview() }
                     }
@@ -1843,10 +1844,11 @@ struct ContentView: View {
                         Task { await model.cancel(); await ambientCamera.stop(); await model.startPreview() }
                     } label: {
                         Text("Try again")
-                            .foregroundStyle(PlumbStyle.primaryButtonText)
-                            .frame(maxWidth: .infinity)
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 50)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
+                    .tint(Color.primary)
                 }
                 // The first screen, with History, Options, Privacy and an open session's Finish
                 // session, stays reachable while the camera cannot be used.
@@ -1861,9 +1863,7 @@ struct ContentView: View {
             .controlSize(.large)
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
-            .background(.bar)
         }
-        .toolbar(.hidden, for: .navigationBar)
     }
 }
 
