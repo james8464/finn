@@ -390,9 +390,12 @@ struct ContentView: View {
         case .home:
             DashboardView(history: model.history, exercise: model.selectedExercise,
                           badges: badges.earned, tryPlumb: { selectedTab = .workout },
-                          watchDemo: { showsPlumbDemo = true }) { route = $0 }
+                          watchDemo: { showsPlumbDemo = true }) { destination in
+                if destination == .posture { selectedTab = .posture }
+                else { route = destination }
+            }
         case .workout: workoutSetup
-        case .posture: historyList(title: "Posture", exercise: nil)
+        case .posture: PostureGuideView(history: model.history, initialExercise: model.selectedExercise)
         case .coach: CoachView(history: model.history)
         }
     }
@@ -420,7 +423,7 @@ struct ContentView: View {
                     .navigationTitle("Last workout")
             }
         case .account: accountPage
-        case .posture: historyList(title: "Posture", exercise: nil)
+        case .posture: PostureGuideView(history: model.history, initialExercise: model.selectedExercise)
         case .weights: historyList(title: "Best set", exercise: model.selectedExercise)
         case .awards: BadgesView(ledger: badges)
         // The subscription does not exist yet (1.1): the banner is hidden, and its route lands on
@@ -461,6 +464,10 @@ struct ContentView: View {
                     }
                     .accessibilityLabel("Privacy")
                 }
+                Button { showsOnboarding = true } label: {
+                    Label("Replay the welcome", systemImage: "arrow.counterclockwise")
+                }
+                .accessibilityIdentifier("account.replayOnboarding")
             }
             Section("Account") {
                 Text("No account required")
