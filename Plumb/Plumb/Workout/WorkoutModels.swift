@@ -1,6 +1,6 @@
 import Foundation
 
-nonisolated enum BodyJoint: String, Codable, Hashable {
+nonisolated enum BodyJoint: String, Codable, Hashable, CaseIterable {
     case leftHip
     case leftKnee
     case leftAnkle
