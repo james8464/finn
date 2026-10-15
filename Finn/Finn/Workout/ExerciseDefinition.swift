@@ -357,7 +357,7 @@ nonisolated extension ExerciseDefinition {
     /// hypothesis checked on real squats (15 October 2026), not a validated standard.
     static let squatTrunk = ExerciseDefinition(
         kind: .bodyweightSquat,
-        rubricVersion: "squat-trunk-v2",
+        rubricVersion: "squat-trunk-v3",
         expectedView: .any,
         evidence: EvidenceRequirement(joints: [.hip], anchor: .hip),
         signal: .shoulderDrop,

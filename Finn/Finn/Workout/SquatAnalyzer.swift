@@ -383,9 +383,9 @@ nonisolated enum ExerciseAnalyzer {
     /// Coordinates use image width, so 0.12 is about 9% of a 4:3 image's height.
     static let minimumHipFallbackTorso = 0.12
     static let minimumHipFallbackTorsoCoverage = 0.25
-    /// At 15 fps, larger frame-to-frame ankle motion suggests the phone is moving. Occasional
-    /// steps by the athlete affect a few frames; the 90th percentile tolerates those.
-    static let maximumHipFallbackAnkleStep = 0.008
+    /// Image widths per second, independent of capture frame rate. Occasional steps affect a
+    /// few readings; the 90th percentile tolerates those without accepting sustained camera shake.
+    static let maximumHipFallbackAnkleSpeed = 0.12
 
     /// Counts squats from the hips going down and up (`ExerciseDefinition.squatTrunk`). Nil when the
     /// set is too short, someone else's joints cannot be told apart, the torso is never seen to set
@@ -477,24 +477,34 @@ nonisolated enum ExerciseAnalyzer {
     }
 
     private static func phoneStableForHipFallback(_ frames: [PoseFrame]) -> Bool {
-        var previous: (time: TimeInterval, x: Double)?
-        var steps: [Double] = []
-        for frame in frames {
-            let ankles = [BodyJoint.leftAnkle, .rightAnkle].compactMap { joint -> JointPoint? in
-                frame.joints[joint].flatMap {
-                    $0.confidence >= EvidenceRubric.minimumJointConfidence ? $0 : nil
+        var bestSpeeds: [Double] = []
+        for joint in [BodyJoint.leftAnkle, .rightAnkle] {
+            var previous: (time: TimeInterval, x: Double, y: Double)?
+            var speeds: [Double] = []
+            for frame in frames {
+                guard frame.athleteVisible, let ankle = frame.joints[joint],
+                      ankle.confidence >= EvidenceRubric.minimumJointConfidence else {
+                    previous = nil
+                    continue
                 }
+                let y = ankle.y * frame.aspectRatio
+                if let previous {
+                    let elapsed = frame.time - previous.time
+                    if elapsed > 0, elapsed <= 0.25 {
+                        speeds.append(hypot(ankle.x - previous.x, y - previous.y) / elapsed)
+                    }
+                }
+                previous = (frame.time, ankle.x, y)
             }
-            guard !ankles.isEmpty else { previous = nil; continue }
-            let x = ankles.map(\.x).reduce(0, +) / Double(ankles.count)
-            if let previous, frame.time - previous.time <= 0.2 {
-                steps.append(abs(x - previous.x))
+            // Follow one ankle. Averaging whichever feet happen to be visible creates jumps
+            // when Vision switches between the near and far side.
+            if speeds.count > bestSpeeds.count {
+                bestSpeeds = speeds
             }
-            previous = (frame.time, x)
         }
-// hidden feet cannot establish whether the phone moved; the torso checks still apply.
-        guard steps.count >= frames.count / 2 else { return true }
-        return percentile(steps, 0.9) <= maximumHipFallbackAnkleStep
+        // Hidden feet cannot establish camera motion; the torso and scale checks still apply.
+        guard bestSpeeds.count >= max(3, frames.count / 2) else { return true }
+        return percentile(bestSpeeds, 0.9) <= maximumHipFallbackAnkleSpeed
     }
 
     /// A push-up keeps the hands on the floor while the shoulders travel. A person squatting or
@@ -503,6 +513,7 @@ nonisolated enum ExerciseAnalyzer {
     /// of the shoulders' travel.
     private static func handsStayPlanted(_ frames: [PoseFrame], shoulderTravel: Double) -> Bool {
         let heights = frames.compactMap { frame -> Double? in
+            guard frame.athleteVisible else { return nil }
             let wrists = [BodyJoint.leftWrist, .rightWrist].compactMap { joint in
                 frame.joints[joint].flatMap { $0.confidence >= EvidenceRubric.minimumJointConfidence ? $0.y : nil }
             }

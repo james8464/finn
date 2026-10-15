@@ -137,6 +137,7 @@ struct CoachTests {
         #expect(answer.text.contains("no saved set"))
         let conversation = CoachConversation(history: [], responder: responder)
         #expect(conversation.messages.first?.text.contains("No saved set yet") == true)
+        #expect(conversation.messages.first?.engine == nil, "The fixed greeting did not run a model")
         #expect(conversation.suggestedQuestions.isEmpty)
     }
 
@@ -282,6 +283,19 @@ struct CoachTests {
         #expect(CoachContext.make(history: history(), limit: -1).isEmpty)
     }
 
+    @Test func promptBudgetKeepsTheLatestSetsWhenOldObservationsAreLong() {
+        let facts = (1...32).map { number in
+            CoachSetFact(number: number, id: UUID(), exerciseName: "Squat", repCount: number,
+                         capturedAt: .now, observation: String(repeating: "Recorded fact. ", count: 1_000),
+                         issues: [], comparison: nil, partlyVisible: false)
+        }
+        let prompt = CoachContext(facts: facts).boundedPromptText(maximumCharacters: 4_000)
+        #expect(prompt.count <= 4_000)
+        #expect(prompt.contains("Set 32: Squat, 32 reps"))
+        #expect(prompt.contains("Set 31: Squat, 31 reps"))
+        #expect(!prompt.contains("Set 1:"))
+    }
+
     @Test func refreshingDeletedHistoryDiscardsAnInFlightAnswer() async {
         let engine = StubCoachEngine(output: "Set 1", delay: .milliseconds(100))
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
@@ -292,6 +306,16 @@ struct CoachTests {
         await request.value
         #expect(conversation.messages.count == 2)
         #expect(!conversation.isAnswering)
+    }
+
+    @Test func newSavedSetsRefreshTheGreetingWithoutPretendingToRunAModel() {
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: .english)
+        let conversation = CoachConversation(history: [], responder: responder)
+        let greetingID = conversation.messages.first?.id
+        conversation.refresh(history: history())
+        #expect(conversation.messages.first?.text == CoachFallback.opening(context: conversation.context, language: .english))
+        #expect(conversation.messages.first?.id == greetingID)
+        #expect(conversation.messages.first?.engine == nil)
     }
 
     @Test func leavingCoachCancelsTheTurnWithoutAppendingAnAnswer() async {

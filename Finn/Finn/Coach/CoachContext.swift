@@ -50,6 +50,31 @@ nonisolated struct CoachContext: Equatable, Sendable {
     var knownNumbers: Set<Int> { Set(facts.map(\.number)) }
     var latest: CoachSetFact? { facts.last }
 
+    /// Keep complete records and favour recent sets when history exceeds the model's budget.
+    /// Truncating the old, unbounded text dropped the newest sets and could cut a fact in half.
+    func boundedPromptText(maximumCharacters: Int) -> String {
+        guard !facts.isEmpty else { return "No saved sets." }
+        var remaining = max(0, maximumCharacters)
+        var lines: [String] = []
+        for fact in facts.reversed() {
+            var line = "\(fact.label): \(fact.exerciseName.prefix(60)), \(fact.repCount) reps, \(fact.capturedAt.formatted(.iso8601))"
+            if fact.partlyVisible { line += " | partly visible; no posture advice" }
+            if let observation = fact.observation {
+                line += " | observation: " + observation.prefix(180)
+            }
+            if let comparison = fact.comparison {
+                line += " | comparison: " + comparison.prefix(160)
+            }
+            if !fact.issues.isEmpty {
+                line += " | showed: " + fact.issues.joined(separator: "; ").prefix(100)
+            }
+            guard line.count + 1 <= remaining else { break }
+            lines.append(line)
+            remaining -= line.count + 1
+        }
+        return lines.reversed().joined(separator: "\n")
+    }
+
     /// builds the context from the saved sessions, keeping the `limit` most recent sets
     static func make(history: [WorkoutSessionSummary], limit: Int = defaultLimit,
                      now: Date = .now) -> CoachContext {

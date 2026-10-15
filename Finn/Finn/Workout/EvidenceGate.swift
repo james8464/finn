@@ -302,7 +302,7 @@ nonisolated enum EvidenceGate {
     private static func anchorMovement(_ frames: [PoseFrame], requirement: EvidenceRequirement,
                                        side: BodySide) -> Double {
         let joint = requirement.anchor.joint(on: side)
-        let points = frames.compactMap { $0.joints[joint] }
+        let points = frames.filter(\.athleteVisible).compactMap { $0.joints[joint] }
             .filter { $0.confidence >= EvidenceRubric.minimumJointConfidence }
         guard !points.isEmpty else { return .infinity }
         return max(spread(points.map(\.x)), spread(points.map(\.y)))
@@ -312,7 +312,7 @@ nonisolated enum EvidenceGate {
                                      side: BodySide) -> (role: JointRole, share: Int) {
         let shares = requirement.joints.map { role -> (JointRole, Int) in
             let seen = frames.filter {
-                ($0.joints[role.joint(on: side)]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence
+                $0.athleteVisible && ($0.joints[role.joint(on: side)]?.confidence ?? 0) >= EvidenceRubric.minimumJointConfidence
             }.count
             return (role, Int((100 * Double(seen) / Double(max(1, frames.count))).rounded()))
         }

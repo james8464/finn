@@ -6,6 +6,7 @@ struct CoachView: View {
     @State private var draft = ""
     @State private var showsSource = false
     @State private var replyTask: Task<Void, Never>?
+    @State private var followsLatestReply = true
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var fieldFocused: Bool
@@ -37,19 +38,35 @@ struct CoachView: View {
                                 .foregroundStyle(HomeStyle.supportingText)
                         }
                         .padding(.horizontal, 4)
-                        .id("thinking")
+                        .accessibilityIdentifier("coach.thinking")
                     }
                     if conversation.messages.count == 1, !conversation.suggestedQuestions.isEmpty {
                         suggestions
                     }
+                    Color.clear.frame(height: 1).id("conversation.bottom")
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
             .scrollDismissesKeyboard(.interactively)
-            .onChange(of: conversation.messages.count) { _, _ in
-                guard let last = conversation.messages.last else { return }
-                withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(last.id, anchor: .bottom) }
+            .onScrollGeometryChange(for: Bool.self) { geometry in
+                geometry.contentSize.height - geometry.visibleRect.maxY < 100
+            } action: { _, isNearBottom in
+                followsLatestReply = isNearBottom
+            }
+            .onChange(of: conversation.messages.last?.id) { _, _ in
+                // The conversation is capped at 40 messages, so its count eventually stops changing.
+                guard followsLatestReply || conversation.messages.last?.role == .person else { return }
+                scrollToLatest(using: proxy)
+            }
+            .onChange(of: conversation.isAnswering) { _, _ in
+                if followsLatestReply { scrollToLatest(using: proxy) }
+            }
+            .onChange(of: fieldFocused) { _, focused in
+                if focused {
+                    conversation.prepare()
+                    if followsLatestReply { scrollToLatest(using: proxy) }
+                }
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -68,29 +85,30 @@ struct CoachView: View {
                         .padding(.vertical, 10)
                         .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                         .accessibilityIdentifier("coach.field")
-                    Button(action: send) {
-                        Image(systemName: "arrow.up.circle.fill")
+                        .onChange(of: draft) { _, value in
+                            if value.count > FoundationModelsCoachPrompt.maximumQuestionCharacters {
+                                draft = String(value.prefix(FoundationModelsCoachPrompt.maximumQuestionCharacters))
+                            }
+                        }
+                    Button {
+                        if conversation.isAnswering {
+                            replyTask?.cancel()
+                        } else {
+                            send()
+                        }
+                    } label: {
+                        Image(systemName: conversation.isAnswering ? "stop.circle.fill" : "arrow.up.circle.fill")
                             .font(.title)
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                             .symbolRenderingMode(.hierarchical)
                     }
                     .buttonStyle(.plain)
-                    .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || conversation.isAnswering)
-                    .accessibilityLabel("Send")
-                    .accessibilityIdentifier("coach.send")
+                    .disabled(!conversation.isAnswering && draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .accessibilityLabel(conversation.isAnswering ? String(localized: "Stop response") : String(localized: "Send"))
+                    .accessibilityIdentifier(conversation.isAnswering ? "coach.stop" : "coach.send")
                 }
-                Button { showsSource = true } label: {
-                    Label("About Coach", systemImage: "info.circle")
-                        .fixedSize(horizontal: false, vertical: true)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("coach.engine")
-                .accessibilityHint("Explains how the Coach chooses its answer")
             }
             .padding(.horizontal, 20)
             .padding(.top, 10)
@@ -101,6 +119,13 @@ struct CoachView: View {
         .navigationTitle("Coach")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showsSource = true } label: {
+                    Label("About Coach", systemImage: "info.circle")
+                }
+                .accessibilityIdentifier("coach.engine")
+                .accessibilityHint("Explains how the Coach chooses its answer")
+            }
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
                 Button("Done") { fieldFocused = false }
@@ -123,7 +148,11 @@ struct CoachView: View {
             .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         }
         .onAppear { conversation.refresh(history: history) }
-        .onDisappear { replyTask?.cancel() }
+        .onChange(of: history) { _, updated in conversation.refresh(history: updated) }
+        .onDisappear {
+            replyTask?.cancel()
+            replyTask = nil
+        }
     }
 
     private var engineLine: String {
@@ -159,7 +188,7 @@ struct CoachView: View {
     @ViewBuilder private func bubble(_ message: CoachMessage) -> some View {
         let isCoach = message.role == .coach
         HStack {
-            if !isCoach { Spacer(minLength: 40) }
+            if !isCoach { Spacer(minLength: typeSize.isAccessibilitySize ? 0 : 40) }
             VStack(alignment: .leading, spacing: 4) {
                 Text(message.text)
                     .font(.body)
@@ -175,14 +204,22 @@ struct CoachView: View {
             .padding(.vertical, 10)
             .background(isCoach ? HomeStyle.card : HomeStyle.filledAccent,
                         in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            if isCoach { Spacer(minLength: 40) }
+            if isCoach { Spacer(minLength: typeSize.isAccessibilitySize ? 0 : 40) }
         }
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(isCoach ? "coach.answer.\(message.engine?.rawValue ?? "opening")" : "coach.question")
+    }
+
+    private func scrollToLatest(using proxy: ScrollViewProxy) {
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
+            proxy.scrollTo("conversation.bottom", anchor: .bottom)
+        }
     }
 
     private func send() {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !conversation.isAnswering else { return }
+        followsLatestReply = true
         draft = ""
         replyTask = Task { await conversation.send(text) }
     }

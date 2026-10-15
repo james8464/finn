@@ -69,6 +69,40 @@ struct PoseIntegrityTests {
         }
     }
 
+    @Test(arguments: [5, 15, 30, 60])
+    func verticalCameraMotionCannotBecomeHipOnlySquats(framesPerSecond: Int) {
+        let frames = (0...(framesPerSecond * 8)).map { index in
+            let time = Double(index) / Double(framesPerSecond)
+            let shift = 0.08 * sin(2 * .pi * time)
+            return PoseFrame(time: time, subjectCount: 1, joints: [
+                .leftShoulder: JointPoint(x: 0.5, y: 0.2 + shift, confidence: 0.9),
+                .leftHip: JointPoint(x: 0.5, y: 0.45 + shift, confidence: 0.9),
+                .leftAnkle: JointPoint(x: 0.5, y: 0.8 + shift, confidence: 0.9)
+            ])
+        }
+        if case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .squat) {
+            #expect(analysis.reps.isEmpty, "Rigid camera translation is not a squat")
+        }
+    }
+
+    @Test(arguments: [5, 15, 30, 60])
+    func observedHipOnlySquatsKeepTheirCountAtDifferentFrameRates(framesPerSecond: Int) throws {
+        let frames = (0...(framesPerSecond * 8)).map { index in
+            let time = Double(index) / Double(framesPerSecond)
+            let shift = 0.2 * (1 - cos(.pi * time)) / 2
+            return PoseFrame(time: time, subjectCount: 1, joints: [
+                .leftShoulder: JointPoint(x: 0.5, y: 0.2 + shift, confidence: 0.9),
+                .leftHip: JointPoint(x: 0.5, y: 0.45 + shift, confidence: 0.9),
+                .leftAnkle: JointPoint(x: 0.5, y: 0.9, confidence: 0.9)
+            ])
+        }
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .squat) else {
+            Issue.record("Clear hip-only squats should remain measurable")
+            return
+        }
+        #expect(analysis.reps.count == 4)
+    }
+
     private var point: JointPoint { JointPoint(x: 0.5, y: 0.4, confidence: 0.9) }
 
     private func standing(at time: TimeInterval) -> PoseFrame {

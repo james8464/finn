@@ -14,18 +14,21 @@ final class CoachConversation {
         self.context = CoachContext.make(history: history)
         self.responder = responder
         messages = [CoachMessage(role: .coach,
-                                 text: Self.opening(for: context, engine: responder.currentEngineKind,
-                                                    language: responder.language),
-                                 engine: responder.currentEngineKind)]
+                                 text: CoachFallback.opening(context: context, language: responder.language))]
     }
 
     /// the app's coach: the standard engine order, with the Claude demo first in Debug builds
     convenience init(history: [WorkoutSessionSummary]) {
         var extra: [any CoachEngine] = []
         #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach") {
+            self.init(history: history, responder: CoachResponder(selector: .standard()))
+            return
+        }
         // synthetic UI tours must not call a live model service. An unsigned iOS 27
         // simulator can advertise PCC as available, then trap inside FoundationModels
-        if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
+        if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo"),
+           !ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach") {
             self.init(history: history, responder: CoachResponder(selector: CoachEngineSelector(engines: [])))
             return
         }
@@ -40,9 +43,20 @@ final class CoachConversation {
     /// why no model answers, when none does: a sentence the person can act on
     var engineNote: String? { responder.unavailableReason }
 
+    func prepare() {
+        guard !context.isEmpty, !isAnswering else { return }
+        responder.prepare()
+    }
+
     /// the saved sets changed (a new set, a deletion): the coach reads them again
     func refresh(history: [WorkoutSessionSummary]) {
-        context = CoachContext.make(history: history)
+        let updated = CoachContext.make(history: history)
+        guard updated != context else { return }
+        context = updated
+        if messages.count == 1, let greeting = messages.first {
+            messages[0] = CoachMessage(id: greeting.id, role: .coach,
+                                       text: CoachFallback.opening(context: context, language: responder.language))
+        }
     }
 
     func send(_ text: String) async {
@@ -79,8 +93,4 @@ final class CoachConversation {
         }
     }
 
-    private static func opening(for context: CoachContext, engine: CoachEngineKind,
-                                language: CoachLanguage) -> String {
-        CoachFallback.opening(context: context, language: language)
-    }
 }

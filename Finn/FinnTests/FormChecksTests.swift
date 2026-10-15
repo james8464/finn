@@ -232,6 +232,29 @@ struct FormChecksTests {
         #expect(review.findings.isEmpty)
     }
 
+    @Test func aBriefDenseBurstCannotOutvoteClearSquatDepth() throws {
+        let clean = squats(thighAtBottom: -5, extraLean: 5)
+        let analysis = try measured(clean, .squat)
+        var frames = clean
+        for rep in 0..<6 {
+            let bottom = clean[rep * 20 + 10]
+            var joints = bottom.joints
+            for joint in [BodyJoint.leftKnee, .rightKnee] {
+                if let original = joints[joint] {
+                    joints[joint] = JointPoint(x: original.x, y: original.y + 0.18, confidence: original.confidence)
+                }
+            }
+            for offset in 1...8 {
+                frames.append(PoseFrame(time: bottom.time + Double(offset) * 0.001,
+                                        subjectCount: 1, joints: joints))
+            }
+        }
+        frames.sort { $0.time < $1.time }
+        let review = FormChecks.review(analysis, frames: frames, definition: .squat)
+        #expect(!review.findings.contains { $0.check == .squatDepth })
+        #expect(review.measurements.first { $0.check == .squatDepth }?.faulty == 0)
+    }
+
     @Test func aPassingBystanderCannotCompleteAHiddenRep() throws {
         let full = pushUps(sag: 0, bottomElbow: 85)
         let frames = full.map { frame in

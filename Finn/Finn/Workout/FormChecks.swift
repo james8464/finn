@@ -446,7 +446,13 @@ nonisolated enum FormChecks {
 
         if check.needsBottomPosition {
             guard last.time - first.time >= 0.1 else { return nil }
-            let value = median(readings.map(\.value))
+            let visibleDuration = zip(readings, readings.dropFirst()).reduce(0.0) { total, pair in
+                let gap = pair.1.time - pair.0.time
+                return total + (gap <= maximumReadingGap + 0.000_001 ? gap : 0)
+            }
+            let windowDuration = (frames.last?.time ?? last.time) - (frames.first?.time ?? first.time)
+            guard visibleDuration >= windowDuration * 0.6 else { return nil }
+            let value = timeWeightedMedian(readings)
             return FormRepReading(number: rep.number, value: value, isFault: check.isFault(value))
         }
 
@@ -470,12 +476,34 @@ nonisolated enum FormChecks {
             let run = start..<(index + 1)
             if run.count >= 3, current.time - readings[start].time + 0.000_001 >= minimumFaultDuration {
                 // The longest supported episode represents the rep, not its single worst frame.
-                if run.count > (sustained?.count ?? 0) { sustained = run }
+                let duration = current.time - readings[start].time
+                let previousDuration = sustained.map { readings[$0.upperBound - 1].time - readings[$0.lowerBound].time } ?? 0
+                if duration > previousDuration { sustained = run }
             }
         }
         guard observedDuration >= rep.duration * 0.6 else { return nil }
-        let values = sustained.map { readings[$0].map(\.value) } ?? readings.map(\.value)
-        return FormRepReading(number: rep.number, value: median(values), isFault: sustained != nil)
+        let supported = sustained.map { Array(readings[$0]) } ?? readings
+        return FormRepReading(number: rep.number, value: timeWeightedMedian(supported), isFault: sustained != nil)
+    }
+
+    /// Weight by observed time so a short burst of noisy frames cannot outvote a longer clear
+    /// view. Missing intervals contribute no weight. This does not interpolate unseen poses.
+    private static func timeWeightedMedian(_ readings: [(time: TimeInterval, value: Double)]) -> Double {
+        let weighted = readings.indices.map { index -> (value: Double, weight: Double) in
+            let before = index > 0 ? readings[index].time - readings[index - 1].time : 0
+            let after = index + 1 < readings.count ? readings[index + 1].time - readings[index].time : 0
+            let weight = (before <= maximumReadingGap + 0.000_001 ? before / 2 : 0)
+                + (after <= maximumReadingGap + 0.000_001 ? after / 2 : 0)
+            return (readings[index].value, weight)
+        }.sorted { $0.value < $1.value }
+        let halfway = weighted.reduce(0.0) { $0 + $1.weight } / 2
+        guard halfway > 0 else { return median(readings.map(\.value)) }
+        var accumulated = 0.0
+        for reading in weighted {
+            accumulated += reading.weight
+            if accumulated >= halfway { return reading.value }
+        }
+        return weighted.last?.value ?? 0
     }
 
     /// A set-wide median can hide the athlete turning for a few reps. Those reps must not

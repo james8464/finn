@@ -50,6 +50,7 @@ protocol CoachEngine: AnyObject {
     var available: Bool { get }
     /// why this engine cannot answer right now, as one sentence the person can act on; nil when it can
     var unavailableReason: String? { get }
+    func prepare(language: CoachLanguage)
     /// selects relevant saved-set labels for `question`; the returned text is never displayed
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String
@@ -86,6 +87,7 @@ final class CoachEngineSelector {
 
 extension CoachEngine {
     var unavailableReason: String? { nil }
+    func prepare(language: CoachLanguage) {}
 }
 
 /// reads why Foundation Models cannot run, once per check, and says what to do about it
@@ -136,6 +138,10 @@ final class CoachResponder {
     /// why no model answers, when none does
     var unavailableReason: String? { selector.unavailableReason() }
 
+    func prepare() {
+        selector.current()?.prepare(language: language)
+    }
+
     func answer(_ question: String, context: CoachContext, history: [CoachMessage]) async -> CoachMessage {
         let fallback = CoachMessage(role: .coach,
                                     text: CoachFallback.reply(to: question, context: context, language: language),
@@ -178,7 +184,7 @@ enum FoundationModelsCoachPrompt {
         if let note = FinnPreferences.app.onboardingProfile.coachNote {
             sections.append("Person's stated preferences:\n" + String(note.prefix(500)))
         }
-        sections.append("Saved sets, oldest first:\n" + String(context.promptText().prefix(4_000)))
+        sections.append("Saved sets, oldest first:\n" + context.boundedPromptText(maximumCharacters: 4_000))
         let recent = history.suffix(4)
         if !recent.isEmpty {
             let lines = recent.map { message in
@@ -206,6 +212,22 @@ private struct AppleCoachSelection {
 @MainActor
 final class OnDeviceCoachEngine: CoachEngine {
     let kind: CoachEngineKind = .onDevice
+    private var preparedSession: LanguageModelSession?
+    private var preparedLanguage: CoachLanguage?
+
+    func prepare(language: CoachLanguage) {
+        guard available, SystemLanguageModel.default.supportsLocale(language.locale) else { return }
+        guard preparedSession == nil || preparedLanguage != language else { return }
+        let session = makeSession(language: language)
+        session.prewarm()
+        preparedSession = session
+        preparedLanguage = language
+    }
+
+    private func makeSession(language: CoachLanguage) -> LanguageModelSession {
+        LanguageModelSession(model: SystemLanguageModel.default,
+                             instructions: FoundationModelsCoachPrompt.instructions(language: language))
+    }
 
     var available: Bool {
         if case .available = SystemLanguageModel.default.availability { return true }
@@ -222,12 +244,16 @@ final class OnDeviceCoachEngine: CoachEngine {
             throw CoachGenerationError.unavailable
         }
         try Task.checkCancellation()
-        let session = LanguageModelSession(model: SystemLanguageModel.default,
-                                           instructions: FoundationModelsCoachPrompt.instructions(language: language))
+        let session = preparedLanguage == language
+            ? preparedSession ?? makeSession(language: language)
+            : makeSession(language: language)
+        // Each turn owns its session; prewarming must never reuse an active transcript.
+        preparedSession = nil
+        preparedLanguage = nil
         let response = try await session.respond(
             to: FoundationModelsCoachPrompt.prompt(question: question, context: context, history: history),
             generating: AppleCoachSelection.self,
-            options: GenerationOptions(maximumResponseTokens: 128))
+            options: GenerationOptions(samplingMode: .greedy, maximumResponseTokens: 128))
         return FoundationModelsCoachPrompt.labels(for: response.content.setNumbers, context: context) ?? "NONE"
     }
 }

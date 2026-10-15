@@ -115,3 +115,44 @@ separate checks. This work does not claim perfect accuracy or complete freedom f
 [guided]: https://developer.apple.com/documentation/foundationmodels/generating-swift-data-structures-with-guided-generation
 [pcc]: https://developer.apple.com/documentation/foundationmodels/adding-server-side-intelligence-with-private-cloud-compute
 [entitlement]: https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.private-cloud-compute
+
+## PR #34 follow-up: Coach and variable-rate evidence
+
+The follow-up keeps the same bundle identifiers and works on the PR branch, separately from the
+active interface checkout.
+
+- The Coach prompt now retains whole, bounded records from the newest sets, with their dates.
+  Previously, cutting the first 4,000 characters could remove the newest workout entirely.
+- The fixed greeting is no longer labelled as an Apple Intelligence response. It refreshes when
+  history changes before the conversation starts. Actual replies retain their engine source.
+- The on-device selector uses greedy guided generation. A session can prewarm when the person
+  focuses the composer; each submitted turn consumes that session exactly once. This follows
+  Apple's [prewarming guidance](https://developer.apple.com/documentation/foundationmodels/languagemodelsession/prewarm%28promptprefix%3A%29).
+  No measured latency improvement is claimed here.
+- Coach scrolling follows the latest message identity, including after the 40-message limit;
+  pending replies can be cancelled. The information button moves to the toolbar, leaving room
+  for the composer at accessibility text sizes. Missing Spanish Coach explanations are translated.
+- Hip-only squat counting checks ankle speed in both axes, using elapsed time and one consistently
+  tracked ankle. The former per-frame horizontal threshold varied with frame rate and missed
+  vertical camera motion. The fallback rubric is `squat-trunk-v3`.
+- Technique summaries weight readings by observed time. A dense, brief burst cannot dominate a
+  longer clear view. Bottom-position checks require temporal coverage, and sustained faults are
+  compared by duration instead of sample count. Hidden athletes cannot supply anchor evidence.
+
+### Native Apple Intelligence test
+
+`NativeCoachIntegrationTests` is opt-in with `TEST_RUNNER_FINN_NATIVE_COACH_TESTS=1`. It checks
+availability and locale support, invokes the production on-device engine, and requires the exact
+recorded answer with engine `.onDevice`; a fallback fails. A separate UI test uses a synthetic
+camera recording but the real production model. Ordinary CI explicitly skips these native tests
+unless enabled, because runner model assets are not guaranteed.
+
+The first native integration run passed all four locale cases in 22.834 seconds on the iOS 27
+simulator, using this Mac's model. Apple explains that simulator inference uses the host Mac's
+assets and requires compatible OS/runtime versions in its
+[developer forum guidance](https://developer.apple.com/forums/thread/787445).
+This is real model inference, not evidence of performance or crash freedom on an iPhone.
+
+The full unit suite at that point passed 535 Swift tests across 63 suites. The 15 strict rendered
+video fixtures and the mirrored/framing checks also passed. Strong blur and camera movement can
+still produce a provisional live count before the final rejection; this limitation is unchanged.
