@@ -83,6 +83,19 @@ nonisolated struct HipCountTests {
         #expect(count(JuryTraces.squats(reps: 6, from: 0, hidesHipsAtTheBottom: true))?.reps == 6)
     }
 
+    @Test func aTinySubjectCannotUseTheHipOnlyCount() {
+        let frames = JuryTraces.squats(reps: 6, from: 0).map { frame in
+            let joints = frame.joints.mapValues { point in
+                JointPoint(x: 0.5 + (point.x - 0.5) * 0.25,
+                           y: 0.5 + (point.y - 0.5) * 0.25,
+                           confidence: point.confidence)
+            }
+            return PoseFrame(time: frame.time, subjectCount: 1, joints: joints,
+                             aspectRatio: frame.aspectRatio, athleteTracking: .tracked)
+        }
+        #expect(count(frames) == nil)
+    }
+
     /// The athlete steps out of the picture for two and a half seconds between reps.
     @Test func steppingOutOfViewKeepsTheRepsOnEitherSide() {
         let frames = JuryTraces.squats(reps: 3, from: 0) + JuryTraces.gap(from: 7, seconds: 2.5)

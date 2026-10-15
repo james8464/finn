@@ -44,20 +44,19 @@ check_result "lower body hidden" "squat-lower-body-hidden.mp4" retake 0
 check_result "feet hidden" "squat-feet-hidden.mp4" measured 6
 check_result "dim light" "squat-dim.mp4" measured 6
 check_result "farther phone" "squat-far.mp4" measured 6
-# At 30% size the person was refused until the reliability pass of 13 October; the side rubric
-# now measures its six reps (local macOS replay, 15 October).
-check_result "too far" "squat-too-far.mp4" measured 6
+# At 30% size the torso is too small for the hip-only fallback, and the side-view
+# evidence gate also refuses posture advice. Keep the retake rather than guessing.
+check_result "too far" "squat-too-far.mp4" retake 0
 check_result "slower tempo" "squat-slow.mp4" measured 6
 check_result "bright exposure" "squat-overexposed.mp4" measured 6
 check_result "warm indoor color" "squat-warm-indoor.mp4" measured 6
 check_result "low resolution" "squat-low-resolution.mp4" measured 6
 check_result "off-center framing" "squat-off-center.mp4" measured 6
 check_result "tilted phone" "squat-angled-phone.mp4" measured 6
-# Nine blended frames plus a strong spatial blur (generate_video_variants.py), and frame shifts
-# during the set: the side rubric refuses both (the hip or the ankle is not clear often enough),
-# and since 15 October the hips count their six squats without posture advice (squat-trunk-v1).
-check_result "motion blur" "squat-motion-blur.mp4" measured 6
-check_result "moving phone" "squat-phone-shake.mp4" measured 6
+# Strong blur leaves too few clear hip-and-shoulder pairs. Frame shifts reveal an
+# unsteady phone. Neither condition supports the hip-only count or posture advice.
+check_result "motion blur" "squat-motion-blur.mp4" retake 0
+check_result "moving phone" "squat-phone-shake.mp4" retake 0
 
 # Mirroring the source currently reduces Vision's required-joint coverage from roughly 81% to
 # 71%; the gate safely asks for a retake. Report it as a known camera-direction limitation rather
