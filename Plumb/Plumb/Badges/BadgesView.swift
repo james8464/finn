@@ -1,21 +1,19 @@
 import SwiftUI
 
-/// The Awards page: every badge, earned ones with the measured fact behind them and the date, the
-/// rest with how to earn them. Black on white, like the rest of Plumb.
+/// The Awards tab: every badge, earned ones with the measured fact behind them and the date, the
+/// rest with how to earn them. Dark silk, glass rows, one white disc per earned badge.
 struct BadgesView: View {
     let ledger: BadgeLedger
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
+                DarkScreenTitle(title: "Awards", subtitle: ledger.count == 0 ? nil
+                    : ledger.count == 1 ? "1 badge earned" : "\(ledger.count) badges earned")
+                    .padding(.bottom, 12)
+                    .accessibilityIdentifier("badges.count")
                 if ledger.count == 0 {
                     emptyState
-                } else {
-                    Text(ledger.count == 1 ? "1 badge earned" : "\(ledger.count) badges earned")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(HomeStyle.supportingText)
-                        .padding(.horizontal, 4)
-                        .accessibilityIdentifier("badges.count")
                 }
                 ForEach(ledger.all, id: \.kind) { entry in
                     BadgeRow(kind: entry.kind, earned: entry.earned)
@@ -24,16 +22,17 @@ struct BadgesView: View {
                     .font(.footnote)
                     .foregroundStyle(HomeStyle.supportingText)
                     .padding(.horizontal, 4)
-                    .padding(.top, 4)
+                    .padding(.top, 8)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+            .padding(.top, 20)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
-        .background(HomeStyle.background.ignoresSafeArea())
-        .navigationTitle("Awards")
-        .toolbarTitleDisplayMode(.inline)
+        .darkScreen()
+        .navigationTitle("")
+        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
         .onAppear { ledger.acknowledge() }
     }
 
@@ -47,7 +46,7 @@ struct BadgesView: View {
                 .foregroundStyle(HomeStyle.supportingText)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .optionCard()
+        .darkGlassCard()
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("badges.empty")
     }
@@ -80,16 +79,15 @@ struct BadgeRow: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .opacity(earned == nil ? 0.72 : 1)
+        .foregroundStyle(.white)
+        .darkGlassCard(padding: 16)
+        .opacity(earned == nil ? 0.75 : 1)
         .accessibilityElement(children: .combine)
         .accessibilityValue(earned == nil ? "Not earned yet" : "Earned")
     }
 }
 
-/// The badge itself: a black disc when earned, a dashed outline when not.
+/// The badge itself: a white disc when earned, a dashed white outline when not.
 struct BadgeMark: View {
     let kind: BadgeKind
     let earned: Bool
@@ -98,13 +96,14 @@ struct BadgeMark: View {
     var body: some View {
         ZStack {
             if earned {
-                Circle().fill(Color.primary)
+                Circle().fill(.white)
+                    .shadow(color: .white.opacity(0.25), radius: size * 0.18)
             } else {
-                Circle().strokeBorder(Color.primary.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [3, 4]))
+                Circle().strokeBorder(Color.white.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [3, 4]))
             }
             Image(systemName: kind.symbol)
                 .font(.system(size: size * 0.42, weight: .semibold))
-                .foregroundStyle(earned ? Color(uiColor: .systemBackground) : Color.primary.opacity(0.55))
+                .foregroundStyle(earned ? Color.black : Color.white.opacity(0.55))
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
@@ -133,23 +132,20 @@ struct BadgeUnlockCard: View {
                     Spacer(minLength: 0)
                     Text(badges.count == 1 ? "New badge" : "\(badges.count) new badges")
                         .font(.footnote.weight(.semibold))
-                        .foregroundStyle(Color.primary.opacity(0.72))
+                        .foregroundStyle(HomeStyle.supportingText)
                 }
                 ForEach(badges) { badge in
                     VStack(alignment: .leading, spacing: 2) {
                         Text(badge.kind.title).font(.headline)
                         Text(badge.detail)
                             .font(.subheadline)
-                            .foregroundStyle(Color.primary.opacity(0.72))
+                            .foregroundStyle(HomeStyle.supportingText)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .foregroundStyle(Color.primary)
-            .background(Color(uiColor: .secondarySystemBackground),
-                        in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .foregroundStyle(.white)
+            .darkGlassCard()
         }
         .buttonStyle(PressableStyle())
         .sensoryFeedback(.success, trigger: shown)

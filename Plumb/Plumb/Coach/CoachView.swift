@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// A plain conversation with the coach about the saved sets. Kept simple so it can be dressed later.
+/// The Coach tab: a conversation about the saved sets, on dark silk. The coach speaks in glass
+/// bubbles, the person in white ones.
 struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var draft = ""
@@ -22,6 +23,9 @@ struct CoachView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
+                        DarkScreenTitle(title: "Coach")
+                            .padding(.top, 4)
+                            .padding(.bottom, 12)
                         ForEach(conversation.messages) { message in
                             bubble(message)
                                 .id(message.id)
@@ -41,7 +45,8 @@ struct CoachView: View {
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(.top, 16)
+                    .padding(.bottom, 16)
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .onChange(of: conversation.messages.count) { _, _ in
@@ -63,9 +68,9 @@ struct CoachView: View {
                     Button(action: send) {
                         Image(systemName: "arrow.up")
                             .font(.body.weight(.bold))
-                            .foregroundStyle(Color(uiColor: .systemBackground))
+                            .foregroundStyle(.black)
                             .frame(width: 36, height: 36)
-                            .background(Color.primary, in: Circle())
+                            .background(.white, in: Circle())
                     }
                     .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty || conversation.isAnswering)
                     .opacity(draft.trimmingCharacters(in: .whitespaces).isEmpty ? 0.35 : 1)
@@ -73,10 +78,10 @@ struct CoachView: View {
                     .accessibilityLabel("Send")
                     .accessibilityIdentifier("coach.send")
                 }
-                .background(HomeStyle.card, in: Capsule())
+                .plumbGlass(in: Capsule())
                 Text(engineLine)
                     .font(.caption2)
-                    .foregroundStyle(HomeStyle.supportingText)
+                    .foregroundStyle(Color.white.opacity(0.4))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityIdentifier("coach.engine")
             }
@@ -84,9 +89,9 @@ struct CoachView: View {
             .padding(.top, 10)
             .padding(.bottom, 8)
         }
-        .background(HomeStyle.background.ignoresSafeArea())
-        .navigationTitle("Coach")
-        .navigationBarTitleDisplayMode(.inline)
+        .darkScreen()
+        .navigationTitle("")
+        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
         .onAppear { conversation.refresh(history: history) }
     }
 
@@ -108,11 +113,12 @@ struct CoachView: View {
                 } label: {
                     Text(question)
                         .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 11)
-                        .overlay(Capsule().strokeBorder(Color.primary.opacity(0.18), lineWidth: 1))
+                        .plumbGlass(in: Capsule(), interactive: true)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableStyle())
             }
         }
         .padding(.top, 4)
@@ -126,7 +132,7 @@ struct CoachView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(message.text)
                     .font(.body)
-                    .foregroundStyle(isCoach ? Color.primary : Color(uiColor: .systemBackground))
+                    .foregroundStyle(isCoach ? Color.white : Color.black)
                     .fixedSize(horizontal: false, vertical: true)
                 if isCoach, let engine = message.engine {
                     Text(engine.label)
@@ -136,8 +142,13 @@ struct CoachView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(isCoach ? HomeStyle.card : Color.primary,
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .background {
+                if isCoach {
+                    Color.clear.plumbGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                } else {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.white)
+                }
+            }
             if isCoach { Spacer(minLength: 40) }
         }
         .accessibilityElement(children: .combine)

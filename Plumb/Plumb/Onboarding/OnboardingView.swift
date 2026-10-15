@@ -37,8 +37,7 @@ struct OnboardingView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
         }
-        .background(HomeStyle.background.ignoresSafeArea())
-        .tint(.primary)
+        .darkScreen()
         .interactiveDismissDisabled()
     }
 
@@ -48,7 +47,7 @@ struct OnboardingView: View {
         HStack(spacing: 6) {
             ForEach(0..<Self.stepCount, id: \.self) { index in
                 Capsule()
-                    .fill(index <= step ? Color.primary : HomeStyle.card)
+                    .fill(index <= step ? Color.white : Color.white.opacity(0.18))
                     .frame(height: 4)
             }
         }
@@ -61,8 +60,7 @@ struct OnboardingView: View {
     private var actions: some View {
         VStack(spacing: 2) {
             Button(action: advance) {
-                PrimaryActionLabel(title: isLast ? "Start" : "Continue",
-                                   symbol: isLast ? "checkmark" : "arrow.right")
+                PrimaryActionLabel(title: isLast ? "Start" : "Continue")
             }
             .buttonStyle(PressableStyle())
             .accessibilityIdentifier("onboarding.continue")
@@ -93,7 +91,7 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(title)
-                        .font(.largeTitle.bold())
+                        .font(.system(size: 34, weight: .bold))
                         .accessibilityAddTraits(.isHeader)
                     Text(subtitle)
                         .font(.body)
@@ -104,8 +102,8 @@ struct OnboardingView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
-            .padding(.top, 28)
-            .padding(.bottom, 16)
+            .padding(.top, 32)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
@@ -176,7 +174,7 @@ struct OnboardingView: View {
                 }
                 .tint(Color(uiColor: .systemGreen))
                 .accessibilityIdentifier("onboarding.speaksLive")
-                .optionCard()
+                .darkGlassCard()
                 HStack(alignment: .top, spacing: 14) {
                     Image(systemName: "airpods.pro")
                         .font(.title2)
@@ -190,7 +188,7 @@ struct OnboardingView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .optionCard()
+                .darkGlassCard()
             }
         }
     }
@@ -213,7 +211,7 @@ struct OnboardingView: View {
                     placementRow("person.crop.rectangle", String(localized: "Whole body in the frame"),
                                  String(localized: "Head and feet both visible, with a bit of room above and below."))
                 }
-                .optionCard()
+                .darkGlassCard()
                 Label("The camera is asked for when you start your first set, not now.", systemImage: "camera")
                     .font(.footnote)
                     .foregroundStyle(HomeStyle.supportingText)
@@ -264,7 +262,7 @@ private struct ChoiceCard: View {
                     Text(title).font(.headline)
                     Text(detail)
                         .font(.subheadline)
-                        .opacity(0.78)
+                        .opacity(selected ? 0.7 : 0.6)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)
@@ -274,9 +272,14 @@ private struct ChoiceCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .foregroundStyle(selected ? Color(uiColor: .systemBackground) : Color.primary)
-            .background(selected ? Color.primary : HomeStyle.card,
-                        in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .foregroundStyle(selected ? Color.black : Color.white)
+            .background {
+                if selected {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous).fill(.white)
+                } else {
+                    Color.clear.plumbGlass(in: RoundedRectangle(cornerRadius: 20, style: .continuous), interactive: true)
+                }
+            }
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -314,13 +317,9 @@ private struct ExerciseTile: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom],
-                               startPoint: .top, endPoint: .bottom),
-                in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .plumbGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous), interactive: true)
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .strokeBorder(rank == nil ? .white.opacity(0.08) : .white, lineWidth: rank == nil ? 1 : 2))
-            .environment(\.colorScheme, .dark)
+                .strokeBorder(.white, lineWidth: rank == nil ? 0 : 1.5))
         }
         .buttonStyle(PressableStyle())
         .accessibilityLabel(kind.definition.copy.name)
@@ -358,7 +357,7 @@ struct PlacementScene: View {
                                startPoint: .top, endPoint: .bottom),
                 in: RoundedRectangle(cornerRadius: 28, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .strokeBorder(.white.opacity(0.08), lineWidth: 1))
+                .strokeBorder(HomeStyle.hairline, lineWidth: 0.5))
             .environment(\.colorScheme, .dark)
         }
         .accessibilityElement()
