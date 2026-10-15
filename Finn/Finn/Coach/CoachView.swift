@@ -23,6 +23,51 @@ struct CoachView: View {
     }
 
     var body: some View {
+        VStack(spacing: 0) {
+            transcript
+            composer
+        }
+        .background(HomeStyle.background.ignoresSafeArea())
+        .navigationTitle("Coach")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showsSource = true } label: {
+                    Label("About Coach", systemImage: "info.circle")
+                }
+                .accessibilityIdentifier("coach.engine")
+                .accessibilityHint("Explains how the Coach chooses its answer")
+            }
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { fieldFocused = false }
+                    .accessibilityIdentifier("coach.dismissKeyboard")
+            }
+        }
+        .sheet(isPresented: $showsSource) {
+            NavigationStack {
+                List {
+                    Section("Source") {
+                        Text(engineLine)
+                        if let note = conversation.engineNote { Text(note).foregroundStyle(.secondary) }
+                    }
+                    Section { Text("Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique.") }
+                }
+                .navigationTitle("About Coach")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showsSource = false } } }
+            }
+            .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])
+        }
+        .onAppear { conversation.refresh(history: history) }
+        .onChange(of: history) { _, updated in conversation.refresh(history: updated) }
+        .onDisappear {
+            replyTask?.cancel()
+            replyTask = nil
+        }
+    }
+
+    private var transcript: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
@@ -49,6 +94,7 @@ struct CoachView: View {
                 .padding(.vertical, 16)
             }
             .scrollDismissesKeyboard(.interactively)
+            .clipped()
             .onScrollGeometryChange(for: Bool.self) { geometry in
                 geometry.contentSize.height - geometry.visibleRect.maxY < 100
             } action: { _, isNearBottom in
@@ -65,11 +111,12 @@ struct CoachView: View {
             .onChange(of: fieldFocused) { _, focused in
                 if focused {
                     conversation.prepare()
-                    if followsLatestReply { scrollToLatest(using: proxy) }
                 }
             }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+    }
+
+    private var composer: some View {
             VStack(spacing: 6) {
                 HStack(spacing: 10) {
                     TextField("Ask about your sets", text: $draft,
@@ -115,45 +162,6 @@ struct CoachView: View {
             .padding(.bottom, 8)
             .background(HomeStyle.background)
         }
-        .background(HomeStyle.background.ignoresSafeArea())
-        .navigationTitle("Coach")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showsSource = true } label: {
-                    Label("About Coach", systemImage: "info.circle")
-                }
-                .accessibilityIdentifier("coach.engine")
-                .accessibilityHint("Explains how the Coach chooses its answer")
-            }
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") { fieldFocused = false }
-                    .accessibilityIdentifier("coach.dismissKeyboard")
-            }
-        }
-        .sheet(isPresented: $showsSource) {
-            NavigationStack {
-                List {
-                    Section("Source") {
-                        Text(engineLine)
-                        if let note = conversation.engineNote { Text(note).foregroundStyle(.secondary) }
-                    }
-                    Section { Text("Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique.") }
-                }
-                .navigationTitle("About Coach")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showsSource = false } } }
-            }
-            .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])
-        }
-        .onAppear { conversation.refresh(history: history) }
-        .onChange(of: history) { _, updated in conversation.refresh(history: updated) }
-        .onDisappear {
-            replyTask?.cancel()
-            replyTask = nil
-        }
-    }
 
     private var engineLine: String {
         switch conversation.engineKind {
