@@ -82,36 +82,46 @@ nonisolated struct CoachContext: Equatable, Sendable {
             let set: SetSummary
             let comparison: String?
         }
-        var pending: [Pending] = []
+        let retainedCount = max(0, min(limit, 32))
+        guard retainedCount > 0 else { return CoachContext(facts: []) }
+        // Sessions can overlap. A session's start does not establish when its last set happened.
+        let chronologicalSets = history.flatMap(\.sets).sorted { earlier, later in
+            if earlier.capturedAt != later.capturedAt {
+                return earlier.capturedAt < later.capturedAt
+            }
+            return earlier.id.uuidString < later.id.uuidString
+        }
+        let firstRetainedIndex = max(0, chronologicalSets.count - retainedCount)
+        var kept: [Pending] = []
+        kept.reserveCapacity(min(retainedCount, chronologicalSets.count))
+        var previousBySession: [UUID: SetSummary] = [:]
         var previousByCheck: [FormHistoryKey: SetSummary] = [:]
-        for session in history.sorted(by: { $0.startedAt < $1.startedAt }) {
-            let sets = session.sets.sorted { $0.capturedAt < $1.capturedAt }
-            var previousInSession: SetSummary?
-            for set in sets {
+        for (index, set) in chronologicalSets.enumerated() {
+            let eligible = FormTrend.eligibleMeasurements(in: set)
+            // Older sets supply comparison evidence, but do not need strings or pending facts.
+            if index >= firstRetainedIndex {
                 var comparisons: [String] = []
-                if let previousInSession,
-                   let compared = SetComparison.compare(previousInSession, set) {
+                if let previous = previousBySession[set.sessionID],
+                   let compared = SetComparison.compare(previous, set) {
                     comparisons.append(describe(compared, exercise: set.exercise))
                 }
-                let eligible = FormTrend.eligibleMeasurements(in: set)
                 let priorSets = eligible.compactMap { previousByCheck[FormHistoryKey(set, check: $0.check)] }
                     .sorted { $0.capturedAt > $1.capturedAt }
                 comparisons += FormTrend.compareLatest(to: set, among: priorSets).map(\.sentence)
-                pending.append(Pending(set: set,
-                                       comparison: comparisons.isEmpty ? nil : comparisons.joined(separator: " ")))
-                previousInSession = set
-                for measurement in eligible {
-                    previousByCheck[FormHistoryKey(set, check: measurement.check)] = set
-                }
+                kept.append(Pending(set: set,
+                                    comparison: comparisons.isEmpty ? nil : comparisons.joined(separator: " ")))
+            }
+            previousBySession[set.sessionID] = set
+            for measurement in eligible {
+                previousByCheck[FormHistoryKey(set, check: measurement.check)] = set
             }
         }
-        let kept = Array(pending.suffix(max(0, min(limit, 32))))
         let facts = kept.enumerated().map { offset, item -> CoachSetFact in
             let set = item.set
             let definition = set.exercise.definition
             var observation: String?
             var nextAction: String?
-            if let cue = set.cue {
+            if set.cueResponse != .notRelevant, let cue = set.cue {
                 observation = [cue.observation, cue.nextAction]
                     .filter { !$0.isEmpty }
                     .joined(separator: " ")

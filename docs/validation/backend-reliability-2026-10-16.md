@@ -185,3 +185,15 @@ submits the existing question, and leaves pasted paragraphs editable. All 31 Coa
 the keyboard/tab-switch UI regression passed. The updated privacy disclosure UI check also passed.
 The UI assertion checks the latest visible reply rather than assuming a lazy transcript retains
 every off-screen accessibility row.
+
+A final context audit found that sorting sessions by their start time could choose an older set
+as “latest” when sessions overlapped. Context now orders individual sets by capture time, with a
+stable identity tie-break, and preserves within-session comparison predecessors. It only builds
+comparison wording for the retained (at most 32) facts. Chronological sorting remains O(n log n);
+this change reduces unnecessary text construction without claiming a constant-time history scan.
+User-rejected observations and their next-action advice are also excluded from Coach prompts.
+Regression tests cover overlapping sessions, comparison evidence outside the retained window,
+input-order independence, and rejected advice.
+
+The final platform-independent backend run passed **245 tests in 19 suites**, including the new
+chronology, rejected-observation and keyboard-edit regressions.

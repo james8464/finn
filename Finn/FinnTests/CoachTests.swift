@@ -70,6 +70,36 @@ struct CoachTests {
         #expect(prompt.contains("Set 3: Push-up, 8 reps"))
     }
 
+    @Test func overlappingSessionsKeepTheActualLatestSetAndItsEarlierComparison() {
+        let firstSession = UUID()
+        let secondSession = UUID()
+        let start = Date(timeIntervalSince1970: 1_760_000_000)
+        let first = set(session: firstSession, at: start, range: 0.4)
+        let latest = set(session: firstSession, at: start.addingTimeInterval(300), range: 0.2)
+        let middle = set(session: secondSession, at: start.addingTimeInterval(100), range: 0.5)
+        let history = [
+            WorkoutSessionSummary(id: firstSession, startedAt: start, sets: [first, latest]),
+            WorkoutSessionSummary(id: secondSession, startedAt: middle.capturedAt, sets: [middle])
+        ]
+        let context = CoachContext.make(history: history, limit: 2)
+        #expect(context.facts.map(\.id) == [middle.id, latest.id])
+        #expect(context.latest?.comparison?.contains("shorter") == true)
+        #expect(CoachContext.make(history: history.reversed(), limit: 2) == context)
+    }
+
+    @Test func rejectedObservationIsNotRepeatedAsAdvice() {
+        let session = UUID()
+        var rejected = set(session: session, at: .now, cue: rangeCue)
+        rejected.cueResponse = .notRelevant
+        let context = CoachContext.make(history: [
+            WorkoutSessionSummary(id: session, startedAt: rejected.capturedAt, sets: [rejected])
+        ])
+        #expect(context.latest?.observation == nil)
+        #expect(context.latest?.nextAction == nil)
+        #expect(!context.promptText().contains(rangeCue.nextAction))
+        #expect(context.latest?.repCount == 6)
+    }
+
     @Test func contextKeepsOnlyTheMostRecentSets() {
         let session = UUID()
         let start = Date(timeIntervalSince1970: 1_760_000_000)
