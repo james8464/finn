@@ -244,7 +244,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Delete all local data"].tap()
         app.buttons["Delete all data"].tap()
         XCTAssertTrue(app.staticTexts["No saved sessions yet."].waitForExistence(timeout: 5))
-        try app.performAccessibilityAudit()
+        try audit(app, at: "history")
     }
 
     @MainActor

@@ -492,6 +492,17 @@ struct ContentView: View {
     private var privacyPage: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 16) {
+                    privacyFact("video.slash", "No video is saved",
+                                "Frames are analyzed on this iPhone, then dropped.")
+                    privacyFact("icloud.slash", "No account, no upload",
+                                "Plumb has no server. Set summaries are saved on this iPhone.")
+                    privacyFact("trash", "Yours to delete",
+                                "Remove one session or everything in History.")
+                }
+                .padding(18)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Camera").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Video is processed on this iPhone and never saved.")
@@ -550,16 +561,37 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.large)
     }
 
+    /// One plain fact at the top of Privacy.
+    private func privacyFact(_ symbol: String, _ title: String, _ detail: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: symbol)
+                .font(.title3)
+                .frame(width: 30)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.headline)
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(PlumbStyle.supportingText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
     private var optionsPage: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Exercise recognition").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     if model.recognitionMethod != .unavailable {
                         Toggle("Recognize the exercise automatically", isOn: Binding(
                             get: { model.recognizesExercise },
                             set: { model.recognizesExercise = $0 }
                         ))
+                        .font(.body)
+                        .foregroundStyle(Color.primary)
+                        .tint(Color(uiColor: .systemGreen))
                         .frame(minHeight: 44)
                         .accessibilityIdentifier("options.recognizeExercise")
                     }
@@ -576,28 +608,37 @@ struct ContentView: View {
                             get: { model.usesTrainedModel },
                             set: { model.usesTrainedModel = $0 }
                         ))
+                        .font(.body)
+                        .foregroundStyle(Color.primary)
+                        .tint(Color(uiColor: .systemGreen))
                         .frame(minHeight: 44)
                         .accessibilityIdentifier("options.useTrainedModel")
                     }
                 }
-                Divider()
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Camera angle").font(.headline).accessibilityAddTraits(.isHeader)
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Camera angle").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Check the camera angle in 3D", isOn: Binding(
                         get: { model.checksCameraAngle },
                         set: { model.checksCameraAngle = $0 }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.checkCameraAngle")
                     Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. It only refuses a set when you clearly face the camera, or face away, for several seconds. If it asks you to turn while your side already faces the camera, switch this off.")
                 }
-                Divider()
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Hands-free").font(.headline).accessibilityAddTraits(.isHeader)
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Hands-free").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Start and stop sets for me", isOn: Binding(
                         get: { model.handsFree },
                         set: { model.handsFree = $0 }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.handsFree")
                     Text("Once you hold still in position for a moment, Plumb counts down and starts the set. It ends the set when you walk back to your iPhone, or when you stop moving after your reps. Start set and Stop set still work.")
@@ -605,13 +646,16 @@ struct ContentView: View {
                         get: { model.speaksLive },
                         set: { model.speaksLive = $0 }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.speaksLive")
                     Text("Plumb says the countdown, each counted rep, and when a rep is clearly faster or shorter than your first reps of the set. It uses your AirPods or other headphones when they are connected, otherwise the iPhone speaker.")
                 }
-                Divider()
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Apple Fitness").font(.headline).accessibilityAddTraits(.isHeader)
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Apple Fitness").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Save workouts to Apple Fitness", isOn: Binding(
                         get: { model.savesToFitness },
                         set: { isOn in
@@ -620,6 +664,9 @@ struct ContentView: View {
                             if isOn { Task { await model.requestFitnessAccess() } }
                         }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .disabled(!model.offersFitness)
                     .accessibilityIdentifier("options.savesToFitness")
@@ -630,14 +677,17 @@ struct ContentView: View {
                             .accessibilityIdentifier("options.fitnessNote")
                     }
                 }
-                Divider()
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Personalize with Health").font(.headline).accessibilityAddTraits(.isHeader)
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Personalize with Health").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Use my Health data", isOn: Binding(
                         get: { model.personalizesWithHealth },
                         // Permission in context: Health asks for each type when the person turns this on.
                         set: { isOn in Task { await model.setPersonalizesWithHealth(isOn) } }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .disabled(!model.offersHealthPersonalization)
                     .accessibilityIdentifier("options.personalizesWithHealth")
@@ -656,12 +706,16 @@ struct ContentView: View {
                         .accessibilityElement(children: .combine)
                     }
                 }
+                .optionCard()
             }
-            .font(.body)
+            .font(.subheadline)
+            .foregroundStyle(PlumbStyle.supportingText)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
         }
         .scrollIndicators(.hidden)
+        .background(HomeStyle.background)
         .navigationTitle("Options")
         .navigationBarTitleDisplayMode(.large)
     }
@@ -1240,8 +1294,22 @@ struct ContentView: View {
                     Button("Try again") { model.retryHistory() }
                 }
             } else if model.history.isEmpty {
-                Text("No saved sessions yet.")
-                    .foregroundStyle(PlumbStyle.supportingText)
+                Section {
+                    VStack(spacing: 10) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.largeTitle)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityHidden(true)
+                        Text("No saved sessions yet.")
+                            .font(.headline)
+                        Text("Finish a set and it shows up here, with its reps and what Plumb noticed.")
+                            .font(.subheadline)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 24)
+                }
             } else {
                 Section("Saved sessions") {
                     ForEach(model.history) { session in
