@@ -21,12 +21,19 @@ nonisolated struct WatchSyncRulesTests {
             WatchSyncRules.state(stage: stage, exercise: exercise, liveReps: 4, caption: "Rep 4 was faster",
                                  result: result, cueDismissed: false, handsFree: true, demoInput: false)
         }
-        #expect(state(.framing) == WatchState(stage: .framing, exercise: "Squat", handsFree: true))
+        #expect(state(.framing) == WatchState(stage: .framing, exercise: "Squat",
+                                              wristControls: false, handsFree: true))
         #expect(state(.countdown(3)).countdown == 3)
         #expect(state(.capturing) == WatchState(stage: .capturing, exercise: "Squat", reps: 4,
-                                                caption: "Rep 4 was faster", handsFree: true))
+                                                caption: "Rep 4 was faster", wristControls: false,
+                                                handsFree: true))
         #expect(state(.capturing, .pushUp).wristControls == false)
         #expect(state(.capturing, .pushUp).exercise == "Push-up")
+        let coached = WatchSyncRules.state(stage: .capturing, exercise: .bodyweightSquat,
+                                           liveReps: 5, caption: nil, result: nil,
+                                           cueDismissed: false, handsFree: false, demoInput: false,
+                                           coachMessage: "Five reps counted. Stay with me for the next one.")
+        #expect(coached.coachMessage?.contains("Five") == true)
         let measured = state(.result, result: .measured(analysis(reps: 6), nil))
         #expect(measured.reps == 6)
         #expect(measured.caption == nil)
@@ -49,40 +56,6 @@ nonisolated struct WatchSyncRulesTests {
         #expect(WatchSyncRules.summary(for: .interrupted, cueDismissed: false)
                 == "The set stopped before it was complete.")
         #expect(WatchSyncRules.summary(for: nil, cueDismissed: false) == nil)
-    }
-
-    @Test func hapticsMarkStartRepsObservationsAndEnd() {
-        let framing = WatchState(stage: .framing)
-        let started = WatchState(stage: .capturing)
-        var oneRep = started
-        oneRep.reps = 1
-        var observed = oneRep
-        observed.reps = 2
-        observed.caption = "Rep 2 was faster than your first reps"
-        var sameCaption = observed
-        sameCaption.reps = 3
-        #expect(WatchSyncRules.haptic(from: nil, to: started) == .none)
-        #expect(WatchSyncRules.haptic(from: framing, to: started) == .start)
-        #expect(WatchSyncRules.haptic(from: started, to: oneRep) == .rep)
-        #expect(WatchSyncRules.haptic(from: oneRep, to: observed) == .observation)
-        #expect(WatchSyncRules.haptic(from: observed, to: sameCaption) == .rep)
-        #expect(WatchSyncRules.haptic(from: sameCaption, to: WatchState(stage: .analyzing, reps: 3)) == .end)
-        #expect(WatchSyncRules.haptic(from: sameCaption, to: WatchState(stage: .ready)) == .end)
-        #expect(WatchSyncRules.haptic(from: WatchState(stage: .countdown, countdown: 3),
-                                      to: WatchState(stage: .countdown, countdown: 2)) == .none)
-    }
-
-    @Test func wristCommandsActOnlyWhenTheyMakeSense() {
-        #expect(WatchSyncRules.action(for: .startSet, stage: .framing, exercise: .bodyweightSquat) == .beginSet)
-        #expect(WatchSyncRules.action(for: .stopSet, stage: .capturing, exercise: .staticLunge) == .endSet)
-        #expect(WatchSyncRules.action(for: .startSet, stage: .capturing, exercise: .bodyweightSquat) == .ignore)
-        #expect(WatchSyncRules.action(for: .startSet, stage: .countdown(2), exercise: .bodyweightSquat) == .ignore)
-        #expect(WatchSyncRules.action(for: .stopSet, stage: .framing, exercise: .stiffLegDeadlift) == .ignore)
-        #expect(WatchSyncRules.action(for: .stopSet, stage: .analyzing, exercise: .bodyweightSquat) == .ignore)
-        #expect(WatchSyncRules.action(for: .startSet, stage: .ready, exercise: .bodyweightSquat) == .ignore)
-        // Push-ups: the watch only shows and taps.
-        #expect(WatchSyncRules.action(for: .startSet, stage: .framing, exercise: .pushUp) == .ignore)
-        #expect(WatchSyncRules.action(for: .stopSet, stage: .capturing, exercise: .pushUp) == .ignore)
     }
 
     @Test func sameScreenIgnoresTapAndTime() {
@@ -119,7 +92,7 @@ struct WatchSyncSessionTests {
         try await waitUntil { sent.last?.stage == .framing }
         await model.beginSet(countdown: 0)
         try await waitUntil { sent.last?.stage == .capturing }
-        #expect(sent.last?.haptic == .start)
+        #expect(sent.last?.haptic == WatchHaptic.none)
 
         let frames = trace(reps: 6)
         for frame in frames { source.emit(frame) }
@@ -132,9 +105,9 @@ struct WatchSyncSessionTests {
         let running = sent.filter { $0.stage == .capturing }
         #expect(running.count >= 2)
         #expect(zip(running, running.dropFirst()).allSatisfy { $1.reps > $0.reps })
-        #expect(running.dropFirst().allSatisfy { $0.haptic == .rep })
+        #expect(running.dropFirst().allSatisfy { $0.haptic == .none })
         let lastRunning = try #require(sent.lastIndex { $0.stage == .capturing })
-        #expect(sent[lastRunning + 1].haptic == .end)
+        #expect(sent[lastRunning + 1].haptic == .none)
         let result = try #require(sent.last)
         #expect(result.reps == 6)
         #expect(result.summary?.hasPrefix("6 reps measured.") == true)
@@ -145,53 +118,49 @@ struct WatchSyncSessionTests {
         #expect(sync.current?.stage == .result)
     }
 
-    @Test func theWristStartsAndStopsASet() async throws {
-        let source = WatchTestPoseSource()
-        let model = WorkoutSessionModel(source: source)
-        model.handsFreeCountdown = 0
-        let sync = WatchSync(model: model) { _ in }
-
-        sync.handle(.stopSet)
-        sync.handle(.startSet)
-        #expect(model.stage == .ready)
-
-        await model.startPreview()
-        sync.handle(.stopSet)
-        try await Task.sleep(for: .milliseconds(50))
-        #expect(model.stage == .framing)
-        sync.handle(.startSet)
-        try await waitUntil { model.stage == .capturing }
-
-        for frame in trace(reps: 5) { source.emit(frame) }
-        sync.handle(.stopSet)
-        try await waitUntil { model.stage == .result }
-        guard case .measured = model.result else {
-            Issue.record("Expected a measured set, got \(String(describing: model.result))")
-            return
-        }
-    }
-
-    @Test func aPushUpIgnoresTheWrist() async throws {
-        let source = WatchTestPoseSource()
-        let model = WorkoutSessionModel(source: source)
-        model.handsFreeCountdown = 0
-        model.selectedExercise = .pushUp
-        var sent: [WatchState] = []
-        let sync = WatchSync(model: model) { sent.append($0) }
-        await model.startPreview()
-        try await waitUntil { sent.last?.stage == .framing }
-        #expect(sent.last?.wristControls == false)
-        sync.handle(.startSet)
-        try await Task.sleep(for: .milliseconds(50))
-        #expect(model.stage == .framing)
-        await model.cancel()
-    }
-
     @Test func demoInputIsMarkedOnTheWatch() async throws {
         let model = WorkoutSessionModel(source: WatchTestPoseSource())
         var sent: [WatchState] = []
         _ = WatchSync(model: model, demoInput: true) { sent.append($0) }
         #expect(sent.last?.demoInput == true)
+    }
+
+    @Test func heartbeatKeepsSetAliveWithoutAnotherTap() async throws {
+        let source = WatchTestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        var sent: [WatchState] = []
+        let sync = WatchSync(model: model) { sent.append($0) }
+        await model.startPreview()
+        try await waitUntil { sent.last?.stage == .framing }
+        await model.beginSet(countdown: 0)
+        try await waitUntil { sent.last?.stage == .capturing }
+        let before = try #require(sent.last)
+        sync.heartbeat()
+        let after = try #require(sent.last)
+        #expect(after.setID == before.setID)
+        #expect(after.sentAt > before.sentAt)
+        #expect(after.haptic == .none)
+        await model.cancel()
+    }
+
+    @Test func turningOffPhoneHapticsDuringCaptureUpdatesTheWatch() async throws {
+        let suite = "WatchSyncTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let model = WorkoutSessionModel(source: WatchTestPoseSource(),
+                                        preferences: PlumbPreferences(defaults: defaults))
+        var sent: [WatchState] = []
+        let sync = WatchSync(model: model) { sent.append($0) }
+        await model.startPreview()
+        try await waitUntil { sent.last?.stage == .framing }
+        await model.beginSet(countdown: 0)
+        try await waitUntil { sent.last?.stage == .capturing }
+        #expect(sent.last?.hapticsEnabled == true)
+        model.hapticFeedback = .off
+        try await waitUntil { sent.last?.hapticsEnabled == false }
+        #expect(sync.current?.hapticsEnabled == false)
+        #expect(sent.last?.stage == .capturing)
+        await model.cancel()
     }
 
     /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI

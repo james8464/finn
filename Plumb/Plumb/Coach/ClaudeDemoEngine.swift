@@ -7,7 +7,7 @@ import Security
 /// The demo API key, kept in this iPhone's Keychain and nowhere else. The person pastes it once in
 /// Options > Developer.
 nonisolated enum CoachDemoKeyStore {
-    private static let service = "com.finlearn.plumb.coach-demo"
+    private static let service = "ai.mwm.build.challenge.team.08.coach-demo"
     private static let account = "anthropic"
 
     private static var query: [String: Any] {
@@ -106,10 +106,11 @@ final class ClaudeDemoCoachEngine: CoachEngine {
         }
         // The API wants alternating roles starting with the person; the coach's opening line is dropped.
         if messages.first?["role"] == "assistant" { messages.removeFirst() }
-        messages.append(["role": "user", "content": question])
+        messages.append(["role": "user", "content": FoundationModelsCoachPrompt.prompt(
+            question: question, context: context, history: [])])
         return ["model": model,
                 "max_tokens": 300,
-                "system": FoundationModelsCoachPrompt.instructions(for: context, language: language),
+                "system": FoundationModelsCoachPrompt.instructions(language: language),
                 "messages": messages]
     }
 

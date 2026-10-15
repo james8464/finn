@@ -67,6 +67,10 @@ struct DashboardView: View {
         return String(format: "%d:%02d", seconds / 60, seconds % 60)
     }
 
+    private var postureEvidence: PostureGuideEvidence {
+        PostureGuideEvidence.make(for: exercise, history: history)
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
@@ -103,7 +107,7 @@ struct DashboardView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 heading("Last workout")
                                 durationLabel
-                                scoreRing
+                                setCountRing
                             }
                         } else {
                             HStack(alignment: .top, spacing: 16) {
@@ -112,14 +116,17 @@ struct DashboardView: View {
                                     durationLabel
                                 }
                                 Spacer(minLength: 0)
-                                scoreRing.padding(.top, 10)
+                                setCountRing.padding(.top, 10)
                             }
                         }
                         HStack {
                             Spacer()
-                            Text(isPreview ? "Oct 13, 2026" : history.first.map {
-                                $0.startedAt.formatted(date: .abbreviated, time: .omitted)
-                            } ?? "No workouts yet")
+                            Group {
+                                if isPreview { Text("Oct 13, 2026") }
+                                else if let last = history.first {
+                                    Text(last.startedAt.formatted(date: .abbreviated, time: .omitted))
+                                } else { Text("No workouts yet") }
+                            }
                             .font(.system(size: detailSize))
                             .fixedSize(horizontal: false, vertical: true)
                             .foregroundStyle(DashboardStyle.secondary)
@@ -130,8 +137,23 @@ struct DashboardView: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10),
                                          count: dynamicTypeSize.isAccessibilitySize ? 1 : 2), spacing: 10) {
                     card(.posture, id: "home.posture") {
-                        metric(title: "Posture", subtitle: exercise.chipName,
-                               label: "Average score", value: isPreview ? "78" : "—", unit: nil)
+                        VStack(alignment: .leading, spacing: 7) {
+                            heading("Posture")
+                            Text(exercise.chipName).font(.footnote).foregroundStyle(DashboardStyle.secondary)
+                            Spacer(minLength: 12)
+                            if !postureEvidence.measurements.isEmpty {
+                                Text(postureEvidence.flagged.isEmpty
+                                     ? String(localized: "No recurring issue")
+                                     : String(localized: "\(postureEvidence.flagged.count) checks to review"))
+                                    .font(.subheadline.weight(.semibold))
+                            } else {
+                                Text("See movement guide").font(.subheadline.weight(.semibold))
+                            }
+                            Image(systemName: "arrow.up.right")
+                                .foregroundStyle(DashboardStyle.accent)
+                                .accessibilityHidden(true)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
                     }
                     card(.weights, id: "home.weights") {
                         metric(title: "Best set", subtitle: exercise.chipName,
@@ -141,7 +163,8 @@ struct DashboardView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             heading("Sessions")
                             Spacer(minLength: 30)
-                            Text(history.isEmpty ? "No sessions" : "\(history.count) sessions")
+                            Text(history.isEmpty ? String(localized: "No sessions")
+                                 : String(localized: "\(history.count) sessions"))
                                 .font(.footnote)
                                 .foregroundStyle(DashboardStyle.secondary)
                             Spacer(minLength: 30)
@@ -252,34 +275,27 @@ struct DashboardView: View {
         }
     }
 
-    private var scoreRing: some View {
+    private var setCountRing: some View {
         VStack(spacing: 5) {
             if dynamicTypeSize.isAccessibilitySize {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(isPreview ? "78" : "—").font(.title.bold())
-                    Text("/ 100").font(.caption).foregroundStyle(DashboardStyle.secondary)
-                }
+                Text(isPreview ? "3" : history.first.map { String($0.sets.count) } ?? "—")
+                    .font(.title.bold())
             } else {
             ZStack {
                 Circle().stroke(.white.opacity(0.13), lineWidth: 10)
-                if isPreview {
-                    Circle().trim(from: 0, to: 0.78)
-                        .stroke(DashboardStyle.accent, style: StrokeStyle(lineWidth: 10, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                }
-                VStack(spacing: 0) {
-                    Text(isPreview ? "78" : "—").font(.system(size: scoreSize, weight: .bold))
-                    Text("/ 100").font(.caption).foregroundStyle(DashboardStyle.secondary)
-                }
+                Text(isPreview ? "3" : history.first.map { String($0.sets.count) } ?? "—")
+                    .font(.system(size: scoreSize, weight: .bold))
             }
             .frame(width: 96, height: 96)
             .padding(5)
             }
-            Text("Avg. posture score").font(.system(size: detailSize)).foregroundStyle(DashboardStyle.secondary)
+            Text("Measured sets").font(.system(size: detailSize)).foregroundStyle(DashboardStyle.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(isPreview ? "Sample average posture score, 78 out of 100" : "Posture score not available yet")
+        .accessibilityLabel(isPreview ? String(localized: "Sample workout, 3 measured sets")
+                            : history.first.map { String(localized: "\($0.sets.count) measured sets") }
+                                ?? String(localized: "No measured sets yet"))
     }
 
     private func metric(title: String, subtitle: String, label: String, value: String, unit: String?) -> some View {
@@ -289,7 +305,7 @@ struct DashboardView: View {
             Text(LocalizedStringKey(label)).font(.footnote).foregroundStyle(DashboardStyle.secondary).padding(.top, 7)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(value).font(.system(size: metricSize, weight: .bold)).foregroundStyle(DashboardStyle.accent)
-                if let unit { Text(unit).font(.subheadline).foregroundStyle(DashboardStyle.secondary) }
+                if let unit { Text(LocalizedStringKey(unit)).font(.subheadline).foregroundStyle(DashboardStyle.secondary) }
             }
             miniatureChart.padding(.top, 3)
         }

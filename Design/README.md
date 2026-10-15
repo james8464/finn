@@ -6,7 +6,7 @@
 - [Production app icon and flat artwork](../Plumb/BrandArtwork/README.md)
 - [iPhone experience review and Apple design references](../docs/design/iphone-experience-review.md)
 
-The Figma guide is the identity reference for the iPhone app: purpose, mark, colour, type, voice, and icon appearance. It deliberately defines a brand rather than fixed screen layouts. The local `.fig` file and preview were refreshed from the live guide on 12 October 2026.
+The Figma guide is the identity reference for the iPhone app: purpose, mark, colour, type, voice, icon appearance, and the current Home and workout expressions. It deliberately defines a brand rather than fixed screen layouts. The local `.fig` file and preview were refreshed from the live guide on 15 October 2026.
 
 ## Idea and identity
 
@@ -40,7 +40,7 @@ Use SF Symbols for interface actions where appropriate. Keep the app icon and br
 
 ## Voice and imagery
 
-Describe what Plumb can observe, then give one specific next step. Say “Your last two reps were shorter” rather than “Your form is wrong.” State tracking limits plainly and never imply injury prevention, diagnosis, or certainty from a single camera angle. Prefer real movement with full-body context, fine evidence traces, and restrained motion. Avoid synthetic athlete imagery, fake heatmaps, and decorative AI motifs.
+Describe what Plumb can observe, then give one specific next step. Say “Your last two reps were shorter” rather than “Your form is wrong.” State tracking limits plainly and never imply injury prevention, diagnosis, or certainty from a single camera angle. In workout and feedback screens, prefer real movement with full-body context, fine evidence traces, and restrained motion. The Home dashboard uses a generated amber athlete backdrop as decorative artwork, not footage or evidence of a measured set. Avoid fake heatmaps and decorative AI motifs.
 
 ## Apple references
 

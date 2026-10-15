@@ -2,13 +2,13 @@
 
 Pour Guilhem, jeudi 15 octobre 2026. La build doit être soumise sur App Store Connect avant vendredi 14 h ; tu es en cours de 9 h à 12 h, donc tout se fait ce soir. Compte deux heures sans accroc, trois avec. Les textes à coller sont dans `app-store-fiche.md`, les réponses de confidentialité dans `app-privacy-answers.md`, les captures dans `screenshots/`.
 
-Ce qui est déjà vérifié à 15 h : l'archive Release iOS de `main` (d8f1503) compile et se signe avec l'équipe FinLearn (2FN6Y5NHS5) en certificat de développement ; version 1.0, build 1 ; icône 1024 sans transparence pour l'iPhone et la montre ; textes caméra et Santé présents ; manifeste de confidentialité présent ; cible montre `com.finlearn.plumb.watchkitapp` embarquée et signée. Aucun code de démo dans le binaire.
+Ce qui est déjà vérifié à 15 h : l'archive Release iOS de `main` (d8f1503) compile et se signe avec l'équipe FinLearn (2FN6Y5NHS5) en certificat de développement ; version 1.0, build 1 ; icône 1024 sans transparence pour l'iPhone et la montre ; textes caméra et Santé présents ; manifeste de confidentialité présent ; cible montre `ai.mwm.build.challenge.team.08.watchkitapp` embarquée et signée. Aucun code de démo dans le binaire.
 
 ## 0. Avant de commencer (10 min)
 
 1. Dans le dépôt : `git checkout main && git pull`. Si la PR `claude/app-store` est fusionnée, les documents sont là ; sinon ouvre-les depuis la branche.
 2. Décide si `claude/coach` entre dans la build. Si oui, fusionne-la d'abord et garde le paragraphe « A COACH YOU CAN ASK » de la fiche ; sinon, supprime ce paragraphe et la phrase du « What's new ».
-3. Même question pour `claude/fr` (interface en français). À 16 h, cette branche n'avait encore aucun fichier de localisation. Si elle est fusionnée avant l'archive : ajoute la langue French (France) à l'app dans Connect (App Information > Localizations), colle les textes français de la fiche, et refais les captures en français avec `xcrun simctl launch 79E9F1F2-D51F-4882-8A4F-DB4BBFE85F80 com.finlearn.plumb -AppleLanguages "(fr)" -AppleLocale fr_FR` puis `xcrun simctl io 79E9F1F2-D51F-4882-8A4F-DB4BBFE85F80 screenshot <fichier>.png` (simulateur iPhone 18 Pro Max, iOS 27, déjà créé ; ou la même tournée `ScreenTourUITests` avec `-AppleLanguages` dans les arguments de lancement). Sinon, la fiche reste en anglais seul ce soir et le français s'ajoute à la version 1.0.1.
+3. Même question pour `claude/fr` (interface en français). À 16 h, cette branche n'avait encore aucun fichier de localisation. Si elle est fusionnée avant l'archive : ajoute la langue French (France) à l'app dans Connect (App Information > Localizations), colle les textes français de la fiche, et refais les captures en français avec `xcrun simctl launch 79E9F1F2-D51F-4882-8A4F-DB4BBFE85F80 ai.mwm.build.challenge.team.08 -AppleLanguages "(fr)" -AppleLocale fr_FR` puis `xcrun simctl io 79E9F1F2-D51F-4882-8A4F-DB4BBFE85F80 screenshot <fichier>.png` (simulateur iPhone 18 Pro Max, iOS 27, déjà créé ; ou la même tournée `ScreenTourUITests` avec `-AppleLanguages` dans les arguments de lancement). Sinon, la fiche reste en anglais seul ce soir et le français s'ajoute à la version 1.0.1.
 4. Un réglage manque dans le projet, à faire par celui qui touche `project.pbxproj` (l'agent widgets, ou toi) : ajouter `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;` dans les quatre blocs de réglages (Plumb Debug et Release, PlumbWatch Debug et Release), juste sous `INFOPLIST_KEY_NSCameraUsageDescription` pour l'iPhone et sous `INFOPLIST_KEY_WKCompanionAppBundleIdentifier` pour la montre. Sans lui, App Store Connect pose la question de conformité à l'export à chaque build ; ce n'est pas bloquant ce soir, tu peux répondre « Non » à la main.
 5. Xcode > Settings > Accounts : vérifie que le compte Apple connecté est membre de l'équipe FinLearn (2FN6Y5NHS5) avec le rôle Admin ou App Manager. Le Mac n'a qu'un certificat « Apple Development: Paul Aubry » ; Xcode créera le certificat Apple Distribution tout seul à l'étape 3 si le compte a le droit, sinon il te le dira et il faudra que Paul le crée ou te donne le rôle.
 
@@ -19,7 +19,7 @@ Sur https://appstoreconnect.apple.com, Apps > « + » > Nouvelle app.
 - Plateformes : iOS.
 - Nom : Plumb (s'il est pris, Apple le dit tout de suite ; prends « Plumb: rep counter » et dis-le à l'équipe).
 - Langue principale : English (U.S.).
-- Identifiant de bundle : `com.finlearn.plumb`. Il existe déjà dans le portail (Xcode l'a créé pour signer, avec HealthKit). S'il n'apparaît pas dans la liste, c'est que le compte n'est pas sur la bonne équipe.
+- Identifiant de bundle : `ai.mwm.build.challenge.team.08`. Il existe déjà dans le portail (Xcode l'a créé pour signer, avec HealthKit). S'il n'apparaît pas dans la liste, c'est que le compte n'est pas sur la bonne équipe.
 - SKU : `plumb-ios`.
 - Accès utilisateur : accès complet.
 
@@ -35,7 +35,7 @@ Ce qui peut bloquer : un accord non signé. Dans Business (Agreements), le titul
 
 1. Organizer > Distribute App > App Store Connect > Upload.
 2. Laisse les cases cochées (symboles, numéro de build géré par Xcode désactivé pour garder 1).
-3. Signature automatique : Xcode crée le certificat Apple Distribution et le profil App Store. Si Xcode affiche « No profiles for com.finlearn.plumb » ou un refus de créer le certificat, c'est le rôle du compte (étape 0.5).
+3. Signature automatique : Xcode crée le certificat Apple Distribution et le profil App Store. Si Xcode affiche « No profiles for ai.mwm.build.challenge.team.08 » ou un refus de créer le certificat, c'est le rôle du compte (étape 0.5).
 4. Validate d'abord si tu veux un retour en deux minutes, puis Upload. Les erreurs ITMS tombent ici : icône, manifeste, clés Info.plist. Elles sont toutes vérifiées sur l'archive de cet après-midi ; une nouveauté viendrait d'un commit d'après 15 h.
 5. Xcode dit « Upload Successful ». App Store Connect traite alors le build : 15 à 30 minutes, parfois une heure. Tu reçois un mail « has completed processing ». Pendant ce temps, fais l'étape 4.
 

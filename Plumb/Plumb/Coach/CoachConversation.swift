@@ -68,6 +68,10 @@ final class CoachConversation {
             return ["Comment s'est passée la série \(latest.number) ?",
                     "À quoi faire attention la prochaine fois ?",
                     "Qu'est-ce qui a changé sur mes dernières séries ?"]
+        case .spanish:
+            return ["¿Cómo fue la serie \(latest.number)?",
+                    "¿En qué debería fijarme la próxima vez?",
+                    "¿Qué cambió en mis últimas series?"]
         }
     }
 

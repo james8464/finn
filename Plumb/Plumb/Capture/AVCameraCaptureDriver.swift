@@ -8,7 +8,7 @@ nonisolated enum CameraCaptureError: Error {
 
 nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @unchecked Sendable {
     nonisolated(unsafe) let session = AVCaptureSession()
-    private let queue = DispatchQueue(label: "com.plumb.camera.capture")
+    private let queue = DispatchQueue(label: "ai.mwm.build.challenge.team.08.camera.capture")
     private let processor: PoseFrameProcessor
     private var configured = false
     private var interruptionObserver: NSObjectProtocol?

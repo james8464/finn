@@ -203,6 +203,12 @@ final class WorkoutSessionModel {
     var speaksLive: Bool {
         didSet { preferences.speaksLive = speaksLive }
     }
+    var hapticFeedback: HapticFeedbackStyle {
+        didSet { preferences.hapticFeedback = hapticFeedback }
+    }
+    var soundFeedback: SoundFeedbackStyle {
+        didSet { preferences.soundFeedback = soundFeedback }
+    }
     /// Countdown of a set started hands-free, in seconds.
     @ObservationIgnored var handsFreeCountdown = 3
     /// While framing hands-free: how far the athlete is through holding position, 0 to 1.
@@ -211,6 +217,8 @@ final class WorkoutSessionModel {
     private(set) var liveRepCount = 0
     /// The latest live observation of the running set, such as a rep faster than the first ones.
     private(set) var liveCaption: String?
+    /// A short, evidence-backed line sent to the Watch during capture.
+    private(set) var liveCoachMessage: String?
     /// The latest set was ended by Plumb (the athlete walked away or stopped), not by a tap.
     private(set) var endedHandsFree = false
     /// The camera stopped during the set (another app took it, an interruption); the part captured
@@ -303,6 +311,8 @@ final class WorkoutSessionModel {
         self.currentDate = currentDate
         self.handsFree = preferences.handsFree
         self.speaksLive = preferences.speaksLive
+        self.hapticFeedback = preferences.hapticFeedback
+        self.soundFeedback = preferences.soundFeedback
         self.recognizesExercise = preferences.recognizesExercise
         self.usesTrainedModel = preferences.usesTrainedModel
         self.checksCameraAngle = preferences.checksCameraAngle
@@ -460,6 +470,7 @@ final class WorkoutSessionModel {
         liveMonitor = LiveSetMonitor(definition: captureExercise.definition)
         liveRepCount = 0
         liveCaption = nil
+        liveCoachMessage = nil
         endedHandsFree = false
         captureStartedAt = .now
         setHeartRateReadings = []
@@ -567,6 +578,7 @@ final class WorkoutSessionModel {
             result = .measured(analysis, cue)
             setHeartRate = SetHeartRate.make(setHeartRateReadings)
             record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues,
+                   formMeasurements: advisable ? review.measurements : [],
                    partlyVisible: diagnostics?.partialVisibility != nil)
             offerPersonalizationIfDue()
         case .insufficientView(let reason):
@@ -745,8 +757,13 @@ final class WorkoutSessionModel {
             switch event {
             case .repCounted(let count), .repCountRevised(let count):
                 liveRepCount = count
+                if case .repCountRevised = event { liveCoachMessage = nil }
             default:
                 liveCaption = event.caption(for: definition)
+            }
+            if let line = WatchCoachRules.line(for: event, reps: monitor.reps, definition: definition,
+                                               canCompareRange: monitor.supportsRangeCoaching) {
+                liveCoachMessage = line
             }
             onLiveEvent?(event, definition.kind)
         }
@@ -786,6 +803,7 @@ final class WorkoutSessionModel {
         liveMonitor = nil
         liveRepCount = 0
         liveCaption = nil
+        liveCoachMessage = nil
         endedHandsFree = false
         endedEarly = false
         endedAtLimit = false
@@ -1012,7 +1030,8 @@ final class WorkoutSessionModel {
     }
 
     private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind, frames: [PoseFrame],
-                        issues: [SetIssue], partlyVisible: Bool = false) {
+                        issues: [SetIssue], formMeasurements: [FormMeasurement],
+                        partlyVisible: Bool = false) {
         guard case .usable(let side) = EvidenceGate.assess(
             frames, requirement: exercise.definition.evidence, allowsPartial: partlyVisible) else { return }
         let now = currentDate()
@@ -1028,8 +1047,16 @@ final class WorkoutSessionModel {
         let newSet = SetSummary(
             id: UUID(), sessionID: session.id, capturedAt: now,
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,
-            exercise: exercise, issues: issues, partlyVisible: partlyVisible ? true : nil
+            exercise: exercise, issues: issues,
+            formMeasurements: formMeasurements.isEmpty ? nil : formMeasurements,
+            partlyVisible: partlyVisible ? true : nil
         )
+        // History is newest session first; each session's sets are oldest first. A recording from a
+        // different side or with too little evidence cannot hide an older comparable set.
+        if newSet.formMeasurements != nil {
+            formNotes += FormTrend.compareLatest(
+                to: newSet, among: history.lazy.flatMap { $0.sets.reversed() }).map(\.sentence)
+        }
         // The latest earlier set of the exercise that can be compared (not only the very last one).
         let earlier = session.sets.filter { $0.exercise == exercise }.reversed()
         session.sets.append(newSet)

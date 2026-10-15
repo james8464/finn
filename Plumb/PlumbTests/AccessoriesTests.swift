@@ -23,16 +23,13 @@ nonisolated struct AccessoriesTests {
         }
     }
 
-    @Test func theWatchShowsRepsAndTapsAndStartsSetsExceptWithHandsOnTheFloor() {
-        for exercise in ExerciseKind.allCases where exercise != .pushUp {
+    @Test func theWatchCoachesAndOffersRhythmForEveryExercise() {
+        for exercise in ExerciseKind.allCases {
             let role = AccessoryRoles.role(of: .appleWatch, for: exercise)
-            #expect(role.features == [.seeRepCount, .feelRepTaps, .startStopFromWrist])
+            #expect(role.features == [.seeCoachMessages, .feelRhythmTaps])
             #expect(role.limitation == nil)
+            #expect(!role.offers(.startStopFromWrist))
         }
-        let pushUp = AccessoryRoles.role(of: .appleWatch, for: .pushUp)
-        #expect(pushUp.features == [.seeRepCount, .feelRepTaps])
-        #expect(!pushUp.offers(.startStopFromWrist))
-        #expect(pushUp.limitation != nil)
     }
 
     @Test func noLineWhenNothingIsAround() {
@@ -58,16 +55,15 @@ nonisolated struct AccessoriesTests {
         }
         #expect(text(WatchConnection(isPaired: false, isAppInstalled: true, isReachable: true)) == nil)
         #expect(text(WatchConnection(isPaired: true)) ==
-                "Apple Watch: install Plumb on your watch to see reps on your wrist.")
+                "Apple Watch: install Plumb for coaching messages and optional rhythm taps.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true)) ==
-                "Apple Watch: open Plumb on your watch to see reps and start sets from your wrist.")
+                "Apple Watch: open Plumb on your watch for coaching messages and rhythm.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true)) ==
-                "Apple Watch connected: see each rep and start sets from your wrist.")
-        // Push-ups: the hands are on the floor, so the line never promises a wrist start.
+                "Apple Watch connected: coaching messages are ready; rhythm is optional.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true), .pushUp) ==
-                "Apple Watch: open Plumb on your watch to see reps and feel a tap on each one.")
+                "Apple Watch: open Plumb on your watch for coaching messages and rhythm.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true), .pushUp) ==
-                "Apple Watch connected: see each rep and feel a tap on your wrist.")
+                "Apple Watch connected: coaching messages are ready; rhythm is optional.")
         #expect(AccessoryStatus(watch: WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true))
             .isConnected(.appleWatch))
         #expect(!AccessoryStatus(watch: WatchConnection(isPaired: true, isAppInstalled: true))

@@ -75,6 +75,35 @@ final class DashboardUITests: XCTestCase {
     }
 
     @MainActor
+    func testPostureCardOpensThePostureTabAndExerciseGuide() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-plumb-ui-demo"]
+        app.launch()
+        let card = app.buttons["home.posture"]
+        XCTAssertTrue(card.waitForExistence(timeout: 8))
+        card.tap()
+        XCTAssertTrue(app.buttons["tab.posture"].isSelected)
+        XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["posture.exercise.pushUp"].exists)
+        let image = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        image.name = "Posture guide"
+        image.lifetime = .keepAlways
+        add(image)
+    }
+
+    @MainActor
+    func testFrenchDashboardUsesFrenchForMainActionsAndEmptyState() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-plumb-ui-demo", "-AppleLanguages", "(fr)",
+                               "-AppleLocale", "fr_FR"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Essayer Plumb"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["home.watchDemo"].label.contains("Voir la démo"))
+        XCTAssertTrue(app.staticTexts["Aucune séance pour l’instant"].exists)
+        XCTAssertTrue(app.staticTexts["Voir le guide du mouvement"].exists)
+    }
+
+    @MainActor
     func testSavedWorkoutAppearsOnDashboard() throws {
         continueAfterFailure = false
         let app = XCUIApplication()

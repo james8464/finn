@@ -553,6 +553,48 @@ nonisolated enum ExerciseAnalyzer {
         }
     }
 
+    /// A rep's interval in chronological capture frames. Binary search avoids revisiting the whole
+    /// recording for each rep when form checks examine its deepest few frames.
+    static func frameRange(from start: TimeInterval, through end: TimeInterval,
+                           in frames: [PoseFrame]) -> Range<Int> {
+        func firstIndex(after time: TimeInterval, inclusive: Bool) -> Int {
+            var low = 0
+            var high = frames.count
+            while low < high {
+                let middle = low + (high - low) / 2
+                if inclusive ? frames[middle].time < time : frames[middle].time <= time {
+                    low = middle + 1
+                } else {
+                    high = middle
+                }
+            }
+            return low
+        }
+        let lower = firstIndex(after: start, inclusive: true)
+        let upper = firstIndex(after: end, inclusive: false)
+        return lower..<max(lower, upper)
+    }
+
+    /// Same signal and tie behaviour as `deepestFrame`, with the already selected athlete side.
+    static func deepestFrameIndex(of rep: RepMetric, in frames: [PoseFrame],
+                                  as definition: ExerciseDefinition, side: BodySide) -> Int? {
+        var best: (index: Int, value: Double)?
+        for index in frameRange(from: rep.startTime, through: rep.endTime, in: frames) {
+            guard let value = sample(from: frames[index], as: definition, side: side)?.value else { continue }
+            if let previous = best {
+                let better: Bool
+                switch definition.signal {
+                case .verticalTravel, .shoulderDrop: better = value > previous.value
+                case .jointBend, .verticalRise: better = value < previous.value
+                }
+                if better { best = (index, value) }
+            } else {
+                best = (index, value)
+            }
+        }
+        return best?.index
+    }
+
     /// Angle at `vertex` in degrees, with y scaled by the image aspect ratio so it matches x.
     static func angle(from a: JointPoint, vertex b: JointPoint, to c: JointPoint,
                       aspectRatio: Double) -> Double? {

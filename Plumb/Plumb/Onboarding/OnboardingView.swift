@@ -248,7 +248,9 @@ struct OnboardingView: View {
                     placementRow("arrow.up.and.down", String(localized: "At hip height"),
                                  String(localized: "Place the camera near hip height."))
                     placementRow("figure.walk", String(localized: "A few steps away"),
-                                 String(localized: "Two to three meters. Walk back to your iPhone to end the set."))
+                                 Locale.current.measurementSystem == .us
+                                     ? String(localized: "About seven to ten feet. Walk back to your iPhone to end the set.")
+                                     : String(localized: "Two to three meters. Walk back to your iPhone to end the set."))
                     placementRow("person.crop.rectangle", String(localized: "Whole body in the frame"),
                                  String(localized: "Head and feet both visible, with a bit of room above and below."))
                 }

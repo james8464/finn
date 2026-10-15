@@ -1,6 +1,6 @@
 # Plumb 1.0 App Privacy answers
 
-**Draft checked 15 October 2026 against `main` at d8f1503 (`com.finlearn.plumb`, team 2FN6Y5NHS5) and its reported Release archive. Coach merged later; inspect the final archive before publishing these answers.** Not yet entered in App Store Connect.
+**Draft checked 15 October 2026 against `main` at d8f1503 (`ai.mwm.build.challenge.team.08`, team 2FN6Y5NHS5) and its reported Release archive. Coach merged later; inspect the final archive before publishing these answers.** Not yet entered in App Store Connect.
 
 ## What to click tonight
 

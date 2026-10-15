@@ -1,6 +1,6 @@
 import Foundation
 
-nonisolated enum BodyJoint: String, Codable, Hashable {
+nonisolated enum BodyJoint: String, Codable, Hashable, CaseIterable {
     case leftHip
     case leftKnee
     case leftAnkle
@@ -274,6 +274,9 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
     /// What this set showed (`SetIssue`), for the person's most frequent pattern. Nil in summaries
     /// saved before 13 October 2026.
     let issues: [SetIssue]?
+    /// Form checks with enough readable reps, including checks that found no fault. Nil in older
+    /// saved sets and sets whose view did not support side-view form measurements.
+    let formMeasurements: [FormMeasurement]?
     /// True when the joints were clear in only 65 to 80% of the set: its clear reps were counted,
     /// without advice or comparison. Nil for a fully visible set and in older summaries.
     let partlyVisible: Bool?
@@ -281,7 +284,8 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
     init(id: UUID, sessionID: UUID, capturedAt: Date, bodySide: BodySide,
          analysis: SetAnalysis, cue: Cue?, cueResponse: CueResponse,
          exercise: ExerciseKind = .bodyweightSquat, cameraView: CameraView = .side,
-         issues: [SetIssue]? = nil, partlyVisible: Bool? = nil) {
+         issues: [SetIssue]? = nil, formMeasurements: [FormMeasurement]? = nil,
+         partlyVisible: Bool? = nil) {
         self.id = id
         self.sessionID = sessionID
         self.capturedAt = capturedAt
@@ -292,6 +296,7 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
         self.exercise = exercise
         self.cameraView = cameraView
         self.issues = issues
+        self.formMeasurements = formMeasurements
         self.partlyVisible = partlyVisible
     }
 }

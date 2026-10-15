@@ -23,7 +23,7 @@ nonisolated struct LastSetSnapshot: Codable, Equatable, Sendable {
 
 /// Where the app and the widget meet: one JSON value in the App Group's shared defaults.
 nonisolated struct SharedSetStore: @unchecked Sendable {
-    static let appGroupID = "group.com.finlearn.plumb"
+    static let appGroupID = "group.ai.mwm.build.challenge.team.08"
     static let key = "lastSetSnapshot"
 
     private let defaults: UserDefaults

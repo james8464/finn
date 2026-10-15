@@ -93,7 +93,7 @@ extension CoachEngine {
 /// Reads why Foundation Models cannot run, once per check, and says what to do about it.
 @MainActor
 enum CoachModelAvailability {
-    static let log = Logger(subsystem: "com.finlearn.plumb", category: "coach")
+    static let log = Logger(subsystem: "ai.mwm.build.challenge.team.08", category: "coach")
 
     static func reason(for availability: SystemLanguageModel.Availability, engine: String) -> String? {
         switch availability {
@@ -177,23 +177,42 @@ final class CoachResponder {
 /// Shared by the two Foundation Models engines: instructions, the context, then the turn.
 @MainActor
 enum FoundationModelsCoachPrompt {
-    static func instructions(for context: CoachContext, language: CoachLanguage) -> String {
+    static func instructions(language: CoachLanguage) -> String {
+        // Instructions contain only trusted app rules. Saved observations and onboarding answers
+        // are data in the prompt, never higher-priority instructions to the model.
         CoachInstructions.text(language: language)
-            // The first-launch answers (level, goal) set the tone; see `OnboardingProfile.coachNote`.
-            + (PlumbPreferences.app.onboardingProfile.coachNote.map { "\n\n" + $0 } ?? "")
-            + "\n\nSaved sets, oldest first:\n" + context.promptText()
     }
 
     /// The earlier turns as text, so a fresh session still knows the conversation. Kept short:
     /// the on-device model has a small window.
-    static func prompt(question: String, history: [CoachMessage]) -> String {
-        let recent = history.suffix(6)
-        guard !recent.isEmpty else { return question }
-        let lines = recent.map { message in
-            (message.role == .person ? "Person: " : "Coach: ") + message.text
+    static func prompt(question: String, context: CoachContext, history: [CoachMessage]) -> String {
+        var sections: [String] = []
+        if let note = PlumbPreferences.app.onboardingProfile.coachNote {
+            sections.append("Person's stated preferences:\n" + note)
         }
-        return "Earlier in this conversation:\n" + lines.joined(separator: "\n") + "\n\nPerson now asks: " + question
+        sections.append("Saved sets, oldest first:\n" + context.promptText())
+        let recent = history.suffix(6)
+        if !recent.isEmpty {
+            let lines = recent.map { message in
+                (message.role == .person ? "Person: " : "Coach: ") + message.text
+            }
+            sections.append("Earlier in this conversation:\n" + lines.joined(separator: "\n"))
+        }
+        sections.append("Person now asks: " + question)
+        return sections.joined(separator: "\n\n")
     }
+
+    static func labels(for numbers: [Int], context: CoachContext) -> String? {
+        guard (1...2).contains(numbers.count), Set(numbers).count == numbers.count,
+              numbers.allSatisfy(context.knownNumbers.contains) else { return nil }
+        return numbers.map { "Set \($0)" }.joined(separator: ", ")
+    }
+}
+
+@Generable
+private struct AppleCoachSelection {
+    @Guide(description: "Zero, one, or two numbered saved sets relevant to the person's question; use an empty list when no set supports an answer.")
+    var setNumbers: [Int]
 }
 
 @MainActor
@@ -212,9 +231,11 @@ final class OnDeviceCoachEngine: CoachEngine {
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String {
         let session = LanguageModelSession(model: SystemLanguageModel.default,
-                                           instructions: FoundationModelsCoachPrompt.instructions(for: context, language: language))
-        let response = try await session.respond(to: FoundationModelsCoachPrompt.prompt(question: question, history: history))
-        return response.content
+                                           instructions: FoundationModelsCoachPrompt.instructions(language: language))
+        let response = try await session.respond(
+            to: FoundationModelsCoachPrompt.prompt(question: question, context: context, history: history),
+            generating: AppleCoachSelection.self)
+        return FoundationModelsCoachPrompt.labels(for: response.content.setNumbers, context: context) ?? "NONE"
     }
 }
 
@@ -241,8 +262,10 @@ final class PrivateCloudComputeCoachEngine: CoachEngine {
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String {
         let session = LanguageModelSession(model: model,
-                                           instructions: FoundationModelsCoachPrompt.instructions(for: context, language: language))
-        let response = try await session.respond(to: FoundationModelsCoachPrompt.prompt(question: question, history: history))
-        return response.content
+                                           instructions: FoundationModelsCoachPrompt.instructions(language: language))
+        let response = try await session.respond(
+            to: FoundationModelsCoachPrompt.prompt(question: question, context: context, history: history),
+            generating: AppleCoachSelection.self)
+        return FoundationModelsCoachPrompt.labels(for: response.content.setNumbers, context: context) ?? "NONE"
     }
 }
