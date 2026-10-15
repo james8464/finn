@@ -311,7 +311,7 @@ nonisolated struct LiveSetMonitor {
     }
 }
 
-extension LiveSetMonitor {
+nonisolated extension LiveSetMonitor {
     /// The same camera-angle reading as the form checks: side-on, or no 3D estimate to say otherwise.
     fileprivate static func seenFromTheSide(_ frames: [PoseFrame]) -> Bool {
         switch ViewCheck.assess(frames, expected: .side) {

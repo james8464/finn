@@ -43,7 +43,7 @@ enum HomeRoute: Hashable, CaseIterable {
 
 extension ExerciseKind {
     /// The short name, for a menu row.
-    var chipName: String {
+    nonisolated var chipName: String {
         switch self {
         case .bodyweightSquat: String(localized: "Squat")
         case .pushUp: String(localized: "Push-up")
