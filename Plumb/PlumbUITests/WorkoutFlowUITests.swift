@@ -430,6 +430,8 @@ final class WorkoutFlowUITests: XCTestCase {
         capture(app, name: "Comparison")
         app.buttons["How range is measured"].tap()
         XCTAssertTrue(methodText.exists)
+        // With the form-check notes above it, the button sits under the bottom bar until scrolled.
+        app.swipeUp()
         app.buttons["Reword comparison"].tap()
         XCTAssertTrue(app.staticTexts["Camera-measured range was longer in your second set."]
             .waitForExistence(timeout: 5))

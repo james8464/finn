@@ -135,6 +135,37 @@ final class ScreenTourUITests: XCTestCase {
         save("14-historique")
     }
 
+    /// Live advice during a demo set, as the person sees it from their spot, with demo poses that show
+    /// a form fault on every rep: the squat's chest drops forward ("Chest up"), the push-up's hips sag
+    /// ("Lift your hips"). Each
+    /// screen is held for a while after a `ready-` file is written, so it can also be captured from
+    /// outside with `xcrun simctl io <device> screenshot`.
+    @MainActor
+    func test5LiveAdviceWithDemoInput() {
+        for (exercise, cue, name) in [("Squat", "Chest up", "16-conseil-en-direct-squat"),
+                                      ("Push-up", "Lift your hips", "17-conseil-en-direct-pompes")] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-plumb-ui-demo", "-plumb-ui-demo-form-fault"]
+            app.launch()
+            app.openWorkoutTab()
+            XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
+            app.buttons[exercise].tap()
+            app.buttons["home.start"].tap()
+            XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 8))
+            app.buttons["Start set"].tap()
+            let caption = app.staticTexts.matching(identifier: "capture.liveCaption").firstMatch
+            XCTAssertTrue(caption.waitForExistence(timeout: 10))
+            let shown = NSPredicate(format: "label == %@", cue)
+            expectation(for: shown, evaluatedWith: caption)
+            waitForExpectations(timeout: 10)
+            Thread.sleep(forTimeInterval: 1)
+            save(name)
+            FileManager.default.createFile(atPath: folder.appending(path: "ready-\(name)").path, contents: nil)
+            Thread.sleep(forTimeInterval: 12)
+            app.terminate()
+        }
+    }
+
     // MARK: - Helpers
 
     /// Opens History, Options or Privacy from the first screen's More menu.

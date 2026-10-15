@@ -28,6 +28,8 @@ struct ContentView: View {
     @State private var showsCameraPrimer = false
     /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
     @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 88
+    /// Live advice during a set: about half the count's height, so a short phrase fits on one line.
+    @ScaledMetric(relativeTo: .largeTitle) private var liveCueSize: CGFloat = 44
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -934,16 +936,8 @@ struct ContentView: View {
                         .controlSize(.large)
                         .tint(.white)
                 } else if model.stage == .capturing {
+                    liveCue
                     liveCount
-                    if let caption = model.liveCaption {
-                        Text(caption)
-                            .font(.subheadline.weight(.semibold))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(.black.opacity(0.68), in: Capsule())
-                            .accessibilityIdentifier("capture.liveCaption")
-                    }
                     if let startedAt = model.captureStartedAt {
                         TimelineView(.periodic(from: startedAt, by: 1)) { timeline in
                             let seconds = max(0, Int(timeline.date.timeIntervalSince(startedAt)))
@@ -1008,6 +1002,26 @@ struct ContentView: View {
         .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("capture.handsFree")
+    }
+
+    /// The latest live advice, such as "Sit lower", in large dark type on white so it reads from two or
+    /// three metres away. It always takes the same place, above the count, and the slot stays empty
+    /// until there is something to say, so the count never moves.
+    private var liveCue: some View {
+        Text(model.liveCaption ?? " ")
+            .font(.system(size: liveCueSize, weight: .heavy, design: .rounded))
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.6)
+            .foregroundStyle(.black)
+            .padding(.horizontal, 22)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, minHeight: liveCueSize * 1.6)
+            .background(.white, in: RoundedRectangle(cornerRadius: 22))
+            .opacity(model.liveCaption == nil ? 0 : 1)
+            .animation(.snappy, value: model.liveCaption)
+            .accessibilityHidden(model.liveCaption == nil)
+            .accessibilityIdentifier("capture.liveCaption")
     }
 
     /// The reps counted so far, readable from where the person stands.
@@ -1176,7 +1190,7 @@ struct ContentView: View {
                             } else {
                                 Text(cue.observation)
                                     .font(.title3.weight(.semibold))
-                                Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
+                                Text("Observed in \(FormChecks.list(cue.repNumbers)).")
                                     .font(.subheadline)
                                     .foregroundStyle(PlumbStyle.supportingText)
                                 nextAction(cue.nextAction)

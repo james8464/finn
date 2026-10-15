@@ -134,6 +134,9 @@ nonisolated struct PostureRule: Equatable, Sendable {
         case .kneeBendIncreased: "Knees bending more at the end of the set"
         case .swingIncreased: "Body swinging more at the end of the set"
         case .rangeDecreased: "Range shorter at the end of the set"
+        case .pushUpHipsSag, .pushUpHipsPike, .pushUpDepth, .squatChestDrop, .squatDepth, .lungeTorsoLean,
+             .lungeFrontKnee, .deadliftKneeBend, .deadliftHinge:
+            FormCheck(cueKind: cueKind)?.title ?? ""
         }
     }
 }

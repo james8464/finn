@@ -10,16 +10,21 @@ final class DemoPoseSource: PoseStreaming {
     /// Synthetic 3D profile deviation attached to every fourth frame, to exercise the angle check.
     private let profileDeviation: Double?
     private let missingWrist: Bool
+    /// `-plumb-ui-demo-form-fault`: every rep shows one form fault, so the live advice appears from
+    /// the second rep (the squat's chest drops forward, the push-up's hips sag).
+    private let formFault: Bool
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var feedTask: Task<Void, Never>?
     private var setNumber = 0
     private var exercise: ExerciseKind = .bodyweightSquat
 
     init(startError: CameraSourceError? = nil, profileDeviation: Double? = nil,
-         missingWrist: Bool = false) {
+         missingWrist: Bool = false,
+         formFault: Bool = ProcessInfo.processInfo.arguments.contains("-plumb-ui-demo-form-fault")) {
         self.startError = startError
         self.profileDeviation = profileDeviation
         self.missingWrist = missingWrist
+        self.formFault = formFault
     }
 
     func start() async throws -> AsyncStream<PoseFrame> {
@@ -42,7 +47,8 @@ final class DemoPoseSource: PoseStreaming {
                 self?.continuation?.yield(Self.frame(index: index, setNumber: currentSet,
                                                      exercise: currentExercise,
                                                      profileDeviation: self?.profileDeviation,
-                                                     missingWrist: self?.missingWrist ?? false))
+                                                     missingWrist: self?.missingWrist ?? false,
+                                                     formFault: self?.formFault ?? false))
             }
         }
     }
@@ -59,12 +65,12 @@ final class DemoPoseSource: PoseStreaming {
     }
 
     private static func frame(index: Int, setNumber: Int, exercise: ExerciseKind,
-                              profileDeviation: Double?, missingWrist: Bool) -> PoseFrame {
+                              profileDeviation: Double?, missingWrist: Bool, formFault: Bool = false) -> PoseFrame {
         let framesPerRep = exercise == .stiffLegDeadlift ? 25 : 20
         let phase = Double(index % framesPerRep) / Double(framesPerRep)
         let motion = (1 - cos(2 * .pi * phase)) / 2
         let late = index / framesPerRep >= 4
-        let joints: [BodyJoint: JointPoint]
+        var joints: [BodyJoint: JointPoint]
         func point(_ x: Double, _ y: Double) -> JointPoint {
             JointPoint(x: x, y: y, confidence: 0.95)
         }
@@ -123,6 +129,29 @@ final class DemoPoseSource: PoseStreaming {
                 .leftHip: point(0.48, shoulderY + 0.20), .leftKnee: point(0.49, shoulderY + 0.37),
                 .leftAnkle: point(0.47, shoulderY + 0.52), .nose: point(0.53, shoulderY - 0.08),
             ]
+        }
+        if formFault {
+            switch exercise {
+            case .bodyweightSquat:
+                // Shoulders tipping 60° forward at the bottom, far past the near-upright shins.
+                let lean = 60 * motion * .pi / 180
+                for (hip, shoulder) in [(BodyJoint.leftHip, BodyJoint.leftShoulder), (.rightHip, .rightShoulder)] {
+                    if let point = joints[hip] {
+                        joints[shoulder] = JointPoint(x: point.x + 0.25 * sin(lean), y: point.y - 0.25 * cos(lean),
+                                                      confidence: 0.95)
+                    }
+                }
+            case .pushUp:
+                // Hips 0.07 of the picture below the shoulder-to-ankle line, about a third of a torso length.
+                if let shoulder = joints[.leftShoulder], let ankle = joints[.leftAnkle] {
+                    joints[.leftHip] = point(shoulder.x + 0.45 * (ankle.x - shoulder.x),
+                                             shoulder.y + 0.45 * (ankle.y - shoulder.y) + 0.07)
+                    joints[.leftKnee] = point(shoulder.x + 0.72 * (ankle.x - shoulder.x),
+                                              shoulder.y + 0.72 * (ankle.y - shoulder.y) + 0.035)
+                }
+            default:
+                break
+            }
         }
         let visibleJoints = missingWrist && exercise == .pushUp
             ? joints.filter { $0.key != .leftWrist } : joints

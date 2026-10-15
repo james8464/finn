@@ -128,8 +128,9 @@ final class WorkoutSessionModel {
     /// The deepest and shallowest reps of the latest measured set, drawn on the result. Pose
     /// points only, kept in memory and never saved.
     private(set) var repExtremes: RepExtremes?
-    /// Per-rep facts for the latest measured set (pull-ups: chin above the hands, straight arms,
-    /// swing). Empty for exercises without such checks.
+    /// Per-rep facts for the latest measured set: pull-ups' chin above the hands, straight arms and
+    /// swing; for the other exercises, form faults beyond the observation and the checks Plumb could
+    /// not make, with the reason.
     private(set) var formNotes: [String] = []
     /// What the optional exercise classifier concluded for the latest set.
     private(set) var recognition: ExerciseRecognition = .notAttempted
@@ -539,13 +540,18 @@ final class WorkoutSessionModel {
             }
             movementNote = explanation
             repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
-            formNotes = FormChecks.sentences(for: analysis, frames: setFrames, definition: definition)
-            // A camera angle outside the supported side view can distort relative range.
+            let review = FormChecks.review(analysis, frames: setFrames, definition: definition,
+                                           viewCheck: checksCameraAngle ? .enforce : .ignore)
+            formNotes = review.notes
             // A camera angle outside the supported side view can distort relative range, and a partly
             // visible set is counted but not advised on.
-            let cue = diagnostics?.angledView == nil && diagnostics?.partialVisibility == nil
-                ? CueSelector.select(from: analysis, exercise: definition) : nil
-            let issues = SetIssue.issues(diagnostics: diagnostics, cue: cue,
+            let advisable = diagnostics?.angledView == nil && diagnostics?.partialVisibility == nil
+            let changeCue = advisable ? CueSelector.select(from: analysis, exercise: definition) : nil
+            // One observation: a form fault seen on several reps comes before a change between the first
+            // and last reps.
+            let findings = advisable ? review.findings : []
+            let cue = findings.first?.cue ?? changeCue
+            let issues = SetIssue.issues(diagnostics: diagnostics, cue: changeCue, findings: findings,
                                          spedUp: liveMonitor?.sawFasterRep ?? false)
             // Before saving, so "again" compares with the earlier sets only.
             let earlier = MistakeProfile.make(history: history, exercise: exercise)
