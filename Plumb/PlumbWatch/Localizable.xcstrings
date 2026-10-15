@@ -456,6 +456,24 @@
             "state" : "translated",
             "value" : "%lld"
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
         }
       }
     },
@@ -465,6 +483,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld bpm"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld bpm"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld bpm"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pulsaciones por minuto"
           }
         }
       }
@@ -476,6 +512,24 @@
             "state" : "translated",
             "value" : "Autorise Plumb dans Santé sur ton iPhone pour voir ta fréquence cardiaque ici."
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow Plumb in Health on your iPhone to see your heart rate here."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow Plumb in Health on your iPhone to see your heart rate here."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite a Plumb en Salud en tu iPhone para ver tu frecuencia cardíaca aquí."
+          }
         }
       }
     },
@@ -485,6 +539,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SOURCE DÉMO"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DEMO INPUT"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DEMO INPUT"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ENTRADA DEMO"
           }
         }
       }
@@ -496,6 +568,24 @@
             "state" : "translated",
             "value" : "Mets-toi en place"
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get in position"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get in position"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponte en posición"
+          }
         }
       }
     },
@@ -505,6 +595,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fréquence cardiaque : %lld battements par minute"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heart rate %lld beats per minute"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heart rate %lld beats per minute"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frecuencia cardíaca %lld pulsaciones por minuto"
           }
         }
       }
@@ -516,6 +624,24 @@
             "state" : "translated",
             "value" : "Fréquence cardiaque indisponible pour l’instant."
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heart rate is not available right now."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heart rate is not available right now."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La frecuencia cardíaca no está disponible ahora mismo."
+          }
         }
       }
     },
@@ -525,6 +651,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvre Plumb sur ton iPhone pour lancer une série."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Plumb on your iPhone to start a set."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Plumb on your iPhone to start a set."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Plumb en tu iPhone para empezar una serie."
           }
         }
       }
@@ -536,6 +680,24 @@
             "state" : "translated",
             "value" : "Ouvre Plumb sur ton iPhone, puis réessaie."
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Plumb on your iPhone, then try again."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Plumb on your iPhone, then try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Plumb en tu iPhone y vuelve a intentarlo."
+          }
         }
       }
     },
@@ -545,6 +707,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Répétitions comptées"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reps counted"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reps counted"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeticiones contadas"
           }
         }
       }
@@ -556,6 +736,24 @@
             "state" : "translated",
             "value" : "Analyse en cours"
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reviewing"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reviewing"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisando"
+          }
         }
       }
     },
@@ -565,6 +763,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Série en cours"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set running"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set running"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serie en curso"
           }
         }
       }
@@ -576,6 +792,24 @@
             "state" : "translated",
             "value" : "Prépare la caméra sur ton iPhone."
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set up the camera on your iPhone."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set up the camera on your iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configura la cámara en tu iPhone."
+          }
         }
       }
     },
@@ -585,6 +819,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Démarrer"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start set"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start set"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar serie"
           }
         }
       }
@@ -596,6 +848,24 @@
             "state" : "translated",
             "value" : "Lance la série sur ton iPhone."
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start the set on your iPhone."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start the set on your iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia la serie en tu iPhone."
+          }
         }
       }
     },
@@ -605,6 +875,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Début dans %lld"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting in %lld"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting in %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciando en %lld"
           }
         }
       }
@@ -616,6 +904,24 @@
             "state" : "translated",
             "value" : "Arrêter"
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop set"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop set"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminar serie"
+          }
         }
       }
     },
@@ -625,6 +931,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La série démarre dès que tu restes immobile."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The set starts once you hold still."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The set starts once you hold still."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La serie comienza cuando te quedas quieto."
           }
         }
       }
@@ -636,6 +960,24 @@
             "state" : "translated",
             "value" : "Puis lance la série."
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Then start the set."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Then start the set."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luego inicia la serie."
+          }
         }
       }
     },
@@ -645,6 +987,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ton iPhone n’a pas reçu l’ordre. Réessaie, ou passe par l’iPhone."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iPhone didn’t get that. Try again, or use the iPhone."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iPhone didn’t get that. Try again, or use the iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu iPhone no lo entendió. Vuelve a intentarlo o usa el iPhone."
           }
         }
       }
@@ -656,6 +1016,24 @@
             "state" : "translated",
             "value" : "répétition"
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rep"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rep"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repetición"
+          }
         }
       }
     },
@@ -665,6 +1043,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "répétitions"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reps"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reps"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repeticiones"
           }
         }
       }

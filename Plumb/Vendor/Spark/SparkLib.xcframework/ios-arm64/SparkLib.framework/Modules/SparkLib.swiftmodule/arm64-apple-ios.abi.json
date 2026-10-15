@@ -1,0 +1,4054 @@
+{
+  "ABIRoot": {
+    "kind": "Root",
+    "name": "SparkLib",
+    "printedName": "SparkLib",
+    "children": [
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "AnalyticsKit",
+        "printedName": "AnalyticsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "Analytics",
+        "printedName": "Analytics",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "logEvent",
+            "printedName": "logEvent(type:properties:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "[Swift.String : Any]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.String : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib9AnalyticsP8logEvent4type10propertiesySS_SDySSypGSgtF",
+            "mangledName": "$s8SparkLib9AnalyticsP8logEvent4type10propertiesySS_SDySSypGSgtF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.Analytics>",
+            "sugared_genericSig": "<Self where Self : SparkLib.Analytics>",
+            "protocolReq": true,
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "sendEvent",
+            "printedName": "sendEvent(type:properties:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.String : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:SD"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib9AnalyticsP9sendEvent4type10propertiesySS_SDySSypGtF",
+            "mangledName": "$s8SparkLib9AnalyticsP9sendEvent4type10propertiesySS_SDySSypGtF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.Analytics>",
+            "sugared_genericSig": "<Self where Self : SparkLib.Analytics>",
+            "protocolReq": true,
+            "declAttributes": [
+              "SPIAccessControl"
+            ],
+            "spi_group_names": [
+              "SparkPrivate"
+            ],
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "sendEvent",
+            "printedName": "sendEvent(type:properties:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.String : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:SD"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib9AnalyticsPAAE9sendEvent4type10propertiesySS_SDySSypGtF",
+            "mangledName": "$s8SparkLib9AnalyticsPAAE9sendEvent4type10propertiesySS_SDySSypGtF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.Analytics>",
+            "sugared_genericSig": "<Self where Self : SparkLib.Analytics>",
+            "declAttributes": [
+              "SPIAccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "spi_group_names": [
+              "SparkPrivate"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "s:8SparkLib9AnalyticsP",
+        "mangledName": "$s8SparkLib9AnalyticsP",
+        "moduleName": "SparkLib",
+        "genericSig": "<τ_0_0 : Swift.Sendable>",
+        "sugared_genericSig": "<Self : Swift.Sendable>",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib"
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "LogLevel",
+        "printedName": "LogLevel",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "debug",
+            "printedName": "debug",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(SparkLib.LogLevel.Type) -> SparkLib.LogLevel",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "LogLevel",
+                    "printedName": "SparkLib.LogLevel",
+                    "usr": "s:8SparkLib8LogLevelO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "SparkLib.LogLevel.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "LogLevel",
+                        "printedName": "SparkLib.LogLevel",
+                        "usr": "s:8SparkLib8LogLevelO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:8SparkLib8LogLevelO5debugyA2CmF",
+            "mangledName": "$s8SparkLib8LogLevelO5debugyA2CmF",
+            "moduleName": "SparkLib",
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "info",
+            "printedName": "info",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(SparkLib.LogLevel.Type) -> SparkLib.LogLevel",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "LogLevel",
+                    "printedName": "SparkLib.LogLevel",
+                    "usr": "s:8SparkLib8LogLevelO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "SparkLib.LogLevel.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "LogLevel",
+                        "printedName": "SparkLib.LogLevel",
+                        "usr": "s:8SparkLib8LogLevelO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:8SparkLib8LogLevelO4infoyA2CmF",
+            "mangledName": "$s8SparkLib8LogLevelO4infoyA2CmF",
+            "moduleName": "SparkLib",
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "warning",
+            "printedName": "warning",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(SparkLib.LogLevel.Type) -> SparkLib.LogLevel",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "LogLevel",
+                    "printedName": "SparkLib.LogLevel",
+                    "usr": "s:8SparkLib8LogLevelO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "SparkLib.LogLevel.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "LogLevel",
+                        "printedName": "SparkLib.LogLevel",
+                        "usr": "s:8SparkLib8LogLevelO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:8SparkLib8LogLevelO7warningyA2CmF",
+            "mangledName": "$s8SparkLib8LogLevelO7warningyA2CmF",
+            "moduleName": "SparkLib",
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "error",
+            "printedName": "error",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(SparkLib.LogLevel.Type) -> SparkLib.LogLevel",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "LogLevel",
+                    "printedName": "SparkLib.LogLevel",
+                    "usr": "s:8SparkLib8LogLevelO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "SparkLib.LogLevel.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "LogLevel",
+                        "printedName": "SparkLib.LogLevel",
+                        "usr": "s:8SparkLib8LogLevelO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:8SparkLib8LogLevelO5erroryA2CmF",
+            "mangledName": "$s8SparkLib8LogLevelO5erroryA2CmF",
+            "moduleName": "SparkLib",
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "shoutoutError",
+            "printedName": "shoutoutError",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(SparkLib.LogLevel.Type) -> SparkLib.LogLevel",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "LogLevel",
+                    "printedName": "SparkLib.LogLevel",
+                    "usr": "s:8SparkLib8LogLevelO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "SparkLib.LogLevel.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "LogLevel",
+                        "printedName": "SparkLib.LogLevel",
+                        "usr": "s:8SparkLib8LogLevelO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:8SparkLib8LogLevelO13shoutoutErroryA2CmF",
+            "mangledName": "$s8SparkLib8LogLevelO13shoutoutErroryA2CmF",
+            "moduleName": "SparkLib",
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ]
+          },
+          {
+            "kind": "Function",
+            "name": "==",
+            "printedName": "==(_:_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "LogLevel",
+                "printedName": "SparkLib.LogLevel",
+                "usr": "s:8SparkLib8LogLevelO"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "LogLevel",
+                "printedName": "SparkLib.LogLevel",
+                "usr": "s:8SparkLib8LogLevelO"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib8LogLevelO2eeoiySbAC_ACtFZ",
+            "mangledName": "$s8SparkLib8LogLevelO2eeoiySbAC_ACtFZ",
+            "moduleName": "SparkLib",
+            "static": true,
+            "implicit": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Var",
+            "name": "hashValue",
+            "printedName": "hashValue",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib8LogLevelO9hashValueSivp",
+            "mangledName": "$s8SparkLib8LogLevelO9hashValueSivp",
+            "moduleName": "SparkLib",
+            "implicit": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib8LogLevelO9hashValueSivg",
+                "mangledName": "$s8SparkLib8LogLevelO9hashValueSivg",
+                "moduleName": "SparkLib",
+                "implicit": true,
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Function",
+            "name": "hash",
+            "printedName": "hash(into:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Hasher",
+                "printedName": "Swift.Hasher",
+                "paramValueOwnership": "InOut",
+                "usr": "s:s6HasherV"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib8LogLevelO4hash4intoys6HasherVz_tF",
+            "mangledName": "$s8SparkLib8LogLevelO4hash4intoys6HasherVz_tF",
+            "moduleName": "SparkLib",
+            "implicit": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Enum",
+        "usr": "s:8SparkLib8LogLevelO",
+        "mangledName": "$s8SparkLib8LogLevelO",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl",
+          "SPIAccessControl"
+        ],
+        "spi_group_names": [
+          "PreReleaseInternalAccess"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "LoggerDelegate",
+        "printedName": "LoggerDelegate",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "log",
+            "printedName": "log(with:message:error:function:file:line:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "LogLevel",
+                "printedName": "SparkLib.LogLevel",
+                "usr": "s:8SparkLib8LogLevelO"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "(any Swift.Error)?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Error",
+                    "printedName": "any Swift.Error",
+                    "usr": "s:s5ErrorP"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib14LoggerDelegateP3log4with7message5error8function4file4lineyAA8LogLevelO_SSs5Error_pSgSSSgAOSitF",
+            "mangledName": "$s8SparkLib14LoggerDelegateP3log4with7message5error8function4file4lineyAA8LogLevelO_SSs5Error_pSgSSSgAOSitF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.LoggerDelegate>",
+            "sugared_genericSig": "<Self where Self : SparkLib.LoggerDelegate>",
+            "protocolReq": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "s:8SparkLib14LoggerDelegateP",
+        "mangledName": "$s8SparkLib14LoggerDelegateP",
+        "moduleName": "SparkLib",
+        "genericSig": "<τ_0_0 : AnyObject, τ_0_0 : Swift.Sendable>",
+        "sugared_genericSig": "<Self : AnyObject, Self : Swift.Sendable>",
+        "declAttributes": [
+          "AccessControl",
+          "SPIAccessControl"
+        ],
+        "spi_group_names": [
+          "PreReleaseInternalAccess"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "AnalyticsKit",
+        "printedName": "AnalyticsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl",
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "Integrations",
+        "printedName": "Integrations",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Integrations",
+                "printedName": "SparkLib.Integrations",
+                "usr": "s:8SparkLib12IntegrationsC"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:8SparkLib12IntegrationsCACycfc",
+            "mangledName": "$s8SparkLib12IntegrationsCACycfc",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "s:8SparkLib12IntegrationsC",
+        "mangledName": "$s8SparkLib12IntegrationsC",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "Final",
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MetricsKit",
+        "printedName": "MetricsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl",
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "AnalyticsKit",
+        "printedName": "AnalyticsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "StoreKit",
+        "printedName": "StoreKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "MonetizationError",
+        "printedName": "MonetizationError",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "incompletePayment",
+            "printedName": "incompletePayment",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(SparkLib.MonetizationError.Type) -> SparkLib.MonetizationError",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "MonetizationError",
+                    "printedName": "SparkLib.MonetizationError",
+                    "usr": "s:8SparkLib17MonetizationErrorO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "SparkLib.MonetizationError.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "MonetizationError",
+                        "printedName": "SparkLib.MonetizationError",
+                        "usr": "s:8SparkLib17MonetizationErrorO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:8SparkLib17MonetizationErrorO17incompletePaymentyA2CmF",
+            "mangledName": "$s8SparkLib17MonetizationErrorO17incompletePaymentyA2CmF",
+            "moduleName": "SparkLib"
+          },
+          {
+            "kind": "Var",
+            "name": "unknownPurchaseResult",
+            "printedName": "unknownPurchaseResult",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(SparkLib.MonetizationError.Type) -> SparkLib.MonetizationError",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "MonetizationError",
+                    "printedName": "SparkLib.MonetizationError",
+                    "usr": "s:8SparkLib17MonetizationErrorO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "SparkLib.MonetizationError.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "MonetizationError",
+                        "printedName": "SparkLib.MonetizationError",
+                        "usr": "s:8SparkLib17MonetizationErrorO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:8SparkLib17MonetizationErrorO21unknownPurchaseResultyA2CmF",
+            "mangledName": "$s8SparkLib17MonetizationErrorO21unknownPurchaseResultyA2CmF",
+            "moduleName": "SparkLib"
+          },
+          {
+            "kind": "Function",
+            "name": "==",
+            "printedName": "==(_:_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "MonetizationError",
+                "printedName": "SparkLib.MonetizationError",
+                "usr": "s:8SparkLib17MonetizationErrorO"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "MonetizationError",
+                "printedName": "SparkLib.MonetizationError",
+                "usr": "s:8SparkLib17MonetizationErrorO"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib17MonetizationErrorO2eeoiySbAC_ACtFZ",
+            "mangledName": "$s8SparkLib17MonetizationErrorO2eeoiySbAC_ACtFZ",
+            "moduleName": "SparkLib",
+            "static": true,
+            "implicit": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Var",
+            "name": "hashValue",
+            "printedName": "hashValue",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib17MonetizationErrorO9hashValueSivp",
+            "mangledName": "$s8SparkLib17MonetizationErrorO9hashValueSivp",
+            "moduleName": "SparkLib",
+            "implicit": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib17MonetizationErrorO9hashValueSivg",
+                "mangledName": "$s8SparkLib17MonetizationErrorO9hashValueSivg",
+                "moduleName": "SparkLib",
+                "implicit": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Function",
+            "name": "hash",
+            "printedName": "hash(into:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Hasher",
+                "printedName": "Swift.Hasher",
+                "paramValueOwnership": "InOut",
+                "usr": "s:s6HasherV"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib17MonetizationErrorO4hash4intoys6HasherVz_tF",
+            "mangledName": "$s8SparkLib17MonetizationErrorO4hash4intoys6HasherVz_tF",
+            "moduleName": "SparkLib",
+            "implicit": true,
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Enum",
+        "usr": "s:8SparkLib17MonetizationErrorO",
+        "mangledName": "$s8SparkLib17MonetizationErrorO",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Error",
+            "printedName": "Error",
+            "usr": "s:s5ErrorP",
+            "mangledName": "$ss5ErrorP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "Monetization",
+        "printedName": "Monetization",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "recordTransactions",
+            "printedName": "recordTransactions(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[Swift.String]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sa"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib12MonetizationP18recordTransactionsyySaySSGYaKF",
+            "mangledName": "$s8SparkLib12MonetizationP18recordTransactionsyySaySSGYaKF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.Monetization>",
+            "sugared_genericSig": "<Self where Self : SparkLib.Monetization>",
+            "protocolReq": true,
+            "declAttributes": [
+              "RawDocComment"
+            ],
+            "throwing": true,
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "recordTransactions",
+            "printedName": "recordTransactions(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[StoreKit.VerificationResult<StoreKit.Transaction>]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VerificationResult",
+                    "printedName": "StoreKit.VerificationResult<StoreKit.Transaction>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Transaction",
+                        "printedName": "StoreKit.Transaction",
+                        "usr": "s:8StoreKit11TransactionV"
+                      }
+                    ],
+                    "usr": "s:8StoreKit18VerificationResultO"
+                  }
+                ],
+                "usr": "s:Sa"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib12MonetizationP18recordTransactionsyySay8StoreKit18VerificationResultOyAE11TransactionVGGYaKF",
+            "mangledName": "$s8SparkLib12MonetizationP18recordTransactionsyySay8StoreKit18VerificationResultOyAE11TransactionVGGYaKF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.Monetization>",
+            "sugared_genericSig": "<Self where Self : SparkLib.Monetization>",
+            "protocolReq": true,
+            "declAttributes": [
+              "RawDocComment"
+            ],
+            "throwing": true,
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "recordPurchase",
+            "printedName": "recordPurchase(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "PurchaseResult",
+                "printedName": "StoreKit.Product.PurchaseResult",
+                "usr": "s:8StoreKit7ProductV14PurchaseResultO"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib12MonetizationP14recordPurchaseyy8StoreKit7ProductV0E6ResultOYaKF",
+            "mangledName": "$s8SparkLib12MonetizationP14recordPurchaseyy8StoreKit7ProductV0E6ResultOYaKF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.Monetization>",
+            "sugared_genericSig": "<Self where Self : SparkLib.Monetization>",
+            "protocolReq": true,
+            "declAttributes": [
+              "RawDocComment"
+            ],
+            "throwing": true,
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "s:8SparkLib12MonetizationP",
+        "mangledName": "$s8SparkLib12MonetizationP",
+        "moduleName": "SparkLib",
+        "genericSig": "<τ_0_0 : Swift.Sendable>",
+        "sugared_genericSig": "<Self : Swift.Sendable>",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "NetworkKit",
+        "printedName": "NetworkKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl",
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "AnalyticsKit",
+        "printedName": "AnalyticsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "OpeningFlow",
+        "printedName": "OpeningFlow",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "context",
+            "printedName": "context",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "OpeningFlowContext",
+                "printedName": "SparkLib.OpeningFlowContext",
+                "usr": "s:8SparkLib18OpeningFlowContextC"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib11OpeningFlowC7contextAA0cD7ContextCvp",
+            "mangledName": "$s8SparkLib11OpeningFlowC7contextAA0cD7ContextCvp",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "Custom",
+              "HasStorage",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpeningFlowContext",
+                    "printedName": "SparkLib.OpeningFlowContext",
+                    "usr": "s:8SparkLib18OpeningFlowContextC"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib11OpeningFlowC7contextAA0cD7ContextCvg",
+                "mangledName": "$s8SparkLib11OpeningFlowC7contextAA0cD7ContextCvg",
+                "moduleName": "SparkLib",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          }
+        ],
+        "declKind": "Class",
+        "usr": "s:8SparkLib11OpeningFlowC",
+        "mangledName": "$s8SparkLib11OpeningFlowC",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "Final",
+          "AccessControl",
+          "Custom",
+          "RawDocComment"
+        ],
+        "hasMissingDesignatedInitializers": true,
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "OpeningFlowContextKey",
+        "printedName": "OpeningFlowContextKey",
+        "children": [
+          {
+            "kind": "AssociatedType",
+            "name": "Value",
+            "printedName": "Value",
+            "declKind": "AssociatedType",
+            "usr": "s:8SparkLib21OpeningFlowContextKeyP5ValueQa",
+            "mangledName": "$s8SparkLib21OpeningFlowContextKeyP5ValueQa",
+            "moduleName": "SparkLib",
+            "protocolReq": true
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "s:8SparkLib21OpeningFlowContextKeyP",
+        "mangledName": "$s8SparkLib21OpeningFlowContextKeyP",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl",
+          "RawDocComment"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "OpeningFlowContext",
+        "printedName": "OpeningFlowContext",
+        "children": [
+          {
+            "kind": "Subscript",
+            "name": "subscript",
+            "printedName": "subscript(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "τ_0_0.Value?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "DependentMember",
+                    "printedName": "τ_0_0.Value"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Metatype",
+                "printedName": "τ_0_0.Type",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GenericTypeParam",
+                    "printedName": "τ_0_0"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Subscript",
+            "usr": "s:8SparkLib18OpeningFlowContextCy5ValueQzSgxmcAA0cdE3KeyRzluip",
+            "mangledName": "$s8SparkLib18OpeningFlowContextCy5ValueQzSgxmcAA0cdE3KeyRzluip",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.OpeningFlowContextKey>",
+            "sugared_genericSig": "<Key where Key : SparkLib.OpeningFlowContextKey>",
+            "declAttributes": [
+              "Custom",
+              "Final",
+              "AccessControl"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "τ_0_0.Value?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "DependentMember",
+                        "printedName": "τ_0_0.Value"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "τ_0_0.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "GenericTypeParam",
+                        "printedName": "τ_0_0"
+                      }
+                    ]
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib18OpeningFlowContextCy5ValueQzSgxmcAA0cdE3KeyRzluig",
+                "mangledName": "$s8SparkLib18OpeningFlowContextCy5ValueQzSgxmcAA0cdE3KeyRzluig",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.OpeningFlowContextKey>",
+                "sugared_genericSig": "<Key where Key : SparkLib.OpeningFlowContextKey>",
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "τ_0_0.Value?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "DependentMember",
+                        "printedName": "τ_0_0.Value"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "τ_0_0.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "GenericTypeParam",
+                        "printedName": "τ_0_0"
+                      }
+                    ]
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib18OpeningFlowContextCy5ValueQzSgxmcAA0cdE3KeyRzluis",
+                "mangledName": "$s8SparkLib18OpeningFlowContextCy5ValueQzSgxmcAA0cdE3KeyRzluis",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.OpeningFlowContextKey>",
+                "sugared_genericSig": "<Key where Key : SparkLib.OpeningFlowContextKey>",
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "τ_0_0.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "GenericTypeParam",
+                        "printedName": "τ_0_0"
+                      }
+                    ]
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib18OpeningFlowContextCy5ValueQzSgxmcAA0cdE3KeyRzluiM",
+                "mangledName": "$s8SparkLib18OpeningFlowContextCy5ValueQzSgxmcAA0cdE3KeyRzluiM",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.OpeningFlowContextKey>",
+                "sugared_genericSig": "<Key where Key : SparkLib.OpeningFlowContextKey>",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "_modify"
+              }
+            ]
+          }
+        ],
+        "declKind": "Class",
+        "usr": "s:8SparkLib18OpeningFlowContextC",
+        "mangledName": "$s8SparkLib18OpeningFlowContextC",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "Final",
+          "AccessControl",
+          "Custom",
+          "RawDocComment"
+        ],
+        "hasMissingDesignatedInitializers": true,
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "OpeningFlowStep",
+        "printedName": "OpeningFlowStep",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "run",
+            "printedName": "run(in:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "OpeningFlow",
+                "printedName": "SparkLib.OpeningFlow",
+                "usr": "s:8SparkLib11OpeningFlowC"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib15OpeningFlowStepP3run2inyAA0cD0C_tYaF",
+            "mangledName": "$s8SparkLib15OpeningFlowStepP3run2inyAA0cD0C_tYaF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.OpeningFlowStep>",
+            "sugared_genericSig": "<Self where Self : SparkLib.OpeningFlowStep>",
+            "protocolReq": true,
+            "declAttributes": [
+              "Custom"
+            ],
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "s:8SparkLib15OpeningFlowStepP",
+        "mangledName": "$s8SparkLib15OpeningFlowStepP",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl",
+          "RawDocComment"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "SwiftUI",
+        "printedName": "SwiftUI",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "OpeningFlowView",
+        "printedName": "OpeningFlowView",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(steps:content:background:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "OpeningFlowView",
+                "printedName": "SparkLib.OpeningFlowView<τ_0_0, τ_0_1>",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GenericTypeParam",
+                    "printedName": "τ_0_0"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GenericTypeParam",
+                    "printedName": "τ_0_1"
+                  }
+                ],
+                "usr": "s:8SparkLib15OpeningFlowViewV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[any SparkLib.OpeningFlowStep]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpeningFlowStep",
+                    "printedName": "any SparkLib.OpeningFlowStep",
+                    "usr": "s:8SparkLib15OpeningFlowStepP"
+                  }
+                ],
+                "usr": "s:Sa"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "() -> τ_0_0",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GenericTypeParam",
+                    "printedName": "τ_0_0"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ]
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "() -> τ_0_1",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GenericTypeParam",
+                    "printedName": "τ_0_1"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "typeAttributes": [
+                  "noescape"
+                ]
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:8SparkLib15OpeningFlowViewV5steps7content10backgroundACyxq_GSayAA0cD4Step_pG_xycq_yXEtcfc",
+            "mangledName": "$s8SparkLib15OpeningFlowViewV5steps7content10backgroundACyxq_GSayAA0cD4Step_pG_xycq_yXEtcfc",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0, τ_0_1 where τ_0_0 : SwiftUI.View, τ_0_1 : SwiftUI.View>",
+            "sugared_genericSig": "<Content, Background where Content : SwiftUI.View, Background : SwiftUI.View>",
+            "declAttributes": [
+              "AccessControl",
+              "Custom",
+              "RawDocComment"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Var",
+            "name": "body",
+            "printedName": "body",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "OpaqueTypeArchetype",
+                "printedName": "some SwiftUI.View",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "View",
+                    "printedName": "SwiftUI.View",
+                    "usr": "s:7SwiftUI4ViewP"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib15OpeningFlowViewV4bodyQrvp",
+            "mangledName": "$s8SparkLib15OpeningFlowViewV4bodyQrvp",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "Preconcurrency",
+              "Custom",
+              "AccessControl"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpaqueTypeArchetype",
+                    "printedName": "some SwiftUI.View",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "View",
+                        "printedName": "SwiftUI.View",
+                        "usr": "s:7SwiftUI4ViewP"
+                      }
+                    ]
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib15OpeningFlowViewV4bodyQrvg",
+                "mangledName": "$s8SparkLib15OpeningFlowViewV4bodyQrvg",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0, τ_0_1 where τ_0_0 : SwiftUI.View, τ_0_1 : SwiftUI.View>",
+                "sugared_genericSig": "<Content, Background where Content : SwiftUI.View, Background : SwiftUI.View>",
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(steps:content:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "OpeningFlowView",
+                "printedName": "SparkLib.OpeningFlowView<τ_0_0, τ_0_1>",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GenericTypeParam",
+                    "printedName": "τ_0_0"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GenericTypeParam",
+                    "printedName": "τ_0_1"
+                  }
+                ],
+                "usr": "s:8SparkLib15OpeningFlowViewV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[any SparkLib.OpeningFlowStep]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpeningFlowStep",
+                    "printedName": "any SparkLib.OpeningFlowStep",
+                    "usr": "s:8SparkLib15OpeningFlowStepP"
+                  }
+                ],
+                "usr": "s:Sa"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "() -> τ_0_0",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GenericTypeParam",
+                    "printedName": "τ_0_0"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:8SparkLib15OpeningFlowViewVA2A07DefaultcD10BackgroundVRs_rlE5steps7contentACyxAEGSayAA0cD4Step_pG_xyctcfc",
+            "mangledName": "$s8SparkLib15OpeningFlowViewVA2A07DefaultcD10BackgroundVRs_rlE5steps7contentACyxAEGSayAA0cD4Step_pG_xyctcfc",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0, τ_0_1 where τ_0_0 : SwiftUI.View, τ_0_1 == SparkLib.DefaultOpeningFlowBackground>",
+            "sugared_genericSig": "<Content, Background where Content : SwiftUI.View, Background == SparkLib.DefaultOpeningFlowBackground>",
+            "declAttributes": [
+              "Custom",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Struct",
+        "usr": "s:8SparkLib15OpeningFlowViewV",
+        "mangledName": "$s8SparkLib15OpeningFlowViewV",
+        "moduleName": "SparkLib",
+        "genericSig": "<τ_0_0, τ_0_1 where τ_0_0 : SwiftUI.View, τ_0_1 : SwiftUI.View>",
+        "sugared_genericSig": "<Content, Background where Content : SwiftUI.View, Background : SwiftUI.View>",
+        "declAttributes": [
+          "Preconcurrency",
+          "Custom",
+          "AccessControl",
+          "RawDocComment"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "View",
+            "printedName": "View",
+            "children": [
+              {
+                "kind": "TypeWitness",
+                "name": "Body",
+                "printedName": "Body",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpaqueTypeArchetype",
+                    "printedName": "some SwiftUI.View",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "View",
+                        "printedName": "SwiftUI.View",
+                        "usr": "s:7SwiftUI4ViewP"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "usr": "s:7SwiftUI4ViewP",
+            "mangledName": "$s7SwiftUI4ViewP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "DefaultOpeningFlowBackground",
+        "printedName": "DefaultOpeningFlowBackground",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "DefaultOpeningFlowBackground",
+                "printedName": "SparkLib.DefaultOpeningFlowBackground",
+                "usr": "s:8SparkLib28DefaultOpeningFlowBackgroundV"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:8SparkLib28DefaultOpeningFlowBackgroundVACycfc",
+            "mangledName": "$s8SparkLib28DefaultOpeningFlowBackgroundVACycfc",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "Preconcurrency",
+              "Custom",
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Var",
+            "name": "body",
+            "printedName": "body",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "OpaqueTypeArchetype",
+                "printedName": "some SwiftUI.View",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "View",
+                    "printedName": "SwiftUI.View",
+                    "usr": "s:7SwiftUI4ViewP"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib28DefaultOpeningFlowBackgroundV4bodyQrvp",
+            "mangledName": "$s8SparkLib28DefaultOpeningFlowBackgroundV4bodyQrvp",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "Preconcurrency",
+              "Custom",
+              "AccessControl"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpaqueTypeArchetype",
+                    "printedName": "some SwiftUI.View",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "View",
+                        "printedName": "SwiftUI.View",
+                        "usr": "s:7SwiftUI4ViewP"
+                      }
+                    ]
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib28DefaultOpeningFlowBackgroundV4bodyQrvg",
+                "mangledName": "$s8SparkLib28DefaultOpeningFlowBackgroundV4bodyQrvg",
+                "moduleName": "SparkLib",
+                "accessorKind": "get"
+              }
+            ]
+          }
+        ],
+        "declKind": "Struct",
+        "usr": "s:8SparkLib28DefaultOpeningFlowBackgroundV",
+        "mangledName": "$s8SparkLib28DefaultOpeningFlowBackgroundV",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "Preconcurrency",
+          "Custom",
+          "AccessControl",
+          "RawDocComment"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "View",
+            "printedName": "View",
+            "children": [
+              {
+                "kind": "TypeWitness",
+                "name": "Body",
+                "printedName": "Body",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpaqueTypeArchetype",
+                    "printedName": "some SwiftUI.View",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "View",
+                        "printedName": "SwiftUI.View",
+                        "usr": "s:7SwiftUI4ViewP"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "usr": "s:7SwiftUI4ViewP",
+            "mangledName": "$s7SwiftUI4ViewP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl",
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib"
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "SparkLib"
+      },
+      {
+        "kind": "Import",
+        "name": "InstallationKit",
+        "printedName": "InstallationKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "NetworkKit",
+        "printedName": "NetworkKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MWMSessions",
+        "printedName": "MWMSessions",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "AnalyticsKit",
+        "printedName": "AnalyticsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MetricsKit",
+        "printedName": "MetricsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "TrackingKit",
+        "printedName": "TrackingKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "SparkInterface",
+        "printedName": "SparkInterface",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "analytics",
+            "printedName": "analytics",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Analytics",
+                "printedName": "any SparkLib.Analytics",
+                "usr": "s:8SparkLib9AnalyticsP"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib0A9InterfaceP9analyticsAA9Analytics_pvp",
+            "mangledName": "$s8SparkLib0A9InterfaceP9analyticsAA9Analytics_pvp",
+            "moduleName": "SparkLib",
+            "protocolReq": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Analytics",
+                    "printedName": "any SparkLib.Analytics",
+                    "usr": "s:8SparkLib9AnalyticsP"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib0A9InterfaceP9analyticsAA9Analytics_pvg",
+                "mangledName": "$s8SparkLib0A9InterfaceP9analyticsAA9Analytics_pvg",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.SparkInterface>",
+                "sugared_genericSig": "<Self where Self : SparkLib.SparkInterface>",
+                "protocolReq": true,
+                "reqNewWitnessTableEntry": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "monetization",
+            "printedName": "monetization",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Monetization",
+                "printedName": "any SparkLib.Monetization",
+                "usr": "s:8SparkLib12MonetizationP"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib0A9InterfaceP12monetizationAA12Monetization_pvp",
+            "mangledName": "$s8SparkLib0A9InterfaceP12monetizationAA12Monetization_pvp",
+            "moduleName": "SparkLib",
+            "protocolReq": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Monetization",
+                    "printedName": "any SparkLib.Monetization",
+                    "usr": "s:8SparkLib12MonetizationP"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib0A9InterfaceP12monetizationAA12Monetization_pvg",
+                "mangledName": "$s8SparkLib0A9InterfaceP12monetizationAA12Monetization_pvg",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.SparkInterface>",
+                "sugared_genericSig": "<Self where Self : SparkLib.SparkInterface>",
+                "protocolReq": true,
+                "reqNewWitnessTableEntry": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "temporary",
+            "printedName": "temporary",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Temporary",
+                "printedName": "any SparkLib.Temporary",
+                "usr": "s:8SparkLib9TemporaryP"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib0A9InterfaceP9temporaryAA9Temporary_pvp",
+            "mangledName": "$s8SparkLib0A9InterfaceP9temporaryAA9Temporary_pvp",
+            "moduleName": "SparkLib",
+            "protocolReq": true,
+            "declAttributes": [
+              "SPIAccessControl"
+            ],
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Temporary",
+                    "printedName": "any SparkLib.Temporary",
+                    "usr": "s:8SparkLib9TemporaryP"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib0A9InterfaceP9temporaryAA9Temporary_pvg",
+                "mangledName": "$s8SparkLib0A9InterfaceP9temporaryAA9Temporary_pvg",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.SparkInterface>",
+                "sugared_genericSig": "<Self where Self : SparkLib.SparkInterface>",
+                "protocolReq": true,
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ],
+                "reqNewWitnessTableEntry": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "temporary",
+            "printedName": "temporary",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Temporary",
+                "printedName": "any SparkLib.Temporary",
+                "usr": "s:8SparkLib9TemporaryP"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib0A9InterfacePAAE9temporaryAA9Temporary_pvp",
+            "mangledName": "$s8SparkLib0A9InterfacePAAE9temporaryAA9Temporary_pvp",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "SPIAccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Temporary",
+                    "printedName": "any SparkLib.Temporary",
+                    "usr": "s:8SparkLib9TemporaryP"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib0A9InterfacePAAE9temporaryAA9Temporary_pvg",
+                "mangledName": "$s8SparkLib0A9InterfacePAAE9temporaryAA9Temporary_pvg",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.SparkInterface>",
+                "sugared_genericSig": "<Self where Self : SparkLib.SparkInterface>",
+                "isFromExtension": true,
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Function",
+            "name": "onApplication",
+            "printedName": "onApplication(_:open:options:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIApplication",
+                "printedName": "UIKit.UIApplication",
+                "usr": "c:objc(cs)UIApplication"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "URL",
+                "printedName": "Foundation.URL",
+                "usr": "s:10Foundation3URLV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[UIKit.UIApplication.OpenURLOptionsKey : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpenURLOptionsKey",
+                    "printedName": "UIKit.UIApplication.OpenURLOptionsKey",
+                    "usr": "c:@T@UIApplicationOpenURLOptionsKey"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:SD"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib0A9InterfacePAAE13onApplication_4open7optionsSbSo13UIApplicationC_10Foundation3URLVSDySo0H17OpenURLOptionsKeyaypGtF",
+            "mangledName": "$s8SparkLib0A9InterfacePAAE13onApplication_4open7optionsSbSo13UIApplicationC_10Foundation3URLVSDySo0H17OpenURLOptionsKeyaypGtF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.SparkInterface>",
+            "sugared_genericSig": "<Self where Self : SparkLib.SparkInterface>",
+            "declAttributes": [
+              "Custom",
+              "SPIAccessControl"
+            ],
+            "isFromExtension": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "continueUserActivity",
+            "printedName": "continueUserActivity(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "NSUserActivity",
+                "printedName": "Foundation.NSUserActivity",
+                "usr": "c:objc(cs)NSUserActivity"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib0A9InterfacePAAE20continueUserActivityySbSo06NSUserF0CF",
+            "mangledName": "$s8SparkLib0A9InterfacePAAE20continueUserActivityySbSo06NSUserF0CF",
+            "moduleName": "SparkLib",
+            "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.SparkInterface>",
+            "sugared_genericSig": "<Self where Self : SparkLib.SparkInterface>",
+            "declAttributes": [
+              "Custom",
+              "SPIAccessControl"
+            ],
+            "isFromExtension": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "s:8SparkLib0A9InterfaceP",
+        "mangledName": "$s8SparkLib0A9InterfaceP",
+        "moduleName": "SparkLib",
+        "genericSig": "<τ_0_0 : Swift.Sendable>",
+        "sugared_genericSig": "<Self : Swift.Sendable>",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "Spark",
+        "printedName": "Spark",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "analytics",
+            "printedName": "analytics",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Analytics",
+                "printedName": "any SparkLib.Analytics",
+                "usr": "s:8SparkLib9AnalyticsP"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib0A0C9analyticsAA9Analytics_pvp",
+            "mangledName": "$s8SparkLib0A0C9analyticsAA9Analytics_pvp",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Analytics",
+                    "printedName": "any SparkLib.Analytics",
+                    "usr": "s:8SparkLib9AnalyticsP"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib0A0C9analyticsAA9Analytics_pvg",
+                "mangledName": "$s8SparkLib0A0C9analyticsAA9Analytics_pvg",
+                "moduleName": "SparkLib",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "monetization",
+            "printedName": "monetization",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Monetization",
+                "printedName": "any SparkLib.Monetization",
+                "usr": "s:8SparkLib12MonetizationP"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib0A0C12monetizationAA12Monetization_pvp",
+            "mangledName": "$s8SparkLib0A0C12monetizationAA12Monetization_pvp",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "Final",
+              "AccessControl"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Monetization",
+                    "printedName": "any SparkLib.Monetization",
+                    "usr": "s:8SparkLib12MonetizationP"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib0A0C12monetizationAA12Monetization_pvg",
+                "mangledName": "$s8SparkLib0A0C12monetizationAA12Monetization_pvg",
+                "moduleName": "SparkLib",
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "temporary",
+            "printedName": "temporary",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Temporary",
+                "printedName": "any SparkLib.Temporary",
+                "usr": "s:8SparkLib9TemporaryP"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib0A0C9temporaryAA9Temporary_pvp",
+            "mangledName": "$s8SparkLib0A0C9temporaryAA9Temporary_pvp",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "SPIAccessControl"
+            ],
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Temporary",
+                    "printedName": "any SparkLib.Temporary",
+                    "usr": "s:8SparkLib9TemporaryP"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib0A0C9temporaryAA9Temporary_pvg",
+                "mangledName": "$s8SparkLib0A0C9temporaryAA9Temporary_pvg",
+                "moduleName": "SparkLib",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "shared",
+            "printedName": "shared",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "SparkInterface",
+                "printedName": "any SparkLib.SparkInterface",
+                "usr": "s:8SparkLib0A9InterfaceP"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib0A0C6sharedAA0A9Interface_pvpZ",
+            "mangledName": "$s8SparkLib0A0C6sharedAA0A9Interface_pvpZ",
+            "moduleName": "SparkLib",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "AccessControl"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "SparkInterface",
+                    "printedName": "any SparkLib.SparkInterface",
+                    "usr": "s:8SparkLib0A9InterfaceP"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib0A0C6sharedAA0A9Interface_pvgZ",
+                "mangledName": "$s8SparkLib0A0C6sharedAA0A9Interface_pvgZ",
+                "moduleName": "SparkLib",
+                "static": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Function",
+            "name": "configure",
+            "printedName": "configure(_:integrations:sdkVersion:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Configuration",
+                "printedName": "SparkLib.Spark.Configuration",
+                "usr": "s:8SparkLib0A0C13ConfigurationV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Integrations",
+                "printedName": "SparkLib.Integrations",
+                "usr": "s:8SparkLib12IntegrationsC"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8SparkLib0A0C9configure_12integrations10sdkVersionyAC13ConfigurationV_AA12IntegrationsCSStFZ",
+            "mangledName": "$s8SparkLib0A0C9configure_12integrations10sdkVersionyAC13ConfigurationV_AA12IntegrationsCSStFZ",
+            "moduleName": "SparkLib",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "SPIAccessControl",
+              "Custom"
+            ],
+            "spi_group_names": [
+              "SparkPrivate"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "TypeDecl",
+            "name": "Configuration",
+            "printedName": "Configuration",
+            "children": [
+              {
+                "kind": "Var",
+                "name": "apiKey",
+                "printedName": "apiKey",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Var",
+                "usr": "s:8SparkLib0A0C13ConfigurationV6apiKeySSvp",
+                "mangledName": "$s8SparkLib0A0C13ConfigurationV6apiKeySSvp",
+                "moduleName": "SparkLib",
+                "declAttributes": [
+                  "HasStorage",
+                  "AccessControl"
+                ],
+                "isLet": true,
+                "hasStorage": true,
+                "accessors": [
+                  {
+                    "kind": "Accessor",
+                    "name": "Get",
+                    "printedName": "Get()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "declKind": "Accessor",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV6apiKeySSvg",
+                    "mangledName": "$s8SparkLib0A0C13ConfigurationV6apiKeySSvg",
+                    "moduleName": "SparkLib",
+                    "implicit": true,
+                    "accessorKind": "get"
+                  }
+                ]
+              },
+              {
+                "kind": "Var",
+                "name": "appToken",
+                "printedName": "appToken",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Var",
+                "usr": "s:8SparkLib0A0C13ConfigurationV8appTokenSSvp",
+                "mangledName": "$s8SparkLib0A0C13ConfigurationV8appTokenSSvp",
+                "moduleName": "SparkLib",
+                "declAttributes": [
+                  "HasStorage",
+                  "AccessControl"
+                ],
+                "isLet": true,
+                "hasStorage": true,
+                "accessors": [
+                  {
+                    "kind": "Accessor",
+                    "name": "Get",
+                    "printedName": "Get()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "declKind": "Accessor",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV8appTokenSSvg",
+                    "mangledName": "$s8SparkLib0A0C13ConfigurationV8appTokenSSvg",
+                    "moduleName": "SparkLib",
+                    "implicit": true,
+                    "accessorKind": "get"
+                  }
+                ]
+              },
+              {
+                "kind": "Var",
+                "name": "mwmAppId",
+                "printedName": "mwmAppId",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Var",
+                "usr": "s:8SparkLib0A0C13ConfigurationV8mwmAppIdSSvp",
+                "mangledName": "$s8SparkLib0A0C13ConfigurationV8mwmAppIdSSvp",
+                "moduleName": "SparkLib",
+                "declAttributes": [
+                  "HasStorage",
+                  "AccessControl"
+                ],
+                "isLet": true,
+                "hasStorage": true,
+                "accessors": [
+                  {
+                    "kind": "Accessor",
+                    "name": "Get",
+                    "printedName": "Get()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "declKind": "Accessor",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV8mwmAppIdSSvg",
+                    "mangledName": "$s8SparkLib0A0C13ConfigurationV8mwmAppIdSSvg",
+                    "moduleName": "SparkLib",
+                    "implicit": true,
+                    "accessorKind": "get"
+                  }
+                ]
+              },
+              {
+                "kind": "TypeDecl",
+                "name": "Builder",
+                "printedName": "Builder",
+                "children": [
+                  {
+                    "kind": "Constructor",
+                    "name": "init",
+                    "printedName": "init(apiKey:)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Builder",
+                        "printedName": "SparkLib.Spark.Configuration.Builder",
+                        "usr": "s:8SparkLib0A0C13ConfigurationV7BuilderC"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "declKind": "Constructor",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV7BuilderC6apiKeyAGSS_tcfc",
+                    "mangledName": "$s8SparkLib0A0C13ConfigurationV7BuilderC6apiKeyAGSS_tcfc",
+                    "moduleName": "SparkLib",
+                    "declAttributes": [
+                      "AccessControl"
+                    ],
+                    "init_kind": "Designated"
+                  },
+                  {
+                    "kind": "Function",
+                    "name": "withAppToken",
+                    "printedName": "withAppToken(_:)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "DynamicSelf",
+                        "printedName": "Self"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "declKind": "Func",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV7BuilderC12withAppTokenyAGXDSSF",
+                    "mangledName": "$s8SparkLib0A0C13ConfigurationV7BuilderC12withAppTokenyAGXDSSF",
+                    "moduleName": "SparkLib",
+                    "declAttributes": [
+                      "Final",
+                      "AccessControl"
+                    ],
+                    "funcSelfKind": "NonMutating"
+                  },
+                  {
+                    "kind": "Function",
+                    "name": "withMwmAppId",
+                    "printedName": "withMwmAppId(_:)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "DynamicSelf",
+                        "printedName": "Self"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "declKind": "Func",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV7BuilderC12withMwmAppIdyAGXDSSF",
+                    "mangledName": "$s8SparkLib0A0C13ConfigurationV7BuilderC12withMwmAppIdyAGXDSSF",
+                    "moduleName": "SparkLib",
+                    "declAttributes": [
+                      "Final",
+                      "AccessControl"
+                    ],
+                    "funcSelfKind": "NonMutating"
+                  },
+                  {
+                    "kind": "Function",
+                    "name": "withDebugMode",
+                    "printedName": "withDebugMode(_:)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "DynamicSelf",
+                        "printedName": "Self"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Bool",
+                        "printedName": "Swift.Bool",
+                        "usr": "s:Sb"
+                      }
+                    ],
+                    "declKind": "Func",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV7BuilderC13withDebugModeyAGXDSbF",
+                    "mangledName": "$s8SparkLib0A0C13ConfigurationV7BuilderC13withDebugModeyAGXDSbF",
+                    "moduleName": "SparkLib",
+                    "declAttributes": [
+                      "Final",
+                      "AccessControl"
+                    ],
+                    "funcSelfKind": "NonMutating"
+                  },
+                  {
+                    "kind": "Function",
+                    "name": "withLoggerDelegate",
+                    "printedName": "withLoggerDelegate(_:)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "DynamicSelf",
+                        "printedName": "Self"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "LoggerDelegate",
+                        "printedName": "any SparkLib.LoggerDelegate",
+                        "usr": "s:8SparkLib14LoggerDelegateP"
+                      }
+                    ],
+                    "declKind": "Func",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV7BuilderC18withLoggerDelegateyAGXDAA0fG0_pF",
+                    "mangledName": "$s8SparkLib0A0C13ConfigurationV7BuilderC18withLoggerDelegateyAGXDAA0fG0_pF",
+                    "moduleName": "SparkLib",
+                    "declAttributes": [
+                      "Final",
+                      "AccessControl",
+                      "SPIAccessControl"
+                    ],
+                    "spi_group_names": [
+                      "PreReleaseInternalAccess"
+                    ],
+                    "funcSelfKind": "NonMutating"
+                  },
+                  {
+                    "kind": "Function",
+                    "name": "build",
+                    "printedName": "build()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Configuration",
+                        "printedName": "SparkLib.Spark.Configuration",
+                        "usr": "s:8SparkLib0A0C13ConfigurationV"
+                      }
+                    ],
+                    "declKind": "Func",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV7BuilderC5buildAEyF",
+                    "mangledName": "$s8SparkLib0A0C13ConfigurationV7BuilderC5buildAEyF",
+                    "moduleName": "SparkLib",
+                    "declAttributes": [
+                      "Final",
+                      "AccessControl"
+                    ],
+                    "funcSelfKind": "NonMutating"
+                  }
+                ],
+                "declKind": "Class",
+                "usr": "s:8SparkLib0A0C13ConfigurationV7BuilderC",
+                "mangledName": "$s8SparkLib0A0C13ConfigurationV7BuilderC",
+                "moduleName": "SparkLib",
+                "declAttributes": [
+                  "Final"
+                ],
+                "isFromExtension": true,
+                "conformances": [
+                  {
+                    "kind": "Conformance",
+                    "name": "Copyable",
+                    "printedName": "Copyable",
+                    "usr": "s:s8CopyableP",
+                    "mangledName": "$ss8CopyableP"
+                  },
+                  {
+                    "kind": "Conformance",
+                    "name": "Escapable",
+                    "printedName": "Escapable",
+                    "usr": "s:s9EscapableP",
+                    "mangledName": "$ss9EscapableP"
+                  }
+                ]
+              },
+              {
+                "kind": "Function",
+                "name": "builder",
+                "printedName": "builder(apiKey:)",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Builder",
+                    "printedName": "SparkLib.Spark.Configuration.Builder",
+                    "usr": "s:8SparkLib0A0C13ConfigurationV7BuilderC"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Func",
+                "usr": "s:8SparkLib0A0C13ConfigurationV7builder6apiKeyAE7BuilderCSS_tFZ",
+                "mangledName": "$s8SparkLib0A0C13ConfigurationV7builder6apiKeyAE7BuilderCSS_tFZ",
+                "moduleName": "SparkLib",
+                "static": true,
+                "isFromExtension": true,
+                "funcSelfKind": "NonMutating"
+              }
+            ],
+            "declKind": "Struct",
+            "usr": "s:8SparkLib0A0C13ConfigurationV",
+            "mangledName": "$s8SparkLib0A0C13ConfigurationV",
+            "moduleName": "SparkLib",
+            "isFromExtension": true,
+            "conformances": [
+              {
+                "kind": "Conformance",
+                "name": "Copyable",
+                "printedName": "Copyable",
+                "usr": "s:s8CopyableP",
+                "mangledName": "$ss8CopyableP"
+              },
+              {
+                "kind": "Conformance",
+                "name": "Escapable",
+                "printedName": "Escapable",
+                "usr": "s:s9EscapableP",
+                "mangledName": "$ss9EscapableP"
+              }
+            ]
+          },
+          {
+            "kind": "TypeDecl",
+            "name": "Environment",
+            "printedName": "Environment",
+            "children": [
+              {
+                "kind": "Var",
+                "name": "dev",
+                "printedName": "dev",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(SparkLib.Spark.Environment.Type) -> SparkLib.Spark.Environment",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Environment",
+                        "printedName": "SparkLib.Spark.Environment",
+                        "usr": "s:8SparkLib0A0C11EnvironmentO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Metatype",
+                        "printedName": "SparkLib.Spark.Environment.Type",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Environment",
+                            "printedName": "SparkLib.Spark.Environment",
+                            "usr": "s:8SparkLib0A0C11EnvironmentO"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "declKind": "EnumElement",
+                "usr": "s:8SparkLib0A0C11EnvironmentO3devyA2EmF",
+                "mangledName": "$s8SparkLib0A0C11EnvironmentO3devyA2EmF",
+                "moduleName": "SparkLib",
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ]
+              },
+              {
+                "kind": "Var",
+                "name": "prod",
+                "printedName": "prod",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(SparkLib.Spark.Environment.Type) -> SparkLib.Spark.Environment",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Environment",
+                        "printedName": "SparkLib.Spark.Environment",
+                        "usr": "s:8SparkLib0A0C11EnvironmentO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Metatype",
+                        "printedName": "SparkLib.Spark.Environment.Type",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Environment",
+                            "printedName": "SparkLib.Spark.Environment",
+                            "usr": "s:8SparkLib0A0C11EnvironmentO"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "declKind": "EnumElement",
+                "usr": "s:8SparkLib0A0C11EnvironmentO4prodyA2EmF",
+                "mangledName": "$s8SparkLib0A0C11EnvironmentO4prodyA2EmF",
+                "moduleName": "SparkLib",
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ]
+              },
+              {
+                "kind": "Function",
+                "name": "==",
+                "printedName": "==(_:_:)",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Environment",
+                    "printedName": "SparkLib.Spark.Environment",
+                    "usr": "s:8SparkLib0A0C11EnvironmentO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Environment",
+                    "printedName": "SparkLib.Spark.Environment",
+                    "usr": "s:8SparkLib0A0C11EnvironmentO"
+                  }
+                ],
+                "declKind": "Func",
+                "usr": "s:8SparkLib0A0C11EnvironmentO2eeoiySbAE_AEtFZ",
+                "mangledName": "$s8SparkLib0A0C11EnvironmentO2eeoiySbAE_AEtFZ",
+                "moduleName": "SparkLib",
+                "static": true,
+                "implicit": true,
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ],
+                "funcSelfKind": "NonMutating"
+              },
+              {
+                "kind": "Var",
+                "name": "hashValue",
+                "printedName": "hashValue",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Var",
+                "usr": "s:8SparkLib0A0C11EnvironmentO9hashValueSivp",
+                "mangledName": "$s8SparkLib0A0C11EnvironmentO9hashValueSivp",
+                "moduleName": "SparkLib",
+                "implicit": true,
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ],
+                "accessors": [
+                  {
+                    "kind": "Accessor",
+                    "name": "Get",
+                    "printedName": "Get()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Int",
+                        "printedName": "Swift.Int",
+                        "usr": "s:Si"
+                      }
+                    ],
+                    "declKind": "Accessor",
+                    "usr": "s:8SparkLib0A0C11EnvironmentO9hashValueSivg",
+                    "mangledName": "$s8SparkLib0A0C11EnvironmentO9hashValueSivg",
+                    "moduleName": "SparkLib",
+                    "implicit": true,
+                    "spi_group_names": [
+                      "PreReleaseInternalAccess"
+                    ],
+                    "accessorKind": "get"
+                  }
+                ]
+              },
+              {
+                "kind": "Function",
+                "name": "hash",
+                "printedName": "hash(into:)",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Hasher",
+                    "printedName": "Swift.Hasher",
+                    "paramValueOwnership": "InOut",
+                    "usr": "s:s6HasherV"
+                  }
+                ],
+                "declKind": "Func",
+                "usr": "s:8SparkLib0A0C11EnvironmentO4hash4intoys6HasherVz_tF",
+                "mangledName": "$s8SparkLib0A0C11EnvironmentO4hash4intoys6HasherVz_tF",
+                "moduleName": "SparkLib",
+                "implicit": true,
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ],
+                "funcSelfKind": "NonMutating"
+              }
+            ],
+            "declKind": "Enum",
+            "usr": "s:8SparkLib0A0C11EnvironmentO",
+            "mangledName": "$s8SparkLib0A0C11EnvironmentO",
+            "moduleName": "SparkLib",
+            "declAttributes": [
+              "SPIAccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "conformances": [
+              {
+                "kind": "Conformance",
+                "name": "Copyable",
+                "printedName": "Copyable",
+                "usr": "s:s8CopyableP",
+                "mangledName": "$ss8CopyableP"
+              },
+              {
+                "kind": "Conformance",
+                "name": "Equatable",
+                "printedName": "Equatable",
+                "usr": "s:SQ",
+                "mangledName": "$sSQ"
+              },
+              {
+                "kind": "Conformance",
+                "name": "Escapable",
+                "printedName": "Escapable",
+                "usr": "s:s9EscapableP",
+                "mangledName": "$ss9EscapableP"
+              },
+              {
+                "kind": "Conformance",
+                "name": "Hashable",
+                "printedName": "Hashable",
+                "usr": "s:SH",
+                "mangledName": "$sSH"
+              },
+              {
+                "kind": "Conformance",
+                "name": "Sendable",
+                "printedName": "Sendable",
+                "usr": "s:s8SendableP",
+                "mangledName": "$ss8SendableP"
+              },
+              {
+                "kind": "Conformance",
+                "name": "SendableMetatype",
+                "printedName": "SendableMetatype",
+                "usr": "s:s16SendableMetatypeP",
+                "mangledName": "$ss16SendableMetatypeP"
+              }
+            ]
+          }
+        ],
+        "declKind": "Class",
+        "usr": "s:8SparkLib0A0C",
+        "mangledName": "$s8SparkLib0A0C",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "Final",
+          "AccessControl"
+        ],
+        "hasMissingDesignatedInitializers": true,
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "SparkInterface",
+            "printedName": "SparkInterface",
+            "usr": "s:8SparkLib0A9InterfaceP",
+            "mangledName": "$s8SparkLib0A9InterfaceP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "os.log",
+        "printedName": "os.log",
+        "declKind": "Import",
+        "moduleName": "SparkLib"
+      },
+      {
+        "kind": "Import",
+        "name": "InstallationKit",
+        "printedName": "InstallationKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "AnalyticsKit",
+        "printedName": "AnalyticsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MetricsKit",
+        "printedName": "MetricsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "AppTrackingTransparency",
+        "printedName": "AppTrackingTransparency",
+        "declKind": "Import",
+        "moduleName": "SparkLib"
+      },
+      {
+        "kind": "Import",
+        "name": "AnalyticsKit",
+        "printedName": "AnalyticsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "Temporary",
+        "printedName": "Temporary",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "installationId",
+            "printedName": "installationId",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib9TemporaryP14installationIdSSvp",
+            "mangledName": "$s8SparkLib9TemporaryP14installationIdSSvp",
+            "moduleName": "SparkLib",
+            "protocolReq": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib9TemporaryP14installationIdSSvg",
+                "mangledName": "$s8SparkLib9TemporaryP14installationIdSSvg",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.Temporary>",
+                "sugared_genericSig": "<Self where Self : SparkLib.Temporary>",
+                "protocolReq": true,
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ],
+                "reqNewWitnessTableEntry": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "environment",
+            "printedName": "environment",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Environment",
+                "printedName": "SparkLib.Spark.Environment",
+                "usr": "s:8SparkLib0A0C11EnvironmentO"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8SparkLib9TemporaryP11environmentAA0A0C11EnvironmentOvp",
+            "mangledName": "$s8SparkLib9TemporaryP11environmentAA0A0C11EnvironmentOvp",
+            "moduleName": "SparkLib",
+            "protocolReq": true,
+            "spi_group_names": [
+              "PreReleaseInternalAccess"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Environment",
+                    "printedName": "SparkLib.Spark.Environment",
+                    "usr": "s:8SparkLib0A0C11EnvironmentO"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:8SparkLib9TemporaryP11environmentAA0A0C11EnvironmentOvg",
+                "mangledName": "$s8SparkLib9TemporaryP11environmentAA0A0C11EnvironmentOvg",
+                "moduleName": "SparkLib",
+                "genericSig": "<τ_0_0 where τ_0_0 : SparkLib.Temporary>",
+                "sugared_genericSig": "<Self where Self : SparkLib.Temporary>",
+                "protocolReq": true,
+                "spi_group_names": [
+                  "PreReleaseInternalAccess"
+                ],
+                "reqNewWitnessTableEntry": true,
+                "accessorKind": "get"
+              }
+            ]
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "s:8SparkLib9TemporaryP",
+        "mangledName": "$s8SparkLib9TemporaryP",
+        "moduleName": "SparkLib",
+        "genericSig": "<τ_0_0 : Swift.Sendable>",
+        "sugared_genericSig": "<Self : Swift.Sendable>",
+        "declAttributes": [
+          "AccessControl",
+          "SPIAccessControl"
+        ],
+        "spi_group_names": [
+          "PreReleaseInternalAccess"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "TrackingKit",
+        "printedName": "TrackingKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "AnalyticsKit",
+        "printedName": "AnalyticsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "SparkLib"
+      },
+      {
+        "kind": "Import",
+        "name": "AnalyticsKit",
+        "printedName": "AnalyticsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "NetworkKit",
+        "printedName": "NetworkKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Primitives",
+        "printedName": "Primitives",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MetricsKit",
+        "printedName": "MetricsKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "TrackingKit",
+        "printedName": "TrackingKit",
+        "declKind": "Import",
+        "moduleName": "SparkLib",
+        "declAttributes": [
+          "AccessControl"
+        ]
+      }
+    ],
+    "json_format_version": 8
+  },
+  "ConstValues": [
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Analytics.swift",
+      "kind": "StringLiteral",
+      "offset": 761,
+      "length": 17,
+      "value": "\"activity_report\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Analytics.swift",
+      "kind": "StringLiteral",
+      "offset": 1005,
+      "length": 22,
+      "value": "\"activity_report_kind\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Analytics.swift",
+      "kind": "StringLiteral",
+      "offset": 1069,
+      "length": 25,
+      "value": "\"activity_report_content\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Configuration.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4337,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/LedgerFlash.swift",
+      "kind": "StringLiteral",
+      "offset": 553,
+      "length": 52,
+      "value": "\"https:\/\/payments.sparkapi.ai\/validate\/transactions\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/LedgerFlash.swift",
+      "kind": "StringLiteral",
+      "offset": 2462,
+      "length": 17,
+      "value": "\"installation_id\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/LedgerFlash.swift",
+      "kind": "StringLiteral",
+      "offset": 2504,
+      "length": 11,
+      "value": "\"bundle_id\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/OpeningFlow\/OpeningFlowContext.swift",
+      "kind": "Dictionary",
+      "offset": 1170,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/OpeningFlowRunner.swift",
+      "kind": "BooleanLiteral",
+      "offset": 551,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/Signal.swift",
+      "kind": "BooleanLiteral",
+      "offset": 179,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Spark.swift",
+      "kind": "StringLiteral",
+      "offset": 2670,
+      "length": 28,
+      "value": "\"https:\/\/events.sparkapi.ai\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Spark.swift",
+      "kind": "StringLiteral",
+      "offset": 2746,
+      "length": 30,
+      "value": "\"https:\/\/presence.sparkapi.ai\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Spark.swift",
+      "kind": "StringLiteral",
+      "offset": 2825,
+      "length": 29,
+      "value": "\"https:\/\/metrics.sparkapi.ai\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Spark.swift",
+      "kind": "StringLiteral",
+      "offset": 3132,
+      "length": 63,
+      "value": "\"https:\/\/attribution-appstore.sparkapi.ai\/app-transaction\/push\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Spark.swift",
+      "kind": "StringLiteral",
+      "offset": 3251,
+      "length": 65,
+      "value": "\"https:\/\/attribution-appstore.sparkapi.ai\/attribution-token\/push\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/StartupEventsSender.swift",
+      "kind": "StringLiteral",
+      "offset": 281,
+      "length": 19,
+      "value": "\"application_start\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/StorageKeys.swift",
+      "kind": "StringLiteral",
+      "offset": 412,
+      "length": 29,
+      "value": "\"com.mwm.psdk.installationId\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/StorageKeys.swift",
+      "kind": "StringLiteral",
+      "offset": 476,
+      "length": 18,
+      "value": "\"MWMSurveyAnswers\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/StorageKeys.swift",
+      "kind": "StringLiteral",
+      "offset": 680,
+      "length": 20,
+      "value": "\"MWMOnboardingShown\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/StorageKeys.swift",
+      "kind": "StringLiteral",
+      "offset": 730,
+      "length": 31,
+      "value": "\"MWMPublishingSDKIsFirstLaunch\""
+    },
+    {
+      "filePath": "\/Users\/runner-owners\/builds\/Fy3vtPRb2\/0\/mwm\/mobile\/sdk-factory\/sdk-factory-ios\/Components\/SparkLib\/Sources\/Internal\/StorageKeys.swift",
+      "kind": "StringLiteral",
+      "offset": 808,
+      "length": 45,
+      "value": "\"has_appsflyer_attribution_already_succeeded\""
+    }
+  ]
+}

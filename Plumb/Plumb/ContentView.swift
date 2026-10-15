@@ -170,6 +170,18 @@ struct ContentView: View {
             default: break
             }
         }
+        .onChange(of: model.stage) { _, stage in
+            switch stage {
+            case .capturing:
+                workoutFeedback.play(.setStarted, haptics: model.hapticFeedback, sound: model.soundFeedback)
+            case .result:
+                let sound: SoundFeedbackStyle
+                if case .measured = model.result { sound = model.soundFeedback }
+                else { sound = .off }
+                workoutFeedback.play(.setFinished, haptics: model.hapticFeedback, sound: sound)
+            default: break
+            }
+        }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
         // Siri or a shortcut asked for a set or the history; a set in progress is never interrupted.
         .onChange(of: SiriLaunchRequests.shared.pending, initial: true) { _, _ in applySiriRequest() }
@@ -987,6 +999,56 @@ struct ContentView: View {
                     Text("Choose English (UK), English (US), French or Spanish in iPhone Settings. Plumb uses your region for dates and numbers.")
                         .font(.subheadline)
                         .foregroundStyle(PlumbStyle.supportingText)
+                }
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Language").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
+                    Text("Current: \(Locale(identifier: SpokenLanguage.appLanguage).localizedString(forIdentifier: SpokenLanguage.appLanguage) ?? SpokenLanguage.appLanguage)")
+                    Button("Choose app language") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                    }
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(Color.primary)
+                    .frame(minHeight: 44, alignment: .leading)
+                    .accessibilityIdentifier("options.language")
+                    Text("Choose English (UK), English (US), French or Spanish in iPhone Settings. Plumb uses your region for dates and numbers.")
+                }
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Workout feedback").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
+                    Picker("Haptics", selection: Binding(
+                        get: { model.hapticFeedback },
+                        set: { style in
+                            model.hapticFeedback = style
+                            if style != .off {
+                                workoutFeedback.play(.rep, haptics: style, sound: .off)
+                            }
+                        }
+                    )) {
+                        ForEach(HapticFeedbackStyle.allCases) { style in
+                            Text(style.title).tag(style)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.hapticFeedback")
+                    Picker("Sound effects", selection: Binding(
+                        get: { model.soundFeedback },
+                        set: { style in
+                            model.soundFeedback = style
+                            if style != .off {
+                                workoutFeedback.play(.setStarted, haptics: .off, sound: style)
+                            }
+                        }
+                    )) {
+                        ForEach(SoundFeedbackStyle.allCases) { style in
+                            Text(style.title).tag(style)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.soundFeedback")
+                    Text("Your iPhone taps at the start and end of a set; Apple Watch taps each rep. Optional tones mark the set. Sounds respect Silent Mode and play alongside your music.")
                 }
                 .optionCard()
                 VStack(alignment: .leading, spacing: 10) {

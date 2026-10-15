@@ -16,6 +16,24 @@
             "state" : "translated",
             "value" : "Plumb se sert de la caméra pour mesurer ta position pendant une série, sur cet iPhone. La vidéo n’est pas enregistrée."
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb usa tu cámara para medir tu posición corporal durante una serie en este iPhone. El vídeo no se guarda."
+          }
         }
       }
     },
@@ -34,6 +52,24 @@
             "state" : "translated",
             "value" : "Seulement si tu actives Personnaliser avec Santé, Plumb lit ta fréquence cardiaque, ta fréquence cardiaque au repos, ta variabilité cardiaque, ta VO2 max, tes entraînements, ton énergie active, tes pas, ton sommeil, ton âge, ton poids et ta taille, pour adapter tes temps de repos et te proposer des jours plus légers. Rien ne quitte ton iPhone."
           }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only after you turn on Personalize with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only after you turn on Personalise with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo después de activar Personalizar con Salud, Plumb lee tu frecuencia cardíaca, frecuencia cardíaca en reposo, variabilidad de la frecuencia cardíaca, VO2 máx, entrenamientos, energía activa, pasos, sueño, edad, peso y altura para adaptar los tiempos de descanso y sugerir días más ligeros. Nada sale de tu iPhone."
+          }
         }
       }
     },
@@ -51,6 +87,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plumb enregistre chaque séance terminée dans Santé comme un entraînement de renforcement musculaire, avec sa durée et ses répétitions mesurées, pour qu’elle apparaisse dans l’app Forme."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb guarda cada sesión que terminas en Salud como un entrenamiento de fuerza, con su tiempo y las repeticiones medidas, para que aparezca en la app Fitness."
           }
         }
       }

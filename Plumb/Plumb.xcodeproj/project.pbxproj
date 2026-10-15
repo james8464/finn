@@ -780,6 +780,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "PlumbWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plumb reads your heart rate during a set only after you enable Personalize with Health. It stays on your devices.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rhythm starts a temporary Watch workout so pacing taps can continue with your wrist down. Plumb discards this workout; your iPhone controls Fitness saving.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = ai.mwm.build.challenge.team.08;
@@ -817,6 +818,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "PlumbWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plumb reads your heart rate during a set only after you enable Personalize with Health. It stays on your devices.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rhythm starts a temporary Watch workout so pacing taps can continue with your wrist down. Plumb discards this workout; your iPhone controls Fitness saving.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = ai.mwm.build.challenge.team.08;
