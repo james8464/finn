@@ -60,9 +60,30 @@ struct OnboardingProfileTests {
     @Test func coachNoteFollowsLevelAndGoal() {
         let new = OnboardingProfile(goal: .comeback, level: .new)
         let note = new.coachNote ?? ""
-        #expect(note.contains("new to these exercises"))
-        #expect(note.contains("coming back after a break"))
+        #expect(note.contains("prefer a recent set"))
+        #expect(note.contains("prefer the most recent relevant set"))
         let onlyGoal = OnboardingProfile(goal: .technique, level: nil)
-        #expect(onlyGoal.coachNote == "Their goal is cleaner technique.")
+        #expect(onlyGoal.coachNote == "Their goal is cleaner technique: prefer a set with a recorded form observation when relevant.")
+    }
+
+    @Test func deletingLocalDataForgetsOnboardingAndHealthChoices() {
+        let prefs = preferences()
+        prefs.apply(OnboardingProfile(goal: .comeback, level: .regular,
+                                      favoriteExercises: [.pushUp], speaksLive: false))
+        prefs.personalizesWithHealth = true
+        prefs.savesToFitness = true
+        prefs.hapticFeedback = .regular
+        prefs.soundFeedback = .bright
+        prefs.resetLocalChoices()
+        #expect(!prefs.onboardingCompleted)
+        #expect(prefs.trainingGoal == nil)
+        #expect(prefs.trainingLevel == nil)
+        #expect(prefs.favoriteExercises.isEmpty)
+        #expect(prefs.selectedExercise == nil)
+        #expect(prefs.speaksLive)
+        #expect(!prefs.personalizesWithHealth)
+        #expect(!prefs.savesToFitness)
+        #expect(prefs.hapticFeedback == .gentle)
+        #expect(prefs.soundFeedback == .off)
     }
 }

@@ -35,7 +35,8 @@ nonisolated enum TrainingGoal: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// How used to these exercises the person is. Changes the coach's wording, nothing it measures.
+/// How used to these exercises the person is. Helps the coach select relevant saved sets;
+/// it never changes what Plumb measures.
 nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
     case new
     case regular
@@ -51,9 +52,9 @@ nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
 
     var detail: String {
         switch self {
-        case .new: String(localized: "Explain each cue.")
-        case .regular: String(localized: "Brief cues with measurements.")
-        case .experienced: String(localized: "Range, tempo and set comparisons.")
+        case .new: String(localized: "Start with one recorded observation at a time.")
+        case .regular: String(localized: "Review your recorded sets and comparisons.")
+        case .experienced: String(localized: "See the rep counts and comparisons Plumb measured.")
         }
     }
 }
@@ -71,21 +72,20 @@ nonisolated struct OnboardingProfile: Equatable, Sendable {
         favoriteExercises + ExerciseKind.allCases.filter { !favoriteExercises.contains($0) }
     }
 
-    /// One sentence added to the coach's instructions, so its tone follows the answers. Nil when the
-    /// person skipped both questions.
+    /// Selection hints added to the coach prompt. The model still returns set labels only.
     var coachNote: String? {
         var parts: [String] = []
         switch level {
-        case .new?: parts.append("The person is new to these exercises: explain each cue in plain words, one at a time.")
-        case .regular?: parts.append("The person trains now and then: keep cues short and give the number behind each one.")
-        case .experienced?: parts.append("The person trains often: lead with numbers (range, tempo, comparison) and skip basics.")
+        case .new?: parts.append("The person is new to these exercises: prefer a recent set with one clear recorded observation.")
+        case .regular?: parts.append("The person trains now and then: prefer a set with a recorded comparison when relevant.")
+        case .experienced?: parts.append("The person trains often: prefer sets with measured counts or comparisons when relevant.")
         case nil: break
         }
         switch goal {
-        case .technique?: parts.append("Their goal is cleaner technique.")
-        case .consistency?: parts.append("Their goal is to train more regularly; notice when they come back.")
-        case .strength?: parts.append("Their goal is to get stronger: more reps over time with a repeatable range.")
-        case .comeback?: parts.append("They are coming back after a break: suggest starting light, never push.")
+        case .technique?: parts.append("Their goal is cleaner technique: prefer a set with a recorded form observation when relevant.")
+        case .consistency?: parts.append("Their goal is to train more regularly: prefer recent dated sets when relevant.")
+        case .strength?: parts.append("Their goal is to get stronger: prefer sets with recorded rep counts or comparisons when relevant.")
+        case .comeback?: parts.append("They are coming back after a break: prefer the most recent relevant set.")
         case nil: break
         }
         return parts.isEmpty ? nil : parts.joined(separator: " ")
@@ -138,4 +138,17 @@ extension PlumbPreferences {
 
     /// The order of the exercise chips on the first screen.
     var exerciseOrder: [ExerciseKind] { onboardingProfile.exerciseOrder }
+
+    /// Erases Plumb's saved choices when the person deletes all local app data. HealthKit grants
+    /// live in iOS and must still be managed in Health settings.
+    func resetLocalChoices() {
+        for key in [Self.onboardingCompletedKey, Self.trainingGoalKey, Self.trainingLevelKey,
+                    Self.favoriteExercisesKey, Self.recognizesExerciseKey, Self.usesTrainedModelKey,
+                    Self.checksCameraAngleKey, Self.handsFreeKey, Self.speaksLiveKey,
+                    Self.savesToFitnessKey, Self.selectedExerciseKey,
+                    Self.personalizesWithHealthKey, Self.personalizationOfferedKey,
+                    Self.hapticFeedbackKey, Self.soundFeedbackKey] {
+            defaults.removeObject(forKey: key)
+        }
+    }
 }

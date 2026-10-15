@@ -379,6 +379,13 @@ nonisolated enum ExerciseAnalyzer {
     /// A torso this much longer than the set's usual one is the athlete close to the phone, walking
     /// to it or reaching for it, not a squat.
     static let closeToPhoneTorso = 1.4
+    /// The hip-only count still needs a torso large and steady enough for Vision to follow.
+    /// Coordinates use image width, so 0.12 is about 9% of a 4:3 image's height.
+    static let minimumHipFallbackTorso = 0.12
+    static let minimumHipFallbackTorsoCoverage = 0.25
+    /// At 15 fps, larger frame-to-frame ankle motion suggests the phone is moving. Occasional
+    /// steps by the athlete affect a few frames; the 90th percentile tolerates those.
+    static let maximumHipFallbackAnkleStep = 0.008
 
     /// Counts squats from the hips going down and up (`ExerciseDefinition.squatTrunk`). Nil when the
     /// set is too short, someone else's joints cannot be told apart, the torso is never seen to set
@@ -390,7 +397,7 @@ nonisolated enum ExerciseAnalyzer {
         -> (outcome: AnalysisOutcome, diagnostics: MovementDiagnostics?)? {
         guard let first = frames.first, let last = frames.last,
               last.time - first.time >= EvidenceRubric.minimumSetDuration,
-              !EvidenceGate.isCrowded(frames) else { return nil }
+              !EvidenceGate.isCrowded(frames), phoneStableForHipFallback(frames) else { return nil }
         let samples = hipSamples(frames)
         guard samples.count >= 5 else { return nil }
         let values = samples.map(\.value)
@@ -444,8 +451,10 @@ nonisolated enum ExerciseAnalyzer {
             Reading(time: $0.time, hip: centre($0, .hip), shoulder: centre($0, .shoulder))
         }
         let torsos = readings.compactMap(\.torso).filter { $0 > 0 }
-        guard torsos.count >= 3 else { return [] }
+        guard torsos.count >= 3,
+              Double(torsos.count) / Double(frames.count) >= minimumHipFallbackTorsoCoverage else { return [] }
         let torso = median(torsos)
+        guard torso >= minimumHipFallbackTorso else { return [] }
         let offsets = readings.compactMap { reading in
             reading.hip.flatMap { hip in reading.shoulder.map { hip.y - $0.y } }
         }
@@ -465,6 +474,27 @@ nonisolated enum ExerciseAnalyzer {
             }
             return Sample(time: reading.time, value: height / torso, scale: 0, confidence: confidence, posture: nil)
         }
+    }
+
+    private static func phoneStableForHipFallback(_ frames: [PoseFrame]) -> Bool {
+        var previous: (time: TimeInterval, x: Double)?
+        var steps: [Double] = []
+        for frame in frames {
+            let ankles = [BodyJoint.leftAnkle, .rightAnkle].compactMap { joint -> JointPoint? in
+                frame.joints[joint].flatMap {
+                    $0.confidence >= EvidenceRubric.minimumJointConfidence ? $0 : nil
+                }
+            }
+            guard !ankles.isEmpty else { previous = nil; continue }
+            let x = ankles.map(\.x).reduce(0, +) / Double(ankles.count)
+            if let previous, frame.time - previous.time <= 0.2 {
+                steps.append(abs(x - previous.x))
+            }
+            previous = (frame.time, x)
+        }
+        // Hidden feet cannot establish whether the phone moved; the torso checks still apply.
+        guard steps.count >= frames.count / 2 else { return true }
+        return percentile(steps, 0.9) <= maximumHipFallbackAnkleStep
     }
 
     /// A push-up keeps the hands on the floor while the shoulders travel. A person squatting or
