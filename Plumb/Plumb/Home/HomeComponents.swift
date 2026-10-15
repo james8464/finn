@@ -237,3 +237,51 @@ struct MoreSheet: View {
         .presentationDragIndicator(.visible)
     }
 }
+
+/// The six exercises, large, each with its moving figure: touch one and the first screen follows.
+struct ExercisePickerSheet: View {
+    let order: [ExerciseKind]
+    @Binding var selection: ExerciseKind
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12),
+                                         count: dynamicTypeSize.isAccessibilitySize ? 1 : 2), spacing: 12) {
+                    ForEach(order, id: \.self) { kind in
+                        let selected = kind == selection
+                        Button {
+                            selection = kind
+                            dismiss()
+                        } label: {
+                            VStack(spacing: 6) {
+                                ExerciseFigureView(kind: kind, lineColor: selected ? Color(uiColor: .systemBackground) : .primary)
+                                    .frame(height: 140)
+                                Text(kind.definition.copy.name)
+                                    .font(.headline)
+                            }
+                            .padding(.vertical, 14)
+                            .frame(maxWidth: .infinity)
+                            .foregroundStyle(selected ? Color(uiColor: .systemBackground) : Color.primary)
+                            .background(selected ? Color.primary : HomeStyle.card,
+                                        in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                        }
+                        .buttonStyle(PressableStyle())
+                        .accessibilityLabel(kind.definition.copy.name)
+                        .accessibilityAddTraits(selected ? .isSelected : [])
+                        .accessibilityIdentifier("exercise.\(kind.rawValue)")
+                    }
+                }
+                .padding(20)
+            }
+            .scrollIndicators(.hidden)
+            .background(HomeStyle.background.ignoresSafeArea())
+            .navigationTitle("Exercises")
+            .toolbarTitleDisplayMode(.inline)
+        }
+        .presentationDragIndicator(.visible)
+        .sensoryFeedback(.selection, trigger: selection)
+    }
+}

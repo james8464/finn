@@ -29,6 +29,8 @@ struct ContentView: View {
     /// The page chosen in the More sheet, pushed once the sheet is gone.
     @State private var pendingRoute: HomeRoute?
     @State private var showsMore = false
+    /// The six exercises, large, behind the icon at the top left of the first screen.
+    @State private var showsExercisePicker = false
     /// Coach, Options or History opened from the result, on top of its sheet.
     @State private var resultPage: ResultPage?
     @State private var resultDetent: PresentationDetent = .large
@@ -46,6 +48,7 @@ struct ContentView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var homeTitleSize: CGFloat = 50
     @ScaledMetric(relativeTo: .largeTitle) private var resultCountSize: CGFloat = 104
     @ScaledMetric(relativeTo: .largeTitle) private var startButtonSize: CGFloat = 132
+    @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 230
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -186,6 +189,12 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: showsResultSheet) { result }
+        .sheet(isPresented: $showsExercisePicker) {
+            ExercisePickerSheet(order: preferences.exerciseOrder, selection: Binding(
+                get: { model.selectedExercise },
+                set: { kind in withAnimation(HomeStyle.spring) { model.selectedExercise = kind } }
+            ))
+        }
         // The phone stands a few steps away and nobody touches it: keep the screen on while the
         // camera is open, or Auto-Lock interrupts framing and throws the set away.
         .onChange(of: model.stage, initial: true) { _, stage in
@@ -288,6 +297,13 @@ struct ContentView: View {
     @ToolbarContentBuilder private var rootToolbar: some ToolbarContent {
         switch model.stage {
         case .ready, .result:
+            ToolbarItem(placement: .topBarLeading) {
+                Button { showsExercisePicker = true } label: {
+                    Label("Exercises", systemImage: "dumbbell.fill")
+                }
+                .accessibilityHint("Choose the exercise")
+                .accessibilityIdentifier("home.exercises")
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showsMore = true } label: {
                     Label("More", systemImage: "ellipsis")
@@ -363,9 +379,18 @@ struct ContentView: View {
             }
             VStack(spacing: 0) {
                 exerciseTitle
-                    .padding(.top, 48)
+                    .padding(.top, 40)
                 homeNotes
-                Spacer()
+                Spacer(minLength: 16)
+                // One slow, well-done rep of the chosen exercise, seen as the camera will see it.
+                ExerciseFigureView(kind: model.selectedExercise, lineColor: .primary)
+                    .frame(maxWidth: 360)
+                    .frame(height: figureHeight)
+                    .id(model.selectedExercise)
+                    .transition(.blurReplace)
+                    .padding(.horizontal, 24)
+                    .accessibilityIdentifier("home.figure")
+                Spacer(minLength: 16)
                 startButton
                     .padding(.bottom, 28)
                 if let lastSessionLine {
