@@ -772,9 +772,7 @@ extension ContentView {
                     privacyFact("trash", "Yours to delete",
                                 "Remove one session or everything in History.")
                 }
-                .padding(18)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .darkGlassCard()
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Camera").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Video is processed on this iPhone and never saved.")
@@ -829,6 +827,7 @@ extension ContentView {
             .padding(24)
         }
         .scrollIndicators(.hidden)
+        .darkScreen()
         .navigationTitle("Privacy")
         .navigationBarTitleDisplayMode(.large)
     }
@@ -885,7 +884,7 @@ extension ContentView {
                         .accessibilityIdentifier("options.useTrainedModel")
                     }
                 }
-                .optionCard()
+                .darkGlassCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Camera angle").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Check the camera angle in 3D", isOn: Binding(
@@ -898,7 +897,7 @@ extension ContentView {
                     .accessibilityIdentifier("options.checkCameraAngle")
                     Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. When you clearly face the camera, or face away, it still counts your reps but gives no posture advice. If it asks you to turn while your side already faces the camera, switch this off.")
                 }
-                .optionCard()
+                .darkGlassCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Hands-free").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Start and stop sets for me", isOn: Binding(
@@ -920,7 +919,7 @@ extension ContentView {
                     .accessibilityIdentifier("options.speaksLive")
                     Text("Plumb says the countdown, each counted rep, and when a rep is clearly faster or shorter than your first reps of the set. It uses your AirPods or other headphones when they are connected, otherwise the iPhone speaker.")
                 }
-                .optionCard()
+                .darkGlassCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Apple Fitness").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Save workouts to Apple Fitness", isOn: Binding(
@@ -943,7 +942,7 @@ extension ContentView {
                             .accessibilityIdentifier("options.fitnessNote")
                     }
                 }
-                .optionCard()
+                .darkGlassCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Personalize with Health").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Use my Health data", isOn: Binding(
@@ -971,7 +970,7 @@ extension ContentView {
                         .accessibilityElement(children: .combine)
                     }
                 }
-                .optionCard()
+                .darkGlassCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Text("The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your answers set the order of the exercises and how the coach talks to you.")
@@ -982,21 +981,23 @@ extension ContentView {
                         .contentShape(Rectangle())
                         .accessibilityIdentifier("options.replayOnboarding")
                 }
-                .optionCard()
+                .darkGlassCard()
                 #if DEBUG
                 // Coach demo key and engine switch; absent from the Release build.
                 CoachDeveloperSection()
-                    .optionCard()
+                    .darkGlassCard()
                 #endif
             }
             .font(.subheadline)
             .foregroundStyle(PlumbStyle.supportingText)
+            // The switches keep the system green: white on white would not read as on.
+            .tint(Color(uiColor: .systemGreen))
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
         }
         .scrollIndicators(.hidden)
-        .background(HomeStyle.background)
+        .darkScreen()
         .navigationTitle("Options")
         .navigationBarTitleDisplayMode(.large)
     }

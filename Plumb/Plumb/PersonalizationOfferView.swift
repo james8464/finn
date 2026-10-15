@@ -15,24 +15,26 @@ struct PersonalizationOfferView: View {
                 .font(.title2.bold())
             Text("Plumb can read your heart rate, recovery, sleep, recent workouts, age, weight and height from Health to adapt rest times and suggest lighter days.")
             Text("It stays on this iPhone, each tip says which data it uses, and you can turn it off in Options.")
-                .foregroundStyle(.secondary)
+                .foregroundStyle(HomeStyle.supportingText)
             Spacer(minLength: 0)
             Button {
                 answer(true)
             } label: {
-                Text("Yes, personalize")
-                    .frame(maxWidth: .infinity, minHeight: 50)
+                PrimaryActionLabel(title: "Yes, personalize")
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PressableStyle())
             .accessibilityIdentifier("offer.personalize")
             Button {
                 answer(false)
             } label: {
                 Text("Later")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(HomeStyle.supportingText)
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
             .accessibilityIdentifier("offer.later")
         }
         .padding(24)
+        .darkScreen()
     }
 }
