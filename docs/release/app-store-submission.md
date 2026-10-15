@@ -1,6 +1,6 @@
 # Plumb App Store submission track
 
-**Status on 15 October 2026: the team recorded a signed Release archive of `main` at d8f1503; no App Store Connect upload has been verified.** Newer Coach, Shortcuts, widget, form-check and UI commits require a fresh archive and review. The challenge asks for a build submitted through App Store Connect by Friday 16 October, 14:00. The submission steps are in [`marche-a-suivre-15-octobre.md`](marche-a-suivre-15-octobre.md); the listing texts in [`app-store-fiche.md`](app-store-fiche.md); the privacy answers in [`app-privacy-answers.md`](app-privacy-answers.md); the screenshots in [`screenshots/`](screenshots/README.md).
+**Status on 15 October 2026: the team recorded a signed Release archive of `main` at d8f1503; no App Store Connect upload has been verified.** Newer Coach, Shortcuts, widget, form-check, welcome, Awards and UI commits require a fresh archive and review. The challenge asks for a build submitted through App Store Connect by Friday 16 October, 14:00. The submission steps are in [`marche-a-suivre-15-octobre.md`](marche-a-suivre-15-octobre.md); the listing texts in [`app-store-fiche.md`](app-store-fiche.md); the privacy answers in [`app-privacy-answers.md`](app-privacy-answers.md); the screenshots in [`screenshots/`](screenshots/README.md).
 
 ## Checked on 15 October (archive `xcodebuild archive`, Release, generic iOS device)
 

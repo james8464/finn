@@ -16,12 +16,12 @@ Why the label stays Data Not Collected, feature by feature:
 | Feature | Leaves the iPhone? | Label |
 | --- | --- | --- |
 | Camera, pose points, rep count | No; processed in memory on the device | not collected |
-| Set summaries, patterns, coach conversation | No; local Application Support files, deleted in History | not collected |
+| Set summaries, patterns, earned Awards, first-launch choices, coach conversation | No; held in local app storage or memory, removable with Delete all local data | not collected |
 | Health reading (Personalize with Health) and Health writing (Save workouts to Apple Fitness) | No; HealthKit store on the same iPhone, Plumb never reads it back for itself | not collected; the Health & Fitness data type stays unselected |
 | Spoken reps | No microphone, no recording | nothing to declare |
 | Apple Watch mirror | iPhone to paired watch over Apple's Watch Connectivity, nothing to a server | not collected |
 | Reword comparison | On-device Foundation Models only | not collected |
-| Coach (now in `main`) | The question and the set summaries (exercise, reps, date, observation) go to Apple's Private Cloud Compute through the Foundation Models framework when the device supports Apple Intelligence; Apple states the requests are not stored and are used only for the request; the developer never receives them | not collected under Apple's definition (data transmitted off device is "collected" only when the developer or a partner can access it beyond servicing the request; and "you are not responsible for disclosing data collected by Apple", [App privacy details](https://developer.apple.com/app-store/app-privacy-details/)). Disclosed anyway in the privacy policy, section "Coach", and in the review notes |
+| Coach (now in `main`) | The question, saved set summaries (exercise, reps, date, observation), and selected training goal and experience level go to Apple's Private Cloud Compute through the Foundation Models framework when the device supports Apple Intelligence; Apple states the requests are not stored and are used only for the request; the developer never receives them | not collected under Apple's definition (data transmitted off device is "collected" only when the developer or a partner can access it beyond servicing the request; and "you are not responsible for disclosing data collected by Apple", [App privacy details](https://developer.apple.com/app-store/app-privacy-details/)). Disclosed anyway in the privacy policy, section "Coach", and in the review notes |
 
 The privacy manifest (`Plumb/Plumb/PrivacyInfo.xcprivacy`) matches: no tracking, no tracking domains, no collected data types, and required-reason declarations for UserDefaults (CA92.1) and system boot time (35F9.1). The coach adds no required-reason API.
 

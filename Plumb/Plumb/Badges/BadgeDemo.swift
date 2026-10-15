@@ -13,7 +13,7 @@ enum BadgeDemo {
             EarnedBadge(kind: .threeDaysInAWeek, earnedAt: now.addingTimeInterval(-2 * 86_400),
                         detail: "Sets on Monday, Wednesday and Friday, within seven days."),
             EarnedBadge(kind: .cleanSet, earnedAt: now.addingTimeInterval(-3_600),
-                        detail: "8 push-up reps, every joint clear, no pattern to correct."),
+                        detail: "8 push-up reps, with no pattern flagged by Plumb's current checks."),
         ]
     }
 }
