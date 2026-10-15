@@ -1,6 +1,454 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Get ready on your iPhone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prépare-toi sur ton iPhone."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get ready on your iPhone."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get ready on your iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepárate en el iPhone."
+          }
+        }
+      }
+    },
+    "Starting soon" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Départ imminent"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting soon"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting soon"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezamos pronto"
+          }
+        }
+      }
+    },
+    "Your iPhone is counting down." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le décompte est en cours sur ton iPhone."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iPhone is counting down."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iPhone is counting down."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El iPhone está haciendo la cuenta atrás."
+          }
+        }
+      }
+    },
+    "I’m with you. Take the next rep at your own pace." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je suis avec toi. Fais la prochaine répétition à ton rythme."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I’m with you. Take the next rep at your own pace."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I’m with you. Take the next rep at your own pace."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estoy contigo. Haz la siguiente repetición a tu ritmo."
+          }
+        }
+      }
+    },
+    "Rhythm: %lld seconds per rep" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rythme : %lld secondes par répétition"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rhythm: %lld seconds per rep"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rhythm: %lld seconds per rep"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritmo: %lld segundos por repetición"
+          }
+        }
+      }
+    },
+    "Set complete" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série terminée"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set complete"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set complete"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serie terminada"
+          }
+        }
+      }
+    },
+    "See your iPhone for the details." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consulte les détails sur ton iPhone."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See your iPhone for the details."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See your iPhone for the details."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consulta los detalles en el iPhone."
+          }
+        }
+      }
+    },
+    "Rhythm" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rythme"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rhythm"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rhythm"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritmo"
+          }
+        }
+      }
+    },
+    "Seconds per rep" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secondes par répétition"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seconds per rep"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seconds per rep"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Segundos por repetición"
+          }
+        }
+      }
+    },
+    "%lld seconds" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld secondes"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld seconds"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld seconds"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld segundos"
+          }
+        }
+      }
+    },
+    "Rhythm is a pacing guide, not a form judgement. It starts a temporary Watch workout for taps with your wrist down. That workout is discarded; your iPhone controls Fitness saving." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le rythme t’aide à cadencer tes répétitions ; il ne juge pas ta technique. Il lance une séance temporaire sur la montre pour les vibrations poignet baissé. Cette séance est supprimée : l’iPhone gère l’enregistrement dans Forme."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rhythm is a pacing guide, not a form judgment. It starts a temporary Watch workout for taps with your wrist down. That workout is discarded; your iPhone controls Fitness saving."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rhythm is a pacing guide, not a form judgement. It starts a temporary Watch workout for taps with your wrist down. That workout is discarded; your iPhone controls Fitness saving."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El ritmo te ayuda a marcar el paso; no evalúa tu técnica. Inicia un entrenamiento temporal en el reloj para vibrar con la muñeca bajada. Ese entrenamiento se descarta: el iPhone controla lo que se guarda en Fitness."
+          }
+        }
+      }
+    },
+    "Turn on haptics in iPhone settings to use Watch rhythm." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active les vibrations dans les réglages de l’iPhone pour utiliser le rythme sur la montre."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on haptics in iPhone settings to use Watch rhythm."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on haptics in iPhone settings to use Watch rhythm."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa la respuesta háptica en los ajustes del iPhone para usar el ritmo en el reloj."
+          }
+        }
+      }
+    },
+    "Allow temporary Watch workouts in Health settings to turn on rhythm." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autorise les séances temporaires de la montre dans les réglages Santé pour activer le rythme."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow temporary Watch workouts in Health settings to turn on rhythm."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow temporary Watch workouts in Health settings to turn on rhythm."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite entrenamientos temporales del reloj en los ajustes de Salud para activar el ritmo."
+          }
+        }
+      }
+    },
+    "Rhythm could not start. The coach messages still work." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le rythme n’a pas pu démarrer. Les messages du coach restent disponibles."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rhythm could not start. The coach messages still work."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rhythm could not start. The coach messages still work."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo iniciar el ritmo. Los mensajes del entrenador siguen disponibles."
+          }
+        }
+      }
+    },
+    "Watch settings" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglages de la montre"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch settings"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch settings"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes del reloj"
+          }
+        }
+      }
+    },
+    "Waiting for iPhone connection" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente de la connexion à l’iPhone"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for iPhone connection"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for iPhone connection"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando conexión con el iPhone"
+          }
+        }
+      }
+    },
     "%lld" : {
       "localizations" : {
         "fr" : {

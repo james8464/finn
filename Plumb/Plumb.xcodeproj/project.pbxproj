@@ -713,8 +713,7 @@
 				INFOPLIST_FILE = "PlumbWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plumb reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plumb runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rhythm starts a temporary Watch workout so pacing taps can continue with your wrist down. Plumb discards this workout; your iPhone controls Fitness saving.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = ai.mwm.build.challenge.team.08;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
@@ -751,8 +750,7 @@
 				INFOPLIST_FILE = "PlumbWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plumb reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plumb runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rhythm starts a temporary Watch workout so pacing taps can continue with your wrist down. Plumb discards this workout; your iPhone controls Fitness saving.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = ai.mwm.build.challenge.team.08;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;

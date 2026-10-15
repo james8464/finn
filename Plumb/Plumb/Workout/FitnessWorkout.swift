@@ -75,7 +75,7 @@ nonisolated struct FitnessWorkout: Equatable, Sendable {
     }
 
     /// HealthKit's sync identifier: one workout per Plumb session, even if a save were repeated.
-    var syncIdentifier: String { "com.james8464.Plumb.session.\(sessionID.uuidString)" }
+    var syncIdentifier: String { "ai.mwm.build.challenge.team.08.session.\(sessionID.uuidString)" }
 
     /// Time counted as workout, without the pauses.
     var activeDuration: TimeInterval {

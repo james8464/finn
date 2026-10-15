@@ -191,6 +191,8 @@ nonisolated struct LiveSetMonitor {
     /// result says it gives no form advice; the live cue must not say otherwise (15 October: "Elbow
     /// bend is smaller" during front-on push-ups, then "no form advice for this set").
     private var rangeAdviceFromSide = true
+    /// Only praise consistency when the latest accepted view supports a side-on range comparison.
+    var supportsRangeCoaching: Bool { analysisAccepted && rangeAdviceFromSide }
 
     init(definition: ExerciseDefinition) {
         self.definition = definition

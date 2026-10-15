@@ -1,14 +1,7 @@
 import Foundation
 import Observation
 
-/// What a command from the watch does to the set.
-nonisolated enum WatchCommandAction: Equatable, Sendable {
-    case beginSet
-    case endSet
-    case ignore
-}
-
-/// What the watch shows for the iPhone's set, which taps it plays, and what a wrist command may do.
+/// Maps the iPhone's measured set to a short Watch state.
 nonisolated enum WatchSyncRules {
     static func stage(for stage: WorkoutStage) -> WatchStage {
         switch stage {
@@ -40,12 +33,13 @@ nonisolated enum WatchSyncRules {
 
     static func state(stage: WorkoutStage, exercise: ExerciseKind, liveReps: Int, caption: String?,
                       result: WorkoutResult?, cueDismissed: Bool, handsFree: Bool,
-                      demoInput: Bool, measuresHeartRate: Bool = false) -> WatchState {
+                      demoInput: Bool, measuresHeartRate: Bool = false,
+                      coachMessage: String? = nil) -> WatchState {
         let watchStage = Self.stage(for: stage)
         var state = WatchState(
             stage: watchStage,
             exercise: exercise.definition.copy.name,
-            wristControls: AccessoryRoles.role(of: .appleWatch, for: exercise).offers(.startStopFromWrist),
+            wristControls: false,
             handsFree: handsFree,
             demoInput: demoInput,
             // Demo input films nobody, so there is no heart rate to pair with it.
@@ -56,6 +50,7 @@ nonisolated enum WatchSyncRules {
         case .capturing, .analyzing:
             state.reps = liveReps
             state.caption = caption
+            if watchStage == .capturing { state.coachMessage = coachMessage }
         case .result:
             if case .measured(let analysis, _) = result { state.reps = analysis.reps.count }
             state.summary = summary(for: result, cueDismissed: cueDismissed)
@@ -63,29 +58,6 @@ nonisolated enum WatchSyncRules {
             break
         }
         return state
-    }
-
-    /// The tap for going from `previous` to `next`: the set starting or ending, a live observation,
-    /// or a counted rep. One tap per update; an observation outranks the rep it came with.
-    static func haptic(from previous: WatchState?, to next: WatchState) -> WatchHaptic {
-        guard let previous else { return .none }
-        if next.stage == .capturing && previous.stage != .capturing { return .start }
-        if previous.stage == .capturing && next.stage != .capturing { return .end }
-        guard next.stage == .capturing else { return .none }
-        if let caption = next.caption, caption != previous.caption { return .observation }
-        if next.reps > previous.reps { return .rep }
-        return .none
-    }
-
-    /// Start only while framing and stop only while the set runs, and only for exercises whose
-    /// hands are free to press the watch.
-    static func action(for command: WatchCommand, stage: WorkoutStage, exercise: ExerciseKind) -> WatchCommandAction {
-        guard AccessoryRoles.role(of: .appleWatch, for: exercise).offers(.startStopFromWrist) else { return .ignore }
-        switch (command, stage) {
-        case (.startSet, .framing): return .beginSet
-        case (.stopSet, .capturing): return .endSet
-        default: return .ignore
-        }
     }
 
     /// Two states show the same screen, whatever their tap and time.
@@ -100,7 +72,7 @@ nonisolated enum WatchSyncRules {
     }
 }
 
-/// Keeps a watch in step with the iPhone's set and lets it start and stop sets. It follows the
+/// Keeps a watch in step with the iPhone's set. It follows the
 /// session model with Observation, so the model knows nothing about the watch, and it knows nothing
 /// about WatchConnectivity: `deliver` hands each new state to `WatchBridge`.
 @MainActor
@@ -111,6 +83,8 @@ final class WatchSync {
     private let deliver: (WatchState) -> Void
     /// The latest state handed to `deliver`.
     private(set) var lastSent: WatchState?
+    private var activeSetID: String?
+    private var heartbeatTask: Task<Void, Never>?
 
     init(model: WorkoutSessionModel, demoInput: Bool = false,
          clock: @escaping () -> Double = { Date().timeIntervalSince1970 },
@@ -133,19 +107,13 @@ final class WatchSync {
         model?.receiveHeartRate(heartRate.beatsPerMinute, at: Date(timeIntervalSince1970: heartRate.measuredAt))
     }
 
-    func handle(_ command: WatchCommand) {
-        guard let model else { return }
-        switch WatchSyncRules.action(for: command, stage: model.stage, exercise: model.captureExercise) {
-        case .beginSet:
-            // The person is at their spot, as with a hands-free start.
-            let countdown = model.handsFreeCountdown
-            Task { await model.beginSet(countdown: countdown) }
-        case .endSet:
-            let tappedAt = ContinuousClock.now
-            Task { await model.endSet(tappedAt: tappedAt) }
-        case .ignore:
-            break
-        }
+    /// Liveness update during capture. It carries no tap or new coaching line.
+    func heartbeat() {
+        guard var current = lastSent, current.stage == .capturing else { return }
+        current.haptic = .none
+        current.sentAt = max(clock(), current.sentAt + 0.001)
+        lastSent = current
+        deliver(current)
     }
 
     private func follow() {
@@ -160,12 +128,29 @@ final class WatchSync {
     }
 
     private func publish(_ state: WatchState) {
-        if let lastSent, WatchSyncRules.sameScreen(lastSent, state) { return }
         var next = state
-        next.haptic = model?.hapticFeedback == .off ? .none : WatchSyncRules.haptic(from: lastSent, to: state)
+        if next.stage == .countdown || next.stage == .capturing, activeSetID == nil {
+            activeSetID = UUID().uuidString
+        }
+        if next.stage == .ready || next.stage == .framing { activeSetID = nil }
+        next.setID = activeSetID
+        next.languageCode = WatchLanguage.resolved(Bundle.main.preferredLocalizations.first)
+        if let lastSent, WatchSyncRules.sameScreen(lastSent, next) { return }
+        next.haptic = .none
         next.sentAt = max(clock(), (lastSent?.sentAt ?? 0) + 0.001)
         lastSent = next
         deliver(next)
+        if next.stage == .capturing, heartbeatTask == nil {
+            heartbeatTask = Task { [weak self] in
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(5))
+                    self?.heartbeat()
+                }
+            }
+        } else if next.stage != .capturing {
+            heartbeatTask?.cancel()
+            heartbeatTask = nil
+        }
     }
 
     private static func state(of model: WorkoutSessionModel, demoInput: Bool) -> WatchState {
@@ -175,9 +160,12 @@ final class WatchSync {
         case .result: exercise = model.resultExercise
         case .framing, .countdown, .capturing, .analyzing: exercise = model.captureExercise
         }
-        return WatchSyncRules.state(stage: model.stage, exercise: exercise, liveReps: model.liveRepCount,
+        var state = WatchSyncRules.state(stage: model.stage, exercise: exercise, liveReps: model.liveRepCount,
                                     caption: model.liveCaption, result: model.result,
                                     cueDismissed: model.cueDismissed, handsFree: model.handsFree,
-                                    demoInput: demoInput, measuresHeartRate: model.personalizesWithHealth)
+                                    demoInput: demoInput, measuresHeartRate: false,
+                                    coachMessage: model.liveCoachMessage)
+        state.hapticsEnabled = model.hapticFeedback != .off
+        return state
     }
 }

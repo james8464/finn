@@ -1,42 +1,52 @@
 import SwiftUI
 
-/// The set the iPhone is measuring: exercise, stage, a large rep count, the latest live observation,
-/// and Start set or Stop set when the hands are free to press them.
+/// One short iPhone-authored coaching line, with an optional Watch-owned rhythm.
 struct WatchSetView: View {
     let link: WatchLink
+    private let lime = Color(red: 0.80, green: 0.97, blue: 0.35)
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 6) {
-                if let state = link.state {
-                    content(for: state)
-                } else {
-                    Image(systemName: "iphone")
-                        .font(.title2)
-                        .accessibilityHidden(true)
-                    Text("Open Plumb on your iPhone to start a set.")
-                        .multilineTextAlignment(.center)
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 12) {
+                    if let state = link.state {
+                        content(for: state)
+                    } else {
+                        Image(systemName: "iphone")
+                            .font(.title2)
+                            .accessibilityHidden(true)
+                        Text("Open Plumb on your iPhone to start a set.")
+                            .multilineTextAlignment(.center)
+                    }
+                    if !link.isLiveCapture, link.state?.stage == .capturing {
+                        Text("Waiting for iPhone connection")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    if let notice = link.notice {
+                        noticeText(notice)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
                 }
-                if let beats = link.heart.beatsPerMinute {
-                    Label("\(beats) bpm", systemImage: "heart.fill")
-                        .font(.footnote.monospacedDigit())
-                        .foregroundStyle(.red)
-                        .accessibilityLabel("Heart rate \(beats) beats per minute")
-                } else if let problem = link.heart.problem {
-                    Text(problem)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                if let notice = link.notice {
-                    Text(notice)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 5)
+            }
+            .background(.black)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        settings
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .accessibilityLabel("Watch settings")
+                    }
                 }
             }
-            .frame(maxWidth: .infinity)
         }
+        .tint(lime)
+        .environment(\.locale, Locale(identifier: link.state?.languageCode ?? "en-GB"))
     }
 
     @ViewBuilder private func content(for state: WatchState) -> some View {
@@ -44,82 +54,99 @@ struct WatchSetView: View {
             Text("DEMO INPUT")
                 .font(.caption2.bold())
                 .foregroundStyle(.black)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(.yellow, in: Capsule())
+                .padding(.horizontal, 7)
+                .padding(.vertical, 3)
+                .background(lime, in: Capsule())
         }
         Text(state.exercise.isEmpty ? "Plumb" : state.exercise)
             .font(.headline)
+            .lineLimit(2)
+            .minimumScaleFactor(0.8)
         switch state.stage {
-        case .ready:
-            Text("Set up the camera on your iPhone.")
+        case .ready, .framing:
+            Image(systemName: "iphone.gen3")
+                .font(.title2)
+                .foregroundStyle(lime)
+                .accessibilityHidden(true)
+            Text("Get ready on your iPhone.")
                 .multilineTextAlignment(.center)
-        case .framing:
-            Text("Get in position")
-            Text(framingHint(for: state))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            if state.wristControls {
-                command("Start set", .startSet)
-            }
         case .countdown:
-            Text("\(state.countdown)")
-                .font(.system(size: 64, weight: .semibold, design: .rounded))
-                .monospacedDigit()
-                .accessibilityLabel("Starting in \(state.countdown)")
-        case .capturing:
-            Text("Set running")
+            Text("Starting soon")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(lime)
+            Text("Your iPhone is counting down.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
-            repCount(state.reps)
-            if let caption = state.caption {
-                Text(caption)
-                    .font(.footnote.weight(.semibold))
-                    .multilineTextAlignment(.center)
-            }
-            if state.wristControls {
-                command("Stop set", .stopSet)
-            }
-        case .analyzing:
-            ProgressView()
-            Text("Reviewing")
-        case .result:
-            if state.reps > 0 {
-                repCount(state.reps)
-            }
-            if let summary = state.summary {
-                Text(summary)
+        case .capturing:
+            if !link.isLiveCapture {
+                Text("Coaching will resume when your iPhone reconnects.")
                     .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            } else if let message = state.coachMessage {
+                Text(message)
+                    .font(.title3.weight(.semibold))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text("I’m with you. Take the next rep at your own pace.")
+                    .font(.title3.weight(.semibold))
                     .multilineTextAlignment(.center)
             }
-        }
-    }
-
-    private func framingHint(for state: WatchState) -> String {
-        if state.handsFree { return String(localized: "The set starts once you hold still.") }
-        return state.wristControls ? String(localized: "Then start the set.") : String(localized: "Start the set on your iPhone.")
-    }
-
-    private func repCount(_ reps: Int) -> some View {
-        VStack(spacing: 0) {
-            Text("\(reps)")
-                .font(.system(size: 72, weight: .semibold, design: .rounded))
-                .monospacedDigit()
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
-                .contentTransition(.numericText())
-            Text(reps == 1 ? "rep" : "reps")
+            if link.isLiveCapture, link.rhythmEnabled, state.hapticsEnabled {
+                Label("Rhythm: \(link.rhythmInterval) seconds per rep", systemImage: "metronome")
+                    .font(.footnote)
+                    .foregroundStyle(lime)
+            }
+        case .analyzing, .result:
+            Text("Set complete")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(lime)
+            Text("See your iPhone for the details.")
                 .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Reps counted")
-        .accessibilityValue("\(reps)")
     }
 
-    private func command(_ title: LocalizedStringKey, _ command: WatchCommand) -> some View {
-        Button(title) { link.send(command) }
-            .buttonStyle(.borderedProminent)
-            .disabled(!link.isPhoneReachable)
+    private var settings: some View {
+        Form {
+            Section {
+                Toggle("Rhythm", isOn: Binding(
+                    get: { link.rhythmEnabled },
+                    set: { enabled in Task { await link.setRhythmEnabled(enabled) } }
+                ))
+                .disabled(link.state?.hapticsEnabled == false)
+                Picker("Seconds per rep", selection: Binding(
+                    get: { link.rhythmInterval },
+                    set: { link.setRhythmInterval($0) }
+                )) {
+                    ForEach(2...5, id: \.self) { seconds in
+                        Text("\(seconds) seconds").tag(seconds)
+                    }
+                }
+                .disabled(!link.rhythmEnabled)
+            } footer: {
+                Text("Rhythm is a pacing guide, not a form judgement. It starts a temporary Watch workout for taps with your wrist down. That workout is discarded; your iPhone controls Fitness saving.")
+            }
+            if link.state?.hapticsEnabled == false {
+                Text("Turn on haptics in iPhone settings to use Watch rhythm.")
+                    .font(.footnote)
+            }
+            if let notice = link.notice {
+                noticeText(notice)
+                    .font(.footnote)
+            }
+        }
+        .navigationTitle("Watch settings")
+    }
+
+    @ViewBuilder private func noticeText(_ notice: WatchNotice) -> some View {
+        switch notice {
+        case .workoutPermission:
+            Text("Allow temporary Watch workouts in Health settings to turn on rhythm.")
+        case .workoutUnavailable:
+            Text("Rhythm could not start. The coach messages still work.")
+        }
     }
 }

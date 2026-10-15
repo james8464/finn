@@ -3,87 +3,155 @@ import Observation
 import WatchConnectivity
 import WatchKit
 
-/// The watch side of Plumb: shows the set the iPhone measures and sends Start set and Stop set.
-/// The watch measures nothing; every number comes from the iPhone camera.
+nonisolated enum WatchNotice: Equatable {
+    case workoutPermission
+    case workoutUnavailable
+}
+
+/// The Watch mirrors one short iPhone coaching line and owns only its optional pacing clock.
 @Observable
 @MainActor
 final class WatchLink: NSObject, WCSessionDelegate {
-    /// The latest screen from the iPhone; nil until one arrives.
     private(set) var state: WatchState?
     private(set) var isPhoneReachable = false
-    /// Shown when a command did not reach the iPhone.
-    private(set) var notice: String?
-    /// Heart rate while the iPhone camera is open, when the person turned on Personalize with Health.
-    let heart = HeartRateSession()
+    private(set) var isLiveCapture = false
+    private(set) var notice: WatchNotice?
+    private(set) var rhythmEnabled: Bool
+    private(set) var rhythmInterval: Int
+    let workout = RhythmWorkoutSession()
+
     @ObservationIgnored private var isStarted = false
+    @ObservationIgnored private var clock: WatchRhythmClock
+    @ObservationIgnored private var rhythmArmed = false
+    @ObservationIgnored private var lastPhoneStateAt = 0.0
+    @ObservationIgnored private var tickTask: Task<Void, Never>?
+    @ObservationIgnored private var startingWorkout = false
+    @ObservationIgnored private var rhythmGeneration = 0
+
+    override init() {
+        let defaults = UserDefaults.standard
+        rhythmEnabled = defaults.bool(forKey: "plumb.watch.rhythm")
+        let stored = defaults.integer(forKey: "plumb.watch.rhythmInterval")
+        let interval = [2, 3, 4, 5].contains(stored) ? stored : 3
+        rhythmInterval = interval
+        clock = WatchRhythmClock(interval: interval)
+        super.init()
+    }
 
     func start() {
         guard !isStarted, WCSession.isSupported() else { return }
         isStarted = true
-        heart.onHeartRate = { beatsPerMinute, date in
-            let reading = WatchHeartRate(beatsPerMinute: beatsPerMinute, measuredAt: date.timeIntervalSince1970)
-            let session = WCSession.default
-            guard session.activationState == .activated, session.isReachable else { return }
-            // A lost reading is replaced by the next one a few seconds later.
-            session.sendMessage(reading.message(), replyHandler: nil, errorHandler: nil)
-        }
         let session = WCSession.default
         session.delegate = self
         session.activate()
+        tickTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(200))
+                self?.tick()
+            }
+        }
     }
 
-    func send(_ command: WatchCommand) {
-        let session = WCSession.default
-        guard session.activationState == .activated, session.isReachable else {
-            notice = String(localized: "Open Plumb on your iPhone, then try again.")
-            return
+    func setRhythmEnabled(_ enabled: Bool) async {
+        if enabled {
+            let permission = await workout.requestPermission()
+            guard WatchRhythmPolicy.canEnable(permissionGranted: permission) else {
+                rhythmEnabled = false
+                UserDefaults.standard.set(false, forKey: "plumb.watch.rhythm")
+                notice = .workoutPermission
+                return
+            }
         }
+        rhythmEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: "plumb.watch.rhythm")
         notice = nil
-        Self.deliver(command, on: session, link: self)
+        if enabled { followCapture() } else { stopRhythm() }
+    }
+
+    func setRhythmInterval(_ interval: Int) {
+        guard [2, 3, 4, 5].contains(interval) else { return }
+        rhythmInterval = interval
+        UserDefaults.standard.set(interval, forKey: "plumb.watch.rhythmInterval")
+        clock = WatchRhythmClock(interval: interval)
+        rhythmArmed = false
+        followCapture()
     }
 
     private func apply(_ incoming: WatchState, live: Bool) {
         guard incoming.isNewer(than: state) else { return }
+        let previousSetID = state?.setID
         state = incoming
-        notice = nil
-        followHeartRate(incoming)
-        // A saved application context is read later, maybe long after: only live states tap.
-        if live { Self.play(incoming.haptic) }
+        if live { lastPhoneStateAt = ProcessInfo.processInfo.systemUptime }
+        isLiveCapture = live && incoming.stage == .capturing && isPhoneReachable
+        if incoming.stage == .capturing, live, previousSetID != incoming.setID {
+            clock.stop()
+            rhythmArmed = false
+        }
+        if live { followCapture() }
+        else if incoming.stage != .capturing { stopRhythm() }
     }
 
-    /// Runs the workout session from the moment the camera opens until it closes.
-    private func followHeartRate(_ state: WatchState) {
-        if state.measuresHeartRate && state.stage != .ready {
-            Task { await heart.start() }
-        } else {
-            heart.stop()
+    private func followCapture() {
+        guard let state, isLiveCapture, isPhoneReachable,
+              rhythmEnabled, state.hapticsEnabled else {
+            stopRhythm()
+            return
+        }
+        if rhythmArmed && workout.isRunning { return }
+        guard !startingWorkout else { return }
+        startingWorkout = true
+        let startGeneration = rhythmGeneration
+        Task { [weak self] in
+            guard let self else { return }
+            defer {
+                self.startingWorkout = false
+                if startGeneration != self.rhythmGeneration { self.followCapture() }
+            }
+            let started = await self.workout.start()
+            guard startGeneration == self.rhythmGeneration else { return }
+            guard self.isLiveCapture, self.isPhoneReachable,
+                  self.rhythmEnabled, self.state?.hapticsEnabled == true else {
+                self.workout.stop()
+                return
+            }
+            guard started else {
+                self.rhythmEnabled = false
+                UserDefaults.standard.set(false, forKey: "plumb.watch.rhythm")
+                self.notice = .workoutUnavailable
+                return
+            }
+            if !self.rhythmArmed {
+                self.clock.resume(now: ProcessInfo.processInfo.systemUptime)
+                self.rhythmArmed = true
+            }
         }
     }
 
-    private func commandFailed() {
-        notice = String(localized: "Your iPhone didn’t get that. Try again, or use the iPhone.")
+    private func stopRhythm() {
+        rhythmGeneration += 1
+        clock.stop()
+        rhythmArmed = false
+        workout.stop()
     }
 
-    private static func play(_ haptic: WatchHaptic) {
-        let type: WKHapticType
-        switch haptic {
-        case .none: return
-        case .rep: type = .click
-        case .observation: type = .directionUp
-        case .start: type = .start
-        case .end: type = .stop
+    private func tick() {
+        let now = ProcessInfo.processInfo.systemUptime
+        if isLiveCapture && now - lastPhoneStateAt >= 15 {
+            isLiveCapture = false
+            stopRhythm()
         }
-        WKInterfaceDevice.current().play(type)
-    }
-
-    nonisolated private static func deliver(_ command: WatchCommand, on session: WCSession, link: WatchLink) {
-        session.sendMessage(command.message(), replyHandler: nil) { _ in
-            Task { @MainActor in link.commandFailed() }
+        guard let state, WatchRhythmPolicy.canTap(enabled: rhythmEnabled,
+                                                  masterHapticsEnabled: state.hapticsEnabled,
+                                                  workoutRunning: workout.isRunning,
+                                                  capturing: isLiveCapture) else { return }
+        if clock.shouldTap(now: now, lastPhoneStateAt: lastPhoneStateAt, reachable: isPhoneReachable) {
+            WKInterfaceDevice.current().play(.click)
+        } else if !isPhoneReachable || now - lastPhoneStateAt >= 15 {
+            stopRhythm()
         }
     }
 
-    // MARK: WCSessionDelegate, called on a background queue
-
+    // WatchConnectivity delegates arrive on a background queue.
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState,
                              error: (any Error)?) {
         let reachable = session.isReachable
@@ -97,16 +165,25 @@ final class WatchLink: NSObject, WCSessionDelegate {
 
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
         let reachable = session.isReachable
-        Task { @MainActor [weak self] in self?.isPhoneReachable = reachable }
+        Task { @MainActor [weak self] in
+            self?.isPhoneReachable = reachable
+            if !reachable {
+                self?.isLiveCapture = false
+                self?.stopRhythm()
+            }
+        }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        guard let state = WatchState(message: message) else { return }
-        Task { @MainActor [weak self] in self?.apply(state, live: true) }
+        guard let incoming = WatchState(message: message) else { return }
+        Task { @MainActor [weak self] in self?.apply(incoming, live: true) }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        guard let state = WatchState(message: applicationContext) else { return }
-        Task { @MainActor [weak self] in self?.apply(state, live: false) }
+        guard let incoming = WatchState(message: applicationContext) else { return }
+        let now = Date().timeIntervalSince1970
+        Task { @MainActor [weak self] in
+            if !incoming.isStale(now: now) { self?.apply(incoming, live: false) }
+        }
     }
 }

@@ -2,10 +2,8 @@ import Foundation
 import Observation
 import WatchConnectivity
 
-/// Links Plumb on the iPhone with Plumb on a paired Apple Watch. The watch shows the set the iPhone
-/// measures, taps the wrist on each rep, and can start or stop the set; it measures nothing itself.
-/// Only the stage, rep count, short observation text and result line go to the watch, never video
-/// or pose points. `WatchSync` decides what to send; this class only carries it.
+/// Sends the phone's measured set state and short coaching lines to a paired Apple Watch.
+/// Rhythm taps are timed on the Watch; no video or pose points cross this link.
 @Observable
 @MainActor
 final class WatchBridge: NSObject, WCSessionDelegate {
@@ -36,7 +34,7 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         session.activate()
     }
 
-    /// Shows `model`'s sets on the watch and lets the watch start and stop them.
+    /// Mirrors `model`'s sets and coaching lines on the watch.
     func attach(to model: WorkoutSessionModel, demoInput: Bool) {
         guard sync == nil else { return }
         sync = WatchSync(model: model, demoInput: demoInput) { [weak self] state in
@@ -114,7 +112,5 @@ final class WatchBridge: NSObject, WCSessionDelegate {
             Task { @MainActor [weak self] in self?.sync?.handle(heartRate) }
             return
         }
-        guard let command = WatchCommand(message: message) else { return }
-        Task { @MainActor [weak self] in self?.sync?.handle(command) }
     }
 }

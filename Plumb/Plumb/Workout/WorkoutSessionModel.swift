@@ -217,6 +217,8 @@ final class WorkoutSessionModel {
     private(set) var liveRepCount = 0
     /// The latest live observation of the running set, such as a rep faster than the first ones.
     private(set) var liveCaption: String?
+    /// A short, evidence-backed line sent to the Watch during capture.
+    private(set) var liveCoachMessage: String?
     /// The latest set was ended by Plumb (the athlete walked away or stopped), not by a tap.
     private(set) var endedHandsFree = false
     /// The camera stopped during the set (another app took it, an interruption); the part captured
@@ -468,6 +470,7 @@ final class WorkoutSessionModel {
         liveMonitor = LiveSetMonitor(definition: captureExercise.definition)
         liveRepCount = 0
         liveCaption = nil
+        liveCoachMessage = nil
         endedHandsFree = false
         captureStartedAt = .now
         setHeartRateReadings = []
@@ -753,8 +756,13 @@ final class WorkoutSessionModel {
             switch event {
             case .repCounted(let count), .repCountRevised(let count):
                 liveRepCount = count
+                if case .repCountRevised = event { liveCoachMessage = nil }
             default:
                 liveCaption = event.caption(for: definition)
+            }
+            if let line = WatchCoachRules.line(for: event, reps: monitor.reps, definition: definition,
+                                               canCompareRange: monitor.supportsRangeCoaching) {
+                liveCoachMessage = line
             }
             onLiveEvent?(event, definition.kind)
         }
@@ -794,6 +802,7 @@ final class WorkoutSessionModel {
         liveMonitor = nil
         liveRepCount = 0
         liveCaption = nil
+        liveCoachMessage = nil
         endedHandsFree = false
         endedEarly = false
         endedAtLimit = false

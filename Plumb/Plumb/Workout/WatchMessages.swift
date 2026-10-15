@@ -18,7 +18,7 @@ nonisolated enum WatchStage: String, CaseIterable, Equatable, Sendable {
     case result
 }
 
-/// The tap the watch plays when a state arrives live.
+/// Legacy live tap values kept readable for older message versions. Current rhythm taps are local.
 nonisolated enum WatchHaptic: String, CaseIterable, Equatable, Sendable {
     case none
     /// A rep was counted.
@@ -55,6 +55,12 @@ nonisolated struct WatchState: Equatable, Sendable {
     /// The person turned on Personalize with Health: the watch runs a workout session while the
     /// camera is open and sends its heart rate back.
     var measuresHeartRate = false
+    /// Stable for one camera set, so the Watch can reset its rhythm on a new set.
+    var setID: String?
+    /// One phone-authored line based on measured reps or live form events.
+    var coachMessage: String?
+    var hapticsEnabled = true
+    var languageCode = "en-GB"
     /// When the iPhone sent this state, in seconds since 1970. The watch keeps the newest.
     var sentAt = 0.0
 
@@ -75,8 +81,12 @@ nonisolated struct WatchState: Equatable, Sendable {
             WatchMessageKey.handsFree: handsFree,
             WatchMessageKey.demoInput: demoInput,
             WatchMessageKey.measuresHeartRate: measuresHeartRate,
+            WatchMessageKey.hapticsEnabled: hapticsEnabled,
+            WatchMessageKey.languageCode: languageCode,
             WatchMessageKey.sentAt: sentAt,
         ]
+        if let setID { message[WatchMessageKey.setID] = setID }
+        if let coachMessage { message[WatchMessageKey.coachMessage] = coachMessage }
         if let caption { message[WatchMessageKey.caption] = caption }
         if let summary { message[WatchMessageKey.summary] = summary }
         return message
@@ -98,13 +108,18 @@ nonisolated struct WatchState: Equatable, Sendable {
         handsFree = message[WatchMessageKey.handsFree] as? Bool ?? false
         demoInput = message[WatchMessageKey.demoInput] as? Bool ?? false
         measuresHeartRate = message[WatchMessageKey.measuresHeartRate] as? Bool ?? false
+        setID = message[WatchMessageKey.setID] as? String
+        coachMessage = message[WatchMessageKey.coachMessage] as? String
+        hapticsEnabled = message[WatchMessageKey.hapticsEnabled] as? Bool ?? true
+        languageCode = message[WatchMessageKey.languageCode] as? String ?? "en-GB"
         sentAt = WatchMessageKey.number(message[WatchMessageKey.sentAt]) ?? 0
     }
 
     init(stage: WatchStage = .ready, countdown: Int = 0, exercise: String = "", reps: Int = 0,
          caption: String? = nil, haptic: WatchHaptic = .none, summary: String? = nil,
          wristControls: Bool = true, handsFree: Bool = false, demoInput: Bool = false,
-         measuresHeartRate: Bool = false, sentAt: Double = 0) {
+         measuresHeartRate: Bool = false, sentAt: Double = 0, setID: String? = nil,
+         coachMessage: String? = nil, hapticsEnabled: Bool = true, languageCode: String = "en-GB") {
         self.stage = stage
         self.countdown = countdown
         self.exercise = exercise
@@ -117,6 +132,10 @@ nonisolated struct WatchState: Equatable, Sendable {
         self.demoInput = demoInput
         self.measuresHeartRate = measuresHeartRate
         self.sentAt = sentAt
+        self.setID = setID
+        self.coachMessage = coachMessage
+        self.hapticsEnabled = hapticsEnabled
+        self.languageCode = languageCode
     }
 
     /// Whether this state should replace `shown` on the watch. Only a newer one does, so a late
@@ -132,7 +151,47 @@ nonisolated struct WatchState: Equatable, Sendable {
     }
 }
 
-/// Watch to iPhone.
+/// A local monotonic schedule: a late wake produces one beat and never replays missed beats.
+nonisolated struct WatchRhythmClock: Equatable, Sendable {
+    let interval: Int
+    private var nextBeat: Double?
+
+    init(interval: Int = 3) { self.interval = [2, 3, 4, 5].contains(interval) ? interval : 3 }
+    mutating func resume(now: Double) { nextBeat = now + Double(interval) }
+    mutating func stop() { nextBeat = nil }
+
+    mutating func shouldTap(now: Double, lastPhoneStateAt: Double, reachable: Bool) -> Bool {
+        guard reachable, now - lastPhoneStateAt < 15, let nextBeat else {
+            stop()
+            return false
+        }
+        guard now >= nextBeat else { return false }
+        let missed = floor((now - nextBeat) / Double(interval)) + 1
+        self.nextBeat = nextBeat + missed * Double(interval)
+        return true
+    }
+}
+
+nonisolated enum WatchRhythmPolicy {
+    static func canEnable(permissionGranted: Bool) -> Bool { permissionGranted }
+
+    static func canTap(enabled: Bool, masterHapticsEnabled: Bool, workoutRunning: Bool,
+                       capturing: Bool) -> Bool {
+        enabled && masterHapticsEnabled && workoutRunning && capturing
+    }
+}
+
+nonisolated enum WatchLanguage {
+    static func resolved(_ identifier: String?) -> String {
+        let language = (identifier ?? "").replacingOccurrences(of: "_", with: "-").lowercased()
+        if language.hasPrefix("fr") { return "fr" }
+        if language.hasPrefix("es") { return "es" }
+        if language == "en-us" { return "en-US" }
+        return "en-GB"
+    }
+}
+
+/// Legacy wrist commands kept readable for older message versions; the current Watch UI sends none.
 nonisolated enum WatchCommand: String, CaseIterable, Equatable, Sendable {
     case startSet
     case stopSet
@@ -182,7 +241,7 @@ nonisolated struct WatchHeartRate: Equatable, Sendable {
 }
 
 nonisolated enum WatchMessageKey {
-    static let currentVersion = 1
+    static let currentVersion = 2
 
     static let messageType = "type"
     static let version = "v"
@@ -201,6 +260,10 @@ nonisolated enum WatchMessageKey {
     static let measuresHeartRate = "heartRate"
     static let beatsPerMinute = "bpm"
     static let measuredAt = "measuredAt"
+    static let setID = "setID"
+    static let coachMessage = "coachMessage"
+    static let hapticsEnabled = "hapticsEnabled"
+    static let languageCode = "languageCode"
 
     /// Numbers come back as NSNumber on Apple platforms and as Int or Double elsewhere.
     static func integer(_ value: Any?) -> Int? {
