@@ -57,12 +57,11 @@ struct AmbientCameraBackdrop: View {
 
     var body: some View {
         ZStack {
-            Color(uiColor: .secondarySystemBackground)
+            PlumbBackdrop()
             if camera.isRunning && !reduceTransparency {
                 AmbientCameraLayer(session: camera.captureSession)
-                    .blur(radius: 18)
-                    .overlay(.regularMaterial)
-                    .overlay(Color(uiColor: .systemBackground).opacity(0.32))
+                    .blur(radius: 22)
+                    .overlay(.black.opacity(0.55))
             }
         }
         .ignoresSafeArea()

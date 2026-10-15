@@ -3,9 +3,9 @@ import SwiftUI
 import UIKit
 
 private enum PlumbStyle {
-    static let ink = Color.primary
-    static let supportingText = Color.primary.opacity(0.72)
-    static let primaryButtonText = Color(uiColor: .systemBackground)
+    static let ink = Color.white
+    static let supportingText = Color.white.opacity(0.6)
+    static let primaryButtonText = Color.black
 }
 
 struct ContentView: View {
@@ -27,9 +27,8 @@ struct ContentView: View {
     @State private var deleteAllRequested = false
     /// History, Coach, Awards, Options or Privacy, pushed from the first screen.
     @State private var route: HomeRoute?
-    /// The page chosen in the More sheet, pushed once the sheet is gone.
-    @State private var pendingRoute: HomeRoute?
-    @State private var showsMore = false
+    /// The four tabs: the set, the history, the coach, and the rest of the person's things.
+    @State private var tab: AppTab = .workout
     /// The six exercises, large, behind the icon at the top left of the first screen.
     @State private var showsExercisePicker = false
     /// Coach, Options or History opened from the result, on top of its sheet.
@@ -120,7 +119,64 @@ struct ContentView: View {
                 })
     }
 
+    private var hidesTabBar: Bool {
+        switch model.stage {
+        case .ready, .result: false
+        default: true
+        }
+    }
+
     var body: some View {
+        TabView(selection: $tab) {
+            Tab(String(localized: "Workout"), systemImage: "figure.strengthtraining.functional", value: AppTab.workout) {
+                workoutTab
+            }
+            Tab(String(localized: "Stats"), systemImage: "chart.xyaxis.line", value: AppTab.stats) {
+                NavigationStack { statsPage }
+            }
+            Tab(String(localized: "Coach"), systemImage: "bubble.left.and.text.bubble.right", value: AppTab.coach) {
+                NavigationStack { CoachView(history: model.history) }
+            }
+            Tab(String(localized: "Awards"), systemImage: "rosette", value: AppTab.awards) {
+                NavigationStack { BadgesView(ledger: badges) }
+            }
+        }
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .sensoryFeedback(.selection, trigger: tab)
+        .overlay(alignment: .top) {
+            #if DEBUG
+            if isDemo && !isCaptureStage && !isErrorStage {
+                Text("DEMO INPUT")
+                    .font(.caption.bold())
+                    .foregroundStyle(Color(uiColor: .systemBackground))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.primary, in: Capsule())
+                    .padding(.top, 6)
+                    .accessibilityHidden(true)
+            }
+            #endif
+        }
+        .tint(.white)
+        // Plumb is dark everywhere: three people preferred it to the light version (15 October).
+        .preferredColorScheme(.dark)
+        .sheet(isPresented: showsResultSheet) { result }
+        .sheet(isPresented: $showsExercisePicker) {
+            ExercisePickerSheet(order: preferences.exerciseOrder, selection: Binding(
+                get: { model.selectedExercise },
+                set: { kind in withAnimation(HomeStyle.spring) { model.selectedExercise = kind } }
+            ))
+        }
+        .modifier(SessionLifecycle(view: self))
+    }
+
+    /// Every measured set since the install, as numbers and curves, with the sessions below.
+    private var statsPage: some View {
+        historyList(title: String(localized: "Stats"), exercise: nil)
+    }
+
+    /// The first tab: the first screen, the camera over it, the result sheet above it.
+    private var workoutTab: some View {
         NavigationStack {
             ZStack {
                 switch model.stage {
@@ -128,7 +184,7 @@ struct ContentView: View {
                     home
                 case .openingCamera:
                     ZStack {
-                        HomeStyle.background.ignoresSafeArea()
+                        PlumbBackdrop()
                         ProgressView("Opening camera")
                     }
                 case .framing, .countdown, .capturing, .analyzing:
@@ -145,57 +201,36 @@ struct ContentView: View {
                 destinationPage(destination)
                     .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
             }
+            // Full-screen camera during a set: the tab bar comes back with the result.
+            .toolbar(hidesTabBar ? .hidden : .visible, for: .tabBar)
             #if DEBUG
             .onAppear {
                 let arguments = ProcessInfo.processInfo.arguments
                 guard route == nil, let index = arguments.firstIndex(of: "-plumb-open"),
                       arguments.indices.contains(index + 1) else { return }
                 switch arguments[index + 1] {
-                case "coach": route = .coach
+                case "coach": tab = .coach
                 case "options": route = .options
-                case "awards": route = .awards
-                case "history": route = .history
+                case "awards": tab = .awards
+                case "history": tab = .stats
                 default: break
                 }
             }
             #endif
         }
-        .overlay(alignment: .top) {
-            #if DEBUG
-            if isDemo && !isCaptureStage && !isErrorStage {
-                Text("DEMO INPUT")
-                    .font(.caption.bold())
-                    .foregroundStyle(Color(uiColor: .systemBackground))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.primary, in: Capsule())
-                    .padding(.top, 6)
-                    .accessibilityHidden(true)
-            }
-            #endif
-        }
-        .tint(PlumbStyle.ink)
-        #if DEBUG
-        .preferredColorScheme(usesTestDarkAppearance ? .dark : nil)
-        #endif
-        .sheet(isPresented: $showsMore, onDismiss: {
-            if let pending = pendingRoute {
-                pendingRoute = nil
-                route = pending
-            }
-        }) {
-            MoreSheet { destination in
-                pendingRoute = destination
-                showsMore = false
-            }
-        }
-        .sheet(isPresented: showsResultSheet) { result }
-        .sheet(isPresented: $showsExercisePicker) {
-            ExercisePickerSheet(order: preferences.exerciseOrder, selection: Binding(
-                get: { model.selectedExercise },
-                set: { kind in withAnimation(HomeStyle.spring) { model.selectedExercise = kind } }
-            ))
-        }
+    }
+}
+
+/// The modifiers that outlive any one tab: screen, Siri, Health, the welcome, badges, accessories,
+/// deep links, the scene, and the two delete dialogs.
+private struct SessionLifecycle: ViewModifier {
+    let view: ContentView
+    func body(content: Content) -> some View { view.lifecycle(content) }
+}
+
+extension ContentView {
+    fileprivate func lifecycle(_ content: some View) -> some View {
+        content
         // The phone stands a few steps away and nobody touches it: keep the screen on while the
         // camera is open, or Auto-Lock interrupts framing and throws the set away.
         .onChange(of: model.stage, initial: true) { _, stage in
@@ -283,6 +318,9 @@ struct ContentView: View {
                  : "This removes saved sessions and any recovered history backups from this iPhone.")
         }
     }
+}
+
+extension ContentView {
 
     /// Asked once after the first measured set. Presented from the result sheet when it is up, or
     /// from the first screen: two sheets on the same view would block each other (15 October, the
@@ -298,6 +336,17 @@ struct ContentView: View {
     @ToolbarContentBuilder private var rootToolbar: some ToolbarContent {
         switch model.stage {
         case .ready, .result:
+            ToolbarItem(placement: .topBarTrailing) {
+                // Settings only: Options and Privacy. The coach and the awards have their tabs.
+                Menu {
+                    Button { route = .options } label: { Label("Options", systemImage: "slider.horizontal.3") }
+                    Button { route = .privacy } label: { Label("Privacy", systemImage: "lock") }
+                } label: {
+                    Label("More", systemImage: "ellipsis")
+                }
+                .accessibilityHint("Options and privacy")
+                .accessibilityIdentifier("home.more")
+            }
             ToolbarItem(placement: .topBarLeading) {
                 Button { showsExercisePicker = true } label: {
                     Label("Exercises", systemImage: "dumbbell.fill")
@@ -305,13 +354,7 @@ struct ContentView: View {
                 .accessibilityHint("Choose the exercise")
                 .accessibilityIdentifier("home.exercises")
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showsMore = true } label: {
-                    Label("More", systemImage: "ellipsis")
-                }
-                .accessibilityHint("History, coach, awards, options and privacy")
-                .accessibilityIdentifier("home.more")
-            }
+
         case .framing, .countdown, .openingCamera:
             ToolbarItem(placement: .topBarLeading) {
                 Button("Cancel") { Task { await model.cancel() } }
@@ -351,13 +394,12 @@ struct ContentView: View {
         switch request {
         case .startSet(let exercise):
             route = nil
-            showsMore = false
+            tab = .workout
             observationSpeaker.stop()
             model.selectedExercise = exercise
             startSet()
         case .showHistory:
-            showsMore = false
-            route = .history
+            tab = .stats
         }
     }
 
@@ -374,7 +416,7 @@ struct ContentView: View {
     private var home: some View {
         ZStack {
             if usesSyntheticInput {
-                Color(uiColor: .secondarySystemBackground).ignoresSafeArea()
+                PlumbBackdrop()
             } else {
                 AmbientCameraBackdrop(camera: ambientCamera)
             }
@@ -384,7 +426,7 @@ struct ContentView: View {
                 homeNotes
                 Spacer(minLength: 16)
                 // One slow, well-done rep of the chosen exercise, seen as the camera will see it.
-                ExerciseFigureView(kind: model.selectedExercise, lineColor: .primary)
+                ExerciseFigureView(kind: model.selectedExercise, lineColor: .white)
                     .frame(maxWidth: 360)
                     .frame(height: figureHeight)
                     .id(model.selectedExercise)
@@ -393,9 +435,9 @@ struct ContentView: View {
                     .accessibilityIdentifier("home.figure")
                 Spacer(minLength: 16)
                 startButton
-                    .padding(.bottom, 28)
+                    .padding(.bottom, 4)
                 if let progressLine {
-                    Button { route = .history } label: {
+                    Button { tab = .stats } label: {
                         Text(progressLine)
                             .font(.subheadline.weight(.medium))
                             .monospacedDigit()
@@ -490,19 +532,10 @@ struct ContentView: View {
 
     private var startButton: some View {
         Button { startSet() } label: {
-            VStack(spacing: 6) {
-                Image(systemName: "play.fill")
-                    .font(.system(size: startButtonSize * 0.27, weight: .bold))
-                Text("Start")
-                    .font(.headline)
-            }
-            .foregroundStyle(Color.primary)
-            .frame(width: startButtonSize, height: startButtonSize)
-            .plumbGlass(in: Circle(), interactive: true)
-            .shadow(color: .black.opacity(0.08), radius: 24, y: 10)
+            PrimaryActionLabel(title: "Start a set")
         }
         .buttonStyle(PressableStyle())
-        .accessibilityLabel("Start a set")
+        .padding(.horizontal, 24)
         .accessibilityHint("Opens the camera for \(selectedCopy.name.lowercased())")
         .accessibilityIdentifier("home.start")
     }
@@ -982,7 +1015,7 @@ struct ContentView: View {
     /// the advice in the banner at the bottom. Nothing to touch while the set runs.
     private var capture: some View {
         ZStack {
-            HomeStyle.background.ignoresSafeArea()
+            Color.black.ignoresSafeArea()
             CameraFeedView(model: model)
                 .ignoresSafeArea()
             VStack(spacing: 12) {
@@ -1010,7 +1043,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(Color.primary)
+                    .tint(.white)
                     .accessibilityIdentifier("capture.start")
                 }
             }
@@ -1249,7 +1282,7 @@ struct ContentView: View {
         // Opens tall so nothing is cut at any text size; a pull down shows the room behind it.
         .presentationDetents([.fraction(0.62), .large], selection: $resultDetent)
         .presentationDragIndicator(.visible)
-        .presentationBackground(HomeStyle.background)
+        .presentationBackground(.thinMaterial)
         .sensoryFeedback(.success, trigger: model.stage == .result)
     }
 
@@ -1307,7 +1340,7 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.glassProminent)
-                .tint(Color.primary)
+                .tint(.white)
                 .accessibilityIdentifier("result.next")
             }
         }
@@ -1368,7 +1401,10 @@ struct ContentView: View {
                 }
             }
             if !badges.justEarned.isEmpty {
-                BadgeUnlockCard(badges: badges.justEarned) { route = .awards }
+                BadgeUnlockCard(badges: badges.justEarned) {
+                    Task { await model.cancel() }
+                    tab = .awards
+                }
                     .padding(.top, 12)
             }
         }
@@ -1412,9 +1448,8 @@ struct ContentView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity, minHeight: 50)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.glass)
                 .buttonBorderShape(.capsule)
-                .tint(Color.primary)
                 .accessibilityHint("Opens the coach with this set's facts")
                 .accessibilityIdentifier("result.askCoach")
                 Divider().padding(.vertical, 8)
@@ -1523,9 +1558,8 @@ struct ContentView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity, minHeight: 50)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.glass)
                 .buttonBorderShape(.capsule)
-                .tint(Color.primary)
                 .accessibilityIdentifier("result.shareSummary")
                 .accessibilityHint("Shares the measured summary without video")
             case .insufficientView(let reason):
@@ -1679,7 +1713,7 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 14))
     }
 
     private func comparisonGapText(_ gap: ComparisonGap) -> LocalizedStringKey {
@@ -1810,6 +1844,7 @@ struct ContentView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .plumbBackdrop()
         .navigationTitle(title)
     }
 
@@ -1964,7 +1999,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, minHeight: 50)
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(Color.primary)
+                    .tint(.white)
                     Button("Try again") {
                         Task { await model.cancel(); await ambientCamera.stop(); await model.startPreview() }
                     }
@@ -1980,7 +2015,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, minHeight: 50)
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(Color.primary)
+                    .tint(.white)
                 }
                 // The first screen, with History, Options, Privacy and an open session's Finish
                 // session, stays reachable while the camera cannot be used.

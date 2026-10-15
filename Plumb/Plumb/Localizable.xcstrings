@@ -5842,6 +5842,16 @@
         }
       }
     },
+    "Stats" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stats"
+          }
+        }
+      }
+    },
     "Stay tall" : {
       "localizations" : {
         "fr" : {
