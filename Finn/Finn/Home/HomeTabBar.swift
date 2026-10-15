@@ -23,7 +23,7 @@ private enum HomeAccessibilityDiagnostics {
 
 struct DashboardGlass: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    var radius: CGFloat = 15
+    var radius: CGFloat = DashboardStyle.cardRadius
     var stableBackdrop = false
     var showsBorder = true
 
