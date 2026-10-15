@@ -126,29 +126,19 @@ nonisolated enum CoachInstructions {
         case .french:
             return english + """
 
-            Answer in French. Name a set as "Série N" where the saved list says "Set N" (same number).
+            For a French question, use "Série N" where the saved list says "Set N" (same number).
             """
         }
     }
 
     static let english = """
-        You are Plumb's coach. Plumb is an iPhone app that films one bodyweight set from the side, \
-        counts the reps and keeps at most one camera-measured observation per set. You talk with the \
-        person about their saved sets and answer their questions.
+        You select saved sets relevant to the person's question. Plumb writes the answer from its \
+        recorded facts; your words are never shown to the person.
 
-        Rules, in order of importance:
-        1. Use only the sets listed under "Saved sets". Every statement about the person's movement, \
-        reps or posture must come from one of those lines. Never add a measurement, a cause, a body \
-        part or a pattern that is not written there.
-        2. Name the set you are talking about with its label, for example "Set 3". Never refer to a \
-        set that is not listed.
-        3. If the saved sets do not answer the question, say so plainly: "Plumb didn't measure that." \
-        Do not guess.
-        4. No medical advice: no claims about injury, pain, safety, diagnosis or health. If asked, say \
-        you can only speak about what the camera measured and suggest a qualified professional for the rest.
-        5. Keep each answer short: two to four sentences, plain words, no bullet lists, no emojis.
-        6. You may encourage, and you may repeat the suggested next action that is written for a set. \
-        Do not invent new exercises, programs or targets.
+        Use only the numbered sets under "Saved sets". Output one or two labels separated by a \
+        comma, for example "Set 2" or "Set 2, Set 3". If none of the saved sets answers the question, \
+        output only "NONE". Do not add an explanation, measurements, advice, or other words. \
+        No medical advice: do not select a set as proof of injury, safety or diagnosis.
         """
 }
 
@@ -225,7 +215,8 @@ nonisolated enum CoachFallback {
     }
 }
 
-/// Checks a generated answer against the context before it is shown: it may only name sets that exist.
+/// Accepts only set labels from a model. The app renders the recorded facts itself; model prose
+/// never reaches the user because checking arbitrary advice for factual support is unreliable.
 nonisolated enum CoachAnswerCheck {
     static func referencedSetNumbers(in text: String) -> Set<Int> {
         var numbers: Set<Int> = []
@@ -236,9 +227,18 @@ nonisolated enum CoachAnswerCheck {
         return numbers
     }
 
-    static func isAcceptable(_ text: String, for context: CoachContext) -> Bool {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return false }
-        return referencedSetNumbers(in: trimmed).isSubset(of: context.knownNumbers)
+    static func selectedFacts(in text: String, for context: CoachContext) -> [CoachSetFact]? {
+        let parts = text.split(separator: ",", omittingEmptySubsequences: false)
+        guard (1...2).contains(parts.count) else { return nil }
+        var selected: [CoachSetFact] = []
+        for part in parts {
+            let label = part.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard let match = label.wholeMatch(of: /(?:[Ss]et|[Ss][ée]rie)\s*#?\s*(\d+)/),
+                  let number = Int(match.output.1),
+                  let fact = context.facts.first(where: { $0.number == number }),
+                  !selected.contains(where: { $0.number == number }) else { return nil }
+            selected.append(fact)
+        }
+        return selected
     }
 }

@@ -66,7 +66,7 @@ APPLE HEALTH, IF YOU WANT
 Turn on Save workouts to Apple Fitness and each finished session is saved to Health as a strength training workout, with its time, sets and reps, so it shows in Fitness. Turn on Personalize with Health and Plumb reads your heart rate, sleep, recent activity, age, weight and height on your iPhone to suggest a lighter day or a longer rest, and shows the set's heart rate from your watch. Both are off until you turn them on. Plumb never writes calories or heart rate.
 
 A COACH YOU CAN ASK
-Ask the coach about your last sets and get an answer written from your own numbers. It runs on Apple Intelligence: Apple's model on Private Cloud Compute when your iPhone supports it, otherwise the model on your iPhone, otherwise a fixed text. It only ever sees your set summaries, never a picture.
+Ask the coach about your saved sets. Apple Intelligence can choose the relevant sets; Plumb writes the answer from recorded counts and observations. When a model is unavailable, Plumb uses a fixed summary. The model receives set summaries, never a picture.
 
 ON YOUR PHONE ONLY
 Video is analyzed on your iPhone and never saved. Set summaries stay on your phone and you can delete them in History. No account, no ads, no tracking, no Plumb server.
@@ -77,7 +77,7 @@ Plumb watches one camera angle and compares your reps with your own first reps. 
 Requires iOS 27. The Apple Watch app requires watchOS 10 and the iPhone app running nearby.
 ```
 
-2,723 characters. The paragraph A COACH YOU CAN ASK describes branch `claude/coach`: keep it only if that branch is merged before the archive is built, and delete it otherwise. Recount after any change.
+2,681 characters. The Coach screen merged into `main` on 15 October. Verify its availability and wording in the exact build uploaded to App Store Connect.
 
 ## What's new in this version (4,000)
 
@@ -174,7 +174,7 @@ TON SCHÉMA LE PLUS FRÉQUENT
 Plumb retient ce que chaque série enregistrée a montré et te dit, avant la suivante, quel schéma revient le plus souvent.
 
 UN COACH À QUI POSER TES QUESTIONS
-Demande au coach ce qu'il pense de tes dernières séries : il répond à partir de tes propres chiffres. Il tourne sur Apple Intelligence : le modèle d'Apple sur Private Cloud Compute quand ton iPhone le permet, sinon le modèle sur l'iPhone, sinon un texte fixe. Il ne voit que tes résumés de séries, jamais une image.
+Pose une question au coach sur tes séries enregistrées. Apple Intelligence peut choisir les séries pertinentes ; Plumb rédige la réponse à partir des comptes et observations conservés. Si aucun modèle n’est disponible, Plumb utilise un résumé fixe. Le modèle reçoit les résumés des séries, jamais une image.
 
 APPLE WATCH
 Avec Plumb sur ta montre, le compte et les observations s'affichent au poignet, chaque rep te tapote, et tu lances ou arrêtes la série depuis la montre.
@@ -197,4 +197,4 @@ Nécessite iOS 27. L'app Apple Watch nécessite watchOS 10 et l'app iPhone ouver
 Première version : six exercices comptés de profil, séries mains libres avec reps annoncées, une observation étayée par série, ton schéma le plus fréquent, un coach qui répond depuis tes propres séries, une app Apple Watch et l'enregistrement facultatif dans Apple Santé.
 ```
 
-Le paragraphe UN COACH À QUI POSER TES QUESTIONS et la mention du coach dans les nouveautés suivent la même règle que la version anglaise : à garder seulement si `claude/coach` est dans la build.
+L’écran Coach a été intégré à `main` le 15 octobre. Vérifier sa présence et ses textes dans la build envoyée à App Store Connect.

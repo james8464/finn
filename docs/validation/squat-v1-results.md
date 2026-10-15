@@ -1,6 +1,6 @@
 # Squat v1 validation results
 
-**Status: participant validation not started. Updated 13 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. Simulator tests and sixteen synthetic video clips verify implementation behavior, not real-camera accuracy. The seven new clips vary exposure, color, resolution, framing, tilt, blur, and phone movement, but reuse the same source person and motion. The blurred clip (nine blended frames and a strong spatial blur) and the moving-phone clip still request a retake with `squat-side-v7`. The covered-feet replay is refused after sampled person-mask corroboration; its false-refusal rate on real sets is unknown. The mirrored clip refused the set up to `squat-side-v6` (required-joint coverage about 71% versus the 80% gate) and measures six reps with v7. Whether facing direction matters on a real camera must be checked on physical iPhones. The 0.75-second tracking retake gate and bystander behavior also need measurement.
+**Status: participant validation not started. Updated 15 October 2026.** No consenting participant sets or qualified specialist reviews have been recorded. Simulator tests and sixteen synthetic video clips verify implementation behavior, not real-camera accuracy. The seven new clips vary exposure, color, resolution, framing, tilt, blur, and phone movement, but reuse the same source person and motion. The blurred clip (nine blended frames and a strong spatial blur) and the moving-phone clip still request a retake with `squat-side-v7`. The covered-feet replay is refused after sampled person-mask corroboration; its false-refusal rate on real sets is unknown. The mirrored clip refused the set up to `squat-side-v6` (required-joint coverage about 71% versus the 80% gate) and measures six reps with v7. Whether facing direction matters on a real camera must be checked on physical iPhones. The 0.75-second tracking retake gate and bystander behavior also need measurement.
 
 ## Simulator UI check · 11 October 2026
 
@@ -14,7 +14,7 @@ Built and launched commit `8c2959e` on the iPhone 18 Pro Max simulator (iOS 27.0
 | Replay on public videos (not participants) | 42 of 50 Mendeley side-view squat videos measured by `squat-side-v3` (0 of 50 by `squat-side-v2`); counts within one rep of an independent dip counter on all 42; no human count. See [`exercise-rules-v1.md`](exercise-rules-v1.md) |
 | Tuning sets | 0 |
 | Holdout sets | 0 |
-| Physical iPhone camera pass | Pending; iPhone 16 Pro Max was unavailable to Xcode on 11 October. Use the [physical run sheet](physical-iphone-run.md) once available |
+| Physical iPhone camera pass | Partial smoke pass on 15 October: iPhone 16 Pro Max, iOS 27.0.1, built from `d8f1503` with temporary personal-team signing. The app launched; UI automation allowed Camera and opened the live preview with the correct missing-joint framing instruction. The phone faced a ceiling, so no person or rep was analyzed. The full [physical run sheet](physical-iphone-run.md) remains open for the final FinLearn build |
 | Specialist cue reviews | 0 |
 | Setup success | Not measured |
 | Exact rep count | Not measured |

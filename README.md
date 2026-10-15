@@ -2,13 +2,13 @@
 
 Plumb reviews strength sets through an iPhone camera. It counts reps and, when the evidence supports it, gives one specific observation to try in the next set. Video is processed on the phone and is not saved. The longer-term product pairs the iPhone with Apple Watch for timely feedback.
 
-**Status — 15 October 2026:** The iPhone flow has simulator and replay coverage, but no physical-iPhone study or independent expert review of its coaching accuracy. Treat Plumb as a fitness aid, not a medical or injury-prevention tool.
+**Status — 15 October 2026:** The iPhone flow has simulator and replay coverage. A development-signed build launched on an iPhone 16 Pro Max and opened the live camera after permission; no real-person set or independent expert review has established coaching accuracy. Treat Plumb as a fitness aid, not a medical or injury-prevention tool.
 
 ## Current build
 
 - **Workout:** Choose one of six exercises. Squat, push-up, static lunge, and stiff-leg deadlift use side-view rules; pull-ups and bar muscle-ups use visible shoulder movement. The camera shows framing and a pose overlay, counts reps live, and supports manual or hands-free sets. Counts and selected observations can be spoken through the system audio route.
 - **Results:** Each set shows a measured count and at most one supported range or posture observation. Weak evidence produces a retake reason or no supported pattern. Partial sets can retain a count without posture advice. Side-view form checks (push-up hips and depth, squat depth and chest, lunge torso and front knee, deadlift knees and hinge) give that observation when a fault shows on at least two reps, and a few words of the same advice appear large on the camera screen during the set; a check that cannot see its joints says so. History stores local summaries, compares compatible sets, identifies a recurring pattern, and shares text through the system sheet.
-- **Home and Coach:** The Home dashboard links to recent sessions and the Workout flow. Coach answers questions about saved set summaries using Apple Intelligence when available, with a fixed-text fallback; a Claude demo is Debug-only. Posture, Weights, Awards, and Plumb+ destinations are placeholders.
+- **Home and Coach:** The Home dashboard links to recent sessions and the Workout flow. Coach uses Apple Intelligence, when available, to select up to two relevant saved sets; Plumb writes the displayed response from their recorded counts and observations. Invalid model output and unavailable models use fixed text. A Claude demo is Debug-only. Posture, Weights, Awards, and Plumb+ destinations are placeholders.
 - **Apple Watch:** An embedded companion mirrors the exercise, stage, count, and observation; it supports wrist taps and start/stop messages. It compiles for simulators but has not been checked on a physical watch.
 - **Apple Health:** Optional workout saving and optional personalization are implemented in code. Personalization may read heart rate, activity, sleep, and body measurements after permission. HealthKit permission, workout appearance in Fitness, and personalized advice still need physical-device checks. Camera use does not require Health access.
 - **Siri and Shortcuts:** App Intents can start a selected set, report the last saved set, or open History. Unit and simulator checks exist; spoken use on a device remains unverified.
@@ -27,7 +27,7 @@ The next gate is a dependable iPhone set-to-set loop on physical devices, with e
 ## For contributors and agents
 
 - Keep this README's build status current when behavior changes. If an older plan conflicts with it, flag the discrepancy.
-- Derive coaching facts from measured, versioned rules. Generative models may phrase supported observations; they must not decide whether movement is safe.
+- Derive coaching facts from measured, versioned rules. The Coach model may select saved sets, but its prose is never shown. Models must not decide whether movement is safe.
 - Ask for camera and Health permissions in context. Keep workout video local and unsaved. Changing data handling requires a deliberate product and privacy-policy update.
 - Label demo data. Keep public copy aligned with the signed build and its validation.
 - For Apple interface work, use the [local HIG reference](docs/design/apple-hig-agent-reference.md) and its official source links.

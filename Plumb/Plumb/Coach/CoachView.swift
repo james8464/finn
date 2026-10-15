@@ -90,9 +90,9 @@ struct CoachView: View {
     private var engineLine: String {
         switch conversation.engineKind {
         case .fallback: String(localized: "No language model available. The coach repeats what Plumb saved.")
-        case .onDevice: String(localized: "Answers come from Apple Intelligence on this iPhone, from your saved sets only.")
-        case .privateCloudCompute: String(localized: "Answers come from Apple's Private Cloud Compute, from your saved sets only.")
-        case .claudeDemo: String(localized: "Debug demo: answers come from Claude Sonnet, from your saved sets only.")
+        case .onDevice: String(localized: "Apple Intelligence chose the sets; the details come from Plumb's records.")
+        case .privateCloudCompute: String(localized: "Apple Private Cloud Compute chose the sets; the details come from Plumb's records.")
+        case .claudeDemo: String(localized: "Debug demo: Claude chose the sets; the details come from Plumb's records.")
         }
     }
 

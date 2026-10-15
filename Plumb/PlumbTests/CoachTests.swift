@@ -107,23 +107,33 @@ struct CoachTests {
 
     // MARK: Simulated engine
 
-    @Test func answerCitingExistingSetsIsKept() async {
-        let engine = StubCoachEngine(output: "Set 2 showed a shorter depth on the last two reps. Set 3 counted 8 push-ups.")
+    @Test func modelSelectionRendersOnlyRecordedSetFacts() async {
+        let engine = StubCoachEngine(output: "Set 2, Set 3")
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
         let context = CoachContext.make(history: history())
         let answer = await responder.answer("What happened?", context: context, history: [])
         #expect(answer.engine == .onDevice)
-        #expect(answer.text == "Set 2 showed a shorter depth on the last two reps. Set 3 counted 8 push-ups.")
+        #expect(answer.text.contains("Set 2: 6 squat reps. Observation: Your last two reps were shallower"))
+        #expect(answer.text.contains("Set 3: 8 push-up reps."))
         #expect(engine.calls == 1)
         #expect(engine.lastInstructionsContext?.facts.count == 3)
     }
 
     @Test func answerCitingAnUnknownSetFallsBack() async {
-        let engine = StubCoachEngine(output: "Set 7 was your best set so far.")
+        let engine = StubCoachEngine(output: "Set 7")
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
         let answer = await responder.answer("Which was best?", context: CoachContext.make(history: history()), history: [])
         #expect(answer.engine == .fallback)
         #expect(!answer.text.contains("Set 7"))
+    }
+
+    @Test func generatedUnsupportedPostureClaimIsNeverShown() async {
+        let engine = StubCoachEngine(output: "Set 2 had perfect posture and prevents knee injury.")
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let answer = await responder.answer("How was set 2?", context: CoachContext.make(history: history()), history: [])
+        #expect(answer.engine == .fallback)
+        #expect(!answer.text.contains("perfect posture"))
+        #expect(!answer.text.contains("prevents knee injury"))
     }
 
     @Test func emptyOrFailingAnswerFallsBack() async {
@@ -157,7 +167,7 @@ struct CoachTests {
     }
 
     @Test func conversationKeepsTurnsAndPassesEarlierOnes() async {
-        let engine = StubCoachEngine(output: "Set 2 had a shorter depth at the end.")
+        let engine = StubCoachEngine(output: "Set 2")
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
         let conversation = CoachConversation(history: history(), responder: responder)
         #expect(conversation.messages.count == 1)
@@ -176,6 +186,11 @@ struct CoachTests {
     @Test func answerCheckReadsSetReferencesInBothLanguages() {
         #expect(CoachAnswerCheck.referencedSetNumbers(in: "Set 2 and set #3, then Série 4 and série 5.") == [2, 3, 4, 5])
         #expect(CoachAnswerCheck.referencedSetNumbers(in: "A set of 8 reps.") == [])
+        let context = CoachContext.make(history: history())
+        #expect(CoachAnswerCheck.selectedFacts(in: "Set 2, Série 3", for: context)?.map(\.number) == [2, 3])
+        #expect(CoachAnswerCheck.selectedFacts(in: "Set 2 had perfect posture", for: context) == nil)
+        #expect(CoachAnswerCheck.selectedFacts(in: "Set 2, Set 2", for: context) == nil)
+        #expect(CoachAnswerCheck.selectedFacts(in: "Set 7", for: context) == nil)
     }
 
     @Test func instructionsCarryTheRulesAndTheLanguage() {
@@ -184,7 +199,7 @@ struct CoachTests {
         #expect(english.contains("Saved sets, oldest first:"))
         #expect(english.contains("Set 3: Push-up"))
         let french = FoundationModelsCoachPrompt.instructions(for: CoachContext.make(history: history()), language: .french)
-        #expect(french.contains("Answer in French"))
+        #expect(french.contains("For a French question, use \"Série N\""))
         let prompt = FoundationModelsCoachPrompt.prompt(question: "Now?", history: [
             CoachMessage(role: .person, text: "Earlier question"),
             CoachMessage(role: .coach, text: "Earlier answer", engine: .onDevice),

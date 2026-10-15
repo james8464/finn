@@ -47,7 +47,7 @@ nonisolated struct CoachMessage: Identifiable, Equatable, Sendable {
 protocol CoachEngine: AnyObject {
     var kind: CoachEngineKind { get }
     var available: Bool { get }
-    /// Answers `question` from `context`, with the earlier turns of this conversation.
+    /// Selects relevant saved-set labels for `question`; the returned text is never displayed.
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String
 }
@@ -77,8 +77,8 @@ final class CoachEngineSelector {
     }
 }
 
-/// Runs one turn: the chosen engine with a timeout, the answer checked against the context,
-/// and the fixed text whenever anything fails. Pure orchestration, so tests can drive it with stubs.
+/// Runs one turn: the model selects at most two saved sets, then Plumb renders recorded facts.
+/// Invalid selections, errors and timeouts use fixed text. No model-authored advice is displayed.
 @MainActor
 final class CoachResponder {
     private let selector: CoachEngineSelector
@@ -104,8 +104,11 @@ final class CoachResponder {
         let generated = await withTimeout { [language] in
             try await engine.reply(to: question, context: context, history: history, language: language)
         }
-        guard let generated, CoachAnswerCheck.isAcceptable(generated, for: context) else { return fallback }
-        return CoachMessage(role: .coach, text: generated.trimmingCharacters(in: .whitespacesAndNewlines),
+        guard let generated, let selected = CoachAnswerCheck.selectedFacts(in: generated, for: context)
+        else { return fallback }
+        let recordedAnswer = selected.map { CoachFallback.summary(of: $0, language: language) }
+            .joined(separator: " ")
+        return CoachMessage(role: .coach, text: recordedAnswer,
                             engine: engine.kind)
     }
 
