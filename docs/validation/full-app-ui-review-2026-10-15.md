@@ -44,6 +44,10 @@ The two remaining failures are `testCaptureAndResultAccessibilityAudits` and `te
 
 Failures and complete issue descriptions are retained in `/tmp/finn-dark-final-audits`. Representative crops are saved alongside the review screenshots. Earlier candidates remain in their local result bundles. The full baseline’s 501 unit tests and replay evidence remain applicable to the unchanged workout logic; this final run specifically exercises the changed interface.
 
+### Release archive
+
+`/tmp/Finn-ui-review-release.xcarchive` built successfully from the final source using Release optimisation for iPhone, Watch and the widget extension. `docs/release/verify-archive.sh` passed: privacy manifest and Health purpose text are present, and Debug demo/validation code is excluded. The archived iPhone app reports `UIUserInterfaceStyle = Dark` and the unchanged bundle identifier `ai.mwm.build.challenge.team.08`. The archive is unsigned, so provisioning and signed HealthKit entitlements were not verified.
+
 ### Screenshots and editable design
 
 The [design screenshots](../design/screenshots/finn) and [release candidates](../release/screenshots) now contain actual dark-only captures from the final candidate, with a 9:41 status bar. Review images include normal and largest text, Reduce Motion, keyboard, expanded privacy and saved demo results. Synthetic workouts remain explicitly labelled DEMO INPUT.
