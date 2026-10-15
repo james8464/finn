@@ -201,6 +201,12 @@ final class WorkoutSessionModel {
     var speaksLive: Bool {
         didSet { preferences.speaksLive = speaksLive }
     }
+    var hapticFeedback: HapticFeedbackStyle {
+        didSet { preferences.hapticFeedback = hapticFeedback }
+    }
+    var soundFeedback: SoundFeedbackStyle {
+        didSet { preferences.soundFeedback = soundFeedback }
+    }
     /// Countdown of a set started hands-free, in seconds.
     @ObservationIgnored var handsFreeCountdown = 3
     /// While framing hands-free: how far the athlete is through holding position, 0 to 1.
@@ -301,6 +307,8 @@ final class WorkoutSessionModel {
         self.currentDate = currentDate
         self.handsFree = preferences.handsFree
         self.speaksLive = preferences.speaksLive
+        self.hapticFeedback = preferences.hapticFeedback
+        self.soundFeedback = preferences.soundFeedback
         self.recognizesExercise = preferences.recognizesExercise
         self.usesTrainedModel = preferences.usesTrainedModel
         self.checksCameraAngle = preferences.checksCameraAngle

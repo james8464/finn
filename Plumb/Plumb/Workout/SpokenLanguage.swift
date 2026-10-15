@@ -13,6 +13,7 @@ nonisolated enum SpokenLanguage {
     /// installed. Nil lets AVSpeechSynthesizer fall back to its default voice.
     static var voice: AVSpeechSynthesisVoice? {
         let language = appLanguage
+        if language.contains("-") { return AVSpeechSynthesisVoice(language: language) }
         if let region = Locale.current.region?.identifier,
            let voice = AVSpeechSynthesisVoice(language: "\(language)-\(region)") {
             return voice

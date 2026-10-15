@@ -1,5 +1,29 @@
 import Foundation
 
+nonisolated enum HapticFeedbackStyle: String, CaseIterable, Identifiable, Sendable {
+    case off, gentle, regular
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .off: String(localized: "Off")
+        case .gentle: String(localized: "Gentle")
+        case .regular: String(localized: "Regular")
+        }
+    }
+}
+
+nonisolated enum SoundFeedbackStyle: String, CaseIterable, Identifiable, Sendable {
+    case off, soft, bright
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .off: String(localized: "Off")
+        case .soft: String(localized: "Soft")
+        case .bright: String(localized: "Bright")
+        }
+    }
+}
+
 /// Options a person can change in the app. Tests pass their own `UserDefaults` suite.
 nonisolated struct PlumbPreferences: @unchecked Sendable {
     static let recognizesExerciseKey = "plumb.recognizesExercise"
@@ -11,6 +35,8 @@ nonisolated struct PlumbPreferences: @unchecked Sendable {
     static let selectedExerciseKey = "plumb.selectedExercise"
     static let personalizesWithHealthKey = "plumb.personalizesWithHealth"
     static let personalizationOfferedKey = "plumb.personalizationOffered"
+    static let hapticFeedbackKey = "plumb.hapticFeedback"
+    static let soundFeedbackKey = "plumb.soundFeedback"
 
     let defaults: UserDefaults
     /// Hands-free capture until the person changes it. On in the app, where the phone stands a
@@ -73,6 +99,16 @@ nonisolated struct PlumbPreferences: @unchecked Sendable {
     var speaksLive: Bool {
         get { defaults.object(forKey: Self.speaksLiveKey) as? Bool ?? true }
         nonmutating set { defaults.set(newValue, forKey: Self.speaksLiveKey) }
+    }
+
+    var hapticFeedback: HapticFeedbackStyle {
+        get { defaults.string(forKey: Self.hapticFeedbackKey).flatMap(HapticFeedbackStyle.init(rawValue:)) ?? .gentle }
+        nonmutating set { defaults.set(newValue.rawValue, forKey: Self.hapticFeedbackKey) }
+    }
+
+    var soundFeedback: SoundFeedbackStyle {
+        get { defaults.string(forKey: Self.soundFeedbackKey).flatMap(SoundFeedbackStyle.init(rawValue:)) ?? .off }
+        nonmutating set { defaults.set(newValue.rawValue, forKey: Self.soundFeedbackKey) }
     }
 
     /// Off by default: a finished session is saved to Apple Health as a workout, so it appears in

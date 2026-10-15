@@ -317,12 +317,15 @@
 				};
 			};
 			buildConfigurationList = 1A1436F530755F8000CFBBF6 /* Build configuration list for PBXProject "Plumb" */;
-			developmentRegion = en;
+			developmentRegion = en-GB;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 				fr,
+				en-GB,
+				en-US,
+				es,
 			);
 			mainGroup = 1A1436F130755F8000CFBBF6;
 			minimizedProjectReferenceProxies = 1;
