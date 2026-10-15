@@ -70,8 +70,64 @@ nonisolated struct WatchMessagesTests {
         #expect(!full.isNewer(than: full))
     }
 
+    @Test func matchingLiveMessageRefreshesOnlyWhileFresh() {
+        #expect(full.matchesShownStateForLive(full, now: full.sentAt + 2))
+        #expect(!full.matchesShownStateForLive(full, now: full.sentAt + 15))
+        #expect(!full.matchesShownStateForLive(nil, now: full.sentAt + 2))
+        var different = full
+        different.reps += 1
+        #expect(!different.matchesShownStateForLive(full, now: full.sentAt + 2))
+    }
+
     @Test func aSavedStateFromLongAgoIsStale() {
         #expect(!full.isStale(now: full.sentAt + 30))
         #expect(full.isStale(now: full.sentAt + WatchState.staleAfter + 1))
+    }
+
+    @Test func coachingStateRoundTripsAndOldMessagesStillLoad() {
+        var coached = full
+        coached.setID = "set-1"
+        coached.coachMessage = "Five reps counted. Stay with it."
+        coached.hapticsEnabled = false
+        coached.languageCode = "fr"
+        #expect(WatchState(message: coached.message()) == coached)
+        let old = WatchState(message: ["type": "state", "v": 1, "stage": "capturing", "reps": 2])
+        #expect(old?.setID == nil)
+        #expect(old?.coachMessage == nil)
+        #expect(old?.hapticsEnabled == true)
+        #expect(old?.languageCode == "en-GB")
+    }
+
+    @Test func rhythmSkipsMissedBeatsAndStopsWhenPhoneIsStale() {
+        var clock = WatchRhythmClock(interval: 3)
+        clock.resume(now: 10)
+        let early = clock.shouldTap(now: 12, lastPhoneStateAt: 10, reachable: true)
+        let first = clock.shouldTap(now: 13, lastPhoneStateAt: 10, reachable: true)
+        let late = clock.shouldTap(now: 23, lastPhoneStateAt: 22, reachable: true)
+        let burst = clock.shouldTap(now: 23.1, lastPhoneStateAt: 22, reachable: true)
+        let phase = clock.shouldTap(now: 25, lastPhoneStateAt: 24, reachable: true)
+        let nextPhase = clock.shouldTap(now: 25.9, lastPhoneStateAt: 24, reachable: true)
+        let stale = clock.shouldTap(now: 39, lastPhoneStateAt: 22, reachable: true)
+        clock.resume(now: 50)
+        let disconnected = clock.shouldTap(now: 53, lastPhoneStateAt: 52, reachable: false)
+        #expect(!early && first && late && !burst && phase && !nextPhase && !stale && !disconnected)
+    }
+
+    @Test func permissionAndPhoneHapticsGateRhythm() {
+        #expect(!WatchRhythmPolicy.canEnable(permissionGranted: false))
+        #expect(WatchRhythmPolicy.canEnable(permissionGranted: true))
+        #expect(!WatchRhythmPolicy.canTap(enabled: true, masterHapticsEnabled: false,
+                                         workoutRunning: true, capturing: true))
+        #expect(!WatchRhythmPolicy.canTap(enabled: true, masterHapticsEnabled: true,
+                                         workoutRunning: false, capturing: true))
+        #expect(WatchRhythmPolicy.canTap(enabled: true, masterHapticsEnabled: true,
+                                        workoutRunning: true, capturing: true))
+    }
+
+    @Test func languageUsesOneOfTheFourSupportedVariants() {
+        #expect(WatchLanguage.resolved("en") == "en-GB")
+        #expect(WatchLanguage.resolved("en_US") == "en-US")
+        #expect(WatchLanguage.resolved("fr-CA") == "fr")
+        #expect(WatchLanguage.resolved("es-ES") == "es")
     }
 }

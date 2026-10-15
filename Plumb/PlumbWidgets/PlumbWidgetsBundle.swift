@@ -41,7 +41,7 @@ struct LastSetProvider: TimelineProvider {
 }
 
 struct LastSetWidget: Widget {
-    static let kind = "com.finlearn.plumb.widgets.last-set"
+    static let kind = "ai.mwm.build.challenge.team.08.widgets.last-set"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: Self.kind, provider: LastSetProvider()) { entry in

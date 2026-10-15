@@ -1,6 +1,454 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Rep %lld: your last three held a steady pace. Keep that going." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétition %lld : les trois dernières ont gardé un rythme régulier. Continue comme ça."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld: your last three held a steady pace. Keep that going."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld: your last three held a steady pace. Keep that going."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetición %lld: las tres últimas mantuvieron un ritmo constante. Sigue así."
+          }
+        }
+      }
+    },
+    "Rep %lld: you kept the same range. Stay with it." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétition %lld : tu as gardé la même amplitude. Continue comme ça."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld: you kept the same range. Stay with it."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld: you kept the same range. Stay with it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetición %lld: mantuviste el mismo recorrido. Sigue así."
+          }
+        }
+      }
+    },
+    "Rep %lld: those last three stayed steady. Take the next one the same way." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétition %lld : les trois dernières étaient régulières. Fais la suivante de la même façon."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld: those last three stayed steady. Take the next one the same way."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld: those last three stayed steady. Take the next one the same way."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetición %lld: las tres últimas fueron constantes. Haz la siguiente igual."
+          }
+        }
+      }
+    },
+    "Apple Watch: install Plumb for coaching messages and optional rhythm taps." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch : installe Plumb pour recevoir des messages du coach et des vibrations de rythme en option."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch: install Plumb for coaching messages and optional rhythm taps."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch: install Plumb for coaching messages and optional rhythm taps."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch: instala Plumb para recibir mensajes del entrenador y vibraciones de ritmo opcionales."
+          }
+        }
+      }
+    },
+    "Apple Watch connected: coaching messages are ready; rhythm is optional." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch connectée : les messages du coach sont prêts ; le rythme est facultatif."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch connected: coaching messages are ready; rhythm is optional."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch connected: coaching messages are ready; rhythm is optional."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch conectado: los mensajes del entrenador están listos; el ritmo es opcional."
+          }
+        }
+      }
+    },
+    "Apple Watch: open Plumb on your watch for coaching messages and rhythm." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch : ouvre Plumb sur ta montre pour recevoir les messages du coach et le rythme."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch: open Plumb on your watch for coaching messages and rhythm."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch: open Plumb on your watch for coaching messages and rhythm."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch: abre Plumb en el reloj para recibir mensajes del entrenador y ritmo."
+          }
+        }
+      }
+    },
+    "Rep %lld was quicker than your first ones. Give the next one a little more time." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La répétition %lld était plus rapide que les premières. Prends un peu plus de temps pour la suivante."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld was quicker than your first ones. Give the next one a little more time."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld was quicker than your first ones. Give the next one a little more time."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La repetición %lld fue más rápida que las primeras. Dedica un poco más de tiempo a la siguiente."
+          }
+        }
+      }
+    },
+    "Rep %lld was shorter than your first ones. Reach the range you started with." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La répétition %lld avait moins d’amplitude que les premières. Retrouve l’amplitude du début."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld was shorter than your first ones. Reach the range you started with."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld was shorter than your first ones. Reach the range you started with."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La repetición %lld tuvo menos recorrido que las primeras. Busca el recorrido con el que empezaste."
+          }
+        }
+      }
+    },
+    "Rep %lld: %@ on the next one. You’ve got this." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétition %lld : %@ sur la prochaine. Tu peux le faire."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld: %@ on the next one. You’ve got this."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep %lld: %@ on the next one. You’ve got this."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetición %lld: %@ en la siguiente. Tú puedes."
+          }
+        }
+      }
+    },
+    "Your last three reps held a steady pace. Keep that going." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes trois dernières répétitions ont gardé un rythme régulier. Continue comme ça."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your last three reps held a steady pace. Keep that going."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your last three reps held a steady pace. Keep that going."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus tres últimas repeticiones mantuvieron un ritmo constante. Sigue así."
+          }
+        }
+      }
+    },
+    "You’re keeping the same range across these reps. Stay with it." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu gardes la même amplitude sur ces répétitions. Continue comme ça."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’re keeping the same range across these reps. Stay with it."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’re keeping the same range across these reps. Stay with it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estás manteniendo el mismo recorrido en estas repeticiones. Sigue así."
+          }
+        }
+      }
+    },
+    "Those last three reps stayed steady. Take the next one the same way." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ces trois dernières répétitions étaient régulières. Fais la suivante de la même façon."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Those last three reps stayed steady. Take the next one the same way."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Those last three reps stayed steady. Take the next one the same way."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esas tres últimas repeticiones fueron constantes. Haz la siguiente igual."
+          }
+        }
+      }
+    },
+    "Three reps counted. Find a rhythm you can repeat." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trois répétitions comptées. Trouve un rythme que tu peux tenir."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three reps counted. Find a rhythm you can repeat."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three reps counted. Find a rhythm you can repeat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tres repeticiones contadas. Encuentra un ritmo que puedas mantener."
+          }
+        }
+      }
+    },
+    "Five reps counted. Stay with me for the next one." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cinq répétitions comptées. Je suis avec toi pour la suivante."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Five reps counted. Stay with me for the next one."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Five reps counted. Stay with me for the next one."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cinco repeticiones contadas. Estoy contigo para la siguiente."
+          }
+        }
+      }
+    },
+    "Eight reps in. One at a time—you’ve got this." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà huit répétitions. Une à la fois, tu peux le faire."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eight reps in. One at a time—you’ve got this."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eight reps in. One at a time—you’ve got this."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya llevas ocho repeticiones. Una a una, tú puedes."
+          }
+        }
+      }
+    },
+    "That’s %lld reps. Keep your next one deliberate." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ça fait %lld répétitions. Prends le temps de bien faire la suivante."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That’s %lld reps. Keep your next one deliberate."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That’s %lld reps. Keep your next one deliberate."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Van %lld repeticiones. Haz la siguiente con intención."
+          }
+        }
+      }
+    },
     " (now %lld)." : {
       "localizations" : {
         "fr" : {
@@ -9392,6 +9840,370 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "—"
+          }
+        }
+      }
+    },
+    "Workout feedback" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avis pendant l’entraînement"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout feedback"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout feedback"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisos durante el entrenamiento"
+          }
+        }
+      }
+    },
+    "Haptics" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vibrations"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haptics"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haptics"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vibraciones"
+          }
+        }
+      }
+    },
+    "Sound effects" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effets sonores"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound effects"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound effects"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Efectos de sonido"
+          }
+        }
+      }
+    },
+    "Gentle" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Douces"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gentle"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gentle"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suave"
+          }
+        }
+      }
+    },
+    "Regular" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normales"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regular"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regular"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normal"
+          }
+        }
+      }
+    },
+    "Soft" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doux"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soft"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soft"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suave"
+          }
+        }
+      }
+    },
+    "Bright" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clair"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bright"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bright"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivé"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactivado"
+          }
+        }
+      }
+    },
+    "Watch rhythm and short set sounds are optional. Sounds respect Silent Mode." : {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch rhythm and short set sounds are optional. Sounds respect Silent Mode."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch rhythm and short set sounds are optional. Sounds respect Silent Mode."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le rythme sur la montre et les courts sons de séance sont facultatifs. Les sons respectent le mode Silence."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El ritmo en el reloj y los sonidos breves de la serie son opcionales. Los sonidos respetan el modo Silencio."
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langue"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma"
+          }
+        }
+      }
+    },
+    "Current: %@" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actuelle : %@"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current: %@"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actual: %@"
+          }
+        }
+      }
+    },
+    "Choose app language" : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir la langue de l’app"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose app language"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose app language"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir idioma de la app"
+          }
+        }
+      }
+    },
+    "Choose English (UK), English (US), French or Spanish in iPhone Settings. Plumb uses your region for dates and numbers." : {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez l’anglais (Royaume-Uni), l’anglais (États-Unis), le français ou l’espagnol dans les réglages de l’iPhone. Plumb utilise votre région pour les dates et les nombres."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose English (UK), English (US), French or Spanish in iPhone Settings. Plumb uses your region for dates and numbers."
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose English (UK), English (US), French or Spanish in iPhone Settings. Plumb uses your region for dates and numbers."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige inglés (Reino Unido), inglés (Estados Unidos), francés o español en Ajustes del iPhone. Plumb usa tu región para las fechas y los números."
           }
         }
       }

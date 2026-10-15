@@ -15,6 +15,7 @@ struct ContentView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var model: WorkoutSessionModel
     @State private var observationSpeaker = ObservationSpeaker()
+    @State private var workoutFeedback = WorkoutFeedback()
     /// Headphones and a paired Apple Watch; idle unless `connectsAccessories`.
     @State private var accessories = AccessoryMonitor()
     /// The set in progress on the Lock Screen and in the Dynamic Island (`Widgets/SetLiveActivity.swift`).
@@ -36,6 +37,9 @@ struct ContentView: View {
     @State private var selectedTab: HomeTab = .home
     @State private var keyboardVisible = false
     @State private var showsPlumbDemo = false
+    #if DEBUG
+    @State private var didRunWatchAutoDemo = false
+    #endif
     /// What the camera does, shown once before iOS asks for it.
     @State private var showsCameraPrimer = false
     /// The first-launch screens (`Onboarding/`), also replayed from Options.
@@ -154,6 +158,18 @@ struct ContentView: View {
             UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(stage)
             if stage == .ready { sessionRoute = nil }
         }
+        .onChange(of: model.stage) { _, stage in
+            switch stage {
+            case .capturing:
+                workoutFeedback.play(.setStarted, haptics: model.hapticFeedback, sound: model.soundFeedback)
+            case .result:
+                let sound: SoundFeedbackStyle
+                if case .measured = model.result { sound = model.soundFeedback }
+                else { sound = .off }
+                workoutFeedback.play(.setFinished, haptics: model.hapticFeedback, sound: sound)
+            default: break
+            }
+        }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
         // Siri or a shortcut asked for a set or the history; a set in progress is never interrupted.
         .onChange(of: SiriLaunchRequests.shared.pending, initial: true) { _, _ in applySiriRequest() }
@@ -195,6 +211,18 @@ struct ContentView: View {
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-plumb-ui-live-activity-sample") {
                 liveActivity.showSample()
+            }
+            if usesSyntheticInput,
+               ProcessInfo.processInfo.arguments.contains("-plumb-watch-auto-demo"),
+               !didRunWatchAutoDemo {
+                didRunWatchAutoDemo = true
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(3))
+                    await model.startPreview()
+                    await model.beginSet(countdown: 0)
+                    try? await Task.sleep(for: .seconds(18))
+                    await model.endSet()
+                }
             }
             #endif
             guard connectsAccessories else { return }
@@ -910,6 +938,55 @@ struct ContentView: View {
                     .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.speaksLive")
+                }
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Workout feedback").font(.headline).accessibilityAddTraits(.isHeader)
+                    Picker("Haptics", selection: Binding(
+                        get: { model.hapticFeedback },
+                        set: { style in
+                            model.hapticFeedback = style
+                            if style != .off { workoutFeedback.play(.rep, haptics: style, sound: .off) }
+                        }
+                    )) {
+                        ForEach(HapticFeedbackStyle.allCases) { style in
+                            Text(style.title).tag(style)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.hapticFeedback")
+                    Picker("Sound effects", selection: Binding(
+                        get: { model.soundFeedback },
+                        set: { style in
+                            model.soundFeedback = style
+                            if style != .off { workoutFeedback.play(.setStarted, haptics: .off, sound: style) }
+                        }
+                    )) {
+                        ForEach(SoundFeedbackStyle.allCases) { style in
+                            Text(style.title).tag(style)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("options.soundFeedback")
+                    Text("Watch rhythm and short set sounds are optional. Sounds respect Silent Mode.")
+                        .font(.subheadline)
+                        .foregroundStyle(PlumbStyle.supportingText)
+                }
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Language").font(.headline).accessibilityAddTraits(.isHeader)
+                    Text("Current: \(Locale(identifier: SpokenLanguage.appLanguage).localizedString(forIdentifier: SpokenLanguage.appLanguage) ?? SpokenLanguage.appLanguage)")
+                    Button("Choose app language") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                    }
+                    .font(.body.weight(.medium))
+                    .frame(minHeight: 44, alignment: .leading)
+                    .accessibilityIdentifier("options.language")
+                    Text("Choose English (UK), English (US), French or Spanish in iPhone Settings. Plumb uses your region for dates and numbers.")
+                        .font(.subheadline)
+                        .foregroundStyle(PlumbStyle.supportingText)
                 }
                 .optionCard()
                 VStack(alignment: .leading, spacing: 10) {

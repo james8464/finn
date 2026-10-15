@@ -125,7 +125,7 @@ nonisolated struct FitnessWorkoutTests {
     @Test func theSyncIdentifierNamesTheSession() throws {
         let sessionValue = session([set(reps: 6, secondsIn: 60)])
         let workout = try #require(FitnessWorkout.make(from: sessionValue))
-        #expect(workout.syncIdentifier == "com.james8464.Plumb.session.\(sessionValue.id.uuidString)")
+        #expect(workout.syncIdentifier == "ai.mwm.build.challenge.team.08.session.\(sessionValue.id.uuidString)")
         #expect(FitnessWorkout.syncVersion == 1)
     }
 

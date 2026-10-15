@@ -2,10 +2,8 @@ import Foundation
 import Observation
 import WatchConnectivity
 
-/// Links Plumb on the iPhone with Plumb on a paired Apple Watch. The watch shows the set the iPhone
-/// measures, taps the wrist on each rep, and can start or stop the set; it measures nothing itself.
-/// Only the stage, rep count, short observation text and result line go to the watch, never video
-/// or pose points. `WatchSync` decides what to send; this class only carries it.
+/// Sends the phone's measured set state and short coaching lines to a paired Apple Watch.
+/// Rhythm taps are timed on the Watch; no video or pose points cross this link.
 @Observable
 @MainActor
 final class WatchBridge: NSObject, WCSessionDelegate {
@@ -36,7 +34,7 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         session.activate()
     }
 
-    /// Shows `model`'s sets on the watch and lets the watch start and stop them.
+    /// Mirrors `model`'s sets and coaching lines on the watch.
     func attach(to model: WorkoutSessionModel, demoInput: Bool) {
         guard sync == nil else { return }
         sync = WatchSync(model: model, demoInput: demoInput) { [weak self] state in
@@ -47,12 +45,11 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     private func deliver(_ state: WatchState) {
         guard isStarted else { return }
         let session = WCSession.default
-        guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
-        if session.isReachable {
-            Self.sendLive(state, on: session)
-        } else {
-            Self.keepForLater(state, on: session)
-        }
+        guard session.activationState == .activated, session.isPaired else { return }
+        // Keep the latest screen even while the watch is reachable: a live message can be lost
+        // when either app moves between foreground and background. Context replaces older states.
+        Self.keepForLater(state, on: session)
+        if session.isReachable { Self.sendLive(state, on: session) }
     }
 
     private func update(_ new: WatchConnection) {
@@ -62,12 +59,10 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         if let current = sync?.current { deliver(current) }
     }
 
-    /// Sends a state the watch shows at once, with its tap. If the watch stops listening on the way,
-    /// the state becomes the latest application context instead.
+    /// Sends a state the watch shows at once. Application context was already updated above, so a
+    /// delayed failure cannot replace a newer state with an older one.
     nonisolated private static func sendLive(_ state: WatchState, on session: WCSession) {
-        session.sendMessage(state.message(), replyHandler: nil) { _ in
-            WatchBridge.keepForLater(state, on: WCSession.default)
-        }
+        session.sendMessage(state.message(), replyHandler: nil, errorHandler: nil)
     }
 
     /// Replaces the application context, which the watch reads when Plumb opens there. Only the newest
@@ -114,7 +109,5 @@ final class WatchBridge: NSObject, WCSessionDelegate {
             Task { @MainActor [weak self] in self?.sync?.handle(heartRate) }
             return
         }
-        guard let command = WatchCommand(message: message) else { return }
-        Task { @MainActor [weak self] in self?.sync?.handle(command) }
     }
 }

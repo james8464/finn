@@ -93,7 +93,7 @@ extension CoachEngine {
 /// Reads why Foundation Models cannot run, once per check, and says what to do about it.
 @MainActor
 enum CoachModelAvailability {
-    static let log = Logger(subsystem: "com.finlearn.plumb", category: "coach")
+    static let log = Logger(subsystem: "ai.mwm.build.challenge.team.08", category: "coach")
 
     static func reason(for availability: SystemLanguageModel.Availability, engine: String) -> String? {
         switch availability {
