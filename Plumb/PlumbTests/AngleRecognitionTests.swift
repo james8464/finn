@@ -4,7 +4,7 @@ import Foundation
 import Testing
 @testable import Plumb
 
-/// The rules are checked on synthetic side-view sequences. The generator and the rules were
+/// the rules are checked on synthetic side-view sequences. The generator and the rules were
 /// written by the same person, so passing here is necessary, not evidence of real accuracy.
 struct AngleRuleRecognitionTests {
     private let exercises: [(String, ExerciseKind)] = [
@@ -46,7 +46,7 @@ struct AngleRuleRecognitionTests {
             PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints.filter { $0.key != farAnkle },
                       aspectRatio: frame.aspectRatio)
         }
-        // With one ankle left, the stance is unknown and a squat cannot be told from a lunge.
+        // with one ankle left, the stance is unknown and a squat cannot be told from a lunge
         let features = PoseWindowFeatureExtractor.windows(frames).compactMap(PoseWindowFeatureExtractor.features)
         #expect(features.allSatisfy { $0.stance == -1 })
         #expect(AngleRecognizer.recognize(frames, using: AngleRuleClassifier()) == .uncertain)
@@ -74,7 +74,7 @@ struct AngleRuleRecognitionTests {
         }
     }
 
-    /// Runs only once the team adds a trained PlumbAngleClassifier.mlmodel to the app target.
+    /// runs only once the team adds a trained PlumbAngleClassifier.mlmodel to the app target
     @Test func bundledAngleModelRecognizesSyntheticSetsWhenPresent() {
         guard let model = CoreMLAngleClassifier.bundled() else { return }
         var rng = SyntheticRandom(seed: 606)

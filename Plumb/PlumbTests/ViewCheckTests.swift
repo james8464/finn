@@ -5,14 +5,14 @@ import Testing
 @testable import Plumb
 
 struct ViewCheckTests {
-    /// Camera-relative joints of a standing person 2.5 m away, turned `yaw` degrees from a
+    /// camera-relative joints of a standing person 2.5 m away, turned `yaw` degrees from a
     /// true profile around the vertical axis. The camera sits slightly above the hips.
     private func body(yaw: Double, offset: SIMD3<Double> = [0.3, -0.1, 2.5],
                       swapSides: Bool = false) -> (SIMD3<Double>, SIMD3<Double>, SIMD3<Double>, SIMD3<Double>) {
         let up = SIMD3<Double>(0, 1, 0)
         let sight = simd_normalize(SIMD3(offset.x, 0, offset.z))
         let angle = yaw * .pi / 180
-        // Rotate the line of sight around the vertical axis to get the left-right axis.
+        // rotate the line of sight around the vertical axis to get the left-right axis
         let lateral = simd_normalize(sight * cos(angle) + simd_cross(up, sight) * sin(angle))
         let side = swapSides ? -lateral : lateral
         return (offset + 0.15 * side, offset - 0.15 * side,
@@ -45,13 +45,13 @@ struct ViewCheckTests {
     @Test func setVerdictUsesTheMedianAndNeedsEnoughEstimates() {
         #expect(ViewCheck.assess(frames(deviations: [10, 80, 12, 9, 15]), expected: .side)
                 == .matches(medianDeviation: 12, estimates: 5))
-        // Off side-on but not clearly frontal: measured, with a tip.
+        // off side-on but not clearly frontal: measured, with a tip
         #expect(ViewCheck.assess(frames(deviations: [50, 60, 12, 70]), expected: .side)
                 == .angled(medianDeviation: 60, estimates: 4))
-        // Clearly frontal over three seconds: refused.
+        // clearly frontal over three seconds: refused
         #expect(ViewCheck.assess(frames(deviations: [70, 80, 75, 90]), expected: .side)
                 == .mismatch(medianDeviation: 80, estimates: 4))
-        // Clearly frontal, but only for a second and a half: still measured.
+        // clearly frontal, but only for a second and a half: still measured
         #expect(ViewCheck.assess(frames(deviations: [70, 80, 75, 90], spacing: 0.5), expected: .side)
                 == .angled(medianDeviation: 80, estimates: 4))
         #expect(ViewCheck.assess(frames(deviations: [80, 80, 80]), expected: .side) == .unavailable)
@@ -64,7 +64,7 @@ struct ViewCheckTests {
         #expect(!ViewCheck.previewAsksToTurn([10, 85, 20], expected: .side))
     }
 
-    /// A jury tries the app facing the phone: the reps count, the posture advice (a side-view
+    /// a jury tries the app facing the phone: the reps count, the posture advice (a side-view
     /// measure) is left out and the result says to turn. Until 15 October the set was refused.
     @Test func aFrontViewIsCountedWithoutPostureForEveryExercise() throws {
         let traces: [(ExerciseDefinition, [PoseFrame])] = [
@@ -112,7 +112,7 @@ struct ViewCheckTests {
     }
 
     @Test func aBriefFrontViewDoesNotRefuseTheSet() {
-        // Facing the camera for the first two seconds only (while getting into place).
+        // facing the camera for the first two seconds only (while getting into place)
         let trace = squatTrace().enumerated().map { index, frame in
             PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints,
                       profileDeviationDegrees: index.isMultiple(of: 4) ? (frame.time < 2 ? 85 : 10) : nil)
@@ -126,7 +126,7 @@ struct ViewCheckTests {
     @Test func sideViewEstimatesLeaveTheSquatUnchanged() {
         let trace = squatTrace()
         #expect(SquatAnalyzer.analyze(withDeviation(trace, 12)) == SquatAnalyzer.analyze(trace))
-        // Three estimates are too few to judge, so the 2D rules decide alone.
+        // three estimates are too few to judge, so the 2D rules decide alone
         #expect(SquatAnalyzer.analyze(withDeviation(trace, 70, every: 50)) == SquatAnalyzer.analyze(trace))
     }
 
@@ -145,7 +145,7 @@ struct ViewCheckTests {
     }
 }
 
-/// Adds a 3D profile deviation to every `every`th frame, as the capture driver does.
+/// adds a 3D profile deviation to every `every`th frame, as the capture driver does
 func withDeviation(_ frames: [PoseFrame], _ degrees: Double, every: Int = 4) -> [PoseFrame] {
     frames.enumerated().map { index, frame in
         PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: frame.joints,
@@ -172,7 +172,7 @@ struct ViewCheckSessionTests {
         await model.cancel()
     }
 
-    /// The person walks to their spot with their back to the phone (read as front-on), then stands
+    /// the person walks to their spot with their back to the phone (read as front-on), then stands
     /// side-on and still while 3D estimates stop: a hot phone skips them, and Vision 3D measures only
     /// the person closest to the camera. The hands-free set starts; before, the front readings
     /// stayed and "Turn your side to the camera" was said forever. Since 15 October a front view
@@ -196,7 +196,7 @@ struct ViewCheckSessionTests {
         await model.cancel()
     }
 
-    /// A person facing the phone, still and in view, starts a hands-free set like a person side-on.
+    /// a person facing the phone, still and in view, starts a hands-free set like a person side-on.
     /// Until 15 October a front view never started: the framing screen kept asking to turn.
     @Test func aFrontViewStartsAHandsFreeSet() async throws {
         let defaults = try #require(UserDefaults(suiteName: "PlumbViewCheckFrontStart-\(UUID().uuidString)"))

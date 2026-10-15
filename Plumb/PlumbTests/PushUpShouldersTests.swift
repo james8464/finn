@@ -2,11 +2,11 @@ import Foundation
 import Testing
 @testable import Plumb
 
-/// A push-up whose arms the side-view rubric cannot read, such as one filmed from the front with the
+/// a push-up whose arms the side-view rubric cannot read, such as one filmed from the front with the
 /// phone on the floor: the shoulders go down and up while the hands stay planted. These traces are
 /// synthetic; their shapes come from three real push-up sets (14 October 2026).
 nonisolated struct PushUpShouldersTests {
-    /// Shoulders, nose and planted wrists. `hiddenAtBottom` drops every joint for that long around
+    /// shoulders, nose and planted wrists. `hiddenAtBottom` drops every joint for that long around
     /// each bottom, as Vision does when the head leaves the picture. `wristSwing` moves the wrists.
     private func frames(reps: Int, drop: Double = 0.22, period: Double = 1.4,
                         deviation: Double? = 85, noseOnly: ClosedRange<Double>? = nil,
@@ -25,7 +25,7 @@ nonisolated struct PushUpShouldersTests {
                 joints[.leftShoulder] = JointPoint(x: 0.4, y: shoulderY, confidence: 0.8)
                 joints[.rightShoulder] = JointPoint(x: 0.6, y: shoulderY, confidence: 0.8)
             }
-            // Within `hiddenAtBottom` seconds of the deepest point of a rep, the upper body is lost.
+            // within `hiddenAtBottom` seconds of the deepest point of a rep, the upper body is lost
             if hiddenAtBottom > 0, time >= 1, phase < Double(reps) {
                 let distanceToBottom = abs(phase - phase.rounded(.down) - 0.5) * period
                 if distanceToBottom < hiddenAtBottom / 2 {

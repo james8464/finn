@@ -1,0 +1,303 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "EF2A85D1",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionBundleGroups" : [
+
+  ],
+  "subscriptionGroups" : [
+    {
+      "id" : "FE3C8B59",
+      "localizations" : [
+
+      ],
+      "name" : "Premium Plan",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "4.99",
+              "displayPrice" : "4.99",
+              "internalID" : "5DEAA13E",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "D88B6891",
+          "introductoryOffer" : {
+            "billingPlanType" : "BILLED_UPFRONT",
+            "internalID" : "80201C7C",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "introductoryOffers" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "internalID" : "80201C7C",
+              "numberOfPeriods" : 1,
+              "paymentMode" : "free",
+              "subscriptionPeriod" : "P1W"
+            }
+          ],
+          "localizations" : [
+
+          ],
+          "productID" : "ai.mwm.build.challenge.team.08.monthly.07.ft.04.99",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "monthly.07.ft.04.99",
+          "subscriptionGroupID" : "FE3C8B59",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "6.99",
+              "displayPrice" : "6.99",
+              "internalID" : "560C9EC5",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "95258BD0",
+          "introductoryOffer" : {
+            "billingPlanType" : "BILLED_UPFRONT",
+            "internalID" : "4375F1D6",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "introductoryOffers" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "internalID" : "4375F1D6",
+              "numberOfPeriods" : 1,
+              "paymentMode" : "free",
+              "subscriptionPeriod" : "P1W"
+            }
+          ],
+          "localizations" : [
+
+          ],
+          "productID" : "ai.mwm.build.challenge.team.08.monthly.07.ft.06.99",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "monthly.07.ft.06.99",
+          "subscriptionGroupID" : "FE3C8B59",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "9.99",
+              "displayPrice" : "9.99",
+              "internalID" : "41BB4938",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "860BB1CC",
+          "introductoryOffer" : {
+            "billingPlanType" : "BILLED_UPFRONT",
+            "internalID" : "64B7BC16",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "introductoryOffers" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "internalID" : "64B7BC16",
+              "numberOfPeriods" : 1,
+              "paymentMode" : "free",
+              "subscriptionPeriod" : "P1W"
+            }
+          ],
+          "localizations" : [
+
+          ],
+          "productID" : "ai.mwm.build.challenge.team.08.monthly.07.ft.09.99",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "monthly.07.ft.09.99",
+          "subscriptionGroupID" : "FE3C8B59",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "34.99",
+              "displayPrice" : "34.99",
+              "internalID" : "5781BA38",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "34.99",
+          "familyShareable" : false,
+          "groupNumber" : 4,
+          "internalID" : "203444DE",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+
+          ],
+          "productID" : "ai.mwm.build.challenge.team.08.yearly.00.ft.34.99",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "yearly.00.ft.34.99",
+          "subscriptionGroupID" : "FE3C8B59",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "49.99",
+              "displayPrice" : "49.99",
+              "internalID" : "BF3F992B",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "49.99",
+          "familyShareable" : false,
+          "groupNumber" : 5,
+          "internalID" : "6427FB1D",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+
+          ],
+          "productID" : "ai.mwm.build.challenge.team.08.yearly.00.ft.49.99",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "yearly.00.ft.49.99",
+          "subscriptionGroupID" : "FE3C8B59",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "69.99",
+              "displayPrice" : "69.99",
+              "internalID" : "CF339087",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "69.99",
+          "familyShareable" : false,
+          "groupNumber" : 6,
+          "internalID" : "75DD97AA",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+
+          ],
+          "productID" : "ai.mwm.build.challenge.team.08.yearly.00.ft.69.99",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "yearly.00.ft.69.99",
+          "subscriptionGroupID" : "FE3C8B59",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "subscriptionSuiteGroups" : [
+
+  ],
+  "version" : {
+    "major" : 6,
+    "minor" : 3
+  }
+}

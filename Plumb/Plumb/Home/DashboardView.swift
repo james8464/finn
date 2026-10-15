@@ -18,7 +18,7 @@ enum DashboardStyle {
     static let secondary = Color.white.opacity(0.7)
 }
 
-/// What the 1.0 build hides. The Plumb+ banner waits for the subscription (1.1): App Store rule
+/// what the 1.0 build hides. The Plumb+ banner waits for the subscription (1.1): App Store rule
 /// 2.1(a) refuses placeholder content, so it is not shown until it opens something real.
 enum DashboardFlags {
     static let showsPlumbPlusBanner = false
@@ -98,7 +98,7 @@ struct HomeTabBar: View {
         HStack(spacing: 0) {
             ForEach(HomeTab.allCases, id: \.self) { tab in
                 Button {
-                    // Animate only the bar. Changing pages should respond immediately.
+                                        // animate only the bar. Changing pages should respond immediately.
                     selection = tab
                 } label: {
                     VStack(spacing: 4) {
@@ -144,13 +144,13 @@ struct HomeTabBar: View {
 struct DashboardView: View {
     let history: [WorkoutSessionSummary]
     let exercise: ExerciseKind
-    /// Badges earned so far (`Badges/`), for the Awards card.
+    /// badges earned so far (`Badges/`), for the Awards card.
     var badges: [EarnedBadge] = []
     let open: (HomeRoute) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .largeTitle) private var titleSize = 40.0
 
-    // Reference values are available only in explicitly labelled design previews.
+    // reference values are available only in explicitly labelled design previews.
     private var isPreview: Bool {
         #if DEBUG
         ProcessInfo.processInfo.arguments.contains("-plumb-dashboard-preview")
@@ -159,7 +159,7 @@ struct DashboardView: View {
         #endif
     }
 
-    /// The most reps Plumb measured in one set of the chosen exercise. Plumb measures no load, so
+    /// the most reps Plumb measured in one set of the chosen exercise. Plumb measures no load, so
     /// the record is in reps, never in kilograms.
     private var bestReps: String {
         if isPreview { return "12" }
@@ -270,7 +270,7 @@ struct DashboardView: View {
         .foregroundStyle(.white)
     }
 
-    /// The Plumb+ banner, kept for 1.1 behind `DashboardFlags.showsPlumbPlusBanner`.
+    /// the Plumb+ banner, kept for 1.1 behind `DashboardFlags.showsPlumbPlusBanner`.
     private var plusBanner: some View {
                 Button { open(.plus) } label: {
                     ZStack(alignment: .topLeading) {
@@ -384,3 +384,6 @@ struct DashboardView: View {
         .accessibilityIdentifier(id)
     }
 }
+
+
+

@@ -2,11 +2,11 @@ import Foundation
 import Testing
 @testable import Plumb
 
-/// A capture on a real phone: walk from the phone to the spot, do the set, walk back to stop.
+/// a capture on a real phone: walk from the phone to the spot, do the set, walk back to stop
 nonisolated struct SetWindowTests {
     @Test func walkingInAndOutNoLongerRefusesTheSet() {
         let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0)
-        // Before the set window, these frames were refused: the legs were out of view for over a second.
+        // before the set window, these frames were refused: the legs were out of view for over a second
         #expect(EvidenceGate.assess(capture, requirement: .squat).isRejected)
 
         guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(capture, as: .squat) else {
@@ -39,7 +39,7 @@ nonisolated struct SetWindowTests {
     }
 
     @Test func noTimeInPositionKeepsTheWholeCaptureSoTheGateExplainsIt() {
-        // Legs never in view: nothing to trim to, and the refusal still names the missing joints.
+        // legs never in view: nothing to trim to, and the refusal still names the missing joints
         let capture = (0..<150).map { index in
             CaptureTraces.frame(time: Double(index) * CaptureTraces.step, hipY: 0.42, ankleX: 0.51, legs: false)
         }
@@ -48,31 +48,31 @@ nonisolated struct SetWindowTests {
     }
 
     @Test func aBriefMomentInPositionIsNotASet() {
-        // In position for one second only: shorter than a set, so nothing is trimmed.
+        // in position for one second only: shorter than a set, so nothing is trimmed
         let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 0, from: 2.0, standing: 1.0) + CaptureTraces.walkOut(from: 3.0)
         #expect(SetWindow.activeRange(capture, requirement: .squat) == nil)
     }
 
     @Test func aGapInsideTheSetStillCounts() {
         var capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0)
-        // Legs hidden for 1.5 s in the middle of the set.
+        // legs hidden for 1.5 s in the middle of the set
         capture = capture.map { frame in
             guard frame.time > 7.0 && frame.time < 8.5 else { return frame }
             return CaptureTraces.frame(time: frame.time, hipY: frame.joints[.leftHip]?.y ?? 0.42, ankleX: 0.51, legs: false)
         }
-        // The side rubric still refuses it; the hips, seen throughout, count the six squats.
+        // the side rubric still refuses it; the hips, seen throughout, count the six squats
         #expect(EvidenceGate.assess(SetWindow.active(capture, requirement: .squat), requirement: .squat).isRejected)
         #expect(Self.hipCount(capture) == 6)
     }
 
-    /// Reps counted from the hips, the side rubric having refused the set; nil otherwise.
+    /// reps counted from the hips, the side rubric having refused the set; nil otherwise
     private static func hipCount(_ capture: [PoseFrame]) -> Int? {
         guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(capture, as: .squat),
               analysis.rubricVersion == ExerciseDefinition.squatTrunk.rubricVersion else { return nil }
         return analysis.reps.count
     }
 
-    /// The athlete stays at the spot, but the ankle is unclear for the last three of eight reps (a
+    /// the athlete stays at the spot, but the ankle is unclear for the last three of eight reps (a
     /// bench, a partner's legs). Those reps are not walking away: the set must not be cut to five
     /// reps and shown as measured from the side. All eight are counted from the hips.
     @Test func repsAtTheSpotWithAnUnclearAnkleAreNotDropped() {
@@ -99,9 +99,9 @@ nonisolated struct SetWindowTests {
         #expect(Self.hipCount(capture) == 8)
     }
 
-    /// The live count works out the set's frames and the athlete's place in each from one pass
+    /// the live count works out the set's frames and the athlete's place in each from one pass
     /// (`layout`) every 0.4 s; it must give exactly what `activeRange` and `spots` give apart, on
-    /// every prefix of a capture as the live count sees it.
+    /// every prefix of a capture as the live count sees it
     @Test func oneLayoutPassGivesTheSameWindowAndSpots() {
         let legsHidden = (0..<60).map { index in
             CaptureTraces.frame(time: Double(index) * CaptureTraces.step, hipY: 0.42, ankleX: 0.51, legs: false)
@@ -123,7 +123,7 @@ nonisolated struct SetWindowTests {
     }
 
     @Test func pushUpGettingDownAndStandingUpIsTrimmed() {
-        // Walk in standing (wrists by the hips), get down, six push-ups, stand up and leave.
+        // walk in standing (wrists by the hips), get down, six push-ups, stand up and leave
         var capture: [PoseFrame] = []
         var time = 0.0
         while time < 2.0 {
@@ -155,12 +155,12 @@ nonisolated struct SetWindowTests {
     }
 }
 
-/// Frame traces of a capture filmed the way people use the phone, shared with the session tests.
+/// frame traces of a capture filmed the way people use the phone, shared with the session tests
 nonisolated enum CaptureTraces {
     static let step = 1.0 / 15
 
 
-    /// One second with the legs out of view (close to the phone), then one second walking into place.
+    /// one second with the legs out of view (close to the phone), then one second walking into place
     static func walkIn() -> [PoseFrame] {
         var frames: [PoseFrame] = []
         var time = 0.0
@@ -175,7 +175,7 @@ nonisolated enum CaptureTraces {
         return frames
     }
 
-    /// Reps of two seconds each, hips 0.20 of the frame down at the bottom.
+    /// reps of two seconds each, hips 0.20 of the frame down at the bottom
     static func squats(reps: Int, from start: Double, standing: Double = 0) -> [PoseFrame] {
         var frames: [PoseFrame] = []
         var time = 0.0
@@ -189,8 +189,8 @@ nonisolated enum CaptureTraces {
         return frames
     }
 
-    /// A tiring set: three 2 s reps with the hips 0.20 down, three quicker (1.2 s) and shallower
-    /// (0.14) ones, then 2 s standing.
+    /// a tiring set: three 2 s reps with the hips 0.20 down, three quicker (1.2 s) and shallower
+    /// (0.14) ones, then 2 s standing
     static func tiringSquats() -> [PoseFrame] {
         var frames: [PoseFrame] = []
         var time = 0.0
@@ -207,7 +207,7 @@ nonisolated enum CaptureTraces {
         return frames
     }
 
-    /// Walking back toward the phone: the feet slide across the frame, then the legs leave the picture.
+    /// walking back towards the phone: the feet slide across the frame, then the legs leave the picture
     static func walkOut(from start: Double, duration: Double = 2.5) -> [PoseFrame] {
         var frames: [PoseFrame] = []
         var time = step
@@ -238,8 +238,8 @@ nonisolated enum CaptureTraces {
         return PoseFrame(time: time, subjectCount: 1, joints: joints, athleteTracking: .tracked)
     }
 
-    /// Side view of a push-up: forearm upright on the planted wrist, the upper arm turning about the
-    /// elbow so the elbow angle is 180° minus `elbowBend`.
+    /// side view of a push-up: forearm upright on the planted wrist, the upper arm turning about the
+    /// elbow so the elbow angle is 180° minus `elbowBend`
     static func pushUpFrame(time: Double, elbowBend: Double, wristX: Double, wristY: Double) -> PoseFrame {
         let bend = elbowBend * .pi / 180
         let elbow = (x: wristX, y: wristY - 0.12)

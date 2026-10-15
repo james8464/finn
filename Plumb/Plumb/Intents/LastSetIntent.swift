@@ -15,7 +15,7 @@ struct LastSetIntent: AppIntent {
         return .result(dialog: IntentDialog("\(dialog)"), view: LastSetSnippet(content: content))
     }
 
-    /// The spoken sentence and the card content for what the store holds. Pure apart from reading
+    /// the spoken sentence and the card content for what the store holds. Pure apart from reading
     /// the store, so tests cover the empty, unreadable and recorded cases.
     nonisolated static func answer(from store: any SessionStoring,
                                    now: Date = Date()) -> (String, LastSetSnippet.Content) {

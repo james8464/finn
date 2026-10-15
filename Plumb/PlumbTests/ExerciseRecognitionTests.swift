@@ -12,7 +12,7 @@ struct ExerciseRecognizerTests {
     }
 
     @Test func lowConfidenceWindowsDoNotVote() {
-        // Five windows; only two are confident, below the 60% agreement needed.
+        // five windows; only two are confident, below the 60% agreement needed
         let classifier = ScriptedClassifier { index in index.isMultiple(of: 3) ? ("squat", 0.9) : ("squat", 0.5) }
         #expect(ExerciseRecognizer.recognize(keypointFrames(seconds: 6), using: classifier) == .uncertain)
         #expect(classifier.calls == 5)
@@ -104,7 +104,7 @@ struct CoreMLExerciseClassifierTests {
     }
 
     @Test func bundledModelLoadsWhenTheTeamAddsOne() {
-        // No trained model ships until the team adds Plumb/Plumb/PlumbExerciseClassifier.mlmodel.
+        // no trained model ships until the team adds Plumb/Plumb/PlumbExerciseClassifier.mlmodel
         guard let classifier = CoreMLExerciseClassifier.bundled() else { return }
         #expect(classifier.windowLength > 0)
         #expect(classifier.frameRate > 0)
@@ -176,7 +176,7 @@ struct RecognitionSessionTests {
                                          preferences: preferences)
         #expect(!second.recognizesExercise)
         #expect(second.usesTrainedModel)
-        // Without a model in the build, the rules still run.
+        // without a model in the build, the rules still run
         #expect(second.recognitionMethod == .angleRules)
     }
 
@@ -203,7 +203,7 @@ struct RecognitionSessionTests {
 
 private final class FixtureBundleToken {}
 
-/// Returns scripted predictions by window index; records each call.
+/// returns scripted predictions by window index; records each call
 nonisolated private final class ScriptedClassifier: ExerciseClassifying, @unchecked Sendable {
     let windowLength = 30
     let frameRate = 15.0

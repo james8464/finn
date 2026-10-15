@@ -3,17 +3,17 @@ import Observation
 import WatchConnectivity
 import WatchKit
 
-/// The watch side of Plumb: shows the set the iPhone measures and sends Start set and Stop set.
+/// the watch side of Plumb: shows the set the iPhone measures and sends Start set and Stop set.
 /// The watch measures nothing; every number comes from the iPhone camera.
 @Observable
 @MainActor
 final class WatchLink: NSObject, WCSessionDelegate {
-    /// The latest screen from the iPhone; nil until one arrives.
+    /// the latest screen from the iPhone; nil until one arrives
     private(set) var state: WatchState?
     private(set) var isPhoneReachable = false
-    /// Shown when a command did not reach the iPhone.
+    /// shown when a command did not reach the iPhone
     private(set) var notice: String?
-    /// Heart rate while the iPhone camera is open, when the person turned on Personalize with Health.
+    /// heart rate while the iPhone camera is open, when the person turned on Personalize with Health
     let heart = HeartRateSession()
     @ObservationIgnored private var isStarted = false
 
@@ -24,7 +24,7 @@ final class WatchLink: NSObject, WCSessionDelegate {
             let reading = WatchHeartRate(beatsPerMinute: beatsPerMinute, measuredAt: date.timeIntervalSince1970)
             let session = WCSession.default
             guard session.activationState == .activated, session.isReachable else { return }
-            // A lost reading is replaced by the next one a few seconds later.
+            // a lost reading is replaced by the next one a few seconds later
             session.sendMessage(reading.message(), replyHandler: nil, errorHandler: nil)
         }
         let session = WCSession.default
@@ -47,11 +47,11 @@ final class WatchLink: NSObject, WCSessionDelegate {
         state = incoming
         notice = nil
         followHeartRate(incoming)
-        // A saved application context is read later, maybe long after: only live states tap.
+        // a saved application context is read later, maybe long after: only live states tap
         if live { Self.play(incoming.haptic) }
     }
 
-    /// Runs the workout session from the moment the camera opens until it closes.
+    /// runs the workout session from the moment the camera opens until it closes
     private func followHeartRate(_ state: WatchState) {
         if state.measuresHeartRate && state.stage != .ready {
             Task { await heart.start() }

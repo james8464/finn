@@ -4,7 +4,7 @@ import Testing
 import WidgetKit
 @testable import Plumb
 
-/// What the widget reads must be exactly what the history saved, and nothing else.
+/// what the widget reads must be exactly what the history saved, and nothing else
 struct WidgetSharingTests {
     private func sharedStore() -> (SharedSetStore, UserDefaults) {
         let defaults = UserDefaults(suiteName: "PlumbWidgetTests-\(UUID().uuidString)")!
@@ -77,7 +77,7 @@ struct WidgetSharingTests {
         #expect(shared.read()?.exerciseName == "Squat")
         #expect(reloads.count == 1)
 
-        // Saving the same session again (a cue dismissed) changes nothing for the widget.
+        // saving the same session again (a cue dismissed) changes nothing for the widget
         try store.save(WorkoutSessionSummary(id: id, startedAt: date, sets: [set(sessionID: id, at: date, reps: 6)]))
         #expect(reloads.count == 1)
 
@@ -142,9 +142,9 @@ struct WidgetSharingTests {
         #expect(!LastSetWidgetView.when(now.addingTimeInterval(-10 * 86_400), now: now).hasPrefix("Today"))
     }
 
-    /// Renders the widget and Live Activity views to PNG files, for review without a device: in
+    /// renders the widget and Live Activity views to PNG files, for review without a device: in
     /// `PLUMB_WIDGET_RENDERS` when set, otherwise in the test process's temporary directory
-    /// (`PlumbWidgetRenders/`, printed below).
+    /// (`PlumbWidgetRenders/`, printed below)
     @Test @MainActor func rendersWidgetPreviews() throws {
         let out = ProcessInfo.processInfo.environment["PLUMB_WIDGET_RENDERS"]
             .map { URL(fileURLWithPath: $0, isDirectory: true) }
@@ -154,7 +154,7 @@ struct WidgetSharingTests {
         let now = Date(timeIntervalSince1970: 1_800_000_000)
         let snapshot = LastSetSnapshot(exerciseName: "Squat", exerciseKey: "bodyweightSquat", reps: 12,
                                        capturedAt: now.addingTimeInterval(-40 * 60), partlyVisible: false)
-        // The activity's clock counts from the real present: a fixed date would render hours of set.
+        // the activity's clock counts from the real present: a fixed date would render hours of set
         let attributes = PlumbSetActivityAttributes(exerciseName: "Squat", startedAt: Date.now.addingTimeInterval(-48),
                                                     demoInput: false)
         let state = PlumbSetActivityAttributes.ContentState(reps: 7)

@@ -13,7 +13,7 @@ nonisolated enum BodyJoint: String, Codable, Hashable {
     case rightShoulder
     case rightElbow
     case rightWrist
-    /// Only used to check the chin against the hands on pull-ups.
+    /// only used to check the chin against the hands on pull-ups
     case nose
 }
 
@@ -23,33 +23,33 @@ nonisolated struct JointPoint: Codable, Equatable {
     let confidence: Double
 }
 
-/// How the person doing the set was followed in a frame.
+/// how the person doing the set was followed in a frame
 nonisolated enum AthleteTracking: String, Codable, Equatable, Sendable {
-    /// `joints` are the athlete's; anyone else is in `bystanders` and ignored.
+    /// `joints` are the athlete's; anyone else is in `bystanders` and ignored
     case tracked
-    /// The athlete is not visible in this frame (hidden, out of view, or not yet found).
+    /// the athlete is not visible in this frame (hidden, out of view, or not yet found)
     case hidden
 }
 
 nonisolated struct PoseFrame: Codable, Equatable {
-    /// Seconds since the current capture began.
+    /// seconds since the current capture began
     let time: TimeInterval
-    /// People Vision found in the frame, the athlete included.
+    /// people Vision found in the frame, the athlete included
     let subjectCount: Int
-    /// Vision coordinates normalized to the image: x by its width, y by its height, origin at top left.
+    /// Vision coordinates normalised to the image: x by its width, y by its height, origin at top left.
     /// With `athleteTracking` set, these are the athlete's joints only.
     let joints: [BodyJoint: JointPoint]
-    /// Image height divided by width. Joint angles scale y by this so both axes use the same unit.
+    /// image height divided by width. Joint angles scale y by this so both axes use the same unit.
     let aspectRatio: Double
-    /// Vision's 18-point body keypoints (shape [1, 3, 18], flattened) for the optional exercise classifier.
+    /// Vision's 18-point body keypoints (shape [1, 3, 18], flattened) for the optional exercise classifier
     let keypoints: [Float]?
-    /// Degrees between the body's left-right axis and the camera's line of sight, from Vision 3D pose.
+    /// degrees between the body's left-right axis and the camera's line of sight, from Vision 3D pose.
     /// 0 is a true side view and 90 faces the camera. Nil when no 3D estimate exists for this frame.
     let profileDeviationDegrees: Double?
-    /// Nil for frames from a source that does not follow one person (tests, older recordings);
+    /// nil for frames from a source that does not follow one person (tests, older recordings);
     /// the evidence gate then refuses sets with someone else in view.
     let athleteTracking: AthleteTracking?
-    /// Everyone else Vision found, for drawing them greyed out. Never analyzed.
+    /// everyone else Vision found, for drawing them greyed out. Never analysed.
     let bystanders: [[BodyJoint: JointPoint]]?
 
     init(time: TimeInterval, subjectCount: Int, joints: [BodyJoint: JointPoint],
@@ -71,7 +71,7 @@ nonisolated struct PoseFrame: Codable, Equatable {
                   athleteTracking: athleteTracking, bystanders: bystanders)
     }
 
-    /// The athlete's joints are in this frame and can be measured, whoever else is around.
+    /// the athlete's joints are in this frame and can be measured, whoever else is around
     var athleteVisible: Bool {
         athleteTracking == .tracked || (athleteTracking == nil && subjectCount == 1)
     }
@@ -81,15 +81,15 @@ nonisolated struct RepMetric: Codable, Equatable {
     let number: Int
     let startTime: TimeInterval
     let endTime: TimeInterval
-    /// Range of this rep in its exercise's own unit: the squat stores hip travel divided by
+    /// range of this rep in its exercise's own unit: the squat stores hip travel divided by
     /// standing leg length; angle-based exercises store degrees of bend from the starting position.
     let relativeRange: Double
-    /// Optional side-view posture reading at the deepest phase. Its meaning is exercise-specific;
+    /// optional side-view posture reading at the deepest phase. Its meaning is exercise-specific;
     /// older saved sessions have no reading and must not produce posture advice.
     let postureValue: Double?
 
     var duration: TimeInterval { endTime - startTime }
-    /// The squat's original name for `relativeRange`, kept for existing callers and saved history.
+    /// the squat's original name for `relativeRange`, kept for existing callers and saved history
     var normalizedHipTravel: Double { relativeRange }
 
     init(number: Int, startTime: TimeInterval, endTime: TimeInterval, relativeRange: Double,
@@ -122,14 +122,14 @@ nonisolated struct SetAnalysis: Codable, Equatable {
     let rubricVersion: String
 }
 
-/// One rep's lowest moment, kept in memory to draw its skeleton on the result.
+/// one rep's lowest moment, kept in memory to draw its skeleton on the result
 nonisolated struct RepSnapshot: Equatable {
     let number: Int
     let range: Double
     let frame: PoseFrame
 }
 
-/// The deepest and shallowest reps of a measured set, compared within the person's own set
+/// the deepest and shallowest reps of a measured set, compared within the person's own set
 /// rather than against a universal target.
 nonisolated struct RepExtremes: Equatable {
     let deepest: RepSnapshot
@@ -161,7 +161,7 @@ nonisolated enum BodySide: String, Codable, Equatable {
     case right
 }
 
-/// A joint named without its body side. The evidence gate picks the side the camera tracks best.
+/// a joint named without its body side. The evidence gate picks the side the camera tracks best.
 nonisolated enum JointRole: String, Equatable, Sendable {
     case shoulder
     case elbow
@@ -211,7 +211,7 @@ nonisolated enum FramingStatus: Equatable {
     case checking
     case adjustPosition
     case landmarksVisible
-    /// Vision 3D pose sees the person from an angle the exercise does not support.
+    /// Vision 3D pose sees the person from an angle the exercise does not support
     case turnToExpectedView
 }
 
@@ -221,7 +221,7 @@ nonisolated enum CueKind: String, Codable, Sendable {
     case hipDropIncreased
     case kneeBendIncreased
     case swingIncreased
-    // A fault seen on at least two reps (`FormCheck`), not a change within the set.
+    // a fault seen on at least two reps (`FormCheck`), not a change within the set
     case pushUpHipsSag
     case pushUpHipsPike
     case pushUpDepth
@@ -271,10 +271,10 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
     var cueResponse: CueResponse
     let exercise: ExerciseKind
     let cameraView: CameraView
-    /// What this set showed (`SetIssue`), for the person's most frequent pattern. Nil in summaries
+    /// what this set showed (`SetIssue`), for the person's most frequent pattern. Nil in summaries
     /// saved before 13 October 2026.
     let issues: [SetIssue]?
-    /// True when the joints were clear in only 65 to 80% of the set: its clear reps were counted,
+    /// true when the joints were clear in only 65 to 80% of the set: its clear reps were counted,
     /// without advice or comparison. Nil for a fully visible set and in older summaries.
     let partlyVisible: Bool?
 
@@ -300,10 +300,10 @@ nonisolated struct WorkoutSessionSummary: Codable, Equatable, Identifiable {
     let id: UUID
     let startedAt: Date
     var sets: [SetSummary]
-    /// The Apple Health workout saved for this session, so it is never saved twice. Nil until then,
+    /// the Apple Health workout saved for this session, so it is never saved twice. Nil until then,
     /// and in sessions saved before 13 October 2026 (decoded as absent).
     var fitnessWorkout: FitnessWorkoutRecord? = nil
-    /// True while the session can still take sets: saved with every set and cleared when it ends
+    /// true while the session can still take sets: saved with every set and cleared when it ends
     /// (Done, Finish session, or the break that starts a new session). After iOS terminates Plumb
     /// without Done, the next launch finds the session still open. Nil once finished, and in
     /// sessions saved by earlier builds, which count as finished.
@@ -311,12 +311,12 @@ nonisolated struct WorkoutSessionSummary: Codable, Equatable, Identifiable {
 }
 
 nonisolated extension WorkoutSessionSummary {
-    /// The longest break between two sets of one session. Cancel, or the app going to the background
+    /// the longest break between two sets of one session. Cancel, or the app going to the background
     /// during a set, leaves the session open without Done; a set measured after a longer break starts
     /// a new session, so one session, and its Apple Health workout, never spans hours or days.
     static let longestBreak: TimeInterval = 30 * 60
 
-    /// Whether a set measured at `date` still belongs to this session.
+    /// whether a set measured at `date` still belongs to this session
     func continues(at date: Date) -> Bool {
         let latest = sets.map(\.capturedAt).max() ?? startedAt
         return date.timeIntervalSince(latest) <= Self.longestBreak

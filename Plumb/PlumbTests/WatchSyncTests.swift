@@ -80,7 +80,7 @@ nonisolated struct WatchSyncRulesTests {
         #expect(WatchSyncRules.action(for: .stopSet, stage: .framing, exercise: .stiffLegDeadlift) == .ignore)
         #expect(WatchSyncRules.action(for: .stopSet, stage: .analyzing, exercise: .bodyweightSquat) == .ignore)
         #expect(WatchSyncRules.action(for: .startSet, stage: .ready, exercise: .bodyweightSquat) == .ignore)
-        // Push-ups: the watch only shows and taps.
+        // push-ups: the watch only shows and taps
         #expect(WatchSyncRules.action(for: .startSet, stage: .framing, exercise: .pushUp) == .ignore)
         #expect(WatchSyncRules.action(for: .stopSet, stage: .capturing, exercise: .pushUp) == .ignore)
     }
@@ -105,7 +105,7 @@ nonisolated struct WatchSyncRulesTests {
 
 @MainActor
 struct WatchSyncSessionTests {
-    /// A set run on the iPhone reaches the watch as framing, start, each rep, end, and the result.
+    /// a set run on the iPhone reaches the watch as framing, start, each rep, end, and the result
     @Test func aSetReachesTheWatchStageByStage() async throws {
         let source = WatchTestPoseSource()
         let model = WorkoutSessionModel(source: source)
@@ -128,7 +128,7 @@ struct WatchSyncSessionTests {
         await model.endSet()
         try await waitUntil { sent.last?.stage == .result }
 
-        // Observation may fold two quick changes into one update, so reps rise but may skip a number.
+        // observation may fold two quick changes into one update, so reps rise but may skip a number
         let running = sent.filter { $0.stage == .capturing }
         #expect(running.count >= 2)
         #expect(zip(running, running.dropFirst()).allSatisfy { $1.reps > $0.reps })
@@ -139,7 +139,7 @@ struct WatchSyncSessionTests {
         #expect(result.reps == 6)
         #expect(result.summary?.hasPrefix("6 reps measured.") == true)
         #expect(result.haptic == .none)
-        // Each state is newer than the one before it, so the watch never rewinds.
+        // each state is newer than the one before it, so the watch never rewinds
         #expect(zip(sent, sent.dropFirst()).allSatisfy { $1.isNewer(than: $0) })
         #expect(sync.current?.haptic == WatchHaptic.none)
         #expect(sync.current?.stage == .result)
@@ -194,7 +194,7 @@ struct WatchSyncSessionTests {
         #expect(sent.last?.demoInput == true)
     }
 
-    /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
+    /// returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
     /// simulator, with many main-actor tests running at once, the live analysis of a whole set can
     /// take several seconds.
     private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(30)) async throws {

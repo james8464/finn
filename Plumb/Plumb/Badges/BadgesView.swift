@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The Awards screen, on the dashboard's backdrop: every badge, earned ones with the measured fact
+/// the Awards screen, on the dashboard's backdrop: every badge, earned ones with the measured fact
 /// behind them and the date, the rest with how to earn them.
 struct BadgesView: View {
     let ledger: BadgeLedger
@@ -57,7 +57,7 @@ struct BadgesView: View {
     }
 }
 
-/// The dashboard's translucent card, for the Awards screen and the unlock card.
+/// the dashboard's translucent card, for the Awards screen and the unlock card.
 struct BadgeGlass: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     var radius: CGFloat = 15
@@ -81,7 +81,7 @@ struct BadgeGlass: ViewModifier {
     }
 }
 
-/// One badge: its mark, its name, and either how it was earned or how to earn it.
+/// one badge: its mark, its name, and either how it was earned or how to earn it.
 struct BadgeRow: View {
     let kind: BadgeKind
     let earned: EarnedBadge?
@@ -117,7 +117,7 @@ struct BadgeRow: View {
     }
 }
 
-/// The badge itself: a lime disc when earned, a dashed outline when not.
+/// the badge itself: a lime disc when earned, a dashed outline when not.
 struct BadgeMark: View {
     let kind: BadgeKind
     let earned: Bool
@@ -139,7 +139,7 @@ struct BadgeMark: View {
     }
 }
 
-/// Inside the dashboard's Awards card: the latest marks and a count, or an invitation.
+/// inside the dashboard's Awards card: the latest marks and a count, or an invitation.
 struct AwardsCardContent<Heading: View>: View {
     let badges: [EarnedBadge]
     let heading: Heading
@@ -170,7 +170,7 @@ struct AwardsCardContent<Heading: View>: View {
     }
 }
 
-/// Shown on the result once per set, when the set earned badges: the marks drop in, then the
+/// shown on the result once per set, when the set earned badges: the marks drop in, then the
 /// person reads why. Sober by design.
 struct BadgeUnlockCard: View {
     let badges: [EarnedBadge]

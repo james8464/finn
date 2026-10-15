@@ -65,7 +65,7 @@ final class ComparisonNarrator {
                      source: .appleIntelligence, facts: comparison)
     }
 
-    /// Reviewed wording used whenever generation is unavailable, slow, or invalid.
+    /// reviewed wording used whenever generation is unavailable, slow, or invalid
     private func template(for comparison: Comparison) -> Recap {
         let copy = comparison.exercise.definition.copy
         let text: String
@@ -78,8 +78,8 @@ final class ComparisonNarrator {
                      source: .template, facts: comparison)
     }
 
-    /// Accepts only sentences from a closed set built from the exercise's own vocabulary, so the
-    /// model can choose wording but cannot add a cause, a number, advice, or another exercise.
+    /// accepts only sentences from a closed set built from the exercise's own vocabulary, so the
+    /// model can choose wording but cannot add a cause, a number, advice, or another exercise
     static func acceptedSentences(for comparison: Comparison) -> Set<String> {
         let copy = comparison.exercise.definition.copy
         let noun = copy.rangeNoun
@@ -118,7 +118,7 @@ private struct AppleGeneratedRecap {
 @MainActor
 private final class AppleRecapGenerator: RecapGenerating {
     var available: Bool {
-        // The instructions and the accepted sentences are English; other languages keep the template.
+        // the instructions and the accepted sentences are English; other languages keep the template
         guard SpokenLanguage.appLanguage == "en" else { return false }
         if case .available = SystemLanguageModel.default.availability { return true }
         return false

@@ -4,9 +4,11 @@
 
 ## Checked on 15 October (archive `xcodebuild archive`, Release, generic iOS device)
 
+The bundle ID row reflects the current Xcode project. The older archive needs to be rebuilt before it can verify those identifiers.
+
 | Item | Result |
 | --- | --- |
-| Bundle IDs | `com.finlearn.plumb` (iPhone), `com.finlearn.plumb.watchkitapp` (watch, `WKCompanionAppBundleIdentifier` = `com.finlearn.plumb`) |
+| Bundle IDs | `ai.mwm.build.challenge.team.08` (iPhone), `ai.mwm.build.challenge.team.08.watchkitapp` (watch, `WKCompanionAppBundleIdentifier` = `ai.mwm.build.challenge.team.08`) |
 | Team and signing | `DEVELOPMENT_TEAM` 2FN6Y5NHS5, automatic. The archive signed with "Apple Development: Paul Aubry (HFWGWBRA9M)" and the team provisioning profiles Xcode generated for both bundle IDs, with the HealthKit entitlement and no clinical records. No Apple Distribution certificate on this Mac: Xcode creates it during Distribute App if the signed-in account has the Admin or App Manager role on the team |
 | Version / build | 1.0 / 1 on both targets; raise `CURRENT_PROJECT_VERSION` on both before any second upload |
 | Minimum OS | iOS 27.0, watchOS 10.0; iPhone only (`TARGETED_DEVICE_FAMILY` 1) |
@@ -29,12 +31,12 @@ Still open: a physical-iPhone run of the final FinLearn build with real sets, th
 | --- | --- |
 | Xcode project | `Plumb/Plumb.xcodeproj`, `Plumb` scheme |
 | Platform | iPhone only, iOS 27.0 minimum |
-| Bundle ID | `com.james8464.Plumb` in the project; ownership in App Store Connect unconfirmed |
+| Bundle ID | Former personal-team test identifier, now retired; the current project uses `ai.mwm.build.challenge.team.08` |
 | Version/build | 1.0 / 1; increment build for each upload |
 | Xcode team | `Z29CKRV8C9` configured; paid Program membership and distribution rights unconfirmed |
-| Local signing identities | One Apple Development identity is present; no Apple Distribution identity was found on 13 October. A fresh development-signed Release archive for `com.james8464.Plumb` passed strict signature and demo-code exclusion checks. App Store Connect export failed: Xcode reported no provider associated with the account, insufficient team permission to create an iOS App Store profile, and no profile for this bundle ID |
+| Local signing identities | One Apple Development identity is present; no Apple Distribution identity was found on 13 October. A fresh development-signed Release archive under the former personal-team identifier passed strict signature and demo-code exclusion checks. App Store Connect export failed: Xcode reported no provider associated with the account, insufficient team permission to create an iOS App Store profile, and no profile for this bundle ID |
 | Connected physical iPhone | iPhone 16 Pro Max was still **unavailable** to Xcode on 13 October. The last known pairing record says it was last connected on 1 October and Developer Mode was disabled; confirm both settings on the phone rather than treating cached device data as current |
-| HealthKit capability | Added 13 October for **Save workouts to Apple Fitness**: `Plumb/Plumb.entitlements` with `com.apple.developer.healthkit` true and an empty `com.apple.developer.healthkit.access` (no Clinical Health Records), set as `CODE_SIGN_ENTITLEMENTS` for Debug and Release. With automatic signing, Xcode enables HealthKit on the `com.james8464.Plumb` App ID when it signs ([Configuring HealthKit access](https://developer.apple.com/documentation/xcode/configuring-healthkit-access)); confirm it under Certificates, Identifiers & Profiles after the first signed build. Not yet built in Xcode |
+| HealthKit capability | Added 13 October for **Save workouts to Apple Fitness**: `Plumb/Plumb.entitlements` with `com.apple.developer.healthkit` true and an empty `com.apple.developer.healthkit.access` (no Clinical Health Records), set as `CODE_SIGN_ENTITLEMENTS` for Debug and Release. With automatic signing, Xcode enables HealthKit on the app's App ID when it signs ([Configuring HealthKit access](https://developer.apple.com/documentation/xcode/configuring-healthkit-access)); confirm it under Certificates, Identifiers & Profiles after the first signed build. Not yet built in Xcode |
 | Health purpose strings | `NSHealthUpdateUsageDescription` (required to ask for write permission; without it the request crashes) and `NSHealthShareUsageDescription`. Apple's documentation requires the share key only for reading, and Plumb never asks to read, but App Store Connect's upload validation has rejected a write-only HealthKit app without it (ITMS-90683, [developer forum report](https://developer.apple.com/forums/thread/653088)). Its text says Plumb does not read Health data. Remove it only if a validated upload proves it unnecessary |
 | Repository | Public GitHub repository, `main` branch |
 | Public pages | [Support](https://james8464.github.io/hackathon-project/support.html) and [privacy policy](https://james8464.github.io/hackathon-project/privacy.html) published via GitHub Pages on 11 October; both returned HTTPS 200 with the supplied publisher/contact details |
@@ -70,4 +72,4 @@ The draft listing copy and support page now name all four available exercises. R
 | --- | --- | --- | --- |
 | 11 October 2026 | 1.0/1 local project | Not uploaded | Unsigned archive and setup screenshot candidate checked; test-only demo and validation markers excluded from Release binary; public support/privacy URLs verified; distribution signing, account access, physical device, result screenshots, and final validation pending |
 | 13 October 2026 | 1.0/1 local candidate | Not uploaded | Development-signed archive passed strict signature and demo-code checks; App Store Connect export failed because the account has no associated provider/team permission or matching distribution profile. Sixteen generated replays, 187 unit tests, and an eleven-video public-data spot check completed locally; physical participant and specialist validation remain pending |
-| 15 October 2026, 16:00 | 1.0/1, `main` d8f1503, `com.finlearn.plumb` | Not uploaded | Release archive built and development-signed with team 2FN6Y5NHS5 from the command line; icon, purpose strings, privacy manifest, watch embedding checked on the archive; listing, privacy answers, review notes, six 6.9-inch screenshots and tonight's walkthrough written. Upload and submission by Guilhem tonight |
+| 15 October 2026, 16:00 | 1.0/1, `main` d8f1503, earlier team identifier | Not uploaded | Release archive built and development-signed with team 2FN6Y5NHS5 from the command line; icon, purpose strings, privacy manifest, watch embedding checked on the archive; listing, privacy answers, review notes, six 6.9-inch screenshots and tonight's walkthrough written. Upload and submission by Guilhem tonight |

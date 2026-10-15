@@ -1,7 +1,7 @@
 import Foundation
 import HealthKit
 
-/// Reads what Personalize with Health needs from Apple Health. Only `HealthCoach` decides what to
+/// reads what Personalize with Health needs from Apple Health. Only `HealthCoach` decides what to
 /// say; this file maps HealthKit samples to a `HealthSnapshot`. It touches HealthKit only after the
 /// person turned the option on, and keeps nothing: each snapshot is read again when needed.
 ///
@@ -52,7 +52,7 @@ final class HealthKitReader: HealthReading {
         let steps = await dailySums(.stepCount, unit: .count(), from: weekBefore, to: today)
         (health.stepsYesterday, health.stepsBaseline) = Self.yesterdayAndBaseline(steps, yesterday: yesterday)
 
-        // The night that ended this morning: from 6 p.m. yesterday to noon today, or now if earlier.
+        // the night that ended this morning: from 6 p.m. yesterday to noon today, or now if earlier
         let nightStart = calendar.date(byAdding: .hour, value: 18, to: yesterday) ?? yesterday
         let nightEnd = min(now, calendar.date(byAdding: .hour, value: 12, to: today) ?? now)
         let asleep = await sleepIntervals(from: nightStart, to: nightEnd)
@@ -67,7 +67,7 @@ final class HealthKitReader: HealthReading {
         return health
     }
 
-    /// The latest value of the last 24 hours, and the mean of the values before it.
+    /// the latest value of the last 24 hours, and the mean of the values before it
     static func latestAndBaseline(_ samples: [(date: Date, value: Double)], now: Date) -> (Double?, Double?) {
         let cutoff = now.addingTimeInterval(-24 * 3600)
         let latest = samples.last(where: { $0.date >= cutoff })?.value
@@ -76,7 +76,7 @@ final class HealthKitReader: HealthReading {
         return (latest, baseline)
     }
 
-    /// Yesterday's total, and the mean of the days before it that have data.
+    /// yesterday's total, and the mean of the days before it that have data
     static func yesterdayAndBaseline(_ days: [(day: Date, sum: Double)], yesterday: Date) -> (Double?, Double?) {
         let value = days.first(where: { $0.day == yesterday })?.sum
         let earlier = days.filter { $0.day < yesterday && $0.sum > 0 }.map(\.sum)

@@ -1,144 +1,72 @@
-# Plumb
+<h1 align="center">Plumb</h1>
 
-Plumb reviews strength sets through your iPhone camera. It counts reps and, when the evidence supports it, gives one specific observation to try on the next set. Video is processed on the phone and is not saved. The longer-term product pairs iPhone with Apple Watch for timely feedback.
+<p align="center"><strong>Find your line.</strong></p>
 
-| Status | Details |
-|--------|---------|
-| **Date** | 15 October 2026 |
-| **Coverage** | Simulator + replay |
-| **Device testing** | Development-signed build launched on iPhone 16 Pro Max; live camera opened after permission |
-| **Gaps** | No real-person set or independent expert review of coaching accuracy |
-| **Classification** | Fitness aid — **not** a medical or injury-prevention tool |
+<p align="center">A private technique companion for deliberate movement.</p>
 
----
+<p align="center">
+  <a href="#the-experience">The experience</a> ·
+  <a href="#inside-the-build">Inside the build</a> ·
+  <a href="#where-it-stands">Where it stands</a> ·
+  <a href="#get-started">Get started</a>
+</p>
 
-## Current Build
-
-### Workout
-
-Choose one of six exercises:
-
-| Rule set | Exercises |
-|----------|-----------|
-| **Side-view** | Squat, push-up, static lunge, stiff-leg deadlift |
-| **Shoulder-movement** | Pull-ups, bar muscle-ups |
-
-The camera shows framing and a pose overlay, counts reps live, and supports manual or hands-free sets. Counts and selected observations can be spoken through the system audio route.
-
-### Results
-
-Each set shows a measured count and **at most one** supported range or posture observation. Weak evidence produces a retake reason or "no supported pattern." Partial sets can retain a count without posture advice.
-
-> **Note:** A squat whose knee and ankle Vision cannot read often enough (phone on the floor, feet at the picture's edge, person turning or stepping out of view and back) is counted from the hips going down and up, without posture advice; a front view is counted the same way, with a tip to turn (15 October).
-
-Side-view form checks produce an observation when a fault appears on **at least two reps**:
-
-| Exercise | Form checks |
-|----------|-------------|
-| Push-up | Hips and depth |
-| Squat | Depth and chest |
-| Lunge | Torso and front knee |
-| Deadlift | Knees and hinge |
-
-A few words of the same advice appear large on the camera screen during the set. A check that cannot see its joints says so.
-
-History stores local summaries, compares compatible sets, identifies a recurring pattern, and shares text through the system sheet.
-
-### Home and Coach
-
-The Home dashboard links to recent sessions and the Workout flow. Coach uses Apple Intelligence, when available, to select up to two relevant saved sets; Plumb writes the displayed response from their recorded counts and observations. Invalid model output and unavailable models use fixed text. (A Claude demo is Debug-only.) Posture, Weights, Awards, and Plumb+ destinations are placeholders.
-
-### Apple Watch
-
-An embedded companion mirrors the exercise, stage, count, and observation. It supports wrist taps and start/stop messages. It compiles for simulators but **has not been checked on a physical watch**.
-
-### Apple Health
-
-Optional workout saving and optional personalization are implemented in code. Personalization may read heart rate, activity, sleep, and body measurements after permission. HealthKit permission, workout appearance in Fitness, and personalized advice still need physical-device checks. Camera use does not require Health access.
-
-### Siri and Shortcuts
-
-App Intents can start a selected set, report the last saved set, or open History. Unit and simulator checks exist; spoken use on a device remains unverified.
-
-### Widgets and Live Activities
-
-The embedded extension shows the last measured set and can open the camera on its exercise. A local Live Activity shows count and elapsed time during a set. Shared data contains a saved-set summary — not video or Health data. Unit tests and a simulator build exist; App Group provisioning and the experience on a physical iPhone remain unchecked.
-
-### MWM Setup
-
-| Item | Detail |
-|------|--------|
-| Bundle ID | Team 08 |
-| Analytics | Spark Flash SDK (bundled) |
-| Debug key | MWM sandbox |
-| Release key | MWM production |
-| Events tracked | App opens, StoreKit transaction updates |
-| StoreKit catalog | Local, six subscription products (shared `Plumb` scheme) |
-| Paywall | Not yet implemented |
-| Privacy draft | [docs/release/app-privacy-answers.md](docs/release/app-privacy-answers.md) — lists Spark's data categories; publish matching privacy page before App Store submission |
+<p align="center">
+  <img src="Design/Plumb%20Brand%20Theme%20preview.png" alt="Plumb's monochrome P mark and Find your line brand statement." width="100%">
+</p>
 
 ---
 
-## Evidence and Limits
+## The experience
 
-Automated checks cover Swift logic, simulator flows, and generated video replays; the [15 October automated report](docs/validation/automated-checks-2026-10-15.md) records current passes and failures. A small public-video spot check has no independent rep or cue annotation. No consenting, varied-person test set or qualified trainer review has established:
+### Better form, one set at a time.
 
-- Rep-count accuracy
-- Cue quality
-- Lighting tolerance
-- Battery cost
-- Hands-free reliability on real devices
+Set your iPhone where it can see your movement. Plumb counts reps and, when the view supports it, gives you **one specific observation** to try on the next set. Your video is processed on the phone and is not saved.
 
-See the [validation protocol](docs/validation/squat-v1-protocol.md), [results](docs/validation/squat-v1-results.md), [exercise rules](docs/validation/exercise-rules-v1.md), and [form checks](docs/validation/form-checks-v1.md) — whose squat and push-up limits were checked against a labeled public set of good and bad side-view videos.
+**Choose a movement.** Start a squat, push-up, lunge, stiff-leg deadlift, pull-up, or bar muscle-up set.
 
-The app checks visibility, viewpoint, and which person it follows before giving advice. A live count can still precede a final retake when the end-of-set evidence gate rejects a set.
+**Move naturally.** A live count, framing guidance, and a pose overlay help you stay with the set. Spoken counts and short observations are optional.
 
-> **Important**
->
-> - **Do not** present synthetic or recorded input as a live camera result.
-> - **Do not** claim that Plumb diagnoses injury risk, proves safe form, or replaces a trainer.
+**Learn from the next set.** Review the measured count, a supported cue or an honest retake reason, then compare compatible sets in your local history.
 
 ---
 
-## Product Direction
+## Inside the build
 
-The next gate is a dependable iPhone set-to-set loop on physical devices, with expert-reviewed cues. Apple Watch timing and haptics can then be tested against camera-only analysis. Widgets and Live Activities need device and provisioning checks. AirPods head motion, iPhone Duo placement, Apple TV, running analysis, accounts, subscriptions, and a paid model need separate evidence and design.
+### An iPhone-first workout flow
 
----
+The camera flow supports manual and hands-free sets. Form checks use exercise-specific rules and withhold posture advice when the view or tracking is too weak. A partial set can still keep its rep count.
 
-## For Contributors and Agents
+### A home for your progress
 
-| Rule | Description |
-|------|-------------|
-| **Keep status current** | Update this README's build status when behavior changes. Flag discrepancies with older plans. |
-| **Facts from rules** | Derive coaching facts from measured, versioned rules. The Coach model may select saved sets, but its prose is never shown. Models must not decide whether movement is safe. |
-| **Permissions in context** | Ask for camera and Health permissions in context. Keep workout video local and unsaved. Changing data handling requires a deliberate product and privacy-policy update. |
-| **Label demo data** | Keep public copy aligned with the signed build and its validation. |
-| **Apple interface work** | Use the [local HIG reference](docs/design/apple-hig-agent-reference.md) and its official source links. |
+Home brings recent sessions and the next workout together. Coach can summarize up to two relevant saved sets using their recorded counts and observations. Posture, Weights, Awards, and Plumb+ destinations are still placeholders.
 
----
+### The Apple ecosystem, thoughtfully used
 
-## Open the Project
+An Apple Watch companion mirrors set progress and supports wrist taps and start/stop messages. Optional Apple Health features, Siri Shortcuts, a last-set widget, and a Live Activity are implemented. Their real-device experience still needs validation.
 
-```bash
-# 1. Open the project
-open Plumb/Plumb.xcodeproj
-
-# 2. Select the scheme and destination
-# Scheme: Plumb
-# Destination: Simulator or connected iPhone
-
-# 3. Build and run (⌘R)
-```
-
-Device signing requires access to the MWM Apple Developer team (`ZUQ3ZP29N4`) and provisioning for the app, Watch, widget, HealthKit, and App Group capabilities.
-
-| Resource | Link |
-|----------|------|
-| Document map | [docs/README.md](docs/README.md) |
-| Detailed plan | [planning.md](planning.md) |
-| Git workflow | [Plumb/GIT guide.md](Plumb/GIT%20guide.md) |
+[Explore the design →](Design/README.md) · [Read the build details →](docs/project-status.md)
 
 ---
 
-Built for the October 2026 Build Challenge by James, Klaus, Theophile, and Guilhem.
+## Where it stands
+
+**Prototype · 15 October 2026**
+
+Swift logic, simulator flows, and generated-video replays have automated coverage. A development build has launched on an iPhone 16 Pro Max and opened the live camera. Plumb has **not yet completed a real-person set test or independent expert review** of rep counts and coaching cues.
+
+Plumb is a fitness aid. It does not diagnose injury risk, establish safe form, or replace a trainer. Demo and recorded input must be identified as such.
+
+[Read the validation report →](docs/validation/automated-checks-2026-10-15.md) · [See the test protocol →](docs/validation/squat-v1-protocol.md)
+
+---
+
+## Get started
+
+Open [Plumb/Plumb.xcodeproj](Plumb/Plumb.xcodeproj) in Xcode, select the **Plumb** scheme and a simulator or connected iPhone, then build and run. Device signing requires access to the MWM Apple Developer team and provisioning for the app's capabilities.
+
+[Documentation →](docs/README.md) · [Product plan →](planning.md) · [Git workflow →](Plumb/GIT%20guide.md)
+
+---
+
+<p align="center">Built for the October 2026 Build Challenge by James, Klaus, Theophile, and Guilhem.</p>

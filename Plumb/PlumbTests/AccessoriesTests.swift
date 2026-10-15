@@ -63,7 +63,7 @@ nonisolated struct AccessoriesTests {
                 "Apple Watch: open Plumb on your watch to see reps and start sets from your wrist.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true)) ==
                 "Apple Watch connected: see each rep and start sets from your wrist.")
-        // Push-ups: the hands are on the floor, so the line never promises a wrist start.
+        // push-ups: the hands are on the floor, so the line never promises a wrist start
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true), .pushUp) ==
                 "Apple Watch: open Plumb on your watch to see reps and feel a tap on each one.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true), .pushUp) ==
@@ -81,7 +81,7 @@ nonisolated struct AccessoriesTests {
         #expect(lines.map(\.accessory) == [.headphones, .appleWatch])
     }
 
-    /// The lines promise delivery only: Plumb's measurements come from the iPhone camera.
+    /// the lines promise delivery only: Plumb's measurements come from the iPhone camera
     @Test func noLineClaimsTheAccessoryMeasures() {
         let statuses = [
             AccessoryStatus(headphonesConnected: true),

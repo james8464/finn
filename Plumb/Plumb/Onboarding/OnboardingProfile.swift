@@ -1,6 +1,6 @@
 import Foundation
 
-/// What the person wants from Plumb, asked once at the first launch.
+/// what the person wants from Plumb, asked once at the first launch.
 nonisolated enum TrainingGoal: String, Codable, CaseIterable, Sendable {
     case technique
     case consistency
@@ -35,7 +35,7 @@ nonisolated enum TrainingGoal: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// How used to these exercises the person is. Changes the coach's wording, nothing it measures.
+/// how used to these exercises the person is. Changes the coach's wording, nothing it measures.
 nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
     case new
     case regular
@@ -58,20 +58,20 @@ nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// The answers of the first launch, read from and written to `PlumbPreferences`.
+/// the answers of the first launch, read from and written to `PlumbPreferences`.
 nonisolated struct OnboardingProfile: Equatable, Sendable {
     var goal: TrainingGoal?
     var level: TrainingLevel?
-    /// Exercises the person picked, in the order of the picker. Empty means no preference.
+    /// exercises the person picked, in the order of the picker. Empty means no preference.
     var favoriteExercises: [ExerciseKind] = []
     var speaksLive = true
 
-    /// The exercises in the order the first screen shows them: favorites first, then the rest.
+    /// the exercises in the order the first screen shows them: favourites first, then the rest.
     var exerciseOrder: [ExerciseKind] {
         favoriteExercises + ExerciseKind.allCases.filter { !favoriteExercises.contains($0) }
     }
 
-    /// One sentence added to the coach's instructions, so its tone follows the answers. Nil when the
+    /// one sentence added to the coach's instructions, so its tone follows the answers. Nil when the
     /// person skipped both questions.
     var coachNote: String? {
         var parts: [String] = []
@@ -98,7 +98,7 @@ extension PlumbPreferences {
     static let trainingLevelKey = "plumb.trainingLevel"
     static let favoriteExercisesKey = "plumb.favoriteExercises"
 
-    /// True once the person finished or skipped the first-launch screens.
+    /// true once the person finished or skipped the first-launch screens.
     var onboardingCompleted: Bool {
         get { defaults.bool(forKey: Self.onboardingCompletedKey) }
         nonmutating set { defaults.set(newValue, forKey: Self.onboardingCompletedKey) }
@@ -114,19 +114,19 @@ extension PlumbPreferences {
         nonmutating set { defaults.set(newValue?.rawValue, forKey: Self.trainingLevelKey) }
     }
 
-    /// The exercises picked at the first launch, in order. Unknown values from a later build are dropped.
+    /// the exercises picked at the first launch, in order. Unknown values from a later build are dropped.
     var favoriteExercises: [ExerciseKind] {
         get { (defaults.stringArray(forKey: Self.favoriteExercisesKey) ?? []).compactMap(ExerciseKind.init(rawValue:)) }
         nonmutating set { defaults.set(newValue.map(\.rawValue), forKey: Self.favoriteExercisesKey) }
     }
 
-    /// The whole profile at once.
+    /// the whole profile at once.
     var onboardingProfile: OnboardingProfile {
         OnboardingProfile(goal: trainingGoal, level: trainingLevel,
                           favoriteExercises: favoriteExercises, speaksLive: speaksLive)
     }
 
-    /// Writes every answer, marks the onboarding done, and makes the first favorite the chosen exercise.
+    /// writes every answer, marks the onboarding done, and makes the first favourite the chosen exercise.
     func apply(_ profile: OnboardingProfile) {
         trainingGoal = profile.goal
         trainingLevel = profile.level
@@ -136,6 +136,6 @@ extension PlumbPreferences {
         onboardingCompleted = true
     }
 
-    /// The order of the exercise chips on the first screen.
+    /// the order of the exercise chips on the first screen.
     var exerciseOrder: [ExerciseKind] { onboardingProfile.exerciseOrder }
 }

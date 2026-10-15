@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The card Siri and Spotlight show for "How did my last set go in Plumb": exercise, measured reps,
+/// the card Siri and Spotlight show for "How did my last set go in Plumb": exercise, measured reps,
 /// when, and the observation word for word. Nothing here is computed; it reads `LastSetReport`.
 struct LastSetSnippet: View {
     enum Content: Equatable {

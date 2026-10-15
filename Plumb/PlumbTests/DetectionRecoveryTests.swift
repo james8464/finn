@@ -2,14 +2,14 @@ import Foundation
 import Testing
 @testable import Plumb
 
-/// Squats filmed the way a jury tries the app (15 October 2026, Guilhem's iPhone): facing the phone,
+/// squats filmed the way a jury tries the app (15 October 2026, Guilhem's iPhone): facing the phone,
 /// the phone on the floor tilted up so the feet sit at the picture's edge, turning from the front to
 /// the side, stepping out of the picture and back. The traces are synthetic; their shapes follow the
 /// screen recording of that morning, where the live count froze at 3 while the squats went on.
 nonisolated enum JuryTraces {
     static let step = 1.0 / 15
 
-    /// A person facing the phone: both hips and both shoulders, 0.25 of the picture apart, and the
+    /// a person facing the phone: both hips and both shoulders, 0.25 of the picture apart, and the
     /// knees and ankles only when `legs`. `down` is the share of a rep's depth (0 standing, 1 bottom),
     /// with the hips 0.20 of the picture down at the bottom.
     static func front(time: Double, down: Double, legs: Bool, x: Double = 0.5,
@@ -33,12 +33,12 @@ nonisolated enum JuryTraces {
         return PoseFrame(time: time, subjectCount: 1, joints: joints, aspectRatio: 1, athleteTracking: .tracked)
     }
 
-    /// Nobody in the picture: the athlete stepped out of it.
+    /// nobody in the picture: the athlete stepped out of it
     static func empty(time: Double) -> PoseFrame {
         PoseFrame(time: time, subjectCount: 0, joints: [:], aspectRatio: 1, athleteTracking: .hidden)
     }
 
-    /// `reps` squats of two seconds from `start`, then `standing` seconds still.
+    /// `reps` squats of two seconds from `start`, then `standing` seconds still
     static func squats(reps: Int, from start: Double, standing: Double = 1, legs: Bool = false, x: Double = 0.5,
                        hidesHipsAtTheBottom: Bool = false) -> [PoseFrame] {
         let duration = Double(reps) * 2 + standing
@@ -63,7 +63,7 @@ nonisolated struct HipCountTests {
 
     @Test func aFrontSquatWithTheFeetOutOfViewIsCountedFromTheHips() throws {
         let frames = JuryTraces.squats(reps: 6, from: 0)
-        // The side rubric needs the knee and ankle: it refused this set.
+        // the side rubric needs the knee and ankle: it refused this set
         #expect(EvidenceGate.assess(frames, requirement: .squat).isRejected)
         let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: .squat)
         guard case .analyzed(let analysis) = outcome else {
@@ -72,7 +72,7 @@ nonisolated struct HipCountTests {
         }
         #expect(analysis.reps.count == 6)
         #expect(analysis.rubricVersion == ExerciseDefinition.squatTrunk.rubricVersion)
-        // Counted, not advised: no posture reading and no posture observation.
+        // counted, not advised: no posture reading and no posture observation
         #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
         #expect(CueSelector.select(from: analysis)?.kind != .torsoTiltIncreased)
         let note = try #require(diagnostics?.explanation(for: .squat, counted: 6))
@@ -83,7 +83,7 @@ nonisolated struct HipCountTests {
         #expect(count(JuryTraces.squats(reps: 6, from: 0, hidesHipsAtTheBottom: true))?.reps == 6)
     }
 
-    /// The athlete steps out of the picture for two and a half seconds between reps.
+    /// the athlete steps out of the picture for two and a half seconds between reps
     @Test func steppingOutOfViewKeepsTheRepsOnEitherSide() {
         let frames = JuryTraces.squats(reps: 3, from: 0) + JuryTraces.gap(from: 7, seconds: 2.5)
             + JuryTraces.squats(reps: 3, from: 9.5, x: 0.3)
@@ -101,7 +101,7 @@ nonisolated struct HipCountTests {
         #expect(count(frames) == nil)
     }
 
-    /// Bobbing a few centimetres, well under a shallow squat, is not counted.
+    /// bobbing a few centimetres, well under a shallow squat, is not counted
     @Test func aSmallBobIsNotASquat() {
         let frames = stride(from: 0.0, to: 12, by: JuryTraces.step).map { time in
             JuryTraces.front(time: time, down: 0.3 * (1 - cos(2 * .pi * time / 2)) / 2, legs: false)
@@ -109,7 +109,7 @@ nonisolated struct HipCountTests {
         #expect(count(frames) == nil)
     }
 
-    /// Walking up to the phone on the floor and reaching for it: the torso grows in the picture as
+    /// walking up to the phone on the floor and reaching for it: the torso grows in the picture as
     /// the hips drop. That is the set ending, not a squat.
     @Test func reachingForThePhoneIsNotASquat() {
         let squats = JuryTraces.squats(reps: 4, from: 0)
@@ -148,7 +148,7 @@ nonisolated struct LiveCountRecoveryTests {
         return monitor.countedReps
     }
 
-    /// Three squats with the legs in view, then four after turning, the knees and ankles lost. The
+    /// three squats with the legs in view, then four after turning, the knees and ankles lost. The
     /// whole set so far fell under the 65% the side rubric needs, and the count froze at 3.
     @Test func theCountGoesOnAfterTheLegsAreLost() {
         let frames = JuryTraces.squats(reps: 3, from: 0, standing: 0, legs: true)
@@ -156,15 +156,15 @@ nonisolated struct LiveCountRecoveryTests {
         #expect(liveCount(frames) == 7)
     }
 
-    /// Out of the picture for two and a half seconds, then back a step to the side: a gap longer than
-    /// the 0.75 s the side rubric allows refused the set so far, and nothing more was counted.
+    /// out of the picture for two and a half seconds, then back a step to the side: a gap longer than
+    /// the 0.75 s the side rubric allows refused the set so far, and nothing more was counted
     @Test func theCountResumesAfterTheAthleteStepsOutAndBack() {
         let frames = JuryTraces.squats(reps: 3, from: 0, legs: true) + JuryTraces.gap(from: 7, seconds: 2.5)
             + JuryTraces.squats(reps: 3, from: 9.5, legs: true, x: 0.4)
         #expect(liveCount(frames) == 6)
     }
 
-    /// The live count and the result agree on the same capture.
+    /// the live count and the result agree on the same capture
     @Test func theResultCountsWhatTheLiveCountSaid() {
         let frames = JuryTraces.squats(reps: 3, from: 0, standing: 0, legs: true)
             + JuryTraces.squats(reps: 4, from: 6)
@@ -177,7 +177,7 @@ nonisolated struct LiveCountRecoveryTests {
 }
 
 nonisolated struct SetWindowSideTests {
-    /// In position with the left side followed, then turned: the left hip is unclear, the right one
+    /// in position with the left side followed, then turned: the left hip is unclear, the right one
     /// clear at the same place. The athlete is still at their spot, not unseen.
     @Test func turningKeepsTheAthleteAtTheirSpot() throws {
         let inPosition = CaptureTraces.squats(reps: 0, from: 0, standing: 2)
@@ -204,7 +204,7 @@ nonisolated struct AthleteRelocationTests {
         ]
     }
 
-    /// During a set the athlete walks out of the picture and comes back a metre to the side. Before,
+    /// during a set the athlete walks out of the picture and comes back a metre to the side. Before,
     /// they were never followed again and only a new set counted.
     @Test func aLockedTrackerFindsTheAthleteBackAfterTheyStepOutOfView() {
         var tracker = AthleteTracker()
@@ -213,15 +213,15 @@ nonisolated struct AthleteRelocationTests {
         for tenth in 1...14 {
             #expect(tracker.select([], aspectRatio: 1, time: Double(tenth) / 10) == nil)
         }
-        // Back at another place, soon after: not yet taken for the athlete.
+        // back at another place, soon after: not yet taken for the athlete
         #expect(tracker.select([person(x: 0.2)], aspectRatio: 1, time: 1.5) == nil)
-        // Once `relocateAfter` has passed, the lone person is the athlete again, and then followed.
+        // once `relocateAfter` has passed, the lone person is the athlete again, and then followed
         #expect(tracker.select([person(x: 0.2)], aspectRatio: 1, time: AthleteTracker.relocateAfter + 0.1) == 0)
         #expect(tracker.select([person(x: 0.21)], aspectRatio: 1, time: AthleteTracker.relocateAfter + 0.2) == 0)
         #expect(tracker.isLocked)
     }
 
-    /// Two people in view after the athlete came back: Plumb cannot tell which one is them, and waits.
+    /// two people in view after the athlete came back: Plumb cannot tell which one is them, and waits
     @Test func withSomeoneElseInViewTheTrackerStillWaits() {
         var tracker = AthleteTracker()
         _ = tracker.select([person(x: 0.5)], aspectRatio: 1, time: 0)

@@ -1,16 +1,16 @@
 import Foundation
 
-/// How one per-frame number is read from 2D pose points. Rep phases are detected on this signal.
+/// how one per-frame number is read from 2D pose points. Rep phases are detected on this signal.
 nonisolated enum MovementSignal: Equatable, Sendable {
-    /// Downward travel of `joint` from its starting height, divided by the starting vertical
+    /// downward travel of `joint` from its starting height, divided by the starting vertical
     /// distance from `joint` to `reference`. The squat uses hip travel over standing leg length.
     case verticalTravel(joint: JointRole, reference: JointRole)
-    /// Degrees that the angle at `vertex`, between `from` and `to`, closes from its starting value.
+    /// degrees that the angle at `vertex`, between `from` and `to`, closes from its starting value
     case jointBend(from: JointRole, vertex: JointRole, to: JointRole)
-    /// Upward travel of `joint` from its lowest position, divided by its largest distance below
+    /// upward travel of `joint` from its lowest position, divided by its largest distance below
     /// `reference`. Pull-ups use shoulder rise over arm length, with the hands on the bar.
     case verticalRise(joint: JointRole, reference: JointRole)
-    /// Downward travel of the trunk from its highest position. Push-ups whose elbows and wrists the
+    /// downward travel of the trunk from its highest position. Push-ups whose elbows and wrists the
     /// side-view rubric cannot read follow the shoulders' midpoint, in image widths; squats whose
     /// knees and ankles it cannot read follow the hips, in torso lengths. Both count sets filmed
     /// from the front or with the phone on the floor.
@@ -26,14 +26,14 @@ nonisolated enum MovementSignal: Equatable, Sendable {
     }
 }
 
-/// The camera view a rubric was written for. Other views make its 2D measurements unreliable.
+/// the camera view a rubric was written for. Other views make its 2D measurements unreliable.
 nonisolated enum ExpectedView: String, Equatable, Sendable {
     case side
-    /// Pull-ups and muscle-ups: the shoulders' rise toward the hands reads the same from the
-    /// side, the front or the back, so the 3D check never asks to turn.
+    /// pull-ups and muscle-ups: the shoulders' rise toward the hands reads the same from the
+    /// side, the front or the back, so the 3D check never asks to turn
     case any
 
-    /// Framing prompt when Vision 3D pose sees the person from another angle.
+    /// framing prompt when Vision 3D pose sees the person from another angle
     var turnPrompt: String {
         switch self {
         case .side: String(localized: "Turn a little: side to the camera")
@@ -41,7 +41,7 @@ nonisolated enum ExpectedView: String, Equatable, Sendable {
         }
     }
 
-    /// Retake reason when the 3D estimates show the person clearly facing the camera for several seconds.
+    /// retake reason when the 3D estimates show the person clearly facing the camera for several seconds
     var wrongViewMessage: String {
         switch self {
         case .side: String(localized: "This exercise needs a side view. Turn so your side faces the camera, then try again.")
@@ -51,13 +51,13 @@ nonisolated enum ExpectedView: String, Equatable, Sendable {
 }
 
 nonisolated enum RangeUnit: Equatable, Sendable {
-    /// A fraction of a body length seen by the camera, such as hip travel over leg length.
+    /// a fraction of a body length seen by the camera, such as hip travel over leg length
     case bodyLengthFraction
-    /// Degrees of joint bend from the starting position.
+    /// degrees of joint bend from the starting position
     case degrees
 }
 
-/// Joints that must stay visible on one body side, plus a joint that should stay still in frame
+/// joints that must stay visible on one body side, plus a joint that should stay still in frame
 /// (planted feet or hands). Movement of that anchor means the phone or the person moved.
 nonisolated struct EvidenceRequirement: Equatable, Sendable {
     let joints: [JointRole]
@@ -68,25 +68,25 @@ nonisolated struct EvidenceRequirement: Equatable, Sendable {
     func joints(on side: BodySide) -> [BodyJoint] { joints.map { $0.joint(on: side) } }
 }
 
-/// The two phases of a rep, expressed as travel away from the starting (top) position.
+/// the two phases of a rep, expressed as travel away from the starting (top) position.
 /// The set must start in the top phase; the first frames set the baseline.
 nonisolated struct RepPhases: Equatable, Sendable {
-    /// Travel at which the person has left the top phase and a rep may begin.
+    /// travel at which the person has left the top phase and a rep may begin
     let leaveTop: Double
-    /// Smallest travel that reaches the bottom phase. Shallower movements are not counted.
+    /// smallest travel that reaches the bottom phase. Shallower movements are not counted.
     let reachBottom: Double
-    /// Drop from the deepest point that marks the way back up.
+    /// drop from the deepest point that marks the way back up
     let returnFromBottom: Double
-    /// Travel at or below which the person is back in the top phase and the rep ends.
+    /// travel at or below which the person is back in the top phase and the rep ends
     let backAtTop: Double
     let minimumDuration: TimeInterval
     let maximumDuration: TimeInterval
 }
 
-/// Every sentence an exercise shows. Squat copy matches the original squat-only build word for word.
+/// every sentence an exercise shows. Squat copy matches the original squat-only build word for word.
 nonisolated struct ExerciseCopy: Equatable, Sendable {
     let name: String
-    /// Lowercase noun used in shared text, such as "Plumb squat set".
+    /// lowercase noun used in shared text, such as "Plumb squat set"
     let shareNoun: String
     let setupTitle: String
     let placementTitle: String
@@ -97,38 +97,38 @@ nonisolated struct ExerciseCopy: Equatable, Sendable {
     let checkingVisibility: String
     let showJoints: String
     let jointsVisible: String
-    /// Shown when too few frames carry the joints the signal needs.
+    /// shown when too few frames carry the joints the signal needs
     let keepJointsVisible: String
-    /// Shown when the tracked body segment is too small to measure.
+    /// shown when the tracked body segment is too small to measure
     let bodyTooSmall: String
     let retakeHint: String
     let noCompleteReps: String
-    /// Noun for the measured range in comparisons, such as "range" or "elbow bend".
+    /// noun for the measured range in comparisons, such as "range" or "elbow bend"
     let rangeNoun: String
     let moreRange: String
     let lessRange: String
     let observation: String
     let nextAction: String
     let rangeExplanation: String
-    /// Rep accessibility description of the range value.
+    /// rep accessibility description of the range value
     let rangeAccessibilityName: String
 
-    /// Said during a set when a rep's range is clearly shorter than the first reps, such as
-    /// "Range is shorter" or "Elbow bend is smaller".
+    /// said during a set when a rep's range is clearly shorter than the first reps, such as
+    /// "Range is shorter" or "Elbow bend is smaller"
     var liveShorterCue: String {
         let noun = rangeNoun.prefix(1).uppercased() + rangeNoun.dropFirst()
         return String(localized: "\(noun) is \(lessRange)")
     }
 }
 
-/// A within-person posture change, not an absolute standard of correct technique.
+/// a within-person posture change, not an absolute standard of correct technique
 nonisolated struct PostureRule: Equatable, Sendable {
     let cueKind: CueKind
     let minimumIncrease: Double
     let observation: String
     let nextAction: String
 
-    /// The change in a few words, for the most-frequent-pattern summary.
+    /// the change in a few words, for the most-frequent-pattern summary
     var title: String {
         switch cueKind {
         case .torsoTiltIncreased: "Torso tilting farther at the end of the set"
@@ -143,7 +143,7 @@ nonisolated struct PostureRule: Equatable, Sendable {
     }
 }
 
-/// One exercise rubric as data: what to track, how a rep moves, which view it needs, and what to say.
+/// one exercise rubric as data: what to track, how a rep moves, which view it needs, and what to say.
 /// Thresholds are product hypotheses for a within-person comparison, not validated standards.
 nonisolated struct ExerciseDefinition: Equatable, Sendable {
     let kind: ExerciseKind
@@ -153,12 +153,12 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
     let signal: MovementSignal
     let phases: RepPhases
     let rangeUnit: RangeUnit
-    /// Range that fills the rep bar in the result list.
+    /// range that fills the rep bar in the result list
     let rangeDisplayScale: Double
-    /// Smallest baseline body length (verticalTravel, in image-height units) or limb segment
-    /// (jointBend, in image-width units) that Plumb will measure.
+    /// smallest baseline body length (verticalTravel, in image-height units) or limb segment
+    /// (jointBend, in image-width units) that Plumb will measure
     let minimumBodyScale: Double
-    /// Folder name and label used by the optional Create ML exercise classifier.
+    /// folder name and label used by the optional Create ML exercise classifier
     let classifierLabel: String
     let posture: PostureRule
     let copy: ExerciseCopy
@@ -187,7 +187,7 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
         }
     }
 
-    /// A depth in words, such as "hips 11% of leg length down" or "elbow bent 28°".
+    /// a depth in words, such as "hips 11% of leg length down" or "elbow bent 28°"
     func formattedDepth(_ value: Double) -> String {
         switch (rangeUnit, signal) {
         case (_, .shoulderDrop) where kind == .bodyweightSquat:
@@ -224,7 +224,7 @@ nonisolated extension ExerciseKind {
 }
 
 nonisolated extension ExerciseDefinition {
-    /// Side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v7`).
+    /// side-view bodyweight squat. Values come from `SquatRubric` (`squat-side-v7`).
     static let squat = ExerciseDefinition(
         kind: .bodyweightSquat,
         rubricVersion: SquatRubric.version,
@@ -274,14 +274,14 @@ nonisolated extension ExerciseDefinition {
         )
     )
 
-    /// The least a push-up may take, from leaving the top to being 65% of the way back up. A rep
+    /// the least a push-up may take, from leaving the top to being 65% of the way back up. A rep
     /// is already required to bend the elbow 40° (or drop the shoulders 55% of the set's travel), which
     /// Vision's jitter does not do; the tempo floor only has to reject a flicker. At 0.4 s, 15 of
     /// Guilhem's fast push-ups on 15 October (about 0.65 s a cycle, so under 0.4 s measured this way)
     /// were refused as "faster than 0.4 s" while the live count had said them.
     static let minimumPushUpDuration: TimeInterval = 0.25
 
-    /// Side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.
+    /// side-view push-up, measured as elbow bend (shoulder, elbow, wrist). Hands stay planted.
     static let pushUp = ExerciseDefinition(
         kind: .pushUp,
         rubricVersion: "push-up-side-v7",
@@ -325,7 +325,7 @@ nonisolated extension ExerciseDefinition {
         )
     )
 
-    /// Push-up counted from the shoulders going down and up, when the side-view rubric cannot read
+    /// push-up counted from the shoulders going down and up, when the side-view rubric cannot read
     /// the arms: filmed from the front, or too close for the elbow and wrist to stay in the picture.
     /// Not in `all`: the person never picks it, `ExerciseAnalyzer` falls back to it. The rep phases
     /// are set per set from the shoulders' own travel (`withPhases`), so the phone can stand a
@@ -347,7 +347,7 @@ nonisolated extension ExerciseDefinition {
         copy: ExerciseDefinition.pushUp.copy
     )
 
-    /// Squat counted from the hips going down and up, when the side-view rubric cannot read the
+    /// squat counted from the hips going down and up, when the side-view rubric cannot read the
     /// knee and ankle: filmed from the front or at an angle, with the phone low and the feet at the
     /// picture's edge, or with the athlete stepping out of the picture for a moment. The shoulders
     /// stand in for the hips when Vision loses them. Heights are in torso lengths, so the phone may
@@ -379,8 +379,8 @@ nonisolated extension ExerciseDefinition {
                            classifierLabel: classifierLabel, posture: posture, copy: copy)
     }
 
-    /// Side-view static lunge (split squat): feet stay planted, measured as knee bend on the
-    /// camera-facing leg (hip, knee, ankle).
+    /// side-view static lunge (split squat): feet stay planted, measured as knee bend on the
+    /// camera-facing leg (hip, knee, ankle)
     static let staticLunge = ExerciseDefinition(
         kind: .staticLunge,
         rubricVersion: "static-lunge-side-v6",
@@ -424,7 +424,7 @@ nonisolated extension ExerciseDefinition {
         )
     )
 
-    /// Side-view stiff-leg deadlift, measured as hip hinge (shoulder, hip, knee). Feet stay planted.
+    /// side-view stiff-leg deadlift, measured as hip hinge (shoulder, hip, knee). Feet stay planted.
     static let stiffLegDeadlift = ExerciseDefinition(
         kind: .stiffLegDeadlift,
         rubricVersion: "stiff-leg-deadlift-side-v6",
@@ -468,7 +468,7 @@ nonisolated extension ExerciseDefinition {
         )
     )
 
-    /// Pull-up from any view, measured as how far the shoulders rise from the hang, as a share of
+    /// pull-up from any view, measured as how far the shoulders rise from the hang, as a share of
     /// the arm's length, with the hands on the bar staying still. Grip (overhand, underhand,
     /// neutral) cannot be seen in 2D pose, so Plumb does not name it.
     static let pullUp = ExerciseDefinition(
@@ -514,7 +514,7 @@ nonisolated extension ExerciseDefinition {
         )
     )
 
-    /// Bar muscle-up from any view: the same rise as a pull-up, but at least 1.2 arm lengths from
+    /// bar muscle-up from any view: the same rise as a pull-up, but at least 1.2 arm lengths from
     /// the hang, which puts the shoulders above the hands. A pull-up, however high, stays below.
     static let muscleUp = ExerciseDefinition(
         kind: .muscleUp,

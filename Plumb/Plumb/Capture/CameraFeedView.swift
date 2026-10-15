@@ -1,7 +1,7 @@
 import AVFoundation
 import SwiftUI
 
-/// The camera picture with the live skeleton on top. Both are drawn in the same box, so the
+/// the camera picture with the live skeleton on top. Both are drawn in the same box, so the
 /// skeleton stays on the body when the picture is mirrored or turned.
 struct CameraFeedView: View {
     let model: WorkoutSessionModel
@@ -29,7 +29,7 @@ struct CameraFeedView: View {
     }
 }
 
-/// Bones and joints of the tracked person: white when Vision is sure of them, orange when the
+/// bones and joints of the tracked person: white when Vision is sure of them, orange when the
 /// analysis would ignore them, with the measured angle beside the key joint. Other people are
 /// drawn thin and grey.
 private struct SkeletonOverlay: View {
@@ -58,7 +58,7 @@ private struct SkeletonOverlay: View {
     }
 }
 
-/// Draws a `SkeletonGeometry`: clear bones and joints in `clear`, unclear ones orange and dashed,
+/// draws a `SkeletonGeometry`: clear bones and joints in `clear`, unclear ones orange and dashed,
 /// other people thin and grey, and the angle in a badge beside its joint.
 enum SkeletonPainter {
     static func draw(_ geometry: SkeletonGeometry, in context: inout GraphicsContext, size canvas: CGSize,
@@ -95,7 +95,7 @@ enum SkeletonPainter {
                 .foregroundStyle(angle.reliable ? labelText : Color.white)
             let resolved = context.resolve(text)
             let size = resolved.measure(in: CGSize(width: 200, height: 40))
-            // Right of the joint, or left of it near the right edge, and always inside the canvas.
+            // right of the joint, or left of it near the right edge, and always inside the canvas.
             let offset = 14 + size.width / 2
             let fitsRight = angle.vertex.x + offset + size.width / 2 + 8 <= canvas.width
             let halfBadge = size.width / 2 + 8
@@ -111,7 +111,7 @@ enum SkeletonPainter {
     }
 }
 
-/// Shows the frames the analysis receives, and reports the phone's rotation to the feed.
+/// shows the frames the analysis receives, and reports the phone's rotation to the feed.
 private struct FeedDisplay: UIViewRepresentable {
     let feed: PreviewFeed
 
@@ -165,7 +165,7 @@ final class FeedDisplayView: UIView {
         guard let device = feed.device else { return }
         let coordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: displayLayer)
         rotationCoordinator = coordinator
-        // Updates arrive on the main queue.
+        // updates arrive on the main queue.
         let report: (AVCaptureDevice.RotationCoordinator) -> Void = { [weak feed] coordinator in
             MainActor.assumeIsolated {
                 feed?.rotationChanged(capture: coordinator.videoRotationAngleForHorizonLevelCapture,

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Asked once, after the first measured set filmed with the camera: whether Plumb may read Health to
+/// asked once, after the first measured set filmed with the camera: whether Plumb may read Health to
 /// adapt its advice. "Yes, personalize" opens Health's permission sheet; "Later" leaves everything off
 /// (Options keeps the switch).
 struct PersonalizationOfferView: View {

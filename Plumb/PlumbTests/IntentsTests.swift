@@ -3,8 +3,8 @@ import SwiftUI
 import Testing
 @testable import Plumb
 
-/// The Siri side of Plumb: what "How did my last set go" says, what "Start a set" asks the app to
-/// do, and when the app may act on it.
+/// the Siri side of Plumb: what "How did my last set go" says, what "Start a set" asks the app to
+/// do, and when the app may act on it
 nonisolated struct IntentsTests {
     private static let now = Date(timeIntervalSince1970: 1_792_051_200) // 15 Oct 2026, 10:00 CEST
     private static let calendar: Calendar = {
@@ -47,7 +47,7 @@ nonisolated struct IntentsTests {
         let older = set(.pushUp, reps: 12, minutesAgo: 60 * 24)
         let latest = set(.pullUp, reps: 5, minutesAgo: 20, observation: "Chin passed the hands on 4 of 5 reps.")
         let middle = set(.bodyweightSquat, reps: 9, minutesAgo: 30)
-        // Sessions are listed newest first in the app, but the report must not rely on that.
+        // sessions are listed newest first in the app, but the report must not rely on that
         let report = LastSetReport.latest(in: sessions([older], [middle, latest]))
         #expect(report?.exercise == .pullUp)
         #expect(report?.reps == 5)
@@ -146,7 +146,7 @@ nonisolated struct IntentsTests {
         #expect(!SiriLaunchRequests.canApply(.showHistory, at: .result))
     }
 
-    /// Draws the Siri card to a PNG next to the test results, for a look without a device.
+    /// draws the Siri card to a PNG next to the test results, for a look without a device
     @Test @MainActor func snippetRenders() throws {
         let report = LastSetReport.latest(in: sessions([
             set(reps: 8, minutesAgo: 20, observation: "Squat depth was shallower on reps 5 and 6 than on your first reps.")

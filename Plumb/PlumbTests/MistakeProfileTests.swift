@@ -38,7 +38,7 @@ nonisolated struct MistakeProfileTests {
     }
 
     @Test func aRarePatternInManySetsIsNotAFocus() {
-        // Two of ten sets is under the 30% share.
+        // two of ten sets is under the 30% share
         var sets = (0..<8).map { set(issues: [], minutesAgo: Double($0)) }
         sets += [set(issues: [.outsideTempo], minutesAgo: 20), set(issues: [.outsideTempo], minutesAgo: 21)]
         #expect(MistakeProfile.make(history: history(sets), exercise: .bodyweightSquat) == nil)

@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Plumb
 
-/// A standing person drawn as six joints, `height` tall (normalized), centred at `x`.
+/// a standing person drawn as six joints, `height` tall (normalised), centred at `x`
 nonisolated private func person(x: Double, top: Double = 0.3, height: Double = 0.6,
                     confidence: Double = 0.9) -> [BodyJoint: JointPoint] {
     let hip = top + height * 0.5
@@ -18,7 +18,7 @@ nonisolated private func person(x: Double, top: Double = 0.3, height: Double = 0
     ]
 }
 
-/// A side-view plank under where `person(x: 0.5)` stands.
+/// a side-view plank under where `person(x: 0.5)` stands
 nonisolated private let plank: [BodyJoint: JointPoint] = [
     .leftShoulder: JointPoint(x: 0.30, y: 0.72, confidence: 0.8),
     .leftElbow: JointPoint(x: 0.31, y: 0.80, confidence: 0.8),
@@ -40,17 +40,17 @@ nonisolated struct AthleteTrackerTests {
         var tracker = AthleteTracker()
         #expect(tracker.select([person(x: 0.5)], aspectRatio: 16.0 / 9, time: 0) == 0)
         tracker.lock()
-        // A slightly larger passer-by walks from the left edge to the right edge behind the athlete.
+        // a slightly larger passer-by walks from the left edge to the right edge behind the athlete
         for step in 0...20 {
             let walker = person(x: 0.05 + 0.045 * Double(step), top: 0.25, height: 0.62)
             let order = step.isMultiple(of: 2) ? [walker, person(x: 0.5)] : [person(x: 0.5), walker]
             let picked = tracker.select(order, aspectRatio: 16.0 / 9, time: 0.1 * Double(step + 1))
             if let picked {
-                // Whenever the tracker answers, it is the athlete, never the walker.
+                // whenever the tracker answers, it is the athlete, never the walker
                 #expect(abs((order[picked][.leftKnee]?.x ?? 0) - 0.5) < 0.001, "step \(step)")
             }
         }
-        // Once the walker has left, the athlete is found again.
+        // once the walker has left, the athlete is found again
         #expect(tracker.select([person(x: 0.5)], aspectRatio: 16.0 / 9, time: 3) == 0)
     }
 
@@ -58,14 +58,14 @@ nonisolated struct AthleteTrackerTests {
         var tracker = AthleteTracker()
         _ = tracker.select([person(x: 0.5)], aspectRatio: 1, time: 0)
         tracker.lock()
-        // The athlete is hidden; only someone across the room is visible, for five seconds.
+        // the athlete is hidden; only someone across the room is visible, for five seconds
         for tenth in 1...50 {
             #expect(tracker.select([person(x: 0.15)], aspectRatio: 1, time: Double(tenth) / 10) == nil)
         }
         #expect(tracker.select([person(x: 0.15), person(x: 0.51)], aspectRatio: 1, time: 5.1) == 1)
     }
 
-    /// Getting down into a push-up: Vision misses the athlete for 0.6 s and finds them again in a
+    /// getting down into a push-up: Vision misses the athlete for 0.6 s and finds them again in a
     /// plank, far from where they stood. Alone in view and where they were, they are the athlete.
     @Test func lockedTrackerPicksUpTheAthleteAfterAPoseChange() {
         var tracker = AthleteTracker()
@@ -73,16 +73,16 @@ nonisolated struct AthleteTrackerTests {
         _ = tracker.select([standing], aspectRatio: 1, time: 0)
         tracker.lock()
         #expect(tracker.select([], aspectRatio: 1, time: 0.3) == nil)
-        // Back in view but far from the remembered joints: not yet.
+        // back in view but far from the remembered joints: not yet
         #expect(tracker.select([plank], aspectRatio: 1, time: 0.6) == nil)
-        // After `reacquireAfter` without a match, the lone person at the athlete's spot is the athlete.
+        // after `reacquireAfter` without a match, the lone person at the athlete's spot is the athlete
         #expect(tracker.select([plank], aspectRatio: 1, time: 1.2) == 0)
         #expect(tracker.isLocked)
-        // And then followed as usual.
+        // and then followed as usual
         #expect(tracker.select([plank], aspectRatio: 1, time: 1.3) == 0)
     }
 
-    /// A coach stands beyond the head of an athlete in a plank; Vision loses the athlete for a
+    /// a coach stands beyond the head of an athlete in a plank; Vision loses the athlete for a
     /// moment. The coach, already known as someone else, is never taken for the athlete.
     @Test func lockedTrackerDoesNotTakeTheCoachBesideALostAthlete() {
         var tracker = AthleteTracker()
@@ -91,11 +91,11 @@ nonisolated struct AthleteTrackerTests {
             #expect(tracker.select([plank, coach], aspectRatio: 1, time: Double(tenth) / 10) == 0)
             if tenth == 0 { tracker.lock() }
         }
-        // The athlete is not detected; only the coach is.
+        // the athlete is not detected; only the coach is
         for tenth in 11...40 {
             #expect(tracker.select([coach], aspectRatio: 1, time: Double(tenth) / 10) == nil)
         }
-        // The athlete is back, and the tracker follows them, not the coach.
+        // the athlete is back, and the tracker follows them, not the coach
         #expect(tracker.select([coach, plank], aspectRatio: 1, time: 4.1) == 1)
     }
 
@@ -103,12 +103,12 @@ nonisolated struct AthleteTrackerTests {
         var tracker = AthleteTracker()
         _ = tracker.select([person(x: 0.5)], aspectRatio: 1, time: 0)
         tracker.lock()
-        // Someone in a plank where the athlete was, and someone else across the room: Plumb cannot tell
-        // which one is the athlete, so it waits.
+        // someone in a plank where the athlete was, and someone else across the room: Plumb cannot tell
+        // which one is the athlete, so it waits
         for tenth in 1...30 {
             #expect(tracker.select([plank, person(x: 0.15)], aspectRatio: 1, time: Double(tenth) / 10) == nil)
         }
-        // Alone, that person is picked up.
+        // alone, that person is picked up
         #expect(tracker.select([plank], aspectRatio: 1, time: 3.1) == 0)
     }
 
@@ -116,17 +116,17 @@ nonisolated struct AthleteTrackerTests {
         var tracker = AthleteTracker()
         let early = person(x: 0.25, top: 0.45, height: 0.3)
         #expect(tracker.select([early], aspectRatio: 1, time: 0) == 0)
-        // The athlete steps into the middle, much larger than the first person.
+        // the athlete steps into the middle, much larger than the first person
         #expect(tracker.select([early, person(x: 0.5, top: 0.2, height: 0.7)], aspectRatio: 1, time: 0.1) == 1)
     }
 
-    /// While framing, the athlete at their spot is followed; a partner much closer to the phone,
+    /// while framing, the athlete at their spot is followed; a partner much closer to the phone,
     /// legs out of the picture, comes into view. A person only partly in view never takes over:
     /// before, the athlete lost the track on the first frame and the set could not start.
     @Test func beforeASetSomeonePartlyInViewDoesNotTakeOver() {
         var tracker = AthleteTracker()
         let athlete = person(x: 0.5, top: 0.45, height: 0.35)
-        // Shoulders to hips, about a metre from the phone: twice as prominent, no legs in view.
+        // shoulders to hips, about a metre from the phone: twice as prominent, no legs in view
         let partner: [BodyJoint: JointPoint] = [
             .leftShoulder: JointPoint(x: 0.18, y: 0.10, confidence: 0.9),
             .rightShoulder: JointPoint(x: 0.38, y: 0.10, confidence: 0.9),
@@ -143,7 +143,7 @@ nonisolated struct AthleteTrackerTests {
         }
     }
 
-    /// Someone in full view walks past close to the phone for half a second: the athlete keeps the track.
+    /// someone in full view walks past close to the phone for half a second: the athlete keeps the track
     @Test func beforeASetSomeoneBrieflyMoreProminentDoesNotTakeOver() {
         var tracker = AthleteTracker()
         let athlete = person(x: 0.5, top: 0.45, height: 0.35)
@@ -157,7 +157,7 @@ nonisolated struct AthleteTrackerTests {
         #expect(tracker.select([athlete], aspectRatio: 1, time: 2.6) == 0)
     }
 
-    /// Someone else was followed before the athlete came into view. Once the athlete, in full view,
+    /// someone else was followed before the athlete came into view. Once the athlete, in full view,
     /// has been clearly more prominent for a second, they take over.
     @Test func beforeASetSomeoneInFullViewAndClearlyMoreProminentTakesOverAfterASecond() {
         var tracker = AthleteTracker()
@@ -188,8 +188,8 @@ nonisolated struct AthleteTrackerTests {
 }
 
 nonisolated struct TrackedSetEvidenceTests {
-    /// A tracked 10-rep squat with a bystander in every frame, and the athlete hidden by them
-    /// between `hiddenFrom` and `hiddenTo` seconds.
+    /// a tracked 10-rep squat with a bystander in every frame, and the athlete hidden by them
+    /// between `hiddenFrom` and `hiddenTo` seconds
     private func trackedSquat(hiddenFrom: Double = .infinity, hiddenTo: Double = .infinity,
                               bystanders: Bool = true) -> [PoseFrame] {
         (0...300).map { index -> PoseFrame in
@@ -198,7 +198,7 @@ nonisolated struct TrackedSetEvidenceTests {
             let athlete = squatFrame(time: time, hipY: hipY)
             let others = bystanders ? [person(x: 0.15 + 0.03 * time.truncatingRemainder(dividingBy: 10))] : []
             if time >= hiddenFrom && time < hiddenTo {
-                // Whoever hides the athlete stands in front of them, where the athlete was.
+                // whoever hides the athlete stands in front of them, where the athlete was
                 let inFront = bystanders ? [person(x: 0.52)] : []
                 return PoseFrame(time: time, subjectCount: inFront.count, joints: [:],
                                  athleteTracking: .hidden, bystanders: inFront)
@@ -218,12 +218,12 @@ nonisolated struct TrackedSetEvidenceTests {
     }
 
     @Test func someoneWalkingInFrontForTwoSecondsIsBridged() {
-        // Hidden from 4.5 s to 6.5 s: across the bottom of one rep and the next.
+        // hidden from 4.5 s to 6.5 s: across the bottom of one rep and the next
         guard case .analyzed(let analysis) = SquatAnalyzer.analyze(trackedSquat(hiddenFrom: 4.5, hiddenTo: 6.5)) else {
             Issue.record("A two-second occlusion must not cancel the set")
             return
         }
-        // No rep is invented while the athlete is hidden; at most the one cut by the gap is lost.
+        // no rep is invented while the athlete is hidden; at most the one cut by the gap is lost
         #expect((9...10).contains(analysis.reps.count), "counted \(analysis.reps.count)")
     }
 
@@ -232,12 +232,12 @@ nonisolated struct TrackedSetEvidenceTests {
             Issue.record("Four seconds without the athlete must be refused")
             return
         }
-        // Last seen at frame 119 (7.93 s), seen again at frame 180 (12.0 s).
+        // last seen at frame 119 (7.93 s), seen again at frame 180 (12.0 s)
         #expect(reason.hasPrefix("Someone else was in view and Plumb lost you for 4.1 s, starting 7.9 s into the set."))
     }
 
-    /// Someone standing at the far side of the room does not excuse losing the athlete: only a
-    /// person in front of them does.
+    /// someone standing at the far side of the room does not excuse losing the athlete: only a
+    /// person in front of them does
     @Test func aDistantBystanderKeepsTheShortLimit() {
         let frames = trackedSquat().map { frame -> PoseFrame in
             guard frame.time >= 7.0 && frame.time < 9.8 else { return frame }
@@ -251,7 +251,7 @@ nonisolated struct TrackedSetEvidenceTests {
         #expect(reason.hasPrefix("Tracking was lost during the set."))
     }
 
-    /// Someone in front of the athlete but a few centimetres off the line of their leg still hides them.
+    /// someone in front of the athlete but a few centimetres off the line of their leg still hides them
     @Test func someoneInFrontSlightlyOffTheLegStillCountsAsHidingTheAthlete() {
         let frames = trackedSquat().map { frame -> PoseFrame in
             guard frame.time >= 4.5 && frame.time < 6.5 else { return frame }

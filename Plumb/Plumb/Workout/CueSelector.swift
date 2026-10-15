@@ -1,7 +1,7 @@
 import Foundation
 
 nonisolated enum CueSelector {
-    /// At most one observation. Prefer a supported posture change when rep range is comparable;
+    /// at most one observation. Prefer a supported posture change when rep range is comparable;
     /// otherwise retain the existing within-set range observation.
     static func select(from analysis: SetAnalysis,
                        exercise definition: ExerciseDefinition = .squat) -> Cue? {

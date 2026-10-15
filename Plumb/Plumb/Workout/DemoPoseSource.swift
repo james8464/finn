@@ -2,16 +2,16 @@
 import AVFoundation
 import Foundation
 
-/// Deterministic launch-argument input for simulator UI tests; never used in a normal launch.
+/// deterministic launch-argument input for simulator UI tests; never used in a normal launch
 @MainActor
 final class DemoPoseSource: PoseStreaming {
     let previewSession = AVCaptureSession()
     private let startError: CameraSourceError?
-    /// Synthetic 3D profile deviation attached to every fourth frame, to exercise the angle check.
+    /// synthetic 3D profile deviation attached to every fourth frame, to exercise the angle check
     private let profileDeviation: Double?
     private let missingWrist: Bool
     /// `-plumb-ui-demo-form-fault`: every rep shows one form fault, so the live advice appears from
-    /// the second rep (the squat's chest drops forward, the push-up's hips sag).
+    /// the second rep (the squat's chest drops forward, the push-up's hips sag)
     private let formFault: Bool
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var feedTask: Task<Void, Never>?
@@ -117,7 +117,7 @@ final class DemoPoseSource: PoseStreaming {
                 .leftWrist: point(shoulderX, shoulderY + 0.24),
             ]
         case .pullUp, .muscleUp:
-            // Side view, hands on a bar at y 0.30, arm length 0.16 of the frame height.
+            // side view, hands on a bar at y 0.30, arm length 0.16 of the frame height
             let full = exercise == .pullUp ? 0.9 : 1.9
             let rise = (setNumber == 1 && late ? full * 0.75 : full) * motion * 0.16
             let shoulderY = 0.46 - rise
@@ -133,7 +133,7 @@ final class DemoPoseSource: PoseStreaming {
         if formFault {
             switch exercise {
             case .bodyweightSquat:
-                // Shoulders tipping 60° forward at the bottom, far past the near-upright shins.
+                // shoulders tipping 60° forward at the bottom, far past the near-upright shins
                 let lean = 60 * motion * .pi / 180
                 for (hip, shoulder) in [(BodyJoint.leftHip, BodyJoint.leftShoulder), (.rightHip, .rightShoulder)] {
                     if let point = joints[hip] {
@@ -142,7 +142,7 @@ final class DemoPoseSource: PoseStreaming {
                     }
                 }
             case .pushUp:
-                // Hips 0.07 of the picture below the shoulder-to-ankle line, about a third of a torso length.
+                // hips 0.07 of the picture below the shoulder-to-ankle line, about a third of a torso length
                 if let shoulder = joints[.leftShoulder], let ankle = joints[.leftAnkle] {
                     joints[.leftHip] = point(shoulder.x + 0.45 * (ankle.x - shoulder.x),
                                              shoulder.y + 0.45 * (ankle.y - shoulder.y) + 0.07)
@@ -160,7 +160,7 @@ final class DemoPoseSource: PoseStreaming {
     }
 }
 
-/// Debug-only stand-in for a trained exercise classifier, so UI tests can reach the recognition
+/// debug-only stand-in for a trained exercise classifier, so UI tests can reach the recognition
 /// path. It ignores the poses and always answers "squat". It is not a model and measures nothing.
 nonisolated final class DemoExerciseClassifier: ExerciseClassifying {
     let windowLength = 30

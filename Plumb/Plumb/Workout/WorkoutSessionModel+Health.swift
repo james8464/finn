@@ -3,10 +3,10 @@ import Foundation
 /// Personalize with Health: what the session model reads from Health, what it says with it, and the
 /// one-time offer after a first set. `HealthCoach` holds the rules.
 extension WorkoutSessionModel {
-    /// Health can be read on this device, for live camera sessions only.
+    /// Health can be read on this device, for live camera sessions only
     var offersHealthPersonalization: Bool { health?.isAvailable ?? false }
 
-    /// Turns personalization on or off from Options or the offer. Turning it on shows Health's sheet
+    /// turns personalisation on or off from Options or the offer. Turning it on shows Health's sheet
     /// for the types not answered yet, then reads them.
     func setPersonalizesWithHealth(_ isOn: Bool) async {
         personalizesWithHealth = isOn
@@ -19,32 +19,32 @@ extension WorkoutSessionModel {
         await refreshHealth()
     }
 
-    /// Reads Health again, when the option is on. Called when the setup screen shows.
+    /// reads Health again, when the option is on. Called when the setup screen shows.
     func refreshHealth() async {
         guard personalizesWithHealth, let health, health.isAvailable else { return }
         let snapshot = await health.snapshot(now: currentDate())
-        // The person may have turned the option off while Health was read.
+        // the person may have turned the option off while Health was read
         guard personalizesWithHealth else { return }
         healthSnapshot = snapshot
     }
 
-    /// The answer to "Make Plumb more personal?". Asked once, whatever the answer.
+    /// the answer to "Make Plumb more personal?". Asked once, whatever the answer.
     func answerPersonalizationOffer(personalize: Bool) async {
         showsPersonalizationOffer = false
         preferences.personalizationOffered = true
         if personalize { await setPersonalizesWithHealth(true) }
     }
 
-    /// After the first measured live set, offer personalization once.
+    /// after the first measured live set, offer personalisation once
     func offerPersonalizationIfDue() {
         guard offersHealthPersonalization, !personalizesWithHealth,
               !preferences.personalizationOffered else { return }
-        // Counted as asked as soon as it shows: closing it with a swipe means "Later".
+        // counted as asked as soon as it shows: closing it with a swipe means "Later"
         preferences.personalizationOffered = true
         showsPersonalizationOffer = true
     }
 
-    /// A heart rate from the Apple Watch. Kept for the set while it runs; shown during the rest after.
+    /// a heart rate from the Apple Watch. Kept for the set while it runs; shown during the rest after.
     func receiveHeartRate(_ beatsPerMinute: Double, at date: Date) {
         guard personalizesWithHealth, beatsPerMinute.isFinite, beatsPerMinute > 25, beatsPerMinute < 250 else { return }
         if let liveHeartRateAt, date < liveHeartRateAt { return }
@@ -53,19 +53,19 @@ extension WorkoutSessionModel {
         if stage == .capturing { setHeartRateReadings.append(beatsPerMinute) }
     }
 
-    /// The watch's heart rate, if it is recent enough to show.
+    /// the watch's heart rate, if it is recent enough to show
     var currentHeartRate: Int? {
         guard let liveHeartRateAt, currentDate().timeIntervalSince(liveHeartRateAt) < 20 else { return nil }
         return liveHeartRate
     }
 
-    /// Before a set: a lighter session after a short night, a heavy day or a sign of low recovery.
+    /// before a set: a lighter session after a short night, a heavy day or a sign of low recovery
     var readinessNote: HealthNote? {
         guard personalizesWithHealth, let healthSnapshot else { return nil }
         return HealthCoach.readiness(healthSnapshot)
     }
 
-    /// After a measured set: heart rate, rest, load and depth, each with the data it rests on.
+    /// after a measured set: heart rate, rest, load and depth, each with the data it rests on
     var resultHealthNotes: [HealthNote] {
         guard personalizesWithHealth, case .measured(let analysis, _) = result else { return [] }
         let snapshot = healthSnapshot

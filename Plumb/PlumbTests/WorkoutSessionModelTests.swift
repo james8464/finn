@@ -59,7 +59,7 @@ struct WorkoutSessionModelTests {
         #expect(analysis.reps.count == 6)
     }
 
-    /// Start at the phone, walk to the spot, squat, walk back to stop: measured and saved.
+    /// start at the phone, walk to the spot, squat, walk back to stop: measured and saved
     @Test func walkingToTheSpotAndBackIsMeasuredAndSaved() async throws {
         let directory = FileManager.default.temporaryDirectory
             .appending(path: "PlumbWalkTests-\(UUID().uuidString)", directoryHint: .isDirectory)
@@ -81,8 +81,8 @@ struct WorkoutSessionModelTests {
         #expect(model.history.first?.sets.count == 1)
     }
 
-    /// The phone stands a few steps away: the set starts once the athlete holds still in position
-    /// and ends once they walk back, and every rep is said aloud.
+    /// the phone stands a few steps away: the set starts once the athlete holds still in position
+    /// and ends once they walk back, and every rep is said aloud
     @Test func handsFreeSetStartsInPositionAndEndsWhenTheAthleteWalksAway() async throws {
         let source = TestPoseSource()
         let announcer = RecordingAnnouncer()
@@ -95,7 +95,7 @@ struct WorkoutSessionModelTests {
         for frame in CaptureTraces.squats(reps: 0, from: 0, standing: 2.0) { source.emit(frame) }
         try await waitUntil { model.stage == .capturing }
 
-        // The camera keeps sending frames after the athlete leaves; the set ends about 2 s later.
+        // the camera keeps sending frames after the athlete leaves; the set ends about 2 s later
         for frame in CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0, duration: 4.0) {
             source.emit(frame)
         }
@@ -111,8 +111,8 @@ struct WorkoutSessionModelTests {
         #expect(announcer.phrases.last == "6 reps measured")
     }
 
-    /// Sets with movements too shallow to count: after two of them, the next set's setup names the
-    /// pattern, and a third set showing it again says so.
+    /// sets with movements too shallow to count: after two of them, the next set's setup names the
+    /// pattern, and a third set showing it again says so
     @Test func aRecurringPatternBecomesTheFocusAndIsRecognizedAgain() async throws {
         let directory = FileManager.default.temporaryDirectory
             .appending(path: "PlumbFocusTests-\(UUID().uuidString)", directoryHint: .isDirectory)
@@ -120,7 +120,7 @@ struct WorkoutSessionModelTests {
         let store = LocalSessionStore(url: directory.appending(path: "sessions.json"))
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source, store: store)
-        // Six full reps with a shallow dip (0.06 of the frame, under the 0.15 leg-length bottom) after each.
+        // six full reps with a shallow dip (0.06 of the frame, under the 0.15 leg-length bottom) after each
         let frames = (0...(6 * 30)).map { index -> PoseFrame in
             let phase = Double(index % 30) / 30
             let full = phase < 2.0 / 3 ? 0.20 * (1 - cos(2 * .pi * phase * 1.5)) / 2 : 0
@@ -167,12 +167,12 @@ struct WorkoutSessionModelTests {
         for frame in frames { source.emit(frame) }
         try await waitUntil { model.frameCount == frames.count }
         await model.endSet()
-        // The live count may still be one rep behind when Stop is tapped right after the last rep.
+        // the live count may still be one rep behind when Stop is tapped right after the last rep
         #expect((5...6).contains(model.liveRepCount))
         #expect(announcer.phrases.isEmpty)
     }
 
-    /// Each live update is said as one phrase, the count first. Said one by one, a count and two
+    /// each live update is said as one phrase, the count first. Said one by one, a count and two
     /// observations queued at once made the speech synthesizer drop its backlog, count included:
     /// a tired person heard "3", "Range is shorter", "5".
     @Test func eachLiveUpdateIsSaidAsOnePhraseWithTheCountFirst() async throws {
@@ -193,7 +193,7 @@ struct WorkoutSessionModelTests {
         await model.cancel()
     }
 
-    /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
+    /// returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
     /// simulator, with many main-actor tests running at once, the live analysis of a whole set can
     /// take several seconds.
     private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(30)) async throws {
@@ -207,7 +207,7 @@ struct WorkoutSessionModelTests {
         }
     }
 
-    /// The camera source picks a frame's clock when it forwards it; the set starts when the model
+    /// the camera source picks a frame's clock when it forwards it; the set starts when the model
     /// reads it. A frame stamped with the preview clock (20 s of framing) can therefore arrive just
     /// after the countdown, ahead of the set's frames from 0 s. It must not become the set's first
     /// frame: the live count stayed silent for 20 s and a short set was refused as lasting -8 s.
@@ -230,7 +230,7 @@ struct WorkoutSessionModelTests {
         #expect(analysis.reps.count == 6)
     }
 
-    /// Hands-free in a dim room, or standing just outside the picture: Vision finds nobody. Plumb
+    /// hands-free in a dim room, or standing just outside the picture: Vision finds nobody. Plumb
     /// says so to the person a few steps away, and after a minute with nobody in view it closes the
     /// camera, so the screen can lock and the camera and Vision stop.
     @Test func framingWithNobodyInViewSaysSoAndClosesTheCamera() async throws {
@@ -256,8 +256,8 @@ struct WorkoutSessionModelTests {
         await model.cancel()
     }
 
-    /// The phone left on the camera screen with a person in view but no set started (an ankle
-    /// behind furniture, or they gave up): framing closes by itself after three minutes.
+    /// the phone left on the camera screen with a person in view but no set started (an ankle
+    /// behind furniture, or they gave up): framing closes by itself after three minutes
     @Test func framingWithoutASetClosesAfterThreeMinutes() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
@@ -279,7 +279,7 @@ struct WorkoutSessionModelTests {
         #expect(model.framingClosedNote == "Plumb closed the camera after 3 minutes without a set.")
     }
 
-    /// After every set the model read the whole history three times (two of them itself) and
+    /// after every set the model read the whole history three times (two of them itself) and
     /// rewrote it on the main actor before the result appeared, more slowly as history grew. A set
     /// now writes its session once and updates the list in memory.
     @Test func aMeasuredSetDoesNotReadTheHistoryAgain() async throws {
@@ -299,7 +299,7 @@ struct WorkoutSessionModelTests {
         #expect(model.history.first?.sets.count == 2)
     }
 
-    /// While framing, the camera screen's hint and focus line read the model on every redraw. They
+    /// while framing, the camera screen's hint and focus line read the model on every redraw. They
     /// read `livePose`, new on every frame, so the whole screen was rebuilt 15 times a second and
     /// the focus recomputed over the full history. What they read now changes only when its value does.
     @Test func framingTextIsNotInvalidatedByEveryFrame() async throws {
@@ -401,7 +401,7 @@ struct WorkoutSessionModelTests {
         #expect(model.lastStopToResultMilliseconds == nil)
     }
 
-    /// The 2-minute limit, or the camera stopping, cuts the set halfway down a rep. That cut is
+    /// the 2-minute limit, or the camera stopping, cuts the set halfway down a rep. That cut is
     /// Plumb's, not a movement the athlete left unfinished: it is not noted or saved as one, and
     /// the limit is said with the result.
     @Test func aCutMidRepIsNotTheAthletesUnfinishedRep() async throws {
@@ -412,7 +412,7 @@ struct WorkoutSessionModelTests {
             let model = WorkoutSessionModel(source: source, preferences: preferences, announcer: announcer)
             await model.startPreview()
             await model.beginSet(countdown: 0)
-            // Six 2 s reps, cut at the bottom of the sixth.
+            // six 2 s reps, cut at the bottom of the sixth
             let frames = CaptureTraces.squats(reps: 6, from: 0).filter { $0.time <= 11.0 }
             for frame in frames { source.emit(frame) }
             try await waitUntil { model.frameCount == frames.count }
@@ -495,7 +495,7 @@ struct WorkoutSessionModelTests {
     @Test func retakeAdviceMatchesTheReason() async throws {
         let source = TestPoseSource()
         let model = WorkoutSessionModel(source: source)
-        // Legs never in view: the general advice about keeping the joints visible applies.
+        // legs never in view: the general advice about keeping the joints visible applies
         await model.startPreview()
         await model.beginSet(countdown: 0)
         for index in 0...40 {
@@ -505,7 +505,7 @@ struct WorkoutSessionModelTests {
         }
         await model.endSet()
         #expect(model.retakeHint == ExerciseDefinition.squat.copy.retakeHint)
-        // Too short: the reason already says what to do.
+        // too short: the reason already says what to do
         await model.startPreview()
         await model.beginSet(countdown: 0)
         for index in 0...5 { source.emit(frame(time: Double(index) * 0.1, hipY: 0.42)) }
@@ -769,12 +769,12 @@ struct WorkoutSessionModelTests {
     }
 }
 
-/// Counts Observation change notifications.
+/// counts Observation change notifications
 nonisolated private final class ChangeCounter: @unchecked Sendable {
     var count = 0
 }
 
-/// History in memory, counting how often the model reads and writes it.
+/// history in memory, counting how often the model reads and writes it
 nonisolated private final class CountingSessionStore: SessionStoring, @unchecked Sendable {
     private(set) var sessions: [WorkoutSessionSummary] = []
     private(set) var loads = 0
@@ -889,7 +889,7 @@ struct ChosenExerciseTests {
         let relaunched = WorkoutSessionModel(source: TestPoseSource(), preferences: preferences)
         #expect(relaunched.selectedExercise == .pushUp)
 
-        // Tests and demo input keep starting on the squat.
+        // tests and demo input keep starting on the squat
         let plain = PlumbPreferences(defaults: defaults)
         #expect(WorkoutSessionModel(source: TestPoseSource(), preferences: plain).selectedExercise == .bodyweightSquat)
     }
@@ -922,7 +922,7 @@ struct ChosenExerciseTests {
         #expect(hint.contains("choose Push-up"))
     }
 
-    /// Hidden feet: the squats are counted from the hips, and no other exercise is suggested.
+    /// hidden feet: the squats are counted from the hips, and no other exercise is suggested
     @Test func aSquatWithHiddenFeetSuggestsNoOtherExercise() async throws {
         let source = TestPoseSource()
         let defaults = try #require(UserDefaults(suiteName: "PlumbChosen-\(UUID())"))

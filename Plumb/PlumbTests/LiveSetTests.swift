@@ -19,7 +19,7 @@ nonisolated struct StartReadinessTests {
     }
 
     @Test func aPushUpStartsFromAPlankNotFromStanding() {
-        // Standing with the arms down: shoulder, elbow and wrist clear and still.
+        // standing with the arms down: shoulder, elbow and wrist clear and still
         var readiness = StartReadiness()
         var time = 0.0
         while time < 2.5 {
@@ -32,7 +32,7 @@ nonisolated struct StartReadinessTests {
             time += CaptureTraces.step
         }
         #expect(!readiness.isReady)
-        // In a plank, the same hold starts the set.
+        // in a plank, the same hold starts the set
         readiness.reset()
         time = 0
         while time < 2.0 {
@@ -51,7 +51,7 @@ nonisolated struct StartReadinessTests {
         }
     }
 
-    /// A plank with the right side to the camera: the far (left) arm is clear enough but the far hip
+    /// a plank with the right side to the camera: the far (left) arm is clear enough but the far hip
     /// is not. The near side is in a plank, so the set starts; before, the far side was tried first
     /// and every frame counted as a miss.
     @Test func aPlankSeenFromTheRightStartsLikeOneSeenFromTheLeft() {
@@ -76,7 +76,7 @@ nonisolated struct StartReadinessTests {
         #expect(readiness.isReady)
     }
 
-    /// Standing with the right side to the camera; the far side hovers around the confidence floor
+    /// standing with the right side to the camera; the far side hovers around the confidence floor
     /// and the near knee is unclear now and then. The side seen best is followed, and its odd
     /// unclear frame is a miss, not a switch to the far side that restarted the hold.
     @Test func aFarSideAroundTheConfidenceFloorDoesNotRestartTheHold() {
@@ -117,7 +117,7 @@ nonisolated struct StartReadinessTests {
         #expect(readiness.progress > 0.5)
         for _ in 0..<5 { step(legs: false) }
         #expect(readiness.progress == 0)
-        // Moving the planted foot restarts the hold too.
+        // moving the planted foot restarts the hold too
         for _ in 0..<10 { step(legs: true) }
         step(legs: true, ankleX: 0.62)
         #expect(readiness.progress == 0)
@@ -125,7 +125,7 @@ nonisolated struct StartReadinessTests {
 }
 
 nonisolated struct LiveSetMonitorTests {
-    /// Feeds the frames one by one, as the camera does, and collects every event.
+    /// feeds the frames one by one, as the camera does, and collects every event
     private func run(_ frames: [PoseFrame], definition: ExerciseDefinition = .squat)
         -> (events: [LiveSetEvent], monitor: LiveSetMonitor, stoppedAt: Double?) {
         var monitor = LiveSetMonitor(definition: definition)
@@ -167,7 +167,7 @@ nonisolated struct LiveSetMonitorTests {
             Issue.record("Expected the set to end once the athlete walked away")
             return
         }
-        // Out of position from about 14.3 s; the set ends about two seconds later, not during the reps.
+        // out of position from about 14.3 s; the set ends about two seconds later, not during the reps
         #expect(stoppedAt > 15.5 && stoppedAt < 17.0)
     }
 
@@ -179,13 +179,13 @@ nonisolated struct LiveSetMonitorTests {
         #expect(run(reps).stoppedAt == nil)
     }
 
-    /// Someone walks between the phone and the athlete for 2.5 s mid-set: the evidence gate allows
-    /// that gap, so hands-free must not end the set.
+    /// someone walks between the phone and the athlete for 2.5 s mid-set: the evidence gate allows
+    /// that gap, so hands-free must not end the set
     @Test func aPasserByHidingTheAthleteDoesNotEndTheSet() {
-        // Eight reps, so 2.5 s hidden keeps the 80% coverage the gate needs.
+        // eight reps, so 2.5 s hidden keeps the 80% coverage the gate needs
         let frames = CaptureTraces.squats(reps: 8, from: 0).map { frame -> PoseFrame in
             guard frame.time > 5.0 && frame.time < 7.5 else { return frame }
-            // The passer-by stands where the athlete is.
+            // the passer-by stands where the athlete is
             let passerBy = CaptureTraces.frame(time: frame.time, hipY: 0.42, ankleX: 0.53, legs: true).joints
             return PoseFrame(time: frame.time, subjectCount: 1, joints: [:], athleteTracking: .hidden,
                              bystanders: [passerBy])
@@ -197,12 +197,12 @@ nonisolated struct LiveSetMonitorTests {
         }
     }
 
-    /// Slow reps with a pause at the top: the idle stop must not cut the set during the next rep.
+    /// slow reps with a pause at the top: the idle stop must not cut the set during the next rep
     @Test func slowRepsWithPausesAreNotIdleness() {
         var frames: [PoseFrame] = []
         var time = 0.0
         while time <= 34.0 {
-            // An 8.5 s cycle: 6.5 s down and up, 2 s standing.
+            // an 8.5 s cycle: 6.5 s down and up, 2 s standing
             let cycle = time.truncatingRemainder(dividingBy: 8.5)
             let phase = cycle < 6.5 ? cycle / 6.5 : 0
             let hipY = 0.42 + 0.20 * (1 - cos(2 * .pi * phase)) / 2
@@ -214,7 +214,7 @@ nonisolated struct LiveSetMonitorTests {
         #expect(result.monitor.countedReps == 4)
     }
 
-    /// The hands-free countdown started but no rep counted (every movement too shallow, or the person
+    /// the hands-free countdown started but no rep counted (every movement too shallow, or the person
     /// changed their mind), then the athlete walks back to the phone. The set ends as it does after
     /// reps, instead of keeping the camera and the screen on until the 2-minute limit.
     @Test func walkingAwayFromTheSpotWithoutAnyRepEndsTheSet() {
@@ -228,8 +228,8 @@ nonisolated struct LiveSetMonitorTests {
         #expect(stoppedAt > 5.5 && stoppedAt < 7.0)
     }
 
-    /// Without a rep, being unseen at the spot does not end the set: getting down into a push-up can
-    /// hide the athlete from Vision for a moment.
+    /// without a rep, being unseen at the spot does not end the set: getting down into a push-up can
+    /// hide the athlete from Vision for a moment
     @Test func beingUnseenWithoutAnyRepDoesNotEndTheSet() {
         let standing = CaptureTraces.squats(reps: 0, from: 0, standing: 3)
         let unseen = (1...90).map { index in
@@ -253,7 +253,7 @@ nonisolated struct LiveSetMonitorTests {
     }
 
     @Test func aRepMuchFasterThanTheFirstOnesIsSaidOnce() {
-        // Three 2 s reps, then three 1 s reps.
+        // three 2 s reps, then three 1 s reps
         var frames = CaptureTraces.squats(reps: 3, from: 0)
         var time = 6.0 + CaptureTraces.step
         while time <= 9.0 {
@@ -271,7 +271,7 @@ nonisolated struct LiveSetMonitorTests {
     }
 
     @Test func aRepMuchShorterThanTheFirstOnesIsSaid() {
-        // Two deep reps, then shallower ones (hips 0.20 down, then 0.15).
+        // two deep reps, then shallower ones (hips 0.20 down, then 0.15)
         var frames: [PoseFrame] = []
         var time = 0.0
         while time <= 10.0 {
@@ -291,7 +291,7 @@ nonisolated struct LiveSetMonitorTests {
         #expect(LiveSetEvent.shorterThanFirstReps(rep: 3).spoken(for: .pushUp) == "Elbow bend is smaller")
     }
 
-    /// Tired late in a set, a rep can be both quicker and shallower than the first ones. It gets one
+    /// tired late in a set, a rep can be both quicker and shallower than the first ones. It gets one
     /// observation, so the count and that observation can be said together without cutting each
     /// other off; the quicker reps are still noted for the frequent pattern.
     @Test func aRepBothFasterAndShorterGetsOneCue() {
@@ -310,7 +310,7 @@ nonisolated struct LiveSetMonitorTests {
         #expect(result.monitor.sawFasterRep)
     }
 
-    /// Fast push-ups at the edge of the depth a rep needs (Guilhem, 15 October: the live count
+    /// fast push-ups at the edge of the depth a rep needs (Guilhem, 15 October: the live count
     /// reached 29, the result 18). Measured over the whole set, a movement said as a rep early can
     /// stop counting later. The live count is the analysis of the set so far, so it ends on what
     /// the result says, comes down when it must, and never says a number twice.
@@ -331,15 +331,15 @@ nonisolated struct LiveSetMonitorTests {
             if case .repCountRevised(let count) = event { return count }
             return nil
         }
-        // Since the turn rule (`ExerciseAnalyzer.turnShareOfDepth`) this trace no longer takes a
-        // rep back; when the analysis does, the revised count is never above what was said.
+        // since the turn rule (`ExerciseAnalyzer.turnShareOfDepth`) this trace no longer takes a
+        // rep back; when the analysis does, the revised count is never above what was said
         #expect(revised.allSatisfy { $0 <= said.count })
-        // A revised count is shown, not spoken.
+        // a revised count is shown, not spoken
         #expect(LiveSetEvent.phrase(for: [.repCountRevised(3)], definition: .pushUp) == nil)
         #expect(LiveSetEvent.repCountRevised(3).caption(for: .pushUp) == nil)
     }
 
-    /// Push-ups at about 0.5 s a cycle, all complete: every one is said and every one is in the result.
+    /// push-ups at about 0.5 s a cycle, all complete: every one is said and every one is in the result
     @Test func fastCompletePushUpsAreCountedLiveAndInTheResult() {
         let frames = fastPushUps(plank: 2, reps: 20, cycle: 0.5, topBend: 0, bottomBend: 80)
         let result = run(frames, definition: .pushUp)
@@ -351,7 +351,7 @@ nonisolated struct LiveSetMonitorTests {
         #expect(result.monitor.countedReps == 20)
     }
 
-    /// A plank, then reps whose top and bottom bends are given, at 15 fps, then the top held 2 s.
+    /// a plank, then reps whose top and bottom bends are given, at 15 fps, then the top held 2 s
     private func fastPushUps(plank: Double, reps: Int, cycle: Double, topBend: Double, bottomBend: Double)
         -> [PoseFrame] {
         var frames: [PoseFrame] = []

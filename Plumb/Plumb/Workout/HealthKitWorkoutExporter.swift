@@ -1,7 +1,7 @@
 import Foundation
 import HealthKit
 
-/// Saves finished Plumb sessions to Apple Health as workouts, so they appear in the Fitness app's
+/// saves finished Plumb sessions to Apple Health as workouts, so they appear in the Fitness app's
 /// workout history and in Health. Plumb asks only to share (write) workouts and reads nothing.
 /// Everything worth testing is in `FitnessWorkout` and `WorkoutSessionModel`; this file only maps
 /// it to HealthKit.
@@ -10,14 +10,14 @@ import HealthKit
 /// - `HKHealthStore.isHealthDataAvailable()`, before any other HealthKit call.
 /// - `authorizationStatus(for:)` reports the share (write) permission, the only one an app can read.
 /// - `requestAuthorization(toShare:read:) async throws` (iOS 15+) shows the sheet only for types the
-///   person has not answered.
+///   person hasn't answered.
 /// - `HKWorkoutBuilder(healthStore:configuration:device:)`, `beginCollection(at:)`,
 ///   `addWorkoutEvents(_:)`, `addMetadata(_:)`, `endCollection(at:)`, `finishWorkout()`: Apple's
 ///   replacement for the `HKWorkout` initializers deprecated in iOS 17. `finishWorkout()` returns nil
 ///   when the workout was saved while the device is locked.
 final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
-    /// One long-lived store per app, as Apple advises. Created on first use: until the person turns
-    /// the option on, Plumb does not touch HealthKit.
+    /// one long-lived store per app, as Apple advises. Created on first use: until the person turns
+    /// the option on, Plumb doesn't touch HealthKit.
     private lazy var store = HKHealthStore()
 
     var authorization: FitnessAuthorization {
@@ -33,10 +33,10 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
     func requestAuthorization() async -> FitnessAuthorization {
         guard HKHealthStore.isHealthDataAvailable() else { return .unavailable }
         do {
-            // Share workouts only; nothing to read.
+            // share workouts only; nothing to read
             try await store.requestAuthorization(toShare: [HKObjectType.workoutType()], read: [])
         } catch {
-            // Fails without the entitlement or usage description, or when Health is restricted.
+            // fails without the entitlement or usage description, or when Health is restricted.
             // The status read below then reports what Plumb may do.
         }
         return authorization
@@ -64,8 +64,8 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
         }
     }
 
-    /// A pause and a resume event (zero-length intervals) per long break; HealthKit leaves the time
-    /// between them out of the workout's duration.
+    /// a pause and a resume event (zero-length intervals) per long break; HealthKit leaves the time
+    /// between them out of the workout's duration
     private static func events(for pauses: [DateInterval]) -> [HKWorkoutEvent] {
         pauses.flatMap { pause in
             [HKWorkoutEvent(type: .pause, dateInterval: DateInterval(start: pause.start, duration: 0), metadata: nil),
@@ -78,8 +78,8 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
     private static func metadata(for workout: FitnessWorkout) -> [String: Any] {
         var metadata: [String: Any] = [
             HKMetadataKeyIndoorWorkout: NSNumber(value: workout.isIndoor),
-            // One workout per session: HealthKit replaces an object with the same sync identifier only
-            // when the new sync version is greater.
+            // one workout per session: HealthKit replaces an object with the same sync identifier only
+            // when the new sync version is greater
             HKMetadataKeySyncIdentifier: NSString(string: workout.syncIdentifier),
             HKMetadataKeySyncVersion: NSNumber(value: FitnessWorkout.syncVersion),
         ]

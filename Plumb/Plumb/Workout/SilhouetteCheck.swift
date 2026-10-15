@@ -1,11 +1,11 @@
 import Foundation
 
-/// A person-segmentation mask in the frame's orientation: one byte per pixel, 0 for background,
+/// a person-segmentation mask in the frame's orientation: one byte per pixel, 0 for background,
 /// 255 for a person, rows from the top. `PoseFrameAnalyzer` copies Vision's mask into it.
 nonisolated struct PersonMask: Equatable {
     let width: Int
     let height: Int
-    /// Row-major bytes, `width` per row.
+    /// row-major bytes, `width` per row
     let pixels: [UInt8]
 
     init?(width: Int, height: Int, pixels: [UInt8]) {
@@ -18,7 +18,7 @@ nonisolated struct PersonMask: Equatable {
     func value(x: Int, y: Int) -> UInt8 { pixels[y * width + x] }
 }
 
-/// Checks the athlete's joints against the person mask, so a joint Vision guessed behind an
+/// checks the athlete's joints against the person mask, so a joint Vision guessed behind an
 /// obstruction (an ankle behind a bench) is not measured. Vision's skeleton may estimate through an
 /// obstruction with good confidence; the mask is independent image evidence.
 ///
@@ -29,18 +29,18 @@ nonisolated struct PersonMask: Equatable {
 /// than as every joint being hidden.
 nonisolated enum SilhouetteCheck {
     enum Verdict: Equatable {
-        /// The mask was checked; these joints have person pixels at or near them.
+        /// the mask was checked; these joints have person pixels at or near them
         case checked(supported: Set<BodyJoint>)
-        /// No usable mask (none, or nobody segmented at all): the joints keep their 2D evidence.
+        /// no usable mask (none, or nobody segmented at all): the joints keep their 2D evidence
         case unavailable
     }
 
-    /// Mask value from which a pixel counts as the person.
+    /// mask value from which a pixel counts as the person
     static let personThreshold: UInt8 = 128
-    /// Search radius around a joint, as a share of the athlete's body size (the diagonal of the box
+    /// search radius around a joint, as a share of the athlete's body size (the diagonal of the box
     /// around their clear joints). About a hand's width on an adult.
     static let radiusShareOfBody = 0.04
-    /// Smallest search radius in mask pixels, for the mask's own edge blur.
+    /// smallest search radius in mask pixels, for the mask's own edge blur
     static let minimumRadiusPixels = 2
 
     static func verdict(for joints: [BodyJoint: JointPoint], mask: PersonMask?) -> Verdict {
@@ -52,7 +52,7 @@ nonisolated enum SilhouetteCheck {
         let ys = reference.map(\.y)
         let bodyWidth = (xs.max() ?? 0) - (xs.min() ?? 0)
         let bodyHeight = (ys.max() ?? 0) - (ys.min() ?? 0)
-        // In normalized units on each axis, so a non-square mask keeps the same physical radius.
+        // in normalised units on each axis, so a non-square mask keeps the same physical radius
         let radiusX = max(Int((radiusShareOfBody * hypot(bodyWidth, bodyHeight) * Double(mask.width)).rounded(.up)),
                           minimumRadiusPixels)
         let radiusY = max(Int((radiusShareOfBody * hypot(bodyWidth, bodyHeight) * Double(mask.height)).rounded(.up)),

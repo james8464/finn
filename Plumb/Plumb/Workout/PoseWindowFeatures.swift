@@ -1,41 +1,41 @@
 import Foundation
 
-/// Joint-angle summary of a short window of 2D poses. Both the rule-based exercise recognizer
+/// joint-angle summary of a short window of 2D poses. Both the rule-based exercise recogniser
 /// and the trained angle classifier read these numbers, so training and the app share one
 /// definition. It depends only on `PoseFrame`, which lets the training tool compile it too.
 nonisolated struct PoseWindowFeatures: Equatable, Sendable {
-    /// Share of frames where the angles below could be measured.
+    /// share of frames where the angles below could be measured
     var coverage: Double
-    /// Spread (90th minus 10th percentile) of each angle, in degrees.
+    /// spread (90th minus 10th percentile) of each angle, in degrees
     var elbowRange: Double
     var kneeRange: Double
     var hipRange: Double
-    /// Spread of the hip-shoulder-elbow angle, which catches arm swings and presses.
+    /// spread of the hip-shoulder-elbow angle, which catches arm swings and presses
     var shoulderRange: Double
-    /// Median of each angle, in degrees; 180 is straight.
+    /// median of each angle, in degrees; 180 is straight
     var elbowMedian: Double
     var kneeMedian: Double
     var hipMedian: Double
-    /// Torso angle from vertical (0 upright, 90 horizontal), median and spread.
+    /// torso angle from vertical (0 upright, 90 horizontal), median and spread
     var trunkTiltMedian: Double
     var trunkTiltRange: Double
-    /// Hip height spread divided by the median hip-to-ankle length.
+    /// hip height spread divided by the median hip-to-ankle length
     var hipTravel: Double
-    /// Horizontal gap between the two ankles divided by the hip-to-ankle length; -1 when the
+    /// horizontal gap between the two ankles divided by the hip-to-ankle length; -1 when the
     /// far ankle is not tracked. Small for a squat, large for a split stance.
     var stance: Double
-    /// Wrist height relative to the hip, in hip-to-ankle lengths (positive is below the hip).
+    /// wrist height relative to the hip, in hip-to-ankle lengths (positive is below the hip)
     var wristDrop: Double
-    /// Wrist height above the shoulder, in hip-to-ankle lengths (75th percentile, so the hang
-    /// counts even when the shoulders later pass the hands; positive when hanging from a bar).
+    /// wrist height above the shoulder, in hip-to-ankle lengths (75th percentile, so the hang
+    /// counts even when the shoulders later pass the hands; positive when hanging from a bar)
     var handLift: Double = 0
-    /// Wrist height spread over hip-to-ankle length: near zero when the hands hold a bar.
+    /// wrist height spread over hip-to-ankle length: near zero when the hands hold a bar
     var wristTravel: Double = 0
-    /// Share of frames with the shoulders above the hands (the top of a muscle-up).
+    /// share of frames with the shoulders above the hands (the top of a muscle-up)
     var shouldersOverHands: Double = 0
 
-    /// Angle models trained before the pull-up rules use the first thirteen; the last three were
-    /// added for hanging exercises.
+    /// angle models trained before the pull-up rules use the first thirteen; the last three were
+    /// added for hanging exercises
     static let featureNames = [
         "coverage", "elbowRange", "kneeRange", "hipRange", "shoulderRange", "elbowMedian", "kneeMedian",
         "hipMedian", "trunkTiltMedian", "trunkTiltRange", "hipTravel", "stance", "wristDrop",
@@ -58,7 +58,7 @@ nonisolated enum PoseWindowFeatureExtractor {
     static let minimumConfidence = 0.2
     static let minimumCoverage = 0.5
 
-    /// Overlapping windows of `windowDuration` seconds; a short set gives one window.
+    /// overlapping windows of `windowDuration` seconds; a short set gives one window
     static func windows(_ frames: [PoseFrame]) -> [[PoseFrame]] {
         guard let first = frames.first?.time, let last = frames.last?.time,
               last - first >= windowDuration * 0.8 else { return [] }
@@ -72,7 +72,7 @@ nonisolated enum PoseWindowFeatureExtractor {
         return result
     }
 
-    /// Features for one window, or nil when too few frames show the measured joints.
+    /// features for one window, or nil when too few frames show the measured joints
     static func features(_ window: [PoseFrame]) -> PoseWindowFeatures? {
         guard !window.isEmpty else { return nil }
         let side = trackedSide(in: window)
@@ -88,8 +88,8 @@ nonisolated enum PoseWindowFeatureExtractor {
                       joint.confidence >= minimumConfidence else { return nil }
                 return (joint.x, joint.y * aspect)
             }
-            // Seen from the side, both hips (and both shoulders) nearly overlap, so the far one
-            // stands in when Vision loses the near one, as it often does for a body lying down.
+            // seen from the side, both hips (and both shoulders) nearly overlap, so the far one
+            // stands in when Vision loses the near one, as it often does for a body lying down
             let otherSide: BodySide = side == .left ? .right : .left
             func midline(_ role: JointRole) -> (x: Double, y: Double)? { point(role) ?? point(role, otherSide) }
             guard let shoulder = midline(.shoulder), let hip = midline(.hip),
@@ -109,7 +109,7 @@ nonisolated enum PoseWindowFeatureExtractor {
                     wristHeights.append(wrist.y)
                 }
                 handFrames += 1
-                // Clearly above, not level with the hands: a high pull-up reaches the bar too.
+                // clearly above, not level with the hands: a high pull-up reaches the bar too
                 if leg > 0 && (wrist.y - shoulder.y) / leg > 0.1 { over += 1 }
             }
             if let angle = angle(hip, knee, ankle) { knees.append(angle) }
@@ -141,7 +141,7 @@ nonisolated enum PoseWindowFeatureExtractor {
         )
     }
 
-    /// The side whose joints Vision tracks with more total confidence in this window.
+    /// the side whose joints Vision tracks with more total confidence in this window
     static func trackedSide(in window: [PoseFrame]) -> BodySide {
         let roles: [JointRole] = [.shoulder, .elbow, .wrist, .hip, .knee, .ankle]
         func score(_ side: BodySide) -> Double {
@@ -182,30 +182,30 @@ nonisolated enum PoseWindowFeatureExtractor {
     }
 }
 
-/// Hand-written exercise rules on joint-angle features (see `AngleRuleClassifier`).
+/// hand-written exercise rules on joint-angle features (see `AngleRuleClassifier`)
 nonisolated enum AngleRules {
-    /// Nil when the window could be a squat or a lunge but the far ankle is not tracked.
+    /// nil when the window could be a squat or a lunge but the far ankle is not tracked
     static func label(for f: PoseWindowFeatures) -> String? {
         let moving = max(f.elbowRange, f.kneeRange, f.hipRange, f.shoulderRange)
         if moving < 15 && f.hipTravel < 0.08 { return "none" }
-        // Pull-up or muscle-up: hanging with the hands above the shoulders, the body rises while
+        // pull-up or muscle-up: hanging with the hands above the shoulders, the body rises while
         // the hands stay put (a press moves the hands and keeps the body still). The shoulders
         // passing above the hands makes it a muscle-up.
         if f.handLift >= 0.25 && f.hipTravel >= 0.15 && f.wristTravel < 0.5 * f.hipTravel
             && f.trunkTiltMedian < 40 {
             return f.shouldersOverHands >= 0.08 ? "muscle_up" : "pull_up"
         }
-        // Push-up: body nearly horizontal and straight at the hip, elbows bend, knees stay straight.
+        // push-up: body nearly horizontal and straight at the hip, elbows bend, knees stay straight
         if f.trunkTiltMedian >= 55 && f.hipMedian >= 145 && f.elbowRange >= 20 && f.kneeRange < 30 {
             return "push_up"
         }
-        // Stiff-leg deadlift: the torso tips forward through a large hip hinge and comes back up,
-        // knees stay nearly straight, and the arms hang straight (a bent-over row bends them).
+        // stiff-leg deadlift: the torso tips forward through a large hip hinge and comes back up,
+        // knees stay nearly straight, and the arms hang straight (a bent-over row bends them)
         if f.hipRange >= 35 && f.trunkTiltRange >= 30 && f.trunkTiltMedian < 60
             && f.kneeRange < 0.5 * f.hipRange && f.kneeMedian >= 140 && f.elbowRange < 35 {
             return "stiff_leg_deadlift"
         }
-        // Squat or lunge: knees bend a lot, the hips drop, and the torso stays mostly upright.
+        // squat or lunge: knees bend a lot, the hips drop, and the torso stays mostly upright
         if f.kneeRange >= 35 && f.hipTravel >= 0.12 && f.trunkTiltMedian < 50 {
             if f.stance >= 0.45 { return "static_lunge" }
             if f.stance >= 0 && f.stance < 0.3 { return "squat" }

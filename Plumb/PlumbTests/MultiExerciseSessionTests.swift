@@ -46,7 +46,7 @@ struct MultiExerciseSessionTests {
         #expect(analysis.reps.count == 5)
     }
 
-    /// Squat is still selected (the default) and the person does push-ups. Recognition measures
+    /// squat is still selected (the default) and the person does push-ups. Recognition measures
     /// them as push-ups; the next set is then framed, counted live and stopped hands-free as a
     /// push-up, instead of as a squat again with a live count stuck at 0.
     @Test func aRecognizedExerciseBecomesTheChoiceForTheNextSet() async throws {
@@ -94,8 +94,8 @@ struct MultiExerciseSessionTests {
         #expect(model.comparisonGap == nil)
     }
 
-    /// Two push-up sets, the arm Vision followed changing between them (a front view gives either):
-    /// the second set is compared with the first, never told it was filmed from the other side.
+    /// two push-up sets, the arm Vision followed changing between them (a front view gives either):
+    /// the second set is compared with the first, never told it was filmed from the other side
     @Test func aPushUpSetIsNotToldItsEarlierSetsWereFilmedFromTheOtherSide() async throws {
         let source = StubPoseSource()
         let model = WorkoutSessionModel(source: source)
@@ -108,7 +108,7 @@ struct MultiExerciseSessionTests {
         #expect(model.comparison?.rangeDirection == .shorter)
     }
 
-    /// Side-view push-ups at 15 fps: a 2 s plank, then 1.6 s reps to the given bend.
+    /// side-view push-ups at 15 fps: a 2 s plank, then 1.6 s reps to the given bend
     private func pushUps(reps: Int, bend: Double) -> [PoseFrame] {
         var frames: [PoseFrame] = []
         var time = 0.0
@@ -121,7 +121,7 @@ struct MultiExerciseSessionTests {
         return frames
     }
 
-    /// The same pose seen from the other side: left joints become right ones, mirrored in x.
+    /// the same pose seen from the other side: left joints become right ones, mirrored in x
     private func mirrored(_ frame: PoseFrame) -> PoseFrame {
         let pairs: [BodyJoint: BodyJoint] = [.leftWrist: .rightWrist, .leftElbow: .rightElbow,
                                              .leftShoulder: .rightShoulder, .leftHip: .rightHip]

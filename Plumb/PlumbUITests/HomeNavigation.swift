@@ -1,7 +1,7 @@
 import XCTest
 
 extension XCUIApplication {
-    /// A fresh simulator shows the welcome screens first; tests that want the app itself skip them.
+    /// a fresh simulator shows the welcome screens first; tests that want the app itself skip them
     @MainActor
     func skipOnboardingIfShown() {
         let skip = buttons["onboarding.skip"]
@@ -20,7 +20,7 @@ extension XCUIApplication {
         tab.tap()
     }
 
-    /// Opens History, Options or Privacy from the More menu of the first screen.
+    /// opens History, Options or Privacy from the More menu of the first screen
     @MainActor
     func openFromHome(_ page: String) {
         let more = buttons["home.more"]

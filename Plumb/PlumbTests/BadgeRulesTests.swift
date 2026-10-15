@@ -48,13 +48,13 @@ struct BadgeRulesTests {
     @Test func threeDaysNeedThreeDistinctDaysWithinAWeek() {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "UTC")!
-        // Three sets on one day: no.
+        // three sets on one day: no
         let sameDay = history([set(reps: 5, at: 0), set(reps: 5, at: 3600), set(reps: 5, at: 7200)])
         #expect(!kinds(BadgeRules.evaluate(history: sameDay, calendar: calendar)).contains(.threeDaysInAWeek))
-        // Three days spread over nine days: no.
+        // three days spread over nine days: no
         let spread = history([set(reps: 5, at: 0), set(reps: 5, at: 4 * day), set(reps: 5, at: 8 * day)])
         #expect(!kinds(BadgeRules.evaluate(history: spread, calendar: calendar)).contains(.threeDaysInAWeek))
-        // Monday, Wednesday, Sunday: yes, dated by the third day.
+        // Monday, Wednesday, Sunday: yes, dated by the third day
         let week = history([set(reps: 5, at: 0), set(reps: 5, at: 2 * day), set(reps: 5, at: 6 * day)])
         let badge = BadgeRules.evaluate(history: week, calendar: calendar).first { $0.kind == .threeDaysInAWeek }
         #expect(badge?.earnedAt == origin.addingTimeInterval(6 * day))
@@ -98,26 +98,26 @@ struct BadgeRulesTests {
         let badges = BadgeRules.evaluate(history: record)
         let squat = badges.first { $0.kind == .repRecord(.bodyweightSquat) }
         #expect(squat?.detail == "9 squat reps, up from 8 in your best earlier set.")
-        // The push-up has one set only: a record is a comparison, not a count.
+        // the push-up has one set only: a record is a comparison, not a count
         #expect(!kinds(badges).contains(.repRecord(.pushUp)))
     }
 
     @Test func longerRangeFollowsTheComparisonRules() {
         let session = UUID()
-        // Same session, same side, enough reps, +25%: yes.
+        // same session, same side, enough reps, +25%: yes
         let longer = history([set(reps: 5, range: 0.40, at: 0, session: session),
                               set(reps: 5, range: 0.50, at: 300, session: session)])
         let badge = BadgeRules.evaluate(history: longer).first { $0.kind == .longerRange(.bodyweightSquat) }
         #expect(badge != nil)
         #expect(badge?.detail.contains("25%") == true)
-        // +10% is within noise: no.
+        // +10% is within noise: no
         let slight = history([set(reps: 5, range: 0.40, at: 0, session: session),
                               set(reps: 5, range: 0.44, at: 300, session: session)])
         #expect(!kinds(BadgeRules.evaluate(history: slight)).contains(.longerRange(.bodyweightSquat)))
-        // Different sessions are not compared.
+        // different sessions are not compared
         let apart = history([set(reps: 5, range: 0.40, at: 0), set(reps: 5, range: 0.60, at: day)])
         #expect(!kinds(BadgeRules.evaluate(history: apart)).contains(.longerRange(.bodyweightSquat)))
-        // A partly visible set never earns it.
+        // a partly visible set never earns it
         let partly = history([set(reps: 5, range: 0.40, at: 0, session: session),
                               set(reps: 5, range: 0.60, at: 300, session: session, partlyVisible: true)])
         #expect(!kinds(BadgeRules.evaluate(history: partly)).contains(.longerRange(.bodyweightSquat)))
@@ -130,15 +130,15 @@ struct BadgeRulesTests {
         let fresh = ledger.update(history: first)
         #expect(fresh.map(\.kind) == [.firstSet, .cleanSet] || fresh.map(\.kind) == [.cleanSet, .firstSet])
         #expect(ledger.justEarned.count == 2)
-        // The same history again: nothing new, and the just-earned list is untouched by a no-op.
+        // the same history again: nothing new, and the just-earned list is untouched by a no-op
         ledger.acknowledge()
         #expect(ledger.update(history: first).isEmpty)
         #expect(ledger.justEarned.isEmpty)
         #expect(ledger.count == 2)
-        // A record set adds exactly one badge.
+        // a record set adds exactly one badge
         let more = history([set(reps: 5, at: 0), set(reps: 7, at: day)])
         #expect(ledger.update(history: more).map(\.kind) == [.repRecord(.bodyweightSquat)])
-        // Saved: a new ledger on the same store knows them, and the history shrinking takes nothing away.
+        // saved: a new ledger on the same store knows them, and the history shrinking takes nothing away
         let reloaded = BadgeLedger(store: store)
         #expect(reloaded.count == 3)
         #expect(reloaded.update(history: []).isEmpty)

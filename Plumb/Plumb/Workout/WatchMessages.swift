@@ -1,33 +1,33 @@
 import Foundation
 
-// The messages between Plumb on the iPhone and Plumb on Apple Watch. The watch target compiles this
+// the messages between Plumb on the iPhone and Plumb on Apple Watch. The watch target compiles this
 // one file too, so it uses Foundation only and none of the iPhone's workout types. WatchConnectivity
 // carries property-list dictionaries: strings, numbers and booleans here, and never nil.
 
-/// The set's stage as the watch shows it.
+/// the set's stage as the watch shows it
 nonisolated enum WatchStage: String, CaseIterable, Equatable, Sendable {
-    /// No camera open on the iPhone.
+    /// no camera open on the iPhone
     case ready
-    /// The camera is open and the person is getting into position.
+    /// the camera is open and the person is getting into position
     case framing
     case countdown
-    /// The set is running.
+    /// the set is running
     case capturing
-    /// The iPhone is reviewing the set.
+    /// the iPhone is reviewing the set
     case analyzing
     case result
 }
 
-/// The tap the watch plays when a state arrives live.
+/// the tap the watch plays when a state arrives live
 nonisolated enum WatchHaptic: String, CaseIterable, Equatable, Sendable {
     case none
-    /// A rep was counted.
+    /// a rep was counted
     case rep
-    /// A live observation, such as a rep faster than the first ones.
+    /// a live observation, such as a rep faster than the first ones
     case observation
-    /// The set started.
+    /// the set started
     case start
-    /// The set ended.
+    /// the set ended
     case end
 }
 
@@ -35,31 +35,31 @@ nonisolated enum WatchHaptic: String, CaseIterable, Equatable, Sendable {
 /// so a lost or late message never leaves the watch stuck.
 nonisolated struct WatchState: Equatable, Sendable {
     var stage: WatchStage = .ready
-    /// Seconds left in the countdown; 0 outside it.
+    /// seconds left in the countdown; 0 outside it
     var countdown = 0
-    /// The exercise's name, such as "Squat".
+    /// the exercise's name, such as "Squat"
     var exercise = ""
-    /// Reps counted so far while the set runs; reps measured once it is reviewed.
+    /// reps counted so far while the set runs; reps measured once it is reviewed
     var reps = 0
-    /// The latest live observation of the running set, measured on the iPhone.
+    /// the latest live observation of the running set, measured on the iPhone
     var caption: String?
     var haptic: WatchHaptic = .none
-    /// One line about the reviewed set.
+    /// one line about the reviewed set
     var summary: String?
-    /// Whether Start set and Stop set are offered on the wrist for this exercise.
+    /// whether Start set and Stop set are offered on the wrist for this exercise
     var wristControls = true
-    /// Whether the set starts and ends by itself (hands-free on the iPhone).
+    /// whether the set starts and ends by itself (hands-free on the iPhone)
     var handsFree = false
-    /// The iPhone is replaying demo input, not filming a person.
+    /// the iPhone is replaying demo input, not filming a person
     var demoInput = false
-    /// The person turned on Personalize with Health: the watch runs a workout session while the
+    /// the person turned on Personalize with Health: the watch runs a workout session while the
     /// camera is open and sends its heart rate back.
     var measuresHeartRate = false
-    /// When the iPhone sent this state, in seconds since 1970. The watch keeps the newest.
+    /// when the iPhone sent this state, in seconds since 1970. The watch keeps the newest.
     var sentAt = 0.0
 
     static let messageType = "state"
-    /// A saved state older than this, in seconds, is not shown when the watch app opens.
+    /// a saved state older than this, in seconds, is not shown when the watch app opens
     static let staleAfter: TimeInterval = 600
 
     func message() -> [String: Any] {
@@ -82,7 +82,7 @@ nonisolated struct WatchState: Equatable, Sendable {
         return message
     }
 
-    /// Reads a state message; nil for anything else. Missing optional values take their defaults.
+    /// reads a state message; nil for anything else. Missing optional values take their defaults.
     init?(message: [String: Any]) {
         guard message[WatchMessageKey.messageType] as? String == Self.messageType,
               let rawStage = message[WatchMessageKey.stage] as? String,
@@ -119,20 +119,20 @@ nonisolated struct WatchState: Equatable, Sendable {
         self.sentAt = sentAt
     }
 
-    /// Whether this state should replace `shown` on the watch. Only a newer one does, so a late
+    /// whether this state should replace `shown` on the watch. Only a newer one does, so a late
     /// application context never rewinds the screen and a repeated message never taps twice.
     func isNewer(than shown: WatchState?) -> Bool {
         guard let shown else { return true }
         return sentAt > shown.sentAt
     }
 
-    /// A saved state from a while ago, such as a set the iPhone never finished telling the watch about.
+    /// a saved state from a while ago, such as a set the iPhone never finished telling the watch about
     func isStale(now: TimeInterval) -> Bool {
         now - sentAt > Self.staleAfter
     }
 }
 
-/// Watch to iPhone.
+/// Watch to iPhone
 nonisolated enum WatchCommand: String, CaseIterable, Equatable, Sendable {
     case startSet
     case stopSet
@@ -153,10 +153,10 @@ nonisolated enum WatchCommand: String, CaseIterable, Equatable, Sendable {
     }
 }
 
-/// Watch to iPhone: one heart rate reading from the watch's workout session.
+/// Watch to iPhone: one heart rate reading from the watch's workout session
 nonisolated struct WatchHeartRate: Equatable, Sendable {
     let beatsPerMinute: Double
-    /// When the watch measured it, in seconds since 1970.
+    /// when the watch measured it, in seconds since 1970
     let measuredAt: Double
 
     static let messageType = "heartRate"
@@ -202,7 +202,7 @@ nonisolated enum WatchMessageKey {
     static let beatsPerMinute = "bpm"
     static let measuredAt = "measuredAt"
 
-    /// Numbers come back as NSNumber on Apple platforms and as Int or Double elsewhere.
+    /// numbers come back as NSNumber on Apple platforms and as Int or Double elsewhere
     static func integer(_ value: Any?) -> Int? {
         if let value = value as? Int { return value }
         if let value = value as? Double, value.isFinite, value == value.rounded() { return Int(value) }

@@ -24,7 +24,7 @@ if [ ! -f "$manifest" ]; then
 fi
 
 app="$1/Products/Applications/Plumb.app"
-# Save workouts to Apple Fitness: HealthKit crashes the app on a permission request without the
+# save workouts to Apple Fitness: HealthKit crashes the app on a permission request without the
 # purpose string, and refuses every call without the entitlement.
 if ! rg -q -a 'NSHealthUpdateUsageDescription' "$app/Info.plist"; then
     echo "Info.plist lacks NSHealthUpdateUsageDescription: asking Health for permission would crash" >&2

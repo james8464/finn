@@ -4,7 +4,7 @@ import Testing
 @testable import Plumb
 
 /// Personalize with Health: the coach's rules on values already read, and the session model's offer,
-/// permission and heart rate, with a fake in place of HealthKit.
+/// permission and heart rate, with a fake in place of HealthKit
 struct HealthCoachTests {
     @Test func aShortNightSuggestsALighterSessionAndSaysItComesFromSleep() throws {
         var health = HealthSnapshot()
@@ -62,14 +62,14 @@ struct HealthCoachTests {
         health.restingHeartRateBaseline = 60
         let withWatch = try #require(HealthCoach.rest(health: health, setHeartRate: SetHeartRate(average: 130, peak: 150),
                                                       currentHeartRate: 121))
-        // 60 + 0.4 × (150 − 60) = 96.
+        // 60 + 0.4 × (150 − 60) = 96
         #expect(withWatch.text == "Rest about 1 min 30 s before your next set. Or wait until your heart rate is back under 96 bpm (now 121).")
         #expect(withWatch.basis == "From your heart rate from your Apple Watch and resting heart rate in Health.")
     }
 
     @Test func heartRateLoadAndDepthLinesUseAgeWeightAndHeight() throws {
         let heart = HealthCoach.heartRateLine(SetHeartRate(average: 128, peak: 150), age: 30)
-        // 208 − 0.7 × 30 = 187; 150 / 187 = 80%.
+        // 208 − 0.7 × 30 = 187; 150 / 187 = 80%
         #expect(heart.text == "Heart rate during the set: 128 bpm on average, peak 150, about 80% of the usual maximum at your age.")
         #expect(HealthCoach.heartRateLine(SetHeartRate(average: 128, peak: 150), age: nil).basis == "From your Apple Watch.")
 
@@ -162,7 +162,7 @@ struct HealthSessionTests {
         #expect(setup.health.requests == 1)
         #expect(setup.model.readinessNote?.basis == "From your sleep in Health.")
 
-        // The watch sends its heart rate while the next set runs.
+        // the watch sends its heart rate while the next set runs
         await setup.model.startPreview()
         await setup.model.beginSet(countdown: 0)
         setup.model.receiveHeartRate(118, at: setup.clock.date)
@@ -176,7 +176,7 @@ struct HealthSessionTests {
         #expect(texts.contains { $0.hasPrefix("Rest about 2 min before your next set, since your night was short.") })
         #expect(texts.contains("Each squat moved about 60 kg, roughly 85% of your weight."))
 
-        // Turned off in Options: nothing personal is shown and no heart rate is kept.
+        // turned off in Options: nothing personal is shown and no heart rate is kept
         await setup.model.setPersonalizesWithHealth(false)
         #expect(setup.model.resultHealthNotes.isEmpty)
         #expect(setup.model.readinessNote == nil)

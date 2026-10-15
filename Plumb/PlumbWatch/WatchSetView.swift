@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The set the iPhone is measuring: exercise, stage, a large rep count, the latest live observation,
-/// and Start set or Stop set when the hands are free to press them.
+/// the set the iPhone is measuring: exercise, stage, a large rep count, the latest live observation,
+/// and Start set or Stop set when the hands are free to press them
 struct WatchSetView: View {
     let link: WatchLink
 

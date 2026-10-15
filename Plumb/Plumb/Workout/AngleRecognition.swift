@@ -1,13 +1,13 @@
 import CoreML
 import Foundation
 
-/// Classifies one window of joint-angle features into a classifier label
-/// (`squat`, `push_up`, `static_lunge`, `stiff_leg_deadlift`, `other`, or `none`).
+/// classifies one window of joint-angle features into a classifier label
+/// (`squat`, `push_up`, `static_lunge`, `stiff_leg_deadlift`, `other`, or `none`)
 nonisolated protocol AngleWindowClassifying: AnyObject {
     func classify(_ features: PoseWindowFeatures) throws -> ClassifierPrediction
 }
 
-/// Recognizes the exercise from Vision's 2D joint angles with hand-written rules: which joint
+/// recognises the exercise from Vision's 2D joint angles with hand-written rules: which joint
 /// bends (elbow, knee, hip), by how much, and how the torso is tilted (horizontal for a push-up,
 /// upright for a squat or lunge, tipping forward for a stiff-leg deadlift). It needs no training
 /// data. Its thresholds are starting values checked on synthetic and public side-view clips only.
@@ -28,7 +28,7 @@ nonisolated final class AngleRuleClassifier: AngleWindowClassifying {
     }
 }
 
-/// Runs an angle-window classifier over a set and votes like the keypoint classifier does.
+/// runs an angle-window classifier over a set and votes like the keypoint classifier does
 nonisolated enum AngleRecognizer {
     static func recognize(_ frames: [PoseFrame],
                           using classifier: any AngleWindowClassifying) -> ExerciseRecognition {
@@ -46,7 +46,7 @@ nonisolated enum AngleRecognizer {
         return ExerciseRecognizer.decide(mergingHangingWindows(predictions))
     }
 
-    /// A muscle-up starts with a pull, so many of its windows look like a pull-up. Pull-up and
+    /// a muscle-up starts with a pull, so many of its windows look like a pull-up. Pull-up and
     /// muscle-up windows vote together as one family; the set is a muscle-up when at least a
     /// quarter of that family's windows saw the shoulders pass above the hands.
     static func mergingHangingWindows(_ predictions: [ClassifierPrediction]) -> [ClassifierPrediction] {
@@ -61,7 +61,7 @@ nonisolated enum AngleRecognizer {
     }
 }
 
-/// A Core ML classifier trained on `PoseWindowFeatures` (tools/exercise-classifier/angle-model).
+/// a Core ML classifier trained on `PoseWindowFeatures` (tools/exercise-classifier/angle-model).
 /// The app looks for `PlumbAngleClassifier.mlmodel` in its target; none ships by default.
 nonisolated final class CoreMLAngleClassifier: AngleWindowClassifying, @unchecked Sendable {
     static let bundledModelName = "PlumbAngleClassifier"

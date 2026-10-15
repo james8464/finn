@@ -4,7 +4,7 @@ import Testing
 @testable import Plumb
 
 struct RepExtremesAndHintTests {
-    /// Six squats, 2 s each, with depths growing then shrinking: rep 3 deepest, rep 6 shallowest.
+    /// six squats, 2 s each, with depths growing then shrinking: rep 3 deepest, rep 6 shallowest
     private func varyingSquat() -> [PoseFrame] {
         let depths = [0.18, 0.22, 0.26, 0.24, 0.20, 0.16]
         return (0...(6 * 20)).map { index in
@@ -24,7 +24,7 @@ struct RepExtremesAndHintTests {
         let extremes = try #require(RepExtremes.make(analysis, frames: frames, definition: .squat))
         #expect(extremes.deepest.number == 3)
         #expect(extremes.shallowest.number == 6)
-        // The frame drawn is the bottom of the rep: hips at their lowest for that rep.
+        // the frame drawn is the bottom of the rep: hips at their lowest for that rep
         let bottom = try #require(extremes.deepest.frame.joints[.leftHip]?.y)
         #expect(abs(bottom - (0.42 + 0.26)) < 0.02)
     }

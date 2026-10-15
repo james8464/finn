@@ -11,10 +11,40 @@
             "value" : "Plumb"
           }
         },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plumb"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "PlumbWatch"
           }
         }
       }
@@ -27,6 +57,24 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Plumb reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb reads your heart rate during a set, only after you turn on Personalise with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb lee tu frecuencia cardíaca durante una serie, solo después de activar Personalizar con Salud en tu iPhone, para mostrarla en tu muñeca y en tu iPhone. Se mantiene en tus dispositivos."
           }
         },
         "fr" : {
@@ -45,6 +93,24 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Plumb runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb ejecuta un entrenamiento de fuerza en tu reloj mientras la cámara del iPhone está abierta, para leer tu frecuencia cardíaca. No guarda ese entrenamiento: tu iPhone guarda la sesión en Fitness solo si se lo pediste."
           }
         },
         "fr" : {

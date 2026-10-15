@@ -1,8 +1,8 @@
 import SwiftUI
 import WidgetKit
 
-/// The widget extension: the last measured set on the home screen, and the set in progress as a
-/// Live Activity. Views are in the app's `Widgets/` folder, shared with this target.
+/// the widget extension: the last measured set on the home screen, and the set in progress as a
+/// Live Activity. Views live in the app's `Widgets/` folder, shared with this target.
 @main
 struct PlumbWidgetsBundle: WidgetBundle {
     var body: some Widget {
@@ -18,8 +18,8 @@ struct LastSetEntry: TimelineEntry {
     let snapshot: LastSetSnapshot?
 }
 
-/// Reads the App Group once per reload; the app asks for a reload every time the history changes,
-/// so there is no schedule. Without the App Group entitlement the store is nil and the widget shows
+/// reads the App Group once per reload; the app asks for a reload every time the history changes,
+/// so there's no schedule. Without the App Group entitlement the store is nil and the widget shows
 /// its empty line.
 struct LastSetProvider: TimelineProvider {
     func placeholder(in context: Context) -> LastSetEntry {
@@ -41,7 +41,7 @@ struct LastSetProvider: TimelineProvider {
 }
 
 struct LastSetWidget: Widget {
-    static let kind = "com.finlearn.plumb.widgets.last-set"
+    static let kind = "ai.mwm.build.challenge.team.08.widgets.last-set"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: Self.kind, provider: LastSetProvider()) { entry in

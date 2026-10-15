@@ -9,7 +9,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         app.openWorkoutTab()
         app.openFromHome("Options")
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
-        // XCTest refuses identifier queries longer than 128 characters, so match the start.
+        // XCTest refuses identifier queries longer than 128 characters, so match the start
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(
             format: "label BEGINSWITH %@", "After each set, Plumb guesses the exercise from your joint angles")).firstMatch.exists)
         let toggle = app.switches["options.recognizeExercise"]
@@ -55,8 +55,8 @@ final class ExerciseOptionsUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
         XCTAssertTrue(app.staticTexts["6 measured reps"].waitForExistence(timeout: 5))
-        // The demo's last two reps also raise the hips above the body line: a form fault seen on two
-        // reps comes before the change in elbow bend (15 October).
+        // the demo's last two reps also raise the hips above the body line: a form fault seen on two
+        // reps comes before the change in elbow bend (15 October)
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(
             format: "label BEGINSWITH %@", "Your hips rose above the line from your shoulders to your ankles in rep 5 and rep 6"))
             .firstMatch.exists)

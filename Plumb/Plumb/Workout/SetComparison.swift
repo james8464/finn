@@ -16,7 +16,7 @@ nonisolated struct Comparison: Codable, Equatable {
     let rangeDirection: RangeDirection
     let cueRepNumbers: [Int]
     let cueKind: CueKind?
-    /// Both sets share this exercise; ranges use its unit.
+    /// both sets share this exercise; ranges use its unit
     let exercise: ExerciseKind
 
     init(firstSetID: UUID, secondSetID: UUID, firstMedianRange: Double, secondMedianRange: Double,
@@ -37,7 +37,7 @@ nonisolated struct Comparison: Codable, Equatable {
 }
 
 nonisolated enum SetComparison {
-    /// Each set needs this many measured reps for its median to mean something.
+    /// each set needs this many measured reps for its median to mean something
     static let minimumReps = 4
 
     static func compare(_ first: SetSummary, _ second: SetSummary) -> Comparison? {
@@ -45,7 +45,7 @@ nonisolated enum SetComparison {
               first.id != second.id,
               first.exercise == second.exercise,
               first.cameraView == second.cameraView,
-              // The side is a key only for an exercise measured from the side; a push-up, accepted
+              // the side is a key only for an exercise measured from the side; a push-up, accepted
               // from any view, compares across sides (filmed from the front, the side is arbitrary).
               first.bodySide == second.bodySide || first.exercise.definition.expectedView != .side,
               first.analysis.rubricVersion == second.analysis.rubricVersion,

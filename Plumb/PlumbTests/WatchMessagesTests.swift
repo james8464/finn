@@ -23,7 +23,7 @@ nonisolated struct WatchMessagesTests {
         #expect(WatchState(message: empty.message()) == empty)
     }
 
-    /// WatchConnectivity carries property lists only: the message must serialize, nil values left out.
+    /// WatchConnectivity carries property lists only: the message must serialise, nil values left out
     @Test func stateIsAPropertyListAndSurvivesSerialization() throws {
         for state in [full, WatchState(stage: .result, exercise: "Push-up", reps: 1, summary: "1 rep measured.",
                                        wristControls: false, demoInput: true, sentAt: 12)] {
@@ -55,7 +55,7 @@ nonisolated struct WatchMessagesTests {
         #expect(WatchState(message: ["type": "state", "stage": "warmingUp"]) == nil)
         #expect(WatchCommand(message: ["type": "command", "command": "pause"]) == nil)
         #expect(WatchCommand(message: ["command": "startSet"]) == nil)
-        // A newer phone may add keys or haptics; the watch keeps what it knows.
+        // a newer phone may add keys or haptics; the watch keeps what it knows
         let tolerant = WatchState(message: ["type": "state", "v": 2, "stage": "capturing", "reps": 4.0,
                                             "haptic": "doubleTap", "extra": "ignored"])
         #expect(tolerant == WatchState(stage: .capturing, reps: 4))

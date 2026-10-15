@@ -27,7 +27,7 @@ nonisolated enum SetShareSummary {
         return lines.joined(separator: "\n")
     }
 
-    /// The deterministic comparison sentence shown on screen and shared.
+    /// the deterministic comparison sentence shown on screen and shared
     static func statement(for direction: RangeDirection, exercise: ExerciseKind) -> String {
         let copy = exercise.definition.copy
         switch direction {

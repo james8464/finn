@@ -1,6 +1,6 @@
 import AppIntents
 
-/// The phrases Siri, Spotlight and the Shortcuts app offer as soon as Plumb is installed, with no
+/// the phrases Siri, Spotlight and the Shortcuts app offer as soon as Plumb is installed, with no
 /// setup. `\(.applicationName)` is "Plumb"; `\(\.$exercise)` takes any exercise name or synonym.
 struct PlumbShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {

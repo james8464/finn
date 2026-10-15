@@ -60,17 +60,17 @@ nonisolated struct SquatAnalyzerTests {
         #expect(analysis.reps.isEmpty)
     }
 
-    /// A pause with a small rise on the way down is not the way up: the rep keeps its full depth,
-    /// and no "range became shorter" observation is made up.
+    /// a pause with a small rise on the way down is not the way up: the rep keeps its full depth,
+    /// and no "range became shorter" observation is made up
     @Test func aWobbleOnTheWayDownKeepsTheRepsFullDepth() {
         var frames: [PoseFrame] = []
         var time = 0.0
         for rep in 0..<6 {
-            // 30 samples per rep at 0.1 s: down to 0.20 below standing, back up.
+            // 30 samples per rep at 0.1 s: down to 0.20 below standing, back up
             for index in 0..<30 {
                 let phase = Double(index) / 30
                 var drop = 0.20 * (1 - cos(2 * .pi * phase)) / 2
-                // Reps 5 and 6 stall about halfway down and rise a little before going on.
+                // reps 5 and 6 stall about halfway down and rise a little before going on
                 if rep >= 4 && index >= 8 && index < 12 { drop = 0.13 - 0.02 * Double(index - 8) }
                 frames.append(frame(time: time, hipY: 0.42 + drop))
                 time += 0.1
@@ -87,8 +87,8 @@ nonisolated struct SquatAnalyzerTests {
         #expect(CueSelector.select(from: analysis) == nil)
     }
 
-    /// The set opened partway down the first squat (it began during the countdown): that rep is
-    /// measured from the set's top, not from where the capture started.
+    /// the set opened partway down the first squat (it began during the countdown): that rep is
+    /// measured from the set's top, not from where the capture started
     @Test func aRepUnderWayWhenTheSetStartsKeepsItsDepth() {
         let trace = squatTrace(reps: 6).dropFirst(5).map { $0 }
         guard case .analyzed(let analysis) = SquatAnalyzer.analyze(trace) else {

@@ -4,9 +4,9 @@ import Testing
 @testable import Plumb
 
 struct SkeletonOverlayTests {
-    /// A side-on squatter in a portrait frame (height / width = 16 / 9), knee bent to 90°.
+    /// a side-on squatter in a portrait frame (height / width = 16 / 9), knee bent to 90°
     private func squatFrame(kneeConfidence: Double = 0.9, aspectRatio: Double = 16.0 / 9) -> PoseFrame {
-        // Thigh horizontal, shin vertical once y is scaled by the aspect ratio, as the angle is.
+        // thigh horizontal, shin vertical once y is scaled by the aspect ratio, as the angle is
         let knee = (x: 0.5, y: 0.7)
         let hip = (x: knee.x - 0.2, y: knee.y)
         let ankle = (x: knee.x, y: knee.y + 0.2 / aspectRatio * 1)
@@ -70,7 +70,7 @@ struct SkeletonOverlayTests {
         #expect(!knee.reliable)
         #expect(geometry.joints.first { $0.joint == .leftHip }?.reliable == true)
         #expect(geometry.angle?.reliable == false)
-        // Hip to knee and knee to ankle use the unclear knee; the hip line uses the weak right hip.
+        // hip to knee and knee to ankle use the unclear knee; the hip line uses the weak right hip
         #expect(geometry.bones.filter { !$0.reliable }.count == 3)
         #expect(geometry.summary.hasPrefix("5 joints, 3 clear"))
     }
@@ -85,24 +85,24 @@ struct SkeletonOverlayTests {
     }
 
     @Test func screenRotationIsWhatTheFrameStillNeeds() {
-        // Portrait: frames are already turned like the screen.
+        // portrait: frames are already turned like the screen
         #expect(PreviewFeed.displayRotation(capture: 90, preview: 90) == 0)
-        // Phone sideways, interface still portrait: a quarter turn either way.
+        // phone sideways, interface still portrait: a quarter turn either way
         #expect(PreviewFeed.displayRotation(capture: 0, preview: 90) == 90)
         #expect(PreviewFeed.displayRotation(capture: 180, preview: 90) == 270)
         #expect(PreviewFeed.displayRotation(capture: 270, preview: 0) == 90)
-        // Small sensor jitter rounds to the nearest quarter turn.
+        // small sensor jitter rounds to the nearest quarter turn
         #expect(PreviewFeed.displayRotation(capture: 88, preview: 91) == 0)
     }
 
     @Test func theMirroredFrontCameraTurnsLikeTheBackCameraForTheSamePhonePosition() {
-        // Portrait is unchanged.
+        // portrait is unchanged
         #expect(PreviewFeed.displayRotation(capture: 90, preview: 90, mirrored: true) == 0)
-        // Phone on its side, interface portrait: the front camera's upright frame needs the same turn
-        // as the back camera's (capture 0, preview 90 gives 90), not the opposite one.
+        // phone on its side, interface portrait: the front camera's upright frame needs the same turn
+        // as the back camera's (capture 0, preview 90 gives 90), not the opposite one
         #expect(PreviewFeed.displayRotation(capture: 180, preview: 90, mirrored: true) == 90)
         #expect(PreviewFeed.displayRotation(capture: 0, preview: 90, mirrored: true) == 270)
-        // A portrait-mounted front sensor (preview 0) on its side.
+        // a portrait-mounted front sensor (preview 0) on its side
         #expect(PreviewFeed.displayRotation(capture: 90, preview: 0, mirrored: true) == 90)
     }
 }

@@ -1,6 +1,18 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Plumb"
+          }
+        }
+      }
+    },
     "NSCameraUsageDescription" : {
       "comment" : "Privacy - Camera Usage Description",
       "extractionState" : "extracted_with_value",
@@ -9,6 +21,24 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb usa tu cámara para medir tu posición corporal durante una serie en este iPhone. El vídeo no se guarda."
           }
         },
         "fr" : {
@@ -29,6 +59,24 @@
             "value" : "Only after you turn on Personalize with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone."
           }
         },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only after you turn on Personalise with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only after you turn on Personalize with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo después de activar Personalizar con Salud, Plumb lee tu frecuencia cardíaca, frecuencia cardíaca en reposo, variabilidad de la frecuencia cardíaca, VO2 máx, entrenamientos, energía activa, pasos, sueño, edad, peso y altura para adaptar los tiempos de descanso y sugerir días más ligeros. Nada sale de tu iPhone."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -45,6 +93,24 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Plumb saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plumb guarda cada sesión que terminas en Salud como un entrenamiento de fuerza, con su tiempo y las repeticiones medidas, para que aparezca en la app Fitness."
           }
         },
         "fr" : {

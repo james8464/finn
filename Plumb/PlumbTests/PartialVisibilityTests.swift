@@ -6,14 +6,14 @@ import Testing
 /// 13 October: a push-up set refused at 79% joint coverage lost all its reps. Between 65 and 80%,
 /// Plumb now counts the reps it saw, without advice or comparison, and marks the set partial.
 struct PartialVisibilityTests {
-    /// Six squats in which Vision misses the knee in one frame out of `everyNth`, as it does when
-    /// a joint flickers all through a set.
+    /// six squats in which Vision misses the knee in one frame out of `everyNth`, as it does when
+    /// a joint flickers all through a set
     static func squats(missingKneeEvery everyNth: Int?, hiddenRep: Int? = nil) -> [PoseFrame] {
         CaptureTraces.squats(reps: 6, from: 0).enumerated().map { index, frame in
             var joints = frame.joints
             let rep = Int(frame.time / 2.0) + 1
             if let everyNth, index % everyNth == 0 { joints[.leftKnee] = nil }
-            // Two frames out of three without the knee in this rep: short gaps, but mostly unclear.
+            // two frames out of three without the knee in this rep: short gaps, but mostly unclear
             if rep == hiddenRep, index % 3 != 0 { joints[.leftKnee] = nil }
             return PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: joints,
                              athleteTracking: frame.athleteTracking)
@@ -55,7 +55,7 @@ struct PartialVisibilityTests {
         #expect(note.contains("gives no posture advice"))
     }
 
-    /// The knee is lost for most of the sixth rep. The side rubric keeps five clear reps; the hips,
+    /// the knee is lost for most of the sixth rep. The side rubric keeps five clear reps; the hips,
     /// seen all through, show the sixth, so it is counted too, from the hips and without advice.
     /// Until 15 October that rep was left out.
     @Test func aRepWithTheKneeHiddenIsCountedFromTheHips() throws {
@@ -73,7 +73,7 @@ struct PartialVisibilityTests {
         #expect(EvidenceGate.partialVisibility(frames, requirement: definition.evidence) != nil)
     }
 
-    /// The knee in only half the frames: no reading from the side, but the hips count the squats.
+    /// the knee in only half the frames: no reading from the side, but the hips count the squats
     @Test func belowSixtyFivePercentTheRepsAreCountedFromTheHips() {
         let frames = Self.squats(missingKneeEvery: 2)
         #expect(EvidenceGate.assess(frames, requirement: .squat, allowsPartial: true).isRejected)
@@ -100,7 +100,7 @@ struct PartialVisibilitySessionTests {
                                         preferences: PlumbPreferences(defaults: defaults))
         model.recognizesExercise = false
 
-        // A clear set first, then a partly visible one.
+        // a clear set first, then a partly visible one
         await model.startPreview()
         await model.beginSet(countdown: 0)
         for frame in CaptureTraces.squats(reps: 6, from: 0) { source.emit(frame) }

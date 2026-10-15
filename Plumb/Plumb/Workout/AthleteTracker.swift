@@ -1,7 +1,7 @@
 import Foundation
 
-/// Follows the person doing the set from frame to frame, so other people in a gym are ignored
-/// instead of refusing the set.
+/// follows the person doing the set from frame to frame, so other people in a gym are ignored
+/// instead of refusing the set
 ///
 /// Before a set it picks the most prominent person (large and near the centre). After that, it
 /// remembers where each of their joints was last seen and, in every frame, takes the person whose
@@ -27,15 +27,15 @@ import Foundation
 /// another place. Someone who stayed in view while the athlete was hidden is never taken this way.
 nonisolated struct AthleteTracker {
     struct Box: Equatable {
-        /// Centre and diagonal in pixel proportions (y scaled by the frame's height / width).
+        /// centre and diagonal in pixel proportions (y scaled by the frame's height / width)
         let x: Double
         let y: Double
         let size: Double
-        /// Half the width and half the height, in the same units.
+        /// half the width and half the height, in the same units
         var halfWidth = 0.0
         var halfHeight = 0.0
 
-        /// The boxes overlap once this one is widened by `margin` of its size on each side.
+        /// the boxes overlap once this one is widened by `margin` of its size on each side
         func overlaps(_ other: Box, margin: Double) -> Bool {
             abs(x - other.x) <= halfWidth + other.halfWidth + margin * size
                 && abs(y - other.y) <= halfHeight + other.halfHeight + margin * size
@@ -49,19 +49,19 @@ nonisolated struct AthleteTracker {
     }
 
     static let minimumJoints = 4
-    /// Joints used to place a person; weaker ones are too often misplaced.
+    /// joints used to place a person; weaker ones are too often misplaced
     static let jointConfidence = 0.2
-    /// Joints compared with the remembered ones; with fewer, the frame is not trusted.
+    /// joints compared with the remembered ones; with fewer, the frame is not trusted
     static let minimumSharedJoints = 3
-    /// A remembered joint older than this no longer counts.
+    /// a remembered joint older than this no longer counts
     static let jointMemory: TimeInterval = 2.0
     static let reacquireAfter: TimeInterval = 1.0
     static let switchFactor = 1.5
-    /// While framing: how long someone is followed before a more prominent person no longer takes
-    /// over at once, and how long that person must then lead.
+    /// while framing: how long someone is followed before a more prominent person no longer takes
+    /// over at once, and how long that person must then lead
     static let switchAfter: TimeInterval = 1.0
-    /// During a set, a lone person this much smaller or larger than the athlete is not picked up as
-    /// them after a loss.
+    /// during a set, a lone person this much smaller or larger than the athlete is not picked up as
+    /// them after a loss
     static let reacquireSizeRange = 0.5...2.0
     /// ...and must overlap where the athlete was last seen, widened by this share of their size...
     static let reacquireMargin = 0.25
@@ -69,37 +69,37 @@ nonisolated struct AthleteTracker {
     /// picture and came back a metre to the side was never followed again: the rest of the set had
     /// no athlete, and only a new set started counting.
     static let relocateAfter: TimeInterval = 2.0
-    /// Two candidates this close in distance could be swapped; the frame then has no athlete.
+    /// two candidates this close in distance could be swapped; the frame then has no athlete
     static let ambiguityMargin = 0.05
 
     private var memory: [BodyJoint: Seen] = [:]
-    /// The athlete's size (box diagonal), smoothed and updated only by fairly complete detections.
+    /// the athlete's size (box diagonal), smoothed and updated only by fairly complete detections
     private var size = 0.0
-    /// Where the athlete's box was when last matched.
+    /// where the athlete's box was when last matched
     private var lastBox: Box?
-    /// Where everyone else was then: a coach or partner beside the athlete is never taken for them.
+    /// where everyone else was then: a coach or partner beside the athlete is never taken for them
     private var lastOthers: [Box] = []
     private(set) var isLocked = false
     private var lastMatchTime = -Double.infinity
-    /// When the current person was first followed.
+    /// when the current person was first followed
     private var followedSince = -Double.infinity
-    /// Since when someone else has been clearly more prominent than the current person.
+    /// since when someone else has been clearly more prominent than the current person
     private var challengedSince: TimeInterval?
-    /// Nobody at all was in view at some point since the athlete was last matched.
+    /// nobody at all was in view at some point since the athlete was last matched
     private var emptiedSinceLoss = false
 
     var isTracking: Bool { !memory.isEmpty }
 
-    /// Keep following the current person for the whole set.
+    /// keep following the current person for the whole set
     mutating func lock() { isLocked = true }
 
-    /// Forget the person; the next frame picks the most prominent one again.
+    /// forget the person; the next frame picks the most prominent one again
     mutating func reset() {
         forget()
         isLocked = false
     }
 
-    /// The index of the athlete in `people`, or nil when they are not visible in this frame.
+    /// the index of the athlete in `people`, or nil when they are not visible in this frame
     mutating func select(_ people: [[BodyJoint: JointPoint]], aspectRatio: Double,
                          time: TimeInterval) -> Int? {
         let boxes = people.map { Self.box(of: $0, aspectRatio: aspectRatio) }
@@ -137,7 +137,7 @@ nonisolated struct AthleteTracker {
             if boxes.allSatisfy({ $0 == nil }) { emptiedSinceLoss = true }
             if time - lastMatchTime < Self.reacquireAfter { return nil }
             if isLocked {
-                // During a set, pick the athlete up again only when they are clearly the one person
+                // during a set, pick the athlete up again only when they are clearly the one person
                 // in view, at about the size they were. Getting down into a push-up can hide them
                 // from Vision for a moment and bring them back far from where they were last seen;
                 // before, every remaining frame of the set then had no athlete.
@@ -170,8 +170,8 @@ nonisolated struct AthleteTracker {
         emptiedSinceLoss = false
     }
 
-    /// Median distance, in person sizes, between a candidate's clear joints and where the
-    /// athlete's same joints were last seen; nil with too few joints in common.
+    /// median distance, in person sizes, between a candidate's clear joints and where the
+    /// athlete's same joints were last seen; nil with too few joints in common
     private func distance(to joints: [BodyJoint: JointPoint], aspectRatio: Double,
                           time: TimeInterval) -> Double? {
         guard size > 0 else { return nil }
@@ -182,7 +182,7 @@ nonisolated struct AthleteTracker {
                 return hypot(point.x - seen.x, point.y * aspectRatio - seen.y) / size
             }.sorted()
         }
-        // Recent joints first; after a long absence, the last positions seen are all there is.
+        // recent joints first; after a long absence, the last positions seen are all there is
         var shared = gaps(maximumAge: Self.jointMemory)
         if shared.count < Self.minimumSharedJoints { shared = gaps(maximumAge: .infinity) }
         guard shared.count >= Self.minimumSharedJoints else { return nil }
@@ -195,7 +195,7 @@ nonisolated struct AthleteTracker {
         for (joint, point) in joints where point.confidence >= Self.jointConfidence {
             memory[joint] = Seen(x: point.x, y: point.y * aspectRatio, time: time)
         }
-        // A detection missing the legs gives a small box; it does not shrink the size.
+        // a detection missing the legs gives a small box; it does not shrink the size
         if let box {
             lastBox = box
             if size == 0 {
@@ -208,7 +208,7 @@ nonisolated struct AthleteTracker {
         emptiedSinceLoss = false
     }
 
-    /// How far the athlete may appear to move, in person sizes, after `elapsed` seconds unseen.
+    /// how far the athlete may appear to move, in person sizes, after `elapsed` seconds unseen
     static func allowedShift(after elapsed: TimeInterval) -> Double {
         min(0.35, 0.12 + 0.25 * max(0, elapsed))
     }
@@ -220,15 +220,15 @@ nonisolated struct AthleteTracker {
         }.max { $0.1 < $1.1 }?.0
     }
 
-    /// Large and central wins: size, reduced by up to half for a person at the frame's edge.
+    /// large and central wins: size, reduced by up to half for a person at the frame's edge
     static func prominence(_ box: Box, aspectRatio: Double) -> Double {
         let offCentre = hypot(box.x - 0.5, box.y - 0.5 * aspectRatio) / hypot(0.5, 0.5 * aspectRatio)
         return box.size * (1 - 0.5 * min(1, offCentre))
     }
 
-    /// Shoulder, hip, knee and ankle clear on one side: the whole body is in the picture, as when
+    /// shoulder, hip, knee and ankle clear on one side: the whole body is in the picture, as when
     /// someone stands at their spot to be filmed, not a person close to the phone with their legs
-    /// out of view.
+    /// out of view
     static func showsWholeSide(_ joints: [BodyJoint: JointPoint]) -> Bool {
         [BodySide.left, .right].contains { side in
             [JointRole.shoulder, .hip, .knee, .ankle].allSatisfy { role in

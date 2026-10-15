@@ -1,6 +1,6 @@
 # Plumb 1.0 App Store listing, ready to paste
 
-Written 15 October 2026 against `main` at d8f1503 (bundle `com.finlearn.plumb`, team 2FN6Y5NHS5, version 1.0, build 1). Every claim below comes from `README.md`, "Current state". Two locales in App Store Connect: **English (U.S.)**, the primary language, and **French (France)**, whose texts are at the end of this file. The French interface comes from branch `claude/fr`; on 15 October at 16:00 that branch had no localization files yet. Add the French locale only once `claude/fr` is merged into the build you upload, otherwise a French page would promise a language the app does not have.
+Written 15 October 2026 against `main` at d8f1503 (bundle `ai.mwm.build.challenge.team.08`, team 2FN6Y5NHS5, version 1.0, build 1). Every claim below comes from `README.md`, "Current state". Two locales in App Store Connect: **English (U.S.)**, the primary language, and **French (France)**, whose texts are at the end of this file. The French interface comes from branch `claude/fr`; on 15 October at 16:00 that branch had no localization files yet. Add the French locale only once `claude/fr` is merged into the build you upload, otherwise a French page would promise a language the app does not have.
 
 Character counts were checked with `python3 -c 'print(len(...))'`; Apple's limits are in parentheses.
 

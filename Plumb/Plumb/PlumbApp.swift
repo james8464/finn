@@ -67,7 +67,7 @@ struct PlumbApp: App {
                             connectsAccessories: true)
             }
             #else
-            // Only live camera sessions can reach Apple Health; demo and recorded input never do.
+            // only live camera sessions can reach Apple Health; demo and recorded input never do.
             // The widget shows only what this store saves.
             ContentView(source: CameraPoseSource.live(),
                         store: WidgetSharingSessionStore(base: LocalSessionStore()),

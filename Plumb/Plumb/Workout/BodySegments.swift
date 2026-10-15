@@ -1,6 +1,6 @@
 import Foundation
 
-/// One side of the body in one frame, as segments and angles worked out from Vision's 2D joints:
+/// one side of the body in one frame, as segments and angles worked out from Vision's 2D joints:
 /// upper arm, forearm, torso, thigh and shin; the elbow, shoulder, hip and knee angles; how far the
 /// torso and shin lean; and how straight the shoulder, hip and ankle line up. Every form check reads
 /// the body through this type, so they all measure the same arm, torso and leg the same way.
@@ -16,7 +16,7 @@ nonisolated struct BodySegments: Equatable, Sendable {
         let y: Double
     }
 
-    /// From one joint to the next, in the order the body chains them (shoulder to elbow, hip to knee...).
+    /// from one joint to the next, in the order the body chains them (shoulder to elbow, hip to knee...)
     struct Segment: Equatable, Sendable {
         let from: Point
         let to: Point
@@ -24,14 +24,14 @@ nonisolated struct BodySegments: Equatable, Sendable {
         var dx: Double { to.x - from.x }
         var dy: Double { to.y - from.y }
         var length: Double { hypot(dx, dy) }
-        /// Degrees between the segment and the vertical, 0 (upright) to 90 (level), whichever way it leans.
+        /// degrees between the segment and the vertical, 0 (upright) to 90 (level), whichever way it leans
         var tiltFromVertical: Double? {
             length > 0 ? atan2(abs(dx), abs(dy)) * 180 / .pi : nil
         }
     }
 
-    /// Confidence a joint needs before a form check reads it: above the 0.3 the rep count accepts,
-    /// the same 0.5 as the posture readings in `ExerciseAnalyzer`.
+    /// confidence a joint needs before a form check reads it: above the 0.3 the rep count accepts,
+    /// the same 0.5 as the posture readings in `ExerciseAnalyzer`
     static let supportingConfidence = 0.5
 
     let side: BodySide
@@ -73,41 +73,41 @@ nonisolated struct BodySegments: Equatable, Sendable {
 
     var upperArm: Segment? { Self.segment(shoulder, elbow) }
     var forearm: Segment? { Self.segment(elbow, wrist) }
-    /// Hip to shoulder.
+    /// hip to shoulder
     var torso: Segment? { Self.segment(hip, shoulder) }
     var thigh: Segment? { Self.segment(hip, knee) }
     var shin: Segment? { Self.segment(knee, ankle) }
 
     // MARK: Joint angles, in degrees; 180 is straight
 
-    /// Shoulder, elbow, wrist.
+    /// shoulder, elbow, wrist
     var elbowAngle: Double? { Self.angle(shoulder, elbow, wrist) }
-    /// Hip, shoulder, elbow: the upper arm against the torso.
+    /// hip, shoulder, elbow: the upper arm against the torso
     var shoulderAngle: Double? { Self.angle(hip, shoulder, elbow) }
-    /// Shoulder, hip, knee: the torso against the thigh.
+    /// shoulder, hip, knee: the torso against the thigh
     var hipAngle: Double? { Self.angle(shoulder, hip, knee) }
-    /// Hip, knee, ankle.
+    /// hip, knee, ankle
     var kneeAngle: Double? { Self.angle(hip, knee, ankle) }
-    /// Shoulder, hip, ankle: 180 when the three are in one straight line.
+    /// shoulder, hip, ankle: 180 when the three are in one straight line
     var shoulderHipAnkleAngle: Double? { Self.angle(shoulder, hip, ankle) }
 
     // MARK: Leans and alignment
 
-    /// Torso lean from vertical, 0 upright to 90 level.
+    /// torso lean from vertical, 0 upright to 90 level
     var torsoTilt: Double? { torso?.tiltFromVertical }
-    /// Shin lean from vertical.
+    /// shin lean from vertical
     var shinTilt: Double? { shin?.tiltFromVertical }
-    /// Thigh lean from vertical.
+    /// thigh lean from vertical
     var thighTilt: Double? { thigh?.tiltFromVertical }
 
-    /// The thigh's angle above level, in degrees: positive with the hip higher than the knee, 0 with
-    /// the thigh level (a parallel squat), negative with the hip below the knee.
+    /// the thigh's angle above level, in degrees: positive with the hip higher than the knee, 0 with
+    /// the thigh level (a parallel squat), negative with the hip below the knee
     var thighAboveLevel: Double? {
         guard let hip, let knee, hip != knee else { return nil }
         return atan2(knee.y - hip.y, abs(knee.x - hip.x)) * 180 / .pi
     }
 
-    /// How far the hip sits off the straight line from the shoulder to the ankle (to the knee when the
+    /// how far the hip sits off the straight line from the shoulder to the ankle (to the knee when the
     /// ankle is not clear), measured square to that line, in torso lengths (shoulder to hip). Positive
     /// below the line (toward the bottom of the picture: the floor, for a push-up filmed upright),
     /// negative above it. Nil when the line is nearly vertical, where "below" means nothing.
@@ -115,7 +115,7 @@ nonisolated struct BodySegments: Equatable, Sendable {
         guard let shoulder, let hip, let end = ankle ?? knee, let torso, torso.length > 0 else { return nil }
         let line = Segment(from: shoulder, to: end)
         guard line.length > torso.length, let tilt = line.tiltFromVertical, tilt >= 30 else { return nil }
-        // The normal to the line that points down the picture.
+        // the normal to the line that points down the picture
         var normal = (x: -line.dy / line.length, y: line.dx / line.length)
         if normal.y < 0 { normal = (-normal.x, -normal.y) }
         let distance = (hip.x - shoulder.x) * normal.x + (hip.y - shoulder.y) * normal.y
@@ -130,7 +130,7 @@ nonisolated struct BodySegments: Equatable, Sendable {
         return segment.length > 0 ? segment : nil
     }
 
-    /// Angle at `vertex`, between `a` and `c`, in degrees.
+    /// angle at `vertex`, between `a` and `c`, in degrees
     static func angle(_ a: Point?, _ vertex: Point?, _ c: Point?) -> Double? {
         guard let a, let vertex, let c else { return nil }
         let first = (x: a.x - vertex.x, y: a.y - vertex.y)

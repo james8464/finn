@@ -29,7 +29,7 @@ final class VideoFilePoseSource: PoseStreaming {
         guard FileManager.default.isReadableFile(atPath: url.path) else {
             throw CameraSourceError.unavailable
         }
-        // Keep the finite fixture intact if a simulator pauses the UI test while taking screenshots.
+        // keep the finite fixture intact if a simulator pauses the UI test while taking screenshots.
         let stream = AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(256)) { continuation in
             self.continuation = continuation
         }
@@ -63,13 +63,13 @@ final class VideoFilePoseSource: PoseStreaming {
 }
 
 nonisolated enum VideoFileReader {
-    /// Reads the file upright (its rotation applied), shows every frame at its own pace, and
-    /// analyzes 15 frames per second, like the camera.
+    /// reads the file upright (its rotation applied), shows every frame at its own pace, and
+    /// analyses 15 frames per second, like the camera.
     static func play(url: URL, sink: PreviewFrameSink, looping: Bool, recordedPoses: [PoseFrame]? = nil,
                      yield: @Sendable (PoseFrame) -> Void) async {
         let asset = AVURLAsset(url: url)
         let analyzer = PoseFrameAnalyzer()
-        // A set (played once) follows the person picked on its first frame throughout.
+        // a set (played once) follows the person picked on its first frame throughout.
         if !looping { analyzer.lockAthlete() }
         repeat {
             guard let track = try? await asset.loadTracks(withMediaType: .video).first,
@@ -109,7 +109,7 @@ nonisolated enum VideoFileReader {
         } while looping && !Task.isCancelled
     }
 
-    /// The recorded pose closest in time, if one is within a frame of it.
+    /// the recorded pose closest in time, if one is within a frame of it.
     static func nearest(_ poses: [PoseFrame], to time: TimeInterval) -> PoseFrame? {
         var low = 0
         var high = poses.count

@@ -17,7 +17,7 @@ nonisolated struct FixtureReplayTests {
         try JSONDecoder().decode([PoseFrame].self, from: Data(contentsOf: Self.fixtures.appending(path: name)))
     }
 
-    /// The recording loses the athlete for three frames right after the sixth rep. The set window
+    /// the recording loses the athlete for three frames right after the sixth rep. The set window
     /// used to end at that rep's top and drop it.
     @Test(.enabled(if: available)) func sixClearSquatsAreSixReps() throws {
         let frames = try poses("squat-six-reps-poses.json")
@@ -28,7 +28,7 @@ nonisolated struct FixtureReplayTests {
         #expect(analysis.reps.count == 6)
     }
 
-    /// Covered feet never reach the side rubric, which reads the hip against the ankle: no depth in
+    /// covered feet never reach the side rubric, which reads the hip against the ankle: no depth in
     /// leg lengths and no posture advice. The hips still show each squat (since 15 October).
     @Test(.enabled(if: available)) func coveredFeetAreCountedFromTheHipsWithoutAdvice() throws {
         let frames = try poses("squat-feet-hidden-poses.json")

@@ -58,7 +58,7 @@ final class ObservationSpeaker: NSObject, AVSpeechSynthesizerDelegate {
     }
 }
 
-/// Says the countdown, rep counts, and live observations during a set. Phrases queue so a count is
+/// says the countdown, rep counts, and live observations during a set. Phrases queue so a count is
 /// not cut off by the observation that follows it; when they pile up, the backlog is dropped so
 /// what is said stays current with the set.
 @MainActor
@@ -68,7 +68,7 @@ final class LiveAnnouncer: NSObject, LiveAnnouncing, AVSpeechSynthesizerDelegate
 
     override init() {
         let synthesizer = AVSpeechSynthesizer()
-        // Plays through the current route (AirPods or other headphones when connected) without
+        // plays through the current route (AirPods or other headphones when connected) without
         // taking over the app's audio session.
         synthesizer.usesApplicationAudioSession = false
         self.synthesizer = synthesizer
@@ -92,7 +92,7 @@ final class LiveAnnouncer: NSObject, LiveAnnouncing, AVSpeechSynthesizerDelegate
         Task { @MainActor [weak self] in self?.finishOne() }
     }
 
-    /// Only `announce` cancels, and it resets the count itself.
+    /// only `announce` cancels, and it resets the count itself
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {}
 
     private func finishOne() {

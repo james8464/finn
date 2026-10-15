@@ -1,13 +1,13 @@
 import CoreGraphics
 import Foundation
 
-/// Where to draw a pose over the camera picture: bones, joints, and the angle at the joint the
+/// where to draw a pose over the camera picture: bones, joints, and the angle at the joint the
 /// exercise is measured at. Coordinates are in the view showing the picture with aspect fit.
 nonisolated struct SkeletonGeometry: Equatable {
     struct Joint: Equatable {
         let joint: BodyJoint
         let point: CGPoint
-        /// Confident enough for the analysis to use (`EvidenceRubric.minimumJointConfidence`).
+        /// confident enough for the analysis to use (`EvidenceRubric.minimumJointConfidence`)
         let reliable: Bool
     }
 
@@ -27,7 +27,7 @@ nonisolated struct SkeletonGeometry: Equatable {
     let joints: [Joint]
     let bones: [Bone]
     let angle: AngleLabel?
-    /// Other people, drawn greyed out: Plumb ignores them.
+    /// other people, drawn greyed out: Plumb ignores them
     let bystanderBones: [Bone]
     let bystanderJoints: [CGPoint]
 
@@ -84,7 +84,7 @@ nonisolated struct SkeletonGeometry: Equatable {
         }
     }
 
-    /// The rectangle a frame with this height-to-width ratio fills when fitted inside `size`.
+    /// the rectangle a frame with this height-to-width ratio fills when fitted inside `size`
     static func imageRect(aspectRatio: Double, in size: CGSize) -> CGRect {
         guard aspectRatio > 0, size.width > 0, size.height > 0 else { return CGRect(origin: .zero, size: size) }
         let width = min(size.width, size.height / aspectRatio)
@@ -93,13 +93,13 @@ nonisolated struct SkeletonGeometry: Equatable {
                       width: width, height: height)
     }
 
-    /// A normalized point (top-left origin) placed in `rect`, flipped left to right when the
+    /// a normalised point (top-left origin) placed in `rect`, flipped left to right when the
     /// picture is shown mirrored.
     static func viewPoint(x: Double, y: Double, in rect: CGRect, mirrored: Bool) -> CGPoint {
         CGPoint(x: rect.minX + (mirrored ? 1 - x : x) * rect.width, y: rect.minY + y * rect.height)
     }
 
-    /// The side whose measured joints Vision is surer of in this frame.
+    /// the side whose measured joints Vision is surer of in this frame
     static func trackedSide(_ frame: PoseFrame, roles: [JointRole]) -> BodySide {
         func total(_ side: BodySide) -> Double {
             roles.reduce(0) { $0 + (frame.joints[$1.joint(on: side)]?.confidence ?? 0) }
@@ -107,7 +107,7 @@ nonisolated struct SkeletonGeometry: Equatable {
         return total(.right) > total(.left) ? .right : .left
     }
 
-    /// The athlete's joints re-framed to fill a box around them (15% margin), for drawing one
+    /// the athlete's joints re-framed to fill a box around them (15% margin), for drawing one
     /// pose on its own. Angles are unchanged: the aspect ratio is carried along.
     static func cropped(_ frame: PoseFrame) -> PoseFrame? {
         let points = frame.joints.values
@@ -126,7 +126,7 @@ nonisolated struct SkeletonGeometry: Equatable {
                          aspectRatio: boxHeight * frame.aspectRatio / boxWidth)
     }
 
-    /// A short description for VoiceOver and UI tests.
+    /// a short description for VoiceOver and UI tests
     var summary: String {
         let reliableCount = joints.filter(\.reliable).count
         var parts = ["\(joints.count) joints", "\(reliableCount) clear"]
@@ -137,7 +137,7 @@ nonisolated struct SkeletonGeometry: Equatable {
 }
 
 nonisolated extension ExerciseDefinition {
-    /// The joint angle shown on the camera picture. Squat depth is measured from hip travel,
+    /// the joint angle shown on the camera picture. Squat depth is measured from hip travel,
     /// but the knee angle is what a person checks, so the squat shows the knee.
     var displayedAngle: (from: JointRole, vertex: JointRole, to: JointRole) {
         switch signal {

@@ -161,7 +161,7 @@ struct SessionStoreAndComparisonTests {
             .appending(path: "sessions.json")
     }
 
-    /// A push-up is accepted from any view: filmed from the front, the side the gate followed is
+    /// a push-up is accepted from any view: filmed from the front, the side the gate followed is
     /// whichever arm Vision saw better, so sides are not a key for comparing push-up sets. On
     /// 15 October a front-view set was told its earlier sets "were filmed from your other side".
     @Test func pushUpSetsCompareAcrossSidesButSquatSetsDoNot() {

@@ -3,7 +3,7 @@ import Foundation
 import Testing
 @testable import Plumb
 
-/// Saving a finished session to Apple Health, with a fake in place of HealthKit.
+/// saving a finished session to Apple Health, with a fake in place of HealthKit
 @MainActor
 struct FitnessSessionTests {
     @Test func aFinishedSessionIsSavedOnceWhenTheOptionIsOn() async throws {
@@ -22,7 +22,7 @@ struct FitnessSessionTests {
         #expect(record.workoutID == setup.fitness.lastWorkoutID)
         #expect(setup.model.history.first?.fitnessWorkout == record)
 
-        // Neither a retry from History nor a reopened app saves it again.
+        // neither a retry from History nor a reopened app saves it again
         let saved = try #require(setup.model.history.first)
         #expect(!setup.model.canSaveToFitness(saved))
         await setup.model.saveToFitness(sessionID: sessionID)
@@ -57,7 +57,7 @@ struct FitnessSessionTests {
         #expect(setup.model.fitnessSave == nil)
     }
 
-    /// A second Done or a History retry while Health is still saving does not start another save.
+    /// a second Done or a History retry while Health is still saving does not start another save
     @Test func aSessionIsNotSavedTwiceWhileASaveIsRunning() async throws {
         let setup = try Setup(savesToFitness: true)
         try await setup.measureASet()
@@ -76,7 +76,7 @@ struct FitnessSessionTests {
         #expect(setup.model.fitnessSave?.status == .saved)
     }
 
-    /// A failed save keeps the session, says so, and a retry from History saves it once.
+    /// a failed save keeps the session, says so, and a retry from History saves it once
     @Test func aFailedSaveIsRetriedWithoutDuplicates() async throws {
         let setup = try Setup(savesToFitness: true)
         setup.fitness.failures = [CocoaError(.fileWriteUnknown)]
@@ -110,7 +110,7 @@ struct FitnessSessionTests {
     }
 
     /// Health denied sharing: the session stays unsaved, the line asks to allow Plumb, and a retry
-    /// after allowing it saves the session.
+    /// after allowing it saves the session
     @Test func deniedPermissionSaysWhereToAllowItAndCanBeRetried() async throws {
         let setup = try Setup(savesToFitness: true, access: .denied)
         try await setup.measureASet()
@@ -128,7 +128,7 @@ struct FitnessSessionTests {
         #expect(setup.fitness.saved.count == 1)
     }
 
-    /// Health refused at save time (permission turned off since it was checked).
+    /// Health refused at save time (permission turned off since it was checked)
     @Test func aRefusedSaveAsksToAllowPlumb() async throws {
         let setup = try Setup(savesToFitness: true)
         setup.fitness.failures = [FitnessSaveError.notAuthorized]
@@ -147,7 +147,7 @@ struct FitnessSessionTests {
     }
 
     /// Health saved the workout while the iPhone was locked and returned no identifier: the session
-    /// is still marked saved.
+    /// is still marked saved
     @Test func aSaveWithoutAnIdentifierStillCountsAsSaved() async throws {
         let setup = try Setup(savesToFitness: true)
         setup.fitness.returnsIdentifier = false
@@ -159,7 +159,7 @@ struct FitnessSessionTests {
         #expect(setup.fitness.saveAttempts == 1)
     }
 
-    /// Demo and recorded input have no exporter: nothing is offered or saved.
+    /// Demo and recorded input have no exporter: nothing is offered or saved
     @Test func withoutAnExporterNothingIsOffered() async throws {
         let directory = FileManager.default.temporaryDirectory
             .appending(path: "PlumbFitnessDemo-\(UUID().uuidString)", directoryHint: .isDirectory)
@@ -181,8 +181,8 @@ struct FitnessSessionTests {
         #expect(!model.canSaveToFitness(try #require(model.history.first)))
     }
 
-    /// Cancel on the camera screen comes back to the first screen without Done: the session stays
-    /// open there, and finishing it saves it to Apple Health once.
+    /// cancel on the camera screen comes back to the first screen without Done: the session stays
+    /// open there, and finishing it saves it to Apple Health once
     @Test func aSessionLeftWithCancelIsFinishedAndSavedFromTheFirstScreen() async throws {
         let setup = try Setup(savesToFitness: true)
         try await setup.measureASet()
@@ -203,14 +203,14 @@ struct FitnessSessionTests {
         #expect(try setup.store.load().first?.fitnessWorkout != nil)
     }
 
-    /// Going to the background during a set also comes back to the first screen without Done:
-    /// History can save that open session, which finishes it, so the next set starts a new one.
+    /// going to the background during a set also comes back to the first screen without Done:
+    /// History can save that open session, which finishes it, so the next set starts a new one
     @Test func aSessionLeftInTheBackgroundCanBeSavedFromHistory() async throws {
         let setup = try Setup(savesToFitness: true)
         try await setup.measureASet()
         let session = try #require(setup.model.history.first)
         await setup.model.startPreview()
-        // During a capture, the session in progress is saved at Done only.
+        // during a capture, the session in progress is saved at Done only
         #expect(!setup.model.canSaveToFitness(session))
         await setup.model.saveToFitness(sessionID: session.id)
         #expect(setup.fitness.saveAttempts == 0)
@@ -231,7 +231,7 @@ struct FitnessSessionTests {
         #expect(setup.fitness.saveAttempts == 1)
     }
 
-    /// With the option off, the open session is not ended by a History save, and Health is untouched.
+    /// with the option off, the open session is not ended by a History save, and Health is untouched
     @Test func anOpenSessionIsNotFinishedFromHistoryWhenTheOptionIsOff() async throws {
         let setup = try Setup(savesToFitness: false)
         try await setup.measureASet()
@@ -244,8 +244,8 @@ struct FitnessSessionTests {
         #expect(setup.fitness.authorizationReads == 0)
     }
 
-    /// A set long after the previous one starts a new session, so a workout never spans a day; the
-    /// earlier session is saved to Apple Health then, as at Done.
+    /// a set long after the previous one starts a new session, so a workout never spans a day; the
+    /// earlier session is saved to Apple Health then, as at Done
     @Test func aSetAfterALongBreakStartsANewSessionAndSavesTheEarlierOne() async throws {
         let setup = try Setup(savesToFitness: true)
         try await setup.measureASet()
@@ -276,7 +276,7 @@ struct FitnessSessionTests {
     }
 
     /// Plumb never deletes Health data, so the delete dialogs say a saved workout stays in Health:
-    /// only for a session saved there (also after reopening), never for one that is not.
+    /// only for a session saved there (also after reopening), never for one that is not
     @Test func deletingSaysASavedWorkoutStaysInHealth() async throws {
         let setup = try Setup(savesToFitness: true)
         setup.fitness.failures = [CocoaError(.fileWriteUnknown)]
@@ -301,15 +301,15 @@ struct FitnessSessionTests {
         #expect(!reopened.leavesHealthWorkout(forSession: unsaved))
         #expect(reopened.leavesHealthWorkouts)
 
-        // Once the saved session is deleted, deleting the rest leaves nothing more in Health.
+        // once the saved session is deleted, deleting the rest leaves nothing more in Health
         setup.model.deleteHistory(id: saved)
         #expect(!setup.model.leavesHealthWorkouts)
         #expect(setup.model.history.map(\.id) == [unsaved])
         #expect(setup.fitness.saved.map(\.sessionID) == [saved])
     }
 
-    /// A save still running when the session is deleted finishes in Health: the dialog says so,
-    /// and the deleted session is not written back to history.
+    /// a save still running when the session is deleted finishes in Health: the dialog says so,
+    /// and the deleted session is not written back to history
     @Test func aSaveStillRunningCountsAsAWorkoutThatStays() async throws {
         let setup = try Setup(savesToFitness: true)
         try await setup.measureASet()
@@ -328,7 +328,7 @@ struct FitnessSessionTests {
         #expect(setup.model.history.isEmpty)
     }
 
-    /// No Done after the last set, then iOS terminates Plumb (swiped away, or reclaimed in the
+    /// no Done after the last set, then iOS terminates Plumb (swiped away, or reclaimed in the
     /// background). On the next launch the first screen still offers to finish the session, a set a
     /// few minutes later joins it, and Done saves it to Apple Health once.
     @Test func anOpenSessionSurvivesARelaunch() async throws {
@@ -358,8 +358,8 @@ struct FitnessSessionTests {
         #expect(again.unfinishedSession == nil)
     }
 
-    /// Sessions saved before Plumb marked open ones are treated as finished: a relaunch does not
-    /// offer to finish every old session.
+    /// sessions saved before Plumb marked open ones are treated as finished: a relaunch does not
+    /// offer to finish every old session
     @Test func anOlderSessionWithoutTheOpenMarkIsNotReopened() throws {
         let setup = try Setup(savesToFitness: true)
         let old = WorkoutSessionSummary(id: UUID(), startedAt: setup.clock.date, sets: [])
@@ -386,8 +386,8 @@ struct FitnessSessionTests {
         }
     }
 
-    /// A save still running when its session is deleted, which then fails: there was never a
-    /// workout in Health, and nothing is left to retry.
+    /// a save still running when its session is deleted, which then fails: there was never a
+    /// workout in Health, and nothing is left to retry
     @Test func aSaveFailingAfterItsSessionWasDeletedLeavesNoRetry() async throws {
         let setup = try Setup(savesToFitness: true)
         try await setup.measureASet()
@@ -403,9 +403,9 @@ struct FitnessSessionTests {
         #expect(setup.model.fitnessSave == nil)
     }
 
-    /// The Back buttons on the result and on a camera error go to the first screen through
+    /// the Back buttons on the result and on a camera error go to the first screen through
     /// `cancel()`, not Done: the session stays open (Finish session is offered), nothing is saved to
-    /// Health yet, and the next set joins the session and is compared.
+    /// Health yet, and the next set joins the session and is compared
     @Test func goingBackFromAResultOrACameraErrorKeepsTheSession() async throws {
         let setup = try Setup(savesToFitness: true)
         try await setup.measureASet()
@@ -438,7 +438,7 @@ struct FitnessSessionTests {
         #expect(empty.continues(at: start.addingTimeInterval(-60)))
     }
 
-    /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
+    /// returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
     /// simulator, with many main-actor tests running at once, the live analysis of a whole set can
     /// take several seconds.
     private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(30)) async throws {
@@ -453,7 +453,7 @@ struct FitnessSessionTests {
     }
 }
 
-/// A model with a local store, its own options, and a fake Health exporter.
+/// a model with a local store, its own options, and a fake Health exporter
 @MainActor
 private final class Setup {
     let directory: URL
@@ -479,7 +479,7 @@ private final class Setup {
 
     deinit { try? FileManager.default.removeItem(at: directory) }
 
-    /// One measured six-rep squat set, saved to history in the current session.
+    /// one measured six-rep squat set, saved to history in the current session
     func measureASet(setsInSession: Int = 1) async throws {
         await model.startPreview()
         await model.beginSet(countdown: 0)
@@ -495,7 +495,7 @@ private final class Setup {
     }
 }
 
-/// The date of each measured set, moved forward by the tests.
+/// the date of each measured set, moved forward by the tests
 @MainActor
 private final class TestClock {
     var date = Date(timeIntervalSince1970: 1_800_000_000)
@@ -505,12 +505,12 @@ private final class TestClock {
 @MainActor
 private final class FakeFitnessExporter: FitnessWorkoutSaving {
     var access: FitnessAuthorization
-    /// What the person answers on Health's sheet.
+    /// what the person answers on Health's sheet
     var grantsOnRequest: FitnessAuthorization = .authorized
-    /// Errors thrown by the next saves, in order.
+    /// errors thrown by the next saves, in order
     var failures: [Error] = []
     var returnsIdentifier = true
-    /// Keeps saves waiting until `releaseSaves()`.
+    /// keeps saves waiting until `releaseSaves()`
     var holdsSaves = false
     private(set) var saved: [FitnessWorkout] = []
     private(set) var saveAttempts = 0

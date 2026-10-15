@@ -1,23 +1,23 @@
 import CoreML
 import Foundation
 
-/// What the optional exercise classifier concluded about a captured set.
+/// what the optional exercise classifier concluded about a captured set
 nonisolated enum ExerciseRecognition: Equatable {
-    /// Recognition is switched off, or this build has no trained model.
+    /// recognition is switched off, or this build has no trained model
     case notAttempted
-    /// Enough confident windows agreed on one supported exercise.
+    /// enough confident windows agreed on one supported exercise
     case recognized(ExerciseKind, agreement: Double)
-    /// The windows disagreed, were not confident, or favored "other" or "none".
+    /// the windows disagreed, were not confident, or favoured "other" or "none"
     case uncertain
 }
 
-/// Which recognizer the app uses, in order of preference.
+/// which recogniser the app uses, in order of preference
 nonisolated enum RecognitionMethod: Equatable {
-    /// A Create ML action classifier on Vision keypoint sequences.
+    /// a Create ML action classifier on Vision keypoint sequences
     case keypointModel
-    /// A trained classifier on joint-angle window features.
+    /// a trained classifier on joint-angle window features
     case angleModel
-    /// Hand-written rules on the same joint-angle features; needs no trained model.
+    /// hand-written rules on the same joint-angle features; needs no trained model
     case angleRules
     case unavailable
 }
@@ -27,16 +27,16 @@ nonisolated struct ClassifierPrediction: Equatable, Sendable {
     let confidence: Double
 }
 
-/// Classifies one window of Vision body keypoints. Each frame is the 54 values of
+/// classifies one window of Vision body keypoints. Each frame is the 54 values of
 /// `VNHumanBodyPoseObservation.keypointsMultiArray()` ([1, 3, 18], flattened in order).
 nonisolated protocol ExerciseClassifying: AnyObject {
     var windowLength: Int { get }
-    /// Pose frames per second the model was trained on.
+    /// pose frames per second the model was trained on
     var frameRate: Double { get }
     func classify(window: [[Float]]) throws -> ClassifierPrediction
 }
 
-/// Turns per-window predictions into one decision for the set. It only names an exercise when
+/// turns per-window predictions into one decision for the set. It only names an exercise when
 /// most windows confidently agree; otherwise Plumb keeps the exercise the person chose.
 nonisolated enum ExerciseRecognizer {
     static let keypointCount = 54
@@ -62,8 +62,8 @@ nonisolated enum ExerciseRecognizer {
         return decide(predictions)
     }
 
-    /// One decision from per-window predictions: a supported exercise only when at least
-    /// `minimumAgreement` of the classified windows name it with `minimumWindowConfidence`.
+    /// one decision from per-window predictions: a supported exercise only when at least
+    /// `minimumAgreement` of the classified windows name it with `minimumWindowConfidence`
     static func decide(_ predictions: [ClassifierPrediction]) -> ExerciseRecognition {
         var votes: [String: Int] = [:]
         for prediction in predictions where prediction.confidence >= minimumWindowConfidence {
@@ -80,7 +80,7 @@ nonisolated enum ExerciseRecognizer {
         return .recognized(definition.kind, agreement: agreement)
     }
 
-    /// Takes the pose nearest each tick at `rate` Hz so windows match the training frame rate.
+    /// takes the pose nearest each tick at `rate` Hz so windows match the training frame rate
     /// A tick with no pose within one tick is zero-filled, as for a frame without a person.
     static func resample(_ frames: [PoseFrame], rate: Double) -> [[Float]] {
         guard let first = frames.first, let last = frames.last, rate > 0 else { return [] }
@@ -113,12 +113,12 @@ nonisolated enum ExerciseClassifierError: Error, Equatable {
     case noProbabilities
 }
 
-/// Runs a Create ML action classifier on the iPhone. The app ships without one until the team
+/// runs a Create ML action classifier on the iPhone. The app ships without one until the team
 /// trains it with tools/exercise-classifier; then `PlumbExerciseClassifier.mlmodel` is added to
 /// the app target and Xcode compiles it into the bundle.
 nonisolated final class CoreMLExerciseClassifier: ExerciseClassifying, @unchecked Sendable {
     static let bundledModelName = "PlumbExerciseClassifier"
-    /// Create ML's default when a model carries no Plumb frame-rate metadata.
+    /// Create ML's default when a model carries no Plumb frame-rate metadata
     static let createMLDefaultFrameRate = 30.0
 
     let windowLength: Int
@@ -154,7 +154,7 @@ nonisolated final class CoreMLExerciseClassifier: ExerciseClassifying, @unchecke
             ?? Self.createMLDefaultFrameRate
     }
 
-    /// The trained model compiled into the app, or nil when none ships with this build.
+    /// the trained model compiled into the app, or nil when none ships with this build
     static func bundled(in bundle: Bundle = .main) -> CoreMLExerciseClassifier? {
         guard let url = bundle.url(forResource: bundledModelName, withExtension: "mlmodelc"),
               let model = try? MLModel(contentsOf: url) else { return nil }

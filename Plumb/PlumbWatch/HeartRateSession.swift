@@ -2,7 +2,7 @@ import Foundation
 import HealthKit
 import Observation
 
-/// A workout session on the watch while the iPhone camera is open, only when the person turned on
+/// a workout session on the watch while the iPhone camera is open, only when the person turned on
 /// Personalize with Health. It reads the heart rate, shows it on the wrist and hands each reading to
 /// `onHeartRate`, which sends it to the iPhone. The session keeps the watch app running with the
 /// wrist down. Its workout is discarded at the end: the iPhone saves the session to Fitness itself
@@ -12,7 +12,7 @@ import Observation
 final class HeartRateSession: NSObject {
     private(set) var beatsPerMinute: Int?
     private(set) var isRunning = false
-    /// Why there is no heart rate, when Health refused or is unavailable.
+    /// why there is no heart rate, when Health refused or is unavailable
     private(set) var problem: String?
     @ObservationIgnored var onHeartRate: ((Double, Date) -> Void)?
     @ObservationIgnored private lazy var store = HKHealthStore()

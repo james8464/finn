@@ -1,16 +1,16 @@
 import Foundation
 
-/// What Siri says and shows for "How did my last set go in Plumb": the latest measured set, with
+/// what Siri says and shows for "How did my last set go in Plumb": the latest measured set, with
 /// its exercise, measured reps, time and the observation Plumb recorded, word for word. Built from
 /// the saved history only, so it never invents a number.
 nonisolated struct LastSetReport: Equatable {
     let exercise: ExerciseKind
     let reps: Int
     let capturedAt: Date
-    /// The observation Plumb kept for this set, exactly as saved. Nil when there was none, or when
+    /// the observation Plumb kept for this set, exactly as saved. Nil when there was none, or when
     /// the person marked it as not relevant.
     let observation: String?
-    /// The joints were clear in only part of the set: reps counted, no observation possible.
+    /// the joints were clear in only part of the set: reps counted, no observation possible.
     let partlyVisible: Bool
 
     /// Siri's answer when the history holds no measured set.
@@ -25,7 +25,7 @@ nonisolated struct LastSetReport: Equatable {
                comment: "Siri, when the history file cannot be read")
     }
 
-    /// The most recent set across all saved sessions, or nil when nothing was measured yet.
+    /// the most recent set across all saved sessions, or nil when nothing was measured yet.
     static func latest(in sessions: [WorkoutSessionSummary]) -> LastSetReport? {
         guard let set = sessions.flatMap(\.sets).max(by: { $0.capturedAt < $1.capturedAt }) else {
             return nil
@@ -59,7 +59,7 @@ nonisolated struct LastSetReport: Equatable {
         return String(localized: "\(day) at \(time)", comment: "Siri, when the set was measured; day then time")
     }
 
-    /// The observation line, honest when there is none.
+    /// the observation line, honest when there is none.
     var observationText: String {
         if let observation { return observation }
         if partlyVisible {
@@ -69,7 +69,7 @@ nonisolated struct LastSetReport: Equatable {
         return String(localized: "No clear observation in that set.", comment: "Siri, set without observation")
     }
 
-    /// The sentence Siri reads.
+    /// the sentence Siri reads.
     func spoken(now: Date = Date(), calendar: Calendar = .current) -> String {
         let when = whenText(now: now, calendar: calendar)
         let opening = String(localized: "Your last set in Plumb: \(exerciseName), \(repsText), \(when).",

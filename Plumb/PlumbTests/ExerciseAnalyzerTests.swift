@@ -32,7 +32,7 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func realisticConfidenceSquatIsCounted() throws {
-        // Real side-view video gives the hip about 0.5 confidence; v2's 0.6 floor refused it.
+        // real side-view video gives the hip about 0.5 confidence; v2's 0.6 floor refused it
         var generator = SplitMix64(seed: 77)
         let frames = (0...120).map { index -> PoseFrame in
             let hipY = 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
@@ -131,7 +131,7 @@ nonisolated struct ExerciseAnalyzerTests {
         for definition in ExerciseDefinition.all {
             #expect(ExerciseDefinition.definition(for: definition.kind) == definition)
             #expect(ExerciseDefinition.definition(forClassifierLabel: definition.classifierLabel) == definition)
-            // Hanging exercises read the same from any view, and their hands (the reference and
+            // hanging exercises read the same from any view, and their hands (the reference and
             // the still joint) only need to be seen now and then; every other joint is required.
             // Push-ups are accepted from any view too: the arm rubric prefers the side, the
             // shoulder count does not care.
@@ -151,7 +151,7 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func angleUsesImageAspectRatio() throws {
-        // A right angle in pixels on a 720 × 1280 portrait frame.
+        // a right angle in pixels on a 720 × 1280 portrait frame
         let aspect = 1280.0 / 720.0
         let shoulder = JointPoint(x: 0.5, y: 0.5 - 0.1 / aspect, confidence: 1)
         let elbow = JointPoint(x: 0.5, y: 0.5, confidence: 1)
@@ -286,7 +286,7 @@ nonisolated struct ExerciseAnalyzerTests {
             return
         }
         #expect(reason.hasPrefix("Tracking was lost during the set. Keep your whole body visible and try again."))
-        // Frames 40 to 50 are empty: tracked at frame 39, then again at 51, 0.1 s apart.
+        // frames 40 to 50 are empty: tracked at frame 39, then again at 51, 0.1 s apart
         #expect(reason.contains("1.2 s"))
     }
 
@@ -341,7 +341,7 @@ nonisolated struct ExerciseAnalyzerTests {
         #expect(analysis.reps.allSatisfy { $0.duration >= ExerciseDefinition.minimumPushUpDuration })
     }
 
-    /// Twelve fast push-ups whose tops sit 25° below the opening plank: the first never comes back
+    /// twelve fast push-ups whose tops sit 25° below the opening plank: the first never comes back
     /// up to the plank, and once the person dips again it is over, not a rep. Every later push-up
     /// is measured from where they turned and counts. Before, that first rep stayed open and all
     /// twelve merged into one 6.7 s rep (15 October).
@@ -381,7 +381,7 @@ enum TraceError: Error { case notMeasured }
 
 // MARK: - Synthetic side-view traces
 
-/// Side-view push-up: wrists planted, forearm vertical, the elbow angle closes by `bend` degrees.
+/// side-view push-up: wrists planted, forearm vertical, the elbow angle closes by `bend` degrees
 nonisolated func pushUpTrace(reps: Int, startTime: Double = 0, bend: Double = 90, lateBend: Double? = nil,
                  aspectRatio: Double = 1) -> [PoseFrame] {
     (0...(reps * 20)).map { index in
@@ -389,7 +389,7 @@ nonisolated func pushUpTrace(reps: Int, startTime: Double = 0, bend: Double = 90
         let depth = repIndex >= reps - 2 ? (lateBend ?? bend) : bend
         let phase = Double(index % 20) / 20
         let elbowAngle = (170 - depth * (1 - cos(2 * .pi * phase)) / 2) * .pi / 180
-        // Positions in width units, then y divided by the aspect ratio for normalized coordinates.
+        // positions in width units, then y divided by the aspect ratio for normalised coordinates
         let wrist = (x: 0.30, y: 0.80)
         let elbow = (x: wrist.x, y: wrist.y - 0.14)
         let shoulder = (x: elbow.x + 0.14 * sin(elbowAngle), y: elbow.y + 0.14 * cos(elbowAngle))
@@ -408,7 +408,7 @@ nonisolated func pushUpTrace(reps: Int, startTime: Double = 0, bend: Double = 90
     }
 }
 
-/// Side-view static lunge: ankle planted, shin vertical, the knee angle closes by `bend` degrees.
+/// side-view static lunge: ankle planted, shin vertical, the knee angle closes by `bend` degrees
 nonisolated func lungeTrace(reps: Int, bend: Double = 75) -> [PoseFrame] {
     (0...(reps * 20)).map { index in
         let phase = Double(index % 20) / 20
@@ -427,7 +427,7 @@ nonisolated func lungeTrace(reps: Int, bend: Double = 75) -> [PoseFrame] {
     }
 }
 
-/// Side-view stiff-leg deadlift: legs still, the shoulder-hip-knee angle closes by `bend` degrees.
+/// side-view stiff-leg deadlift: legs still, the shoulder-hip-knee angle closes by `bend` degrees
 nonisolated func hingeTrace(reps: Int, bend: Double = 80) -> [PoseFrame] {
     (0...(reps * 25)).map { index in
         let phase = Double(index % 25) / 25
@@ -460,13 +460,13 @@ nonisolated func squatFrame(time: Double, hipY: Double, confidence: Double = 0.9
     ])
 }
 
-/// Squat traces with varied depth, tempo, noise, dropped frames, low confidence, bystanders,
-/// tracking gaps, drift, and partial reps, so both measured and abstaining paths are compared.
+/// squat traces with varied depth, tempo, noise, dropped frames, low confidence, bystanders,
+/// tracking gaps, drift, and partial reps, so both measured and abstaining paths are compared
 nonisolated private func randomSquatTrace(using generator: inout SplitMix64) -> [PoseFrame] {
     let reps = Int.random(in: 0...8, using: &generator)
     let framesPerRep = Int.random(in: 8...40, using: &generator)
     let step = [0.0667, 0.1, 0.125].randomElement(using: &generator)!
-    // Each disturbance is present in only some traces, so many sets still reach the rep counter.
+    // each disturbance is present in only some traces, so many sets still reach the rep counter
     func sometimes(_ chance: Double, _ value: () -> Double) -> Double {
         Double.random(in: 0..<1, using: &generator) < chance ? value() : 0
     }
@@ -518,7 +518,7 @@ nonisolated struct SplitMix64: RandomNumberGenerator {
 
 // MARK: - Frozen squat-side-v2
 
-/// Verbatim copy of the squat-only analyzer and evidence gate at commit 41f4ff3, with its
+/// verbatim copy of the squat-only analyzer and evidence gate at commit 41f4ff3, with its
 /// constants written out. The generic engine must reproduce it exactly for the squat.
 private enum FrozenSquatV2 {
     private enum Phase {

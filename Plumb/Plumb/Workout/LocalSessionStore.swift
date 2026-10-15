@@ -63,7 +63,7 @@ nonisolated struct LocalSessionStore: SessionStoring {
         }
     }
 
-    /// Moves damaged data aside before starting an empty history. The caller must request this action.
+    /// moves damaged data aside before starting an empty history. The caller must request this action.
     func recoverCorruptStore() throws -> URL {
         do {
             _ = try load()

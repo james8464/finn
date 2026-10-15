@@ -1,27 +1,27 @@
 import Foundation
 
-/// Something a measured set showed, saved with its summary so Plumb can learn which patterns come
-/// back most often for this person. Each one is a measured fact about the set, not a judgment of
+/// something a measured set showed, saved with its summary so Plumb can learn which patterns come
+/// back most often for this person. Each one is a measured fact about the set, not a judgement of
 /// technique.
 nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
-    /// Movements that left the top and came back without reaching the bottom.
+    /// movements that left the top and came back without reaching the bottom
     case shallowMovements
-    /// Full movements faster or slower than a rep may take.
+    /// full movements faster or slower than a rep may take
     case outsideTempo
-    /// The set ended partway through a movement.
+    /// the set ended partway through a movement
     case unfinishedLastRep
-    /// The last two reps had a clearly shorter range than the first two (the end-of-set observation).
+    /// the last two reps had a clearly shorter range than the first two (the end-of-set observation)
     case rangeDropped
-    /// The last two reps showed a posture change against the first two: torso tilt, hip alignment or
-    /// knee bend, depending on the exercise (`PostureRule`).
+    /// the last two reps showed a posture change against the first two: torso tilt, hip alignment or
+    /// knee bend, depending on the exercise (`PostureRule`)
     case postureChanged
-    /// A rep was clearly faster than the first reps of the set (said live).
+    /// a rep was clearly faster than the first reps of the set (said live)
     case spedUp
-    /// The camera saw the person at an angle instead of from the side.
+    /// the camera saw the person at an angle instead of from the side
     case angledView
-    /// The joints were clear in only 65 to 80% of the set (`PartialVisibility`).
+    /// the joints were clear in only 65 to 80% of the set (`PartialVisibility`)
     case partlyVisible
-    // A form fault seen on at least two reps (`FormCheck`), with the check's own name.
+    // a form fault seen on at least two reps (`FormCheck`), with the check's own name
     case pushUpHipsSag
     case pushUpHipsPike
     case pushUpDepth
@@ -32,11 +32,11 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     case deadliftKneeBend
     case deadliftHinge
 
-    /// The form check this issue records, if it is one.
+    /// the form check this issue records, if it is one
     var formCheck: FormCheck? { FormCheck(rawValue: rawValue) }
 
-    /// Issues of one measured set, from its diagnostics, its change observation (`CueSelector`), its
-    /// form faults and its live events.
+    /// issues of one measured set, from its diagnostics, its change observation (`CueSelector`), its
+    /// form faults and its live events
     static func issues(diagnostics: MovementDiagnostics?, cue: Cue?, findings: [FormFinding] = [],
                        spedUp: Bool) -> [SetIssue] {
         var issues: [SetIssue] = []
@@ -60,7 +60,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
         return issues
     }
 
-    /// The pattern, in a few words.
+    /// the pattern, in a few words
     func title(for definition: ExerciseDefinition) -> String {
         switch self {
         case .shallowMovements: String(localized: "Movements too shallow to count")
@@ -78,7 +78,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
         }
     }
 
-    /// What to keep in mind on the next set.
+    /// what to keep in mind on the next set
     func focus(for definition: ExerciseDefinition) -> String {
         switch self {
         case .shallowMovements:
@@ -98,24 +98,24 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// The pattern that comes back most often in a person's recent sets of one exercise, so the app can
-/// point it out before the next set and recognize it when it returns. Counts only measured sets
+/// the pattern that comes back most often in a person's recent sets of one exercise, so the app can
+/// point it out before the next set and recognise it when it returns. Counts only measured sets
 /// saved on this iPhone; nothing is compared with other people.
 nonisolated struct MistakeProfile: Equatable, Sendable {
-    /// Recent sets of the exercise that are looked at.
+    /// recent sets of the exercise that are looked at
     static let recentSets = 10
-    /// A pattern must appear in at least this many of those sets...
+    /// a pattern must appear in at least this many of those sets...
     static let minimumSets = 2
-    /// ...and in at least this share of them.
+    /// ...and in at least this share of them
     static let minimumShare = 0.3
 
     let exercise: ExerciseKind
     let issue: SetIssue
-    /// Sets that showed the issue, among `outOf` recent sets of the exercise.
+    /// sets that showed the issue, among `outOf` recent sets of the exercise
     let sets: Int
     let outOf: Int
 
-    /// The most frequent issue in the latest sets of `exercise`, or nil when none comes back often
+    /// the most frequent issue in the latest sets of `exercise`, or nil when none comes back often
     /// enough. Ties go to the issue seen most recently.
     static func make(history: [WorkoutSessionSummary], exercise: ExerciseKind) -> MistakeProfile? {
         let recent = history.flatMap(\.sets)
@@ -139,7 +139,7 @@ nonisolated struct MistakeProfile: Equatable, Sendable {
         return MistakeProfile(exercise: exercise, issue: best.issue, sets: best.count, outOf: recent.count)
     }
 
-    /// For example "Movements too shallow to count in 3 of your last 5 squat sets."
+    /// for example "Movements too shallow to count in 3 of your last 5 squat sets."
     var summary: String {
         let definition = exercise.definition
         return String(localized: "\(issue.title(for: definition)) in \(sets) of your last \(outOf) \(definition.copy.shareNoun) sets.")

@@ -5,8 +5,8 @@ import Testing
 nonisolated struct FitnessWorkoutTests {
     private let origin = Date(timeIntervalSince1970: 1_800_000_000)
 
-    /// A set saved `secondsIn` after `origin`, with `reps` reps of 2 s each, 1 s apart, on the
-    /// capture clock starting at `clockStart` (the camera's clock, not the date).
+    /// a set saved `secondsIn` after `origin`, with `reps` reps of 2 s each, 1 s apart, on the
+    /// capture clock starting at `clockStart` (the camera's clock, not the date)
     private func set(_ exercise: ExerciseKind = .bodyweightSquat, reps: Int, secondsIn: TimeInterval,
                      clockStart: TimeInterval = 5_000) -> SetSummary {
         let metrics = (0..<reps).map { index in
@@ -28,7 +28,7 @@ nonisolated struct FitnessWorkoutTests {
         #expect(FitnessWorkout.make(from: session([set(reps: 0, secondsIn: 60)])) == nil)
     }
 
-    /// Six reps span 17 s on the capture clock (0 to 17); the set ended when it was saved.
+    /// six reps span 17 s on the capture clock (0 to 17); the set ended when it was saved
     @Test func theWorkoutRunsFromTheFirstMeasuredRepToTheEndOfTheLastSet() throws {
         let sessionValue = session([set(reps: 6, secondsIn: 60), set(reps: 4, secondsIn: 200, clockStart: 90_000)])
         let workout = try #require(FitnessWorkout.make(from: sessionValue))
@@ -47,8 +47,8 @@ nonisolated struct FitnessWorkoutTests {
         #expect(workout.end == origin.addingTimeInterval(300))
     }
 
-    /// The person left the app open for an hour between two sets: five minutes of rest count,
-    /// the rest of the break is paused so it does not count as workout time.
+    /// the person left the app open for an hour between two sets: five minutes of rest count,
+    /// the rest of the break is paused so it does not count as workout time
     @Test func aLongBreakBetweenSetsIsPaused() throws {
         let workout = try #require(FitnessWorkout.make(from: session([
             set(reps: 6, secondsIn: 60), set(reps: 6, secondsIn: 3_660),
@@ -115,7 +115,7 @@ nonisolated struct FitnessWorkoutTests {
         ])
     }
 
-    /// Plumb measures neither energy nor heart rate: its own metadata holds only its three keys.
+    /// Plumb measures neither energy nor heart rate: its own metadata holds only its three keys
     @Test func metadataHasNoEnergyOrHeartRate() throws {
         let workout = try #require(FitnessWorkout.make(from: session([set(reps: 6, secondsIn: 60)])))
         #expect(Set(workout.plumbMetadata.keys) == ["PlumbSetCount", "PlumbMeasuredReps", "PlumbExercises"])
@@ -125,7 +125,7 @@ nonisolated struct FitnessWorkoutTests {
     @Test func theSyncIdentifierNamesTheSession() throws {
         let sessionValue = session([set(reps: 6, secondsIn: 60)])
         let workout = try #require(FitnessWorkout.make(from: sessionValue))
-        #expect(workout.syncIdentifier == "com.james8464.Plumb.session.\(sessionValue.id.uuidString)")
+        #expect(workout.syncIdentifier == "ai.mwm.build.challenge.team.08.session.\(sessionValue.id.uuidString)")
         #expect(FitnessWorkout.syncVersion == 1)
     }
 
@@ -137,7 +137,7 @@ nonisolated struct FitnessWorkoutTests {
         #expect(!FitnessSaveStatus.saved.offersRetry)
     }
 
-    /// History saved before this feature has no Fitness record and still loads; a record round-trips.
+    /// history saved before this feature has no Fitness record and still loads; a record round-trips
     @Test func savedSessionsDecodeWithAndWithoutAFitnessRecord() throws {
         let id = UUID()
         let old = Data("""

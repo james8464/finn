@@ -2,13 +2,13 @@ import Foundation
 import Testing
 @testable import Plumb
 
-/// The side-view form checks on synthetic poses: a clean rep gives no advice, a rep with one fault
-/// gives that advice, and a check that cannot see its joints says so instead of guessing.
+/// the side-view form checks on synthetic poses: a clean rep gives no advice, a rep with one fault
+/// gives that advice, and a check that cannot see its joints says so instead of guessing
 struct FormChecksTests {
     // MARK: Geometry
 
     @Test func segmentsReadAnglesAndBodyLine() {
-        // A plank seen from the side, elbow bent square, hip 0.05 below the shoulder-ankle line.
+        // a plank seen from the side, elbow bent square, hip 0.05 below the shoulder-ankle line
         let frame = PoseFrame(time: 0, subjectCount: 1, joints: [
             .leftWrist: point(0.30, 0.80), .leftElbow: point(0.30, 0.66), .leftShoulder: point(0.44, 0.66),
             .leftHip: point(0.64, 0.71), .leftKnee: point(0.79, 0.70), .leftAnkle: point(0.94, 0.66),
@@ -18,12 +18,12 @@ struct FormChecksTests {
         #expect((body.hipOffsetFromBodyLine ?? 0) > 0.2)
         #expect((body.torsoTilt ?? 0) > 70)
 
-        // Standing tall: torso and shins upright, knee straight, thigh far above level.
+        // standing tall: torso and shins upright, knee straight, thigh far above level
         let standing = BodySegments(frame: squatFrame(depth: 0, thighAtBottom: 0, extraLean: 0, time: 0), side: .left)
         #expect((standing.kneeAngle ?? 0) > 175)
         #expect((standing.torsoTilt ?? 90) < 1)
         #expect((standing.thighAboveLevel ?? 0) > 85)
-        // Too unsure of a joint: everything that needs it is unknown.
+        // too unsure of a joint: everything that needs it is unknown
         let unsure = BodySegments(frame: frame, side: .left, minimumConfidence: 0.99)
         #expect(unsure.elbowAngle == nil && unsure.hipOffsetFromBodyLine == nil)
     }
@@ -51,7 +51,7 @@ struct FormChecksTests {
     }
 
     @Test func oneShallowSquatIsNotAdvice() throws {
-        // Only the fourth rep stays high: a fault on one rep is not a pattern.
+        // only the fourth rep stays high: a fault on one rep is not a pattern
         let frames = squats(thighAtBottom: -5, extraLean: 5, faultyRep: 3, faultyThigh: 45)
         #expect(try reviewed(frames, .squat).findings.isEmpty)
     }
@@ -70,7 +70,7 @@ struct FormChecksTests {
         let analysis = try measured(frames, .squat)
         let review = FormChecks.review(analysis, frames: frames, definition: .squat)
         #expect(review.findings.isEmpty && review.notes.isEmpty)
-        // The person's camera-angle option off: they say their side faces the camera.
+        // the person's camera-angle option off: they say their side faces the camera
         let trusted = FormChecks.review(analysis, frames: frames, definition: .squat, viewCheck: .ignore)
         #expect(trusted.findings.first?.check == .squatChestDrop)
     }
@@ -97,7 +97,7 @@ struct FormChecksTests {
     @Test func shallowPushUpsComeAfterTheBodyLine() throws {
         let shallow = try reviewed(pushUps(sag: 0, bottomElbow: 126), .pushUp)
         #expect(shallow.findings.map(\.check) == [.pushUpDepth])
-        // Both faults: the body line is the observation, the depth a fact listed below it.
+        // both faults: the body line is the observation, the depth a fact listed below it
         let both = try reviewed(pushUps(sag: 0.4, bottomElbow: 126), .pushUp)
         #expect(both.findings.map(\.check) == [.pushUpHipsSag, .pushUpDepth])
         #expect(both.notes.first?.hasPrefix("Your elbows stayed at about") == true)
@@ -132,8 +132,8 @@ struct FormChecksTests {
 
     // MARK: Generated motion and the live set
 
-    /// The debug motion generator's clean squats and push-ups (random bodies, depths, a camera up
-    /// to 10° off the side) never get form advice.
+    /// the debug motion generator's clean squats and push-ups (random bodies, depths, a camera up
+    /// to 10° off the side) never get form advice
     @Test func generatedCleanSetsGetNoAdvice() {
         var generator = SyntheticRandom(seed: 42)
         var measuredSets = 0
@@ -164,7 +164,7 @@ struct FormChecksTests {
         }
         #expect(faults.first?.0 == .pushUpHipsSag)
         #expect(faults.first?.1 == 2)
-        // Said again at most every `cueSpacing` reps.
+        // said again at most every `cueSpacing` reps
         #expect(faults.map(\.1) == [2, 5])
         #expect(LiveSetEvent.formFault(.pushUpHipsSag, rep: 2).caption(for: .pushUp) == "Lift your hips")
         #expect(LiveSetEvent.phrase(for: [.repCounted(2), .formFault(.pushUpHipsSag, rep: 2)],
@@ -174,7 +174,7 @@ struct FormChecksTests {
         let cleanFrames = pushUps(sag: 0, bottomElbow: 85)
         var cleanEvents: [LiveSetEvent] = []
         for end in cleanFrames.indices { cleanEvents += clean.update(with: Array(cleanFrames[...end])) }
-        // The live count analyzes every 0.4 s of frames; the trace ends before the last rep is read.
+        // the live count analyses every 0.4 s of frames; the trace ends before the last rep is read
         #expect(clean.countedReps >= 5)
         #expect(!cleanEvents.contains { if case .formFault = $0 { true } else { false } })
     }
@@ -208,7 +208,7 @@ struct FormChecksTests {
         JointPoint(x: x, y: y, confidence: confidence)
     }
 
-    /// Both sides at the same place, the far one less sure, as Vision sees a side view.
+    /// both sides at the same place, the far one less sure, as Vision sees a side view
     private func bothSides(_ near: [JointRole: (Double, Double)]) -> [BodyJoint: JointPoint] {
         var joints: [BodyJoint: JointPoint] = [:]
         for (role, position) in near {
@@ -218,11 +218,11 @@ struct FormChecksTests {
         return joints
     }
 
-    /// Depth 0 is standing, 1 the bottom of the rep, with a smooth rise and fall over 20 frames.
+    /// depth 0 is standing, 1 the bottom of the rep, with a smooth rise and fall over 20 frames
     private func depth(_ index: Int) -> Double { (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2 }
 
-    /// Squats with the shins tilting 35° forward at the bottom, the thighs `thighAtBottom` degrees
-    /// above level, and the torso `extraLean` degrees beyond the shins.
+    /// squats with the shins tilting 35° forward at the bottom, the thighs `thighAtBottom` degrees
+    /// above level, and the torso `extraLean` degrees beyond the shins
     private func squats(thighAtBottom: Double, extraLean: Double, faultyRep: Int? = nil,
                         faultyThigh: Double = 0) -> [PoseFrame] {
         (0...120).map { index in
@@ -246,8 +246,8 @@ struct FormChecksTests {
         ]))
     }
 
-    /// Push-ups from the side: hands planted, the elbow closing from 170° to `bottomElbow`, the hips
-    /// `sag` torso lengths below the shoulder-to-ankle line (negative: above it).
+    /// push-ups from the side: hands planted, the elbow closing from 170° to `bottomElbow`, the hips
+    /// `sag` torso lengths below the shoulder-to-ankle line (negative: above it)
     private func pushUps(sag: Double, bottomElbow: Double) -> [PoseFrame] {
         (0...120).map { index in
             let elbowAngle = (170 - (170 - bottomElbow) * depth(index)) * .pi / 180
@@ -270,7 +270,7 @@ struct FormChecksTests {
         }
     }
 
-    /// Static lunges from the side: front shin upright, the front knee closing from 172° to
+    /// static lunges from the side: front shin upright, the front knee closing from 172° to
     /// `bottomKnee`, the torso leaning `lean` degrees forward at the bottom. The back leg is hidden.
     private func lunges(bottomKnee: Double, lean: Double) -> [PoseFrame] {
         (0...120).map { index in
@@ -288,14 +288,14 @@ struct FormChecksTests {
         }
     }
 
-    /// Stiff-leg deadlifts from the side over 25 frames a rep: the torso tipping from upright to
-    /// `torsoAtBottom` degrees, the knees bending `kneeBend` degrees at the bottom.
+    /// stiff-leg deadlifts from the side over 25 frames a rep: the torso tipping from upright to
+    /// `torsoAtBottom` degrees, the knees bending `kneeBend` degrees at the bottom
     private func hinges(kneeBend: Double, torsoAtBottom: Double) -> [PoseFrame] {
         (0...150).map { index in
             let s = (1 - cos(2 * .pi * Double(index % 25) / 25)) / 2
             let ankle = (0.50, 0.90)
             let hip = (0.50, 0.55)
-            // The knee moves forward until the hip-knee-ankle angle has closed by `kneeBend`.
+            // the knee moves forward until the hip-knee-ankle angle has closed by `kneeBend`
             let knee = (0.50 + 0.175 * tan(kneeBend / 2 * s * .pi / 180), 0.725)
             let tilt = (5 + (torsoAtBottom - 5) * s) * .pi / 180
             let shoulder = (hip.0 + 0.3 * sin(tilt), hip.1 - 0.3 * cos(tilt))

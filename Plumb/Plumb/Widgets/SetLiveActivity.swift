@@ -3,7 +3,7 @@ import Foundation
 import Observation
 import os
 
-/// What the Live Activity should do as the session model moves. Pure, so it is unit-tested without
+/// what the Live Activity should do as the session model moves. Pure, so it is unit-tested without
 /// ActivityKit: the activity exists exactly while the stage is `.capturing`.
 nonisolated enum SetLiveActivityRules {
     enum Step: Equatable {
@@ -25,19 +25,19 @@ nonisolated enum SetLiveActivityRules {
     }
 }
 
-/// Starts a Live Activity when a set starts, counts its reps, and ends it when the set ends. It
+/// starts a Live Activity when a set starts, counts its reps, and ends it when the set ends. It
 /// follows the session model with Observation, like the watch does, so the model knows nothing
 /// about ActivityKit. Everything is local: no push token is requested.
 @MainActor
 final class SetLiveActivity {
-    private static let log = Logger(subsystem: "com.finlearn.plumb", category: "LiveActivity")
+    private static let log = Logger(subsystem: "ai.mwm.build.challenge.team.08", category: "LiveActivity")
     private weak var model: WorkoutSessionModel?
     private var demoInput = false
     private var activity: Activity<PlumbSetActivityAttributes>?
     private var lastReps = -1
     private var lastStage: WorkoutStage?
 
-    /// Follows `model` for the app's lifetime. Any activity left from an earlier run (the app was
+    /// follows `model` for the app's lifetime. Any activity left from an earlier run (the app was
     /// killed mid-set) is ended first, so the Lock Screen never shows a set that is not running.
     func attach(to model: WorkoutSessionModel, demoInput: Bool) {
         guard self.model == nil else { return }
@@ -83,7 +83,7 @@ final class SetLiveActivity {
     }
 
     #if DEBUG
-    /// A sample activity for simulator screenshots (`-plumb-ui-live-activity-sample`), labeled DEMO.
+    /// a sample activity for simulator screenshots (`-plumb-ui-live-activity-sample`), labelled DEMO.
     /// Never a real count: it stands for no set.
     func showSample() {
         guard ActivityAuthorizationInfo().areActivitiesEnabled, activity == nil else { return }
