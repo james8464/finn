@@ -567,6 +567,7 @@ final class WorkoutSessionModel {
             result = .measured(analysis, cue)
             setHeartRate = SetHeartRate.make(setHeartRateReadings)
             record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues,
+                   formMeasurements: advisable ? review.measurements : [],
                    partlyVisible: diagnostics?.partialVisibility != nil)
             offerPersonalizationIfDue()
         case .insufficientView(let reason):
@@ -1012,7 +1013,8 @@ final class WorkoutSessionModel {
     }
 
     private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind, frames: [PoseFrame],
-                        issues: [SetIssue], partlyVisible: Bool = false) {
+                        issues: [SetIssue], formMeasurements: [FormMeasurement],
+                        partlyVisible: Bool = false) {
         guard case .usable(let side) = EvidenceGate.assess(
             frames, requirement: exercise.definition.evidence, allowsPartial: partlyVisible) else { return }
         let now = currentDate()
@@ -1028,8 +1030,16 @@ final class WorkoutSessionModel {
         let newSet = SetSummary(
             id: UUID(), sessionID: session.id, capturedAt: now,
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,
-            exercise: exercise, issues: issues, partlyVisible: partlyVisible ? true : nil
+            exercise: exercise, issues: issues,
+            formMeasurements: formMeasurements.isEmpty ? nil : formMeasurements,
+            partlyVisible: partlyVisible ? true : nil
         )
+        // History is newest session first; each session's sets are oldest first. A recording from a
+        // different side or with too little evidence cannot hide an older comparable set.
+        if newSet.formMeasurements != nil {
+            formNotes += FormTrend.compareLatest(
+                to: newSet, among: history.lazy.flatMap { $0.sets.reversed() }).map(\.sentence)
+        }
         // The latest earlier set of the exercise that can be compared (not only the very last one).
         let earlier = session.sets.filter { $0.exercise == exercise }.reversed()
         session.sets.append(newSet)

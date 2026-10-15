@@ -279,7 +279,17 @@ nonisolated struct FormFinding: Equatable, Sendable {
 /// (pull-up facts, secondary faults, and what Plumb could not check and why).
 nonisolated struct FormReview: Equatable, Sendable {
     var findings: [FormFinding] = []
+    /// Every check supported by enough clear reps, including checks that found no fault.
+    var measurements: [FormMeasurement] = []
     var notes: [String] = []
+}
+
+/// A compact, comparable measurement. The video and joint coordinates stay off disk.
+nonisolated struct FormMeasurement: Codable, Equatable, Sendable {
+    let check: FormCheck
+    let judged: Int
+    let faulty: Int
+    let typical: Double
 }
 
 /// Facts measured on each rep of a set, beyond the count. For the squat, push-up, lunge and
@@ -333,7 +343,9 @@ nonisolated enum FormChecks {
                 break
             }
         }
-        let bottoms = analysis.reps.map { rep in (rep, bottomFrames(of: rep, in: frames, definition: definition)) }
+        let bottoms = analysis.reps.map { rep in
+            (rep, bottomFrames(of: rep, in: frames, definition: definition, side: side))
+        }
         let thigh = standingThigh(frames, side: side)
         var review = FormReview()
         for check in FormCheck.checks(for: definition.kind) {
@@ -347,6 +359,9 @@ nonisolated enum FormChecks {
                 continue
             }
             let faulty = readings.filter { check.isFault($0.1) }
+            review.measurements.append(FormMeasurement(check: check, judged: readings.count,
+                                                       faulty: faulty.count,
+                                                       typical: median(readings.map(\.1))))
             guard faulty.count >= FormCheck.minimumFaultyReps,
                   Double(faulty.count) >= FormCheck.minimumFaultyShare * Double(readings.count) else { continue }
             review.findings.append(FormFinding(check: check, reps: faulty.map(\.0), judged: readings.count,
@@ -365,9 +380,9 @@ nonisolated enum FormChecks {
     /// The frames around a rep's deepest point (up to two on each side, within the rep), where every
     /// check reads its value. A median over them keeps one jittery frame from deciding.
     static func bottomFrames(of rep: RepMetric, in frames: [PoseFrame],
-                             definition: ExerciseDefinition) -> [PoseFrame] {
-        guard let deepest = ExerciseAnalyzer.deepestFrame(of: rep, in: frames, as: definition),
-              let index = frames.firstIndex(where: { $0.time == deepest.time }) else { return [] }
+                             definition: ExerciseDefinition, side: BodySide) -> [PoseFrame] {
+        guard let index = ExerciseAnalyzer.deepestFrameIndex(of: rep, in: frames,
+                                                             as: definition, side: side) else { return [] }
         return frames[max(0, index - 2)...min(frames.count - 1, index + 2)]
             .filter { $0.time >= rep.startTime && $0.time <= rep.endTime }
     }
@@ -418,7 +433,10 @@ nonisolated enum FormChecks {
 
         // Chin above the hands at the top of each rep (the bar itself is not tracked).
         if definition.kind == .pullUp {
-            let tops = analysis.reps.map { ExerciseAnalyzer.deepestFrame(of: $0, in: frames, as: definition) }
+            let tops = analysis.reps.map { rep in
+                ExerciseAnalyzer.deepestFrameIndex(of: rep, in: frames, as: definition, side: side)
+                    .map { frames[$0] }
+            }
             let judged = zip(analysis.reps, tops).compactMap { rep, frame -> (Int, Bool)? in
                 guard let frame, let chin = chinAboveHands(frame) else { return nil }
                 return (rep.number, chin)
@@ -435,7 +453,8 @@ nonisolated enum FormChecks {
         // the previous rep's end and this rep's start.
         let starts = analysis.reps.enumerated().compactMap { index, rep -> (Int, Double)? in
             let from = index == 0 ? (frames.first?.time ?? 0) : analysis.reps[index - 1].endTime
-            let hang = frames.filter { $0.time >= from && $0.time <= rep.startTime + 0.05 }
+            let hang = frames[ExerciseAnalyzer.frameRange(from: from, through: rep.startTime + 0.05,
+                                                          in: frames)]
                 .compactMap { frame -> (PoseFrame, Double)? in
                     guard let shoulder = frame.joints[JointRole.shoulder.joint(on: side)],
                           shoulder.confidence >= EvidenceRubric.minimumJointConfidence else { return nil }

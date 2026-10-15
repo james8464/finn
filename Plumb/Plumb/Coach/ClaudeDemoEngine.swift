@@ -106,10 +106,11 @@ final class ClaudeDemoCoachEngine: CoachEngine {
         }
         // The API wants alternating roles starting with the person; the coach's opening line is dropped.
         if messages.first?["role"] == "assistant" { messages.removeFirst() }
-        messages.append(["role": "user", "content": question])
+        messages.append(["role": "user", "content": FoundationModelsCoachPrompt.prompt(
+            question: question, context: context, history: [])])
         return ["model": model,
                 "max_tokens": 300,
-                "system": FoundationModelsCoachPrompt.instructions(for: context, language: language),
+                "system": FoundationModelsCoachPrompt.instructions(language: language),
                 "messages": messages]
     }
 

@@ -7040,6 +7040,50 @@
         }
       }
     },
+    "Your %@ check flagged %lld of %lld reps, down from %lld of %lld in the previous comparable set." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your %1$@ check flagged %2$lld of %3$lld reps, down from %4$lld of %5$lld in the previous comparable set."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La comprobación de %1$@ señaló %2$lld de %3$lld repeticiones, frente a %4$lld de %5$lld en la serie comparable anterior: una mejora."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le contrôle de %1$@ a signalé %2$lld répétitions sur %3$lld, contre %4$lld sur %5$lld dans la série comparable précédente : une amélioration."
+          }
+        }
+      }
+    },
+    "Your %@ check flagged %lld of %lld reps, up from %lld of %lld in the previous comparable set." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your %1$@ check flagged %2$lld of %3$lld reps, up from %4$lld of %5$lld in the previous comparable set."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La comprobación de %1$@ señaló %2$lld de %3$lld repeticiones, frente a %4$lld de %5$lld en la serie comparable anterior: un aumento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le contrôle de %1$@ a signalé %2$lld répétitions sur %3$lld, contre %4$lld sur %5$lld dans la série comparable précédente : une augmentation."
+          }
+        }
+      }
+    },
     "Your Plumb" : {
       "localizations" : {
         "fr" : {
