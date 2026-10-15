@@ -126,6 +126,24 @@ final class WorkoutFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testTabTextScalingAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launch()
+        app.openWorkoutTab()
+        try app.performAccessibilityAudit(for: .dynamicType)
+    }
+
+    @MainActor
+    func testSetupReducedTransparencyAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("-plumb-ui-opaque-surface")
+        app.launch()
+        app.openWorkoutTab()
+        XCTAssertTrue(app.buttons["Start a set"].waitForExistence(timeout: 5))
+        try audit(app, at: "setup, opaque surface")
+    }
+
+    @MainActor
     func testSetupDarkModeAccessibilityAudit() throws {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-dark")
@@ -313,8 +331,8 @@ final class WorkoutFlowUITests: XCTestCase {
             let element = issue.element.map {
                 "\($0.elementType.rawValue) '\($0.label)' id '\($0.identifier)' at \($0.frame)"
             } ?? "no element"
-            XCTFail("\(screen): \(issue.compactDescription). \(issue.detailedDescription) Element: \(element)")
-            return true
+            print("\(screen): \(issue.compactDescription). \(issue.detailedDescription) Element: \(element)")
+            return false
         }
     }
 

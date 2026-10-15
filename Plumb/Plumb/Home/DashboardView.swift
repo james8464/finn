@@ -1,253 +1,322 @@
 import SwiftUI
-import Charts
 
-/// Stable destinations. Starting a set is an action inside Workout, never a tab action.
 enum HomeTab: String, CaseIterable {
     case home = "Home", posture = "Posture", coach = "Coach", workout = "Workout"
+
+    var identifier: String { "tab.\(rawValue.lowercased())" }
 
     var symbol: String {
         switch self {
         case .home: "house.fill"
-        case .workout: "plus"
-        case .posture: "figure.run"
         case .coach: "person"
-        }
-    }
-
-    var identifier: String {
-        switch self {
-        case .home: "tab.home"
-        case .workout: "tab.workout"
-        case .posture: "tab.posture"
-        case .coach: "tab.coach"
+        case .posture: "figure.run"
+        case .workout: "plus"
         }
     }
 }
 
-/// Content determines each widget's layout; all values come from saved measurements.
+enum DashboardStyle {
+    static let lime = Color(red: 0.80, green: 0.97, blue: 0.35)
+    static let secondary = Color.white.opacity(0.7)
+}
+
+/// What the 1.0 build hides. The Plumb+ banner waits for the subscription (1.1): App Store rule
+/// 2.1(a) refuses placeholder content, so it is not shown until it opens something real.
+enum DashboardFlags {
+    static let showsPlumbPlusBanner = false
+}
+
 struct DashboardView: View {
     let history: [WorkoutSessionSummary]
     let exercise: ExerciseKind
+    /// Badges earned so far (`Badges/`), for the Awards card.
     var badges: [EarnedBadge] = []
-    let startWorkout: () -> Void
+    let tryPlumb: () -> Void
+    let watchDemo: () -> Void
     let open: (HomeRoute) -> Void
-    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize = 40.0
 
-    private var bestReps: Int? {
-        history.flatMap(\.sets).filter { $0.exercise == exercise }.map { $0.analysis.reps.count }.max()
+    // Reference values are available only in explicitly labelled design previews.
+    private var isPreview: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-plumb-dashboard-preview")
+        #else
+        false
+        #endif
+    }
+
+    /// The most reps Plumb measured in one set of the chosen exercise. Plumb measures no load, so
+    /// the record is in reps, never in kilograms.
+    private var bestReps: String {
+        if isPreview { return "12" }
+        let best = history.flatMap(\.sets).filter { $0.exercise == exercise }
+            .map { $0.analysis.reps.count }.max()
+        return best.map(String.init) ?? "—"
+    }
+
+    private var duration: String {
+        if isPreview { return "42:18" }
+        guard let last = history.first, let workout = FitnessWorkout.make(from: last) else { return "—" }
+        let seconds = Int(workout.activeDuration)
+        return String(format: "%d:%02d", seconds / 60, seconds % 60)
     }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                workoutCard
-                TimelineView(.periodic(from: .now, by: 60)) { context in
-                    activityCard(now: context.date)
+            VStack(spacing: 10) {
+                HStack {
+                    Text("Home")
+                        .font(.system(size: titleSize, weight: .bold))
+                        .accessibilityAddTraits(.isHeader)
+                    Spacer()
+                    Button { open(.account) } label: {
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 21))
+                            .frame(width: 44, height: 44)
+                            .modifier(DashboardGlass(radius: 22))
+                    }
+                    .buttonStyle(PressableStyle())
+                    .accessibilityLabel("Account settings")
+                    .accessibilityIdentifier("home.account")
                 }
-                let layout = typeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
-                    : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
-                layout {
-                    bestSetCard
-                    awardsCard
+                .padding(.bottom, 5)
+
+                if isPreview {
+                    Text("DESIGN PREVIEW · SAMPLE DATA")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(DashboardStyle.lime)
                 }
-                if !history.isEmpty { recentCard }
+
+                tryPlumbCard
+
+                card(.lastWorkout, id: "home.lastSession") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ViewThatFits(in: .horizontal) {
+                            HStack(alignment: .top, spacing: 16) {
+                                VStack(alignment: .leading, spacing: 28) {
+                                    heading("Last workout")
+                                    durationLabel
+                                }
+                                Spacer(minLength: 0)
+                                scoreRing.padding(.top, 10)
+                            }
+                            VStack(alignment: .leading, spacing: 16) {
+                                heading("Last workout")
+                                durationLabel
+                                scoreRing
+                            }
+                        }
+                        HStack {
+                            Spacer()
+                            Text(isPreview ? "Oct 13, 2026" : history.first.map {
+                                $0.startedAt.formatted(date: .abbreviated, time: .omitted)
+                            } ?? "No workouts yet")
+                            .font(.system(size: 10))
+                            .foregroundStyle(DashboardStyle.secondary)
+                        }
+                    }
+                }
+
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10),
+                                         count: dynamicTypeSize.isAccessibilitySize ? 1 : 2), spacing: 10) {
+                    card(.posture, id: "home.posture") {
+                        metric(title: "Posture", subtitle: exercise.chipName,
+                               label: "Average score", value: isPreview ? "78" : "—", unit: nil)
+                    }
+                    card(.weights, id: "home.weights") {
+                        metric(title: "Best set", subtitle: exercise.chipName,
+                               label: "Most reps in one set", value: bestReps, unit: "reps")
+                    }
+                    card(.history, id: "home.sessions") {
+                        VStack(alignment: .leading, spacing: 0) {
+                            heading("Sessions")
+                            Spacer(minLength: 30)
+                            Text(history.isEmpty ? "No sessions recorded." : "\(history.count) sessions recorded.")
+                                .font(.footnote)
+                                .foregroundStyle(DashboardStyle.secondary)
+                            Spacer(minLength: 30)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
+                    }
+                    card(.awards, id: "home.awards") {
+                        AwardsCardContent(badges: badges, heading: heading("Awards"))
+                            .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
+                    }
+                }
+
+                if DashboardFlags.showsPlumbPlusBanner {
+                    plusBanner
+                }
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-            .padding(.bottom, 24)
-            .frame(maxWidth: 680)
+            .padding(.horizontal, 21)
+            .padding(.top, 5)
+            .padding(.bottom, 16)
+            .frame(maxWidth: 600)
             .frame(maxWidth: .infinity)
         }
         .accessibilityIdentifier("summary.scroll")
+        .scrollIndicators(.hidden)
+        .foregroundStyle(.white)
         .background { HomeBackdrop() }
-        .navigationTitle("Home")
     }
 
-    private var workoutCard: some View {
-        Button(action: startWorkout) {
-            VStack(alignment: .leading, spacing: 16) {
-                Text(exercise.definition.copy.name)
-                    .font(.title2.bold())
-                    .fixedSize(horizontal: false, vertical: true)
-                ExerciseFigureView(kind: exercise, animates: false)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: typeSize.isAccessibilitySize ? 160 : 190)
-                    .padding(.horizontal, 12)
-                    .accessibilityHidden(true)
-                HStack(spacing: 12) {
-                    Text("Choose a workout").font(.headline)
-                    Spacer(minLength: 0)
-                    Image(systemName: "arrow.right.circle.fill")
-                        .font(.system(size: 32, weight: .regular))
-                        .foregroundStyle(HomeStyle.lime)
-                        .accessibilityHidden(true)
-                }
-            }
-            .padding(22)
-            .foregroundStyle(.white)
-            .background(HomeStyle.cameraBottom, in: RoundedRectangle(cornerRadius: 24))
-            .contentShape(RoundedRectangle(cornerRadius: 24))
-        }
-        .buttonStyle(PressableStyle())
-        .accessibilityIdentifier("summary.workout")
-    }
-
-    private func activityCard(now: Date) -> some View {
-        let days = DashboardActivityDay.recent(history: history, now: now)
-        let total = days.reduce(0) { $0 + $1.reps }
-        return Button { open(.history) } label: {
-            HomeCard {
-                VStack(alignment: .leading, spacing: 14) {
-                    cardHeading("Activity")
-                    if history.isEmpty {
-                        Text("No saved sets")
-                            .font(.subheadline).foregroundStyle(.secondary)
-                            .padding(.vertical, 4)
-                    } else {
-                        let layout = typeSize.isAccessibilitySize
-                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
-                            : AnyLayout(HStackLayout(alignment: .center, spacing: 20))
-                        layout {
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                                    Text(total, format: .number).font(.largeTitle.bold()).monospacedDigit()
-                                    Text("reps").font(.headline).foregroundStyle(.secondary)
-                                }
-                                Text("Last 7 days").font(.caption).foregroundStyle(.secondary)
-                            }
-                            activityChart(days)
-                                .frame(maxWidth: .infinity)
-                        }
-                    }
-                }
-            }
-        }
-        .buttonStyle(PressableStyle())
-        .foregroundStyle(.primary)
-        .accessibilityIdentifier("home.sessions")
-        .accessibilityLabel(Text("Activity"))
-        .accessibilityValue(history.isEmpty ? String(localized: "No saved sets") :
-            String(localized: "\(total) reps in the last 7 days") + ". " + days.map {
-                $0.date.formatted(.dateTime.weekday(.wide)) + ": " + String(localized: "\($0.reps) reps")
-            }.joined(separator: ". "))
-        .accessibilityHint("All your saved sessions")
-    }
-
-    private func activityChart(_ days: [DashboardActivityDay]) -> some View {
-        Chart(days) { day in
-            BarMark(x: .value("Day", day.date.formatted(.dateTime.weekday(.wide))),
-                    y: .value("Reps", day.reps), width: .ratio(0.5))
-                .cornerRadius(3)
-                .foregroundStyle(HomeStyle.activityGreen)
-                .accessibilityLabel(day.date.formatted(date: .complete, time: .omitted))
-                .accessibilityValue(String(localized: "\(day.reps) reps"))
-        }
-        .chartYScale(domain: 0...max(days.map(\.reps).max() ?? 0, 1))
-        .chartYAxis(.hidden)
-        .chartXAxis {
-            AxisMarks { value in
-                AxisValueLabel {
-                    if days.indices.contains(value.index) {
-                        Text(days[value.index].date.formatted(.dateTime.weekday(.narrow)))
-                    }
-                }
-            }
-        }
-        .frame(height: 88)
-        .accessibilityHidden(true)
-        .accessibilityIdentifier("summary.activityChart")
-    }
-
-    private var bestSetCard: some View {
-        Button { open(.weights) } label: {
-            HomeCard {
-                VStack(alignment: .leading, spacing: 14) {
-                    cardHeading("Best set")
-                    if let bestReps {
-                        Text("\(bestReps) reps").font(.title2.bold()).monospacedDigit()
-                    } else {
-                        Text("—").font(.largeTitle.bold())
+    /// A solid lime invitation to the real workout, with a separate illustrated preview.
+    private var tryPlumbCard: some View {
+        VStack(spacing: 0) {
+            Button(action: tryPlumb) {
+                HStack(spacing: 16) {
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        Image(systemName: "viewfinder")
+                            .font(.title3)
+                            .frame(width: 48, height: 48)
+                            .background(.black.opacity(0.08), in: Circle())
                             .accessibilityHidden(true)
                     }
-                    Text(exercise.chipName).font(.subheadline).foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
-            }
-        }
-        .buttonStyle(PressableStyle())
-        .foregroundStyle(.primary)
-        .accessibilityIdentifier("home.weights")
-        .accessibilityValue(bestReps == nil ? String(localized: "No saved sets") : "")
-    }
-
-    private var awardsCard: some View {
-        Button { open(.awards) } label: {
-            HomeCard {
-                VStack(alignment: .leading, spacing: 14) {
-                    cardHeading("Awards")
-                    Image(systemName: badges.isEmpty ? "rosette" : "medal.fill")
-                        .font(.system(size: 34, weight: .regular))
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(.primary)
-                        .accessibilityHidden(true)
-                    Text(badges.isEmpty ? "View milestones" : "\(badges.count) earned")
-                        .font(.subheadline).foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
-            }
-        }
-        .buttonStyle(PressableStyle())
-        .foregroundStyle(.primary)
-        .accessibilityIdentifier("home.awards")
-    }
-
-    private var recentCard: some View {
-        Button { open(.lastWorkout) } label: {
-            HomeCard {
-                VStack(alignment: .leading, spacing: 16) {
-                    cardHeading("Recent workout")
-                    if let last = history.first {
-                        HStack(alignment: .top, spacing: 12) {
-                            HomeSymbol(name: "figure.strengthtraining.functional", size: 48)
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(last.sets.first?.exercise.definition.copy.name ?? String(localized: "Workout"))
-                                    .font(.headline)
-                                Text(last.startedAt.formatted(date: .abbreviated, time: .shortened))
-                                    .font(.subheadline).foregroundStyle(.secondary)
-                            }
-                        }
-                        Divider()
-                        let layout = typeSize.isAccessibilitySize
-                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
-                            : AnyLayout(HStackLayout(spacing: 24))
-                        layout {
-                            Label("\(last.sets.count) sets", systemImage: "square.stack.3d.up")
-                            Label("\(last.sets.reduce(0) { $0 + $1.analysis.reps.count }) reps", systemImage: "repeat")
-                        }
-                        .font(.subheadline.weight(.medium))
-                    } else {
-                        Text("No workouts yet").font(.headline)
-                        Text("Your first finished session will appear here.")
-                            .font(.subheadline).foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Try Plumb").font(.title3.bold()).fixedSize(horizontal: false, vertical: true)
+                        Text("Your first set starts here.")
+                            .font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        Spacer(minLength: 0)
+                        Image(systemName: "arrow.up.right").font(.headline).accessibilityHidden(true)
                     }
                 }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
+            .buttonStyle(PressableStyle())
+            .accessibilityHint("Opens workout setup for your first real set.")
+            .accessibilityIdentifier("home.tryPlumb")
+            Rectangle().fill(.black.opacity(0.12)).frame(height: 1).padding(.horizontal, 20)
+            Button(action: watchDemo) {
+                Label("Watch the demo", systemImage: "play.circle")
+                    .font(.subheadline.weight(.medium))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(PressableStyle())
+            .accessibilityIdentifier("home.watchDemo")
         }
-        .buttonStyle(PressableStyle())
-        .foregroundStyle(.primary)
-        .accessibilityIdentifier("home.lastSession")
+        .foregroundStyle(.black)
+        .background(DashboardStyle.lime, in: RoundedRectangle(cornerRadius: 24))
     }
 
-    private func cardHeading(_ title: LocalizedStringKey) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Text(title).foregroundStyle(.primary)
-            Spacer(minLength: 0)
-            Image(systemName: "chevron.right").font(.caption2.weight(.semibold))
-                .foregroundStyle(.tertiary).accessibilityHidden(true)
+    /// The Plumb+ banner, kept for 1.1 behind `DashboardFlags.showsPlumbPlusBanner`.
+    private var plusBanner: some View {
+                Button { open(.plus) } label: {
+                    ZStack(alignment: .topLeading) {
+                        GeometryReader { proxy in
+                            Image("HomeBackdrop").resizable().scaledToFill()
+                                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+                                .clipped()
+                        }
+                        LinearGradient(colors: [.black.opacity(0.2), .clear, .black.opacity(0.65)],
+                                       startPoint: .top, endPoint: .bottom)
+                        HStack {
+                            heading("Plumb+")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.headline)
+                                .foregroundStyle(.black)
+                                .frame(width: 26, height: 26)
+                                .background(.white.opacity(0.4), in: Circle())
+                        }
+                        .padding(16)
+                    }
+                    .frame(height: 165)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                }
+                .buttonStyle(PressableStyle())
+                .accessibilityIdentifier("home.plus")
+    }
+
+    private var durationLabel: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(duration)
+                .font(.system(size: 44, weight: .bold))
+                .monospacedDigit()
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+            Text("Duration").font(.subheadline).foregroundStyle(DashboardStyle.secondary)
         }
-        .font(.headline)
-        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var scoreRing: some View {
+        VStack(spacing: 5) {
+            ZStack {
+                Circle().stroke(.white.opacity(0.13), lineWidth: 10)
+                if isPreview {
+                    Circle().trim(from: 0, to: 0.78)
+                        .stroke(DashboardStyle.lime, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                }
+                VStack(spacing: 0) {
+                    Text(isPreview ? "78" : "—").font(.system(size: 26, weight: .bold))
+                    Text("/ 100").font(.caption).foregroundStyle(DashboardStyle.secondary)
+                }
+            }
+            .frame(width: 96, height: 96)
+            .padding(5)
+            Text("Avg. posture score").font(.system(size: 11)).foregroundStyle(DashboardStyle.secondary)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(isPreview ? "Sample average posture score, 78 out of 100" : "Posture score not available yet")
+    }
+
+    private func metric(title: String, subtitle: String, label: String, value: String, unit: String?) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            heading(title)
+            Text(subtitle).font(.footnote).foregroundStyle(DashboardStyle.secondary)
+            Text(LocalizedStringKey(label)).font(.footnote).foregroundStyle(DashboardStyle.secondary).padding(.top, 7)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(value).font(.system(size: 32, weight: .bold)).foregroundStyle(DashboardStyle.lime)
+                if let unit { Text(unit).font(.subheadline).foregroundStyle(DashboardStyle.secondary) }
+            }
+            miniatureChart.padding(.top, 3)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var miniatureChart: some View {
+        VStack(spacing: 5) {
+            HStack(alignment: .bottom, spacing: 5) {
+                ForEach(0..<16) { index in
+                    Capsule().fill(.white.opacity(0.045))
+                        .overlay(alignment: .bottom) {
+                            if isPreview && [0, 1, 6, 9, 10].contains(index) {
+                                Capsule().fill(index >= 9 ? DashboardStyle.lime : .white.opacity(0.25))
+                                    .frame(height: index == 10 ? 38 : (index == 0 ? 12 : 20))
+                            }
+                        }
+                }
+            }
+            .frame(height: 38)
+            HStack(spacing: 0) {
+                ForEach(["12 AM", "6 AM", "12 PM", "6 PM"], id: \.self) { time in
+                    Text(time).font(.system(size: 9)).frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .foregroundStyle(DashboardStyle.secondary)
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func heading(_ text: String) -> some View {
+        Text(LocalizedStringKey(text)).font(.title3.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func card<Content: View>(_ route: HomeRoute, id: String, @ViewBuilder content: () -> Content) -> some View {
+        Button { open(route) } label: {
+            content().padding(14).frame(maxWidth: .infinity, alignment: .leading)
+                .modifier(DashboardGlass())
+                .contentShape(RoundedRectangle(cornerRadius: 15))
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityIdentifier(id)
     }
 }

@@ -75,12 +75,49 @@ struct BadgeMark: View {
     var size: CGFloat = 46
 
     var body: some View {
-        Image(systemName: kind.symbol)
-            .font(.system(size: size * 0.44, weight: .medium))
-            .foregroundStyle(earned ? HomeStyle.accent : Color(uiColor: .secondaryLabel))
-            .frame(width: size, height: size)
-            .background(earned ? HomeStyle.accent.opacity(0.1) : Color(uiColor: .tertiarySystemFill), in: Circle())
-            .accessibilityHidden(true)
+        ZStack {
+            if earned {
+                Circle().fill(DashboardStyle.lime)
+            } else {
+                Circle().strokeBorder(.white.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [3, 4]))
+            }
+            Image(systemName: kind.symbol)
+                .font(.system(size: size * 0.42, weight: .semibold))
+                .foregroundStyle(earned ? Color.black : Color.white.opacity(0.55))
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+}
+
+/// Inside the dashboard's Awards card: the latest marks and a count, or an invitation.
+struct AwardsCardContent<Heading: View>: View {
+    let badges: [EarnedBadge]
+    let heading: Heading
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            heading
+            Spacer(minLength: 0)
+            HStack(spacing: -8) {
+                if badges.isEmpty {
+                    BadgeMark(kind: .firstSet, earned: false, size: 34)
+                } else {
+                    ForEach(Array(badges.suffix(3).reversed()), id: \.kind) { badge in
+                        BadgeMark(kind: badge.kind, earned: true, size: 34)
+                            .overlay(Circle().strokeBorder(.black.opacity(0.5), lineWidth: 1.5))
+                    }
+                }
+            }
+            Text(badges.isEmpty ? "Your first badge is one set away."
+                 : (badges.count == 1 ? "1 badge · \(badges.last!.kind.title)"
+                    : "\(badges.count) badges · latest: \(badges.last!.kind.title)"))
+                .font(.footnote)
+                .foregroundStyle(DashboardStyle.secondary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

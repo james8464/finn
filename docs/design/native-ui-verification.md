@@ -99,3 +99,25 @@ Nine distinct navigation/screen checks passed across focused runs: five dashboar
 The signed iPhone Release build uses a temporary personal-team signing copy; repository signing settings are unchanged. This verification does not establish physical camera accuracy or service integration behavior.
 
 The final signed iPhone Release build passed. Installed and launched successfully on James’s connected iPhone, preserving the existing app container.
+
+## Théophile original design restoration
+
+James subsequently requested the original design, replacing the hybrid. Home now restores `design/visuals-tabs` (`c0ffdff`): the colour photograph, original lime invitation/demo, glass dashboard cards, scrolling header, account control and glass tab styling. The original workout illustration/action proportions and badge marks are restored. The isolated illustrated demo is available again. Newer navigation stacks, storage, privacy, draft preservation and localization remain.
+
+### Accessibility investigation
+
+The previous custom-tab Dynamic Type warning is resolved. A focused comparison showed that replacing caption2 with an 11-point `@ScaledMetric(relativeTo: .body)` label cleared the scaling findings. Default label size, weight and tab geometry match the original source. Labels grow at accessibility sizes, with two tab rows. Decorative invitation icons yield space to text only at accessibility sizes.
+
+Full audits are **not all green**: the glass bar still receives contrast findings in normal and dark setup runs. The same full setup audit passes with its existing opaque Reduce Transparency rendering (exercised through a DEBUG-only diagnostic flag). This implicates translucent rendering but does not prove a false positive. Largest-text Home also receives an element-less `Text clipped` report; screenshots were inspected, but that does not resolve the automated finding. These reports remain reproducible and unsuppressed. The audit helper now returns failures to XCTest so its original diagnostic attachments are preserved.
+
+Nine functional screen/navigation tests passed in the restoration batch: six dashboard tests plus French, Health offer and destinations. They cover actual saved sessions, nested navigation, scroll position and demo isolation. The full unit suite was not repeated because measurement/storage code is unchanged. See the final focused verification below for the last build.
+
+The exact design requirement applies to the normal appearance; accessibility layouts and newer functional controls remain supported. Previous monochrome/hybrid commits and screenshots remain in Git history.
+
+### Final focused verification
+
+The final three-test run passed: tab Dynamic Type audit, full setup audit with the opaque accessibility surface, and largest-text Workout/Coach controls (including draft preservation and keyboard return). Signed iPhone Release build passed.
+
+Captures: [Home](screenshots/2026-10-15-theophile-original/home.png), [largest-text Workout](screenshots/2026-10-15-theophile-original/workout-largest-text-demo.png), [Coach keyboard](screenshots/2026-10-15-theophile-original/coach-largest-text-keyboard-demo.png), [largest-text Home audit capture](screenshots/2026-10-15-theophile-original/home-largest-text-audit-demo.png). Demo-labelled captures use synthetic input.
+
+Installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; unlock it and open Plumb. Repository signing settings remain unchanged.

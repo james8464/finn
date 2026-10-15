@@ -131,3 +131,7 @@ James and teammates requested the monochrome design combined with Théophile’s
 Recovered `origin/design/visuals-tabs` at `c0ffdff`; original dashboard commit `536d3ba`. Reuse its artwork in greyscale with an appearance-dependent wash, and its tab order, symbols, floating capsule and lime selection. Keep native TabView stacks behind the custom bar so tab switches preserve state. Posture displays saved measured reviews; History remains available through Home activity, Settings and Workout’s menu.
 
 Keep current exercise drawings and compact widgets. Lime marks selection and small action details; activity bars use a darker accessible green in light appearance. Respect reduced transparency/motion, stack larger-text content and hide the tab bar while typing. Verify navigation, title/scroll state, saved-session flow, French, dark appearance and keyboard layouts.
+
+## Original design restoration (supersedes hybrid)
+
+James requested Théophile’s original design from `design/visuals-tabs` (`c0ffdff`): full-colour background, lime invitation/demo, glass dashboard cards, scrolling header and original tab styling. Retain newer functionality and navigation state. Fix tab text scaling with the same default 11-point appearance; verify full setup audits, navigation, demo isolation, larger text and signed phone deployment before publishing.

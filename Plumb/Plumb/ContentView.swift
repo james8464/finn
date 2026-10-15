@@ -34,6 +34,7 @@ struct ContentView: View {
     }
     @State private var selectedTab: HomeTab = .home
     @State private var keyboardVisible = false
+    @State private var showsPlumbDemo = false
     /// What the camera does, shown once before iOS asks for it.
     @State private var showsCameraPrimer = false
     /// The first-launch screens (`Onboarding/`), also replayed from Options.
@@ -176,6 +177,12 @@ struct ContentView: View {
                 showsOnboarding = false
             }
         }
+        .fullScreenCover(isPresented: $showsPlumbDemo) {
+            PlumbDemoView {
+                showsPlumbDemo = false
+                selectedTab = .workout
+            }
+        }
         // Badges follow the saved history: checked at launch and after every saved set. Only the set
         // just saved is celebrated; at launch (`lastSavedSetID` nil) the history's badges are recorded quietly.
         .onChange(of: model.history, initial: true) { _, history in
@@ -300,7 +307,7 @@ struct ContentView: View {
                                 set: { tabRoutes[tab] = $0 }
                             )) { destinationPage($0) }
                             .toolbar {
-                                if tab != .workout {
+                                if tab != .workout && tab != .home {
                                     ToolbarItem(placement: .topBarTrailing) {
                                         Button { route = .account } label: {
                                             Label("Settings", systemImage: "gearshape")
@@ -310,21 +317,18 @@ struct ContentView: View {
                                 }
                             }
                     }
+                    .toolbar(tab == .home && tabRoutes[tab] == nil ? .hidden : .visible, for: .navigationBar)
                     .toolbar(.hidden, for: .tabBar)
-                    .tabItem {
-                        Label(LocalizedStringKey(tab.rawValue), systemImage: tab.symbol)
-                            .accessibilityIdentifier(tab.identifier)
-                    }
                     .tag(tab)
                 }
             }
             if !keyboardVisible {
                 HomeTabBar(selection: $selectedTab)
-                    .padding(.top, 8)
-                    .padding(.bottom, 4)
             }
         }
-        .background(HomeStyle.background)
+        .background { HomeBackdrop() }
+        .environment(\.colorScheme, .dark)
+        .preferredColorScheme(.dark)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             keyboardVisible = true
         }
@@ -337,7 +341,8 @@ struct ContentView: View {
         switch tab {
         case .home:
             DashboardView(history: model.history, exercise: model.selectedExercise,
-                          badges: badges.earned, startWorkout: { selectedTab = .workout }) { route = $0 }
+                          badges: badges.earned, tryPlumb: { selectedTab = .workout },
+                          watchDemo: { showsPlumbDemo = true }) { route = $0 }
         case .workout: workoutSetup
         case .posture: historyList(title: "Posture", exercise: nil)
         case .coach: CoachView(history: model.history)

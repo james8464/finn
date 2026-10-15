@@ -1,20 +1,15 @@
 # Plumb interface
 
-Use Home, Posture, Coach and Workout (+), in that order. James approved restoring Théophile’s tab composition on 15 October 2026. The floating bar uses his home, runner, person-with-sparkles and plus symbols. Each destination retains its own navigation stack.
+James requested Théophile’s original design on 15 October 2026, superseding the monochrome hybrid. Restore the source design from [design/visuals-tabs at c0ffdff](https://github.com/james8464/hackathon-project/tree/c0ffdff).
 
-- **Home:** selected exercise illustration, seven-day measured reps, best set, awards and latest saved session. Activity opens History.
-- **Posture:** saved sessions and their measured set reviews. Do not invent posture scores.
-- **Coach:** conversation grounded in saved sets, with source information available.
-- **Workout:** exercise selection, camera-placement illustration and Start a set. Selecting the plus tab opens setup; it does not start the camera.
+- Home uses the original full-colour background, lime Try Plumb/demo card, glass Last workout, Posture, Best set, Sessions and Awards cards, and scrolling Home/account header.
+- The glass bar contains Home, Posture, Coach and Workout (+), with the original symbols, spacing, selection treatment and default label size.
+- Posture opens measured set reviews. Workout opens setup, never the camera immediately. The illustrated demo neither records nor saves sample workouts.
+- Preserve newer independent navigation stacks, saved data, localization, keyboard dismissal and camera/privacy behavior.
+- Unavailable posture scores stay blank. Sample values appear only in explicitly labelled previews.
 
-Keep the black-and-white foundation, system text styles and concise labels. Théophile’s original background is desaturated and softened behind Home. Lime highlights selected tabs, exercise chips and action arrows; charts use a darker green in light appearance for contrast. Other content surfaces remain opaque. Preserve light/dark appearance, Dynamic Type, Reduce Motion and Reduce Transparency.
+The original design uses dark appearance. At accessibility text sizes the tabs use two rows and Home cards stack. Tab labels retain 11 points at default size but scale with the body curve; caption2 plateaus at smaller settings. Preserve Reduce Motion and Reduce Transparency. Bottom actions must remain above navigation.
 
-Large titles collapse with scrolling. Bottom controls respect safe areas. The tab bar hides while the keyboard is open; the Coach composer remains accessible. At accessibility text sizes tab labels remain visible, the bar uses two rows, and Home widgets stack vertically. Coach offers a Done keyboard control to restore navigation without sending a message.
+Keep work on `ui/apple-native-revamp` with PR 26 draft. Main and teammates’ branches are independent.
 
-## Source and preservation
-
-Théophile’s branch is [design/visuals-tabs](https://github.com/james8464/hackathon-project/tree/design/visuals-tabs), last inspected at `c0ffdff`. His dashboard originated in `536d3ba`; the branch and its history were not lost. This refinement reuses the original HomeBackdrop asset and tab composition without replacing the app’s measurement or storage logic.
-
-Keep the combined design on `ui/apple-native-revamp` and PR 26 draft until James requests a merge. Other worktrees remain independent.
-
-[Research](../architecture/specs/2026-10-15-native-ui-design.md) · [HIG coverage](hig-ui-coverage.md) · [Verification](native-ui-verification.md)
+[Research](../architecture/specs/2026-10-15-native-ui-design.md) · [HIG reference](apple-hig-agent-reference.md) · [Verification](native-ui-verification.md)

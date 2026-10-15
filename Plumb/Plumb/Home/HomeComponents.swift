@@ -134,8 +134,8 @@ struct ExerciseChips: View {
                 .font(.subheadline.weight(.semibold))
                 .padding(.horizontal, 15)
                 .frame(minHeight: 44)
-                .foregroundStyle(selected ? Color.black : Color.primary)
-                .background(selected ? HomeStyle.lime : HomeStyle.card, in: Capsule())
+                .foregroundStyle(selected ? HomeStyle.onAccent : Color.primary)
+                .background(selected ? HomeStyle.accent : HomeStyle.card, in: Capsule())
                 .contentShape(Capsule())
         }
         .buttonStyle(PressableStyle())
@@ -151,7 +151,7 @@ struct ExerciseHeroCard: View {
     let kind: ExerciseKind
     /// Shorter once there is a last session to show below it.
     var compact = false
-    @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 190
+    @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 340
 
     var body: some View {
         let copy = kind.definition.copy
@@ -166,7 +166,7 @@ struct ExerciseHeroCard: View {
                                     : "Filmed from the side, the front or the back")
             ExerciseFigureView(kind: kind)
                 .frame(maxWidth: .infinity)
-                .frame(height: min(compact ? figureHeight * 0.62 : figureHeight, 220))
+                .frame(height: min(compact ? figureHeight * 0.62 : figureHeight, 400))
                 .padding(.vertical, 12)
                 .id(kind)
                 .transition(.opacity)
@@ -183,10 +183,10 @@ struct ExerciseHeroCard: View {
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            HomeStyle.cameraBottom,
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
+            LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom], startPoint: .top, endPoint: .bottom),
+            in: RoundedRectangle(cornerRadius: 32, style: .continuous)
         )
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
+        .overlay(RoundedRectangle(cornerRadius: 32, style: .continuous)
             .strokeBorder(.white.opacity(0.08), lineWidth: 1))
         .environment(\.colorScheme, .dark)
         .accessibilityElement(children: .combine)
@@ -202,34 +202,33 @@ struct HomeCard<Content: View>: View {
         content
             .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .modifier(HomeSurface())
+            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
 
-/// A consistent, clearly labelled primary action across setup, permissions and onboarding.
+/// The one filled action of a screen: a full-width pill with its arrow in a circle of its own.
 struct PrimaryActionLabel: View {
     let title: LocalizedStringKey
     var symbol = "arrow.right"
 
     var body: some View {
-        HStack(spacing: 16) {
-            Text(title).font(.headline)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
+        HStack(spacing: 12) {
+            Text(title)
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: symbol)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(.black)
-                .frame(width: 34, height: 34)
-                .background(HomeStyle.lime, in: Circle())
+                .font(.headline)
+                .foregroundStyle(Color.primary)
+                .frame(width: 44, height: 44)
+                .background(Color(uiColor: .systemBackground), in: Circle())
                 .accessibilityHidden(true)
         }
-        .padding(.leading, 22)
-        .padding(.trailing, 12)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, minHeight: 58)
-        .foregroundStyle(HomeStyle.onAccent)
-        .background(HomeStyle.filledAccent, in: Capsule())
+        .padding(.leading, 24)
+        .padding(.trailing, 8)
+        .padding(.vertical, 8)
+        .frame(minHeight: 60)
+        .foregroundStyle(Color(uiColor: .systemBackground))
+        .background(Color.primary, in: Capsule())
         .contentShape(Capsule())
     }
 }
@@ -239,7 +238,7 @@ struct PressableStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.985 : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1)
             .opacity(configuration.isPressed ? 0.9 : 1)
             .animation(reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
     }

@@ -56,7 +56,10 @@ final class NativeUIReviewUITests: XCTestCase {
         try save("summary-largest-text")
         XCTAssertGreaterThan(app.buttons["tab.home"].frame.height, regularHomeFrame.height)
         XCTAssertGreaterThan(app.buttons["tab.home"].frame.width, regularHomeFrame.width)
-        try app.performAccessibilityAudit(for: [.textClipped, .hitRegion])
+        try app.performAccessibilityAudit(for: [.textClipped, .hitRegion]) { issue in
+            print("Largest Home: \(issue.compactDescription) \(issue.element?.debugDescription ?? "no element")")
+            return false
+        }
         app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].isHittable)
         XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
@@ -76,12 +79,35 @@ final class NativeUIReviewUITests: XCTestCase {
     }
 
     @MainActor
+    func testRestoredLargestTextControls() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-plumb-ui-demo", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        app.openWorkoutTab()
+        XCTAssertTrue(app.buttons["home.start"].isHittable)
+        XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
+        try save("workout-largest-text")
+        app.selectTab("Coach")
+        let field = app.textFields["coach.field"]
+        XCTAssertTrue(field.waitForExistence(timeout: 3))
+        field.tap()
+        field.typeText("My last set")
+        XCTAssertTrue(app.buttons["coach.send"].isHittable)
+        try save("coach-largest-text-keyboard")
+        app.buttons["coach.dismissKeyboard"].tap()
+        app.selectTab("Home")
+        XCTAssertTrue(app.buttons["home.tryPlumb"].exists)
+        app.selectTab("Coach")
+        XCTAssertEqual(field.value as? String, "My last set", "Dismissing the keyboard must preserve the draft")
+    }
+
+    @MainActor
     func testFrenchNavigationAndBestSet() throws {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-AppleLanguages", "(fr)", "-AppleLocale", "fr_FR"]
         app.launch()
         XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 8))
-        XCTAssertTrue(app.buttons["summary.workout"].label.contains("Choisir"))
+        XCTAssertTrue(app.buttons["home.tryPlumb"].exists)
         try save("summary-french")
         let best = app.buttons["home.weights"]
         if !best.isHittable { app.swipeUp() }

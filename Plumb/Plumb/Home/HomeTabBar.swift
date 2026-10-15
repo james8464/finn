@@ -1,105 +1,145 @@
 import SwiftUI
 
-/// Théophile's original artwork, softened behind the monochrome content.
 struct HomeBackdrop: View {
-  @Environment(\.colorScheme) private var colorScheme
-
-  var body: some View {
-    GeometryReader { proxy in
-      Image("HomeBackdrop")
-        .resizable()
-        .scaledToFill()
-        .frame(width: proxy.size.width, height: proxy.size.height)
-        .clipped()
-        .saturation(0)
-        .overlay(HomeStyle.background.opacity(colorScheme == .dark ? 0.62 : 0.84))
-        .overlay(alignment: .bottom) {
-          LinearGradient(
-            colors: [.clear, HomeStyle.background], startPoint: .top, endPoint: .bottom
-          )
-          .frame(height: 160)
+    var body: some View {
+        GeometryReader { proxy in
+            Image("HomeBackdrop")
+                .resizable()
+                .scaledToFill()
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
+                .overlay(.black.opacity(0.16))
         }
+        .ignoresSafeArea()
+        .accessibilityHidden(true)
     }
-    .ignoresSafeArea()
-    .accessibilityHidden(true)
-  }
 }
 
-/// Restores Théophile's tab composition while TabView keeps each navigation stack alive.
-struct HomeTabBar: View {
-  @Binding var selection: HomeTab
-  @Environment(\.accessibilityReduceMotion) private var reduceMotion
-  @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-  @Environment(\.dynamicTypeSize) private var typeSize
-  @ScaledMetric(relativeTo: .caption2) private var itemHeight = 62.0
-  @ScaledMetric(relativeTo: .caption2) private var iconSize = 24.0
-  @Namespace private var selectedShape
-
-  var body: some View {
-    LazyVGrid(
-      columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: typeSize.isAccessibilitySize ? 2 : 4),
-      spacing: 4
-    ) {
-      ForEach(HomeTab.allCases, id: \.self) { tabButton($0) }
+private enum HomeAccessibilityDiagnostics {
+    static var opaqueSurface: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-plumb-ui-opaque-surface")
+        #else
+        false
+        #endif
     }
-    .padding(5)
-    .background {
-      if reduceTransparency {
-        shell.fill(Color(white: 0.08))
-      } else {
-        shell.fill(.ultraThinMaterial).environment(\.colorScheme, .dark)
-        shell.fill(.black.opacity(0.55))
-      }
-    }
-    .overlay(shell.strokeBorder(.white.opacity(0.18), lineWidth: 0.5))
-    .animation(reduceMotion ? nil : .spring(duration: 0.28, bounce: 0.12), value: selection)
-    .sensoryFeedback(.selection, trigger: selection)
-    .padding(.horizontal, 16)
-    .accessibilityElement(children: .contain)
-    .accessibilityIdentifier("home.tabBar")
-  }
+}
 
-  private var shell: RoundedRectangle {
-    RoundedRectangle(cornerRadius: typeSize.isAccessibilitySize ? 28 : 50)
-  }
+struct DashboardGlass: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    var radius: CGFloat = 15
 
-  private func tabButton(_ tab: HomeTab) -> some View {
-    Button {
-      selection = tab
-    } label: {
-      let layout = typeSize.isAccessibilitySize
-        ? AnyLayout(HStackLayout(spacing: 8))
-        : AnyLayout(VStackLayout(spacing: 4))
-      layout {
-        Image(systemName: tab.symbol)
-          .font(.system(size: min(iconSize, 32), weight: tab == .home ? .semibold : .regular))
-          .overlay(alignment: .topTrailing) {
-            if tab == .coach {
-              Image(systemName: "sparkles")
-                .font(.system(size: min(iconSize * 11 / 24, 14), weight: .medium))
-                .offset(x: 9, y: -5)
+    func body(content: Content) -> some View {
+        content
+            .background {
+                let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+                if reduceTransparency || HomeAccessibilityDiagnostics.opaqueSurface {
+                    shape.fill(Color(white: 0.09)).accessibilityHidden(true)
+                } else {
+                    shape.fill(.ultraThinMaterial).opacity(0.8).environment(\.colorScheme, .dark).accessibilityHidden(true)
+                    shape.fill(.black.opacity(0.16)).accessibilityHidden(true)
+                }
             }
-          }
-          .frame(minHeight: 28)
-          .accessibilityHidden(true)
-        Text(LocalizedStringKey(tab.rawValue))
-          .font(.caption2.weight(selection == tab ? .semibold : .regular))
-          .multilineTextAlignment(.center)
-          .fixedSize(horizontal: false, vertical: true)
-      }
-      .foregroundStyle(selection == tab ? HomeStyle.lime : Color.white)
-      .frame(maxWidth: .infinity, minHeight: min(itemHeight, 88))
-      .background {
-        if selection == tab {
-          Capsule().fill(.white.opacity(0.1))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.16), lineWidth: 0.5))
-            .matchedGeometryEffect(id: "selected", in: selectedShape)
-        }
-      }
-      .contentShape(Capsule())
+            .overlay {
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .strokeBorder(LinearGradient(colors: [.white.opacity(0.32), .white.opacity(0.13)],
+                                                 startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                    .accessibilityHidden(true)
+            }
     }
-    .buttonStyle(PressableStyle())
-    .accessibilityIdentifier(tab.identifier)
-    .accessibilityAddTraits(selection == tab ? .isSelected : [])
-  }
+}
+
+struct HomeTabBar: View {
+    @Binding var selection: HomeTab
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.dynamicTypeSize) private var typeSize
+    // Caption2 plateaus at smaller sizes. Body scaling preserves 11pt at default
+    // while responding at every content size; the original normal-size layout is unchanged.
+    @ScaledMetric(relativeTo: .body) private var labelSize = 11.0
+    @ScaledMetric(relativeTo: .body) private var tabHeight = 64.0
+    @Namespace private var glassSelection
+
+    var body: some View {
+        tabs
+            .background {
+                GlassEffectContainer(spacing: 0) {
+                    LazyVGrid(columns: tabColumns, spacing: 0) {
+                        ForEach(HomeTab.allCases, id: \.self) { tab in
+                            Color.clear
+                                .overlay {
+                                    if selection == tab { selectionCapsule }
+                                }
+                                .frame(maxWidth: .infinity, minHeight: typeSize.isAccessibilitySize ? min(tabHeight, 88) : 64)
+                        }
+                    }
+                }
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+            }
+        .padding(4)
+        // Glass must not sample another Liquid Glass layer. Keep the shell a material surface
+        // and render the labels above the independently morphing native glass selection.
+        .modifier(DashboardGlass(radius: 48))
+        .animation(reduceMotion ? nil : .spring(duration: 0.28, bounce: 0.12), value: selection)
+        .sensoryFeedback(.selection, trigger: selection)
+        .padding(.horizontal, 12)
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.isTabBar)
+        .accessibilityIdentifier("home.tabBar")
+    }
+
+    private var tabColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 0), count: typeSize.isAccessibilitySize ? 2 : 4)
+    }
+
+    private var tabs: some View {
+        LazyVGrid(columns: tabColumns, spacing: 0) {
+            ForEach(HomeTab.allCases, id: \.self) { tab in
+                Button {
+                    // Animate only the bar. Changing pages should respond immediately.
+                    selection = tab
+                } label: {
+                    let layout = typeSize.isAccessibilitySize
+                        ? AnyLayout(HStackLayout(spacing: 8))
+                        : AnyLayout(VStackLayout(spacing: 4))
+                    layout {
+                        Image(systemName: tab.symbol)
+                            .font(.system(size: 24, weight: tab == .home ? .semibold : .regular))
+                            .overlay(alignment: .topTrailing) {
+                                if tab == .coach {
+                                    Image(systemName: "sparkles")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .offset(x: 9, y: -5)
+                                }
+                            }
+                            .frame(height: 28)
+                            .accessibilityHidden(true)
+                        Text(LocalizedStringKey(tab.rawValue))
+                            .font(.system(size: labelSize, weight: selection == tab ? .medium : .regular))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .foregroundStyle(selection == tab ? DashboardStyle.lime : DashboardStyle.secondary)
+                    .frame(maxWidth: .infinity, minHeight: typeSize.isAccessibilitySize ? min(tabHeight, 88) - 2 : 62)
+                    .padding(.vertical, 1)
+                    .contentShape(Capsule())
+                }
+                .buttonStyle(PressableStyle())
+                .accessibilityIdentifier(tab.identifier)
+                .accessibilityAddTraits(selection == tab ? .isSelected : [])
+            }
+        }
+    }
+
+    @ViewBuilder private var selectionCapsule: some View {
+        if reduceTransparency || HomeAccessibilityDiagnostics.opaqueSurface {
+            Capsule().fill(Color(white: 0.04))
+                .matchedGeometryEffect(id: "selection", in: glassSelection)
+        } else {
+            Capsule().fill(.black.opacity(0.16))
+                .glassEffect(.regular.tint(.black.opacity(0.28)).interactive(!reduceMotion), in: Capsule())
+                .glassEffectID("selection", in: glassSelection)
+                .glassEffectTransition(reduceMotion ? .identity : .matchedGeometry)
+        }
+    }
 }
