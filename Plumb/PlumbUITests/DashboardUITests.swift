@@ -104,6 +104,27 @@ final class DashboardUITests: XCTestCase {
     }
 
     @MainActor
+    func testHomeAndPostureNavigationInSupportedLanguages() {
+        for (language, region, tryLabel, startLabel) in [
+            ("en-GB", "en_GB", "Try Plumb", "Start a set"),
+            ("en-US", "en_US", "Try Plumb", "Start a set"),
+            ("fr", "fr_FR", "Essayer Plumb", "Commencer une série"),
+            ("es", "es_ES", "Prueba Plumb", "Inicia una serie"),
+        ] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-plumb-ui-demo", "-AppleLanguages", "(\(language))",
+                                   "-AppleLocale", region]
+            app.launch()
+            XCTAssertTrue(app.staticTexts[tryLabel].waitForExistence(timeout: 8), language)
+            app.buttons["home.posture"].tap()
+            XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 3), language)
+            app.openWorkoutTab()
+            XCTAssertEqual(app.buttons["home.start"].label, startLabel, language)
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testSavedWorkoutAppearsOnDashboard() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
