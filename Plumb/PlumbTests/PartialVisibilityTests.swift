@@ -55,28 +55,35 @@ struct PartialVisibilityTests {
         #expect(note.contains("gives no posture advice"))
     }
 
-    @Test func aRepHiddenForMostOfItsFramesIsLeftOutAndTheOthersRenumbered() throws {
+    /// The knee is lost for most of the sixth rep. The side rubric keeps five clear reps; the hips,
+    /// seen all through, show the sixth, so it is counted too, from the hips and without advice.
+    /// Until 15 October that rep was left out.
+    @Test func aRepWithTheKneeHiddenIsCountedFromTheHips() throws {
         let definition = ExerciseKind.bodyweightSquat.definition
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(
-            Self.squats(missingKneeEvery: 4, hiddenRep: 6), as: definition, trimsToSet: false)
+        let frames = Self.squats(missingKneeEvery: 4, hiddenRep: 6)
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: definition, trimsToSet: false)
         guard case .analyzed(let analysis) = outcome else {
-            Issue.record("Expected the clear reps to be counted, got \(outcome)")
+            Issue.record("Expected the reps to be counted, got \(outcome)")
             return
         }
-        #expect(diagnostics?.partialVisibility != nil)
-        #expect(analysis.reps.count + (diagnostics?.unclearReps ?? 0) <= 6)
-        #expect(analysis.reps.count == 5)
-        #expect(analysis.reps.map(\.number) == Array(1...analysis.reps.count))
+        #expect(diagnostics?.countedFromHips == true)
+        #expect(analysis.reps.count == 6)
+        #expect(analysis.reps.map(\.number) == Array(1...6))
+        #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
+        #expect(EvidenceGate.partialVisibility(frames, requirement: definition.evidence) != nil)
     }
 
-    @Test func belowSixtyFivePercentTheSetIsStillRefused() {
-        let outcome = ExerciseAnalyzer.analyze(Self.squats(missingKneeEvery: 2),
-                                               as: ExerciseKind.bodyweightSquat.definition)
-        guard case .insufficientView(let reason) = outcome else {
-            Issue.record("Expected a refusal at 50% coverage, got \(outcome)")
+    /// The knee in only half the frames: no reading from the side, but the hips count the squats.
+    @Test func belowSixtyFivePercentTheRepsAreCountedFromTheHips() {
+        let frames = Self.squats(missingKneeEvery: 2)
+        #expect(EvidenceGate.assess(frames, requirement: .squat, allowsPartial: true).isRejected)
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: ExerciseKind.bodyweightSquat.definition)
+        else {
+            Issue.record("Expected the squats to be counted from the hips")
             return
         }
-        #expect(reason.contains("needs 80%"))
+        #expect(analysis.reps.count == 6)
+        #expect(analysis.rubricVersion == ExerciseDefinition.squatTrunk.rubricVersion)
     }
 }
 

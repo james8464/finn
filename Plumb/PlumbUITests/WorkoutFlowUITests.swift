@@ -2,6 +2,30 @@ import XCTest
 
 final class WorkoutFlowUITests: XCTestCase {
     @MainActor
+    func testPhysicalCameraOpensAfterPermission() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["PLUMB_PHYSICAL_CAMERA"] == "1",
+                          "Run explicitly on a connected iPhone with TEST_RUNNER_PLUMB_PHYSICAL_CAMERA=1")
+        let app = XCUIApplication()
+        app.resetAuthorizationStatus(for: .camera)
+        app.launch()
+        XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
+        app.buttons["home.start"].tap()
+        let primer = app.buttons["primer.continue"]
+        if primer.waitForExistence(timeout: 5) { primer.tap() }
+
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let allow = springboard.buttons.matching(NSPredicate(
+            format: "label ==[c] %@ OR label ==[c] %@ OR label ==[c] %@",
+            "Allow", "OK", "Autoriser"
+        )).firstMatch
+        if allow.waitForExistence(timeout: 8) { allow.tap() }
+
+        XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 15),
+                      "Live camera framing should open after permission")
+        capture(app, name: "Physical iPhone camera framing")
+    }
+
+    @MainActor
     func testPrimaryActionsStayNearBottomOfWorkoutFlow() {
         let app = XCUIApplication()
         app.launchArguments.append("-plumb-ui-demo")
@@ -256,7 +280,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Delete all local data"].tap()
         app.buttons["Delete all data"].tap()
         XCTAssertTrue(app.staticTexts["No saved sessions yet."].waitForExistence(timeout: 5))
-        try app.performAccessibilityAudit()
+        try audit(app, at: "history")
     }
 
     @MainActor
@@ -430,6 +454,8 @@ final class WorkoutFlowUITests: XCTestCase {
         capture(app, name: "Comparison")
         app.buttons["How range is measured"].tap()
         XCTAssertTrue(methodText.exists)
+        // With the form-check notes above it, the button sits under the bottom bar until scrolled.
+        app.swipeUp()
         app.buttons["Reword comparison"].tap()
         XCTAssertTrue(app.staticTexts["Camera-measured range was longer in your second set."]
             .waitForExistence(timeout: 5))

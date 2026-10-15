@@ -7,10 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1A1437AA30755F9000CFBBF6 /* PlumbWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1A1437A130755F9000CFBBF6 /* PlumbWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1A14378830755F9000CFBBF6 /* PlumbWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 1A14378030755F9000CFBBF6 /* PlumbWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1A1437AB30755F9000CFBBF6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A1436F230755F8000CFBBF6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1A1437A030755F9000CFBBF6;
+			remoteInfo = PlumbWidgets;
+		};
 		1A14370A30755F8100CFBBF6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1A1436F230755F8000CFBBF6 /* Project object */;
@@ -35,6 +43,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1A1437A930755F9000CFBBF6 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1A1437AA30755F9000CFBBF6 /* PlumbWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1A14378730755F9000CFBBF6 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
@@ -47,6 +66,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1A1437A130755F9000CFBBF6 /* PlumbWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PlumbWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A1436FA30755F8000CFBBF6 /* Plumb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Plumb.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A14370930755F8100CFBBF6 /* PlumbTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlumbTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A14371330755F8100CFBBF6 /* PlumbUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlumbUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -55,6 +75,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1A1437AD30755F9000CFBBF6 /* Exceptions for "Plumb" folder in "PlumbWidgets" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Widgets/LastSetSnapshot.swift,
+				Widgets/SetActivityAttributes.swift,
+				Widgets/WidgetViews.swift,
+			);
+			target = 1A1437A030755F9000CFBBF6 /* PlumbWidgets */;
+		};
 		1A14378230755F9000CFBBF6 /* Exceptions for "Plumb" folder in "PlumbWatch" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -66,10 +95,16 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		1A1437A230755F9000CFBBF6 /* PlumbWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PlumbWidgets;
+			sourceTree = "<group>";
+		};
 		1A1436FC30755F8000CFBBF6 /* Plumb */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				1A14378230755F9000CFBBF6 /* Exceptions for "Plumb" folder in "PlumbWatch" target */,
+				1A1437AD30755F9000CFBBF6 /* Exceptions for "Plumb" folder in "PlumbWidgets" target */,
 			);
 			path = Plumb;
 			sourceTree = "<group>";
@@ -92,6 +127,11 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1A1437A430755F9000CFBBF6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
 		1A1436F730755F8000CFBBF6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
@@ -123,6 +163,7 @@
 				1A14370C30755F8100CFBBF6 /* PlumbTests */,
 				1A14371630755F8100CFBBF6 /* PlumbUITests */,
 				1A14378130755F9000CFBBF6 /* PlumbWatch */,
+				1A1437A230755F9000CFBBF6 /* PlumbWidgets */,
 				1A1436FB30755F8000CFBBF6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -134,6 +175,7 @@
 				1A14370930755F8100CFBBF6 /* PlumbTests.xctest */,
 				1A14371330755F8100CFBBF6 /* PlumbUITests.xctest */,
 				1A14378030755F9000CFBBF6 /* PlumbWatch.app */,
+				1A1437A130755F9000CFBBF6 /* PlumbWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -141,6 +183,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1A1437A030755F9000CFBBF6 /* PlumbWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A1437A630755F9000CFBBF6 /* Build configuration list for PBXNativeTarget "PlumbWidgets" */;
+			buildPhases = (
+				1A1437A330755F9000CFBBF6 /* Sources */,
+				1A1437A430755F9000CFBBF6 /* Frameworks */,
+				1A1437A530755F9000CFBBF6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1A1437A230755F9000CFBBF6 /* PlumbWidgets */,
+			);
+			name = PlumbWidgets;
+			productName = PlumbWidgets;
+			productReference = 1A1437A130755F9000CFBBF6 /* PlumbWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		1A1436F930755F8000CFBBF6 /* Plumb */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1A14371B30755F8100CFBBF6 /* Build configuration list for PBXNativeTarget "Plumb" */;
@@ -149,11 +211,13 @@
 				1A1436F730755F8000CFBBF6 /* Frameworks */,
 				1A1436F830755F8000CFBBF6 /* Resources */,
 				1A14378730755F9000CFBBF6 /* Embed Watch Content */,
+				1A1437A930755F9000CFBBF6 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				1A14378A30755F9000CFBBF6 /* PBXTargetDependency */,
+				1A1437AC30755F9000CFBBF6 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				1A1436FC30755F8000CFBBF6 /* Plumb */,
@@ -247,6 +311,9 @@
 					1A14378330755F9000CFBBF6 = {
 						CreatedOnToolsVersion = 27.0;
 					};
+					1A1437A030755F9000CFBBF6 = {
+						CreatedOnToolsVersion = 27.0;
+					};
 				};
 			};
 			buildConfigurationList = 1A1436F530755F8000CFBBF6 /* Build configuration list for PBXProject "Plumb" */;
@@ -267,11 +334,17 @@
 				1A14370830755F8100CFBBF6 /* PlumbTests */,
 				1A14371230755F8100CFBBF6 /* PlumbUITests */,
 				1A14378330755F9000CFBBF6 /* PlumbWatch */,
+				1A1437A030755F9000CFBBF6 /* PlumbWidgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1A1437A530755F9000CFBBF6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
 		1A1436F830755F8000CFBBF6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
@@ -295,6 +368,11 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1A1437A330755F9000CFBBF6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 		1A1436F630755F8000CFBBF6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
@@ -318,6 +396,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1A1437AC30755F9000CFBBF6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1A1437A030755F9000CFBBF6 /* PlumbWidgets */;
+			targetProxy = 1A1437AB30755F9000CFBBF6 /* PBXContainerItemProxy */;
+		};
 		1A14370B30755F8100CFBBF6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1A1436F930755F8000CFBBF6 /* Plumb */;
@@ -336,6 +419,72 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		1A1437A730755F9000CFBBF6 /* Debug configuration for PBXNativeTarget "PlumbWidgets" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PlumbWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_FILE = "PlumbWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		1A1437A830755F9000CFBBF6 /* Release configuration for PBXNativeTarget "PlumbWidgets" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PlumbWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_FILE = "PlumbWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 		1A14371930755F8100CFBBF6 /* Debug configuration for PBXProject "Plumb" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -371,7 +520,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -435,7 +584,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -465,9 +614,11 @@
 				CODE_SIGN_ENTITLEMENTS = Plumb.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_FILE = "Plumb-Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Only after you turn on Personalize with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plumb saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app.";
@@ -481,7 +632,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.james8464.Plumb;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -501,9 +652,11 @@
 				CODE_SIGN_ENTITLEMENTS = Plumb.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_FILE = "Plumb-Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Plumb uses your camera to measure body position during a workout set on this iPhone. Video is not saved.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Only after you turn on Personalize with Health, Plumb reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plumb saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app.";
@@ -517,7 +670,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.james8464.Plumb;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -535,11 +688,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.james8464.PlumbTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -557,11 +710,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.james8464.PlumbTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -578,10 +731,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.james8464.PlumbUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -598,10 +751,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.james8464.PlumbUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -620,22 +773,23 @@
 				CODE_SIGN_ENTITLEMENTS = PlumbWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "PlumbWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plumb reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plumb runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.james8464.Plumb;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.finlearn.plumb;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.james8464.Plumb.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -657,22 +811,23 @@
 				CODE_SIGN_ENTITLEMENTS = PlumbWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Z29CKRV8C9;
+				DEVELOPMENT_TEAM = 2FN6Y5NHS5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "PlumbWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Plumb;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Plumb reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Plumb runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.james8464.Plumb;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.finlearn.plumb;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.james8464.Plumb.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finlearn.plumb.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -690,6 +845,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1A1437A630755F9000CFBBF6 /* Build configuration list for PBXNativeTarget "PlumbWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A1437A730755F9000CFBBF6 /* Debug configuration for PBXNativeTarget "PlumbWidgets" */,
+				1A1437A830755F9000CFBBF6 /* Release configuration for PBXNativeTarget "PlumbWidgets" */,
+			);
+			defaultConfigurationName = Release;
+		};
 		1A1436F530755F8000CFBBF6 /* Build configuration list for PBXProject "Plumb" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

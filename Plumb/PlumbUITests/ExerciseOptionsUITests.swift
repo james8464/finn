@@ -30,6 +30,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         let squat = app.buttons["Squat"]
         XCTAssertTrue(squat.waitForExistence(timeout: 5))
         XCTAssertTrue(squat.isSelected)
+        XCTAssertTrue(squat.isHittable, "The selected exercise must be visible on first launch")
         let pushUp = app.buttons["Push-up"]
         pushUp.tap()
         XCTAssertTrue(pushUp.isSelected)
@@ -54,7 +55,11 @@ final class ExerciseOptionsUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
         XCTAssertTrue(app.staticTexts["6 measured reps"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Your elbow bend became smaller in the last two reps."].exists)
+        // The demo's last two reps also raise the hips above the body line: a form fault seen on two
+        // reps comes before the change in elbow bend (15 October).
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
+            format: "label BEGINSWITH %@", "Your hips rose above the line from your shoulders to your ankles in rep 5 and rep 6"))
+            .firstMatch.exists)
     }
 
     @MainActor

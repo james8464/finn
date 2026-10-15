@@ -1,6 +1,27 @@
 # Plumb App Store submission track
 
-**Status on 13 October 2026: preparing a release candidate; no App Store Connect upload has been verified.** The October 16 challenge target is a submitted build, not guaranteed App Review approval or public availability.
+**Status on 15 October 2026: the team recorded a signed Release archive of `main` at d8f1503; no App Store Connect upload has been verified.** Newer Coach, Shortcuts, widget and UI commits require a fresh archive and review. The challenge asks for a build submitted through App Store Connect by Friday 16 October, 14:00. The submission steps are in [`marche-a-suivre-15-octobre.md`](marche-a-suivre-15-octobre.md); the listing texts in [`app-store-fiche.md`](app-store-fiche.md); the privacy answers in [`app-privacy-answers.md`](app-privacy-answers.md); the screenshots in [`screenshots/`](screenshots/README.md).
+
+## Checked on 15 October (archive `xcodebuild archive`, Release, generic iOS device)
+
+| Item | Result |
+| --- | --- |
+| Bundle IDs | `com.finlearn.plumb` (iPhone), `com.finlearn.plumb.watchkitapp` (watch, `WKCompanionAppBundleIdentifier` = `com.finlearn.plumb`) |
+| Team and signing | `DEVELOPMENT_TEAM` 2FN6Y5NHS5, automatic. The archive signed with "Apple Development: Paul Aubry (HFWGWBRA9M)" and the team provisioning profiles Xcode generated for both bundle IDs, with the HealthKit entitlement and no clinical records. No Apple Distribution certificate on this Mac: Xcode creates it during Distribute App if the signed-in account has the Admin or App Manager role on the team |
+| Version / build | 1.0 / 1 on both targets; raise `CURRENT_PROJECT_VERSION` on both before any second upload |
+| Minimum OS | iOS 27.0, watchOS 10.0; iPhone only (`TARGETED_DEVICE_FAMILY` 1) |
+| Icon | Icon Composer bundle `AppIcon.icon` (two 1024 px SVG layers, light, dark and tinted appearances), compiled into `Assets.car` for the iPhone and the watch; the flattened `AppIcon60x60@2x.png` has no alpha channel |
+| Purpose strings | iPhone: `NSCameraUsageDescription`, `NSHealthShareUsageDescription`, `NSHealthUpdateUsageDescription`. Watch: both Health strings. No microphone key, and none needed: the app never records |
+| Privacy manifest | `PrivacyInfo.xcprivacy` in the app bundle: no tracking, no collected data, UserDefaults CA92.1, system boot time 35F9.1 |
+| Export compliance | `ITSAppUsesNonExemptEncryption` absent from both Info.plists: App Store Connect will ask at each build. Add `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;` to the four build-settings blocks of `project.pbxproj` (Plumb and PlumbWatch, Debug and Release) |
+| Debug-only code | `strings` on the Release binary finds none of the demo, video-file or validation markers |
+| Public pages | support and privacy pages answered HTTP 200 on 15 October; `site/` changes in this branch go live only after the manual **Publish Plumb support pages** workflow runs from `main` |
+
+The local iPhone 16 Pro Max (iOS 27.0.1) installed and launched a temporary James-team Debug build of d8f1503 on 15 October. Automated UI testing allowed Camera and opened its live preview, which correctly asked for the missing hip, knee and ankle while the phone faced a ceiling. This verifies launch, permission and preview only; it is not a real exercise or a FinLearn-signed build.
+
+Still open: a physical-iPhone run of the final FinLearn build with real sets, the Apple Watch on a real watch, the French interface (`claude/fr`) if it ships, the Coach on device, the Private Cloud Compute entitlement for its server model (see the privacy answers), and three real-set screenshots (set in progress, result, home after a set).
+
+## Earlier state (13 October, kept for the record)
 
 ## Known project settings
 
@@ -49,3 +70,4 @@ The draft listing copy and support page now name all four available exercises. R
 | --- | --- | --- | --- |
 | 11 October 2026 | 1.0/1 local project | Not uploaded | Unsigned archive and setup screenshot candidate checked; test-only demo and validation markers excluded from Release binary; public support/privacy URLs verified; distribution signing, account access, physical device, result screenshots, and final validation pending |
 | 13 October 2026 | 1.0/1 local candidate | Not uploaded | Development-signed archive passed strict signature and demo-code checks; App Store Connect export failed because the account has no associated provider/team permission or matching distribution profile. Sixteen generated replays, 187 unit tests, and an eleven-video public-data spot check completed locally; physical participant and specialist validation remain pending |
+| 15 October 2026, 16:00 | 1.0/1, `main` d8f1503, `com.finlearn.plumb` | Not uploaded | Release archive built and development-signed with team 2FN6Y5NHS5 from the command line; icon, purpose strings, privacy manifest, watch embedding checked on the archive; listing, privacy answers, review notes, six 6.9-inch screenshots and tonight's walkthrough written. Upload and submission by Guilhem tonight |

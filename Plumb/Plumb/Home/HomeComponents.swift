@@ -17,7 +17,7 @@ enum HomeStyle {
 
 /// The secondary pages reachable from the first screen.
 enum HomeRoute: Hashable {
-    case history, options, privacy
+    case history, options, privacy, coach
     case account, lastWorkout, posture, weights, awards, plus
 }
 
@@ -39,13 +39,15 @@ extension ExerciseKind {
 /// accessibility text sizes the chips become one menu, which never runs off the screen.
 struct ExerciseChips: View {
     @Binding var selection: ExerciseKind
+    /// The order of the chips: the exercises picked at the first launch come first.
+    var order: [ExerciseKind] = ExerciseKind.allCases
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         if dynamicTypeSize.isAccessibilitySize {
             Menu {
                 Picker("Exercise", selection: $selection.animation(HomeStyle.spring)) {
-                    ForEach(ExerciseKind.allCases, id: \.self) { kind in
+                    ForEach(order, id: \.self) { kind in
                         Text(kind.definition.copy.name).tag(kind)
                     }
                 }
@@ -64,14 +66,21 @@ struct ExerciseChips: View {
             }
             .accessibilityLabel("Exercise: \(selection.definition.copy.name)")
         } else {
-            ScrollView(.horizontal) {
-                HStack(spacing: 8) {
-                    ForEach(ExerciseKind.allCases, id: \.self) { kind in
-                        chip(kind)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal) {
+                    HStack(spacing: 8) {
+                        ForEach(order, id: \.self) { kind in
+                            chip(kind).id(kind)
+                        }
                     }
                 }
+                .scrollIndicators(.hidden)
+                // The chosen exercise is kept across launches: bring its chip into view.
+                .onAppear { proxy.scrollTo(selection, anchor: .center) }
+                .onChange(of: selection) { _, kind in
+                    withAnimation(HomeStyle.spring) { proxy.scrollTo(kind, anchor: .center) }
+                }
             }
-            .scrollIndicators(.hidden)
             .sensoryFeedback(.selection, trigger: selection)
         }
     }
@@ -263,5 +272,14 @@ struct CameraPrimer: View {
             }
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+extension View {
+    /// A group of settings on its own rounded card, as on the first screen.
+    func optionCard() -> some View {
+        padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }

@@ -128,8 +128,9 @@ final class WorkoutSessionModel {
     /// The deepest and shallowest reps of the latest measured set, drawn on the result. Pose
     /// points only, kept in memory and never saved.
     private(set) var repExtremes: RepExtremes?
-    /// Per-rep facts for the latest measured set (pull-ups: chin above the hands, straight arms,
-    /// swing). Empty for exercises without such checks.
+    /// Per-rep facts for the latest measured set: pull-ups' chin above the hands, straight arms and
+    /// swing; for the other exercises, form faults beyond the observation and the checks Plumb could
+    /// not make, with the reason.
     private(set) var formNotes: [String] = []
     /// What the optional exercise classifier concluded for the latest set.
     private(set) var recognition: ExerciseRecognition = .notAttempted
@@ -539,13 +540,18 @@ final class WorkoutSessionModel {
             }
             movementNote = explanation
             repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
-            formNotes = FormChecks.sentences(for: analysis, frames: setFrames, definition: definition)
-            // A camera angle outside the supported side view can distort relative range.
+            let review = FormChecks.review(analysis, frames: setFrames, definition: definition,
+                                           viewCheck: checksCameraAngle ? .enforce : .ignore)
+            formNotes = review.notes
             // A camera angle outside the supported side view can distort relative range, and a partly
             // visible set is counted but not advised on.
-            let cue = diagnostics?.angledView == nil && diagnostics?.partialVisibility == nil
-                ? CueSelector.select(from: analysis, exercise: definition) : nil
-            let issues = SetIssue.issues(diagnostics: diagnostics, cue: cue,
+            let advisable = diagnostics?.angledView == nil && diagnostics?.partialVisibility == nil
+            let changeCue = advisable ? CueSelector.select(from: analysis, exercise: definition) : nil
+            // One observation: a form fault seen on several reps comes before a change between the first
+            // and last reps.
+            let findings = advisable ? review.findings : []
+            let cue = findings.first?.cue ?? changeCue
+            let issues = SetIssue.issues(diagnostics: diagnostics, cue: changeCue, findings: findings,
                                          spedUp: liveMonitor?.sawFasterRep ?? false)
             // Before saving, so "again" compares with the earlier sets only.
             let earlier = MistakeProfile.make(history: history, exercise: exercise)
@@ -558,20 +564,15 @@ final class WorkoutSessionModel {
         case .insufficientView(let reason):
             result = .insufficientView(reason)
             retakeHint = Self.otherExerciseHint(in: frames, chosen: exercise, refusedFrames: setFrames)
-                ?? Self.retakeHint(for: setFrames, definition: definition,
-                                   viewRefused: lastViewVerdict.isMismatch && checksCameraAngle)
+                ?? Self.retakeHint(for: setFrames, definition: definition)
         case .failed(let reason):
             result = .failed(reason)
         }
     }
 
     /// The general retake advice fits a refusal for joints Plumb could not see; other refusals
-    /// already say what to change, and a 3D view refusal points to its switch.
-    private static func retakeHint(for frames: [PoseFrame], definition: ExerciseDefinition,
-                                   viewRefused: Bool) -> String? {
-        if viewRefused {
-            return "If your side already faces the camera, turn off Check the camera angle in Options."
-        }
+    /// already say what to change. The camera angle no longer refuses a set.
+    private static func retakeHint(for frames: [PoseFrame], definition: ExerciseDefinition) -> String? {
         switch EvidenceGate.assess(frames, requirement: definition.evidence) {
         case .reject(.missingJoints), .reject(.lowConfidence): return definition.copy.retakeHint
         default: return nil
@@ -637,10 +638,9 @@ final class WorkoutSessionModel {
     private func updateHandsFreeStart(with frame: PoseFrame) {
         guard handsFree, handsFreeTask == nil else { return }
         let progress = startReadiness.update(with: frame, definition: captureExercise.definition)
-        // A slight angle only earns a tip, as for a set started by hand; a clear front view does not start.
-        let clearlyFront = previewDeviations.count >= ViewCheck.minimumPreviewEstimates
-            && previewDeviations.sorted()[previewDeviations.count / 2] >= ViewCheck.clearlyFrontDegrees
-        let placed = previewLandmarksVisible && !(checksCameraAngle && clearlyFront)
+        // Any view starts the set: an angle, even a front view, only earns a tip to turn, and the
+        // reps are counted without posture advice. A front view used to never start hands-free.
+        let placed = previewLandmarksVisible
         handsFreeProgress = placed ? progress : 0
         sayWhyNotReady(frame, placed: placed)
         guard placed, startReadiness.isReady else { return }

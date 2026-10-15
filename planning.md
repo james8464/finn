@@ -1,10 +1,6 @@
 # Plumb — product and build plan
 
-**Working plan, updated 13 October 2026.** The [README](README.md) owns the product direction and current state: an intended iPhone + Apple Watch coach with timely, validated corrections, beginning with an iPhone-only strength-set prototype. Treadmill running is a planned, separate use case. The app has a camera, setup, set, and result loop for four side-view exercises, with a shared rep analyzer, athlete tracking, an evidence gate, local history and comparison, optional spoken feedback, and guarded Foundation Models wording. A sustained clearly frontal view can be refused; other angled views receive a placement tip. The latest capture revision checks sampled joints against a person mask and refuses the generated covered-feet test. Simulator and generated-video checks pass, but physical-device reliability, coaching quality, audio routing, and model wording still need validation. Apple Watch integration, live corrections, treadmill running, and subscriptions are not implemented. This document separates the intended product from the hackathon prototype and the longer-term product.
-
-The first-build execution plan is [`docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md`](docs/superpowers/plans/2026-10-11-plumb-iphone-squat-mvp.md). It scopes the first complete iPhone squat loop and its validation gate; later integrations remain in this broader product plan.
-
-The [product brief](docs/product/brief.md) expands the README's feature order and result boundaries. This plan retains the detailed implementation choices, validation gates, and timeline.
+**Historical plan, 13 October 2026.** This records the challenge-era design, technical choices, validation gates, and decisions. The [README](README.md) owns current feature status; some implementation statements below are superseded. The [product brief](docs/product/brief.md) holds current result boundaries and sequence.
 
 ## 1. Product thesis
 
@@ -33,7 +29,7 @@ The [product brief](docs/product/brief.md) expands the README's feature order an
 ### Primary journey
 
 1. Choose an exercise and read a short setup card: phone on a stable surface, side view, entire body and equipment in frame, enough light, clear floor.
-2. Grant camera access when starting capture. Plumb shows whether the joints required for the chosen exercise stay visible. Its 3D viewpoint check can suggest turning or reject a clearly frontal view, but actual camera suitability still needs physical-device validation. It never starts analysis silently.
+2. Grant camera access when starting capture. Plumb shows whether the joints required for the chosen exercise stay visible. Its 3D viewpoint check can suggest turning; a clearly frontal view is counted without posture advice. Actual camera suitability still needs physical-device validation. It never starts analysis silently.
 3. Tap or use a short countdown to start. The current build analyses a live frame stream on the iPhone without saving a video.
 4. After the set, Plumb displays measured rep count and at most one supported observation, or explains that no clear pattern was found or why to retake. Supporting rep details remain available. This is not a judgment of perfect overall form.
 5. The person chooses **Try this next set**, **Not relevant**, or **Retake**. A follow-up set can show whether the same observed pattern changed; the current camera view does not display an in-set coaching reminder.
@@ -134,7 +130,7 @@ Camera frame
 
 The fuller observation contract should include exercise, assessed viewpoint, involved joints, confidence, metric, threshold version, and rep/time range. The current prototype stores a smaller derived summary and estimates camera angle when Vision 3D is available; that estimate still needs physical-device validation. Thresholds are product hypotheses awaiting trainer review, not medical constants. The app should suppress a cue if the required joints are missing, a rep is incomplete, the camera moves, another person dominates the frame, or evidence conflicts.
 
-**Viewpoint remains an unvalidated measurement gate.** The side-view rubric uses relative 2D movement and joint visibility; the validation sheet therefore separates actual camera viewpoint from a specialist's suitability judgment and counts measured results on unsuitable views. The [Vision 3D](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) check, on by default, suggests turning when the median is over 30° from profile and refuses only a sustained clearly frontal view at 75° or more. Those cutoffs were examined on public videos, but need physical iPhone confirmation and expert suitability labels. Labeled front, side, and three-quarter sets must reveal both false refusals and false acceptance.
+**Viewpoint remains an unvalidated measurement gate.** The side-view rubric uses relative 2D movement and joint visibility; the validation sheet therefore separates actual camera viewpoint from a specialist's suitability judgment and counts measured results on unsuitable views. The [Vision 3D](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) check, on by default, suggests turning when the median is over 30° from profile. A sustained frontal view at 75° or more was refused until 15 October; it is now counted without posture advice. Those cutoffs were examined on public videos, but need physical iPhone confirmation and expert suitability labels. Labeled front, side, and three-quarter sets must reveal both false refusals and false acceptance.
 
 **Research sequence after the first build:** benchmark the existing 3D camera-view check on real devices, then compare synchronized Watch accelerometer data with camera-only rep boundaries and tempo. These tests support the README's planned iPhone + Watch experience; neither establishes coaching accuracy without labeled sets and expert review.
 

@@ -221,6 +221,16 @@ nonisolated enum CueKind: String, Codable, Sendable {
     case hipDropIncreased
     case kneeBendIncreased
     case swingIncreased
+    // A fault seen on at least two reps (`FormCheck`), not a change within the set.
+    case pushUpHipsSag
+    case pushUpHipsPike
+    case pushUpDepth
+    case squatChestDrop
+    case squatDepth
+    case lungeTorsoLean
+    case lungeFrontKnee
+    case deadliftKneeBend
+    case deadliftHinge
 }
 
 nonisolated struct Cue: Codable, Equatable {

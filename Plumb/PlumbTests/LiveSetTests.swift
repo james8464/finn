@@ -299,7 +299,8 @@ nonisolated struct LiveSetMonitorTests {
         var cuesPerRep: [Int: Int] = [:]
         for event in result.events {
             switch event {
-            case .fasterThanFirstReps(let rep), .shorterThanFirstReps(let rep): cuesPerRep[rep, default: 0] += 1
+            case .fasterThanFirstReps(let rep), .shorterThanFirstReps(let rep), .formFault(_, let rep):
+                cuesPerRep[rep, default: 0] += 1
             case .repCounted: break
             }
         }

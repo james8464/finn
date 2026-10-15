@@ -60,15 +60,21 @@ nonisolated struct SetWindowTests {
             guard frame.time > 7.0 && frame.time < 8.5 else { return frame }
             return CaptureTraces.frame(time: frame.time, hipY: frame.joints[.leftHip]?.y ?? 0.42, ankleX: 0.51, legs: false)
         }
-        guard case .insufficientView = ExerciseAnalyzer.analyze(capture, as: .squat) else {
-            Issue.record("A 1.5 s gap inside the set must still refuse it")
-            return
-        }
+        // The side rubric still refuses it; the hips, seen throughout, count the six squats.
+        #expect(EvidenceGate.assess(SetWindow.active(capture, requirement: .squat), requirement: .squat).isRejected)
+        #expect(Self.hipCount(capture) == 6)
+    }
+
+    /// Reps counted from the hips, the side rubric having refused the set; nil otherwise.
+    private static func hipCount(_ capture: [PoseFrame]) -> Int? {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(capture, as: .squat),
+              analysis.rubricVersion == ExerciseDefinition.squatTrunk.rubricVersion else { return nil }
+        return analysis.reps.count
     }
 
     /// The athlete stays at the spot, but the ankle is unclear for the last three of eight reps (a
     /// bench, a partner's legs). Those reps are not walking away: the set must not be cut to five
-    /// reps and shown as measured.
+    /// reps and shown as measured from the side. All eight are counted from the hips.
     @Test func repsAtTheSpotWithAnUnclearAnkleAreNotDropped() {
         let reps = CaptureTraces.squats(reps: 8, from: 0).map { frame -> PoseFrame in
             guard frame.time > 10.0 else { return frame }
@@ -78,10 +84,8 @@ nonisolated struct SetWindowTests {
         let capture = reps + CaptureTraces.walkOut(from: 16.0)
         let window = SetWindow.active(capture, requirement: .squat)
         #expect((window.last?.time ?? 0) >= 16.0)
-        guard case .insufficientView = ExerciseAnalyzer.analyze(capture, as: .squat) else {
-            Issue.record("Reps at the spot with the ankle unclear must keep refusing the set")
-            return
-        }
+        #expect(EvidenceGate.assess(window, requirement: .squat).isRejected)
+        #expect(Self.hipCount(capture) == 8)
     }
 
     @Test func firstRepsWithAnUnclearAnkleAreNotDroppedEither() {
@@ -91,10 +95,8 @@ nonisolated struct SetWindowTests {
                                        ankleX: 0.51, legs: true, ankle: false)
         }
         let capture = CaptureTraces.walkIn() + reps
-        guard case .insufficientView = ExerciseAnalyzer.analyze(capture, as: .squat) else {
-            Issue.record("Reps at the spot with the ankle unclear must keep refusing the set")
-            return
-        }
+        #expect(EvidenceGate.assess(SetWindow.active(capture, requirement: .squat), requirement: .squat).isRejected)
+        #expect(Self.hipCount(capture) == 8)
     }
 
     /// The live count works out the set's frames and the athlete's place in each from one pass

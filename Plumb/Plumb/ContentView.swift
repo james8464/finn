@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var observationSpeaker = ObservationSpeaker()
     /// Headphones and a paired Apple Watch; idle unless `connectsAccessories`.
     @State private var accessories = AccessoryMonitor()
+    /// The set in progress on the Lock Screen and in the Dynamic Island (`Widgets/SetLiveActivity.swift`).
+    @State private var liveActivity = SetLiveActivity()
     /// True for the live camera, and for demo input only behind `-plumb-watch-demo`.
     private let connectsAccessories: Bool
     @State private var deleteCandidate: UUID?
@@ -24,8 +26,15 @@ struct ContentView: View {
     @State private var selectedTab: HomeTab = .home
     /// What the camera does, shown once before iOS asks for it.
     @State private var showsCameraPrimer = false
+    /// The first-launch screens (`Onboarding/`), also replayed from Options.
+    @State private var showsOnboarding: Bool
+    /// Badges earned from the saved history (`Badges/`).
+    @State private var badges: BadgeLedger
+    private let preferences: PlumbPreferences
     /// The live rep count, large enough to read from a few steps away, scaled with Dynamic Type.
     @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 88
+    /// Live advice during a set: about half the count's height, so a short phrase fits on one line.
+    @ScaledMetric(relativeTo: .largeTitle) private var liveCueSize: CGFloat = 44
     private var destructiveLabelColor: Color {
         Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -59,7 +68,9 @@ struct ContentView: View {
                     announcer: (any LiveAnnouncing)? = nil,
                     fitness: (any FitnessWorkoutSaving)? = nil,
                     health: (any HealthReading)? = nil,
-                    connectsAccessories: Bool = false) {
+                    connectsAccessories: Bool = false,
+                    badgeStore: (any BadgeStoring)? = nil,
+                    showsOnboarding: Bool? = nil) {
         _model = State(initialValue: WorkoutSessionModel(source: source, store: store,
                                                          narrator: narrator,
                                                          exerciseClassifier: exerciseClassifier,
@@ -68,6 +79,10 @@ struct ContentView: View {
                                                          fitness: fitness,
                                                          health: health))
         self.connectsAccessories = connectsAccessories
+        self.preferences = preferences
+        _badges = State(initialValue: BadgeLedger(store: badgeStore ?? LocalBadgeStore()))
+        // Demo and recorded input skip the welcome unless asked for it (`-plumb-ui-onboarding`).
+        _showsOnboarding = State(initialValue: showsOnboarding ?? !preferences.onboardingCompleted)
     }
 
     /// Demo or recorded input, marked as such on the watch too.
@@ -96,6 +111,19 @@ struct ContentView: View {
                 destinationPage(destination)
                     .toolbar(.visible, for: .navigationBar)
             }
+            #if DEBUG
+            .onAppear {
+                let arguments = ProcessInfo.processInfo.arguments
+                guard route == nil, let index = arguments.firstIndex(of: "-plumb-open"),
+                      arguments.indices.contains(index + 1) else { return }
+                switch arguments[index + 1] {
+                case "coach": route = .coach
+                case "options": route = .options
+                case "awards": route = .awards
+                default: break
+                }
+            }
+            #endif
         }
         .overlay(alignment: .top) {
             #if DEBUG
@@ -120,6 +148,9 @@ struct ContentView: View {
             UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(stage)
         }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+        // Siri or a shortcut asked for a set or the history; a set in progress is never interrupted.
+        .onChange(of: SiriLaunchRequests.shared.pending, initial: true) { _, _ in applySiriRequest() }
+        .onChange(of: model.stage) { _, _ in applySiriRequest() }
         // Personalize with Health: read again whenever the first screen shows.
         .task(id: model.stage == .ready) {
             if model.stage == .ready { await model.refreshHealth() }
@@ -133,9 +164,38 @@ struct ContentView: View {
             }
             .presentationDetents([.medium, .large])
         }
+        .fullScreenCover(isPresented: $showsOnboarding) {
+            OnboardingView(preferences: preferences) { profile in
+                // The answers take effect now, not at the next launch.
+                model.speaksLive = profile.speaksLive
+                if let first = profile.favoriteExercises.first { model.selectedExercise = first }
+                showsOnboarding = false
+            }
+        }
+        // Badges follow the saved history: checked at launch and after every saved set.
+        .onChange(of: model.history, initial: true) { _, history in
+            badges.update(history: history)
+        }
         .task {
+            liveActivity.attach(to: model, demoInput: usesSyntheticInput)
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("-plumb-ui-live-activity-sample") {
+                liveActivity.showSample()
+            }
+            #endif
             guard connectsAccessories else { return }
             accessories.start(model: model, demoInput: usesSyntheticInput)
+        }
+        // The home screen widget opens the camera on its exercise (`plumb://start-set`).
+        .onOpenURL { url in
+            guard let link = PlumbDeepLink(url), case .startSet(let key) = link,
+                  model.stage == .ready || model.stage == .result else { return }
+            if let key, let exercise = ExerciseKind(rawValue: key) { model.selectedExercise = exercise }
+            if !usesSyntheticInput && CameraPermission.notAskedYet {
+                showsCameraPrimer = true
+            } else {
+                Task { await model.startPreview() }
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active && connectsAccessories { accessories.refreshHeadphones() }
@@ -162,12 +222,36 @@ struct ContentView: View {
                  : "Its measured set summaries will be removed from this iPhone.")
         }
         .alert("Delete all local data?", isPresented: $deleteAllRequested) {
-            Button("Delete all data", role: .destructive) { model.deleteAllData() }
+            Button("Delete all data", role: .destructive) {
+                model.deleteAllData()
+                badges.reset()
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text(model.leavesHealthWorkouts
                  ? "This removes saved sessions and any recovered history backups from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
                  : "This removes saved sessions and any recovered history backups from this iPhone.")
+        }
+    }
+
+    /// Carries out what Siri asked ("Start a squat set in Plumb", "Show my history in Plumb") once the
+    /// model can take it; otherwise the request waits for the next stage change.
+    private func applySiriRequest() {
+        guard let request = SiriLaunchRequests.shared.pending,
+              SiriLaunchRequests.canApply(request, at: model.stage) else { return }
+        SiriLaunchRequests.shared.pending = nil
+        switch request {
+        case .startSet(let exercise):
+            route = nil
+            observationSpeaker.stop()
+            model.selectedExercise = exercise
+            if !usesSyntheticInput && CameraPermission.notAskedYet {
+                showsCameraPrimer = true
+            } else {
+                Task { await model.startPreview() }
+            }
+        case .showHistory:
+            route = .history
         }
     }
 
@@ -182,18 +266,23 @@ struct ContentView: View {
         Group {
             switch selectedTab {
             case .home:
-                DashboardView(history: model.history, exercise: model.selectedExercise) { route = $0 }
+                DashboardView(history: model.history, exercise: model.selectedExercise,
+                              badges: badges.earned) { route = $0 }
             case .workout:
                 workoutSetup
-            case .coach, .posture:
-                UnfinishedPage(title: selectedTab.rawValue, symbol: selectedTab.symbol)
+            case .coach:
+                CoachView(history: model.history)
+            case .posture:
+                // The sets Plumb measured, with what it noticed in each: posture lives in the history.
+                historyList(title: "Posture", exercise: nil)
+                    .scrollContentBackground(.hidden)
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             HomeTabBar(selection: $selectedTab)
         }
         .background { HomeBackdrop() }
-        .toolbar(selectedTab == .workout ? .visible : .hidden, for: .navigationBar)
+        .toolbar(selectedTab == .workout || selectedTab == .posture ? .visible : .hidden, for: .navigationBar)
         .environment(\.colorScheme, .dark)
         .preferredColorScheme(.dark)
     }
@@ -203,6 +292,7 @@ struct ContentView: View {
         case .history: historyPage
         case .options: optionsPage
         case .privacy: privacyPage
+        case .coach: CoachView(history: model.history)
         case .lastWorkout:
             if let last = model.history.first {
                 historyDetail(last)
@@ -212,10 +302,12 @@ struct ContentView: View {
                     .navigationTitle("Last workout")
             }
         case .account: accountPage
-        case .posture: UnfinishedPage(title: "Posture", symbol: "figure.walk")
-        case .weights: UnfinishedPage(title: "Weights", symbol: "dumbbell")
-        case .awards: UnfinishedPage(title: "Awards", symbol: "trophy")
-        case .plus: UnfinishedPage(title: "Plumb+", symbol: "sparkles")
+        case .posture: historyList(title: "Posture", exercise: nil)
+        case .weights: historyList(title: "Best set", exercise: model.selectedExercise)
+        case .awards: BadgesView(ledger: badges)
+        // The subscription does not exist yet (1.1): the banner is hidden, and its route lands on
+        // the account page rather than on a placeholder.
+        case .plus: accountPage
         }
     }
 
@@ -240,7 +332,8 @@ struct ContentView: View {
                 }
             }
             Section("Account") {
-                Text("Not made yet").foregroundStyle(.secondary)
+                Text("Plumb needs no account: there is no server, nothing to sign in to, and nothing to sync.")
+                    .foregroundStyle(.secondary)
             }
         }
         .navigationTitle("Account settings")
@@ -272,7 +365,7 @@ struct ContentView: View {
                     ExerciseChips(selection: Binding(
                         get: { model.selectedExercise },
                         set: { model.selectedExercise = $0 }
-                    ))
+                    ), order: preferences.exerciseOrder)
                     .padding(.horizontal, -20)
                     .contentMargins(.horizontal, 20, for: .scrollContent)
                     .accessibilityElement(children: .contain)
@@ -350,6 +443,12 @@ struct ContentView: View {
                 Menu {
                     Button { route = .history } label: {
                         Label("History", systemImage: "clock.arrow.circlepath")
+                    }
+                    Button { route = .coach } label: {
+                        Label("Coach", systemImage: "bubble.left.and.text.bubble.right")
+                    }
+                    Button { route = .awards } label: {
+                        Label("Awards", systemImage: "rosette")
                     }
                     Button { route = .options } label: {
                         Label("Options", systemImage: "slider.horizontal.3")
@@ -558,6 +657,17 @@ struct ContentView: View {
     private var privacyPage: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 16) {
+                    privacyFact("video.slash", "No video is saved",
+                                "Frames are analyzed on this iPhone, then dropped.")
+                    privacyFact("icloud.slash", "No account, no upload",
+                                "Plumb has no server. Set summaries are saved on this iPhone.")
+                    privacyFact("trash", "Yours to delete",
+                                "Remove one session or everything in History.")
+                }
+                .padding(18)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Camera").font(.headline).accessibilityAddTraits(.isHeader)
                     Text("Video is processed on this iPhone and never saved.")
@@ -616,16 +726,37 @@ struct ContentView: View {
         .navigationBarTitleDisplayMode(.large)
     }
 
+    /// One plain fact at the top of Privacy.
+    private func privacyFact(_ symbol: String, _ title: String, _ detail: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: symbol)
+                .font(.title3)
+                .frame(width: 30)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.headline)
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(PlumbStyle.supportingText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
     private var optionsPage: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Exercise recognition").font(.headline).accessibilityAddTraits(.isHeader)
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Exercise recognition").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     if model.recognitionMethod != .unavailable {
                         Toggle("Recognize the exercise automatically", isOn: Binding(
                             get: { model.recognizesExercise },
                             set: { model.recognizesExercise = $0 }
                         ))
+                        .font(.body)
+                        .foregroundStyle(Color.primary)
+                        .tint(Color(uiColor: .systemGreen))
                         .frame(minHeight: 44)
                         .accessibilityIdentifier("options.recognizeExercise")
                     }
@@ -642,28 +773,37 @@ struct ContentView: View {
                             get: { model.usesTrainedModel },
                             set: { model.usesTrainedModel = $0 }
                         ))
+                        .font(.body)
+                        .foregroundStyle(Color.primary)
+                        .tint(Color(uiColor: .systemGreen))
                         .frame(minHeight: 44)
                         .accessibilityIdentifier("options.useTrainedModel")
                     }
                 }
-                Divider()
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Camera angle").font(.headline).accessibilityAddTraits(.isHeader)
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Camera angle").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Check the camera angle in 3D", isOn: Binding(
                         get: { model.checksCameraAngle },
                         set: { model.checksCameraAngle = $0 }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.checkCameraAngle")
-                    Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. It only refuses a set when you clearly face the camera, or face away, for several seconds. If it asks you to turn while your side already faces the camera, switch this off.")
+                    Text("On supported iPhones, Plumb estimates your body’s 3D position to tell a side view from a front or angled one. When you are a little turned, it suggests turning and still counts your reps. When you clearly face the camera, or face away, it still counts your reps but gives no posture advice. If it asks you to turn while your side already faces the camera, switch this off.")
                 }
-                Divider()
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Hands-free").font(.headline).accessibilityAddTraits(.isHeader)
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Hands-free").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Start and stop sets for me", isOn: Binding(
                         get: { model.handsFree },
                         set: { model.handsFree = $0 }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.handsFree")
                     Text("Once you hold still in position for a moment, Plumb counts down and starts the set. It ends the set when you walk back to your iPhone, or when you stop moving after your reps. Start set and Stop set still work.")
@@ -671,13 +811,16 @@ struct ContentView: View {
                         get: { model.speaksLive },
                         set: { model.speaksLive = $0 }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .accessibilityIdentifier("options.speaksLive")
                     Text("Plumb says the countdown, each counted rep, and when a rep is clearly faster or shorter than your first reps of the set. It uses your AirPods or other headphones when they are connected, otherwise the iPhone speaker.")
                 }
-                Divider()
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Apple Fitness").font(.headline).accessibilityAddTraits(.isHeader)
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Apple Fitness").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Save workouts to Apple Fitness", isOn: Binding(
                         get: { model.savesToFitness },
                         set: { isOn in
@@ -686,6 +829,9 @@ struct ContentView: View {
                             if isOn { Task { await model.requestFitnessAccess() } }
                         }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .disabled(!model.offersFitness)
                     .accessibilityIdentifier("options.savesToFitness")
@@ -696,14 +842,17 @@ struct ContentView: View {
                             .accessibilityIdentifier("options.fitnessNote")
                     }
                 }
-                Divider()
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Personalize with Health").font(.headline).accessibilityAddTraits(.isHeader)
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Personalize with Health").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Toggle("Use my Health data", isOn: Binding(
                         get: { model.personalizesWithHealth },
                         // Permission in context: Health asks for each type when the person turns this on.
                         set: { isOn in Task { await model.setPersonalizesWithHealth(isOn) } }
                     ))
+                    .font(.body)
+                    .foregroundStyle(Color.primary)
+                    .tint(Color(uiColor: .systemGreen))
                     .frame(minHeight: 44)
                     .disabled(!model.offersHealthPersonalization)
                     .accessibilityIdentifier("options.personalizesWithHealth")
@@ -722,12 +871,32 @@ struct ContentView: View {
                         .accessibilityElement(children: .combine)
                     }
                 }
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
+                    Text("The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your answers set the order of the exercises and how the coach talks to you.")
+                    Button("Replay the welcome") { showsOnboarding = true }
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(Color.primary)
+                        .frame(minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .accessibilityIdentifier("options.replayOnboarding")
+                }
+                .optionCard()
+                #if DEBUG
+                // Coach demo key and engine switch; absent from the Release build.
+                CoachDeveloperSection()
+                    .optionCard()
+                #endif
             }
-            .font(.body)
+            .font(.subheadline)
+            .foregroundStyle(PlumbStyle.supportingText)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(24)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
         }
         .scrollIndicators(.hidden)
+        .background(HomeStyle.background)
         .navigationTitle("Options")
         .navigationBarTitleDisplayMode(.large)
     }
@@ -814,16 +983,8 @@ struct ContentView: View {
                         .controlSize(.large)
                         .tint(.white)
                 } else if model.stage == .capturing {
+                    liveCue
                     liveCount
-                    if let caption = model.liveCaption {
-                        Text(caption)
-                            .font(.subheadline.weight(.semibold))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(.black.opacity(0.68), in: Capsule())
-                            .accessibilityIdentifier("capture.liveCaption")
-                    }
                     if let startedAt = model.captureStartedAt {
                         TimelineView(.periodic(from: startedAt, by: 1)) { timeline in
                             let seconds = max(0, Int(timeline.date.timeIntervalSince(startedAt)))
@@ -888,6 +1049,26 @@ struct ContentView: View {
         .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("capture.handsFree")
+    }
+
+    /// The latest live advice, such as "Sit lower", in large dark type on white so it reads from two or
+    /// three metres away. It always takes the same place, above the count, and the slot stays empty
+    /// until there is something to say, so the count never moves.
+    private var liveCue: some View {
+        Text(model.liveCaption ?? " ")
+            .font(.system(size: liveCueSize, weight: .heavy, design: .rounded))
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.6)
+            .foregroundStyle(.black)
+            .padding(.horizontal, 22)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, minHeight: liveCueSize * 1.6)
+            .background(.white, in: RoundedRectangle(cornerRadius: 22))
+            .opacity(model.liveCaption == nil ? 0 : 1)
+            .animation(.snappy, value: model.liveCaption)
+            .accessibilityHidden(model.liveCaption == nil)
+            .accessibilityIdentifier("capture.liveCaption")
     }
 
     /// The reps counted so far, readable from where the person stands.
@@ -983,6 +1164,9 @@ struct ContentView: View {
                 }
                 Text(resultTitle)
                     .font(.largeTitle.bold())
+                if !badges.justEarned.isEmpty {
+                    BadgeUnlockCard(badges: badges.justEarned) { route = .awards }
+                }
                 if model.endedEarly {
                     Text("The camera stopped during the set. Plumb reviewed the part it captured.")
                         .font(.footnote)
@@ -1056,7 +1240,7 @@ struct ContentView: View {
                             } else {
                                 Text(cue.observation)
                                     .font(.title3.weight(.semibold))
-                                Text("Observed in reps \(cue.repNumbers.map(String.init).joined(separator: " and ")).")
+                                Text("Observed in \(FormChecks.list(cue.repNumbers)).")
                                     .font(.subheadline)
                                     .foregroundStyle(PlumbStyle.supportingText)
                                 nextAction(cue.nextAction)
@@ -1286,8 +1470,15 @@ struct ContentView: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    private var historyPage: some View {
-        List {
+    private var historyPage: some View { historyList(title: "History", exercise: nil) }
+
+    /// The saved sessions, every one or only those with a set of `exercise`.
+    private func historyList(title: String, exercise: ExerciseKind?) -> some View {
+        let sessions = exercise.map { kind in
+            model.history.filter { $0.sets.contains { $0.exercise == kind } }
+        } ?? model.history
+        let exerciseName = exercise?.definition.copy.name.lowercased()
+        return List {
             if model.historyIssue == .corrupted {
                 Section {
                     Text("Couldn’t read saved history").font(.headline)
@@ -1305,12 +1496,27 @@ struct ContentView: View {
                         .foregroundStyle(PlumbStyle.supportingText)
                     Button("Try again") { model.retryHistory() }
                 }
-            } else if model.history.isEmpty {
-                Text("No saved sessions yet.")
-                    .foregroundStyle(PlumbStyle.supportingText)
+            } else if sessions.isEmpty {
+                Section {
+                    VStack(spacing: 10) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.largeTitle)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .accessibilityHidden(true)
+                        Text(exerciseName.map { "No \($0) sets saved yet." } ?? "No saved sessions yet.")
+                            .font(.headline)
+                        Text(exerciseName.map { "Finish a \($0) set and it shows up here, with its reps and what Plumb noticed." }
+                             ?? "Finish a set and it shows up here, with its reps and what Plumb noticed.")
+                            .font(.subheadline)
+                            .foregroundStyle(PlumbStyle.supportingText)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 24)
+                }
             } else {
                 Section("Saved sessions") {
-                    ForEach(model.history) { session in
+                    ForEach(sessions) { session in
                         HStack(spacing: 12) {
                             NavigationLink { historyDetail(session) } label: {
                                 VStack(alignment: .leading, spacing: 4) {
@@ -1348,7 +1554,7 @@ struct ContentView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("History")
+        .navigationTitle(title)
     }
 
     private func historyDetail(_ session: WorkoutSessionSummary) -> some View {

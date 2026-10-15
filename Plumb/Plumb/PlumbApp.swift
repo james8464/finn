@@ -45,22 +45,33 @@ struct PlumbApp: App {
                                     .contains("-plumb-ui-hands-free")),
                             announcer: ProcessInfo.processInfo.arguments
                                 .contains("-plumb-ui-hands-free") ? LiveAnnouncer() : nil,
-                            connectsAccessories: Self.mirrorsDemoOnWatch)
+                            connectsAccessories: Self.mirrorsDemoOnWatch,
+                            // `-plumb-ui-badges-demo` seeds a few earned badges; `-plumb-ui-onboarding`
+                            // shows the welcome screens. Both for headless screenshots.
+                            badgeStore: MemoryBadgeStore(ProcessInfo.processInfo.arguments
+                                .contains("-plumb-ui-badges-demo") ? BadgeDemo.sample : []),
+                            showsOnboarding: ProcessInfo.processInfo.arguments.contains("-plumb-ui-onboarding"))
             } else if let path = Self.argument(after: "-plumb-video-file") {
                 ContentView(source: VideoFilePoseSource(url: URL(fileURLWithPath: path),
                                                         recordedPoses: Self.recordedPoses()),
                             store: LocalSessionStore(url: FileManager.default.temporaryDirectory
                                 .appending(path: "PlumbVideo-\(UUID().uuidString)", directoryHint: .isDirectory)
                                 .appending(path: "sessions.json")),
-                            connectsAccessories: Self.mirrorsDemoOnWatch)
+                            connectsAccessories: Self.mirrorsDemoOnWatch,
+                            badgeStore: MemoryBadgeStore(), showsOnboarding: false)
             } else {
-                ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer(),
+                ContentView(source: CameraPoseSource.live(),
+                            store: WidgetSharingSessionStore(base: LocalSessionStore()),
+                            preferences: .app, announcer: LiveAnnouncer(),
                             fitness: HealthKitWorkoutExporter(), health: HealthKitReader(),
-                        connectsAccessories: true)
+                            connectsAccessories: true)
             }
             #else
             // Only live camera sessions can reach Apple Health; demo and recorded input never do.
-            ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer(),
+            // The widget shows only what this store saves.
+            ContentView(source: CameraPoseSource.live(),
+                        store: WidgetSharingSessionStore(base: LocalSessionStore()),
+                        preferences: .app, announcer: LiveAnnouncer(),
                         fitness: HealthKitWorkoutExporter(), health: HealthKitReader(),
                         connectsAccessories: true)
             #endif

@@ -21,9 +21,24 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     case angledView
     /// The joints were clear in only 65 to 80% of the set (`PartialVisibility`).
     case partlyVisible
+    // A form fault seen on at least two reps (`FormCheck`), with the check's own name.
+    case pushUpHipsSag
+    case pushUpHipsPike
+    case pushUpDepth
+    case squatChestDrop
+    case squatDepth
+    case lungeTorsoLean
+    case lungeFrontKnee
+    case deadliftKneeBend
+    case deadliftHinge
 
-    /// Issues of one measured set, from its diagnostics, its observation and its live events.
-    static func issues(diagnostics: MovementDiagnostics?, cue: Cue?, spedUp: Bool) -> [SetIssue] {
+    /// The form check this issue records, if it is one.
+    var formCheck: FormCheck? { FormCheck(rawValue: rawValue) }
+
+    /// Issues of one measured set, from its diagnostics, its change observation (`CueSelector`), its
+    /// form faults and its live events.
+    static func issues(diagnostics: MovementDiagnostics?, cue: Cue?, findings: [FormFinding] = [],
+                       spedUp: Bool) -> [SetIssue] {
         var issues: [SetIssue] = []
         if let diagnostics {
             if diagnostics.shallow > 0 { issues.append(.shallowMovements) }
@@ -36,8 +51,11 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
         case .rangeDecreased?: issues.append(.rangeDropped)
         case .torsoTiltIncreased?, .hipDropIncreased?, .kneeBendIncreased?, .swingIncreased?:
             issues.append(.postureChanged)
-        case nil: break
+        case .pushUpHipsSag?, .pushUpHipsPike?, .pushUpDepth?, .squatChestDrop?, .squatDepth?, .lungeTorsoLean?,
+             .lungeFrontKnee?, .deadliftKneeBend?, .deadliftHinge?, nil:
+            break
         }
+        issues += findings.compactMap { SetIssue(rawValue: $0.check.rawValue) }
         if spedUp { issues.append(.spedUp) }
         return issues
     }
@@ -54,6 +72,9 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
         case .spedUp: "Reps faster than your first ones"
         case .angledView: "Filmed at an angle"
         case .partlyVisible: "Joints not always in view"
+        case .pushUpHipsSag, .pushUpHipsPike, .pushUpDepth, .squatChestDrop, .squatDepth, .lungeTorsoLean,
+             .lungeFrontKnee, .deadliftKneeBend, .deadliftHinge:
+            formCheck?.title ?? ""
         }
     }
 
@@ -71,6 +92,9 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
         case .spedUp: "Keep the pace of your first reps."
         case .angledView: "Turn so your side faces the camera."
         case .partlyVisible: "Keep your whole body in view, with even light."
+        case .pushUpHipsSag, .pushUpHipsPike, .pushUpDepth, .squatChestDrop, .squatDepth, .lungeTorsoLean,
+             .lungeFrontKnee, .deadliftKneeBend, .deadliftHinge:
+            formCheck?.nextAction ?? ""
         }
     }
 }

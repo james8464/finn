@@ -10,25 +10,30 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.account"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.buttons["tab.home"].isSelected)
         XCTAssertFalse(app.staticTexts["42:18"].exists)
+        XCTAssertFalse(app.buttons["home.plus"].exists)
+        XCTAssertFalse(app.staticTexts["Not made yet"].exists)
 
-        for tab in ["coach", "posture"] {
-            app.buttons["tab.\(tab)"].tap()
-            XCTAssertTrue(app.staticTexts["Not made yet"].waitForExistence(timeout: 3))
-            XCTAssertTrue(app.buttons["tab.\(tab)"].isSelected)
-        }
+        app.buttons["tab.coach"].tap()
+        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["tab.coach"].isSelected)
+        app.buttons["tab.posture"].tap()
+        XCTAssertTrue(app.navigationBars["Posture"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["tab.posture"].isSelected)
         app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["Squat"].exists)
         app.buttons["tab.home"].tap()
 
-        for card in ["lastSession", "posture", "weights", "sessions", "awards", "plus"] {
+        for card in ["lastSession", "posture", "weights", "sessions", "awards"] {
             let button = app.buttons["home.\(card)"]
             if !button.isHittable { app.swipeUp() }
             button.tap()
             switch card {
             case "lastSession": XCTAssertTrue(app.staticTexts["No workouts yet"].waitForExistence(timeout: 3))
             case "sessions": XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 3))
-            default: XCTAssertTrue(app.staticTexts["Not made yet"].waitForExistence(timeout: 3))
+            case "posture": XCTAssertTrue(app.navigationBars["Posture"].waitForExistence(timeout: 3))
+            case "weights": XCTAssertTrue(app.navigationBars["Best set"].waitForExistence(timeout: 3))
+            default: XCTAssertTrue(app.navigationBars["Awards"].waitForExistence(timeout: 3))
             }
             app.navigationBars.buttons.element(boundBy: 0).tap()
         }
@@ -74,7 +79,7 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.account"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.buttons["home.account"].isHittable)
         app.buttons["tab.coach"].tap()
-        XCTAssertTrue(app.staticTexts["Not made yet"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
         app.buttons["tab.home"].tap()
         XCTAssertTrue(app.buttons["home.lastSession"].exists)
     }

@@ -10,9 +10,10 @@ nonisolated enum MovementSignal: Equatable, Sendable {
     /// Upward travel of `joint` from its lowest position, divided by its largest distance below
     /// `reference`. Pull-ups use shoulder rise over arm length, with the hands on the bar.
     case verticalRise(joint: JointRole, reference: JointRole)
-    /// Downward travel of the shoulders' midpoint from its highest position, in image widths. Used
-    /// to count push-ups whose elbows and wrists the side-view rubric cannot read, such as a set
-    /// filmed from the front with the phone on the floor.
+    /// Downward travel of the trunk from its highest position. Push-ups whose elbows and wrists the
+    /// side-view rubric cannot read follow the shoulders' midpoint, in image widths; squats whose
+    /// knees and ankles it cannot read follow the hips, in torso lengths. Both count sets filmed
+    /// from the front or with the phone on the floor.
     case shoulderDrop
 
     var joints: [JointRole] {
@@ -134,6 +135,9 @@ nonisolated struct PostureRule: Equatable, Sendable {
         case .kneeBendIncreased: "Knees bending more at the end of the set"
         case .swingIncreased: "Body swinging more at the end of the set"
         case .rangeDecreased: "Range shorter at the end of the set"
+        case .pushUpHipsSag, .pushUpHipsPike, .pushUpDepth, .squatChestDrop, .squatDepth, .lungeTorsoLean,
+             .lungeFrontKnee, .deadliftKneeBend, .deadliftHinge:
+            FormCheck(cueKind: cueKind)?.title ?? ""
         }
     }
 }
@@ -185,6 +189,8 @@ nonisolated struct ExerciseDefinition: Equatable, Sendable {
     /// A depth in words, such as "hips 11% of leg length down" or "elbow bent 28°".
     func formattedDepth(_ value: Double) -> String {
         switch (rangeUnit, signal) {
+        case (_, .shoulderDrop) where kind == .bodyweightSquat:
+            return "hips \(Int((value * 100).rounded()))% of your torso length down"
         case (_, .shoulderDrop):
             return "shoulders \(Int((value * 100).rounded()))% of the picture width down"
         case (.bodyLengthFraction, .verticalRise):
@@ -325,6 +331,31 @@ nonisolated extension ExerciseDefinition {
         classifierLabel: "push_up",
         posture: ExerciseDefinition.pushUp.posture,
         copy: ExerciseDefinition.pushUp.copy
+    )
+
+    /// Squat counted from the hips going down and up, when the side-view rubric cannot read the
+    /// knee and ankle: filmed from the front or at an angle, with the phone low and the feet at the
+    /// picture's edge, or with the athlete stepping out of the picture for a moment. The shoulders
+    /// stand in for the hips when Vision loses them. Heights are in torso lengths, so the phone may
+    /// stand one or four metres away. Not in `all`: `ExerciseAnalyzer` falls back to it, and its
+    /// rep phases follow the set's own travel (`withPhases`). The 0.3 torso lengths below is the
+    /// least travel it accepts, about the hip travel of the side rubric's shallowest rep. A product
+    /// hypothesis checked on real squats (15 October 2026), not a validated standard.
+    static let squatTrunk = ExerciseDefinition(
+        kind: .bodyweightSquat,
+        rubricVersion: "squat-trunk-v1",
+        expectedView: .any,
+        evidence: EvidenceRequirement(joints: [.hip], anchor: .hip),
+        signal: .shoulderDrop,
+        phases: RepPhases(leaveTop: 0.12, reachBottom: 0.3, returnFromBottom: 0.08, backAtTop: 0.08,
+                          minimumDuration: SquatRubric.minimumRepDuration,
+                          maximumDuration: SquatRubric.maximumRepDuration),
+        rangeUnit: .bodyLengthFraction,
+        rangeDisplayScale: 1.2,
+        minimumBodyScale: 0.3,
+        classifierLabel: "squat",
+        posture: ExerciseDefinition.squat.posture,
+        copy: ExerciseDefinition.squat.copy
     )
 
     func withPhases(_ phases: RepPhases) -> ExerciseDefinition {

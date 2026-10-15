@@ -93,6 +93,8 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
     case fasterThanFirstReps(rep: Int)
     /// This rep's range was clearly shorter than the person's first reps.
     case shorterThanFirstReps(rep: Int)
+    /// A form check (`FormCheck`) found its fault again on this rep: at least two reps so far.
+    case formFault(FormCheck, rep: Int)
 
     /// A few words to say aloud, short enough to hear mid-rep.
     func spoken(for definition: ExerciseDefinition) -> String {
@@ -100,6 +102,7 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
         case .repCounted(let count): "\(count)"
         case .fasterThanFirstReps: "Faster than your first reps"
         case .shorterThanFirstReps: definition.copy.liveShorterCue
+        case .formFault(let check, _): check.liveCue
         }
     }
 
@@ -120,12 +123,12 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
         return parts.isEmpty ? nil : parts.joined(separator: ". ")
     }
 
-    /// The line shown on the camera screen.
+    /// The line shown on the camera screen, large enough to read from a few steps away: the same
+    /// few words that are said.
     func caption(for definition: ExerciseDefinition) -> String? {
         switch self {
         case .repCounted: nil
-        case .fasterThanFirstReps(let rep): "Rep \(rep) was faster than your first reps"
-        case .shorterThanFirstReps(let rep): "Rep \(rep): \(definition.copy.rangeNoun) shorter than your first reps"
+        case .fasterThanFirstReps, .shorterThanFirstReps, .formFault: spoken(for: definition)
         }
     }
 }
@@ -167,6 +170,12 @@ nonisolated struct LiveSetMonitor {
     private var lastAnalysisTime = -Double.infinity
     private var lastFasterCue = Int.min / 2
     private var lastShorterCue = Int.min / 2
+    /// The latest analysis, its frames and what it noticed, for the form checks.
+    private var latestAnalysis: SetAnalysis?
+    private var latestFrames: [PoseFrame] = []
+    private var latestDiagnostics: MovementDiagnostics?
+    /// The rep each form fault was last pointed out on.
+    private var lastFormCue: [FormCheck: Int] = [:]
 
     init(definition: ExerciseDefinition) {
         self.definition = definition
@@ -189,6 +198,9 @@ nonisolated struct LiveSetMonitor {
             analysisAccepted = true
             midMovement = diagnostics?.unfinished ?? false
             reps = analysis.reps
+            latestAnalysis = analysis
+            latestFrames = set
+            latestDiagnostics = diagnostics
             // A later analysis can merge or split a rep at the set's edge; the count never goes back.
             while countedReps < reps.count {
                 countedReps += 1
@@ -242,6 +254,10 @@ nonisolated struct LiveSetMonitor {
     private mutating func cues(forRep number: Int) -> [LiveSetEvent] {
         guard reps.indices.contains(number - 1) else { return [] }
         let rep = reps[number - 1]
+        if let fault = formFault(onRep: number) {
+            lastFormCue[fault] = number
+            return [.formFault(fault, rep: number)]
+        }
         var faster = false
         if number >= 4 {
             let first = reps.prefix(3).map(\.duration).sorted()[1]
@@ -260,6 +276,23 @@ nonisolated struct LiveSetMonitor {
             return [.fasterThanFirstReps(rep: number)]
         }
         return []
+    }
+}
+
+extension LiveSetMonitor {
+    /// The first form fault, in advice order, that this rep shows and that has shown on at least
+    /// `FormCheck.minimumFaultyReps` reps so far, not pointed out in the last `cueSpacing` reps. The
+    /// same checks as the result, on the set so far, and silent for a partly visible set, a push-up
+    /// counted from the shoulders, or a person filmed at an angle.
+    fileprivate func formFault(onRep number: Int) -> FormCheck? {
+        guard let analysis = latestAnalysis, latestDiagnostics?.partialVisibility == nil,
+              latestDiagnostics?.countedFromShoulders != true else { return nil }
+        let analysisSoFar = SetAnalysis(reps: Array(analysis.reps.prefix(number)), confidence: analysis.confidence,
+                                        rubricVersion: analysis.rubricVersion)
+        let review = FormChecks.review(analysisSoFar, frames: latestFrames, definition: definition)
+        return review.findings.first { finding in
+            finding.reps.contains(number) && number - (lastFormCue[finding.check] ?? Int.min / 2) >= Self.cueSpacing
+        }?.check
     }
 }
 

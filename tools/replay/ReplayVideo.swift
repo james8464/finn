@@ -22,6 +22,8 @@ enum ReplayVideo {
         let handsFreeReadyAt: Double?
         /// What the app's angle rules say the exercise is, whatever the person chose.
         var recognized: String?
+        /// Start and end of each measured rep, in seconds, to check a count against the video.
+        var repTimes: [[Double]] = []
     }
 
     /// The hands-free path on the same frames: the start readiness, the live count and cues, and
@@ -125,6 +127,9 @@ enum ReplayVideo {
                             handsFreeReadyAt: live.readyAt)
         }
         var finalReport = report
+        if case .analyzed(let analysis) = result, finalReport.status == "measured" {
+            finalReport.repTimes = analysis.reps.map { [($0.startTime * 10).rounded() / 10, ($0.endTime * 10).rounded() / 10] }
+        }
         switch AngleRecognizer.recognize(poses, using: AngleRuleClassifier()) {
         case .recognized(let kind, _): finalReport.recognized = kind.rawValue
         case .uncertain: finalReport.recognized = "uncertain"
