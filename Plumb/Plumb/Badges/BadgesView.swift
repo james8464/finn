@@ -217,4 +217,3 @@ struct BadgeDetailView: View {
         .accessibilityIdentifier("badges.detail")
     }
 }
-
