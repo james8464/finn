@@ -31,14 +31,32 @@ extension XCUIApplication {
         Thread.sleep(forTimeInterval: 0.5)
     }
 
-    /// Opens History, Coach, Awards, Options or Privacy from the sheet behind the first screen's icon.
+    /// Opens a page from the first screen: Stats (History), Coach and Awards are tabs; Options and
+    /// Privacy sit behind the icon at the top right.
     @MainActor
     func openFromHome(_ page: String) {
+        let tabName = ["History": "Stats", "Stats": "Stats", "Coach": "Coach", "Awards": "Awards"][page]
+        if let tabName {
+            let tab = tabBars.buttons[tabName]
+            XCTAssertTrue(tab.waitForExistence(timeout: 5), "The \(tabName) tab is missing")
+            tab.tap()
+            return
+        }
         let more = buttons["home.more"]
         XCTAssertTrue(more.waitForExistence(timeout: 5), "The first screen's More button is missing")
         more.tap()
         let item = buttons[page].firstMatch
-        XCTAssertTrue(item.waitForExistence(timeout: 3), "\(page) is missing from the More sheet")
+        XCTAssertTrue(item.waitForExistence(timeout: 3), "\(page) is missing from the More menu")
         item.tap()
+    }
+
+    /// Back to the first screen after `openFromHome`.
+    @MainActor
+    func returnHome() {
+        let workout = tabBars.buttons["Workout"]
+        if workout.exists && !workout.isSelected { workout.tap() }
+        if !buttons["home.start"].waitForExistence(timeout: 2) {
+            navigationBars.buttons.element(boundBy: 0).tap()
+        }
     }
 }

@@ -9,13 +9,13 @@ final class HomeUITests: XCTestCase {
         app.launchArguments = ["-plumb-ui-demo"]
         app.launch()
         app.openHome()
-        XCTAssertFalse(app.tabBars.firstMatch.exists, "The first screen has no tab bar")
-        for (page, check) in [("History", "History"), ("Coach", "Coach"), ("Awards", "Awards"),
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5), "The glass tab bar is missing")
+        for (page, check) in [("Stats", "Stats"), ("Coach", "Coach"), ("Awards", "Awards"),
                               ("Options", "Options"), ("Privacy", "Privacy")] {
             app.openFromHome(page)
             XCTAssertTrue(app.navigationBars[check].waitForExistence(timeout: 5), page)
             if page == "Coach" { XCTAssertTrue(app.textFields["coach.field"].exists) }
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            app.returnHome()
             XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 5), "Back from \(page)")
         }
     }
@@ -53,6 +53,9 @@ final class HomeUITests: XCTestCase {
         let line = app.buttons["home.progress"]
         XCTAssertTrue(line.waitForExistence(timeout: 5))
         XCTAssertTrue(line.label.contains("this week"), line.label)
+        line.tap()
+        XCTAssertTrue(app.navigationBars["Stats"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Saved sessions"].waitForExistence(timeout: 5))
     }
 
     @MainActor
