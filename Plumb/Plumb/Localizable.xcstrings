@@ -4209,29 +4209,29 @@
       }
     },
     ", with no pattern flagged by Plumb's current checks." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ", sans écart signalé par les vérifications actuelles de Plumb."
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", sans écart signalé par les vérifications actuelles de Plumb."
           }
         },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ", every joint clear, no pattern to correct."
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", with no pattern flagged by Plumb's current checks."
           }
         },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ", every joint clear, no pattern to correct."
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", with no pattern flagged by Plumb's current checks."
           }
         },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ", todas las articulaciones claras, nada que corregir."
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ", sin patrones señalados por las comprobaciones actuales de Plumb."
           }
         }
       }
@@ -4742,29 +4742,29 @@
       }
     },
     "A measured set of %lld reps or more with no pattern flagged by Plumb's current checks." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une série mesurée d’au moins %lld répétitions, sans écart signalé par les vérifications actuelles de Plumb."
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une série mesurée d’au moins %lld répétitions, sans écart signalé par les vérifications actuelles de Plumb."
           }
         },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A fully visible set of %lld reps or more with no observation to correct."
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A measured set of %lld reps or more with no pattern flagged by Plumb's current checks."
           }
         },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A fully visible set of %lld reps or more with no observation to correct."
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A measured set of %lld reps or more with no pattern flagged by Plumb's current checks."
           }
         },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una serie totalmente visible de %lld repeticiones o más, sin nada que corregir."
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una serie medida de %lld repeticiones o más sin patrones señalados por las comprobaciones actuales de Plumb."
           }
         }
       }
@@ -13758,29 +13758,29 @@
       }
     },
     "No flagged pattern" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun écart signalé"
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun écart signalé"
           }
         },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing to fix"
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No flagged pattern"
           }
         },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing to fix"
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No flagged pattern"
           }
         },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nada que corregir"
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin patrones señalados"
           }
         }
       }
@@ -25934,6 +25934,174 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elige inglés (Reino Unido), inglés (Estados Unidos), francés o español en Ajustes del iPhone. Plumb usa tu región para las fechas y los números."
+          }
+        }
+      }
+    },
+    "Start with one recorded observation at a time." : {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start with one recorded observation at a time."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start with one recorded observation at a time."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commencez par une observation enregistrée à la fois."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza con una observación registrada cada vez."
+          }
+        }
+      }
+    },
+    "Review your recorded sets and comparisons." : {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review your recorded sets and comparisons."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review your recorded sets and comparisons."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consultez vos séries enregistrées et leurs comparaisons."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisa tus series registradas y sus comparaciones."
+          }
+        }
+      }
+    },
+    "See the rep counts and comparisons Plumb measured." : {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See the rep counts and comparisons Plumb measured."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See the rep counts and comparisons Plumb measured."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consultez les répétitions et comparaisons mesurées par Plumb."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consulta las repeticiones y comparaciones que midió Plumb."
+          }
+        }
+      }
+    },
+    "The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your choices set exercise order and help Coach select relevant saved sets." : {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your choices set exercise order and help Coach select relevant saved sets."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your choices set exercise order and help Coach select relevant saved sets."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les écrans de bienvenue : votre objectif, vos exercices, votre niveau, la voix et où placer votre iPhone. Vos choix définissent l’ordre des exercices et aident Coach à sélectionner les séries enregistrées pertinentes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las pantallas de bienvenida: tu objetivo, tus ejercicios, tu nivel, la voz y dónde colocar el iPhone. Tus elecciones ordenan los ejercicios y ayudan a Coach a seleccionar las series guardadas pertinentes."
+          }
+        }
+      }
+    },
+    "This removes saved sessions, awards and preferences from this iPhone." : {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This removes saved sessions, awards and preferences from this iPhone."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This removes saved sessions, awards and preferences from this iPhone."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela supprime les séances enregistrées, les récompenses et les préférences de cet iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esto elimina las sesiones guardadas, los premios y las preferencias de este iPhone."
+          }
+        }
+      }
+    },
+    "This removes saved sessions, awards and preferences from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app." : {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This removes saved sessions, awards and preferences from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This removes saved sessions, awards and preferences from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela supprime les séances enregistrées, les récompenses et les préférences de cet iPhone. Les entraînements enregistrés dans Apple Santé y restent ; vous pouvez les supprimer dans l’app Santé."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esto elimina las sesiones guardadas, los premios y las preferencias de este iPhone. Los entrenamientos guardados en Salud de Apple permanecen allí; puedes eliminarlos en la app Salud."
           }
         }
       }

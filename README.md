@@ -46,7 +46,7 @@ History stores local summaries, compares compatible sets, identifies a recurring
 
 ### Interface and Coach
 
-Native Summary, Workout, History and Coach tabs keep their navigation state. Summary shows saved activity, recent workouts, the most measured reps for the selected exercise, and earned awards. System text, semantic colours and adaptive layouts support light/dark appearance and larger text. See the [design research](docs/architecture/specs/2026-10-15-native-ui-design.md) and [173-topic HIG review](docs/design/hig-ui-coverage.md).
+The Home, Posture, Coach and Workout tabs keep their navigation state. Home shows recent sessions, measured progress and awards. Posture shows looping illustrated exercise movements, short cues and comparisons with eligible saved measurements. The illustrations are guidance, not validated video of a person. System text and adaptive layouts support larger text. See the [design research](docs/architecture/specs/2026-10-15-native-ui-design.md) and [HIG review](docs/design/hig-ui-coverage.md).
 
 First launch asks for a goal, experience level, favourite exercises, and spoken feedback preference; these choices stay on the iPhone. Awards mark measured milestones, including a set with no pattern flagged by Plumb's current checks; they do not certify perfect form.
 
