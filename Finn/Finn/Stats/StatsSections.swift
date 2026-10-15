@@ -243,10 +243,8 @@ struct ExerciseStatsCard: View {
                     "\($0.date.formatted(date: .abbreviated, time: .omitted)): \($0.reps)"
                 }.joined(separator: "; "))
             }
-            Text("Tempo \(facts.tempo.formatted(.number.precision(.fractionLength(1)))) s per rep · median \(definition.copy.rangeNoun) \(definition.formattedRange(facts.medianRange))")
-                .font(.footnote)
-                .monospacedDigit()
-                .foregroundStyle(HomeStyle.supportingText)
+            WrappingText(text: String(localized: "Tempo \(facts.tempo.formatted(.number.precision(.fractionLength(1)))) s per rep · median \(definition.copy.rangeNoun) \(definition.formattedRange(facts.medianRange))"),
+                         style: .footnote, color: .label.withAlphaComponent(0.72))
         }
         .padding(.vertical, 4)
         .accessibilityIdentifier("stats.exercise.\(facts.kind.rawValue)")

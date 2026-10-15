@@ -52,13 +52,7 @@ struct ContentView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 64
     /// Live advice during a set: a short order that fits on one line and reads from three metres.
     @ScaledMetric(relativeTo: .largeTitle) private var liveCueSize: CGFloat = 44
-    private var destructiveLabelColor: Color {
-        Color(uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 1, green: 69 / 255, blue: 58 / 255, alpha: 1)
-                : UIColor(red: 198 / 255, green: 40 / 255, blue: 40 / 255, alpha: 1)
-        })
-    }
+    private let destructiveLabelColor = Color(red: 1, green: 69 / 255, blue: 58 / 255)
     #if DEBUG
     @ScaledMetric(relativeTo: .body) private var demoLabelSize = 12.0
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") }
@@ -262,7 +256,7 @@ struct ContentView: View {
                         .navigationDestination(item: $sessionRoute) { destinationPage($0) }
                 }
                 .background(HomeStyle.background)
-                .preferredColorScheme(pageColorScheme)
+                .preferredColorScheme(.dark)
                 .interactiveDismissDisabled()
                 .onAppear { UIApplication.shared.isIdleTimerDisabled = Self.keepsScreenOn(model.stage) }
             }
@@ -291,7 +285,7 @@ struct ContentView: View {
         }
         #endif
         .tint(HomeStyle.accent)
-        .preferredColorScheme(pageColorScheme)
+        .preferredColorScheme(.dark)
     }
 
     /// Carries out what Siri asked ("Start a squat set in Finn", "Show my history in Finn") once the
@@ -378,10 +372,10 @@ struct ContentView: View {
                 }
             }
             if !keyboardVisible && model.stage == .ready {
-                HomeTabBar(selection: $selectedTab, dashboardAppearance: selectedTab == .home && route == nil)
+                HomeTabBar(selection: $selectedTab)
             }
         }
-        .background((pageColorScheme == .dark ? Color(white: 0.035) : AppPageStyle.background).ignoresSafeArea())
+        .background(Color(white: 0.035).ignoresSafeArea())
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             keyboardVisible = true
         }
@@ -497,15 +491,6 @@ struct ContentView: View {
         #else
         systemReduceMotion
         #endif
-    }
-
-    private var pageColorScheme: ColorScheme? {
-        #if DEBUG
-        let arguments = ProcessInfo.processInfo.arguments
-        if arguments.contains("-finn-ui-light") { return .light }
-        if arguments.contains("-finn-ui-dark") { return .dark }
-        #endif
-        return selectedTab == .home && route == nil && model.stage == .ready ? .dark : nil
     }
 
     private var workoutSetup: some View {
@@ -902,7 +887,7 @@ struct ContentView: View {
     }
 
     /// One plain fact at the top of Privacy.
-    private func privacyFact(_ symbol: String, _ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
+    private func privacyFact(_ symbol: String, _ title: String.LocalizationValue, _ detail: String.LocalizationValue) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: symbol)
                 .font(.title3)
@@ -910,11 +895,8 @@ struct ContentView: View {
                 .frame(width: 28)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.headline)
-                Text(detail)
-                    .font(.subheadline)
-                    .foregroundStyle(FinnStyle.supportingText)
-                    .fixedSize(horizontal: false, vertical: true)
+                WrappingText(text: String(localized: title), style: .headline)
+                WrappingText(text: String(localized: detail), style: .subheadline, color: .label.withAlphaComponent(0.72))
             }
         }
         .accessibilityElement(children: .combine)

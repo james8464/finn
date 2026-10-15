@@ -1,18 +1,30 @@
 import XCTest
 import UIKit
 
-/// Captures supporting screens in both appearances and verifies controls after branch consolidation.
+/// Captures dark-only supporting screens and verifies controls after branch consolidation.
 final class PresentationReviewUITests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = false }
 
-    @MainActor func testSupportingPagesInBothAppearances() throws {
-        for appearance in ["light", "dark"] {
+    @MainActor func testSupportingPagesInDarkAppearance() throws {
+        for appearance in ["dark"] {
             for page in ["workout", "options", "privacy", "coach", "awards", "history", "posture"] {
                 let app = XCUIApplication()
-                app.launchArguments = ["-finn-ui-demo", "-finn-ui-\(appearance)", "-finn-open", page]
+                app.launchArguments = ["-finn-ui-demo", "-finn-open", page]
                 app.launch()
                 if page == "posture" { app.selectTab("Posture") }
                 XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 8))
+                // The runner sets the simulator to light: the app must still render dark.
+                let screenshot = try XCTUnwrap(app.screenshot().image.cgImage)
+                var pixel = [UInt8](repeating: 0, count: 4)
+                try pixel.withUnsafeMutableBytes { buffer in
+                    let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: 1, height: 1,
+                        bitsPerComponent: 8, bytesPerRow: 4, space: CGColorSpaceCreateDeviceRGB(),
+                        bitmapInfo: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue))
+                    let sample = try XCTUnwrap(screenshot.cropping(to: CGRect(x: 3, y: screenshot.height / 3, width: 1, height: 1)))
+                    context.draw(sample, in: CGRect(x: 0, y: 0, width: 1, height: 1))
+                }
+                XCTAssertLessThan(Int(pixel[0]) + Int(pixel[1]) + Int(pixel[2]), 180,
+                                  "\(page) must remain dark with light system appearance")
                 try save("\(page)-\(appearance)")
                 if page == "workout" { XCTAssertTrue(app.buttons["home.start"].isHittable) }
                 if page == "coach" { XCTAssertTrue(app.textFields["coach.field"].isHittable) }
@@ -23,7 +35,7 @@ final class PresentationReviewUITests: XCTestCase {
 
     @MainActor func testMeasuredResultChartDrawsBars() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["-finn-ui-demo", "-finn-ui-light"]
+        app.launchArguments = ["-finn-ui-demo"]
         app.launch()
         app.openWorkoutTab()
         app.buttons["home.start"].tap()

@@ -25,7 +25,7 @@ struct WrappingText: UIViewRepresentable {
             ? .forceRightToLeft : .forceLeftToRight
         let traits = label.traitCollection.modifyingTraits {
             $0.preferredContentSizeCategory = UIContentSizeCategory(context.environment.dynamicTypeSize)
-            $0.userInterfaceStyle = context.environment.colorScheme == .dark ? .dark : .light
+            $0.userInterfaceStyle = .dark
         }
         label.textColor = color.resolvedColor(with: traits)
         let font = UIFont.preferredFont(forTextStyle: style, compatibleWith: traits)
