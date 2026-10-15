@@ -6,20 +6,32 @@ nonisolated struct PostureGuideEvidence {
     let measurements: [FormMeasurement]
     let flagged: [FormMeasurement]
     let trends: [FormTrendChange]
+    let movementIssue: SetIssue?
 
     static func make(for exercise: ExerciseKind, history: [WorkoutSessionSummary]) -> Self {
         let sets = history.flatMap(\.sets).filter { $0.exercise == exercise }
             .sorted { $0.capturedAt > $1.capturedAt }
         guard let latest = sets.first else {
-            return Self(latest: nil, measurements: [], flagged: [], trends: [])
+            return Self(latest: nil, measurements: [], flagged: [], trends: [], movementIssue: nil)
         }
         let measurements = FormTrend.eligibleMeasurements(in: latest)
         let flagged = measurements.filter {
             $0.faulty >= FormCheck.minimumFaultyReps &&
                 Double($0.faulty) / Double($0.judged) >= FormCheck.minimumFaultyShare
         }
+        let issue: SetIssue? = if latest.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
+                                 latest.partlyVisible != true {
+            (latest.issues ?? []).first { issue in
+                switch issue {
+                case .rangeDropped, .postureChanged, .shallowMovements, .outsideTempo, .spedUp:
+                    true
+                default: false
+                }
+            }
+        } else { nil }
         return Self(latest: latest, measurements: measurements, flagged: flagged,
-                    trends: FormTrend.compareLatest(to: latest, among: sets.dropFirst()))
+                    trends: FormTrend.compareLatest(to: latest, among: sets.dropFirst()),
+                    movementIssue: issue)
     }
 }
 

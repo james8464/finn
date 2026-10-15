@@ -5,7 +5,7 @@ import Testing
 struct PostureGuideTests {
     private func set(_ exercise: ExerciseKind, at date: Date,
                      measurements: [FormMeasurement]? = nil,
-                     partlyVisible: Bool? = nil) -> SetSummary {
+                     partlyVisible: Bool? = nil, issues: [SetIssue]? = nil) -> SetSummary {
         let reps = (1...6).map {
             RepMetric(number: $0, startTime: Double($0), endTime: Double($0) + 1,
                       relativeRange: 0.4)
@@ -14,7 +14,7 @@ struct PostureGuideTests {
                           analysis: SetAnalysis(reps: reps, confidence: 0.9,
                                                 rubricVersion: "squat-side-v7"),
                           cue: nil, cueResponse: .unanswered, exercise: exercise,
-                          formMeasurements: measurements, partlyVisible: partlyVisible)
+                          issues: issues, formMeasurements: measurements, partlyVisible: partlyVisible)
     }
 
     @Test func usesLatestSetForChosenExercise() {
@@ -43,5 +43,17 @@ struct PostureGuideTests {
         let history = [WorkoutSessionSummary(id: UUID(), startedAt: .now, sets: [current])]
         let evidence = PostureGuideEvidence.make(for: .bodyweightSquat, history: history)
         #expect(evidence.flagged.map(\.check) == [.squatChestDrop])
+    }
+
+    @Test func pullUpUsesMeasuredIssueWithoutClaimingSideViewFormChecks() {
+        let current = set(.pullUp, at: .now, issues: [.rangeDropped])
+        let history = [WorkoutSessionSummary(id: UUID(), startedAt: .now, sets: [current])]
+        let evidence = PostureGuideEvidence.make(for: .pullUp, history: history)
+        #expect(evidence.measurements.isEmpty)
+        #expect(evidence.movementIssue == .rangeDropped)
+        let unclear = set(.pullUp, at: .now, partlyVisible: true, issues: [.rangeDropped])
+        #expect(PostureGuideEvidence.make(for: .pullUp, history: [
+            WorkoutSessionSummary(id: UUID(), startedAt: .now, sets: [unclear])
+        ]).movementIssue == nil)
     }
 }

@@ -136,8 +136,18 @@ struct PostureGuideView: View {
                             .font(.subheadline)
                             .foregroundStyle(DashboardStyle.secondary)
                     }
+                } else if let issue = evidence.movementIssue {
+                    Text("What Plumb noticed")
+                        .font(.subheadline.weight(.semibold))
+                    Text(issue.title(for: exercise.definition))
+                    Text("Try next")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(DashboardStyle.accent)
+                    Text(exercise.definition.copy.nextAction)
                 } else {
-                    Text("No reliable side-view form comparison for this set. Keep your whole body in view and record another set.")
+                    Text(exercise.definition.expectedView == .side
+                         ? String(localized: "No reliable side-view form comparison for this set. Keep your whole body in view and record another set.")
+                         : String(localized: "No specific movement change measured for this set. Keep your whole body in view and record another set."))
                         .font(.subheadline)
                         .foregroundStyle(DashboardStyle.secondary)
                 }

@@ -1,6 +1,62 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "What Plumb noticed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce que Plumb a remarqué"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What Plumb noticed"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What Plumb noticed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo que observó Plumb"
+          }
+        }
+      }
+    },
+    "No specific movement change measured for this set. Keep your whole body in view and record another set.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun changement précis du mouvement mesuré pour cette série. Place tout ton corps dans le cadre et refais une série."
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No specific movement change measured for this set. Keep your whole body in view and record another set."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No specific movement change measured for this set. Keep your whole body in view and record another set."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se midió ningún cambio de movimiento específico en esta serie. Mantén todo el cuerpo en el encuadre y graba otra serie."
+          }
+        }
+      }
+    },
     "Shoulders, hips and heels aligned": {
       "localizations": {
         "fr": {

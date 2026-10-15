@@ -161,6 +161,17 @@ struct CoachTests {
         #expect(answer.text.contains("Série 3 : 8 répétitions, push-up."))
     }
 
+    @Test func spanishFallbackAndSuggestionsSpeakSpanish() async {
+        #expect(CoachLanguage.current(locale: Locale(identifier: "es_ES")) == .spanish)
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: .spanish)
+        let context = CoachContext.make(history: history())
+        let answer = await responder.answer("¿Cómo fue mi serie?", context: context, history: [])
+        #expect(answer.text.contains("Serie"))
+        #expect(answer.text.contains("repeticiones"))
+        let conversation = CoachConversation(history: history(), responder: responder)
+        #expect(conversation.suggestedQuestions.first?.contains("serie") == true)
+    }
+
     // MARK: Simulated engine
 
     @Test func modelSelectionRendersOnlyRecordedSetFacts() async {
@@ -257,6 +268,8 @@ struct CoachTests {
         #expect(!english.contains("Set 3: Push-up"))
         let french = FoundationModelsCoachPrompt.instructions(language: .french)
         #expect(french.contains("For a French question, use \"Série N\""))
+        let spanish = FoundationModelsCoachPrompt.instructions(language: .spanish)
+        #expect(spanish.contains("For a Spanish question, use \"Serie N\""))
         let prompt = FoundationModelsCoachPrompt.prompt(question: "Now?", context: context, history: [
             CoachMessage(role: .person, text: "Earlier question"),
             CoachMessage(role: .coach, text: "Earlier answer", engine: .onDevice),

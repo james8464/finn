@@ -85,6 +85,10 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.buttons["tab.posture"].isSelected)
         XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["posture.exercise.pushUp"].exists)
+        let image = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        image.name = "Posture guide"
+        image.lifetime = .keepAlways
+        add(image)
     }
 
     @MainActor

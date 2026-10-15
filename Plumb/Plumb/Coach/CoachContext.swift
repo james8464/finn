@@ -140,9 +140,14 @@ nonisolated struct CoachContext: Equatable, Sendable {
 nonisolated enum CoachLanguage: Equatable, Sendable {
     case english
     case french
+    case spanish
 
-    static func current(locale: Locale = .current) -> CoachLanguage {
-        locale.language.languageCode?.identifier == "fr" ? .french : .english
+    static func current(locale: Locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? Locale.current.identifier)) -> CoachLanguage {
+        switch locale.language.languageCode?.identifier {
+        case "fr": .french
+        case "es": .spanish
+        default: .english
+        }
     }
 
     /// How a set is named in an answer, so the person and the validator agree.
@@ -150,6 +155,7 @@ nonisolated enum CoachLanguage: Equatable, Sendable {
         switch self {
         case .english: "Set"
         case .french: "Série"
+        case .spanish: "Serie"
         }
     }
 }
@@ -163,6 +169,11 @@ nonisolated enum CoachInstructions {
             return english + """
 
             For a French question, use "Série N" where the saved list says "Set N" (same number).
+            """
+        case .spanish:
+            return english + """
+
+            For a Spanish question, use "Serie N" where the saved list says "Set N" (same number).
             """
         }
     }
@@ -195,10 +206,11 @@ nonisolated enum CoachFallback {
             return .set(number)
         }
         let advice = ["next", "should", "keep in mind", "improve", "work on", "focus", "tip", "advice",
-                      "prochain", "faire quoi", "je dois", "attention", "conseil", "ameliorer", "travailler"]
+                      "prochain", "faire quoi", "je dois", "attention", "conseil", "ameliorer", "travailler",
+                      "siguiente", "mejorar", "consejo", "trabajar", "deberia", "enfocar"]
         if advice.contains(where: text.contains) { return .advice }
         let progress = ["change", "progress", "better", "worse", "evol", "compar", "over time", "trend",
-                        "chang", "progres", "mieux", "moins bien", "au fil"]
+                        "chang", "progres", "mieux", "moins bien", "au fil", "cambio", "mejor", "peor", "evolucion"]
         if progress.contains(where: text.contains) { return .progress }
         return .recap
     }
@@ -209,6 +221,7 @@ nonisolated enum CoachFallback {
             return switch language {
             case .english: "Plumb has no saved set yet, so there is nothing to comment on. Finish a set and come back."
             case .french: "Plumb n'a encore aucune série enregistrée, donc rien à commenter. Finis une série et reviens."
+            case .spanish: "Plumb aún no tiene series guardadas, así que no hay nada que comentar. Termina una serie y vuelve."
             }
         }
         switch intent(of: question) {
@@ -223,6 +236,7 @@ nonisolated enum CoachFallback {
             return switch language {
             case .english: "Plumb has no set \(number) in its last \(context.facts.count) saved sets. " + summary(of: latest, language: language)
             case .french: "Plumb n'a pas de série \(number) parmi ses \(context.facts.count) dernières séries. " + summary(of: latest, language: language)
+            case .spanish: "Plumb no tiene la serie \(number) entre sus últimas \(context.facts.count) series guardadas. " + summary(of: latest, language: language)
             }
         case .recap:
             var lines = [summary(of: latest, language: language)]
@@ -249,6 +263,8 @@ nonisolated enum CoachFallback {
                 lines.append("For your \(name): \(action) That is what Plumb saw on \(setList(numbers, language: language)).")
             case .french:
                 lines.append("Pour tes \(name) : \(action) C'est ce que Plumb a vu sur \(setList(numbers, language: language)).")
+            case .spanish:
+                lines.append("Para tus \(name): \(action) Eso es lo que Plumb observó en \(setList(numbers, language: language)).")
             }
         }
         if lines.isEmpty {
@@ -262,6 +278,10 @@ nonisolated enum CoachFallback {
                 clean.isEmpty
                     ? "Plumb n'a noté aucune action sur tes \(context.facts.count) dernières séries, donc rien à travailler pour l'instant. Continue à mesurer de profil et j'en saurai plus."
                     : "Rien à corriger : Plumb n'a trouvé aucun motif net sur \(setList(clean.map(\.number), language: language)). Garde la même amplitude et le même tempo."
+            case .spanish:
+                clean.isEmpty
+                    ? "Plumb no registró ninguna acción para tus últimas \(context.facts.count) series. Sigue grabando el movimiento y podré decirte más."
+                    : "Plumb no encontró un patrón claro en \(setList(clean.map(\.number), language: language)). Mantén el mismo recorrido y ritmo."
             }
         }
         return lines.joined(separator: " ")
@@ -280,17 +300,20 @@ nonisolated enum CoachFallback {
                 line = switch language {
                 case .english: "\(fact.exerciseName): one set saved, \(first.repCount) reps on \(language.setWord.lowercased()) \(first.number)."
                 case .french: "\(fact.exerciseName) : une seule série enregistrée, \(first.repCount) répétitions sur la série \(first.number)."
+                case .spanish: "\(fact.exerciseName): una serie guardada, \(first.repCount) repeticiones en la serie \(first.number)."
                 }
             } else {
                 line = switch language {
                 case .english: "\(fact.exerciseName): \(first.repCount) reps on set \(first.number), \(last.repCount) on set \(last.number)."
                 case .french: "\(fact.exerciseName) : \(first.repCount) répétitions sur la série \(first.number), \(last.repCount) sur la série \(last.number)."
+                case .spanish: "\(fact.exerciseName): \(first.repCount) repeticiones en la serie \(first.number), \(last.repCount) en la serie \(last.number)."
                 }
             }
             if let comparison = same.last(where: { $0.comparison != nil })?.comparison {
                 let tail = switch language {
                 case .english: " Last camera comparison: \(comparison)."
                 case .french: " Dernière comparaison caméra : \(comparison)."
+                case .spanish: " Última comparación de cámara: \(comparison)."
                 }
                 line += tail
             }
@@ -303,9 +326,14 @@ nonisolated enum CoachFallback {
     static func setList(_ numbers: [Int], language: CoachLanguage) -> String {
         let sorted = Array(Set(numbers)).sorted()
         let word = language.setWord.lowercased()
-        let plural = language == .english ? "sets" : "séries"
-        let and = language == .english ? "and" : "et"
-        let to = language == .english ? "to" : "à"
+        let plural: String
+        let and: String
+        let to: String
+        switch language {
+        case .english: (plural, and, to) = ("sets", "and", "to")
+        case .french: (plural, and, to) = ("séries", "et", "à")
+        case .spanish: (plural, and, to) = ("series", "y", "a")
+        }
         guard let first = sorted.first, let last = sorted.last else { return "" }
         if sorted.count == 1 { return "\(word) \(first)" }
         if sorted.count == 2 { return "\(plural) \(first) \(and) \(last)" }
@@ -320,6 +348,7 @@ nonisolated enum CoachFallback {
             return switch language {
             case .english: "No saved set yet."
             case .french: "Aucune série enregistrée."
+            case .spanish: "Aún no hay series guardadas."
             }
         }
         return summary(of: latest, language: language)
@@ -356,6 +385,21 @@ nonisolated enum CoachFallback {
             }
             if let comparison = fact.comparison {
                 text += " Par rapport à la série d'avant : \(comparison)."
+            }
+            return text
+        case .spanish:
+            var text = "\(label): \(fact.repCount) repeticiones de \(fact.exerciseName.lowercased())."
+            if let observation = fact.observation {
+                text += " Observación registrada: \(observation)"
+            } else if fact.partlyVisible {
+                text += " Las articulaciones no siempre se veían, así que Plumb no dio consejos de postura."
+            } else if !fact.issues.isEmpty {
+                text += " Se observó: \(fact.issues.joined(separator: ", ").lowercased())."
+            } else {
+                text += " Plumb no encontró un patrón claro."
+            }
+            if let comparison = fact.comparison {
+                text += " Frente a la serie anterior: \(comparison)."
             }
             return text
         }
