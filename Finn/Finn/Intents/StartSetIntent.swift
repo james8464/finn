@@ -1,7 +1,7 @@
 import AppIntents
 
 /// "Start a push-up set in Finn": opens the app on the set screen with that exercise chosen. The
-/// camera itself starts only in the app, with its usual permission flow; Siri never films.
+/// camera itself starts only in the app, with its usual permission flow; Siri never films
 struct StartSetIntent: AppIntent {
     static let title: LocalizedStringResource = "Start a Set"
     static let description = IntentDescription(

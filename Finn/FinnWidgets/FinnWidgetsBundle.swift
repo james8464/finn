@@ -1,7 +1,7 @@
 import SwiftUI
 import WidgetKit
 
-/// The widget extension: the last measured set on the home screen, and the set in progress as a
+/// the widget extension: the last measured set on the home screen, and the set in progress as a
 /// Live Activity. Views are in the app's `Widgets/` folder, shared with this target.
 @main
 struct FinnWidgetsBundle: WidgetBundle {
@@ -18,7 +18,7 @@ struct LastSetEntry: TimelineEntry {
     let snapshot: LastSetSnapshot?
 }
 
-/// Reads the App Group once per reload; the app asks for a reload every time the history changes,
+/// reads the App Group once per reload; the app asks for a reload every time the history changes,
 /// so there is no schedule. Without the App Group entitlement the store is nil and the widget shows
 /// its empty line.
 struct LastSetProvider: TimelineProvider {

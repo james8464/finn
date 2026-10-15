@@ -36,7 +36,7 @@ nonisolated struct PoseFrame: Codable, Equatable {
     let time: TimeInterval
     /// People Vision found in the frame, the athlete included.
     let subjectCount: Int
-    /// Vision coordinates normalized to the image: x by its width, y by its height, origin at top left.
+    /// Vision coordinates normalised to the image: x by its width, y by its height, origin at top left.
     /// With `athleteTracking` set, these are the athlete's joints only.
     let joints: [BodyJoint: JointPoint]
     /// Image height divided by width. Joint angles scale y by this so both axes use the same unit.
@@ -49,7 +49,7 @@ nonisolated struct PoseFrame: Codable, Equatable {
     /// Nil for frames from a source that does not follow one person (tests, older recordings);
     /// the evidence gate then refuses sets with someone else in view.
     let athleteTracking: AthleteTracking?
-    /// Everyone else Vision found, for drawing them greyed out. Never analyzed.
+    /// Everyone else Vision found, for drawing them greyed out. Never analysed.
     let bystanders: [[BodyJoint: JointPoint]]?
 
     init(time: TimeInterval, subjectCount: Int, joints: [BodyJoint: JointPoint],
@@ -221,7 +221,7 @@ nonisolated enum CueKind: String, Codable, Sendable {
     case hipDropIncreased
     case kneeBendIncreased
     case swingIncreased
-    // A fault seen on at least two reps (`FormCheck`), not a change within the set.
+// a fault seen on at least two reps (`FormCheck`), not a change within the set.
     case pushUpHipsSag
     case pushUpHipsPike
     case pushUpDepth

@@ -1,6 +1,6 @@
 import XCTest
 
-/// Repeatable visual coverage of the app, using isolated demo data rather than personal history.
+/// repeatable visual coverage of the app, using isolated demo data rather than personal history
 final class InterfaceAccessibilityUITests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = true }
 
@@ -163,14 +163,14 @@ final class InterfaceAccessibilityUITests: XCTestCase {
     }
 
     @MainActor private func check(_ app: XCUIApplication, _ name: String) throws {
-        // Native sheet and navigation animations may outlive the accessibility tree update.
+        // native sheet and navigation animations may outlive the accessibility tree update
         Thread.sleep(forTimeInterval: 2)
         if let path = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] {
             let directory = URL(fileURLWithPath: path, isDirectory: true)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             try XCUIScreen.main.screenshot().pngRepresentation.write(to: directory.appending(path: name + ".png"))
         }
-        // The iOS 27 image scanner also inspects hidden tabs and offscreen scroll content.
+        // the iOS 27 image scanner also inspects hidden tabs and offscreen scroll content
         // Keep the full diagnostic scan available; verify contrast from rendered pixels
         // and PaletteAccessibilityTests instead of treating those reports as proof.
         let fullScan = ProcessInfo.processInfo.environment["FINN_FULL_ACCESSIBILITY_AUDIT"] == "1"

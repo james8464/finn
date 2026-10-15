@@ -1,8 +1,8 @@
 import XCTest
 
-/// Walks the arrival path and saves one full-screen PNG per screen, for design reviews.
+/// walks the arrival path and saves one full-screen PNG per screen, for design reviews
 ///
-/// It runs only when the test runner gets `FINN_CAPTURE_DIR` (pass it to xcodebuild as
+/// it runs only when the test runner gets `FINN_CAPTURE_DIR` (pass it to xcodebuild as
 /// `TEST_RUNNER_FINN_CAPTURE_DIR=/some/folder`), so CI skips it. The set screens use the
 /// Debug demo feed, which shows DEMO INPUT: they show the interface, not a measured set.
 final class ScreenTourUITests: XCTestCase {
@@ -34,8 +34,8 @@ final class ScreenTourUITests: XCTestCase {
         }
     }
 
-    /// The first screen as a new user sees it, what Finn says about the camera, then the
-    /// system permission alert.
+    /// the first screen as a new user sees it, what Finn says about the camera, then the
+    /// system permission alert
     @MainActor
     func test1FirstLaunch() {
         let app = XCUIApplication()
@@ -57,7 +57,7 @@ final class ScreenTourUITests: XCTestCase {
             primer.tap()
         }
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        // The simulator may run in English or French.
+        // the simulator may run in English or French
         let allow = springboard.buttons.matching(NSPredicate(
             format: "(label ==[c] %@ OR label ==[c] %@ OR label ==[c] %@)", "Allow", "OK", "Autoriser")
         ).firstMatch
@@ -160,7 +160,7 @@ final class ScreenTourUITests: XCTestCase {
         save("14-historique")
     }
 
-    /// Live advice during a demo set, as the person sees it from their spot, with demo poses that show
+    /// live advice during a demo set, as the person sees it from their spot, with demo poses that show
     /// a form fault on every rep: the squat's chest drops forward ("Chest up"), the push-up's hips sag
     /// ("Lift your hips"). Each
     /// screen is held for a while after a `ready-` file is written, so it can also be captured from
@@ -193,7 +193,7 @@ final class ScreenTourUITests: XCTestCase {
 
     // MARK: - Helpers
 
-    /// Opens History, Options or Privacy from the first screen's More menu.
+    /// opens History, Options or Privacy from the first screen's More menu
     @MainActor
     private func open(_ app: XCUIApplication, _ label: String) {
         app.buttons["home.more"].tap()
@@ -202,7 +202,7 @@ final class ScreenTourUITests: XCTestCase {
         item.tap()
     }
 
-    /// The whole screen, system sheets included.
+    /// the whole screen, system sheets included
     @MainActor
     private func save(_ name: String) {
         let png = XCUIScreen.main.screenshot().pngRepresentation

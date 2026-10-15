@@ -13,7 +13,7 @@ struct PartialVisibilityTests {
             var joints = frame.joints
             let rep = Int(frame.time / 2.0) + 1
             if let everyNth, index % everyNth == 0 { joints[.leftKnee] = nil }
-            // Two frames out of three without the knee in this rep: short gaps, but mostly unclear.
+// two frames out of three without the knee in this rep: short gaps, but mostly unclear.
             if rep == hiddenRep, index % 3 != 0 { joints[.leftKnee] = nil }
             return PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: joints,
                              athleteTracking: frame.athleteTracking)
@@ -100,7 +100,7 @@ struct PartialVisibilitySessionTests {
                                         preferences: FinnPreferences(defaults: defaults))
         model.recognizesExercise = false
 
-        // A clear set first, then a partly visible one.
+// a clear set first, then a partly visible one.
         await model.startPreview()
         await model.beginSet(countdown: 0)
         for frame in CaptureTraces.squats(reps: 6, from: 0) { source.emit(frame) }

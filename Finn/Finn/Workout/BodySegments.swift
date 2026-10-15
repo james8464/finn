@@ -109,13 +109,13 @@ nonisolated struct BodySegments: Equatable, Sendable {
 
     /// How far the hip sits off the straight line from the shoulder to the ankle (to the knee when the
     /// ankle is not clear), measured square to that line, in torso lengths (shoulder to hip). Positive
-    /// below the line (toward the bottom of the picture: the floor, for a push-up filmed upright),
+    /// below the line (towards the bottom of the picture: the floor, for a push-up filmed upright),
     /// negative above it. Nil when the line is nearly vertical, where "below" means nothing.
     var hipOffsetFromBodyLine: Double? {
         guard let shoulder, let hip, let end = ankle ?? knee, let torso, torso.length > 0 else { return nil }
         let line = Segment(from: shoulder, to: end)
         guard line.length > torso.length, let tilt = line.tiltFromVertical, tilt >= 30 else { return nil }
-        // The normal to the line that points down the picture.
+// the normal to the line that points down the picture.
         var normal = (x: -line.dy / line.length, y: line.dx / line.length)
         if normal.y < 0 { normal = (-normal.x, -normal.y) }
         let distance = (hip.x - shoulder.x) * normal.x + (hip.y - shoulder.y) * normal.y

@@ -1,6 +1,6 @@
 import Foundation
 
-// The messages between Finn on the iPhone and Finn on Apple Watch. The watch target compiles this
+// the messages between Finn on the iPhone and Finn on Apple Watch. The watch target compiles this
 // one file too, so it uses Foundation only and none of the iPhone's workout types. WatchConnectivity
 // carries property-list dictionaries: strings, numbers and booleans here, and never nil.
 

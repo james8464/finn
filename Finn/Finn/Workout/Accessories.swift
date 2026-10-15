@@ -107,7 +107,7 @@ nonisolated enum AccessoryGuide {
 
     static func headphonesLine(status: AccessoryStatus, speaksLive: Bool) -> AccessoryLine? {
         guard status.headphonesConnected else { return nil }
-        // The route says Bluetooth or wired headphones, not which model, so the line does not say AirPods.
+// the route says Bluetooth or wired headphones, not which model, so the line does not say AirPods.
         return AccessoryLine(accessory: .headphones, text: speaksLive
             ? String(localized: "Headphones connected: you will hear each rep.")
             : String(localized: "Headphones connected. Turn on Say reps aloud in Options to hear each rep."))

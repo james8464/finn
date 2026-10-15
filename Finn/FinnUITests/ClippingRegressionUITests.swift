@@ -1,6 +1,6 @@
 import XCTest
 
-/// Isolates the screens reported by the whole-app clipping survey.
+/// isolates the screens reported by the whole-app clipping survey
 final class ClippingRegressionUITests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = true }
 

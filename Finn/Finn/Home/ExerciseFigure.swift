@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A line drawing of one rep of an exercise, seen from the side, for the first screen.
+/// a line drawing of one rep of an exercise, seen from the side, for the first screen
 ///
 /// It is an illustration made from a few joint angles per exercise, not a recording and not a
 /// model of correct technique: it shows what Finn's camera view looks like before the person
@@ -11,16 +11,16 @@ nonisolated struct ExerciseFigure {
         case backToe, backAnkle, backKnee
     }
 
-    /// Body proportions in figure units (about one standing height).
+    /// body proportions in figure units (about one standing height)
     private static let shin = 0.24, thigh = 0.24, torso = 0.30, neck = 0.11
     private static let upperArm = 0.16, forearm = 0.15, foot = 0.09, heel = 0.03
     static let headRadius = 0.052
-    /// Where the hands hold the bar in pull-ups and muscle-ups, with the feet just off the floor.
+    /// where the hands hold the bar in pull-ups and muscle-ups, with the feet just off the floor
     static let barHeight = 1.2
 
     let kind: ExerciseKind
 
-    /// Joint positions, x forward and y up, with the floor at y = 0.
+    /// joint positions, x forward and y up, with the floor at y = 0
     func pose(at phase: Double) -> [Joint: CGPoint] {
         let t = min(1, max(0, phase))
         func mix(_ top: Double, _ bottom: Double) -> Double { top + (bottom - top) * t }
@@ -43,7 +43,7 @@ nonisolated struct ExerciseFigure {
             points[.elbow] = Self.point(points[.shoulder]!, -90, Self.upperArm)
             points[.wrist] = Self.point(points[.elbow]!, -90, Self.forearm)
         case .pushUp:
-            // A straight line from ankle to shoulder; the hands stay where they are on the floor.
+            // a straight line from ankle to shoulder; the hands stay where they are on the floor
             let ankle = CGPoint(x: 0, y: 0.05)
             let body = Self.shin + Self.thigh + Self.torso
             let top = Self.point(ankle, 18.5, body)
@@ -72,7 +72,7 @@ nonisolated struct ExerciseFigure {
             points[.elbow] = Self.point(points[.shoulder]!, -96, Self.upperArm)
             points[.wrist] = Self.point(points[.elbow]!, -84, Self.forearm)
         case .pullUp, .muscleUp:
-            // Hands stay on the bar; the shoulders rise to it (pull-up) or over it (muscle-up).
+            // hands stay on the bar; the shoulders rise to it (pull-up) or over it (muscle-up)
             let bar = Self.barHeight
             let wrist = CGPoint(x: 0, y: bar)
             let hang = CGPoint(x: 0, y: bar - Self.upperArm - Self.forearm)
@@ -82,7 +82,7 @@ nonisolated struct ExerciseFigure {
                 shoulder = CGPoint(x: mix(0, 0.04), y: mix(hang.y, bar - 0.07))
                 lean = mix(-90, -100)
             } else {
-                // The chest passes in front of the bar, then the arms press to a straight support.
+                // the chest passes in front of the bar, then the arms press to a straight support
                 shoulder = CGPoint(x: 0.04 * t + 0.13 * sin(.pi * t),
                                    y: mix(hang.y, bar + Self.upperArm + Self.forearm - 0.01))
                 lean = mix(-90, -104) - 18 * sin(.pi * t)
@@ -105,15 +105,15 @@ nonisolated struct ExerciseFigure {
         return points
     }
 
-    /// The bones to draw, far side first.
+    /// the bones to draw, far side first
     static let bones: [(Joint, Joint)] = [
         (.backToe, .backAnkle), (.backAnkle, .backKnee), (.backKnee, .hip),
         (.heel, .toe), (.heel, .ankle), (.ankle, .knee), (.knee, .hip), (.hip, .shoulder),
         (.shoulder, .elbow), (.elbow, .wrist),
     ]
 
-    /// The line Finn's camera judges this movement against: a vertical line over the midfoot,
-    /// over the hips for the lunge, and the ankle-to-shoulder line for the push-up.
+    /// the line Finn's camera judges this movement against: a vertical line over the midfoot,
+    /// over the hips for the lunge, and the ankle-to-shoulder line for the push-up
     func guide(at phase: Double) -> (CGPoint, CGPoint) {
         switch kind {
         case .bodyweightSquat, .stiffLegDeadlift:
@@ -131,7 +131,7 @@ nonisolated struct ExerciseFigure {
         }
     }
 
-    /// The area both ends of the rep cover, so the drawing never jumps while it moves.
+    /// the area both ends of the rep cover, so the drawing never jumps while it moves
     func bounds() -> CGRect {
         var rect = CGRect.null
         for phase in stride(from: 0.0, through: 1.0, by: 0.25) {
@@ -147,7 +147,7 @@ nonisolated struct ExerciseFigure {
         return CGPoint(x: from.x + cos(radians) * length, y: from.y + sin(radians) * length)
     }
 
-    /// The middle joint of a two-bone limb reaching from `root` to `end`.
+    /// the middle joint of a two-bone limb reaching from `root` to `end`
     private static func bend(from root: CGPoint, to end: CGPoint, _ first: Double, _ second: Double,
                              preferForward: Bool) -> CGPoint {
         let dx = end.x - root.x, dy = end.y - root.y
@@ -161,7 +161,7 @@ nonisolated struct ExerciseFigure {
     }
 }
 
-/// The animated drawing: one slow rep after another, inside the open corners of Finn's icon.
+/// the animated drawing: one slow rep after another, inside the open corners of Finn's icon
 struct ExerciseFigureView: View {
     let kind: ExerciseKind
     var lineColor: Color = .white
@@ -169,15 +169,15 @@ struct ExerciseFigureView: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
-    /// Seconds for one rep, down and up.
+    /// seconds for one rep, down and up
     private let period = 3.2
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion || !animates)) { timeline in
             let seconds = timeline.date.timeIntervalSinceReferenceDate
-            // Down slowly, hold, then back up; still at the bottom when motion is reduced.
+            // down slowly, hold, then back up; still at the bottom when motion is reduced
             let phase = reduceMotion || !animates ? 0.85 : (1 - cos(2 * .pi * seconds / period)) / 2
-            // The finn bob sways a little, like a real one.
+            // the finn bob sways a little, like a real one
             let sway = reduceMotion || !animates ? 0 : sin(2 * .pi * seconds / 2.6) * 1.2
             Canvas { context, size in
                 draw(in: &context, size: size, phase: phase, swayDegrees: sway)
@@ -195,7 +195,7 @@ struct ExerciseFigureView: View {
         let room = CGRect(x: inset, y: inset, width: size.width - 2 * inset, height: size.height - 2 * inset)
         let scale = min(room.width / box.width, room.height / box.height)
         let offsetX = room.midX - box.midX * scale
-        // The figure sits in the middle of its room.
+        // the figure sits in the middle of its room
         let offsetY = room.midY + box.midY * scale
         func place(_ p: CGPoint) -> CGPoint { CGPoint(x: offsetX + p.x * scale, y: offsetY - p.y * scale) }
         let floorY = offsetY
@@ -203,13 +203,13 @@ struct ExerciseFigureView: View {
         let width = min(5.5, max(3.5, scale * 0.02))
         let line = StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round)
 
-        // The floor.
+        // the floor
         var floor = Path()
         floor.move(to: CGPoint(x: room.minX, y: floorY))
         floor.addLine(to: CGPoint(x: room.maxX, y: floorY))
         context.stroke(floor, with: .color(lineColor.opacity(0.16)), lineWidth: 1)
 
-        // The finn line: a string with its bob over the midfoot, or the body line of a push-up.
+        // the finn line: a string with its bob over the midfoot, or the body line of a push-up
         if kind == .pushUp {
             let (from, to) = figure.guide(at: phase)
             var guide = Path()
@@ -235,7 +235,7 @@ struct ExerciseFigureView: View {
             context.fill(weight, with: .color(lineColor.opacity(0.75)))
         }
 
-        // The bar, seen end-on from the side.
+        // the bar, seen end-on from the side
         if kind == .pullUp || kind == .muscleUp {
             var bar = Path()
             bar.move(to: place(CGPoint(x: -0.2, y: ExerciseFigure.barHeight)))
@@ -270,7 +270,7 @@ struct ExerciseFigureView: View {
                            with: .color(HomeStyle.cameraBottom), lineWidth: 1.5)
         }
 
-        // The open corners of the app icon: the camera's view of the set.
+        // the open corners of the app icon: the camera's view of the set
         let corner: CGFloat = 26
         let frame = CGRect(x: 2, y: 2, width: size.width - 4, height: size.height - 4)
         var brackets = Path()

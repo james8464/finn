@@ -1,6 +1,6 @@
 import Foundation
 
-/// Joint-angle summary of a short window of 2D poses. Both the rule-based exercise recognizer
+/// Joint-angle summary of a short window of 2D poses. Both the rule-based exercise recogniser
 /// and the trained angle classifier read these numbers, so training and the app share one
 /// definition. It depends only on `PoseFrame`, which lets the training tool compile it too.
 nonisolated struct PoseWindowFeatures: Equatable, Sendable {
@@ -88,7 +88,7 @@ nonisolated enum PoseWindowFeatureExtractor {
                       joint.confidence >= minimumConfidence else { return nil }
                 return (joint.x, joint.y * aspect)
             }
-            // Seen from the side, both hips (and both shoulders) nearly overlap, so the far one
+// seen from the side, both hips (and both shoulders) nearly overlap, so the far one
             // stands in when Vision loses the near one, as it often does for a body lying down.
             let otherSide: BodySide = side == .left ? .right : .left
             func midline(_ role: JointRole) -> (x: Double, y: Double)? { point(role) ?? point(role, otherSide) }
@@ -109,7 +109,7 @@ nonisolated enum PoseWindowFeatureExtractor {
                     wristHeights.append(wrist.y)
                 }
                 handFrames += 1
-                // Clearly above, not level with the hands: a high pull-up reaches the bar too.
+// clearly above, not level with the hands: a high pull-up reaches the bar too.
                 if leg > 0 && (wrist.y - shoulder.y) / leg > 0.1 { over += 1 }
             }
             if let angle = angle(hip, knee, ankle) { knees.append(angle) }
@@ -188,24 +188,24 @@ nonisolated enum AngleRules {
     static func label(for f: PoseWindowFeatures) -> String? {
         let moving = max(f.elbowRange, f.kneeRange, f.hipRange, f.shoulderRange)
         if moving < 15 && f.hipTravel < 0.08 { return "none" }
-        // Pull-up or muscle-up: hanging with the hands above the shoulders, the body rises while
+// pull-up or muscle-up: hanging with the hands above the shoulders, the body rises while
         // the hands stay put (a press moves the hands and keeps the body still). The shoulders
         // passing above the hands makes it a muscle-up.
         if f.handLift >= 0.25 && f.hipTravel >= 0.15 && f.wristTravel < 0.5 * f.hipTravel
             && f.trunkTiltMedian < 40 {
             return f.shouldersOverHands >= 0.08 ? "muscle_up" : "pull_up"
         }
-        // Push-up: body nearly horizontal and straight at the hip, elbows bend, knees stay straight.
+// push-up: body nearly horizontal and straight at the hip, elbows bend, knees stay straight.
         if f.trunkTiltMedian >= 55 && f.hipMedian >= 145 && f.elbowRange >= 20 && f.kneeRange < 30 {
             return "push_up"
         }
-        // Stiff-leg deadlift: the torso tips forward through a large hip hinge and comes back up,
+// stiff-leg deadlift: the torso tips forward through a large hip hinge and comes back up,
         // knees stay nearly straight, and the arms hang straight (a bent-over row bends them).
         if f.hipRange >= 35 && f.trunkTiltRange >= 30 && f.trunkTiltMedian < 60
             && f.kneeRange < 0.5 * f.hipRange && f.kneeMedian >= 140 && f.elbowRange < 35 {
             return "stiff_leg_deadlift"
         }
-        // Squat or lunge: knees bend a lot, the hips drop, and the torso stays mostly upright.
+// squat or lunge: knees bend a lot, the hips drop, and the torso stays mostly upright.
         if f.kneeRange >= 35 && f.hipTravel >= 0.12 && f.trunkTiltMedian < 50 {
             if f.stance >= 0.45 { return "static_lunge" }
             if f.stance >= 0 && f.stance < 0.3 { return "squat" }

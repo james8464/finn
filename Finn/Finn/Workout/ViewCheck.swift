@@ -37,7 +37,7 @@ nonisolated enum ViewCheck {
 
     /// Degrees between the body's left-right axis and the camera's line of sight to the hips.
     /// 0 is a true side view; 90 means the person faces the camera or turns away from it.
-    /// Positions are camera-relative, in meters, as Vision 3D pose returns them. Left and right
+    /// Positions are camera-relative, in metres, as Vision 3D pose returns them. Left and right
     /// labels may be swapped without changing the result.
     static func profileDeviation(leftHip: SIMD3<Double>, rightHip: SIMD3<Double>,
                                  leftShoulder: SIMD3<Double>? = nil,

@@ -47,7 +47,7 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
     let remembersExercise: Bool
 
     init(defaults: UserDefaults, handsFreeByDefault: Bool = false, remembersExercise: Bool = false) {
-        // Keep settings selected before the product was renamed. A new value always wins.
+// keep settings selected before the product was renamed. A new value always wins.
         for (key, value) in defaults.dictionaryRepresentation() where key.hasPrefix("plumb.") {
             let renamedKey = "finn." + key.dropFirst("plumb.".count)
             if defaults.object(forKey: renamedKey) == nil {
@@ -77,7 +77,7 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
         }
     }
 
-    /// On by default: the joint-angle rules recognize the exercise after a set, and the
+    /// On by default: the joint-angle rules recognise the exercise after a set, and the
     /// person's choice stays whenever they are not sure.
     var recognizesExercise: Bool {
         get { defaults.object(forKey: Self.recognizesExerciseKey) as? Bool ?? true }

@@ -1,12 +1,12 @@
 import Foundation
 
 /// One coaching check a coach would make from the side, measured at the bottom of each rep with
-/// `BodySegments`. Each threshold below is a product hypothesis checked against labeled side-view
+/// `BodySegments`. Each threshold below is a product hypothesis checked against labelled side-view
 /// videos (see `docs/validation/form-checks-v1.md`), not a validated standard or a safety limit.
 /// Nothing here can be seen only from the front (knees caving in, elbows flaring), so no check
 /// reads it.
 nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
-    // Listed in the order the advice is given when several show in one set: the body's shape first,
+// listed in the order the advice is given when several show in one set: the body's shape first,
     // then how deep the rep went.
     case pushUpHipsSag
     case pushUpHipsPike
@@ -38,7 +38,7 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
     /// squat; Vision's hip point sits above the hip crease, and good sets bottomed out around 15°.
     static let squatMaximumThighAboveLevel = 30.0
     /// Squat: torso leaning more than this many degrees beyond the shins at the bottom. Coaches cue a
-    /// torso roughly parallel to the shins; the bad squats of the labeled set do not show this fault,
+    /// torso roughly parallel to the shins; the bad squats of the labelled set do not show this fault,
     /// so the limit is set high to keep false alarms rare.
     static let squatMaximumTorsoBeyondShin = 45.0
     /// Lunge: torso more than this many degrees from upright at the bottom.
@@ -121,7 +121,7 @@ nonisolated enum FormCheck: String, CaseIterable, Codable, Sendable {
             return body.thighAboveLevel
         case .lungeTorsoLean: return body.torsoTilt
         case .lungeFrontKnee:
-            // The front leg is the one whose thigh leans most toward level; it may be the far leg.
+// the front leg is the one whose thigh leans most towards level; it may be the far leg.
             let legs = [side, side == .left ? BodySide.right : .left]
                 .map { BodySegments(frame: frame, side: $0) }
                 .compactMap { leg -> (tilt: Double, knee: Double)? in
@@ -295,7 +295,7 @@ nonisolated struct FormMeasurement: Codable, Equatable, Sendable {
 /// Facts measured on each rep of a set, beyond the count. For the squat, push-up, lunge and
 /// stiff-leg deadlift, the coaching checks of `FormCheck`; for pull-ups and muscle-ups, whether the
 /// chin passed the hands, whether the arms were straight at the start of the rep, and how much the
-/// body swung. Each check is a camera measurement from the side, not a judgment of technique;
+/// body swung. Each check is a camera measurement from the side, not a judgement of technique;
 /// when a joint it needs is not tracked, it says so instead of guessing.
 nonisolated enum FormChecks {
     /// Elbow angle from which an arm counts as straight at the bottom of a pull-up.
@@ -325,7 +325,7 @@ nonisolated enum FormChecks {
 
     private static func sideChecks(_ analysis: SetAnalysis, frames: [PoseFrame], definition: ExerciseDefinition,
                                    viewCheck: ExerciseAnalyzer.ViewCheckPolicy) -> FormReview {
-        // Push-ups counted from the shoulders (filmed from the front, or the arm out of the picture)
+// push-ups counted from the shoulders (filmed from the front, or the arm out of the picture)
         // have no side-view joints to read; the result already says so.
         guard !analysis.reps.isEmpty, analysis.rubricVersion != ExerciseDefinition.pushUpShoulders.rubricVersion,
               case .usable(let side) = EvidenceGate.assess(frames, requirement: definition.evidence) else {
@@ -334,7 +334,7 @@ nonisolated enum FormChecks {
         if viewCheck == .enforce {
             switch ViewCheck.assess(frames, expected: .side) {
             case .angled(let deviation, _), .mismatch(let deviation, _):
-                // Exercises filmed only from the side already get "turn a little" from the analysis.
+// exercises filmed only from the side already get "turn a little" from the analysis.
                 guard definition.expectedView == .any else { return FormReview() }
                 return FormReview(notes: [
                     String(localized: "Finn checks \(definition.copy.shareNoun) form from the side only. It saw you about \(Int(deviation.rounded()))° from side-on, so it gives no form advice for this set."),
@@ -367,12 +367,12 @@ nonisolated enum FormChecks {
             review.findings.append(FormFinding(check: check, reps: faulty.map(\.0), judged: readings.count,
                                                typical: median(faulty.map(\.1))))
         }
-        // Sag and pike read the same line; when both show, the one seen on more reps is kept.
+// sag and pike read the same line; when both show, the one seen on more reps is kept.
         if let sag = review.findings.firstIndex(where: { $0.check == .pushUpHipsSag }),
            let pike = review.findings.firstIndex(where: { $0.check == .pushUpHipsPike }) {
             review.findings.remove(at: review.findings[sag].reps.count >= review.findings[pike].reps.count ? pike : sag)
         }
-        // The first finding becomes the set's observation; the others are listed as facts.
+// the first finding becomes the set's observation; the others are listed as facts.
         review.notes.insert(contentsOf: review.findings.dropFirst().map(\.observation), at: 0)
         return review
     }
@@ -431,7 +431,7 @@ nonisolated enum FormChecks {
         var sentences: [String] = []
         let total = analysis.reps.count
 
-        // Chin above the hands at the top of each rep (the bar itself is not tracked).
+// chin above the hands at the top of each rep (the bar itself is not tracked).
         if definition.kind == .pullUp {
             let tops = analysis.reps.map { rep in
                 ExerciseAnalyzer.deepestFrameIndex(of: rep, in: frames, as: definition, side: side)
@@ -449,7 +449,7 @@ nonisolated enum FormChecks {
             }
         }
 
-        // Straight arms at the hang before each rep: the frame with the lowest shoulders between
+// straight arms at the hang before each rep: the frame with the lowest shoulders between
         // the previous rep's end and this rep's start.
         let starts = analysis.reps.enumerated().compactMap { index, rep -> (Int, Double)? in
             let from = index == 0 ? (frames.first?.time ?? 0) : analysis.reps[index - 1].endTime
@@ -470,7 +470,7 @@ nonisolated enum FormChecks {
                 : String(localized: "Arms not fully straight at the start of \(list(bent))."))
         }
 
-        // Swing: how far the hips travel forward and back during the set.
+// swing: how far the hips travel forward and back during the set.
         if let swing = swing(frames, side: side), swing >= swingShare {
             sentences.append(String(localized: "Your hips swung about \(Int((swing * 100).rounded()))% of your arm length forward and back. A still body makes each rep count the same."))
         }

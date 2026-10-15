@@ -20,7 +20,7 @@ struct PreviewFeedTests {
                 Issue.record("The receiver rejected a ready preview frame")
                 return
             }
-            // Rendering must not change the capture buffer's presentation metadata.
+// rendering must not change the capture buffer's presentation metadata.
             if let attachments = CMSampleBufferGetSampleAttachmentsArray(sample, createIfNecessary: false),
                CFArrayGetCount(attachments) > 0 {
                 let dictionary = unsafeBitCast(CFArrayGetValueAtIndex(attachments, 0), to: CFDictionary.self)

@@ -10,7 +10,7 @@ private func hangingTrace(reps: Int, rise: Double, framesPerRep: Int = 24, start
         let motion = index >= 4 + reps * framesPerRep ? 0 : (1 - cos(2 * .pi * phase)) / 2
         let shoulderY = 0.46 - rise * motion * 0.16
         let distance = abs(shoulderY - 0.30)
-        // Straight arms at the hang unless `startArm` bends them.
+// straight arms at the hang unless `startArm` bends them.
         let bentReach = sin((180 - startArm) * .pi / 360) * 0.08
         let reach = max(bentReach, sqrt(max(0, 0.08 * 0.08 - distance * distance / 4)))
         let sway = swing * sin(Double(index) * 0.5)
@@ -22,7 +22,7 @@ private func hangingTrace(reps: Int, rise: Double, framesPerRep: Int = 24, start
             .leftAnkle: JointPoint(x: 0.47 + sway, y: shoulderY + 0.52, confidence: 0.9),
         ]
         if index % handsEvery == 0 { joints[.leftWrist] = JointPoint(x: 0.50, y: 0.30, confidence: 0.9) }
-        // The nose sits about a third of an arm length above the shoulders.
+// the nose sits about a third of an arm length above the shoulders.
         if nose { joints[.nose] = JointPoint(x: 0.53, y: shoulderY - 0.05, confidence: 0.9) }
         return PoseFrame(time: Double(index) / 12, subjectCount: 1, joints: joints)
     }
@@ -52,7 +52,7 @@ struct PullUpTests {
     }
 
     @Test func handsSeenNowAndThenAreEnough() {
-        // With the bar near the top of the picture, Vision often loses the hands.
+// with the bar near the top of the picture, Vision often loses the hands.
         guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(
             hangingTrace(reps: 4, rise: 0.85, handsEvery: 4), as: .pullUp) else {
             Issue.record("Pull-ups with hands seen in a quarter of the frames must be measured")
@@ -123,7 +123,7 @@ struct PullUpTests {
     }
 
     @Test func overheadPressesAreNotPullUps() {
-        // The synthetic "other" class includes shoulder presses and overhead triceps extensions.
+// the synthetic "other" class includes shoulder presses and overhead triceps extensions.
         var rng = SyntheticRandom(seed: 1014)
         for _ in 0..<30 {
             let frames = SyntheticExerciseMotion.sequence(label: "other", using: &rng)

@@ -42,7 +42,7 @@ struct OnboardingProfileTests {
         #expect(prefs.trainingLevel == .experienced)
         #expect(prefs.favoriteExercises == [.pullUp, .pushUp])
         #expect(prefs.speaksLive == false)
-        // The first favorite is the exercise ready on the first screen.
+        // The first favourite is the exercise ready on the first screen.
         #expect(prefs.selectedExercise == .pullUp)
         #expect(prefs.onboardingProfile == profile)
     }

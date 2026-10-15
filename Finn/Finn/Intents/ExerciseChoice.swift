@@ -1,7 +1,7 @@
 import AppIntents
 
-/// The six exercises as a Siri parameter: "Start a push-up set in Finn". One case per
-/// `ExerciseKind`, with the names and synonyms Siri listens for.
+/// the six exercises as a Siri parameter: "Start a push-up set in Finn". One case per
+/// `ExerciseKind`, with the names and synonyms Siri listens for
 nonisolated enum ExerciseChoice: String, AppEnum {
     case squat
     case pushUp
@@ -28,7 +28,7 @@ nonisolated enum ExerciseChoice: String, AppEnum {
                                          synonyms: ["muscle-ups", "muscleup", "bar muscle-up"])
     ]
 
-    /// The app's exercise behind this choice.
+    /// the app's exercise behind this choice
     var kind: ExerciseKind {
         switch self {
         case .squat: .bodyweightSquat

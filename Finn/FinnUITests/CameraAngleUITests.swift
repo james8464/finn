@@ -1,7 +1,7 @@
 import XCTest
 
 final class CameraAngleUITests: XCTestCase {
-    /// The Debug demo feed attaches a synthetic 75° profile deviation, standing in for a
+    /// the Debug demo feed attaches a synthetic 75° profile deviation, standing in for a
     /// front-facing person. Counts remain available while posture advice is withheld.
     @MainActor
     func testFrontViewSetKeepsCountWithoutSideViewPostureAdvice() throws {
@@ -61,8 +61,8 @@ final class CameraAngleUITests: XCTestCase {
         XCTAssertTrue(readout.label.contains("refused"))
     }
 
-    /// A push-up filmed from the front is measured, not refused: the framing screen and the
-    /// result never ask the person to turn sideways.
+    /// a push-up filmed from the front is measured, not refused: the framing screen and the
+    /// result never ask the person to turn sideways
     @MainActor
     func testFrontViewPushUpIsMeasuredNotRefused() {
         let app = XCUIApplication()

@@ -22,7 +22,7 @@ nonisolated enum SetWindow {
     /// How far the body's reference joint (the hip, or the shoulder for push-ups) may move from its
     /// place during the set, as a share of the frame's width, before the athlete has left the spot.
     static let spotRadius = 0.12
-    /// How much larger or smaller the torso may look before the athlete has moved toward or away
+    /// How much larger or smaller the torso may look before the athlete has moved towards or away
     /// from the phone. Walking back to the phone makes it grow well past this before the legs leave
     /// the picture.
     static let torsoTolerance = 0.25
@@ -74,7 +74,7 @@ nonisolated enum SetWindow {
             inPosition[index] && settled(frames, inPosition, from: index, forward: false)
         }), start < end,
               frames[end].time - frames[start].time >= EvidenceRubric.minimumSetDuration else { return nil }
-        // Reps at the spot with a joint unclear, or with Vision missing the athlete for a moment,
+// reps at the spot with a joint unclear, or with Vision missing the athlete for a moment,
         // stay in the set, so the gate judges them. A dropout of a few frames right after the last
         // rep used to end the set at that rep's top and drop it.
         let places = makeSpots()
@@ -218,7 +218,7 @@ nonisolated enum SetWindow {
             last = cursor
             cursor += forward ? 1 : -1
         }
-        // The stretch must actually last: a capture that stops just after this frame is not settled.
+// the stretch must actually last: a capture that stops just after this frame is not settled.
         return abs(frames[last].time - origin) >= settleDuration * 0.75
             && Double(held) >= settleShare * Double(total)
     }

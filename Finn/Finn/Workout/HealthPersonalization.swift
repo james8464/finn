@@ -1,6 +1,6 @@
 import Foundation
 
-// Personalizing Finn with what the person keeps in Apple Health. Everything here is plain logic on
+// personalising Finn with what the person keeps in Apple Health. Everything here is plain logic on
 // values already read, so it is tested without HealthKit; `HealthKitReader` does the reading. Finn
 // asks to read these types only once the person turns on Personalize with Health (in Options or in
 // the one-time offer after a first set). Nothing read leaves the iPhone or serves another purpose.
@@ -85,13 +85,13 @@ nonisolated struct HealthSnapshot: Equatable, Sendable {
     var age: Int?
     /// Kilograms.
     var weight: Double?
-    /// Meters.
+    /// Metres.
     var height: Double?
 
     var isEmpty: Bool { self == HealthSnapshot() }
 }
 
-/// One personalized line, with the Health data it rests on, so the person sees why Finn says it.
+/// One personalised line, with the Health data it rests on, so the person sees why Finn says it.
 nonisolated struct HealthNote: Equatable, Sendable {
     let text: String
     /// Such as "From your resting heart rate in Health."
@@ -226,7 +226,7 @@ nonisolated enum HealthCoach {
         case .pushUp: 0.64
         case .bodyweightSquat, .staticLunge: 0.85
         case .stiffLegDeadlift: nil
-        // The whole body hangs from the bar.
+// the whole body hangs from the bar.
         case .pullUp, .muscleUp: 1.0
         }
     }
@@ -240,7 +240,7 @@ nonisolated enum HealthCoach {
             basis: String(localized: "From your weight in Health."))
     }
 
-    /// The deepest squat in centimeters: the hip drop is measured as a share of the standing hip
+    /// The deepest squat in centimetres: the hip drop is measured as a share of the standing hip
     /// height, taken here as 48% of body height.
     static func depthLine(for exercise: ExerciseKind, deepestRange: Double?, height: Double?) -> HealthNote? {
         guard exercise == .bodyweightSquat, let deepestRange, deepestRange > 0,
@@ -250,7 +250,7 @@ nonisolated enum HealthCoach {
                           basis: String(localized: "From your height in Health."))
     }
 
-    /// The person's cardio fitness, shown as a number to follow, not a judgment.
+    /// The person's cardio fitness, shown as a number to follow, not a judgement.
     static func fitnessLine(_ health: HealthSnapshot) -> HealthNote? {
         guard let vo2 = health.vo2Max, vo2 > 10, vo2 < 90 else { return nil }
         return HealthNote(text: String(localized: "Cardio fitness: VO2 max \(vo2.formatted(.number.precision(.fractionLength(1))))."),
@@ -296,7 +296,7 @@ nonisolated enum HealthCoach {
     }
 }
 
-/// Reads Health for personalization. `HealthKitReader` in the app; fakes in tests.
+/// Reads Health for personalisation. `HealthKitReader` in the app; fakes in tests.
 protocol HealthReading: AnyObject {
     /// False where Health is not available, such as some iPads.
     var isAvailable: Bool { get }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Calendar days use each set's capture date, including sessions spanning midnight.
+/// calendar days use each set's capture date, including sessions spanning midnight
 nonisolated struct DashboardActivityDay: Identifiable, Equatable {
     var id: Date { date }
     let date: Date

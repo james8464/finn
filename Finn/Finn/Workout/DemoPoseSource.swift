@@ -117,7 +117,7 @@ final class DemoPoseSource: PoseStreaming {
                 .leftWrist: point(shoulderX, shoulderY + 0.24),
             ]
         case .pullUp, .muscleUp:
-            // Side view, hands on a bar at y 0.30, arm length 0.16 of the frame height.
+// side view, hands on a bar at y 0.30, arm length 0.16 of the frame height.
             let full = exercise == .pullUp ? 0.9 : 1.9
             let rise = (setNumber == 1 && late ? full * 0.75 : full) * motion * 0.16
             let shoulderY = 0.46 - rise
@@ -133,7 +133,7 @@ final class DemoPoseSource: PoseStreaming {
         if formFault {
             switch exercise {
             case .bodyweightSquat:
-                // Shoulders tipping 60° forward at the bottom, far past the near-upright shins.
+// shoulders tipping 60° forward at the bottom, far past the near-upright shins.
                 let lean = 60 * motion * .pi / 180
                 for (hip, shoulder) in [(BodyJoint.leftHip, BodyJoint.leftShoulder), (.rightHip, .rightShoulder)] {
                     if let point = joints[hip] {
@@ -142,7 +142,7 @@ final class DemoPoseSource: PoseStreaming {
                     }
                 }
             case .pushUp:
-                // Hips 0.07 of the picture below the shoulder-to-ankle line, about a third of a torso length.
+// hips 0.07 of the picture below the shoulder-to-ankle line, about a third of a torso length.
                 if let shoulder = joints[.leftShoulder], let ankle = joints[.leftAnkle] {
                     joints[.leftHip] = point(shoulder.x + 0.45 * (ankle.x - shoulder.x),
                                              shoulder.y + 0.45 * (ankle.y - shoulder.y) + 0.07)

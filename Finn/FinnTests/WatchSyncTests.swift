@@ -101,7 +101,7 @@ struct WatchSyncSessionTests {
         await model.endSet()
         try await waitUntil { sent.last?.stage == .result }
 
-        // Observation may fold two quick changes into one update, so reps rise but may skip a number.
+// observation may fold two quick changes into one update, so reps rise but may skip a number.
         let running = sent.filter { $0.stage == .capturing }
         #expect(running.count >= 2)
         #expect(zip(running, running.dropFirst()).allSatisfy { $1.reps > $0.reps })

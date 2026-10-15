@@ -22,7 +22,7 @@ struct FitnessSessionTests {
         #expect(record.workoutID == setup.fitness.lastWorkoutID)
         #expect(setup.model.history.first?.fitnessWorkout == record)
 
-        // Neither a retry from History nor a reopened app saves it again.
+// neither a retry from History nor a reopened app saves it again.
         let saved = try #require(setup.model.history.first)
         #expect(!setup.model.canSaveToFitness(saved))
         await setup.model.saveToFitness(sessionID: sessionID)
@@ -210,7 +210,7 @@ struct FitnessSessionTests {
         try await setup.measureASet()
         let session = try #require(setup.model.history.first)
         await setup.model.startPreview()
-        // During a capture, the session in progress is saved at Done only.
+// during a capture, the session in progress is saved at Done only.
         #expect(!setup.model.canSaveToFitness(session))
         await setup.model.saveToFitness(sessionID: session.id)
         #expect(setup.fitness.saveAttempts == 0)
@@ -301,7 +301,7 @@ struct FitnessSessionTests {
         #expect(!reopened.leavesHealthWorkout(forSession: unsaved))
         #expect(reopened.leavesHealthWorkouts)
 
-        // Once the saved session is deleted, deleting the rest leaves nothing more in Health.
+// once the saved session is deleted, deleting the rest leaves nothing more in Health.
         setup.model.deleteHistory(id: saved)
         #expect(!setup.model.leavesHealthWorkouts)
         #expect(setup.model.history.map(\.id) == [unsaved])

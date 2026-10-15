@@ -1,7 +1,7 @@
 import AppIntents
 
-/// The phrases Siri, Spotlight and the Shortcuts app offer as soon as Finn is installed, with no
-/// setup. `\(.applicationName)` is "Finn"; `\(\.$exercise)` takes any exercise name or synonym.
+/// the phrases Siri, Spotlight and the Shortcuts app offer as soon as Finn is installed, with no
+/// setup. `\(.applicationName)` is "Finn"; `\(\.$exercise)` takes any exercise name or synonym
 struct FinnShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(

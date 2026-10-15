@@ -1,8 +1,8 @@
 import XCTest
 
 final class AppleFitnessUITests: XCTestCase {
-    /// Demo input never reaches Apple Health: the option is shown, off, and cannot be turned on.
-    /// (The live app's switch asks Health for permission, a system sheet these tests do not drive.)
+    /// demo input never reaches Apple Health: the option is shown, off, and can't be turned on
+    /// (the live app's switch asks Health for permission, a system sheet these tests don't drive.)
     @MainActor
     func testFitnessOptionIsOffAndUnavailableWithDemoInput() throws {
         let app = XCUIApplication()

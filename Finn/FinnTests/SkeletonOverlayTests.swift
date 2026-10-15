@@ -6,7 +6,7 @@ import Testing
 struct SkeletonOverlayTests {
     /// A side-on squatter in a portrait frame (height / width = 16 / 9), knee bent to 90°.
     private func squatFrame(kneeConfidence: Double = 0.9, aspectRatio: Double = 16.0 / 9) -> PoseFrame {
-        // Thigh horizontal, shin vertical once y is scaled by the aspect ratio, as the angle is.
+// thigh horizontal, shin vertical once y is scaled by the aspect ratio, as the angle is.
         let knee = (x: 0.5, y: 0.7)
         let hip = (x: knee.x - 0.2, y: knee.y)
         let ankle = (x: knee.x, y: knee.y + 0.2 / aspectRatio * 1)
@@ -85,7 +85,7 @@ struct SkeletonOverlayTests {
     }
 
     @Test func screenRotationIsWhatTheFrameStillNeeds() {
-        // Portrait: frames are already turned like the screen.
+// portrait: frames are already turned like the screen.
         #expect(PreviewFeed.displayRotation(capture: 90, preview: 90) == 0)
         // Phone sideways, interface still portrait: a quarter turn either way.
         #expect(PreviewFeed.displayRotation(capture: 0, preview: 90) == 90)
@@ -96,7 +96,7 @@ struct SkeletonOverlayTests {
     }
 
     @Test func theMirroredFrontCameraTurnsLikeTheBackCameraForTheSamePhonePosition() {
-        // Portrait is unchanged.
+// portrait is unchanged.
         #expect(PreviewFeed.displayRotation(capture: 90, preview: 90, mirrored: true) == 0)
         // Phone on its side, interface portrait: the front camera's upright frame needs the same turn
         // as the back camera's (capture 0, preview 90 gives 90), not the opposite one.

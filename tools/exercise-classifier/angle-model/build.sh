@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds the two command-line tools from the app's own pose and feature code.
+# builds the two command-line tools from the app's own pose and feature code
 #   sh tools/exercise-classifier/angle-model/build.sh [output folder]
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)

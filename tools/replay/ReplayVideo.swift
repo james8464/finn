@@ -2,7 +2,7 @@ import AVFoundation
 import CoreImage
 import Foundation
 
-/// Mac-only harness: frame extraction and scoring use the same pose and exercise analyzers as the app.
+/// Mac-only harness: frame extraction and scoring use the same pose and exercise analysers as the app.
 @main
 enum ReplayVideo {
     struct Report: Encodable {
@@ -167,7 +167,7 @@ enum ReplayVideo {
         if orientation == .up && margin == 0 { return source }
         let image = CIImage(cvPixelBuffer: source).oriented(orientation)
         let extent = image.extent.integral
-        // A black border around the picture lets Vision see a person the frame cuts off.
+// a black border around the picture lets Vision see a person the frame cuts off.
         let border = (extent.width * margin).rounded()
         let width = Int(extent.width + 2 * border)
         let height = Int(extent.height + 2 * border)

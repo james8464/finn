@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// System text with explicit multiline measurement. UIKit keeps its text-layout and
-/// accessibility bounds in agreement inside scaled sheet presentations on iOS 27.
+/// system text with explicit multiline measurement. UIKit keeps its text-layout and
+/// accessibility bounds in agreement inside scaled sheet presentations on iOS 27
 struct WrappingText: UIViewRepresentable {
     let text: String
     var style: UIFont.TextStyle = .body
@@ -42,7 +42,7 @@ struct WrappingText: UIViewRepresentable {
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: UILabel, context: Context) -> CGSize? {
         let width = max(1, proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? ceil(uiView.intrinsicContentSize.width))
         let fit = uiView.sizeThatFits(CGSize(width: max(1, width), height: .greatestFiniteMagnitude))
-        // Leave room for fractional glyph advances when a sheet scales its contents.
+        // leave room for fractional glyph advances when a sheet scales its contents
         return CGSize(width: min(width, ceil(fit.width)), height: ceil(fit.height))
     }
 }

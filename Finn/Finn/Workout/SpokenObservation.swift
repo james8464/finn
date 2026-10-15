@@ -68,7 +68,7 @@ final class LiveAnnouncer: NSObject, LiveAnnouncing, AVSpeechSynthesizerDelegate
 
     override init() {
         let synthesizer = AVSpeechSynthesizer()
-        // Plays through the current route (AirPods or other headphones when connected) without
+// plays through the current route (AirPods or other headphones when connected) without
         // taking over the app's audio session.
         synthesizer.usesApplicationAudioSession = false
         self.synthesizer = synthesizer

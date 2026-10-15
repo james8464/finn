@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Finn
 
-/// A standing person drawn as six joints, `height` tall (normalized), centred at `x`.
+/// A standing person drawn as six joints, `height` tall (normalised), centred at `x`.
 nonisolated private func person(x: Double, top: Double = 0.3, height: Double = 0.6,
                     confidence: Double = 0.9) -> [BodyJoint: JointPoint] {
     let hip = top + height * 0.5
@@ -40,17 +40,17 @@ nonisolated struct AthleteTrackerTests {
         var tracker = AthleteTracker()
         #expect(tracker.select([person(x: 0.5)], aspectRatio: 16.0 / 9, time: 0) == 0)
         tracker.lock()
-        // A slightly larger passer-by walks from the left edge to the right edge behind the athlete.
+// a slightly larger passer-by walks from the left edge to the right edge behind the athlete.
         for step in 0...20 {
             let walker = person(x: 0.05 + 0.045 * Double(step), top: 0.25, height: 0.62)
             let order = step.isMultiple(of: 2) ? [walker, person(x: 0.5)] : [person(x: 0.5), walker]
             let picked = tracker.select(order, aspectRatio: 16.0 / 9, time: 0.1 * Double(step + 1))
             if let picked {
-                // Whenever the tracker answers, it is the athlete, never the walker.
+// whenever the tracker answers, it is the athlete, never the walker.
                 #expect(abs((order[picked][.leftKnee]?.x ?? 0) - 0.5) < 0.001, "step \(step)")
             }
         }
-        // Once the walker has left, the athlete is found again.
+// once the walker has left, the athlete is found again.
         #expect(tracker.select([person(x: 0.5)], aspectRatio: 16.0 / 9, time: 3) == 0)
     }
 
@@ -58,7 +58,7 @@ nonisolated struct AthleteTrackerTests {
         var tracker = AthleteTracker()
         _ = tracker.select([person(x: 0.5)], aspectRatio: 1, time: 0)
         tracker.lock()
-        // The athlete is hidden; only someone across the room is visible, for five seconds.
+// the athlete is hidden; only someone across the room is visible, for five seconds.
         for tenth in 1...50 {
             #expect(tracker.select([person(x: 0.15)], aspectRatio: 1, time: Double(tenth) / 10) == nil)
         }
@@ -91,11 +91,11 @@ nonisolated struct AthleteTrackerTests {
             #expect(tracker.select([plank, coach], aspectRatio: 1, time: Double(tenth) / 10) == 0)
             if tenth == 0 { tracker.lock() }
         }
-        // The athlete is not detected; only the coach is.
+// the athlete is not detected; only the coach is.
         for tenth in 11...40 {
             #expect(tracker.select([coach], aspectRatio: 1, time: Double(tenth) / 10) == nil)
         }
-        // The athlete is back, and the tracker follows them, not the coach.
+// the athlete is back, and the tracker follows them, not the coach.
         #expect(tracker.select([coach, plank], aspectRatio: 1, time: 4.1) == 1)
     }
 
@@ -103,12 +103,12 @@ nonisolated struct AthleteTrackerTests {
         var tracker = AthleteTracker()
         _ = tracker.select([person(x: 0.5)], aspectRatio: 1, time: 0)
         tracker.lock()
-        // Someone in a plank where the athlete was, and someone else across the room: Finn cannot tell
+// someone in a plank where the athlete was, and someone else across the room: Finn cannot tell
         // which one is the athlete, so it waits.
         for tenth in 1...30 {
             #expect(tracker.select([plank, person(x: 0.15)], aspectRatio: 1, time: Double(tenth) / 10) == nil)
         }
-        // Alone, that person is picked up.
+// alone, that person is picked up.
         #expect(tracker.select([plank], aspectRatio: 1, time: 3.1) == 0)
     }
 
@@ -126,7 +126,7 @@ nonisolated struct AthleteTrackerTests {
     @Test func beforeASetSomeonePartlyInViewDoesNotTakeOver() {
         var tracker = AthleteTracker()
         let athlete = person(x: 0.5, top: 0.45, height: 0.35)
-        // Shoulders to hips, about a metre from the phone: twice as prominent, no legs in view.
+// shoulders to hips, about a metre from the phone: twice as prominent, no legs in view.
         let partner: [BodyJoint: JointPoint] = [
             .leftShoulder: JointPoint(x: 0.18, y: 0.10, confidence: 0.9),
             .rightShoulder: JointPoint(x: 0.38, y: 0.10, confidence: 0.9),
@@ -198,7 +198,7 @@ nonisolated struct TrackedSetEvidenceTests {
             let athlete = squatFrame(time: time, hipY: hipY)
             let others = bystanders ? [person(x: 0.15 + 0.03 * time.truncatingRemainder(dividingBy: 10))] : []
             if time >= hiddenFrom && time < hiddenTo {
-                // Whoever hides the athlete stands in front of them, where the athlete was.
+// whoever hides the athlete stands in front of them, where the athlete was.
                 let inFront = bystanders ? [person(x: 0.52)] : []
                 return PoseFrame(time: time, subjectCount: inFront.count, joints: [:],
                                  athleteTracking: .hidden, bystanders: inFront)
@@ -218,12 +218,12 @@ nonisolated struct TrackedSetEvidenceTests {
     }
 
     @Test func someoneWalkingInFrontForTwoSecondsIsBridged() {
-        // Hidden from 4.5 s to 6.5 s: across the bottom of one rep and the next.
+// hidden from 4.5 s to 6.5 s: across the bottom of one rep and the next.
         guard case .analyzed(let analysis) = SquatAnalyzer.analyze(trackedSquat(hiddenFrom: 4.5, hiddenTo: 6.5)) else {
             Issue.record("A two-second occlusion must not cancel the set")
             return
         }
-        // No rep is invented while the athlete is hidden; at most the one cut by the gap is lost.
+// no rep is invented while the athlete is hidden; at most the one cut by the gap is lost.
         #expect((9...10).contains(analysis.reps.count), "counted \(analysis.reps.count)")
     }
 
@@ -232,7 +232,7 @@ nonisolated struct TrackedSetEvidenceTests {
             Issue.record("Four seconds without the athlete must be refused")
             return
         }
-        // Last seen at frame 119 (7.93 s), seen again at frame 180 (12.0 s).
+// last seen at frame 119 (7.93 s), seen again at frame 180 (12.0 s).
         #expect(reason.hasPrefix("Someone else was in view and Finn lost you for 4.1 s, starting 7.9 s into the set."))
     }
 

@@ -52,7 +52,7 @@ final class HealthKitReader: HealthReading {
         let steps = await dailySums(.stepCount, unit: .count(), from: weekBefore, to: today)
         (health.stepsYesterday, health.stepsBaseline) = Self.yesterdayAndBaseline(steps, yesterday: yesterday)
 
-        // The night that ended this morning: from 6 p.m. yesterday to noon today, or now if earlier.
+// the night that ended this morning: from 6 p.m. yesterday to noon today, or now if earlier.
         let nightStart = calendar.date(byAdding: .hour, value: 18, to: yesterday) ?? yesterday
         let nightEnd = min(now, calendar.date(byAdding: .hour, value: 12, to: today) ?? now)
         let asleep = await sleepIntervals(from: nightStart, to: nightEnd)

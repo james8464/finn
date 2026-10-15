@@ -1,7 +1,7 @@
 import XCTest
 
-/// Saves one PNG per welcome screen, the Awards screen with a few badges, and the Home card.
-/// Runs only with `TEST_RUNNER_FINN_CAPTURE_DIR`, like `ScreenTourUITests`.
+/// saves one PNG per welcome screen, the Awards screen with a few badges, and the Home card
+/// runs only with `TEST_RUNNER_FINN_CAPTURE_DIR`, like `ScreenTourUITests`
 final class OnboardingTourUITests: XCTestCase {
     private var folder: URL!
 
@@ -43,7 +43,7 @@ final class OnboardingTourUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.2)
         save("onboarding-5-placement")
         next.tap()
-        // The first favorite (push-up) is the exercise ready on the Workout tab.
+        // the first favourite (push-up) is the exercise ready on the Workout tab
         app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 1)

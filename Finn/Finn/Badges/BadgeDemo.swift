@@ -1,7 +1,7 @@
 import Foundation
 
 #if DEBUG
-/// A few earned badges for screenshots of the Awards screen (`-finn-ui-badges-demo`). Demo input only.
+/// a few earned badges for screenshots of the Awards screen (`-finn-ui-badges-demo`). Demo input only.
 enum BadgeDemo {
     static var sample: [EarnedBadge] {
         let now = Date()

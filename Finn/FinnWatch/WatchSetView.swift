@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// One short iPhone-authored coaching line, with an optional Watch-owned rhythm.
+/// one short iPhone-authored coaching line, with an optional Watch-owned rhythm
 struct WatchSetView: View {
     let link: WatchLink
     private let accent = Color(.sRGB, red: 1, green: 45.0 / 255, blue: 146.0 / 255, opacity: 1)

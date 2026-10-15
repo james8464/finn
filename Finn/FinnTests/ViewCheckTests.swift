@@ -12,7 +12,7 @@ struct ViewCheckTests {
         let up = SIMD3<Double>(0, 1, 0)
         let sight = simd_normalize(SIMD3(offset.x, 0, offset.z))
         let angle = yaw * .pi / 180
-        // Rotate the line of sight around the vertical axis to get the left-right axis.
+// rotate the line of sight around the vertical axis to get the left-right axis.
         let lateral = simd_normalize(sight * cos(angle) + simd_cross(up, sight) * sin(angle))
         let side = swapSides ? -lateral : lateral
         return (offset + 0.15 * side, offset - 0.15 * side,
@@ -45,13 +45,13 @@ struct ViewCheckTests {
     @Test func setVerdictUsesTheMedianAndNeedsEnoughEstimates() {
         #expect(ViewCheck.assess(frames(deviations: [10, 80, 12, 9, 15]), expected: .side)
                 == .matches(medianDeviation: 12, estimates: 5))
-        // Off side-on but not clearly frontal: measured, with a tip.
+// off side-on but not clearly frontal: measured, with a tip.
         #expect(ViewCheck.assess(frames(deviations: [50, 60, 12, 70]), expected: .side)
                 == .angled(medianDeviation: 60, estimates: 4))
-        // Clearly frontal over three seconds: refused.
+// clearly frontal over three seconds: refused.
         #expect(ViewCheck.assess(frames(deviations: [70, 80, 75, 90]), expected: .side)
                 == .mismatch(medianDeviation: 80, estimates: 4))
-        // Clearly frontal, but only for a second and a half: still measured.
+// clearly frontal, but only for a second and a half: still measured.
         #expect(ViewCheck.assess(frames(deviations: [70, 80, 75, 90], spacing: 0.5), expected: .side)
                 == .angled(medianDeviation: 80, estimates: 4))
         #expect(ViewCheck.assess(frames(deviations: [80, 80, 80]), expected: .side) == .unavailable)
@@ -112,7 +112,7 @@ struct ViewCheckTests {
     }
 
     @Test func aBriefFrontViewDoesNotRefuseTheSet() {
-        // Facing the camera for the first two seconds only (while getting into place).
+// facing the camera for the first two seconds only (while getting into place).
         let trace = squatTrace().enumerated().map { index, frame in
             PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints,
                       profileDeviationDegrees: index.isMultiple(of: 4) ? (frame.time < 2 ? 85 : 10) : nil)

@@ -8,7 +8,7 @@ nonisolated enum WatchNotice: Equatable {
     case workoutUnavailable
 }
 
-/// The Watch mirrors one short iPhone coaching line and owns only its optional pacing clock.
+/// the Watch mirrors one short iPhone coaching line and owns only its optional pacing clock
 @Observable
 @MainActor
 final class WatchLink: NSObject, WCSessionDelegate {
@@ -89,8 +89,8 @@ final class WatchLink: NSObject, WCSessionDelegate {
         let now = Date().timeIntervalSince1970
         let fresh = incoming.isFreshForLive(now: now)
         guard incoming.isNewer(than: state) else {
-            // Context and a live message may arrive in either order with the same timestamp.
-            // The live copy still confirms liveness; it does not replay a state or tap.
+            // context and a live message may arrive in either order with the same timestamp.
+            // The live copy still confirms liveness; it doesn't replay a state or tap.
             if live, incoming.matchesShownStateForLive(state, now: now) {
                 lastPhoneStateAt = ProcessInfo.processInfo.systemUptime
                 isLiveCapture = incoming.stage == .capturing
@@ -170,7 +170,7 @@ final class WatchLink: NSObject, WCSessionDelegate {
         }
     }
 
-    // WatchConnectivity delegates arrive on a background queue.
+    // WatchConnectivity delegates arrive on a background queue
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState,
                              error: (any Error)?) {
         let reachable = session.isReachable

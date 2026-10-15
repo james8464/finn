@@ -1,22 +1,22 @@
 import Foundation
 
-/// What a badge is for. Every badge rests on measured sets saved on this iPhone; none is decorative.
+/// what a badge is for. Every badge rests on measured sets saved on this iPhone; none is decorative.
 nonisolated enum BadgeKind: Codable, Hashable, Sendable {
-    /// One measured set, whatever it showed.
+    /// one measured set, whatever it showed
     case firstSet
-    /// Sets on three different days within seven days.
+    /// sets on three different days within seven days
     case threeDaysInAWeek
-    /// A fully visible set with at least `SetComparison.minimumReps` reps and no flagged pattern.
+    /// a fully visible set with at least `SetComparison.minimumReps` reps and no flagged pattern
     case cleanSet
-    /// A measured set of each of the six exercises.
+    /// a measured set of each of the six exercises
     case allSixExercises
-    /// More reps in one set of this exercise than in any earlier set of it.
+    /// more reps in one set of this exercise than in any earlier set of it
     case repRecord(ExerciseKind)
-    /// Two comparable sets of the same exercise where the median range grew clearly.
+    /// two comparable sets of the same exercise where the median range grew clearly
     case longerRange(ExerciseKind)
 
-    /// Every badge the app can show, in the order of the Awards screen. The per-exercise ones follow
-    /// `ExerciseKind.allCases`.
+    /// every badge the app can show, in the order of the Awards screen. The per-exercise ones follow
+    /// `ExerciseKind.allCases`
     static var all: [BadgeKind] {
         [.firstSet, .threeDaysInAWeek, .cleanSet, .allSixExercises]
             + ExerciseKind.allCases.map(BadgeKind.repRecord)
@@ -34,7 +34,7 @@ nonisolated enum BadgeKind: Codable, Hashable, Sendable {
         }
     }
 
-    /// How to earn it, for the locked state. One sentence, no promise.
+    /// how to earn it, for the locked state. One sentence, no promise.
     var rule: String {
         switch self {
         case .firstSet: String(localized: "Finish one measured set.")
@@ -58,27 +58,27 @@ nonisolated enum BadgeKind: Codable, Hashable, Sendable {
     }
 }
 
-/// A badge the person has, with when and how. Saved as is; never recomputed from a changed rule.
+/// a badge the person has, with when and how. Saved as is; never recomputed from a changed rule.
 nonisolated struct EarnedBadge: Codable, Equatable, Identifiable, Sendable {
     let kind: BadgeKind
     let earnedAt: Date
-    /// One sentence with the measured facts behind it, written when it was earned.
+    /// one sentence with the measured facts behind it, written when it was earned
     let detail: String
-    /// The set that earned it. Only that set's result celebrates it: a badge the history already
+    /// the set that earned it. Only that set's result celebrates it: a badge the history already
     /// supported when the app first evaluated it is written down without a fête (15 October: a
-    /// 14-rep push-up set announced "First set, 7 pull-up reps" and an old record).
+    /// 14-rep push-up set announced "First set, 7 pull-up reps" and an old record)
     var setID: UUID? = nil
 
     var id: BadgeKind { kind }
 }
 
-/// The rules, as pure functions of the saved history. `evaluate` returns everything the history
-/// supports; `BadgeLedger` keeps what was already given so nothing is given twice.
+/// the rules, as pure functions of the saved history. `evaluate` returns everything the history
+/// supports; `BadgeLedger` keeps what was already given so nothing is given twice
 nonisolated enum BadgeRules {
-    /// Ratio of medians that counts as a clearly longer range, the same as `SetComparison`.
+    /// ratio of medians that counts as a clearly longer range, the same as `SetComparison`
     static let longerRangeRatio = 1.15
 
-    /// Every badge the history earns, each dated by the set that earned it.
+    /// every badge the history earns, each dated by the set that earned it
     static func evaluate(history: [WorkoutSessionSummary], calendar: Calendar = .current) -> [EarnedBadge] {
         let sets = history.flatMap(\.sets)
             .filter { !$0.analysis.reps.isEmpty }
@@ -143,7 +143,7 @@ nonisolated enum BadgeRules {
         return nil
     }
 
-    /// The first set of the exercise that beats every earlier one. A single set is no record.
+    /// the first set of the exercise that beats every earlier one. A single set is no record.
     private static func repRecord(_ sets: [SetSummary], kind: ExerciseKind) -> EarnedBadge? {
         guard sets.count >= 2 else { return nil }
         var best = sets[0].analysis.reps.count
@@ -161,8 +161,8 @@ nonisolated enum BadgeRules {
                            + String(localized: ", up from \(previous) in your best earlier set."), setID: set.id)
     }
 
-    /// The first pair of comparable sets (same session, same side, enough reps, fully visible) where
-    /// the later median range is at least 15% longer.
+    /// the first pair of comparable sets (same session, same side, enough reps, fully visible) where
+    /// the later median range is at least 15% longer
     private static func longerRange(_ sets: [SetSummary], kind: ExerciseKind) -> EarnedBadge? {
         let visible = sets.filter { $0.partlyVisible != true }
         for (index, later) in visible.enumerated().dropFirst() {

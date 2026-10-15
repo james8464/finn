@@ -1,7 +1,7 @@
 import Foundation
 
-/// Something a measured set showed, saved with its summary so Finn can learn which patterns come
-/// back most often for this person. Each one is a measured fact about the set, not a judgment of
+/// something a measured set showed, saved with its summary so Finn can learn which patterns come
+/// back most often for this person. Each one is a measured fact about the set, not a judgement of
 /// technique.
 nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     /// Movements that left the top and came back without reaching the bottom.
@@ -21,7 +21,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     case angledView
     /// The joints were clear in only 65 to 80% of the set (`PartialVisibility`).
     case partlyVisible
-    // A form fault seen on at least two reps (`FormCheck`), with the check's own name.
+// a form fault seen on at least two reps (`FormCheck`), with the check's own name.
     case pushUpHipsSag
     case pushUpHipsPike
     case pushUpDepth
@@ -99,7 +99,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
 }
 
 /// The pattern that comes back most often in a person's recent sets of one exercise, so the app can
-/// point it out before the next set and recognize it when it returns. Counts only measured sets
+/// point it out before the next set and recognise it when it returns. Counts only measured sets
 /// saved on this iPhone; nothing is compared with other people.
 nonisolated struct MistakeProfile: Equatable, Sendable {
     /// Recent sets of the exercise that are looked at.

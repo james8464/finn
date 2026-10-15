@@ -1,18 +1,18 @@
 import SwiftUI
 import WidgetKit
 
-/// The views of the home screen widget and the Live Activity. They live with the app's sources so
-/// unit tests can render them to images; the extension declares the widgets around them.
-/// Semantic surfaces and one accent match the app while adapting to widget rendering modes.
+/// the views of the home screen widget and the Live Activity. They live with the app's sources so
+/// unit tests can render them to images; the extension declares the widgets around them
+/// semantic surfaces and one accent match the app while adapting to widget rendering modes
 
 // MARK: - Last set widget
 
-/// The home screen widget: the last measured set, or a plain line when nothing is saved yet, and a
-/// way to start a set in the app.
+/// the home screen widget: the last measured set, or a plain line when nothing is saved yet, and a
+/// way to start a set in the app
 struct LastSetWidgetView: View {
     let snapshot: LastSetSnapshot?
     let family: WidgetFamily
-    /// Today, for "Today 9:41" versus a date; tests fix it.
+    /// today, for "Today 9:41" versus a date; tests fix it
     var now: Date = .now
 
     private var startURL: URL {
@@ -120,7 +120,7 @@ struct LastSetWidgetView: View {
         .foregroundStyle(.secondary)
     }
 
-    /// "Today 9:41", "Yesterday 18:02", otherwise the date.
+    /// "Today 9:41", "Yesterday 18:02", otherwise the date
     static func when(_ date: Date, now: Date) -> String {
         let calendar = Calendar.current
         let time = date.formatted(date: .omitted, time: .shortened)
@@ -133,7 +133,7 @@ struct LastSetWidgetView: View {
 
 // MARK: - Live Activity
 
-/// The Lock Screen banner of a set in progress.
+/// the Lock Screen banner of a set in progress
 struct SetActivityLockScreenView: View {
     let attributes: FinnSetActivityAttributes
     let state: FinnSetActivityAttributes.ContentState
@@ -170,7 +170,7 @@ struct SetActivityLockScreenView: View {
     }
 }
 
-/// The two ends of the compact Dynamic Island.
+/// the two ends of the compact Dynamic Island
 struct SetActivityCompactLeading: View {
     let state: FinnSetActivityAttributes.ContentState
     var body: some View {
@@ -197,7 +197,7 @@ struct SetActivityCompactTrailing: View {
     }
 }
 
-/// The small yellow label the app shows on demo input, carried into the activity.
+/// the small yellow label the app shows on demo input, carried into the activity
 struct DemoTag: View {
     var body: some View {
         Text("DEMO")

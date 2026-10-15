@@ -137,7 +137,7 @@ nonisolated struct AthleteTracker {
             if boxes.allSatisfy({ $0 == nil }) { emptiedSinceLoss = true }
             if time - lastMatchTime < Self.reacquireAfter { return nil }
             if isLocked {
-                // During a set, pick the athlete up again only when they are clearly the one person
+// during a set, pick the athlete up again only when they are clearly the one person
                 // in view, at about the size they were. Getting down into a push-up can hide them
                 // from Vision for a moment and bring them back far from where they were last seen;
                 // before, every remaining frame of the set then had no athlete.
@@ -182,7 +182,7 @@ nonisolated struct AthleteTracker {
                 return hypot(point.x - seen.x, point.y * aspectRatio - seen.y) / size
             }.sorted()
         }
-        // Recent joints first; after a long absence, the last positions seen are all there is.
+// recent joints first; after a long absence, the last positions seen are all there is.
         var shared = gaps(maximumAge: Self.jointMemory)
         if shared.count < Self.minimumSharedJoints { shared = gaps(maximumAge: .infinity) }
         guard shared.count >= Self.minimumSharedJoints else { return nil }
@@ -195,7 +195,7 @@ nonisolated struct AthleteTracker {
         for (joint, point) in joints where point.confidence >= Self.jointConfidence {
             memory[joint] = Seen(x: point.x, y: point.y * aspectRatio, time: time)
         }
-        // A detection missing the legs gives a small box; it does not shrink the size.
+// a detection missing the legs gives a small box; it does not shrink the size.
         if let box {
             lastBox = box
             if size == 0 {

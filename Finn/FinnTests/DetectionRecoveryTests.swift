@@ -63,7 +63,7 @@ nonisolated struct HipCountTests {
 
     @Test func aFrontSquatWithTheFeetOutOfViewIsCountedFromTheHips() throws {
         let frames = JuryTraces.squats(reps: 6, from: 0)
-        // The side rubric needs the knee and ankle: it refused this set.
+// the side rubric needs the knee and ankle: it refused this set.
         #expect(EvidenceGate.assess(frames, requirement: .squat).isRejected)
         let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: .squat)
         guard case .analyzed(let analysis) = outcome else {
@@ -226,7 +226,7 @@ nonisolated struct AthleteRelocationTests {
         for tenth in 1...14 {
             #expect(tracker.select([], aspectRatio: 1, time: Double(tenth) / 10) == nil)
         }
-        // Back at another place, soon after: not yet taken for the athlete.
+// back at another place, soon after: not yet taken for the athlete.
         #expect(tracker.select([person(x: 0.2)], aspectRatio: 1, time: 1.5) == nil)
         // Once `relocateAfter` has passed, the lone person is the athlete again, and then followed.
         #expect(tracker.select([person(x: 0.2)], aspectRatio: 1, time: AthleteTracker.relocateAfter + 0.1) == 0)

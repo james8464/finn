@@ -88,7 +88,7 @@ nonisolated enum EvidenceGate {
         }
         let best = bestSide(frames, requirement: requirement)
         let weakest = weakestJoint(frames, requirement: requirement, side: side)
-        // Rounded down, like the refusal message, so 79.8% never reads as the 80% needed.
+// rounded down, like the refusal message, so 79.8% never reads as the 80% needed.
         return PartialVisibility(coverage: 100 * min(best.complete, best.confident) / max(1, frames.count),
                                  weakest: weakest.role, weakestShare: weakest.share)
     }
@@ -125,7 +125,7 @@ nonisolated enum EvidenceGate {
             return "Another person was in view. Keep only yourself in frame and try again."
         case .missingJoints, .lowConfidence:
             let best = bestSide(frames, requirement: requirement)
-            // Round down so a rejected 79.8% set never appears to meet the 80% minimum.
+// round down so a rejected 79.8% set never appears to meet the 80% minimum.
             let share = 100 * (reason == .missingJoints ? best.complete : best.confident) / total
             let weakest = weakestJoint(frames, requirement: requirement, side: best.side)
             return "Finn saw your \(jointList) clearly in \(share)% of the set and needs \(Int(EvidenceRubric.minimumCoverage * 100))%. "
@@ -142,7 +142,7 @@ nonisolated enum EvidenceGate {
                               + "into the set. Finn ignores other people, but it has to see you: keep a clear "
                               + "line between you and the phone, then try again.", gap.duration, start)
             }
-            // Name only the joints that were lost, in the exercise's order.
+// name only the joints that were lost, in the exercise's order.
             let lostRoles = requirement.joints.filter { role in
                 gap.missing.contains(role.joint(on: .left)) || gap.missing.contains(role.joint(on: .right))
             }
@@ -159,7 +159,7 @@ nonisolated enum EvidenceGate {
         case .unstableFraming:
             let movement = anchorMovement(frames, requirement: requirement,
                                           side: bestSide(frames, requirement: requirement).side)
-            // No clear anchor joint at all gives an infinite movement, which has no percentage.
+// no clear anchor joint at all gives an infinite movement, which has no percentage.
             let moved = movement.isFinite ? "moved \(Int((movement * 100).rounded()))% of the frame" : "was not seen"
             return "Your \(requirement.anchor.rawValue) \(moved) during the set "
                 + "(the limit is \(Int(EvidenceRubric.maximumAnchorMovement * 100))%). Keep the phone still and your "
@@ -254,7 +254,7 @@ nonisolated enum EvidenceGate {
                 lastTracked = frame.time
                 occluded = false
                 missing = []
-                // The whole body, not only the measured side's joints: a person in front covers more
+// the whole body, not only the measured side's joints: a person in front covers more
                 // than the line of the leg.
                 let points = frame.joints.values.filter { $0.confidence >= AthleteTracker.jointConfidence }
                 if let minX = points.map(\.x).min(), let maxX = points.map(\.x).max(),

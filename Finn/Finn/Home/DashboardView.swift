@@ -16,13 +16,13 @@ enum HomeTab: String, CaseIterable {
 }
 
 enum DashboardStyle {
-    /// Figma brand/pink/selection, node 68:12: #FF2D92 (sRGB).
+    /// Figma brand/pink/selection, node 68:12: #FF2D92 (sRGB)
     static let accent = Color(.sRGB, red: 1, green: 45.0 / 255, blue: 146.0 / 255, opacity: 1)
     static let secondary = Color.white.opacity(0.7)
 }
 
-/// What the 1.0 build hides. The Finn+ banner waits for the subscription (1.1): App Store rule
-/// 2.1(a) refuses placeholder content, so it is not shown until it opens something real.
+/// what the 1.0 build hides. The Finn+ banner waits for the subscription (1.1): App Store rule
+/// 2.1(a) refuses placeholder content, so it is not shown until it opens something real
 enum DashboardFlags {
     static let showsFinnPlusBanner = false
 }
@@ -30,7 +30,7 @@ enum DashboardFlags {
 struct DashboardView: View {
     let history: [WorkoutSessionSummary]
     let exercise: ExerciseKind
-    /// Badges earned so far (`Badges/`), for the Awards card.
+    /// badges earned so far (`Badges/`), for the Awards card
     var badges: [EarnedBadge] = []
     let tryFinn: () -> Void
     let watchDemo: () -> Void
@@ -42,7 +42,7 @@ struct DashboardView: View {
     @ScaledMetric(relativeTo: .body) private var scoreSize = 26.0
     @ScaledMetric(relativeTo: .body) private var detailSize = 11.0
 
-    // Reference values are available only in explicitly labelled design previews.
+    // reference values are available only in explicitly labelled design previews
     private var isPreview: Bool {
         #if DEBUG
         ProcessInfo.processInfo.arguments.contains("-finn-dashboard-preview")
@@ -51,8 +51,8 @@ struct DashboardView: View {
         #endif
     }
 
-    /// The most reps Finn measured in one set of the chosen exercise. Finn measures no load, so
-    /// the record is in reps, never in kilograms.
+    /// the most reps Finn measured in one set of the chosen exercise. Finn measures no load, so
+    /// the record is in reps, never in kilograms
     private var bestReps: String {
         if isPreview { return "12" }
         let best = history.flatMap(\.sets).filter { $0.exercise == exercise }
@@ -103,7 +103,7 @@ struct DashboardView: View {
                 card(.lastWorkout, id: "home.lastSession") {
                     VStack(alignment: .leading, spacing: 8) {
                         if dynamicTypeSize.isAccessibilitySize {
-                            // Avoid measuring a discarded horizontal layout at large text sizes.
+                            // avoid measuring a discarded horizontal layout at large text sizes
                             VStack(alignment: .leading, spacing: 16) {
                                 heading("Last workout")
                                 durationLabel
@@ -193,7 +193,7 @@ struct DashboardView: View {
         .background { HomeBackdrop() }
     }
 
-    /// A solid brand-colour invitation to the real workout, with a separate illustrated preview.
+    /// a solid brand-colour invitation to the real workout, with a separate illustrated preview
     private var tryFinnCard: some View {
         VStack(spacing: 0) {
             Button(action: tryFinn) {
@@ -235,7 +235,7 @@ struct DashboardView: View {
         .background(DashboardStyle.accent, in: RoundedRectangle(cornerRadius: 24))
     }
 
-    /// The Finn+ banner, kept for 1.1 behind `DashboardFlags.showsFinnPlusBanner`.
+    /// the Finn+ banner, kept for 1.1 behind `DashboardFlags.showsFinnPlusBanner`
     private var plusBanner: some View {
                 Button { open(.plus) } label: {
                     ZStack(alignment: .topLeading) {
@@ -326,8 +326,8 @@ struct DashboardView: View {
                 }
             }
             .frame(height: 38)
-            // The empty real-data charts have no time series to label. Hours belong
-            // only to the explicitly marked sample preview.
+            // the empty real-data charts have no time series to label. Hours belong
+            // only to the explicitly marked sample preview
             if isPreview { HStack(spacing: 0) {
                 ForEach(["12 AM", "6 AM", "12 PM", "6 PM"], id: \.self) { time in
                     Text(time).font(.system(size: detailSize))

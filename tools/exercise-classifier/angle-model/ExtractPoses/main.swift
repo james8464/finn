@@ -1,4 +1,4 @@
-// Extracts Vision 2D body poses from videos, the way the app does on the iPhone, and writes one
+// extracts Vision 2D body poses from videos, the way the app does on the iPhone, and writes one
 // JSON file of PoseFrame values per video. Videos are only decoded, never executed or uploaded.
 //
 //   extract-poses <videos folder> <output folder>
@@ -83,7 +83,7 @@ func extract(_ url: URL) async throws -> [PoseFrame] {
         try? handler.perform([request])
         let observations = request.results ?? []
         var joints: [BodyJoint: JointPoint] = [:]
-        // Gyms have bystanders: keep the person who fills most of the frame, the one exercising.
+// gyms have bystanders: keep the person who fills most of the frame, the one exercising.
         if let subject = observations.max(by: {
             extent(of: $0, aspectRatio: aspectRatio) < extent(of: $1, aspectRatio: aspectRatio)
         }) {

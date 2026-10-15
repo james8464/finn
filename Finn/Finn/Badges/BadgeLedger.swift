@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// Where earned badges are kept. The app writes a JSON file next to the history; tests use memory.
+/// where earned badges are kept. The app writes a JSON file next to the history; tests use memory.
 nonisolated protocol BadgeStoring: Sendable {
     func load() throws -> [EarnedBadge]
     func save(_ badges: [EarnedBadge]) throws
@@ -28,7 +28,7 @@ nonisolated struct LocalBadgeStore: BadgeStoring {
     }
 }
 
-/// Keeps badges in memory only, for tests and demo input.
+/// keeps badges in memory only, for tests and demo input
 final class MemoryBadgeStore: BadgeStoring, @unchecked Sendable {
     private var badges: [EarnedBadge]
     init(_ badges: [EarnedBadge] = []) { self.badges = badges }
@@ -36,12 +36,12 @@ final class MemoryBadgeStore: BadgeStoring, @unchecked Sendable {
     func save(_ badges: [EarnedBadge]) throws { self.badges = badges }
 }
 
-/// The badges the person has, and the ones just earned, to show once at the end of a set.
-/// A badge given once is never given again, even if the history later changes.
+/// the badges the person has, and the ones just earned, to show once at the end of a set
+/// a badge given once is never given again, even if the history later changes
 @MainActor @Observable
 final class BadgeLedger {
     private(set) var earned: [EarnedBadge] = []
-    /// Badges earned by the latest `update`, shown on the result until `acknowledge`.
+    /// badges earned by the latest `update`, shown on the result until `acknowledge`
     private(set) var justEarned: [EarnedBadge] = []
     @ObservationIgnored private let store: any BadgeStoring
 
@@ -50,7 +50,7 @@ final class BadgeLedger {
         earned = (try? store.load()) ?? []
     }
 
-    /// The badges in display order, earned ones with their date, the rest locked.
+    /// the badges in display order, earned ones with their date, the rest locked
     var all: [(kind: BadgeKind, earned: EarnedBadge?)] {
         BadgeKind.all.map { kind in (kind, earned.first { $0.kind == kind }) }
     }
@@ -59,11 +59,11 @@ final class BadgeLedger {
 
     func has(_ kind: BadgeKind) -> Bool { earned.contains { $0.kind == kind } }
 
-    /// Compares the history with what was already given and keeps the new ones. Returns them.
-    /// Only the badges that `celebrating`, the set just saved, earned itself go to `justEarned`;
+    /// compares the history with what was already given and keeps the new ones. Returns them.
+    /// only the badges that `celebrating`, the set just saved, earned itself go to `justEarned`;
     /// the rest (at launch, after an update or an import, or a record set by an older set) are
     /// written down quietly. A set that earned nothing shows nothing, even if the launch found
-    /// badges in the history.
+    /// badges in the history
     @discardableResult
     func update(history: [WorkoutSessionSummary], calendar: Calendar = .current,
                 celebrating setID: UUID? = nil) -> [EarnedBadge] {
@@ -79,7 +79,7 @@ final class BadgeLedger {
 
     func acknowledge() { justEarned = [] }
 
-    /// Forgets every badge, for "Delete all local data".
+    /// forgets every badge, for "Delete all local data"
     func reset() {
         earned = []
         justEarned = []

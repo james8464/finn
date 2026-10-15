@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// The state behind the Coach screen: the saved sets as context, the turns, and the engine in use.
+/// the state behind the Coach screen: the saved sets as context, the turns, and the engine in use
 @MainActor
 @Observable
 final class CoachConversation {
@@ -19,12 +19,12 @@ final class CoachConversation {
                                  engine: responder.currentEngineKind)]
     }
 
-    /// The app's coach: the standard engine order, with the Claude demo first in Debug builds.
+    /// the app's coach: the standard engine order, with the Claude demo first in Debug builds
     convenience init(history: [WorkoutSessionSummary]) {
         var extra: [any CoachEngine] = []
         #if DEBUG
-        // Synthetic UI tours must not call a live model service. An unsigned iOS 27
-        // simulator can advertise PCC as available, then trap inside FoundationModels.
+        // synthetic UI tours must not call a live model service. An unsigned iOS 27
+        // simulator can advertise PCC as available, then trap inside FoundationModels
         if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
             self.init(history: history, responder: CoachResponder(selector: CoachEngineSelector(engines: [])))
             return
@@ -34,13 +34,13 @@ final class CoachConversation {
         self.init(history: history, responder: CoachResponder(selector: .standard(extra: extra)))
     }
 
-    /// Which engine would answer the next question.
+    /// which engine would answer the next question
     var engineKind: CoachEngineKind { responder.currentEngineKind }
 
-    /// Why no model answers, when none does: a sentence the person can act on.
+    /// why no model answers, when none does: a sentence the person can act on
     var engineNote: String? { responder.unavailableReason }
 
-    /// The saved sets changed (a new set, a deletion): the coach reads them again.
+    /// the saved sets changed (a new set, a deletion): the coach reads them again
     func refresh(history: [WorkoutSessionSummary]) {
         context = CoachContext.make(history: history)
     }
@@ -56,7 +56,7 @@ final class CoachConversation {
         messages.append(answer)
     }
 
-    /// Questions the person can tap, so the demo does not start from a blank field.
+    /// questions the person can tap, so the demo does not start from a blank field
     var suggestedQuestions: [String] {
         guard let latest = context.latest else { return [] }
         switch responder.language {

@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// An isolated illustrated tour, available in release builds. It never opens the camera,
-/// runs analysis, talks to accessories, or writes sample workouts to the person's history.
+/// an isolated illustrated tour, available in release builds. It never opens the camera,
+/// runs analysis, talks to accessories, or writes sample workouts to the person's history
 struct FinnDemoView: View {
     let startWorkout: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -116,7 +116,7 @@ struct DemoStoryPage: View {
     }
 }
 
-/// The same framing, count and set status as the camera UI, with an explicitly synthetic athlete.
+/// the same framing, count and set status as the camera UI, with an explicitly synthetic athlete
 struct DemoCameraCard: View {
     let showsAdvice: Bool
     var welcome = false
@@ -176,7 +176,7 @@ struct DemoCameraCard: View {
             }
             .padding(20)
             if !welcome {
-                // Frame corners echo the production capture screen. They are decorative, not pose data.
+                // frame corners echo the production capture screen. They are decorative, not pose data.
                 DemoFrameCorners()
                     .stroke(DashboardStyle.accent.opacity(0.8), style: StrokeStyle(lineWidth: 2, lineCap: .round))
                     .padding(.horizontal, 25).padding(.top, 70).padding(.bottom, 90)

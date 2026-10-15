@@ -23,7 +23,7 @@ nonisolated struct WatchMessagesTests {
         #expect(WatchState(message: empty.message()) == empty)
     }
 
-    /// WatchConnectivity carries property lists only: the message must serialize, nil values left out.
+    /// WatchConnectivity carries property lists only: the message must serialise, nil values left out.
     @Test func stateIsAPropertyListAndSurvivesSerialization() throws {
         for state in [full, WatchState(stage: .result, exercise: "Push-up", reps: 1, summary: "1 rep measured.",
                                        wristControls: false, demoInput: true, sentAt: 12)] {

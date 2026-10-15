@@ -25,7 +25,7 @@ nonisolated struct PushUpShouldersTests {
                 joints[.leftShoulder] = JointPoint(x: 0.4, y: shoulderY, confidence: 0.8)
                 joints[.rightShoulder] = JointPoint(x: 0.6, y: shoulderY, confidence: 0.8)
             }
-            // Within `hiddenAtBottom` seconds of the deepest point of a rep, the upper body is lost.
+// within `hiddenAtBottom` seconds of the deepest point of a rep, the upper body is lost.
             if hiddenAtBottom > 0, time >= 1, phase < Double(reps) {
                 let distanceToBottom = abs(phase - phase.rounded(.down) - 0.5) * period
                 if distanceToBottom < hiddenAtBottom / 2 {

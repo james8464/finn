@@ -99,7 +99,7 @@ struct BadgeMark: View {
     }
 }
 
-/// Inside the dashboard's Awards card: the latest marks and a count, or an invitation.
+/// inside the dashboard's Awards card: the latest marks and a count, or an invitation
 struct AwardsCardContent<Heading: View>: View {
     let badges: [EarnedBadge]
     let heading: Heading
@@ -129,7 +129,7 @@ struct AwardsCardContent<Heading: View>: View {
     }
 }
 
-/// Inline completion feedback. Awards never interrupt a workout with a modal or push alert.
+/// inline completion feedback. Awards never interrupt a workout with a modal or push alert.
 struct BadgeUnlockCard: View {
     let badges: [EarnedBadge]
     let open: () -> Void
@@ -166,8 +166,8 @@ struct BadgeEntry: Identifiable, Equatable {
     var id: BadgeKind { kind }
 }
 
-/// One badge on its own sheet: the mark large, the measured fact and the date when earned, the
-/// condition when not.
+/// one badge on its own sheet: the mark large, the measured fact and the date when earned, the
+/// condition when not
 struct BadgeDetailView: View {
     let kind: BadgeKind
     let earned: EarnedBadge?
