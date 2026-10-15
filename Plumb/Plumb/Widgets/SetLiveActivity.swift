@@ -30,7 +30,7 @@ nonisolated enum SetLiveActivityRules {
 /// about ActivityKit. Everything is local: no push token is requested.
 @MainActor
 final class SetLiveActivity {
-    private static let log = Logger(subsystem: "com.finlearn.plumb", category: "LiveActivity")
+    private static let log = Logger(subsystem: "ai.mwm.build.challenge.team.08", category: "LiveActivity")
     private weak var model: WorkoutSessionModel?
     private var demoInput = false
     private var activity: Activity<PlumbSetActivityAttributes>?

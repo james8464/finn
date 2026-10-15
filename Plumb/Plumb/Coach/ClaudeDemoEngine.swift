@@ -7,7 +7,7 @@ import Security
 /// The demo API key, kept in this iPhone's Keychain and nowhere else. The person pastes it once in
 /// Options > Developer.
 nonisolated enum CoachDemoKeyStore {
-    private static let service = "com.finlearn.plumb.coach-demo"
+    private static let service = "ai.mwm.build.challenge.team.08.coach-demo"
     private static let account = "anthropic"
 
     private static var query: [String: Any] {

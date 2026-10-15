@@ -162,7 +162,7 @@ final class WatchSync {
     private func publish(_ state: WatchState) {
         if let lastSent, WatchSyncRules.sameScreen(lastSent, state) { return }
         var next = state
-        next.haptic = WatchSyncRules.haptic(from: lastSent, to: state)
+        next.haptic = model?.hapticFeedback == .off ? .none : WatchSyncRules.haptic(from: lastSent, to: state)
         next.sentAt = max(clock(), (lastSent?.sentAt ?? 0) + 0.001)
         lastSent = next
         deliver(next)
