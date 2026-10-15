@@ -135,7 +135,7 @@ struct ContentView: View {
             }
         }
         #endif
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+        .safeAreaInset(edge: .top, spacing: 0) {
             #if DEBUG
             if isDemo && !isCaptureStage && !isErrorStage { demoIndicator }
             #endif

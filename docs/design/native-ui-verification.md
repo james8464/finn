@@ -8,14 +8,14 @@ The redesign replaces the photo/glass dashboard with native tabs and semantic su
 
 ## Preservation
 
-The branch includes current main through `1056759`: French localization, best-set filtered history, squat visibility recovery and live/final rep-count reconciliation, movement-turn handling and the architecture documentation reorganization. Existing translations and plural rules are retained; new interface copy has French entries. Other worktrees and their uncommitted work were left intact.
+The branch includes current main through `53e5646`: French localization, best-set filtered history, squat visibility recovery and live/final rep-count reconciliation, movement-turn handling and the architecture documentation reorganization. The alternative single-screen redesign in `53e5646` was resolved in favour of this native-tab design at James’s explicit request; its commit remains in history. The subsequent integration includes the front-view push-up cue and award-celebration fixes plus the shared English test scheme. Existing translations and plural rules are retained; new interface copy has French entries. Other worktrees and their uncommitted work were left intact.
 
 ## Review findings addressed
 
 - Native tab destinations keep independent navigation state. Camera presentation keeps the underlying tab hierarchy alive, preserving nested destinations and Coach drafts. The new regression test reproduced the original reset before the fix.
 - Accessibility layouts shorten the pinned privacy action, limit the instructional illustration’s growth, and keep the Coach information link readable with the keyboard open.
 - Result navigation uses native toolbar actions; measured reps precede awards. Awards use readable rows in both appearances.
-- White action labels use a deeper blue for contrast. The pinned privacy action uses primary text. The Debug demo marker sits below navigation and is excluded only from Dynamic Type auditing.
+- White action labels use a deeper blue for contrast. The pinned privacy action uses primary text. The noninteractive Debug demo marker is excluded only from Dynamic Type auditing; it is absent from Release.
 - The Health offer scrolls and opens at full height at accessibility text sizes.
 - Demo Coach conversations use the existing local fallback. The unsigned iOS 27 simulator advertised Private Cloud Compute as available but trapped inside FoundationModels when asked to reply. Normal model selection is unchanged. This UI run does not validate live Apple Intelligence service access.
 
