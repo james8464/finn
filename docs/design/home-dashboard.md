@@ -2,8 +2,8 @@
 
 James requested Théophile’s original design on 15 October 2026, superseding the monochrome hybrid. Restore the source design from [design/visuals-tabs at c0ffdff](https://github.com/james8464/hackathon-project/tree/c0ffdff).
 
-- Home uses the original full-colour background, lime Try Plumb/demo card, glass Last workout, Posture, Best set, Sessions and Awards cards, and scrolling Home/account header.
-- The glass bar contains Home, Posture, Coach and Workout (+), with the original symbols, spacing, selection treatment and default label size.
+- Home uses the minimalist charcoal background (James’s subsequent request), lime Try Plumb/demo card, glass Last workout, Posture, Best set, Sessions and Awards cards, and scrolling Home/account header.
+- The glass bar contains Home, Posture, Coach and Workout (+), with the original symbols, spacing, selection capsule and default label size. Stable dark fills and a subtle selection gradient retain the glass outline while keeping label contrast predictable.
 - Posture opens measured set reviews. Workout opens setup, never the camera immediately. The illustrated demo neither records nor saves sample workouts.
 - Preserve newer independent navigation stacks, saved data, localization, keyboard dismissal and camera/privacy behavior.
 - Unavailable posture scores stay blank. Sample values appear only in explicitly labelled previews.

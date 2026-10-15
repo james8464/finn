@@ -92,7 +92,14 @@ struct DashboardView: View {
 
                 card(.lastWorkout, id: "home.lastSession") {
                     VStack(alignment: .leading, spacing: 8) {
-                        ViewThatFits(in: .horizontal) {
+                        if dynamicTypeSize.isAccessibilitySize {
+                            // Avoid measuring a discarded horizontal layout at large text sizes.
+                            VStack(alignment: .leading, spacing: 16) {
+                                heading("Last workout")
+                                durationLabel
+                                scoreRing
+                            }
+                        } else {
                             HStack(alignment: .top, spacing: 16) {
                                 VStack(alignment: .leading, spacing: 28) {
                                     heading("Last workout")
@@ -100,11 +107,6 @@ struct DashboardView: View {
                                 }
                                 Spacer(minLength: 0)
                                 scoreRing.padding(.top, 10)
-                            }
-                            VStack(alignment: .leading, spacing: 16) {
-                                heading("Last workout")
-                                durationLabel
-                                scoreRing
                             }
                         }
                         HStack {

@@ -79,6 +79,20 @@ final class NativeUIReviewUITests: XCTestCase {
     }
 
     @MainActor
+    func testHomeLargestTextAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        app.skipOnboardingIfShown()
+        XCTAssertTrue(app.buttons["home.tryPlumb"].waitForExistence(timeout: 8))
+        try save("home-largest-text-normal")
+        try app.performAccessibilityAudit(for: [.textClipped, .hitRegion]) { issue in
+            print("Home without demo: \(issue.compactDescription) \(issue.element?.debugDescription ?? "no element")")
+            return false
+        }
+    }
+
+    @MainActor
     func testRestoredLargestTextControls() throws {
         let app = XCUIApplication()
         app.launchArguments = ["-plumb-ui-demo", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]

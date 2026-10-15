@@ -326,7 +326,7 @@ struct ContentView: View {
                 HomeTabBar(selection: $selectedTab)
             }
         }
-        .background { HomeBackdrop() }
+        .background(Color(white: 0.035).ignoresSafeArea())
         .environment(\.colorScheme, .dark)
         .preferredColorScheme(.dark)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in

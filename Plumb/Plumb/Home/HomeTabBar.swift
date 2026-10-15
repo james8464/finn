@@ -2,15 +2,11 @@ import SwiftUI
 
 struct HomeBackdrop: View {
     var body: some View {
-        GeometryReader { proxy in
-            Image("HomeBackdrop")
-                .resizable()
-                .scaledToFill()
-                .frame(width: proxy.size.width, height: proxy.size.height)
-                .clipped()
-                .overlay(.black.opacity(0.16))
+        GeometryReader { _ in
+            Color(white: 0.035)
         }
         .ignoresSafeArea()
+        .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
 }
@@ -28,12 +24,13 @@ private enum HomeAccessibilityDiagnostics {
 struct DashboardGlass: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     var radius: CGFloat = 15
+    var stableBackdrop = false
 
     func body(content: Content) -> some View {
         content
             .background {
                 let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
-                if reduceTransparency || HomeAccessibilityDiagnostics.opaqueSurface {
+                if stableBackdrop || reduceTransparency || HomeAccessibilityDiagnostics.opaqueSurface {
                     shape.fill(Color(white: 0.09)).accessibilityHidden(true)
                 } else {
                     shape.fill(.ultraThinMaterial).opacity(0.8).environment(\.colorScheme, .dark).accessibilityHidden(true)
@@ -78,9 +75,9 @@ struct HomeTabBar: View {
                 .accessibilityHidden(true)
             }
         .padding(4)
-        // Glass must not sample another Liquid Glass layer. Keep the shell a material surface
-        // and render the labels above the independently morphing native glass selection.
-        .modifier(DashboardGlass(radius: 48))
+        // Stable charcoal surfaces retain the glass outline without variable contrast
+        // beneath small labels. The selection still moves between tabs.
+        .modifier(DashboardGlass(radius: 48, stableBackdrop: true))
         .animation(reduceMotion ? nil : .spring(duration: 0.28, bounce: 0.12), value: selection)
         .sensoryFeedback(.selection, trigger: selection)
         .padding(.horizontal, 12)
@@ -136,10 +133,13 @@ struct HomeTabBar: View {
             Capsule().fill(Color(white: 0.04))
                 .matchedGeometryEffect(id: "selection", in: glassSelection)
         } else {
-            Capsule().fill(.black.opacity(0.16))
-                .glassEffect(.regular.tint(.black.opacity(0.28)).interactive(!reduceMotion), in: Capsule())
-                .glassEffectID("selection", in: glassSelection)
-                .glassEffectTransition(reduceMotion ? .identity : .matchedGeometry)
+            Capsule()
+                .fill(LinearGradient(colors: [Color(white: 0.14), Color(white: 0.10)],
+                                     startPoint: .top, endPoint: .bottom))
+                .overlay {
+                    Capsule().strokeBorder(.white.opacity(0.10), lineWidth: 1)
+                }
+                .matchedGeometryEffect(id: "selection", in: glassSelection)
         }
     }
 }

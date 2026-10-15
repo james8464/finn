@@ -135,3 +135,7 @@ Keep current exercise drawings and compact widgets. Lime marks selection and sma
 ## Original design restoration (supersedes hybrid)
 
 James requested Théophile’s original design from `design/visuals-tabs` (`c0ffdff`): full-colour background, lime invitation/demo, glass dashboard cards, scrolling header and original tab styling. Retain newer functionality and navigation state. Fix tab text scaling with the same default 11-point appearance; verify full setup audits, navigation, demo isolation, larger text and signed phone deployment before publishing.
+
+### Follow-up: minimal background
+
+James requested a plain charcoal Home background, preserving Théophile’s cards and green/tab design. Stable dark tab surfaces replace variable glass fills to resolve contrast findings; the selection retains its outline and movement. Large-text Last workout uses an explicit vertical layout to prevent clipping. See the current verification record.

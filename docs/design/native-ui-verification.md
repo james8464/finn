@@ -121,3 +121,22 @@ The final three-test run passed: tab Dynamic Type audit, full setup audit with t
 Captures: [Home](screenshots/2026-10-15-theophile-original/home.png), [largest-text Workout](screenshots/2026-10-15-theophile-original/workout-largest-text-demo.png), [Coach keyboard](screenshots/2026-10-15-theophile-original/coach-largest-text-keyboard-demo.png), [largest-text Home audit capture](screenshots/2026-10-15-theophile-original/home-largest-text-audit-demo.png). Demo-labelled captures use synthetic input.
 
 Installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; unlock it and open Plumb. Repository signing settings remain unchanged.
+
+## Minimal background and accessibility fixes
+
+James requested a plain charcoal Home background while retaining Théophile’s cards, green accents and tab layout. This supersedes the photograph requirement above; the source asset remains available.
+
+- Last workout now chooses its large-text stack explicitly. Removing the discarded horizontal `ViewThatFits` layout cleared the reproducible Home clipping finding.
+- The tab shell uses a stable charcoal fill. This cleared the three unselected-tab contrast findings; replacing the selected capsule’s variable glass fill with a dark gradient cleared the fourth. Symbols, sizes, outline, selection movement and haptics remain. Native glass refraction is replaced by stable shading.
+- The root uses a background colour directly, avoiding the empty accessibility container introduced by the decorative background view.
+- The full setup audit passes without issue filtering. The new normal-input largest-text Home regression also passes; it previously failed before the layout fix.
+
+No data, storage, camera or service behavior changed. Review found no functional regressions. Repository signing remains unchanged; the personal-team Release build succeeded.
+
+Captures: [Home](screenshots/2026-10-15-minimal-background/home-demo.png) and [largest-text Home](screenshots/2026-10-15-minimal-background/home-largest-text-demo.png). Both show explicitly labelled synthetic input; the installed Release app does not.
+
+The update installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; opening Plumb after unlocking uses this update.
+
+The largest-text Home checks passed with both normal and synthetic input, including Workout/Coach controls and return to Home. The destinations tour also passed. The combined audit/keyboard test encountered long simulator animation-idle waits and the pre-existing keyboard `Invalid frame dimension` runtime warning; all its assertions passed. These are separate from the resolved contrast/clipping audit findings.
+
+Final five-test batch: **5 passed, 0 failures** (largest-text demo flow, normal-input Home clipping/hit regions, destination tour, full dark setup audit, full opaque-surface setup audit). Together with the earlier full normal setup audit, all targeted contrast/clipping checks pass without filtering. Signed Release build and phone installation succeeded.
