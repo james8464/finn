@@ -144,6 +144,7 @@ struct FormChecksTests {
             for _ in 0..<12 {
                 var settings = SyntheticExerciseMotion.Settings()
                 settings.maximumYawDegrees = 10
+                settings.repDepth = 0.95...1.0
                 let frames = SyntheticExerciseMotion.sequence(label: label, settings: settings, using: &generator)
                 guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: definition),
                       analysis.reps.count >= 3 else { continue }

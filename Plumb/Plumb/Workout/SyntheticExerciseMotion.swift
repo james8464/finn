@@ -15,6 +15,7 @@ nonisolated enum SyntheticExerciseMotion {
         var maximumYawDegrees = 20.0
         var jitterPixels: ClosedRange<Double> = 2...7
         var dropRate: ClosedRange<Double> = 0...0.05
+        var repDepth: ClosedRange<Double> = 0.65...1.0
     }
 
     static func sequence<G: RandomNumberGenerator>(label: String, settings: Settings = Settings(),
@@ -28,7 +29,7 @@ nonisolated enum SyntheticExerciseMotion {
         let duration = Double.random(in: settings.duration, using: &rng)
         let jitter = Double.random(in: settings.jitterPixels, using: &rng)
         let dropRate = Double.random(in: settings.dropRate, using: &rng)
-        let schedule = Schedule(duration: duration, using: &rng)
+        let schedule = Schedule(duration: duration, repDepth: settings.repDepth, using: &rng)
 
         // Fit the whole movement in a portrait 720 × 1280 frame before sampling it.
         var poses: [(TimeInterval, Skeleton)] = []
@@ -103,10 +104,10 @@ nonisolated enum SyntheticExerciseMotion {
     /// Reps with rests: amount 0 is the top position, 1 the bottom of a full rep.
     struct Schedule {
         let start: Double, tempo: Double, depths: [Double]
-        init<G: RandomNumberGenerator>(duration: Double, using rng: inout G) {
+        init<G: RandomNumberGenerator>(duration: Double, repDepth: ClosedRange<Double>, using rng: inout G) {
             start = .random(in: 0.3...1.2, using: &rng)
             tempo = .random(in: 1.4...3.2, using: &rng)
-            depths = (0..<40).map { _ in .random(in: 0.65...1.0, using: &rng) }
+            depths = (0..<40).map { _ in .random(in: repDepth, using: &rng) }
         }
 
         func amount(at time: Double) -> (Double, Double) {
