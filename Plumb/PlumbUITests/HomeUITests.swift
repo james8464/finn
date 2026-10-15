@@ -50,9 +50,9 @@ final class HomeUITests: XCTestCase {
         stop.tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 8))
         app.buttons["Done"].tap()
-        let line = app.staticTexts["home.lastSession"]
+        let line = app.buttons["home.progress"]
         XCTAssertTrue(line.waitForExistence(timeout: 5))
-        XCTAssertTrue(line.label.hasPrefix("Today, "), line.label)
+        XCTAssertTrue(line.label.contains("this week"), line.label)
     }
 
     @MainActor

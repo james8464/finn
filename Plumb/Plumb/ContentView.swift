@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 import UIKit
 
@@ -393,14 +394,20 @@ struct ContentView: View {
                 Spacer(minLength: 16)
                 startButton
                     .padding(.bottom, 28)
-                if let lastSessionLine {
-                    Text(lastSessionLine)
-                        .font(.subheadline)
-                        .monospacedDigit()
-                        .foregroundStyle(PlumbStyle.supportingText)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-                        .accessibilityIdentifier("home.lastSession")
+                if let progressLine {
+                    Button { route = .history } label: {
+                        Text(progressLine)
+                            .font(.subheadline.weight(.medium))
+                            .monospacedDigit()
+                            .foregroundStyle(Color.primary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Opens your history")
+                    .accessibilityIdentifier("home.progress")
                 }
                 // Said where the decision is made: before the camera opens.
                 Button { route = .privacy } label: {
@@ -537,6 +544,22 @@ struct ContentView: View {
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .plumbGlass(in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    /// "3 sessions this week · best 27 push-ups": measured, never estimated.
+    private var progressLine: String? {
+        guard !model.history.isEmpty else { return nil }
+        let calendar = Calendar.current
+        let thisWeek = model.history.filter {
+            calendar.isDate($0.startedAt, equalTo: .now, toGranularity: .weekOfYear)
+        }.count
+        let kind = model.selectedExercise
+        let best = model.history.flatMap(\.sets).filter { $0.exercise == kind }
+            .map { $0.analysis.reps.count }.max()
+        let sessions = String(localized: "\(thisWeek) sessions this week")
+        guard let best else { return sessions }
+        let record = best == 1 ? "1 \(kind.definition.copy.name.lowercased())" : "\(best) \(kind.pluralName)"
+        return String(localized: "\(sessions) · best \(record)")
     }
 
     /// "Yesterday, 27 push-ups": the latest saved session in one line.
@@ -1377,6 +1400,24 @@ struct ContentView: View {
             switch result {
             case .measured(let analysis, let cue):
                 Divider().padding(.vertical, 8)
+                if analysis.reps.count >= 2 {
+                    depthChart(analysis.reps, exercise: model.resultExercise, highlighted: cue?.repNumbers ?? [])
+                }
+                if let extremes = model.repExtremes {
+                    repExtremesView(extremes)
+                        .padding(.top, 8)
+                }
+                Button { resultPage = .coach } label: {
+                    Label("Ask the coach", systemImage: "bubble.left.and.text.bubble.right")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .tint(Color.primary)
+                .accessibilityHint("Opens the coach with this set's facts")
+                .accessibilityIdentifier("result.askCoach")
+                Divider().padding(.vertical, 8)
                 Text("\(analysis.reps.count) measured reps")
                     .font(.subheadline)
                     .monospacedDigit()
@@ -1487,12 +1528,6 @@ struct ContentView: View {
                 .tint(Color.primary)
                 .accessibilityIdentifier("result.shareSummary")
                 .accessibilityHint("Shares the measured summary without video")
-                // Last on the result, as in #10: higher up, the cards sat behind the bottom
-                // button on a short result and the contrast audit measured them through it.
-                if let extremes = model.repExtremes {
-                    Divider().padding(.vertical, 12)
-                    repExtremesView(extremes)
-                }
             case .insufficientView(let reason):
                 recognitionNote
                 Text(reason)
@@ -1526,6 +1561,75 @@ struct ContentView: View {
         }
     }
     #endif
+
+    /// One bar per rep, its range in the exercise's own unit; the reps behind the observation are
+    /// drawn in black, the others in grey. Measured values only.
+    private func depthChart(_ reps: [RepMetric], exercise: ExerciseKind, highlighted: [Int]) -> some View {
+        let definition = exercise.definition
+        let noun = definition.copy.rangeNoun
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("\(noun.prefix(1).uppercased() + noun.dropFirst()) per rep")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            Chart(reps, id: \.number) { rep in
+                BarMark(x: .value("Rep", rep.number),
+                        y: .value("Range", min(1.2, rep.relativeRange / definition.rangeDisplayScale)))
+                    .foregroundStyle(highlighted.contains(rep.number) ? Color.primary : Color.primary.opacity(0.28))
+                    .cornerRadius(5)
+            }
+            .chartYAxis(.hidden)
+            .chartXAxis {
+                AxisMarks(values: reps.map(\.number)) { _ in
+                    AxisValueLabel().font(.caption2)
+                }
+            }
+            .chartXScale(domain: 0.5...(Double(reps.count) + 0.5))
+            .frame(height: 120)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(noun) per rep")
+            .accessibilityValue(reps.map { "rep \($0.number), \(definition.accessibleRange($0.relativeRange))" }
+                .joined(separator: "; "))
+        }
+        .accessibilityIdentifier("result.depthChart")
+    }
+
+    /// Reps per session for each exercise, above the saved sessions. Only with two or more sessions.
+    @ViewBuilder private func historyChart(_ sessions: [WorkoutSessionSummary]) -> some View {
+        let points: [(exercise: ExerciseKind, date: Date, reps: Int)] = sessions.flatMap { session in
+            Dictionary(grouping: session.sets, by: \.exercise).map { kind, sets in
+                (kind, session.startedAt, sets.reduce(0) { $0 + $1.analysis.reps.count })
+            }
+        }
+        let kinds = Dictionary(grouping: points, by: \.exercise).filter { $0.value.count >= 2 }.keys
+        let shown = points.filter { kinds.contains($0.exercise) }.sorted { $0.date < $1.date }
+        if !shown.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Reps per session")
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+                Chart(Array(shown.enumerated()), id: \.offset) { _, point in
+                    LineMark(x: .value("Date", point.date), y: .value("Reps", point.reps))
+                        .foregroundStyle(by: .value("Exercise", point.exercise.chipName))
+                        .interpolationMethod(.monotone)
+                    PointMark(x: .value("Date", point.date), y: .value("Reps", point.reps))
+                        .foregroundStyle(by: .value("Exercise", point.exercise.chipName))
+                }
+                .chartForegroundStyleScale(range: [Color.primary, Color.primary.opacity(0.55),
+                                                   Color.primary.opacity(0.3), Color.primary.opacity(0.18),
+                                                   Color.primary.opacity(0.12), Color.primary.opacity(0.08)])
+                .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) }
+                .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) }
+                .frame(height: 160)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Reps per session")
+                .accessibilityValue(shown.map {
+                    "\($0.exercise.chipName), \($0.date.formatted(date: .abbreviated, time: .omitted)), \($0.reps) reps"
+                }.joined(separator: "; "))
+            }
+            .padding(.vertical, 6)
+            .accessibilityIdentifier("history.chart")
+        }
+    }
 
     /// The set's deepest and shallowest reps side by side, drawn from their pose points.
     private func repExtremesView(_ extremes: RepExtremes) -> some View {
@@ -1664,6 +1768,9 @@ struct ContentView: View {
                     .padding(.vertical, 24)
                 }
             } else {
+                if sessions.count >= 2 {
+                    Section { historyChart(sessions) }
+                }
                 Section("Saved sessions") {
                     ForEach(sessions) { session in
                         HStack(spacing: 12) {

@@ -195,6 +195,16 @@
         }
       }
     },
+    "%@ per rep" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ par répétition"
+          }
+        }
+      }
+    },
     "%@ record" : {
       "localizations" : {
         "fr" : {
@@ -277,6 +287,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%@ · best %@" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · record %2$@"
           }
         }
       }
@@ -668,6 +688,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld sessions this week" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld séances cette semaine"
           }
         }
       }
@@ -1241,6 +1271,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pose une question sur tes séries"
+          }
+        }
+      }
+    },
+    "Ask the coach" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demander au coach"
           }
         }
       }
@@ -4852,6 +4892,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Répétitions plus rapides que les premières"
+          }
+        }
+      }
+    },
+    "Reps per session" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répétitions par séance"
           }
         }
       }
