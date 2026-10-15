@@ -1,54 +1,25 @@
-# Plumb · product brief
+# Plumb product brief
 
-**Supporting product brief · 13 October 2026.** [The README](../../README.md) is the source of truth for the product direction and current state. This page expands its result boundaries and feature order; [planning.md](../../planning.md) owns technical and validation detail. Align public release copy with the *shipped* build.
+Plumb helps people training alone see how a camera-visible movement changed during a set. The first audience is a self-directed iPhone user doing basic strength exercises at home or in a gym. The current loop is **choose an exercise → frame the body → count a set → review one supported observation or a retake reason → try again**. No account or accessory is required. [README](../../README.md) owns the current build status.
 
-## Purpose and audience
+## Result boundaries
 
-People training alone often cannot see how their own movement changes through a set. Reviewing a video takes time and still leaves the interpretation to them. Plumb turns a short, camera-visible movement into one bounded observation they can check in the next set.
+| Outcome | Meaning |
+| --- | --- |
+| Measured observation | An exercise-specific rule found a range or posture change in sufficiently clear, comparable reps. Show the supporting reps and one next-set action. |
+| No supported pattern | The set was measurable, but no rule supports a specific correction. Do not imply perfect form. |
+| Partial set | Keep the visible count, name the unclear joint, and withhold posture advice or comparison. |
+| Retake | The view or movement could not support a measured result. Explain what to change. |
+| Analysis failure | A capture or processing problem occurred. Offer retry without interpreting the movement. |
 
-The first audience is a self-directed iPhone user doing basic strength work at home or in a gym. The intended full experience pairs iPhone camera analysis with Apple Watch rep timing, effort context, discreet haptics, and timely, validated advice. The expansion includes treadmill runners, whose continuous movement needs a different session and analysis design. Qualified trainers help validate coaching cues; a trainer account is not part of the README's product scope.
+A single camera cannot assess force, pain, load, or every joint. Plumb must not certify safe technique or diagnose a condition. New technique cues need labeled sets and qualified review before release.
 
-**Current product loop:** choose an exercise → place the iPhone → analyze live without saving video → review at most one supported finding, no clear pattern, or a retake reason → try another set → compare the same measured signal. No account or accessory is required for this iPhone build.
+## Sequence
 
-## What a result means
+1. **Validate the iPhone loop.** Test setup, count, cue support, latency, accessibility, and trust across consenting people, devices, views, and lighting. Report abstention alongside accuracy. The [protocol](../validation/squat-v1-protocol.md) defines the initial gates.
+2. **Test the paired experience.** The Watch companion exists, but physical-device tests must establish whether its timing and haptics improve on camera-only feedback. AirPods are an audio route; head-motion analysis is a separate unvalidated idea.
+3. **Expand by evidence.** Treadmill running needs a distinct gait rubric. iPhone Duo placement, Apple TV display, widgets, Live Activities, and monetization each need a demonstrated user benefit and release checks. Scaffolded code is not proof of a finished feature.
 
-| Outcome | What Plumb says | Evidence needed |
-| --- | --- | --- |
-| Shorter observed range | The later reps had a smaller measured range; one next-set action appears. | At least four measured reps, a sufficient view, and the exercise's versioned range rule. |
-| Posture change | The later reps changed in one exercise-specific, camera-visible posture measure; one next-set action appears. | At least four measured reps, clear supporting joints, a side-on view, and comparable rep range. |
-| No supported pattern | Plumb has no specific posture or range finding for this set. | A measurable set with no rule supported. |
-| Retake | The view or movement cannot support a measured result. | Missing/weak joints, wrong view, interruption, or incomplete movement. |
-| Analysis failed | Plumb could not complete the set analysis and offers a retry. | A capture or processing error; do not present this as a movement finding. |
+Use native Apple controls and accessible text. Camera and Health permissions belong at the moment of use. Video remains local and unsaved. Generative language can explain measured facts with a deterministic fallback; it cannot invent coaching evidence.
 
-A single side camera cannot check every joint, force, load, pain, or personal constraint. The UI must not certify perfect or safe technique. A qualified coach and real-person holdout must review any new technique claim before release.
-
-## Features and sequence
-
-| Priority | Feature | Current state / next decision |
-| --- | --- | --- |
-| Now | iPhone side-view squat, push-up, static lunge, and stiff-leg deadlift; rep analysis, evidence gate, one observation, history, comparison, text sharing | Implemented with simulator and synthetic video checks; real-person accuracy remains unvalidated. |
-| Before release | Physical iPhone validation, cue review, accessibility, privacy and signing checks | Test consented sets across people, views, clothing, light, and occlusion. Suppress claims that miss the [validation gates](../../planning.md#6-validation-and-success-measures). |
-| Core product expansion | Apple Watch workout session, rep timing, tempo, effort context, and discreet haptics | Watch is central to the intended iPhone + Watch experience, but absent from this build. Prototype after the iPhone loop is dependable; compare sensor-assisted timing with camera-only analysis before claiming an improvement. |
-| Next movement | Treadmill running | Research safe camera placement and a running-specific, expert-reviewed gait signal. Begin with post-run feedback; do not reuse strength rep thresholds. |
-| Full product | Timely live cues, including Watch haptics and optional AirPods audio | Central to the vision; release only when tracking confidence, latency, coach review, and distraction testing support the particular cue. |
-| Later surfaces and business | iPhone Duo placement, Apple TV display, widgets, Live Activities, and a tested monetization model | These are named in the README but are not current features or submission claims. |
-
-## Apple platform choices
-
-- **Vision + AVFoundation:** on-device pose from a live frame sequence; confidence, occlusion, viewpoint, and the full movement matter more than a single image. [Vision reports joint positions and confidence](https://developer.apple.com/documentation/vision/detecting-human-body-poses-in-images), rather than an overall technique verdict.
-- **Foundation Models:** optional language for a structured, already validated comparison, with reviewed deterministic wording whenever generation is unavailable or invalid. It never decides whether a rep is safe.
-- **AirPods:** audio output for a user-requested observation works today through the system route. Head-motion-assisted movement checks are planned and need availability, permission, timing, and coaching validation; headphones do not currently measure form for Plumb.
-- **Apple Watch:** core to the intended paired experience, currently unbuilt. Workout context, timing, and haptics come first; any camera/watch sensor fusion needs synchronized, paired-device tests.
-- **iPhone Duo and Apple TV:** proposed placement and living-room display surfaces, respectively; neither is implemented or validated.
-- **Native UI:** system typography, controls, accessibility, and quiet black/white branding from the [brand guide](../../Design/README.md). The measured fact and next action should remain the focus. Apple's [feedback guidance](https://developer.apple.com/design/human-interface-guidelines/feedback) favors passive status for information a person can glance at, and its [workout guidance](https://developer.apple.com/design/human-interface-guidelines/workouts) cautions against distracting information during activity. The current camera view shows framing and set controls, not coaching prompts.
-
-## How we decide whether it works
-
-The first success event is a user reaching a trustworthy measured result, understanding why it appeared, and choosing a feasible next-set action. Track setup success within two tries, rep-count agreement with annotated sets, expert agreement on emitted cues, result latency, second-set completion, and user trust. Report how often the app abstains alongside cue agreement; silence alone is not a useful product. Targets and the collection protocol live in [planning.md](../../planning.md) and [validation](../validation/squat-v1-protocol.md). No real-person accuracy or retention result is claimed today.
-
-## Supporting documents
-
-- [Product rationale](rationale.md): why the problem and approach matter.
-- [Market research](market-research.md): alternatives, positioning questions, and research plan.
-- [Pitch](pitch.md): a three-minute story constrained to the implemented build.
-- [Release documents](../release/): public copy and submission gates; they must describe the final signed build rather than this roadmap.
+For positioning and research, see the [rationale](rationale.md), [market research](market-research.md), and [running note](running-stride.md). The [earlier build plan](../../planning.md) records technical choices; release copy must describe the signed, validated build.

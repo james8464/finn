@@ -1,13 +1,13 @@
 # Project documents
 
-Start with the root [README](../README.md) for the product direction and current build. The [product brief](product/brief.md) expands its feature order and claim boundaries; [planning.md](../planning.md) holds implementation and validation detail.
+The root [README](../README.md) owns current build status. [Planning](../planning.md) records earlier technical choices and validation gates; its implementation status may be superseded.
 
-| Area | Documents | Purpose |
-| --- | --- | --- |
-| Product | [Brief](product/brief.md) · [Rationale](product/rationale.md) · [Market research](product/market-research.md) · [User needs](product/user-needs.md) · [Pitch](product/pitch.md) · [Running stride](product/running-stride.md) | Promise, audience, evidence limits, alternatives, and presentation. |
-| Design | [Brand theme](../Design/README.md) · [iPhone experience review](design/iphone-experience-review.md) · [Apple Watch and AirPods](design/apple-watch-and-airpods.md) · [Apple HIG agent reference](design/apple-hig-agent-reference.md) | Visual decisions, native interaction guidance, Apple HIG page index, and what each accessory adds per exercise. |
-| Validation | [Protocol](validation/squat-v1-protocol.md) · [Results](validation/squat-v1-results.md) · [Exercise rules](validation/exercise-rules-v1.md) · [Replay guide](../tools/replay/README.md) | What was tested, how, and what remains unproven. |
-| Release | [Submission checklist](release/app-store-submission.md) · [Listing copy](release/listing-copy.md) · [Privacy answers](release/app-privacy-answers.md) | Final build claims and App Store work. |
-| Engineering history | [Specifications and completed plans](superpowers/) | Earlier decisions; current product status belongs in the brief and README. |
+| Area | Start here |
+| --- | --- |
+| Product | [Brief](product/brief.md), [user needs](product/user-needs.md), [market research](product/market-research.md), [rationale](product/rationale.md), [pitch](product/pitch.md), [running](product/running-stride.md) |
+| Design | [Brand](../Design/README.md), [Home dashboard](design/home-dashboard.md), [Workout flow](design/iphone-experience-review.md), [Watch and AirPods](design/apple-watch-and-airpods.md), [Apple HIG reference](design/apple-hig-agent-reference.md) |
+| Validation | [Protocol](validation/squat-v1-protocol.md), [results](validation/squat-v1-results.md), [exercise rules](validation/exercise-rules-v1.md), [device run](validation/physical-iphone-run.md), [replay guide](../tools/replay/README.md) |
+| Release | [Submission](release/app-store-submission.md), [listing](release/listing-copy.md), [privacy answers](release/app-privacy-answers.md), [screenshots](release/screenshots/README.md) |
+| Engineering history | [Specifications and plans](superpowers/) |
 
-**Editing rule:** distinguish implemented behavior, synthetic test evidence, physical-device validation, and future ideas. Update the README first when scope or build state changes, then align supporting documents. Update public release pages only when the signed candidate contains the behavior.
+Keep implemented behavior, synthetic results, physical-device evidence, and future ideas distinct. Update the README when product status changes; public release copy must match the signed build.
