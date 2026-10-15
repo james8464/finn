@@ -338,6 +338,10 @@ struct ContentView: View {
                 NavigationLink { privacyPage } label: {
                     Label("Privacy", systemImage: "lock")
                 }
+                Button { showsOnboarding = true } label: {
+                    Label("Replay the welcome", systemImage: "arrow.counterclockwise")
+                }
+                .accessibilityIdentifier("account.replayOnboarding")
             }
             Section("Account") {
                 Text("Plumb needs no account: there is no server, nothing to sign in to, and nothing to sync.")
@@ -756,6 +760,19 @@ struct ContentView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 10) {
+                    Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
+                    Text("Meet Plumb, explore an illustrated set and its advice, and choose your coach. You can replay this tour any time.")
+                    Button { showsOnboarding = true } label: {
+                        Label("Replay the welcome", systemImage: "arrow.counterclockwise")
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(Color.primary)
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                            .contentShape(Rectangle())
+                    }
+                    .accessibilityIdentifier("options.replayOnboarding")
+                }
+                .optionCard()
+                VStack(alignment: .leading, spacing: 10) {
                     Text("Exercise recognition").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     if model.recognitionMethod != .unavailable {
                         Toggle("Recognize the exercise automatically", isOn: Binding(
@@ -880,17 +897,6 @@ struct ContentView: View {
                     }
                 }
                 .optionCard()
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
-                    Text("Meet Plumb, explore an illustrated set and its advice, and choose your coach. You can replay this tour any time.")
-                    Button("Replay the welcome") { showsOnboarding = true }
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(Color.primary)
-                        .frame(minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                        .accessibilityIdentifier("options.replayOnboarding")
-                }
-                .optionCard()
                 #if DEBUG
                 // Coach demo key and engine switch; absent from the Release build.
                 CoachDeveloperSection()
@@ -903,7 +909,8 @@ struct ContentView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicators(.visible)
+        .accessibilityIdentifier("options.scroll")
         .background(HomeStyle.background)
         .navigationTitle("Options")
         .navigationBarTitleDisplayMode(.large)
