@@ -9,10 +9,9 @@ final class ExerciseOptionsUITests: XCTestCase {
         app.openWorkoutTab()
         app.openFromHome("Options")
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
-        // XCTest refuses identifier queries longer than 128 characters, so match the start
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
-            format: "label BEGINSWITH %@", "Estimates from joint angles; uses your selection when uncertain.")).firstMatch.exists)
         let toggle = app.switches["options.recogniseExercise"]
+        app.reveal(toggle)
+        XCTAssertTrue(app.staticTexts["Estimates from joint angles; uses your selection when uncertain."].exists)
         XCTAssertTrue(toggle.exists)
         XCTAssertEqual(toggle.value as? String, "1")
         XCTAssertFalse(app.switches["options.useTrainedModel"].exists)
@@ -107,6 +106,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         app.launch()
         app.openWorkoutTab()
         app.openFromHome("Options")
+        app.reveal(app.switches["options.recogniseExercise"])
         XCTAssertEqual(app.switches["options.recogniseExercise"].value as? String, "1")
         let toggle = app.switches["options.useTrainedModel"]
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))

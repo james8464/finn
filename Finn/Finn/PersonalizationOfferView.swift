@@ -27,7 +27,7 @@ struct PersonalizationOfferView: View {
                         .frame(maxWidth: .infinity, minHeight: 32)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(HomeStyle.filledAccent)
+                .tint(AppPageStyle.action)
                 .controlSize(.large)
                 .accessibilityLabel("Continue")
                 .accessibilityIdentifier("offer.personalize")

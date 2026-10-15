@@ -129,6 +129,13 @@ final class ScreenTourUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 1)
         save("15-accueil-apres-une-serie")
+        open(app, "History")
+        XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 5))
+        save("history-demo-saved-set")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.selectTab("Coach")
+        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 5))
+        save("coach-demo-saved-set")
     }
 
     @MainActor

@@ -36,9 +36,14 @@ final class CoachReliabilityUITests: XCTestCase {
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
         field.typeText("What should I improve?\n")
-        let secondAnswer = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "count == 2"), object: answer)
-        XCTAssertEqual(XCTWaiter().wait(for: [secondAnswer], timeout: 5), .completed)
+        let submittedQuestion = app.staticTexts["What should I improve?"]
+        XCTAssertTrue(submittedQuestion.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(app.buttons["coach.send"].isEnabled, app.debugDescription)
+        XCTAssertTrue(answer.firstMatch.waitForExistence(timeout: 5))
+        // Lazy transcript rows can be discarded outside the viewport. Verify the visible reply
+        // follows the newly submitted question instead of counting off-screen answer views.
+        let latestAnswer = answer.element(boundBy: max(0, answer.count - 1))
+        XCTAssertGreaterThan(latestAnswer.frame.minY, submittedQuestion.frame.minY)
         XCTAssertEqual(app.state, .runningForeground)
     }
 
@@ -94,6 +99,8 @@ final class CoachReliabilityUITests: XCTestCase {
         XCTAssertEqual(XCTWaiter().wait(for: [counted], timeout: 10), .completed)
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        app.buttons["result.done"].tap()
+        XCTAssertTrue(app.buttons["Start a set"].waitForExistence(timeout: 5))
         app.selectTab("Coach")
         let field = app.textFields["coach.field"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))

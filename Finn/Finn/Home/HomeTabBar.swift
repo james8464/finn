@@ -51,7 +51,8 @@ struct DashboardGlass: ViewModifier {
 
 struct HomeTabBar: View {
     @Binding var selection: HomeTab
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.dynamicTypeSize) private var typeSize
     // caption2 plateaus at smaller sizes. Body scaling preserves 11pt at default
@@ -119,7 +120,9 @@ struct HomeTabBar: View {
                             .font(.system(size: labelSize, weight: selection == tab ? .medium : .regular))
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    .foregroundStyle(selection == tab ? DashboardStyle.accent : DashboardStyle.secondary)
+                    .foregroundStyle(selection == tab
+                                     ? DashboardStyle.accent
+                                     : DashboardStyle.secondary)
                     .frame(maxWidth: .infinity, minHeight: typeSize.isAccessibilitySize ? min(tabHeight, 88) - 2 : 62)
                     .padding(.vertical, 1)
                     .contentShape(Capsule())

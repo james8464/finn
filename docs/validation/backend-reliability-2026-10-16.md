@@ -50,7 +50,8 @@ The Send button also has an explicit 44-point tap area, verified with the keyboa
 The PCC path is a plausible cause of the reported phone crash, not a confirmed crash-log diagnosis. No
 matching Finn report was returned from the connected phone's crash-log listing; a later request
 lost its device connection. Live Apple Intelligence inference on that physical iPhone remains
-unverified. Simulator checks use deterministic fallbacks or injected engines. The explicit
+unverified. The follow-up below adds genuine on-device model tests in the simulator, alongside
+the deterministic fallback and injected-engine checks. The explicit
 Debug-only Claude option remains separate; it is not enabled or used by these checks.
 
 ## Research and design decisions
@@ -156,3 +157,31 @@ This is real model inference, not evidence of performance or crash freedom on an
 The full unit suite at that point passed 535 Swift tests across 63 suites. The 15 strict rendered
 video fixtures and the mirrored/framing checks also passed. Strong blur and camera movement can
 still produce a provisional live count before the final rejection; this limitation is unchanged.
+
+### CI and merged interface verification
+
+The original PR #34 run (`38818094226`) failed four time-formatting tests and eighteen interface
+checks. The time formatter used the host time zone even when its caller supplied a calendar in
+another zone. It now applies that calendar and zone to both date and time, with an additional
+regression across a day boundary. The 45 Coach/Siri tests passed with the test runner set to UTC.
+
+The interface branch at `ce50d5b` is incorporated, preserving its contrast, camera-primer, navigation,
+large-text and Release launch fixes. British-spelt wrapper arguments were reconciled with the
+backend branch. Coach's composer is a normal keyboard-aware layout child; the previous bottom
+inset could leave its visual and interactive positions inconsistent during keyboard transitions.
+
+The merged build passed the native model selection test in all four languages (9.755 seconds for
+the combined integration test), the full recorded-demo-set-to-native-Coach UI flow (43.342 seconds),
+and the largest-text composer flow in English UK, English US, French and Spanish (83.400 seconds).
+These are execution durations, not a controlled inference-performance benchmark.
+
+The in-app privacy disclosure now matches the on-device production selector and published policy.
+Graphify's local-only code graph was used to follow Coach and generation-gate dependencies; generated
+graph files are not part of the app or repository changes.
+
+The software keyboard's Send key exposed a separate multiline-field issue: SwiftUI inserted a
+newline without calling `onSubmit`. Coach now recognises a single Return edit in linear time,
+submits the existing question, and leaves pasted paragraphs editable. All 31 Coach unit tests and
+the keyboard/tab-switch UI regression passed. The updated privacy disclosure UI check also passed.
+The UI assertion checks the latest visible reply rather than assuming a lazy transcript retains
+every off-screen accessibility row.

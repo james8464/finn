@@ -11,14 +11,13 @@ final class AppleFitnessUITests: XCTestCase {
         app.openWorkoutTab()
         app.openFromHome("Options")
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Apple Fitness"].exists)
         let toggle = app.switches["options.savesToFitness"]
+        app.reveal(toggle)
+        XCTAssertTrue(app.staticTexts["Apple Fitness"].exists)
         XCTAssertTrue(toggle.exists)
         XCTAssertEqual(toggle.value as? String, "0")
         XCTAssertFalse(toggle.isEnabled)
-        // XCTest refuses identifier queries longer than 128 characters, so match the start
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
-            format: "label BEGINSWITH %@", "When you finish a session (Done, or Finish session")).firstMatch.exists)
+        XCTAssertTrue(app.staticTexts["Saves finished sessions with duration and reps, without calorie or heart-rate estimates."].exists)
         XCTAssertTrue(app.staticTexts["Demo and recorded input are never saved to Apple Health."].exists)
     }
 }

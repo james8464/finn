@@ -1,6 +1,33 @@
 import XCTest
 
 final class DashboardUITests: XCTestCase {
+    /// exercises the real launch path in both Debug and Release; no synthetic-input flags
+    @MainActor
+    func testProductionLaunchRendersAllTabsAndDestinations() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launch()
+        app.skipOnboardingIfShown()
+        XCTAssertTrue(app.scrollViews["summary.scroll"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["home.tryFinn"].isHittable)
+        app.selectTab("Posture")
+        XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 5))
+        app.selectTab("Coach")
+        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 5))
+        app.openWorkoutTab()
+        XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["home.start"].isHittable)
+        app.openFromHome("Options")
+        XCTAssertTrue(app.buttons["options.hapticFeedback"].waitForExistence(timeout: 5))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.openFromHome("Privacy")
+        XCTAssertTrue(app.buttons["privacy.camera"].waitForExistence(timeout: 5))
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Production privacy destination"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
     @MainActor
     func testOriginalHomeScrollPositionSurvivesTabSwitch() throws {
         let app = XCUIApplication()

@@ -8,7 +8,8 @@ struct CoachView: View {
     @State private var replyTask: Task<Void, Never>?
     @State private var followsLatestReply = true
     @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     @FocusState private var fieldFocused: Bool
     private let history: [WorkoutSessionSummary]
 
@@ -27,14 +28,19 @@ struct CoachView: View {
             transcript
             composer
         }
-        .background(HomeStyle.background.ignoresSafeArea())
+        .background(AppPageStyle.background.ignoresSafeArea())
         .navigationTitle("Coach")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showsSource = true } label: {
-                    Label("About Coach", systemImage: "info.circle")
+                    Image(systemName: "info.circle")
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .frame(minWidth: 44, minHeight: 44)
+                .accessibilityLabel("About Coach")
                 .accessibilityIdentifier("coach.engine")
                 .accessibilityHint("Explains how the Coach chooses its answer")
             }
@@ -49,7 +55,7 @@ struct CoachView: View {
                 List {
                     Section("Source") {
                         Text(engineLine)
-                        if let note = conversation.engineNote { Text(note).foregroundStyle(.secondary) }
+                        if let note = conversation.engineNote { Text(note).foregroundStyle(AppPageStyle.secondaryText) }
                     }
                     Section { Text("Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique.") }
                 }
@@ -72,8 +78,24 @@ struct CoachView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     ForEach(conversation.messages) { message in
-                        bubble(message)
+                        if conversation.messages.count == 1 {
+                            VStack(alignment: .leading, spacing: 16) {
+                                Image(systemName: "bubble.left.and.text.bubble.right")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(AppPageStyle.tint)
+                                    .accessibilityHidden(true)
+                                Text("Ask about your sets")
+                                    .font(.title2.weight(.bold))
+                                Text(message.text)
+                                    .font(.body)
+                                    .foregroundStyle(AppPageStyle.secondaryText)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .modifier(AppSurface())
                             .id(message.id)
+                        } else {
+                            bubble(message).id(message.id)
+                        }
                     }
                     if conversation.isAnswering {
                         HStack(spacing: 8) {
@@ -132,8 +154,13 @@ struct CoachView: View {
                         .padding(.vertical, 10)
                         .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                         .accessibilityIdentifier("coach.field")
-                        .onChange(of: draft) { _, value in
-                            if value.count > FoundationModelsCoachPrompt.maximumQuestionCharacters {
+                        .onChange(of: draft) { previous, value in
+                            // Multiline SwiftUI fields can insert a newline instead of invoking
+                            // onSubmit for the software keyboard's Send key.
+                            if let question = CoachDraft.submission(previous: previous, updated: value) {
+                                draft = question
+                                send()
+                            } else if value.count > FoundationModelsCoachPrompt.maximumQuestionCharacters {
                                 draft = String(value.prefix(FoundationModelsCoachPrompt.maximumQuestionCharacters))
                             }
                         }
@@ -152,6 +179,7 @@ struct CoachView: View {
                             .symbolRenderingMode(.hierarchical)
                     }
                     .buttonStyle(.plain)
+                    .tint(AppPageStyle.tint)
                     .disabled(!conversation.isAnswering && draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .accessibilityLabel(conversation.isAnswering ? String(localized: "Stop response") : String(localized: "Send"))
                     .accessibilityIdentifier(conversation.isAnswering ? "coach.stop" : "coach.send")
@@ -160,7 +188,7 @@ struct CoachView: View {
             .padding(.horizontal, 20)
             .padding(.top, 10)
             .padding(.bottom, 8)
-            .background(HomeStyle.background)
+            .background(AppPageStyle.background)
         }
 
     private var engineLine: String {
@@ -200,7 +228,7 @@ struct CoachView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(message.text)
                     .font(.body)
-                    .foregroundStyle(isCoach ? Color.primary : HomeStyle.onAccent)
+                    .foregroundStyle(isCoach ? Color.primary : Color.black)
                     .fixedSize(horizontal: false, vertical: true)
                 if isCoach, !history.isEmpty, let engine = message.engine {
                     Text(engine.label)
@@ -210,7 +238,7 @@ struct CoachView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(isCoach ? HomeStyle.card : HomeStyle.filledAccent,
+            .background(isCoach ? AppPageStyle.surface : AppPageStyle.action,
                         in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             if isCoach { Spacer(minLength: typeSize.isAccessibilitySize ? 0 : 40) }
         }
