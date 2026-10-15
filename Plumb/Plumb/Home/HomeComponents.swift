@@ -63,14 +63,21 @@ struct ExerciseChips: View {
             }
             .accessibilityLabel("Exercise: \(selection.definition.copy.name)")
         } else {
-            ScrollView(.horizontal) {
-                HStack(spacing: 8) {
-                    ForEach(ExerciseKind.allCases, id: \.self) { kind in
-                        chip(kind)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal) {
+                    HStack(spacing: 8) {
+                        ForEach(ExerciseKind.allCases, id: \.self) { kind in
+                            chip(kind).id(kind)
+                        }
                     }
                 }
+                .scrollIndicators(.hidden)
+                // The chosen exercise is kept across launches: bring its chip into view.
+                .onAppear { proxy.scrollTo(selection, anchor: .center) }
+                .onChange(of: selection) { _, kind in
+                    withAnimation(HomeStyle.spring) { proxy.scrollTo(kind, anchor: .center) }
+                }
             }
-            .scrollIndicators(.hidden)
             .sensoryFeedback(.selection, trigger: selection)
         }
     }
@@ -261,5 +268,14 @@ struct CameraPrimer: View {
             }
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+extension View {
+    /// A group of settings on its own rounded card, as on the first screen.
+    func optionCard() -> some View {
+        padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
