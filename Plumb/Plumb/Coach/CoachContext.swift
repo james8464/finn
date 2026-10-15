@@ -145,6 +145,13 @@ nonisolated enum CoachInstructions {
 /// Fixed sentences built from the saved observations, used when no language model can run.
 /// It does not pretend to converse: it reports, and says what it cannot do.
 nonisolated enum CoachFallback {
+    static func noRelevantAnswer(language: CoachLanguage) -> String {
+        switch language {
+        case .english: "Plumb didn't measure that in these saved sets. I can only comment on recorded reps and observations."
+        case .french: "Plumb n'a pas mesuré cela dans ces séries. Je peux seulement commenter les répétitions et observations enregistrées."
+        }
+    }
+
     static func reply(to question: String, context: CoachContext,
                       language: CoachLanguage = .current()) -> String {
         guard let latest = context.latest else {

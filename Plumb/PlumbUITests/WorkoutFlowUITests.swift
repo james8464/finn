@@ -8,6 +8,7 @@ final class WorkoutFlowUITests: XCTestCase {
         let app = XCUIApplication()
         app.resetAuthorizationStatus(for: .camera)
         app.launch()
+        app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         app.buttons["home.start"].tap()
         let primer = app.buttons["primer.continue"]

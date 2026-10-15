@@ -136,6 +136,15 @@ struct CoachTests {
         #expect(!answer.text.contains("prevents knee injury"))
     }
 
+    @Test func noRelevantSetDoesNotReciteUnrelatedHistory() async {
+        let engine = StubCoachEngine(output: "NONE")
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let answer = await responder.answer("Did I injure my knee?", context: CoachContext.make(history: history()), history: [])
+        #expect(answer.engine == .fallback)
+        #expect(answer.text.contains("didn't measure that"))
+        #expect(!answer.text.contains("Set 3"))
+    }
+
     @Test func emptyOrFailingAnswerFallsBack() async {
         let empty = StubCoachEngine(output: "   ")
         let context = CoachContext.make(history: history())
