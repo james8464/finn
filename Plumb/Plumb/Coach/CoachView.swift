@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A plain conversation with the coach about the saved sets. Kept simple so it can be dressed later.
+/// a plain conversation with the coach about the saved sets. Kept simple so it can be dressed later.
 struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var draft = ""
@@ -90,9 +90,9 @@ struct CoachView: View {
     private var engineLine: String {
         switch conversation.engineKind {
         case .fallback: String(localized: "No language model available. The coach repeats what Plumb saved.")
-        case .onDevice: String(localized: "Apple Intelligence chose the sets; the details come from Plumb's records.")
-        case .privateCloudCompute: String(localized: "Apple Private Cloud Compute chose the sets; the details come from Plumb's records.")
-        case .claudeDemo: String(localized: "Debug demo: Claude chose the sets; the details come from Plumb's records.")
+        case .onDevice: String(localized: "Answered by Apple Intelligence on this device.")
+        case .privateCloudCompute: String(localized: "Answered by Apple Private Cloud Compute.")
+        case .claudeDemo: String(localized: "Debug demo: answered by Claude Sonnet via Anthropic API.")
         }
     }
 

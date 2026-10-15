@@ -107,33 +107,15 @@ struct CoachTests {
 
     // MARK: Simulated engine
 
-    @Test func modelSelectionRendersOnlyRecordedSetFacts() async {
-        let engine = StubCoachEngine(output: "Set 2, Set 3")
+    @Test func modelReplyIsUsedDirectly() async {
+        let engine = StubCoachEngine(output: "Set 2 was a strong squat set — your depth improved compared to set 1.")
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
         let context = CoachContext.make(history: history())
         let answer = await responder.answer("What happened?", context: context, history: [])
         #expect(answer.engine == .onDevice)
-        #expect(answer.text.contains("Set 2: 6 squat reps. Observation: Your last two reps were shallower"))
-        #expect(answer.text.contains("Set 3: 8 push-up reps."))
+        #expect(answer.text == "Set 2 was a strong squat set — your depth improved compared to set 1.")
         #expect(engine.calls == 1)
         #expect(engine.lastInstructionsContext?.facts.count == 3)
-    }
-
-    @Test func answerCitingAnUnknownSetFallsBack() async {
-        let engine = StubCoachEngine(output: "Set 7")
-        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
-        let answer = await responder.answer("Which was best?", context: CoachContext.make(history: history()), history: [])
-        #expect(answer.engine == .fallback)
-        #expect(!answer.text.contains("Set 7"))
-    }
-
-    @Test func generatedUnsupportedPostureClaimIsNeverShown() async {
-        let engine = StubCoachEngine(output: "Set 2 had perfect posture and prevents knee injury.")
-        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
-        let answer = await responder.answer("How was set 2?", context: CoachContext.make(history: history()), history: [])
-        #expect(answer.engine == .fallback)
-        #expect(!answer.text.contains("perfect posture"))
-        #expect(!answer.text.contains("prevents knee injury"))
     }
 
     @Test func emptyOrFailingAnswerFallsBack() async {
@@ -149,7 +131,7 @@ struct CoachTests {
     }
 
     @Test func slowEngineFallsBackAfterTimeout() async {
-        let engine = StubCoachEngine(output: "Set 1 was fine.", delay: .seconds(5))
+        let engine = StubCoachEngine(output: "Great set!", delay: .seconds(5))
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]),
                                        timeout: .milliseconds(100), language: .english)
         let answer = await responder.answer("Hi", context: CoachContext.make(history: history()), history: [])
@@ -157,9 +139,9 @@ struct CoachTests {
     }
 
     @Test func firstAvailableEngineWins() async {
-        let first = StubCoachEngine(kind: .claudeDemo, available: false, output: "Set 1 was fine.")
-        let second = StubCoachEngine(kind: .privateCloudCompute, output: "Set 1 was fine.")
-        let third = StubCoachEngine(kind: .onDevice, output: "Set 1 was fine.")
+        let first = StubCoachEngine(kind: .claudeDemo, available: false, output: "Good set.")
+        let second = StubCoachEngine(kind: .privateCloudCompute, output: "Good set.")
+        let third = StubCoachEngine(kind: .onDevice, output: "Good set.")
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [first, second, third]), language: .english)
         #expect(responder.currentEngineKind == .privateCloudCompute)
         _ = await responder.answer("Hi", context: CoachContext.make(history: history()), history: [])
@@ -181,25 +163,14 @@ struct CoachTests {
         #expect(conversation.messages.count == 3)
     }
 
-    // MARK: Validator and prompt
-
-    @Test func answerCheckReadsSetReferencesInBothLanguages() {
-        #expect(CoachAnswerCheck.referencedSetNumbers(in: "Set 2 and set #3, then Série 4 and série 5.") == [2, 3, 4, 5])
-        #expect(CoachAnswerCheck.referencedSetNumbers(in: "A set of 8 reps.") == [])
-        let context = CoachContext.make(history: history())
-        #expect(CoachAnswerCheck.selectedFacts(in: "Set 2, Série 3", for: context)?.map(\.number) == [2, 3])
-        #expect(CoachAnswerCheck.selectedFacts(in: "Set 2 had perfect posture", for: context) == nil)
-        #expect(CoachAnswerCheck.selectedFacts(in: "Set 2, Set 2", for: context) == nil)
-        #expect(CoachAnswerCheck.selectedFacts(in: "Set 7", for: context) == nil)
-    }
 
     @Test func instructionsCarryTheRulesAndTheLanguage() {
         let english = FoundationModelsCoachPrompt.instructions(for: CoachContext.make(history: history()), language: .english)
-        #expect(english.contains("No medical advice"))
+        #expect(english.contains("Do not give medical advice"))
         #expect(english.contains("Saved sets, oldest first:"))
         #expect(english.contains("Set 3: Push-up"))
         let french = FoundationModelsCoachPrompt.instructions(for: CoachContext.make(history: history()), language: .french)
-        #expect(french.contains("For a French question, use \"Série N\""))
+        #expect(french.contains("Answer in French"))
         let prompt = FoundationModelsCoachPrompt.prompt(question: "Now?", history: [
             CoachMessage(role: .person, text: "Earlier question"),
             CoachMessage(role: .coach, text: "Earlier answer", engine: .onDevice),

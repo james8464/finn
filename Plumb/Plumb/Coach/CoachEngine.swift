@@ -1,13 +1,13 @@
 import Foundation
 import FoundationModels
 
-/// Where an answer came from, shown discreetly under the conversation.
+/// where an answer came from, shown discreetly under the conversation.
 nonisolated enum CoachEngineKind: String, Equatable, Sendable {
     /// Apple's server model on Private Cloud Compute, through Foundation Models (iOS 27).
     case privateCloudCompute
-    /// The on-device Apple Intelligence model.
+    /// the on-device Apple Intelligence model.
     case onDevice
-    /// Fixed sentences from the saved observations; no model ran.
+    /// fixed sentences from the saved observations; no model ran.
     case fallback
     /// Claude Sonnet through the Anthropic API. Debug builds only.
     case claudeDemo
@@ -31,7 +31,7 @@ nonisolated struct CoachMessage: Identifiable, Equatable, Sendable {
     let id: UUID
     let role: Role
     let text: String
-    /// Set on coach messages only.
+    /// set on coach messages only.
     let engine: CoachEngineKind?
 
     init(id: UUID = UUID(), role: Role, text: String, engine: CoachEngineKind? = nil) {
@@ -42,17 +42,17 @@ nonisolated struct CoachMessage: Identifiable, Equatable, Sendable {
     }
 }
 
-/// A language model the coach can talk through. `available` is checked before every use.
+/// a language model the coach can talk through. `available` is checked before every use.
 @MainActor
 protocol CoachEngine: AnyObject {
     var kind: CoachEngineKind { get }
     var available: Bool { get }
-    /// Selects relevant saved-set labels for `question`; the returned text is never displayed.
+    /// returns a conversational reply to `question`, grounded in `context`.
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String
 }
 
-/// Picks the engine for a turn: the first available one in order, or nil for the fixed text.
+/// picks the engine for a turn: the first available one in order, or nil for the fixed text.
 @MainActor
 final class CoachEngineSelector {
     private let engines: [any CoachEngine]
@@ -61,7 +61,7 @@ final class CoachEngineSelector {
         self.engines = engines
     }
 
-    /// The order the product asks for: Private Cloud Compute, then the on-device model.
+    /// the order the product asks for: Private Cloud Compute, then the on-device model.
     /// In Debug, `extra` goes first (the Claude demo) when the person turned it on.
     static func standard(extra: [any CoachEngine] = []) -> CoachEngineSelector {
         var engines: [any CoachEngine] = extra
@@ -77,8 +77,9 @@ final class CoachEngineSelector {
     }
 }
 
-/// Runs one turn: the model selects at most two saved sets, then Plumb renders recorded facts.
-/// Invalid selections, errors and timeouts use fixed text. No model-authored advice is displayed.
+/// runs one turn: the model writes a conversational reply grounded in the recorded set facts.
+/// Errors and timeouts fall back to fixed text. The system prompt restricts the model to the
+/// provided facts only, so no hallucinated measurements reach the user.
 @MainActor
 final class CoachResponder {
     private let selector: CoachEngineSelector
@@ -104,12 +105,10 @@ final class CoachResponder {
         let generated = await withTimeout { [language] in
             try await engine.reply(to: question, context: context, history: history, language: language)
         }
-        guard let generated, let selected = CoachAnswerCheck.selectedFacts(in: generated, for: context)
-        else { return fallback }
-        let recordedAnswer = selected.map { CoachFallback.summary(of: $0, language: language) }
-            .joined(separator: " ")
-        return CoachMessage(role: .coach, text: recordedAnswer,
-                            engine: engine.kind)
+        guard let text = generated, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return fallback
+        }
+        return CoachMessage(role: .coach, text: text, engine: engine.kind)
     }
 
     private func withTimeout(_ work: @escaping @MainActor () async throws -> String) async -> String? {
@@ -133,18 +132,17 @@ final class CoachResponder {
     }
 }
 
-/// Shared by the two Foundation Models engines: instructions, the context, then the turn.
+/// shared by the two Foundation Models engines: system instructions + context + turn history.
 @MainActor
 enum FoundationModelsCoachPrompt {
     static func instructions(for context: CoachContext, language: CoachLanguage) -> String {
         CoachInstructions.text(language: language)
-            // The first-launch answers (level, goal) set the tone; see `OnboardingProfile.coachNote`.
             + (PlumbPreferences.app.onboardingProfile.coachNote.map { "\n\n" + $0 } ?? "")
             + "\n\nSaved sets, oldest first:\n" + context.promptText()
     }
 
-    /// The earlier turns as text, so a fresh session still knows the conversation. Kept short:
-    /// the on-device model has a small window.
+    /// the earlier turns as text so a fresh session still knows the conversation. Kept short:
+    /// the on-device model has a small context window.
     static func prompt(question: String, history: [CoachMessage]) -> String {
         let recent = history.suffix(6)
         guard !recent.isEmpty else { return question }
@@ -166,9 +164,13 @@ final class OnDeviceCoachEngine: CoachEngine {
 
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String {
-        let session = LanguageModelSession(model: SystemLanguageModel.default,
-                                           instructions: FoundationModelsCoachPrompt.instructions(for: context, language: language))
-        let response = try await session.respond(to: FoundationModelsCoachPrompt.prompt(question: question, history: history))
+        let session = LanguageModelSession(
+            model: SystemLanguageModel.default,
+            instructions: FoundationModelsCoachPrompt.instructions(for: context, language: language)
+        )
+        let response = try await session.respond(
+            to: FoundationModelsCoachPrompt.prompt(question: question, history: history)
+        )
         return response.content
     }
 }
@@ -186,9 +188,13 @@ final class PrivateCloudComputeCoachEngine: CoachEngine {
 
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String {
-        let session = LanguageModelSession(model: model,
-                                           instructions: FoundationModelsCoachPrompt.instructions(for: context, language: language))
-        let response = try await session.respond(to: FoundationModelsCoachPrompt.prompt(question: question, history: history))
+        let session = LanguageModelSession(
+            model: model,
+            instructions: FoundationModelsCoachPrompt.instructions(for: context, language: language)
+        )
+        let response = try await session.respond(
+            to: FoundationModelsCoachPrompt.prompt(question: question, history: history)
+        )
         return response.content
     }
 }

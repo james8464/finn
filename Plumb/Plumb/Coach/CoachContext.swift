@@ -1,27 +1,27 @@
 import Foundation
 
-/// One saved set, reduced to what the coach may talk about. Every field comes from the local
+/// one saved set, reduced to what the coach may talk about. Every field comes from the local
 /// history; nothing here is measured or guessed by the coach itself.
 nonisolated struct CoachSetFact: Equatable, Identifiable, Sendable {
-    /// Position in the context, oldest first, so "Set 3" means the same thing to the model,
+    /// position in the context, oldest first, so "Set 3" means the same thing to the model,
     /// the validator and the person. Starts at 1.
     let number: Int
     let id: UUID
     let exerciseName: String
     let repCount: Int
     let capturedAt: Date
-    /// The one observation Plumb kept for this set, with its suggested next action.
+    /// the one observation Plumb kept for this set, with its suggested next action.
     let observation: String?
-    /// What the set showed, in the words of the result screen.
+    /// what the set showed, in the words of the result screen.
     let issues: [String]
-    /// Comparison with the previous compatible set of the same session, when there was one.
+    /// comparison with the previous compatible set of the same session, when there was one.
     let comparison: String?
     let partlyVisible: Bool
 
     var label: String { "Set \(number)" }
 }
 
-/// The last sets of the local history, as text the coach engines receive and the fallback reads.
+/// the last sets of the local history, as text the coach engines receive and the fallback reads.
 nonisolated struct CoachContext: Equatable, Sendable {
     static let defaultLimit = 8
 
@@ -31,7 +31,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
     var knownNumbers: Set<Int> { Set(facts.map(\.number)) }
     var latest: CoachSetFact? { facts.last }
 
-    /// Builds the context from the saved sessions, keeping the `limit` most recent sets.
+    /// builds the context from the saved sessions, keeping the `limit` most recent sets.
     static func make(history: [WorkoutSessionSummary], limit: Int = defaultLimit,
                      now: Date = .now) -> CoachContext {
         struct Pending {
@@ -83,7 +83,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
         }
     }
 
-    /// The context as the model reads it: one line per set, oldest first.
+    /// the context as the model reads it: one line per set, oldest first.
     func promptText(calendar: Calendar = .current, timeZone: TimeZone = .current) -> String {
         guard !facts.isEmpty else { return "No saved sets." }
         var formatter = Date.FormatStyle(date: .abbreviated, time: .shortened)
@@ -100,7 +100,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
     }
 }
 
-/// The language the coach speaks: the app's, from the device locale. English unless French.
+/// the language the coach speaks: the app's, from the device locale. English unless French.
 nonisolated enum CoachLanguage: Equatable, Sendable {
     case english
     case french
@@ -109,7 +109,7 @@ nonisolated enum CoachLanguage: Equatable, Sendable {
         locale.language.languageCode?.identifier == "fr" ? .french : .english
     }
 
-    /// How a set is named in an answer, so the person and the validator agree.
+    /// how a set is named in an answer, so the person and the validator agree.
     var setWord: String {
         switch self {
         case .english: "Set"
@@ -118,7 +118,9 @@ nonisolated enum CoachLanguage: Equatable, Sendable {
     }
 }
 
-/// The rules every engine receives. The coach rewords measured facts; it never measures.
+/// the rules every engine receives. The coach speaks conversationally, grounded strictly in the
+/// recorded facts supplied below. It never invents measurements, never gives medical advice,
+/// and always refers back to what Plumb actually captured.
 nonisolated enum CoachInstructions {
     static func text(language: CoachLanguage) -> String {
         switch language {
@@ -126,23 +128,22 @@ nonisolated enum CoachInstructions {
         case .french:
             return english + """
 
-            For a French question, use "Série N" where the saved list says "Set N" (same number).
+            Answer in French. Use "Série N" where the data says "Set N" (same number).
             """
         }
     }
 
     static let english = """
-        You select saved sets relevant to the person's question. Plumb writes the answer from its \
-        recorded facts; your words are never shown to the person.
-
-        Use only the numbered sets under "Saved sets". Output one or two labels separated by a \
-        comma, for example "Set 2" or "Set 2, Set 3". If none of the saved sets answers the question, \
-        output only "NONE". Do not add an explanation, measurements, advice, or other words. \
-        No medical advice: do not select a set as proof of injury, safety or diagnosis.
+        You are Plumb's personal coach. You have access to the person's recorded workout sets \
+        listed below. Reply conversationally and helpfully, drawing only on the facts in those sets. \
+        Do not invent numbers, measurements, or form advice that is not in the data. \
+        Keep replies concise — two to four sentences. \
+        Do not give medical advice or make injury diagnoses. \
+        If the question cannot be answered from the recorded data, say so honestly and briefly.
         """
 }
 
-/// Fixed sentences built from the saved observations, used when no language model can run.
+/// fixed sentences built from the saved observations, used when no language model can run.
 /// It does not pretend to converse: it reports, and says what it cannot do.
 nonisolated enum CoachFallback {
     static func reply(to question: String, context: CoachContext,
@@ -167,7 +168,7 @@ nonisolated enum CoachFallback {
         return lines.joined(separator: " ")
     }
 
-    /// The opening line shown before the person asks anything.
+    /// the opening line shown before the person asks anything.
     static func opening(context: CoachContext, language: CoachLanguage = .current()) -> String {
         guard let latest = context.latest else {
             return switch language {
@@ -215,30 +216,4 @@ nonisolated enum CoachFallback {
     }
 }
 
-/// Accepts only set labels from a model. The app renders the recorded facts itself; model prose
-/// never reaches the user because checking arbitrary advice for factual support is unreliable.
-nonisolated enum CoachAnswerCheck {
-    static func referencedSetNumbers(in text: String) -> Set<Int> {
-        var numbers: Set<Int> = []
-        let pattern = /(?:[Ss]et|[Ss][ée]rie)\s*#?\s*(\d+)/
-        for match in text.matches(of: pattern) {
-            if let number = Int(match.output.1) { numbers.insert(number) }
-        }
-        return numbers
-    }
 
-    static func selectedFacts(in text: String, for context: CoachContext) -> [CoachSetFact]? {
-        let parts = text.split(separator: ",", omittingEmptySubsequences: false)
-        guard (1...2).contains(parts.count) else { return nil }
-        var selected: [CoachSetFact] = []
-        for part in parts {
-            let label = part.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard let match = label.wholeMatch(of: /(?:[Ss]et|[Ss][ée]rie)\s*#?\s*(\d+)/),
-                  let number = Int(match.output.1),
-                  let fact = context.facts.first(where: { $0.number == number }),
-                  !selected.contains(where: { $0.number == number }) else { return nil }
-            selected.append(fact)
-        }
-        return selected
-    }
-}
