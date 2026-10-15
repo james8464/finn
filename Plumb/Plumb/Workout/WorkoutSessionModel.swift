@@ -175,6 +175,8 @@ final class WorkoutSessionModel {
     private(set) var currentSession: WorkoutSessionSummary?
     private(set) var comparison: Comparison?
     private(set) var history: [WorkoutSessionSummary] = []
+    /// The set `record` last saved, so the badges it earned itself can be shown on its result.
+    private(set) var lastSavedSetID: UUID?
     private(set) var historyIssue: HistoryIssue?
     private(set) var comparisonRecap: Recap?
     private(set) var isGeneratingRecap = false
@@ -547,8 +549,11 @@ final class WorkoutSessionModel {
                                            viewCheck: checksCameraAngle ? .enforce : .ignore)
             formNotes = review.notes
             // A camera angle outside the supported side view can distort relative range, and a partly
-            // visible set is counted but not advised on.
+            // visible set is counted but not advised on. A push-up is accepted from any view, so its
+            // angle is not in `angledView`: `postureFromSide` carries it, and the form checks' note
+            // "no form advice for this set" must then be the whole truth (15 October).
             let advisable = diagnostics?.angledView == nil && diagnostics?.partialVisibility == nil
+                && diagnostics?.postureFromSide != false
             let changeCue = advisable ? CueSelector.select(from: analysis, exercise: definition) : nil
             // One observation: a form fault seen on several reps comes before a change between the first
             // and last reps.
@@ -1028,6 +1033,7 @@ final class WorkoutSessionModel {
         // The latest earlier set of the exercise that can be compared (not only the very last one).
         let earlier = session.sets.filter { $0.exercise == exercise }.reversed()
         session.sets.append(newSet)
+        lastSavedSetID = newSet.id
         currentSession = session
         comparisonRecap = nil
         // A partly visible set has reps but too few clear frames to compare ranges with.

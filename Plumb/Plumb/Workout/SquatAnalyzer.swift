@@ -231,6 +231,7 @@ nonisolated enum ExerciseAnalyzer {
         var lastTopTime = samples[0].time
         var reps: [RepMetric] = []
         var diagnostics = MovementDiagnostics(requiredDepth: phases.reachBottom, angledView: angledView)
+        diagnostics.postureFromSide = postureFromSide
         for (index, sample) in samples.enumerated() {
             let distance = travel(smoothed[index])
             if let restartAfterGap, index > 0, sample.time - samples[index - 1].time > restartAfterGap {
@@ -678,6 +679,10 @@ nonisolated struct MovementDiagnostics: Equatable, Sendable {
     /// The reps were counted from the shoulders going down and up, because the arm rubric could not
     /// read the elbow and wrist (a set filmed from the front, or the arm cut off by the picture).
     var countedFromShoulders = false
+    /// The posture and range readings come from a side view. False for a push-up filmed at an angle
+    /// or from the front: the reps count, and no form advice (end-of-set range cue included) rests
+    /// on angles the camera bent.
+    var postureFromSide = true
     /// The squats were counted from the hips going down and up, because the side rubric could not
     /// read the knee and ankle often enough (filmed from the front, the feet at the picture's edge,
     /// or the athlete out of view for a moment).

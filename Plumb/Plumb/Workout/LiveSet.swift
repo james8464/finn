@@ -100,12 +100,13 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
     /// A form check (`FormCheck`) found its fault again on this rep: at least two reps so far.
     case formFault(FormCheck, rep: Int)
 
-    /// A few words to say aloud, short enough to hear mid-rep.
+    /// A few words to say aloud, short enough to hear mid-rep: an order ("Go lower", "Slow down"),
+    /// never a reading, so the athlete knows what to change without thinking.
     func spoken(for definition: ExerciseDefinition) -> String {
         switch self {
         case .repCounted(let count): "\(count)"
         case .repCountRevised: ""
-        case .fasterThanFirstReps: String(localized: "Faster than your first reps")
+        case .fasterThanFirstReps: String(localized: "Slow down")
         case .shorterThanFirstReps: definition.copy.liveShorterCue
         case .formFault(let check, _): check.liveCue
         }
@@ -185,6 +186,11 @@ nonisolated struct LiveSetMonitor {
     private var latestDiagnostics: MovementDiagnostics?
     /// The rep each form fault was last pointed out on.
     private var lastFormCue: [FormCheck: Int] = [:]
+    /// The latest analysis saw the person from the side, with the set's joints clear: the range cue
+    /// can be trusted. Filmed at an angle, a 2D range is bent like every other 2D angle, and the
+    /// result says it gives no form advice; the live cue must not say otherwise (15 October: "Elbow
+    /// bend is smaller" during front-on push-ups, then "no form advice for this set").
+    private var rangeAdviceFromSide = true
 
     init(definition: ExerciseDefinition) {
         self.definition = definition
@@ -210,6 +216,8 @@ nonisolated struct LiveSetMonitor {
             latestAnalysis = analysis
             latestFrames = set
             latestDiagnostics = diagnostics
+            rangeAdviceFromSide = diagnostics?.partialVisibility == nil && diagnostics?.countedFromShoulders != true
+                && Self.seenFromTheSide(set)
             // The count is the analysis of the whole set so far, the same the result makes at the
             // end. Measured over a longer set, a movement said as a rep can stop counting (on
             // 15 October, fast push-ups: the top the set is measured from settled lower as the set
@@ -288,7 +296,7 @@ nonisolated struct LiveSetMonitor {
             faster = first > 0 && rep.duration < Self.fasterShare * first
         }
         if faster { sawFasterRep = true }
-        if number >= 3, number - lastShorterCue >= Self.cueSpacing {
+        if rangeAdviceFromSide, number >= 3, number - lastShorterCue >= Self.cueSpacing {
             let first = (reps[0].relativeRange + reps[1].relativeRange) / 2
             if first > 0, rep.relativeRange <= Self.shorterShare * first {
                 lastShorterCue = number
@@ -304,6 +312,14 @@ nonisolated struct LiveSetMonitor {
 }
 
 extension LiveSetMonitor {
+    /// The same camera-angle reading as the form checks: side-on, or no 3D estimate to say otherwise.
+    fileprivate static func seenFromTheSide(_ frames: [PoseFrame]) -> Bool {
+        switch ViewCheck.assess(frames, expected: .side) {
+        case .matches, .unavailable: true
+        case .angled, .mismatch: false
+        }
+    }
+
     /// The first form fault, in advice order, that this rep shows and that has shown on at least
     /// `FormCheck.minimumFaultyReps` reps so far, not pointed out in the last `cueSpacing` reps. The
     /// same checks as the result, on the set so far, and silent for a partly visible set, a push-up

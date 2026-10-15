@@ -107,18 +107,16 @@ nonisolated struct ExerciseCopy: Equatable, Sendable {
     let rangeNoun: String
     let moreRange: String
     let lessRange: String
+    /// Shown and said during a set when a rep's range is clearly shorter than the first reps. An
+    /// order of two or three words that is understood mid-effort ("Go lower"), never a description
+    /// of the measurement ("Elbow bend is smaller", which told the athlete nothing to do, 15 October).
+    let liveShorterCue: String
     let observation: String
     let nextAction: String
     let rangeExplanation: String
     /// Rep accessibility description of the range value.
     let rangeAccessibilityName: String
 
-    /// Said during a set when a rep's range is clearly shorter than the first reps, such as
-    /// "Range is shorter" or "Elbow bend is smaller".
-    var liveShorterCue: String {
-        let noun = rangeNoun.prefix(1).uppercased() + rangeNoun.dropFirst()
-        return String(localized: "\(noun) is \(lessRange)")
-    }
 }
 
 /// A within-person posture change, not an absolute standard of correct technique.
@@ -267,6 +265,7 @@ nonisolated extension ExerciseDefinition {
             rangeNoun: String(localized: "range"),
             moreRange: String(localized: "longer"),
             lessRange: String(localized: "shorter"),
+            liveShorterCue: String(localized: "Sit lower"),
             observation: String(localized: "Your range became shorter in the last two reps."),
             nextAction: String(localized: "Choose a range you can repeat on each rep."),
             rangeExplanation: String(localized: "Relative range compares hip travel with the leg length seen by the camera. Use it only to compare your own sets from the same view."),
@@ -318,6 +317,7 @@ nonisolated extension ExerciseDefinition {
             rangeNoun: String(localized: "elbow bend"),
             moreRange: String(localized: "greater"),
             lessRange: String(localized: "smaller"),
+            liveShorterCue: String(localized: "Go lower"),
             observation: String(localized: "Your elbow bend became smaller in the last two reps."),
             nextAction: String(localized: "Keep your elbow bend similar from rep to rep."),
             rangeExplanation: String(localized: "Elbow bend is how much your elbow angle closed from the starting position, as seen by the camera. Use it only to compare your own sets from the same view."),
@@ -417,6 +417,7 @@ nonisolated extension ExerciseDefinition {
             rangeNoun: String(localized: "knee bend"),
             moreRange: String(localized: "greater"),
             lessRange: String(localized: "smaller"),
+            liveShorterCue: String(localized: "Go lower"),
             observation: String(localized: "Your knee bend became smaller in the last two reps."),
             nextAction: String(localized: "Keep your knee bend similar from rep to rep."),
             rangeExplanation: String(localized: "Knee bend is how much the knee angle on the side facing the camera closed from the starting position. Use it only to compare your own sets from the same view and front leg."),
@@ -461,6 +462,7 @@ nonisolated extension ExerciseDefinition {
             rangeNoun: String(localized: "hip hinge"),
             moreRange: String(localized: "greater"),
             lessRange: String(localized: "smaller"),
+            liveShorterCue: String(localized: "Hips further back"),
             observation: String(localized: "Your hip hinge became smaller in the last two reps."),
             nextAction: String(localized: "Keep your hip hinge similar from rep to rep."),
             rangeExplanation: String(localized: "Hip hinge is how much the angle between your torso and thigh closed from the starting position, as seen by the camera. Use it only to compare your own sets from the same view."),
@@ -507,6 +509,7 @@ nonisolated extension ExerciseDefinition {
             rangeNoun: String(localized: "pull height"),
             moreRange: String(localized: "higher"),
             lessRange: String(localized: "lower"),
+            liveShorterCue: String(localized: "Pull higher"),
             observation: String(localized: "Your pulls got lower in the last two reps."),
             nextAction: String(localized: "Try a pace you can keep consistent."),
             rangeExplanation: String(localized: "Pull height is how far your shoulders rose from the hang, as a share of your arm length, as seen by the camera. Use it only to compare your own sets from the same view."),
@@ -552,6 +555,7 @@ nonisolated extension ExerciseDefinition {
             rangeNoun: String(localized: "rise"),
             moreRange: String(localized: "higher"),
             lessRange: String(localized: "lower"),
+            liveShorterCue: String(localized: "Pull higher"),
             observation: String(localized: "Your rise got lower in the last two reps."),
             nextAction: String(localized: "Try a pace you can keep consistent."),
             rangeExplanation: String(localized: "Rise is how far your shoulders went up from the hang, as a share of your arm length, as seen by the camera. Above 100% your shoulders are above your hands."),

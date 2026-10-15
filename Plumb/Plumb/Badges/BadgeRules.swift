@@ -64,6 +64,10 @@ nonisolated struct EarnedBadge: Codable, Equatable, Identifiable, Sendable {
     let earnedAt: Date
     /// One sentence with the measured facts behind it, written when it was earned.
     let detail: String
+    /// The set that earned it. Only that set's result celebrates it: a badge the history already
+    /// supported when the app first evaluated it is written down without a fête (15 October: a
+    /// 14-rep push-up set announced "First set, 7 pull-up reps" and an old record).
+    var setID: UUID? = nil
 
     var id: BadgeKind { kind }
 }
@@ -85,7 +89,7 @@ nonisolated enum BadgeRules {
         if let first = sets.first {
             earned.append(EarnedBadge(kind: .firstSet, earnedAt: first.capturedAt,
                                       detail: Self.text(reps: first.analysis.reps.count, of: first.exercise)
-                                      + String(localized: ", measured on this iPhone.")))
+                                      + String(localized: ", measured on this iPhone."), setID: first.id))
         }
 
         if let badge = threeDaysInAWeek(sets, calendar: calendar) { earned.append(badge) }
@@ -96,7 +100,8 @@ nonisolated enum BadgeRules {
         }) {
             earned.append(EarnedBadge(kind: .cleanSet, earnedAt: clean.capturedAt,
                                       detail: Self.text(reps: clean.analysis.reps.count, of: clean.exercise)
-                                      + String(localized: ", every joint clear, no pattern to correct.")))
+                                      + String(localized: ", every joint clear, no pattern to correct."),
+                                      setID: clean.id))
         }
 
         var seen: Set<ExerciseKind> = []
@@ -104,7 +109,8 @@ nonisolated enum BadgeRules {
             seen.insert(set.exercise)
             if seen.count == ExerciseKind.allCases.count {
                 earned.append(EarnedBadge(kind: .allSixExercises, earnedAt: set.capturedAt,
-                                          detail: String(localized: "Your sixth exercise was \(set.exercise.definition.copy.shareNoun).")))
+                                          detail: String(localized: "Your sixth exercise was \(set.exercise.definition.copy.shareNoun)."),
+                                          setID: set.id))
                 break
             }
         }
@@ -127,10 +133,11 @@ nonisolated enum BadgeRules {
         for index in 2..<days.count {
             let span = calendar.dateComponents([.day], from: days[index - 2], to: days[index]).day ?? .max
             if span <= 6 {
-                let earnedAt = sets.first { calendar.startOfDay(for: $0.capturedAt) == days[index] }?.capturedAt ?? days[index]
+                let third = sets.first { calendar.startOfDay(for: $0.capturedAt) == days[index] }
                 let names = days[(index - 2)...index].map { $0.formatted(.dateTime.weekday(.wide)) }
-                return EarnedBadge(kind: .threeDaysInAWeek, earnedAt: earnedAt,
-                                   detail: String(localized: "Sets on \(names[0]), \(names[1]) and \(names[2]), within seven days."))
+                return EarnedBadge(kind: .threeDaysInAWeek, earnedAt: third?.capturedAt ?? days[index],
+                                   detail: String(localized: "Sets on \(names[0]), \(names[1]) and \(names[2]), within seven days."),
+                                   setID: third?.id)
             }
         }
         return nil
@@ -151,7 +158,7 @@ nonisolated enum BadgeRules {
         guard let (set, previous) = record else { return nil }
         return EarnedBadge(kind: .repRecord(kind), earnedAt: set.capturedAt,
                            detail: Self.text(reps: set.analysis.reps.count, of: kind)
-                           + String(localized: ", up from \(previous) in your best earlier set."))
+                           + String(localized: ", up from \(previous) in your best earlier set."), setID: set.id)
     }
 
     /// The first pair of comparable sets (same session, same side, enough reps, fully visible) where
@@ -165,7 +172,8 @@ nonisolated enum BadgeRules {
                     let unit = kind.definition.copy.rangeNoun
                     let percent = Int(((comparison.secondMedianRange / comparison.firstMedianRange) - 1) * 100)
                     return EarnedBadge(kind: .longerRange(kind), earnedAt: later.capturedAt,
-                                       detail: String(localized: "Median \(unit) \(percent)% longer than in your previous set of that session, over \(later.analysis.reps.count) reps."))
+                                       detail: String(localized: "Median \(unit) \(percent)% longer than in your previous set of that session, over \(later.analysis.reps.count) reps."),
+                                       setID: later.id)
                 }
             }
         }

@@ -126,24 +126,65 @@ struct BadgeRulesTests {
     @MainActor @Test func ledgerGivesEachBadgeOnceAndKeepsIt() throws {
         let store = MemoryBadgeStore()
         let ledger = BadgeLedger(store: store)
-        let first = history([set(reps: 5, at: 0)])
-        let fresh = ledger.update(history: first)
+        let a = set(reps: 5, at: 0)
+        let first = history([a])
+        let fresh = ledger.update(history: first, celebrating: a.id)
         #expect(fresh.map(\.kind) == [.firstSet, .cleanSet] || fresh.map(\.kind) == [.cleanSet, .firstSet])
         #expect(ledger.justEarned.count == 2)
-        // The same history again: nothing new, and the just-earned list is untouched by a no-op.
+        // The same history again: nothing new, nothing to celebrate.
         ledger.acknowledge()
-        #expect(ledger.update(history: first).isEmpty)
+        #expect(ledger.update(history: first, celebrating: a.id).isEmpty)
         #expect(ledger.justEarned.isEmpty)
         #expect(ledger.count == 2)
-        // A record set adds exactly one badge.
-        let more = history([set(reps: 5, at: 0), set(reps: 7, at: day)])
-        #expect(ledger.update(history: more).map(\.kind) == [.repRecord(.bodyweightSquat)])
+        // A record set adds exactly one badge, and that set celebrates it.
+        let b = set(reps: 7, at: day)
+        let more = history([a, b])
+        #expect(ledger.update(history: more, celebrating: b.id).map(\.kind) == [.repRecord(.bodyweightSquat)])
+        #expect(ledger.justEarned.map(\.kind) == [.repRecord(.bodyweightSquat)])
         // Saved: a new ledger on the same store knows them, and the history shrinking takes nothing away.
         let reloaded = BadgeLedger(store: store)
         #expect(reloaded.count == 3)
         #expect(reloaded.update(history: []).isEmpty)
         #expect(reloaded.count == 3)
         #expect(try store.load().count == 3)
+    }
+
+    /// First launch after an update: what the history already supports is written down without a
+    /// fête, and a later set that earns nothing shows nothing. On 15 October a 14-rep push-up set
+    /// announced "First set, 7 pull-up reps" and a 27-rep push-up record, both from older sets.
+    @MainActor @Test func badgesFoundAtLaunchAreRecordedWithoutCelebration() {
+        let ledger = BadgeLedger(store: MemoryBadgeStore())
+        let older = [set(.pullUp, reps: 7, at: 0), set(.pushUp, reps: 19, at: day), set(.pushUp, reps: 27, at: 2 * day)]
+        let found = ledger.update(history: history(older))
+        #expect(kinds(found).isSuperset(of: [.firstSet, .repRecord(.pushUp)]))
+        #expect(ledger.justEarned.isEmpty)
+        let pushUps14 = set(.pushUp, reps: 14, at: 3 * day)
+        #expect(ledger.update(history: history(older + [pushUps14]), celebrating: pushUps14.id).isEmpty)
+        #expect(ledger.justEarned.isEmpty)
+        #expect(ledger.has(.repRecord(.pushUp)))
+    }
+
+    @MainActor @Test func aSetCelebratesOnlyTheBadgesItEarnedItself() {
+        let ledger = BadgeLedger(store: MemoryBadgeStore())
+        let a = set(reps: 5, at: 0)
+        ledger.update(history: history([a]), celebrating: a.id)
+        #expect(kinds(ledger.justEarned) == [.firstSet, .cleanSet])
+        let b = set(reps: 7, at: day)
+        ledger.update(history: history([a, b]), celebrating: b.id)
+        #expect(kinds(ledger.justEarned) == [.repRecord(.bodyweightSquat)])
+    }
+
+    /// A record is celebrated by the set that beat it, never by a later set that merely finds it in
+    /// the history.
+    @MainActor @Test func aRecordIsCelebratedOnlyByTheSetThatBeatsIt() {
+        let a = set(reps: 5, at: 0), b = set(reps: 9, at: day), c = set(reps: 6, at: 2 * day)
+        let quiet = BadgeLedger(store: MemoryBadgeStore())
+        quiet.update(history: history([a, b, c]), celebrating: c.id)
+        #expect(quiet.has(.repRecord(.bodyweightSquat)))
+        #expect(!kinds(quiet.justEarned).contains(.repRecord(.bodyweightSquat)))
+        let loud = BadgeLedger(store: MemoryBadgeStore())
+        loud.update(history: history([a, b]), celebrating: b.id)
+        #expect(kinds(loud.justEarned).contains(.repRecord(.bodyweightSquat)))
     }
 
     @MainActor @Test func resetForgetsEverything() throws {
