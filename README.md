@@ -1,13 +1,14 @@
 # Plumb
 
-> **TL;DR · 13 October 2026**
+> **TL;DR · 15 October 2026**
 >
 > - **Source of truth.** Keep it accurate.
 > - **Idea:** iPhone + Apple Watch fitness coach that checks every rep and gives actionable posture/execution advice. Track progress and workouts.
 > - **Today (iPhone only):** 6 exercises (4 side-view: squat, push-up, lunge, stiff-leg deadlift; pull-ups & muscle-ups any view) with live rep counting + limited evidence-linked posture/range advice after sets. Hands-free sets with live count on screen and audio (AirPods/speaker). Most frequent pattern shown before each set. Optional Apple Health workout saving (written, unit-tested, unbuilt/untested on iPhone). Optional Personalize with Health: reads HR, recovery, sleep, activity, age, weight, height to suggest lighter days, adapt rest, show set HR from Watch; each tip names its data.
 > - **In build, not on watch:** Watch companion mirrors iPhone count, taps wrist per rep (target `PlumbWatch`, embedded since 13 Oct).
-> - **Not built:** Watch wrist-motion, Apple TV, AirPods head tracking, widgets, Live Activities.
+> - **In build, not on iPhone yet (15 Oct):** home screen widget with the last measured set and a tap that opens the camera; Live Activity counting the set on the Lock Screen and in the Dynamic Island (target `PlumbWidgets`).
 > - **Home (15 Oct):** photographic dashboard and glass tab bar; Workout keeps the existing set flow, Coach opens the saved-set conversation.
+> - **Not built:** Watch wrist-motion, Apple TV, AirPods head tracking.
 
 ## Rules for AI agents & contributors
 
@@ -40,7 +41,7 @@ Long term: same approach for gym, home workouts, treadmill running.
 
 ## Current state
 
-_Updated 13 October 2026._
+_Updated 15 October 2026._
 
 **In one sentence:** iPhone-only app analyzing one selected exercise at a time from the side, counting reps live with audio, giving ≤1 supported posture/range observation after set. **Not tested on real iPhone with real people.**
 
@@ -83,9 +84,13 @@ _Updated 13 October 2026._
 
 Apple Watch companion (`Plumb/PlumbWatch`, `Accessories.swift`, `WatchBridge.swift`): shows exercise, stage, live rep count, observations; taps wrist per rep; starts/stops set from wrist. Target `PlumbWatch` (watchOS 10+, bundle `com.james8464.Plumb.watchkitapp`) embedded in iPhone app → installing Plumb from Xcode on paired iPhone installs on watch. Messages + set mirroring unit-tested; both targets compile for simulators. See `docs/design/apple-watch-and-airpods.md`.
 
+### In build, not on a physical iPhone: widgets and Live Activity (15 October)
+
+Target `PlumbWidgets` (`com.finlearn.plumb.widgets`), embedded in the iPhone app. Home screen widget (small, medium): last measured set, exercise, reps, when, "partly visible" when it was; tap or **Start a set** opens Plumb on that exercise via `plumb://start-set`. No saved set: says so. Reads one JSON value in App Group `group.com.finlearn.plumb`, written only when a session is saved to local history (`Widgets/WidgetSharingSessionStore.swift`), never from demo/recorded input; no video, pose points or Health data leave the app. Live Activity (`Widgets/SetLiveActivity.swift`): starts with the set, counts reps + elapsed time on Lock Screen and Dynamic Island, ends with the set, locally (no push). Demo input labeled DEMO. Views in `Plumb/Widgets/WidgetViews.swift`, strings EN/FR in `PlumbWidgets/Localizable.xcstrings`. Sharing, deep link and activity rules unit-tested; simulator build embeds the extension. Unchecked: widget and activity on a real iPhone, App Group under the FinLearn team's provisioning.
+
 ### Not built
 
-Watch wrist-motion measurement, Apple TV, AirPods head tracking, widgets, Live Activities, accounts, subscriptions, running analysis (see `docs/product/running-stride.md`).
+Watch wrist-motion measurement, Apple TV, AirPods head tracking, accounts, subscriptions, running analysis (see `docs/product/running-stride.md`).
 
 ### Challenge goal
 

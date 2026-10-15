@@ -69,10 +69,12 @@ struct LastSetWidgetView: View {
                         Text(snapshot.exerciseName)
                             .font(.headline)
                     }
-                    Text(Self.when(snapshot.capturedAt, now: now)
-                         + (snapshot.partlyVisible ? " · partly visible" : ""))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 0) {
+                        Text(Self.when(snapshot.capturedAt, now: now))
+                        if snapshot.partlyVisible { Text(" · partly visible") }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 } else {
                     Text("No set measured yet")
                         .font(.headline)
@@ -114,9 +116,9 @@ struct LastSetWidgetView: View {
     static func when(_ date: Date, now: Date) -> String {
         let calendar = Calendar.current
         let time = date.formatted(date: .omitted, time: .shortened)
-        if calendar.isDate(date, inSameDayAs: now) { return "Today \(time)" }
+        if calendar.isDate(date, inSameDayAs: now) { return String(localized: "Today \(time)") }
         if let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
-           calendar.isDate(date, inSameDayAs: yesterday) { return "Yesterday \(time)" }
+           calendar.isDate(date, inSameDayAs: yesterday) { return String(localized: "Yesterday \(time)") }
         return date.formatted(date: .abbreviated, time: .omitted)
     }
 }

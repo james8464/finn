@@ -54,13 +54,18 @@ struct PlumbApp: App {
                                 .appending(path: "sessions.json")),
                             connectsAccessories: Self.mirrorsDemoOnWatch)
             } else {
-                ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer(),
+                ContentView(source: CameraPoseSource.live(),
+                            store: WidgetSharingSessionStore(base: LocalSessionStore()),
+                            preferences: .app, announcer: LiveAnnouncer(),
                             fitness: HealthKitWorkoutExporter(), health: HealthKitReader(),
-                        connectsAccessories: true)
+                            connectsAccessories: true)
             }
             #else
             // Only live camera sessions can reach Apple Health; demo and recorded input never do.
-            ContentView(source: CameraPoseSource.live(), preferences: .app, announcer: LiveAnnouncer(),
+            // The widget shows only what this store saves.
+            ContentView(source: CameraPoseSource.live(),
+                        store: WidgetSharingSessionStore(base: LocalSessionStore()),
+                        preferences: .app, announcer: LiveAnnouncer(),
                         fitness: HealthKitWorkoutExporter(), health: HealthKitReader(),
                         connectsAccessories: true)
             #endif

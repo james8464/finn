@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var observationSpeaker = ObservationSpeaker()
     /// Headphones and a paired Apple Watch; idle unless `connectsAccessories`.
     @State private var accessories = AccessoryMonitor()
+    /// The set in progress on the Lock Screen and in the Dynamic Island (`Widgets/SetLiveActivity.swift`).
+    @State private var liveActivity = SetLiveActivity()
     /// True for the live camera, and for demo input only behind `-plumb-watch-demo`.
     private let connectsAccessories: Bool
     @State private var deleteCandidate: UUID?
@@ -149,8 +151,25 @@ struct ContentView: View {
             .presentationDetents([.medium, .large])
         }
         .task {
+            liveActivity.attach(to: model, demoInput: usesSyntheticInput)
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("-plumb-ui-live-activity-sample") {
+                liveActivity.showSample()
+            }
+            #endif
             guard connectsAccessories else { return }
             accessories.start(model: model, demoInput: usesSyntheticInput)
+        }
+        // The home screen widget opens the camera on its exercise (`plumb://start-set`).
+        .onOpenURL { url in
+            guard let link = PlumbDeepLink(url), case .startSet(let key) = link,
+                  model.stage == .ready || model.stage == .result else { return }
+            if let key, let exercise = ExerciseKind(rawValue: key) { model.selectedExercise = exercise }
+            if !usesSyntheticInput && CameraPermission.notAskedYet {
+                showsCameraPrimer = true
+            } else {
+                Task { await model.startPreview() }
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active && connectsAccessories { accessories.refreshHeadphones() }

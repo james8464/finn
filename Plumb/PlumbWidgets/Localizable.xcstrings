@@ -1,0 +1,166 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    " · partly visible": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · partiellement visible"
+          }
+        }
+      }
+    },
+    "%lld reps": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld répétitions"
+          }
+        }
+      }
+    },
+    "1 rep": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 répétition"
+          }
+        }
+      }
+    },
+    "Counted on your iPhone. Tap to come back to the set.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comptée sur ton iPhone. Touche pour revenir à la série."
+          }
+        }
+      }
+    },
+    "DEMO": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DÉMO"
+          }
+        }
+      }
+    },
+    "Last set": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière série"
+          }
+        }
+      }
+    },
+    "No set measured yet": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune série mesurée"
+          }
+        }
+      }
+    },
+    "Open Plumb to start one": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre Plumb pour en lancer une"
+          }
+        }
+      }
+    },
+    "Plumb · %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plumb · %@"
+          }
+        }
+      }
+    },
+    "Start a set": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancer une série"
+          }
+        }
+      }
+    },
+    "Start a set in Plumb": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lancer une série dans Plumb"
+          }
+        }
+      }
+    },
+    "Today %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aujourd’hui %@"
+          }
+        }
+      }
+    },
+    "Yesterday %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier %@"
+          }
+        }
+      }
+    },
+    "Your last measured set, and a tap to start the next one.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta dernière série mesurée, et un geste pour lancer la suivante."
+          }
+        }
+      }
+    },
+    "Your last set shows here": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta dernière série s’affiche ici"
+          }
+        }
+      }
+    },
+    "elapsed": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "écoulé"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
