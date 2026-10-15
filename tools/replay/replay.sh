@@ -23,6 +23,8 @@ xcrun swiftc -swift-version 6 -o "$binary" \
   "$project_root/Plumb/Plumb/Workout/SetWindow.swift" \
   "$project_root/Plumb/Plumb/Workout/SilhouetteCheck.swift" \
   "$project_root/Plumb/Plumb/Workout/MistakeProfile.swift" \
+  "$project_root/Plumb/Plumb/Workout/BodySegments.swift" \
+  "$project_root/Plumb/Plumb/Workout/FormChecks.swift" \
   "$project_root/Plumb/Plumb/Workout/FitnessWorkout.swift" \
   "$project_root/Plumb/Plumb/Workout/LiveSet.swift" \
   "$project_root/Plumb/Plumb/Workout/AngleRecognition.swift" \
