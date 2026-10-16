@@ -165,6 +165,8 @@ nonisolated struct ExerciseFigure {
 struct ExerciseFigureView: View {
     let kind: ExerciseKind
     var lineColor: Color = .white
+    /// the body itself: limbs, head and joints. Nil draws it in `lineColor`
+    var figureColor: Color? = nil
     var animates = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -243,6 +245,7 @@ struct ExerciseFigureView: View {
                            style: StrokeStyle(lineWidth: width * 1.4, lineCap: .round))
         }
 
+        let bodyColor = figureColor ?? lineColor
         let pose = figure.pose(at: phase)
         for (a, b) in ExerciseFigure.bones + [(.shoulder, .head)] {
             guard let p = pose[a], let q = pose[b] else { continue }
@@ -250,21 +253,21 @@ struct ExerciseFigureView: View {
             bone.move(to: place(p))
             bone.addLine(to: place(q))
             let far = [ExerciseFigure.Joint.backToe, .backAnkle, .backKnee].contains(a)
-            context.stroke(bone, with: .color(lineColor.opacity(far ? 0.5 : 1)), style: line)
+            context.stroke(bone, with: .color(bodyColor.opacity(far ? 0.5 : 1)), style: line)
         }
         if let head = pose[.head] {
             let radius = ExerciseFigure.headRadius * scale
             let center = place(head)
             context.fill(Path(ellipseIn: CGRect(x: center.x - radius, y: center.y - radius,
                                                 width: 2 * radius, height: 2 * radius)),
-                         with: .color(lineColor))
+                         with: .color(bodyColor))
         }
         let dot = width * 0.95
         for joint in [ExerciseFigure.Joint.ankle, .knee, .hip, .shoulder, .elbow, .wrist, .backKnee] {
             guard let p = pose[joint] else { continue }
             let c = place(p)
             context.fill(Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: 2 * dot, height: 2 * dot)),
-                         with: .color(lineColor))
+                         with: .color(bodyColor))
             context.stroke(Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: 2 * dot, height: 2 * dot)),
                            with: .color(HomeStyle.cameraBottom), lineWidth: 1.5)
         }

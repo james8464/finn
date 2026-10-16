@@ -19,6 +19,52 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.tryFinn"].isHittable)
     }
 
+    /// TEMPORARY with `FinnFirstTryTrigger.swift`: Try Finn shows the placeholder, then the coach card.
+    @MainActor
+    func testTryFinnSwitchesToCoachCard() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-finn-ui-demo"]
+        app.launch()
+        XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 8))
+        app.buttons["home.tryFinn"].tap()
+        // The placeholder shows for under a second: too brief to assert on reliably.
+        let coach = app.buttons["home.finnCoach"]
+        XCTAssertTrue(coach.waitForExistence(timeout: 5))
+        XCTAssertTrue(coach.label.hasPrefix("Finn: your next workout, "), coach.label)
+        XCTAssertFalse(app.buttons["home.watchDemo"].exists)
+        // the card opens the Workout tab with the previous workouts blurred; a tap clears them
+        coach.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["workout.next"].waitForExistence(timeout: 3))
+        let reveal = app.buttons["workout.history.reveal"]
+        XCTAssertTrue(reveal.waitForExistence(timeout: 3))
+        reveal.tap()
+        XCTAssertTrue(reveal.waitForNonExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["home.account"].exists)
+    }
+
+    /// Replay onboarding, in the profile, starts again from the welcome screens, then Try Finn.
+    @MainActor
+    func testReplayOnboardingStartsFromTheBeginning() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-finn-ui-demo"]
+        app.launch()
+        XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 8))
+        app.buttons["home.tryFinn"].tap()
+        XCTAssertTrue(app.buttons["home.finnCoach"].waitForExistence(timeout: 5))
+        app.buttons["home.account"].tap()
+        let replay = app.buttons["account.replayOnboarding"]
+        XCTAssertTrue(replay.waitForExistence(timeout: 3))
+        replay.tap()
+        // the replay starts from the very beginning: the welcome, then the first step
+        let welcome = app.buttons["onboarding.welcome.continue"]
+        XCTAssertTrue(welcome.waitForExistence(timeout: 3))
+        welcome.tap()
+        let finish = app.buttons["onboarding.finish"]
+        XCTAssertTrue(finish.waitForExistence(timeout: 3))
+        finish.tap()
+        XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 5))
+    }
+
     @MainActor
     func testRestoredDemoNeverWritesHistory() {
         let app = XCUIApplication()
@@ -51,8 +97,8 @@ final class DashboardUITests: XCTestCase {
         app.navigationBars.buttons.element(boundBy: 0).tap()
         app.selectTab("Coach")
         XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
-        app.selectTab("Posture")
-        XCTAssertTrue(app.navigationBars["Posture"].waitForExistence(timeout: 3))
+        app.selectTab("Progress")
+        XCTAssertTrue(app.navigationBars["Progress"].waitForExistence(timeout: 3))
         app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["Squat"].exists)
@@ -82,9 +128,9 @@ final class DashboardUITests: XCTestCase {
         let card = app.buttons["home.posture"]
         XCTAssertTrue(card.waitForExistence(timeout: 8))
         card.tap()
-        XCTAssertTrue(app.buttons["tab.posture"].isSelected)
-        XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["posture.exercise.pushUp"].exists)
+        XCTAssertTrue(app.buttons["tab.progress"].isSelected)
+        XCTAssertTrue(app.descendants(matching: .any)["posture.guide"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["progress.exercise.pushUp"].exists)
         let image = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         image.name = "Posture guide"
         image.lifetime = .keepAlways
@@ -117,7 +163,7 @@ final class DashboardUITests: XCTestCase {
             app.launch()
             XCTAssertTrue(app.staticTexts[tryLabel].waitForExistence(timeout: 8), language)
             app.buttons["home.posture"].tap()
-            XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 3), language)
+            XCTAssertTrue(app.descendants(matching: .any)["posture.guide"].waitForExistence(timeout: 3), language)
             app.openWorkoutTab()
             XCTAssertEqual(app.buttons["home.start"].label, startLabel, language)
             app.terminate()

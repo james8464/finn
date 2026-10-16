@@ -8,6 +8,14 @@ private enum FinnStyle {
     static let primaryButtonText = HomeStyle.onAccent
 }
 
+/// builds its content in its own body, so a pushed page follows the observable model it reads: a
+/// navigation destination's closure is not run again when the model changes
+private struct LiveContent<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View { content() }
+}
+
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
@@ -37,11 +45,22 @@ struct ContentView: View {
     @State private var selectedTab: HomeTab = .home
     @State private var keyboardVisible = false
     @State private var showsFinnDemo = false
+    /// TEMPORARY with `FinnFirstTryTrigger.swift`: whether Home shows the coach card.
+    @AppStorage(FinnFirstTry.key, store: FinnFirstTry.defaults) private var hasTriedFinn = false
+    /// the next workout and Finn's line, the one source for the Home and Workout cards
+    @State private var coachMessage = FinnCoachMessage()
+    /// Home's coach card opened the Workout tab: its previous workouts stay blurred until tapped
+    @State private var blursPreviousWorkouts = false
+    /// the Progress tab's section and exercise, so Home's Posture card can open them
+    @State private var progressSection: ProgressSection = .posture
+    @State private var progressExercise: ExerciseKind?
     #if DEBUG
     @State private var didRunWatchAutoDemo = false
     #endif
     /// what the camera does, shown once before iOS asks for it
     @State private var showsCameraPrimer = false
+    /// camera privacy, pushed over workout setup so Back returns to it
+    @State private var showsSetupPrivacy = false
     /// the first-launch screens (`Onboarding/`), also replayed from Options
     @State private var showsOnboarding: Bool
     /// badges earned from the saved history (`Badges/`)
@@ -135,6 +154,7 @@ struct ContentView: View {
                   arguments.indices.contains(index + 1) else { return }
             switch arguments[index + 1] {
             case "coach": selectedTab = .coach
+            case "progress": selectedTab = .progress
             case "workout": selectedTab = .workout
             case "history": route = .history
             case "options": route = .options
@@ -142,7 +162,7 @@ struct ContentView: View {
             case "awards": route = .awards
             case "health": model.showsPersonalizationOffer = true
             case "camera-primer":
-                selectedTab = .workout
+                openWorkoutSetup()
                 showsCameraPrimer = true
             default: break
             }
@@ -210,7 +230,7 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showsFinnDemo) {
             FinnDemoView {
                 showsFinnDemo = false
-                selectedTab = .workout
+                openWorkoutSetup()
             }
         }
         // badges follow the saved history: checked at launch and after every saved set. Only the set
@@ -357,13 +377,10 @@ struct ContentView: View {
                                 set: { tabRoutes[tab] = $0 }
                             )) { destinationPage($0) }
                             .toolbar {
-                                if tab != .workout && tab != .home {
-                                    ToolbarItem(placement: .topBarTrailing) {
-                                        Button { route = .account } label: {
-                                            Label("Settings", systemImage: "gearshape")
-                                        }
-                                        .accessibilityIdentifier("home.account")
-                                    }
+                                // Home draws its own, having no navigation bar; Workout places it
+                                // after its More menu
+                                if tab != .home && tab != .workout {
+                                    ToolbarItem(placement: .topBarTrailing) { accountButton }
                                 }
                             }
                     }
@@ -377,6 +394,19 @@ struct ContentView: View {
             }
         }
         .background(Color(white: 0.035).ignoresSafeArea())
+        // the camera primer, from workout setup, Siri or the widget, whichever tab is showing
+        .sheet(isPresented: $showsCameraPrimer) {
+            CameraPrimer(onContinue: {
+                showsCameraPrimer = false
+                Task { await model.startPreview() }
+            }, onPrivacy: {
+                showsCameraPrimer = false
+                if route == .launchWorkout { showsSetupPrivacy = true } else { route = .privacy }
+            })
+            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.fraction(0.62), .large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color(uiColor: .systemBackground))
+        }
         .environment(\.colorScheme, .dark)
         .preferredColorScheme(.dark)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
@@ -391,15 +421,45 @@ struct ContentView: View {
         switch tab {
         case .home:
             DashboardView(history: model.history, exercise: model.selectedExercise,
-                          badges: badges.earned, tryFinn: { selectedTab = .workout },
+                          badges: badges.earned, hasTriedFinn: $hasTriedFinn, coachMessage: $coachMessage,
+                          openNextWorkout: openNextWorkout,
                           watchDemo: { showsFinnDemo = true }) { destination in
-                if destination == .posture { selectedTab = .posture }
+                if destination == .posture { openPostureProgress() }
                 else { route = destination }
             }
-        case .workout: workoutSetup
-        case .posture: PostureGuideView(history: model.history, initialExercise: model.selectedExercise)
+        case .workout: workoutHome
+        case .progress: progressPage
         case .coach: CoachView(history: model.history)
         }
+    }
+
+    private var progressPage: some View {
+        ProgressTabView(history: model.history, section: $progressSection, exercise: Binding(
+            get: { progressExercise ?? model.selectedExercise },
+            set: { progressExercise = $0 }
+        ))
+    }
+
+    /// the Workout tab with its selection step open, where the demo leads
+    private func openWorkoutSetup() {
+        selectedTab = .workout
+        tabRoutes[.workout] = .launchWorkout
+    }
+
+    /// Home's coach card: the Workout tab at its root, the next workout in focus and the previous
+    /// workouts blurred until tapped
+    private func openNextWorkout() {
+        tabRoutes[.workout] = nil
+        blursPreviousWorkouts = true
+        selectedTab = .workout
+    }
+
+    /// Home's Posture card: always the Progress tab's Posture section, on the exercise the card shows
+    private func openPostureProgress() {
+        progressSection = .posture
+        progressExercise = model.selectedExercise
+        tabRoutes[.progress] = nil
+        selectedTab = .progress
     }
 
     private func destinationPage(_ destination: HomeRoute) -> some View {
@@ -425,13 +485,36 @@ struct ContentView: View {
                     .navigationTitle("Last workout")
             }
         case .account: accountPage
-        case .posture: PostureGuideView(history: model.history, initialExercise: model.selectedExercise)
+        // pushed pages that follow the model: built in their own body (`LiveContent`)
+        case .launchWorkout: LiveContent { workoutSetup }
+        case .session(let id):
+            LiveContent {
+                if let session = model.history.first(where: { $0.id == id }) {
+                    historyDetail(session)
+                } else {
+                    ContentUnavailableView("No workouts yet", systemImage: "figure.strengthtraining.functional")
+                }
+            }
+        case .posture: LiveContent { progressPage }
         case .weights: historyList(title: "Best set", exercise: model.selectedExercise)
         case .awards: BadgesView(ledger: badges)
         // the subscription does not exist yet (1.1): the banner is hidden, and its route lands on
         // the account page rather than on a placeholder
         case .plus: accountPage
         }
+    }
+
+    /// Plays the first-run experience again from its very start, as on a first launch: the welcome
+    /// screens, then Home with Try Finn, then the one-time Health offer after a set. Every first-run
+    /// step resets here, so a new onboarding step adds its reset here too. Saved sets, answers and
+    /// settings are kept.
+    private func replayOnboarding() {
+        preferences.onboardingCompleted = false
+        preferences.personalizationOffered = false
+        hasTriedFinn = false // TEMPORARY with `FinnFirstTryTrigger.swift`.
+        tabRoutes = [:]
+        selectedTab = .home
+        showsOnboarding = true
     }
 
     private var accountPage: some View {
@@ -466,9 +549,10 @@ struct ContentView: View {
                     }
                     .accessibilityLabel("Privacy")
                 }
-                Button { showsOnboarding = true } label: {
-                    Label("Replay the welcome", systemImage: "arrow.counterclockwise")
+                Button(action: replayOnboarding) {
+                    Label("Replay onboarding", systemImage: "arrow.counterclockwise")
                 }
+                .accessibilityHint("Starts again from the welcome screens. Your sets and settings are kept.")
                 .accessibilityIdentifier("account.replayOnboarding")
             }
             Section("Account") {
@@ -535,9 +619,6 @@ struct ContentView: View {
                     .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("setup.focus")
                 }
-                if let last = model.history.first {
-                    lastSessionCard(last)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
@@ -547,7 +628,7 @@ struct ContentView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 4) {
                 // said where the decision is made: before the camera opens
-                Button { route = .privacy } label: {
+                Button { showsSetupPrivacy = true } label: {
                     Label("Camera privacy", systemImage: "lock.fill")
                         .font(.footnote)
                         .foregroundStyle(Color.primary)
@@ -576,96 +657,57 @@ struct ContentView: View {
             .background(HomeStyle.background)
         }
         .background(HomeStyle.background.ignoresSafeArea())
-        .navigationTitle("Workout")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button { route = .history } label: {
-                        Label("History", systemImage: "clock.arrow.circlepath")
-                    }
-                    Button { route = .coach } label: {
-                        Label("Coach", systemImage: "bubble.left.and.text.bubble.right")
-                    }
-                    Button { route = .awards } label: {
-                        Label("Awards", systemImage: "rosette")
-                    }
-                    Button { route = .options } label: {
-                        Label("Options", systemImage: "slider.horizontal.3")
-                    }
-                    Button { route = .privacy } label: {
-                        Label("Privacy", systemImage: "lock")
-                    }
-                } label: {
-                    Label("More", systemImage: "ellipsis")
-                }
-                .accessibilityIdentifier("home.more")
-            }
-        }
-        .sheet(isPresented: $showsCameraPrimer) {
-            CameraPrimer(onContinue: {
-                showsCameraPrimer = false
-                Task { await model.startPreview() }
-            }, onPrivacy: {
-                showsCameraPrimer = false
-                route = .privacy
-            })
-            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.fraction(0.62), .large])
-            .presentationDragIndicator(.visible)
-            .presentationBackground(Color(uiColor: .systemBackground))
-        }
+        .navigationTitle("Launch workout")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $showsSetupPrivacy) { privacyPage }
     }
 
-    /// the latest saved session, with what Finn noticed in it, opening History
-    private func lastSessionCard(_ session: WorkoutSessionSummary) -> some View {
-        let reps = session.sets.reduce(0) { $0 + $1.analysis.reps.count }
-        var names: [String] = []
-        for set in session.sets where !names.contains(set.exercise.definition.copy.name) {
-            names.append(set.exercise.definition.copy.name)
-        }
-        let sets = String(localized: "\(session.sets.count) sets")
-        let when: String = {
-            let time = session.startedAt.formatted(date: .omitted, time: .shortened)
-            if Calendar.current.isDateInToday(session.startedAt) { return String(localized: "Today, \(time)") }
-            if Calendar.current.isDateInYesterday(session.startedAt) { return String(localized: "Yesterday, \(time)") }
-            return session.startedAt.formatted(.dateTime.day().month(.abbreviated).hour().minute())
-        }()
-        // the latest observation the person kept, word for word
-        let note = session.sets.last(where: { $0.cue != nil && $0.cueResponse != .notRelevant })?.cue?.observation
-        return Button { route = .history } label: {
-            HomeCard {
-                HStack(alignment: .top, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Last session")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(HomeStyle.supportingText)
-                        Text("\(names.joined(separator: ", ")) · \(reps) reps")
-                            .font(.headline)
-                            .monospacedDigit()
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text("\(when) · \(sets)")
-                            .font(.subheadline)
-                            .foregroundStyle(HomeStyle.supportingText)
-                        if let note {
-                            Label(note, systemImage: "text.quote")
-                                .font(.subheadline)
-                                .padding(.top, 6)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(HomeStyle.supportingText)
-                        .padding(.top, 2)
-                        .accessibilityHidden(true)
-                }
+    /// the Workout tab: the next workout, previous sessions, and Launch workout for the setup above
+    private var workoutHome: some View {
+        WorkoutTabView(message: coachMessage, history: model.history,
+                       blursPreviousWorkouts: $blursPreviousWorkouts,
+                       savedToFitness: { model.fitnessRecord(forSession: $0.id) != nil },
+                       openSession: { route = .session($0.id) },
+                       launch: { route = .launchWorkout })
+            // the blur belongs to the visit Home's card started: gone once the person leaves the tab
+            .onChange(of: selectedTab) { _, tab in
+                if tab != .workout { blursPreviousWorkouts = false }
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button { route = .history } label: {
+                            Label("History", systemImage: "clock.arrow.circlepath")
+                        }
+                        Button { route = .coach } label: {
+                            Label("Coach", systemImage: "bubble.left.and.text.bubble.right")
+                        }
+                        Button { route = .awards } label: {
+                            Label("Awards", systemImage: "rosette")
+                        }
+                        Button { route = .options } label: {
+                            Label("Options", systemImage: "slider.horizontal.3")
+                        }
+                        Button { route = .privacy } label: {
+                            Label("Privacy", systemImage: "lock")
+                        }
+                    } label: {
+                        Label("More", systemImage: "ellipsis")
+                    }
+                    .accessibilityIdentifier("home.more")
+                }
+                // its own glass, at the far right like on the other tabs
+                ToolbarSpacer(.fixed, placement: .topBarTrailing)
+                ToolbarItem(placement: .topBarTrailing) { accountButton }
+            }
+    }
+
+    /// Home's profile button, the same on every tab: it opens Settings
+    private var accountButton: some View {
+        Button { route = .account } label: {
+            Label("Account settings", systemImage: "person.fill")
         }
-        .buttonStyle(PressableStyle())
-        .accessibilityElement(children: .combine)
-        .accessibilityHint("Opens your history")
-        .accessibilityIdentifier("home.lastSession")
+        .accessibilityIdentifier("home.account")
     }
 
     /// one short line about the latest save to Apple Health, with Try again when it can help
@@ -1118,7 +1160,7 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Welcome").font(.headline).foregroundStyle(Color.primary).accessibilityAddTraits(.isHeader)
                     Text("The first-launch screens: your goal, your exercises, your level, the voice, and where to put your iPhone. Your choices set exercise order and help Coach select relevant saved sets.")
-                    Button("Replay the welcome") { showsOnboarding = true }
+                    Button("Replay the welcome", action: replayOnboarding)
                         .font(.body.weight(.medium))
                         .foregroundStyle(Color.primary)
                         .frame(minHeight: 44, alignment: .leading)

@@ -24,7 +24,7 @@
     "_failTransactionsEnabled" : false,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
-    "_storefront" : "USA",
+    "_storefront" : "FRA",
     "_storeKitErrors" : [
 
     ],
@@ -284,6 +284,136 @@
           "productID" : "ai.mwm.build.challenge.team.08.yearly.00.ft.69.99",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "yearly.00.ft.69.99",
+          "subscriptionGroupID" : "FE3C8B59",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "5.99",
+              "displayPrice" : "5.99",
+              "internalID" : "A1C3E5F7",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "5.99",
+          "familyShareable" : false,
+          "groupNumber" : 7,
+          "internalID" : "B2D4F6A8",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Full coaching, billed every week.",
+              "displayName" : "Finn Coach+ Weekly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "ai.mwm.build.challenge.team.08.weekly.00.ft.05.99",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "weekly.00.ft.05.99",
+          "subscriptionGroupID" : "FE3C8B59",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "149.99",
+              "displayPrice" : "149.99",
+              "internalID" : "C3E5A7B9",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "149.99",
+          "familyShareable" : false,
+          "groupNumber" : 8,
+          "internalID" : "D4F6B8CA",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Full coaching, billed every year.",
+              "displayName" : "Finn Coach+ Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "ai.mwm.build.challenge.team.08.yearly.00.ft.149.99",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "yearly.00.ft.149.99",
+          "subscriptionGroupID" : "FE3C8B59",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "149.99",
+              "displayPrice" : "149.99",
+              "internalID" : "E5A7C9DB",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "149.99",
+          "familyShareable" : false,
+          "groupNumber" : 9,
+          "internalID" : "F6B8DAEC",
+          "introductoryOffer" : {
+            "billingPlanType" : "BILLED_UPFRONT",
+            "internalID" : "A7C9EBFD",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P2W"
+          },
+          "introductoryOffers" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "internalID" : "A7C9EBFD",
+              "numberOfPeriods" : 1,
+              "paymentMode" : "free",
+              "subscriptionPeriod" : "P2W"
+            }
+          ],
+          "localizations" : [
+            {
+              "description" : "Two weeks free, then billed every year.",
+              "displayName" : "Finn Coach+ Annual, 2-week trial",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "ai.mwm.build.challenge.team.08.yearly.14.ft.149.99",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "yearly.14.ft.149.99",
           "subscriptionGroupID" : "FE3C8B59",
           "type" : "RecurringSubscription",
           "winbackOffers" : [

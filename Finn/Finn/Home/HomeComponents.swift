@@ -48,6 +48,8 @@ struct HomeSurface: ViewModifier {
 enum HomeRoute: Hashable {
     case history, options, privacy, coach
     case account, lastWorkout, posture, weights, awards, plus
+    /// the selection step before a workout, and one saved session
+    case launchWorkout, session(UUID)
 }
 
 extension ExerciseKind {
@@ -196,7 +198,8 @@ struct HomeCard<Content: View>: View {
     }
 }
 
-/// the one filled action of a screen: a full-width pill with its arrow in a circle of its own
+/// the one filled action of a screen: a full-width pill with its arrow in a pink circle of its own,
+/// the same on every screen
 struct PrimaryActionLabel: View {
     let title: LocalizedStringResource
     var symbol = "arrow.right"
@@ -210,9 +213,9 @@ struct PrimaryActionLabel: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: symbol)
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(.white)
                 .frame(width: 44, height: 44)
-                .background(Color(uiColor: .systemBackground), in: Circle())
+                .background(DashboardStyle.accent, in: Circle())
                 .accessibilityHidden(true)
         }
         .padding(.leading, 24)

@@ -1,106 +1,12 @@
 import SwiftUI
 
-struct PostureGuideView: View {
-    let history: [WorkoutSessionSummary]
-    @State private var exercise: ExerciseKind
-    @State private var playsIllustration = true
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    init(history: [WorkoutSessionSummary], initialExercise: ExerciseKind) {
-        self.history = history
-        _exercise = State(initialValue: initialExercise)
-    }
-
-    private var evidence: PostureGuideEvidence {
-        PostureGuideEvidence.make(for: exercise, history: history)
-    }
+/// the latest measured set of the chosen exercise against the guide: each form check, what to try
+/// next and how it moved since earlier sets
+struct MeasuredFormCard: View {
+    let exercise: ExerciseKind
+    let evidence: PostureGuideEvidence
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Choose an exercise")
-                    .font(.headline)
-                    .accessibilityAddTraits(.isHeader)
-                ScrollView(.horizontal) {
-                    HStack(spacing: 8) {
-                        ForEach(ExerciseKind.allCases, id: \.rawValue) { kind in
-                            Button {
-                                exercise = kind
-                            } label: {
-                                Text(kind.chipName)
-                                    .font(.subheadline.weight(.semibold))
-                                    .padding(.horizontal, 14)
-                                    .frame(minHeight: 44)
-                                    .background(exercise == kind ? DashboardStyle.accent : Color.white.opacity(0.12),
-                                                in: Capsule())
-                                    .foregroundStyle(exercise == kind ? .black : .white)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("posture.exercise.\(kind.rawValue)")
-                            .accessibilityAddTraits(exercise == kind ? .isSelected : [])
-                        }
-                    }
-                    .padding(.vertical, 2)
-                }
-                .scrollIndicators(.hidden)
-
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Illustrated movement")
-                            .font(.headline)
-                            .accessibilityAddTraits(.isHeader)
-                        Spacer()
-                        Button(playsIllustration ? "Pause" : "Play") {
-                            playsIllustration.toggle()
-                        }
-                        .font(.subheadline)
-                        .accessibilityIdentifier("posture.playback")
-                    }
-                    ExerciseFigureView(kind: exercise, lineColor: DashboardStyle.accent,
-                                       animates: playsIllustration)
-                        .frame(height: 230)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("posture.illustration")
-                    Text(reduceMotion ? "Motion paused for Reduce Motion" : "Illustration for guidance; bodies and ranges vary")
-                        .font(.caption)
-                        .foregroundStyle(DashboardStyle.secondary)
-                }
-                .padding(16)
-                .modifier(DashboardGlass())
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("How to move")
-                        .font(.headline)
-                        .accessibilityAddTraits(.isHeader)
-                    ForEach(PostureGuideSteps.forExercise(exercise), id: \.self) { step in
-                        HStack(alignment: .firstTextBaseline, spacing: 12) {
-                            Image(systemName: "circle.fill")
-                                .font(.system(size: 6))
-                                .foregroundStyle(DashboardStyle.accent)
-                                .accessibilityHidden(true)
-                            Text(step).font(.body)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .modifier(DashboardGlass())
-
-                comparison
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .frame(maxWidth: 620)
-            .frame(maxWidth: .infinity)
-        }
-        .accessibilityIdentifier("posture.guide")
-        .foregroundStyle(.white)
-        .background { HomeBackdrop() }
-        .navigationTitle("Posture")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-
-    @ViewBuilder private var comparison: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Your movement and the guide")
                 .font(.headline)
