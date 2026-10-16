@@ -1680,14 +1680,20 @@ struct ContentView: View {
     }
 
     /// the reps counted so far, readable from where the person stands, in the top corner of the
-    /// picture where it covers no one
+    /// picture where it covers no one. With a rep target (Try Finn), the count shows it: "4/8"
     private var liveCount: some View {
         VStack(spacing: 0) {
-            Text("\(model.liveRepCount)")
-                .font(.system(size: liveCountSize, weight: .semibold, design: .rounded))
-                .monospacedDigit()
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
+            Group {
+                if let target = model.repTarget {
+                    Text("\(model.liveRepCount)/\(target)")
+                } else {
+                    Text("\(model.liveRepCount)")
+                }
+            }
+            .font(.system(size: liveCountSize, weight: .semibold, design: .rounded))
+            .monospacedDigit()
+            .minimumScaleFactor(0.5)
+            .lineLimit(1)
             // Counts must stay legible while changing; a fading digit loses contrast.
             // the exercise being measured, such as "push-ups", so a wrong choice shows before the reps
             // are done (13 October: push-ups filmed while Squat was chosen counted nothing)
@@ -1701,7 +1707,8 @@ struct ContentView: View {
         .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 20))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Reps counted")
-        .accessibilityValue("\(model.liveRepCount)")
+        .accessibilityValue(model.repTarget.map { Text("\(model.liveRepCount) of \($0)") }
+                            ?? Text("\(model.liveRepCount)"))
         .accessibilityIdentifier("capture.liveReps")
     }
 

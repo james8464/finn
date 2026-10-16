@@ -110,7 +110,7 @@ final class WorkoutSessionModel {
     @ObservationIgnored private let announcer: (any LiveAnnouncing)?
     @ObservationIgnored private var startReadiness = StartReadiness()
     @ObservationIgnored private var liveMonitor: LiveSetMonitor?
-    /// A hands-free start or stop on its way; at most one at a time.
+    /// A hands-free start or stop, or the stop at `repTarget`, on its way; at most one at a time.
     @ObservationIgnored private var handsFreeTask: Task<Void, Never>?
     /// Saves finished sessions to Apple Health. Nil for demo and recorded input, which must never
     /// reach Health.
@@ -263,6 +263,9 @@ final class WorkoutSessionModel {
     private(set) var handsFreeProgress = 0.0
     /// Reps counted so far in the running set.
     private(set) var liveRepCount = 0
+    /// Reps that end the set by themselves, such as Try Finn's first exercise; nil for an ordinary
+    /// set. Kept for another set from the result, cleared when the camera screen closes.
+    var repTarget: Int?
     /// The latest live observation of the running set, such as a rep faster than the first ones.
     private(set) var liveCaption: String?
     /// A short, evidence-backed line sent to the Watch during capture.
@@ -958,6 +961,13 @@ final class WorkoutSessionModel {
         if let phrase = LiveSetEvent.phrase(for: events, definition: definition) {
             say(phrase)
         }
+        if let repTarget, liveRepCount >= repTarget, handsFreeTask == nil {
+            handsFreeTask = Task { @MainActor [weak self] in
+                await self?.endSet()
+                self?.handsFreeTask = nil
+            }
+            return
+        }
         guard handsFree, handsFreeTask == nil, monitor.isOver else {
             return
         }
@@ -1401,6 +1411,7 @@ final class WorkoutSessionModel {
         framingWatchdog?.cancel()
         framingWatchdog = nil
         resetLiveSet()
+        repTarget = nil
         await source.stop()
         await collectionTask?.value
         collectionTask = nil
