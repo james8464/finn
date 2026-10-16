@@ -17,7 +17,9 @@ struct WorkoutPlannerTests {
         _ exercise: ExerciseKind,
         reps: Int,
         daysAgo: Int,
-        now: Date
+        now: Date,
+        confidence: Double = 0.95,
+        partlyVisible: Bool = false
     ) -> WorkoutSessionSummary {
         let date = now.addingTimeInterval(-Double(daysAgo) * 86_400)
         let id = UUID()
@@ -28,13 +30,14 @@ struct WorkoutPlannerTests {
             bodySide: .left,
             analysis: SetAnalysis(
                 reps: (1 ... reps).map(rep),
-                confidence: 0.95,
+                confidence: confidence,
                 rubricVersion: "test"
             ),
             cue: nil,
             cueResponse: .unanswered,
             exercise: exercise,
-            cameraView: .side
+            cameraView: .side,
+            partlyVisible: partlyVisible
         )
         return WorkoutSessionSummary(id: id, startedAt: date, sets: [set])
     }
@@ -74,6 +77,28 @@ struct WorkoutPlannerTests {
         #expect(!few.exercises.contains { $0.exercise == .muscleUp })
         let many = WorkoutPlanner.make(history: [session(.pullUp, reps: 10, daysAgo: 2, now: now)], now: now)
         #expect(many.exercises.contains { $0.exercise == .muscleUp })
+    }
+
+    @Test func uncertainPartialAndFutureSetsCannotUnlockMuscleUp() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let untrusted = [
+            session(.pullUp, reps: 15, daysAgo: 1, now: now, confidence: 0.4),
+            session(.pullUp, reps: 15, daysAgo: 1, now: now, partlyVisible: true),
+            session(.pullUp, reps: 15, daysAgo: -1, now: now)
+        ]
+        for saved in untrusted {
+            let workout = WorkoutPlanner.make(history: [saved], now: now)
+            #expect(!workout.exercises.contains { $0.exercise == .muscleUp })
+        }
+    }
+
+    @Test func currentCapacityWinsOverOldPersonalBest() throws {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let older = session(.pushUp, reps: 20, daysAgo: 30, now: now)
+        let current = session(.pushUp, reps: 5, daysAgo: 1, now: now)
+        let workout = WorkoutPlanner.make(history: [older, current], now: now)
+        let pushUp = try #require(workout.exercises.first { $0.exercise == .pushUp })
+        #expect(pushUp.reps == 5)
     }
 
     @Test func storeKeepsAValidatedWorkoutUntickedAndOnlyOnce() {

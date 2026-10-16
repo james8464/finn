@@ -48,6 +48,15 @@ nonisolated struct PlannedWorkout: Codable, Equatable, Identifiable, Sendable {
     }
 }
 
+/// Only clear, completed measurements can inform a future rep target.
+nonisolated enum WorkoutCapacityEvidence {
+    static func isCredible(_ set: SetSummary, asOf date: Date) -> Bool {
+        set.partlyVisible != true && set.analysis.confidence.isFinite
+            && set.analysis.confidence >= 0.8 && !set.analysis.reps.isEmpty
+            && set.capturedAt <= date
+    }
+}
+
 /// composes a workout from the saved history alone: no model runs, so it works on every iPhone
 nonisolated enum WorkoutPlanner {
     private enum Group { case lower, push, pull }
@@ -72,22 +81,28 @@ nonisolated enum WorkoutPlanner {
         }
     }
 
-    /// the most reps measured in one set of `kind`, nil when the person never did it
-    private static func bestReps(_ kind: ExerciseKind, in sets: [SetSummary]) -> Int? {
-        sets.filter { $0.exercise == kind }.map { $0.analysis.reps.count }.max()
-    }
-
     /// Picks the exercise of each muscle group that was done longest ago, so a new workout covers
     /// what the last ones left out. The bar muscle-up only appears once the person has done it or
     /// pulls up ten times in a set.
     static func make(history: [WorkoutSessionSummary], now: Date = Date()) -> PlannedWorkout {
-        let sets = history.flatMap(\.sets)
+        // Keep only recent, trustworthy measurements for each movement. A partly visible or
+        // uncertain set must not raise a prescription or unlock a difficult movement.
+        var recent: [ExerciseKind: [SetSummary]] = [:]
+        var lastDates: [ExerciseKind: Date] = [:]
+        for set in history.flatMap(\.sets) where WorkoutCapacityEvidence.isCredible(set, asOf: now) {
+            lastDates[set.exercise] = max(lastDates[set.exercise] ?? .distantPast, set.capturedAt)
+            var matches = recent[set.exercise, default: []]
+            matches.append(set)
+            matches.sort { $0.capturedAt > $1.capturedAt }
+            recent[set.exercise] = Array(matches.prefix(3))
+        }
+        let capacities = recent.mapValues { $0.map { $0.analysis.reps.count }.min() ?? 0 }
         func lastDone(_ kind: ExerciseKind) -> Date {
-            sets.filter { $0.exercise == kind }.map(\.capturedAt).max() ?? .distantPast
+            lastDates[kind] ?? .distantPast
         }
         func eligible(_ kind: ExerciseKind) -> Bool {
             guard kind == .muscleUp else { return true }
-            return (bestReps(.muscleUp, in: sets) ?? 0) > 0 || (bestReps(.pullUp, in: sets) ?? 0) >= 10
+            return (capacities[.muscleUp] ?? 0) > 0 || (capacities[.pullUp] ?? 0) >= 10
         }
         func stalest(_ group: Group, skipping taken: Set<ExerciseKind> = []) -> ExerciseKind? {
             ExerciseKind.allCases
@@ -103,8 +118,8 @@ nonisolated enum WorkoutPlanner {
 
         let exercises = picked.map { kind -> PlannedExercise in
             let reps: Int
-            if let best = bestReps(kind, in: sets), best > 0 {
-                reps = min(max(best, 3), 20)
+            if let capacity = capacities[kind], capacity > 0 {
+                reps = min(max(capacity, 3), 20)
             } else {
                 reps = startingReps(kind)
             }

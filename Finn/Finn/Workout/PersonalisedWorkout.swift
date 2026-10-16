@@ -33,8 +33,7 @@ nonisolated enum PersonalisedWorkoutRules {
             || profile.goal == .comeback || profile.intensity == .easy
             || (!profile.noPastInjuries && !profile.injuries.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         let credible = context.history.flatMap(\.sets).filter {
-            $0.partlyVisible != true && $0.analysis.confidence.isFinite && $0.analysis.confidence >= 0.8
-                && !$0.analysis.reps.isEmpty && $0.capturedAt <= now
+            WorkoutCapacityEvidence.isCredible($0, asOf: now)
         }
         var lastDates: [ExerciseKind: Date] = [:]
         var recentSets: [ExerciseKind: [SetSummary]] = [:]
@@ -63,9 +62,7 @@ nonisolated enum PersonalisedWorkoutRules {
         let acceptedHistory = context.history.map { session in
             var copy = session
             copy.sets = session.sets.filter {
-                $0.cueResponse != .notRelevant && $0.partlyVisible != true
-                    && $0.analysis.confidence.isFinite && $0.analysis.confidence >= 0.8
-                    && !$0.analysis.reps.isEmpty && $0.capturedAt <= now
+                $0.cueResponse != .notRelevant && WorkoutCapacityEvidence.isCredible($0, asOf: now)
             }
             return copy
         }
