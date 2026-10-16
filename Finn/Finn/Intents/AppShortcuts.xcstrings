@@ -1,217 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Start a ${exercise} set in ${applicationName}" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lance une série de ${exercise} dans ${applicationName}"
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start a ${exercise} set in ${applicationName}"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start a ${exercise} set in ${applicationName}"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicia una serie de ${exercise} en ${applicationName}"
-          }
-        }
-      }
-    },
-    "Start ${exercise} in ${applicationName}" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Démarre ${exercise} dans ${applicationName}"
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start ${exercise} in ${applicationName}"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start ${exercise} in ${applicationName}"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicia ${exercise} en ${applicationName}"
-          }
-        }
-      }
-    },
-    "Start a set in ${applicationName}" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lance une série dans ${applicationName}"
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start a set in ${applicationName}"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start a set in ${applicationName}"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicia una serie en ${applicationName}"
-          }
-        }
-      }
-    },
-    "Start a set with ${applicationName}" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Démarre une série avec ${applicationName}"
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start a set with ${applicationName}"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start a set with ${applicationName}"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicia una serie con ${applicationName}"
-          }
-        }
-      }
-    },
-    "How did my last set go in ${applicationName}" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comment s'est passée ma dernière série dans ${applicationName}"
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How did my last set go in ${applicationName}"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How did my last set go in ${applicationName}"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Cómo fue mi última serie en ${applicationName}?"
-          }
-        }
-      }
-    },
-    "How was my last set in ${applicationName}" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "C'était comment ma dernière série dans ${applicationName}"
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How was my last set in ${applicationName}"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How was my last set in ${applicationName}"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Qué tal fue mi última serie en ${applicationName}?"
-          }
-        }
-      }
-    },
-    "What was my last set in ${applicationName}" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quelle était ma dernière série dans ${applicationName}"
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What was my last set in ${applicationName}"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What was my last set in ${applicationName}"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Cuál fue mi última serie en ${applicationName}?"
-          }
-        }
-      }
-    },
     "${applicationName} last set" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${applicationName} dernière série"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "${applicationName} last set"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "${applicationName} last set"
@@ -222,52 +21,123 @@
             "state" : "translated",
             "value" : "Última serie de ${applicationName}"
           }
-        }
-      }
-    },
-    "Show my history in ${applicationName}" : {
-      "localizations" : {
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Montre mon historique dans ${applicationName}"
+            "value" : "${applicationName} dernière série"
+          }
+        }
+      }
+    },
+    "How did my last set go in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "How did my last set go in ${applicationName}",
+              "How was my last set in ${applicationName}",
+              "What was my last set in ${applicationName}",
+              "${applicationName} last set"
+            ]
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "How did my last set go in ${applicationName}"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "How did my last set go in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "¿Cómo fue mi última serie en ${applicationName}?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Comment s'est passée ma dernière série dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "How was my last set in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How was my last set in ${applicationName}"
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Show my history in ${applicationName}"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show my history in ${applicationName}"
+            "value" : "How was my last set in ${applicationName}"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Muestra mi historial en ${applicationName}"
+            "value" : "¿Qué tal fue mi última serie en ${applicationName}?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C'était comment ma dernière série dans ${applicationName}"
           }
         }
       }
     },
-    "Show my ${applicationName} history" : {
+    "Open ${applicationName} history" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "fr" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Montre mon historique ${applicationName}"
+            "value" : "Open ${applicationName} history"
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Open ${applicationName} history"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre el historial de ${applicationName}"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l'historique ${applicationName}"
+          }
+        }
+      }
+    },
+    "Show my ${applicationName} history" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "Show my ${applicationName} history"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Show my ${applicationName} history"
@@ -278,33 +148,206 @@
             "state" : "translated",
             "value" : "Muestra mi historial de ${applicationName}"
           }
-        }
-      }
-    },
-    "Open ${applicationName} history" : {
-      "localizations" : {
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvre l'historique ${applicationName}"
+            "value" : "Montre mon historique ${applicationName}"
+          }
+        }
+      }
+    },
+    "Show my history in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Show my history in ${applicationName}",
+              "Show my ${applicationName} history",
+              "Open ${applicationName} history"
+            ]
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show my history in ${applicationName}"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show my history in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Muestra mi historial en ${applicationName}"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Montre mon historique dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Start ${exercise} in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start ${exercise} in ${applicationName}"
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open ${applicationName} history"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open ${applicationName} history"
+            "value" : "Start ${exercise} in ${applicationName}"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abre el historial de ${applicationName}"
+            "value" : "Inicia ${exercise} en ${applicationName}"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarre ${exercise} dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Start a ${exercise} set in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Start a ${exercise} set in ${applicationName}",
+              "Start ${exercise} in ${applicationName}",
+              "Start a set in ${applicationName}",
+              "Start a set with ${applicationName}"
+            ]
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Start a ${exercise} set in ${applicationName}"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Start a ${exercise} set in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Inicia una serie de ${exercise} en ${applicationName}"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Lance une série de ${exercise} dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Start a set in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a set in ${applicationName}"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a set in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia una serie en ${applicationName}"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lance une série dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Start a set with ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a set with ${applicationName}"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a set with ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia una serie con ${applicationName}"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarre une série avec ${applicationName}"
+          }
+        }
+      }
+    },
+    "What was my last set in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What was my last set in ${applicationName}"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What was my last set in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuál fue mi última serie en ${applicationName}?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelle était ma dernière série dans ${applicationName}"
           }
         }
       }

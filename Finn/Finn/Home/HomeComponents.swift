@@ -198,13 +198,11 @@ struct HomeCard<Content: View>: View {
     }
 }
 
-/// the one filled action of a screen: a full-width pill with its arrow in a circle of its own
+/// the one filled action of a screen: a full-width pill with its arrow in a pink circle of its own,
+/// the same on every screen
 struct PrimaryActionLabel: View {
     let title: LocalizedStringResource
     var symbol = "arrow.right"
-    /// the circle and its symbol invert with the appearance unless a screen sets them
-    var symbolBackground = Color(uiColor: .systemBackground)
-    var symbolColor = Color.primary
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
@@ -215,9 +213,9 @@ struct PrimaryActionLabel: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: symbol)
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(symbolColor)
+                .foregroundStyle(.white)
                 .frame(width: 44, height: 44)
-                .background(symbolBackground, in: Circle())
+                .background(DashboardStyle.accent, in: Circle())
                 .accessibilityHidden(true)
         }
         .padding(.leading, 24)

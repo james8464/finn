@@ -1,19 +1,42 @@
 import SwiftUI
 
-/// the welcome, then the five first-launch screens. Each one can be skipped; the answers go to `FinnPreferences`
-/// when the person taps Start, and the camera is asked for later, when a set starts
+/// the welcome, two demos, six questions, the plan offer, then a few details about the person.
+/// Questions can be skipped; Continue waits for a first name, Access Finn for the training setup.
+/// The answers go to `FinnPreferences` when the person leaves, and the camera is asked for later,
+/// when a set starts
 struct OnboardingView: View {
     let preferences: FinnPreferences
     /// called once the answers are saved (or the whole thing was skipped)
     let finished: (OnboardingProfile) -> Void
 
-    @State private var showsWelcome = true
-    @State private var step = 0
+    @State private var stage = Stage.welcome
+    @State private var step = Step.liveDemo
     @State private var profile: OnboardingProfile
+    /// Finn's answer to the current choice; nil while Finn is quiet
+    @State private var reaction: Reaction?
+    @State private var reactionTask: Task<Void, Never>?
+    @FocusState private var nameFocused: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
     @Environment(\.dynamicTypeSize) private var typeSize
 
-    private static let stepCount = 5
+    private enum Stage { case welcome, questions, plan, aboutYou }
+
+    /// the screens that carry the progress bar, in order
+    private enum Step: Int, CaseIterable {
+        case liveDemo, wearablesDemo, name, goal, level, pastProgram, intensity, days
+    }
+
+    private struct Reaction: Equatable {
+        let line: String
+        /// false while the LEDs light up
+        var speaks: Bool
+    }
+
+    /// 00-Notes: Finn's line fades in over 180 ms
+    private static let lineFade = 0.18
+    /// how long the line stays before the next screen
+    private static let lineHold = 1.5
 
     init(preferences: FinnPreferences, finished: @escaping (OnboardingProfile) -> Void) {
         self.preferences = preferences
@@ -23,13 +46,18 @@ struct OnboardingView: View {
 
     var body: some View {
         Group {
-            if showsWelcome {
-                OnboardingWelcomeView {
-                    withAnimation(reduceMotion ? nil : HomeStyle.spring) { showsWelcome = false }
-                }
-                .transition(.opacity)
-            } else {
-                steps
+            switch stage {
+            case .welcome:
+                OnboardingWelcomeView { show(.questions) }
+                    .transition(.opacity)
+            case .questions:
+                questions
+                    .transition(.opacity)
+            case .plan:
+                PaywallView(back: { show(.questions) }, next: { show(.aboutYou) })
+                    .transition(.opacity)
+            case .aboutYou:
+                AboutYouView(profile: $profile, back: { show(.plan) }, finish: finish)
                     .transition(.opacity)
             }
         }
@@ -38,68 +66,100 @@ struct OnboardingView: View {
         .interactiveDismissDisabled()
     }
 
+    private func show(_ next: Stage) {
+        withAnimation(reduceMotion ? nil : HomeStyle.spring) { stage = next }
+    }
+
     // MARK: Chrome
 
-    private var steps: some View {
+    private var questions: some View {
         VStack(spacing: 0) {
-            progress
+            header
                 .padding(.horizontal, 20)
                 .padding(.top, 18)
             TabView(selection: $step) {
-                goalPage.tag(0)
-                exercisesPage.tag(1)
-                levelPage.tag(2)
-                voicePage.tag(3)
-                placementPage.tag(4)
+                page(String(localized: "Finn watches every rep"),
+                     String(localized: "Set your iPhone down. Move with Finn.")) {
+                    LiveCoachingDemo()
+                }
+                .tag(Step.liveDemo)
+                page(String(localized: "In your ears, on your wrist"),
+                     String(localized: "Feel the tempo on your wrist. Hear my cues through your AirPods or iPhone.")) {
+                    WearablesDemo()
+                }
+                .tag(Step.wearablesDemo)
+                namePage.tag(Step.name)
+                goalPage.tag(Step.goal)
+                levelPage.tag(Step.level)
+                pastProgramPage.tag(Step.pastProgram)
+                intensityPage.tag(Step.intensity)
+                daysPage.tag(Step.days)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(reduceMotion ? nil : HomeStyle.spring, value: step)
+            // the options stay as they are while Finn answers
+            .disabled(reaction != nil)
+            if let reaction {
+                FinnReaction(line: reaction.line, speaks: reaction.speaks)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .transition(.opacity)
+            }
             actions
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
         }
+        .onChange(of: step) { _, newStep in
+            endReaction()
+            nameFocused = newStep == .name
+        }
     }
 
-    private var progress: some View {
-        Group {
-            if typeSize.isAccessibilitySize {
-                VStack(spacing: 4) {
+    /// the row (Back, the counter, Not now), then the pink bar
+    private var header: some View {
+        VStack(spacing: 15) {
+            Group {
+                if typeSize.isAccessibilitySize {
+                    VStack(spacing: 4) {
+                        HStack {
+                            backButton
+                            Spacer()
+                            skipAllButton
+                        }
+                        counter.font(.footnote.weight(.semibold))
+                    }
+                } else {
                     HStack {
                         backButton
                         Spacer()
+                        counter.font(.subheadline.weight(.semibold))
+                        Spacer()
                         skipAllButton
                     }
-                    Text("\(step + 1) of \(Self.stepCount)")
-                        .font(.footnote).monospacedDigit().foregroundStyle(.secondary)
-                }
-            } else {
-                HStack {
-                    backButton
-                    Spacer()
-                    Text("\(step + 1) of \(Self.stepCount)")
-                        .font(.subheadline).monospacedDigit().foregroundStyle(.secondary)
-                    Spacer()
-                    skipAllButton
                 }
             }
+            .accessibilityElement(children: .contain)
+            // the counter above already says how far along this is
+            ProgressView(value: Double(step.rawValue + 1), total: Double(Step.allCases.count))
+                .tint(DashboardStyle.accent)
+                .accessibilityHidden(true)
+                .animation(reduceMotion ? nil : HomeStyle.spring, value: step)
         }
-        .accessibilityElement(children: .contain)
+    }
+
+    private var counter: some View {
+        Text("\(step.rawValue + 1) of \(Step.allCases.count)")
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
     }
 
     private var backButton: some View {
-        Button { withAnimation(reduceMotion ? nil : HomeStyle.spring) { step -= 1 } } label: {
-            if typeSize.isAccessibilitySize {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 17, weight: .semibold))
-                    .frame(width: 44, height: 44)
-            } else {
-                Label("Back", systemImage: "chevron.left")
-                    .frame(minHeight: 44)
-            }
+        OnboardingBackButton {
+            guard let previous = Step(rawValue: step.rawValue - 1) else { return }
+            withAnimation(reduceMotion ? nil : HomeStyle.spring) { step = previous }
         }
-        .accessibilityLabel("Back")
-        .disabled(step == 0)
-        .opacity(step == 0 ? 0 : 1)
+        .disabled(step == .liveDemo)
+        .opacity(step == .liveDemo ? 0 : 1)
     }
 
     private var skipAllButton: some View {
@@ -107,20 +167,20 @@ struct OnboardingView: View {
             .accessibilityIdentifier("onboarding.finish")
     }
 
-    private var isLast: Bool { step == Self.stepCount - 1 }
+    /// the first name is the one answer Continue waits for: two titles use it
+    private var continueDisabled: Bool { step == .name && profile.preferredName == nil }
 
     private var actions: some View {
         VStack(spacing: 2) {
             Button(action: advance) {
-                PrimaryActionLabel(title: isLast ? "Start" : "Continue",
-                                   symbol: isLast ? "checkmark" : "arrow.right")
+                PrimaryActionLabel(title: "Continue")
             }
             .buttonStyle(PressableStyle())
+            .disabled(continueDisabled)
+            .opacity(continueDisabled ? 0.4 : 1)
             .accessibilityIdentifier("onboarding.continue")
-            Button {
-                if isLast { finish() } else { withAnimation(reduceMotion ? nil : HomeStyle.spring) { step += 1 } }
-            } label: {
-                Text(isLast ? "Skip this" : "Skip")
+            Button(action: goToNextStep) {
+                Text("Skip")
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .contentShape(Rectangle())
             }
@@ -131,29 +191,91 @@ struct OnboardingView: View {
         }
     }
 
+    // MARK: Finn's reaction
+
+    /// what Finn says about the current answer; nil on the demos, the name, or with no answer
+    private var finnLine: String? {
+        switch step {
+        case .liveDemo, .wearablesDemo, .name: nil
+        case .goal: profile.goal?.finnLine
+        case .level: profile.level?.finnLine
+        case .pastProgram:
+            profile.followedProgram.map {
+                $0 ? String(localized: "Good. We'll build on what worked.")
+                   : String(localized: "No problem. We'll build one together.")
+            }
+        case .intensity: profile.intensity?.finnLine
+        case .days: profile.days?.finnLine
+        }
+    }
+
+    /// Continue: Finn answers the choice first, then the next screen comes by itself. Tapping
+    /// again while Finn speaks moves on at once
     private func advance() {
-        if isLast { finish() } else { withAnimation(reduceMotion ? nil : HomeStyle.spring) { step += 1 } }
+        guard reaction == nil, let line = finnLine else {
+            goToNextStep()
+            return
+        }
+        reactionTask = Task { await react(with: line) }
+    }
+
+    private func react(with line: String) async {
+        let fade = Animation.easeInOut(duration: Self.lineFade)
+        if reduceMotion {
+            withAnimation(fade) { reaction = Reaction(line: line, speaks: true) }
+        } else {
+            withAnimation(fade) { reaction = Reaction(line: line, speaks: false) }
+            do { try await Task.sleep(for: .seconds(FinnReaction.waveDuration)) } catch { return }
+            withAnimation(fade) { reaction?.speaks = true }
+        }
+        // VoiceOver reads the line, then waits for Continue rather than moving on by itself
+        if voiceOverEnabled {
+            AccessibilityNotification.Announcement(line).post()
+            return
+        }
+        do { try await Task.sleep(for: .seconds(Self.lineFade + Self.lineHold)) } catch { return }
+        goToNextStep()
+    }
+
+    private func endReaction() {
+        reactionTask?.cancel()
+        reactionTask = nil
+        guard reaction != nil else { return }
+        withAnimation(.easeInOut(duration: Self.lineFade)) { reaction = nil }
+    }
+
+    private func goToNextStep() {
+        endReaction()
+        if let next = Step(rawValue: step.rawValue + 1) {
+            withAnimation(reduceMotion ? nil : HomeStyle.spring) { step = next }
+        } else {
+            show(.plan)
+        }
     }
 
     private func finish() {
+        endReaction()
         preferences.apply(profile)
         finished(profile)
     }
 
     // MARK: Pages
 
-    private func page<Content: View>(_ title: String, _ subtitle: String,
+    private func page<Content: View>(_ title: String, _ subtitle: String? = nil,
                                      @ViewBuilder content: () -> Content) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(title)
                         .font(.largeTitle.bold())
-                        .accessibilityAddTraits(.isHeader)
-                    Text(subtitle)
-                        .font(.body)
-                        .foregroundStyle(HomeStyle.supportingText)
                         .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityAddTraits(.isHeader)
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(.body)
+                            .foregroundStyle(HomeStyle.supportingText)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
                 content()
             }
@@ -166,9 +288,18 @@ struct OnboardingView: View {
         .scrollBounceBehavior(.basedOnSize)
     }
 
+    private var namePage: some View {
+        page(String(localized: "What should I call you?")) {
+            OnboardingNameField(name: $profile.firstName, focus: $nameFocused) {
+                if !continueDisabled { advance() }
+            }
+        }
+    }
+
     private var goalPage: some View {
-        page(String(localized: "Training goal"),
-             String(localized: "Choose a focus for set feedback.")) {
+        page(profile.preferredName.map { String(localized: "Your training goal, \($0)") }
+                ?? String(localized: "Training goal"),
+             String(localized: "Choose a focus for better coaching")) {
             VStack(spacing: 10) {
                 ForEach(TrainingGoal.allCases, id: \.self) { goal in
                     ChoiceCard(title: goal.title, detail: nil, symbol: goal.symbol,
@@ -180,6 +311,103 @@ struct OnboardingView: View {
             }
         }
     }
+
+    private var levelPage: some View {
+        page(String(localized: "Training experience"),
+             String(localized: "Adjusts training plan")) {
+            VStack(spacing: 10) {
+                ForEach(TrainingLevel.allCases, id: \.self) { level in
+                    ChoiceCard(title: level.title, detail: nil, symbol: nil,
+                               selected: profile.level == level) {
+                        profile.level = profile.level == level ? nil : level
+                    }
+                    .accessibilityIdentifier("onboarding.level.\(level.rawValue)")
+                }
+            }
+        }
+    }
+
+    /// Yes opens a second question below, to scroll to; No (or no answer) clears it
+    private var pastProgramPage: some View {
+        page(String(localized: "Have you ever followed a training program?")) {
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach([true, false], id: \.self) { answer in
+                    ChoiceCard(title: answer ? String(localized: "Yes") : String(localized: "No"),
+                               detail: nil, symbol: nil, selected: profile.followedProgram == answer) {
+                        withAnimation(reduceMotion ? nil : HomeStyle.spring) {
+                            profile.followedProgram = profile.followedProgram == answer ? nil : answer
+                            if profile.followedProgram != true { profile.stopReasons = [] }
+                        }
+                    }
+                    .accessibilityIdentifier("onboarding.program.\(answer ? "yes" : "no")")
+                }
+                if profile.followedProgram == true {
+                    stopReasons
+                        .transition(.opacity)
+                }
+            }
+        }
+    }
+
+    private var stopReasons: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Why did you stop?")
+                    .font(.title2.bold())
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+                Text("Select all that apply")
+                    .font(.subheadline)
+                    .foregroundStyle(HomeStyle.supportingText)
+            }
+            .padding(.top, 22)
+            .padding(.bottom, 4)
+            ForEach(ProgramStopReason.allCases, id: \.self) { reason in
+                ChoiceCard(title: reason.title, detail: nil, symbol: nil,
+                           selected: profile.stopReasons.contains(reason), multiple: true) {
+                    if let index = profile.stopReasons.firstIndex(of: reason) {
+                        profile.stopReasons.remove(at: index)
+                    } else {
+                        profile.stopReasons.append(reason)
+                    }
+                }
+                .accessibilityIdentifier("onboarding.stopReason.\(reason.rawValue)")
+            }
+        }
+    }
+
+    private var intensityPage: some View {
+        page(profile.preferredName.map { String(localized: "How hard do you want me to push you, \($0)?") }
+                ?? String(localized: "How hard do you want me to push you?")) {
+            VStack(spacing: 10) {
+                ForEach(TrainingIntensity.allCases, id: \.self) { intensity in
+                    ChoiceCard(title: intensity.title, detail: nil, symbol: nil,
+                               selected: profile.intensity == intensity) {
+                        profile.intensity = profile.intensity == intensity ? nil : intensity
+                    }
+                    .accessibilityIdentifier("onboarding.intensity.\(intensity.rawValue)")
+                }
+            }
+        }
+    }
+
+    private var daysPage: some View {
+        page(String(localized: "How many days a week are you ready to train?")) {
+            VStack(spacing: 10) {
+                ForEach(TrainingDays.allCases, id: \.self) { days in
+                    ChoiceCard(title: days.title, detail: nil, symbol: nil,
+                               selected: profile.days == days) {
+                        profile.days = profile.days == days ? nil : days
+                    }
+                    .accessibilityIdentifier("onboarding.days.\(days.rawValue)")
+                }
+            }
+        }
+    }
+
+    // MARK: Out of the flow
+    // Exercises, Spoken feedback and Camera setup left the onboarding; they stay here, with the
+    // answers they save, until favourite exercises move to Options
 
     private var exercisesPage: some View {
         page(String(localized: "Exercises"),
@@ -198,21 +426,6 @@ struct OnboardingView: View {
                 }
             }
             .sensoryFeedback(.selection, trigger: profile.favoriteExercises)
-        }
-    }
-
-    private var levelPage: some View {
-        page(String(localized: "Training experience"),
-             String(localized: "Adjusts the detail in set feedback.")) {
-            VStack(spacing: 10) {
-                ForEach(TrainingLevel.allCases, id: \.self) { level in
-                    ChoiceCard(title: level.title, detail: level.detail, symbol: nil,
-                               selected: profile.level == level) {
-                        profile.level = profile.level == level ? nil : level
-                    }
-                    .accessibilityIdentifier("onboarding.level.\(level.rawValue)")
-                }
-            }
         }
     }
 
@@ -296,12 +509,13 @@ struct OnboardingView: View {
     }
 }
 
-/// one answer: a card that fills when chosen
+/// one answer: a card that fills when chosen. Square check boxes when several answers can apply
 private struct ChoiceCard: View {
     let title: String
     let detail: String?
     let symbol: String?
     let selected: Bool
+    var multiple = false
     let tap: () -> Void
 
     var body: some View {
@@ -323,7 +537,8 @@ private struct ChoiceCard: View {
                     }
                 }
                 Spacer(minLength: 0)
-                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                Image(systemName: multiple ? (selected ? "checkmark.square.fill" : "square")
+                                           : (selected ? "checkmark.circle.fill" : "circle"))
                     .foregroundStyle(selected ? HomeStyle.accent : Color(uiColor: .secondaryLabel))
                     .font(.system(size: 20))
                     .accessibilityHidden(true)

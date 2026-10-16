@@ -99,22 +99,43 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         try check(app, "\(prefix)-19-welcome")
         welcome.tap()
         XCTAssertTrue(app.buttons["onboarding.continue"].waitForExistence(timeout: 8))
-        for step in 1...5 {
+        for step in 1...8 {
             try check(app, "\(prefix)-20-welcome-\(step)")
             let last: XCUIElement
             switch step {
-            case 1: last = app.buttons["onboarding.goal.comeback"]
-            case 2: last = app.buttons["onboarding.exercise.muscleUp"]
-            case 3: last = app.buttons["onboarding.level.experienced"]
-            case 4: last = app.staticTexts["Audio plays through connected headphones or the iPhone speaker."]
-            default: last = app.descendants(matching: .any).matching(NSPredicate(
-                format: "label BEGINSWITH %@", "The camera is asked for when you start your first set")).firstMatch
+            case 3: last = app.textFields["onboarding.name"]
+            case 4: last = app.buttons["onboarding.goal.fatLoss"]
+            case 5: last = app.buttons["onboarding.level.experienced"]
+            case 6: last = app.buttons["onboarding.program.no"]
+            case 7: last = app.buttons["onboarding.intensity.finnDecides"]
+            case 8: last = app.buttons["onboarding.days.fivePlus"]
+            default: last = app.buttons["onboarding.continue"]
             }
             for _ in 0..<16 where !last.isHittable { app.scrollViews.firstMatch.swipeUp() }
             app.scrollViews.firstMatch.swipeUp()
             try check(app, "\(prefix)-21-welcome-\(step)-bottom")
+            // Continue waits for a first name
+            if step == 3 {
+                app.textFields["onboarding.name"].tap()
+                app.typeText("Alex")
+            }
             app.buttons["onboarding.continue"].tap()
         }
+        XCTAssertTrue(app.buttons["plan.skip"].waitForExistence(timeout: 8))
+        try check(app, "\(prefix)-24-plan")
+        app.buttons["plan.skip"].tap()
+        let access = app.buttons["aboutYou.access"]
+        XCTAssertTrue(access.waitForExistence(timeout: 8))
+        try check(app, "\(prefix)-25-about-you")
+        app.buttons["aboutYou.location"].tap()
+        app.buttons["Outdoors"].tap()
+        app.buttons["aboutYou.equipment"].tap()
+        app.buttons["None, bodyweight only"].tap()
+        app.staticTexts["A little more about you."].tap()
+        for _ in 0..<16 where !access.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        app.buttons["aboutYou.noInjuries"].tap()
+        try check(app, "\(prefix)-25-about-you-bottom")
+        access.tap()
         XCTAssertTrue(app.buttons["home.watchDemo"].waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 2)
         app.buttons["home.watchDemo"].tap()

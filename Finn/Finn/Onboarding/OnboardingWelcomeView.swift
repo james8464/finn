@@ -124,7 +124,7 @@ struct OnboardingWelcomeView: View {
             Button(action: onContinue) {
                 // the glass is a layer behind the opaque pill, a rim wider on each side, so only a
                 // ring of it shows. Wrapping the pill itself would make it glass content and dim it
-                PrimaryActionLabel(title: "Continue", symbolBackground: DashboardStyle.accent, symbolColor: .black)
+                PrimaryActionLabel(title: "Continue")
                     .background {
                         Color.clear
                             .glassEffect(.regular.interactive(), in: rimShape)

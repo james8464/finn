@@ -3,19 +3,13 @@
   "strings" : {
     " · partly visible" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : " · partiellement visible"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : " · partly visible"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : " · partly visible"
@@ -26,24 +20,27 @@
             "state" : "translated",
             "value" : " · parcialmente visible"
           }
-        }
-      }
-    },
-    "%lld reps" : {
-      "localizations" : {
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld répétitions"
+            "value" : " · partiellement visible"
           }
-        },
-        "en-US" : {
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld reps" : {
+      "localizations" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld reps"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld reps"
@@ -54,24 +51,24 @@
             "state" : "translated",
             "value" : "%lld repeticiones"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld répétitions"
+          }
         }
       }
     },
     "1 rep" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 répétition"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 rep"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 rep"
@@ -82,24 +79,24 @@
             "state" : "translated",
             "value" : "1 repetición"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 répétition"
+          }
         }
       }
     },
     "Counted on your iPhone. Tap to come back to the set." : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comptée sur ton iPhone. Touche pour revenir à la série."
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Counted on your iPhone. Tap to come back to the set."
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Counted on your iPhone. Tap to come back to the set."
@@ -110,24 +107,24 @@
             "state" : "translated",
             "value" : "Contada en tu iPhone. Toca para volver a la serie."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comptée sur ton iPhone. Touche pour revenir à la série."
+          }
         }
       }
     },
     "DEMO" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DÉMO"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "DEMO"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "DEMO"
@@ -138,24 +135,80 @@
             "state" : "translated",
             "value" : "DEMO"
           }
-        }
-      }
-    },
-    "Last set" : {
-      "localizations" : {
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dernière série"
+            "value" : "DÉMO"
+          }
+        }
+      }
+    },
+    "elapsed" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "elapsed"
           }
         },
         "en-US" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "elapsed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "transcurrido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "écoulé"
+          }
+        }
+      }
+    },
+    "Finn · %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn · %@"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn · %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn · %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn · %@"
+          }
+        }
+      }
+    },
+    "Last set" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "Last set"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Last set"
@@ -166,24 +219,24 @@
             "state" : "translated",
             "value" : "Última serie"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière série"
+          }
         }
       }
     },
     "No set measured yet" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune série mesurée"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No set measured yet"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No set measured yet"
@@ -194,24 +247,24 @@
             "state" : "translated",
             "value" : "Aún no se ha medido ninguna serie"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune série mesurée"
+          }
         }
       }
     },
     "Open Finn to start one" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre Finn pour en lancer une"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open Finn to start one"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open Finn to start one"
@@ -222,52 +275,33 @@
             "state" : "translated",
             "value" : "Abre Finn para empezar una"
           }
-        }
-      }
-    },
-    "Finn · %@" : {
-      "localizations" : {
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finn · %@"
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finn · %@"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finn · %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finn · %@"
+            "value" : "Ouvre Finn pour en lancer une"
           }
         }
       }
+    },
+    "Partly visible · %@" : {
+
+    },
+    "rep · %@" : {
+
+    },
+    "reps · %@" : {
+
     },
     "Start a set" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lancer une série"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Start a set"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Start a set"
@@ -278,24 +312,24 @@
             "state" : "translated",
             "value" : "Inicia una serie"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancer une série"
+          }
         }
       }
     },
     "Start a set in Finn" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lancer une série dans Finn"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Start a set in Finn"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Start a set in Finn"
@@ -306,24 +340,24 @@
             "state" : "translated",
             "value" : "Inicia una serie en Finn"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancer une série dans Finn"
+          }
         }
       }
     },
     "Today %@" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aujourd’hui %@"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Today %@"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Today %@"
@@ -334,24 +368,24 @@
             "state" : "translated",
             "value" : "Hoy %@"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aujourd’hui %@"
+          }
         }
       }
     },
     "Yesterday %@" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hier %@"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yesterday %@"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yesterday %@"
@@ -362,24 +396,24 @@
             "state" : "translated",
             "value" : "Ayer %@"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hier %@"
+          }
         }
       }
     },
     "Your last measured set, and a tap to start the next one." : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ta dernière série mesurée, et un geste pour lancer la suivante."
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your last measured set, and a tap to start the next one."
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your last measured set, and a tap to start the next one."
@@ -390,24 +424,24 @@
             "state" : "translated",
             "value" : "Tu última serie medida y un toque para iniciar la siguiente."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta dernière série mesurée, et un geste pour lancer la suivante."
+          }
         }
       }
     },
     "Your last set shows here" : {
       "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ta dernière série s’affiche ici"
-          }
-        },
-        "en-US" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your last set shows here"
           }
         },
-        "en-GB" : {
+        "en-US" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your last set shows here"
@@ -418,33 +452,11 @@
             "state" : "translated",
             "value" : "Aquí se muestra tu última serie"
           }
-        }
-      }
-    },
-    "elapsed" : {
-      "localizations" : {
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "écoulé"
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "elapsed"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "elapsed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "transcurrido"
+            "value" : "Ta dernière série s’affiche ici"
           }
         }
       }
