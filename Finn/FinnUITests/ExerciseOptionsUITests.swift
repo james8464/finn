@@ -56,9 +56,10 @@ final class ExerciseOptionsUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["6 measured reps"].waitForExistence(timeout: 5))
         // the demo's last two reps also raise the hips above the body line: a form fault seen on two
         // reps comes before the change in elbow bend (15 October)
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
-            format: "label BEGINSWITH %@", "Your hips rose above the line from your shoulders to your ankles in rep 5 and rep 6"))
-            .firstMatch.exists)
+        let observation = app.staticTexts.matching(NSPredicate(
+            format: "label BEGINSWITH %@", "Your hips rose above your body line in rep 5 and rep 6"))
+            .firstMatch
+        XCTAssertTrue(observation.waitForExistence(timeout: 5), app.debugDescription)
     }
 
     @MainActor

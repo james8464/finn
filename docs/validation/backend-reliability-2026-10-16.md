@@ -239,3 +239,20 @@ six synthetic reps and the Watch launched with its pink settings control. WatchC
 reported `paired:YES, appInstalled:NO` despite that installation, including after restarting only
 this pair's connection services. Stage/coaching/result delivery is therefore not verified by this
 run. No bundle identifiers were changed to work around the simulator registration failure.
+
+### Complete CI follow-up
+
+Run `38875271912` passed **539 Swift tests in 63 suites**, Release startup/navigation, all strict
+Vision replay fixtures and the validation scorer. Its combined simulator summary contained 605
+passes, one failure and 20 intentional skips. The sole failure exposed two stale assumptions in
+the push-up demo: the observation wording had changed, and the synthetic hips were raised during
+all six reps despite the test expecting only the last two. The demo now places the early hips on
+the shoulder-to-ankle line and offsets only the last two reps perpendicular to that line. The
+assertion still requires the hip-rise finding specifically in rep 5 and rep 6; production technique
+thresholds have not been relaxed.
+
+CI now runs analysis/Release, Vision replay and three interface groups on separate machines.
+Tests remain sequential within each simulator. The grouping helper automatically assigns every
+current UI test class exactly once, using recorded durations only to balance machines. The
+original `simulator` check remains an aggregate gate over all five jobs. Vision replay has a
+30-minute step limit and preserves its log on failure. No test or fixture has been removed.

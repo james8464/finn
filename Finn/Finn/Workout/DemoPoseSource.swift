@@ -88,12 +88,19 @@ final class DemoPoseSource: PoseStreaming {
             let angle = (170 - bend * motion) * .pi / 180
             let shoulderX = 0.30 + 0.14 * sin(angle)
             let shoulderY = 0.66 + 0.14 * cos(angle)
+            let bodyX = 0.85 - shoulderX
+            let bodyY = 0.80 - shoulderY
+            let bodyLength = hypot(bodyX, bodyY)
+            // Keep the first four reps straight; the last two deliberately raise the hips.
+            // Offset perpendicular to the body so the fault stays consistent as the arms bend.
+            let hipRise = setNumber == 1 && late ? 0.30 * 0.45 * bodyLength : 0
+            let hipX = shoulderX + 0.45 * bodyX + bodyY / bodyLength * hipRise
+            let hipY = shoulderY + 0.45 * bodyY - bodyX / bodyLength * hipRise
             joints = [
                 .leftWrist: point(0.30, 0.80), .leftElbow: point(0.30, 0.66),
                 .leftShoulder: point(shoulderX, shoulderY),
-                .leftHip: point(shoulderX + 0.25, shoulderY + 0.03),
-                .leftKnee: point((shoulderX + 0.25 + 0.85) / 2,
-                                 (shoulderY + 0.03 + 0.80) / 2),
+                .leftHip: point(hipX, hipY),
+                .leftKnee: point((hipX + 0.85) / 2, (hipY + 0.80) / 2),
                 .leftAnkle: point(0.85, 0.80),
             ]
         case .staticLunge:

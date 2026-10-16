@@ -14,13 +14,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  simulator:
+  checks:
+    name: ${{ matrix.suite }}
     runs-on: xcode-27
-    # The full simulator suite plus Release compilation can exceed one hour.
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [analysis, replay, interface-1, interface-2, interface-3]
+    # Separate machines isolate UI state; tests stay sequential within each simulator.
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
       - name: Select iOS 27 iPhone simulator
+        if: matrix.suite != 'replay'
         run: |
           xcrun simctl list devices available -j > "$RUNNER_TEMP/devices.json"
           DEVICE_ID=$(python3 - <<'PY'
@@ -36,6 +42,7 @@ jobs:
           )
           echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
       - name: Test analysis and iPhone flows
+        if: matrix.suite != 'replay'
         env:
           TEST_RUNNER_FINN_VIDEO_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps.mp4
           TEST_RUNNER_FINN_VIDEO_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps-poses.json
@@ -44,9 +51,15 @@ jobs:
           TEST_RUNNER_FINN_VIDEO_OCCLUDED_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden.mp4
           TEST_RUNNER_FINN_VIDEO_OCCLUDED_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden-poses.json
         run: |
+          TEST_TARGETS=$(python3 tools/ci_test_groups.py "${{ matrix.suite }}")
+          test_arguments=()
+          while IFS= read -r target; do
+            test_arguments+=("-only-testing:$target")
+          done <<< "$TEST_TARGETS"
           xcodebuild test \
             -project Finn/Finn.xcodeproj \
             -scheme Finn \
+            "${test_arguments[@]}" \
             -destination "platform=iOS Simulator,id=$DEVICE_ID" \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             -resultBundlePath "$RUNNER_TEMP/Finn.xcresult" \
@@ -55,7 +68,7 @@ jobs:
             -collect-test-diagnostics never \
             CODE_SIGNING_ALLOWED=NO
       - name: Show failed test messages
-        if: failure()
+        if: failure() && matrix.suite != 'replay'
         run: |
           # The xcodebuild summary names failing tests without saying why; the result bundle does.
           xcrun xcresulttool get test-results summary --path "$RUNNER_TEMP/Finn.xcresult" > "$RUNNER_TEMP/summary.json" || exit 0
@@ -68,7 +81,7 @@ jobs:
               print(json.dumps(failure, indent=2))
           PY
       - name: Check Release startup and navigation
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.suite == 'analysis' }}
         run: |
           xcodebuild test \
             -project Finn/Finn.xcodeproj \
@@ -83,17 +96,31 @@ jobs:
             -only-testing:FinnUITests/DashboardUITests/testProductionLaunchRendersAllTabsAndDestinations \
             ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO
       - name: Replay generated workout videos through Vision
-        if: ${{ !cancelled() }}
-        run: tools/replay/test_generated_videos.sh
+        timeout-minutes: 30
+        if: ${{ !cancelled() && matrix.suite == 'replay' }}
+        run: tools/replay/test_generated_videos.sh 2>&1 | tee "$RUNNER_TEMP/replay.log"
       - name: Test validation scorer
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.suite == 'replay' }}
         run: python3 -m unittest discover -s docs/validation -p 'test_*.py'
       - name: Upload failed test report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: finn-test-report
+          name: finn-test-report-${{ matrix.suite }}
           path: |
             ${{ runner.temp }}/Finn.xcresult
             ${{ runner.temp }}/Finn-Release.xcresult
+            ${{ runner.temp }}/summary.json
+            ${{ runner.temp }}/replay.log
           if-no-files-found: ignore
+
+  # Preserve the original required check name while reporting all independent suites.
+  simulator:
+    needs: checks
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every simulator suite to pass
+        env:
+          SUITES_RESULT: ${{ needs.checks.result }}
+        run: test "$SUITES_RESULT" = success
