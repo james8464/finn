@@ -30,7 +30,7 @@ nonisolated final class AngleRuleClassifier: AngleWindowClassifying {
 
 /// Runs an angle-window classifier over a set and votes like the keypoint classifier does.
 nonisolated enum AngleRecognizer {
-    static func recognize(_ frames: [PoseFrame],
+    static func recognise(_ frames: [PoseFrame],
                           using classifier: any AngleWindowClassifying) -> ExerciseRecognition {
         var windows = PoseWindowFeatureExtractor.windows(frames)
         if windows.count > ExerciseRecognizer.maximumWindows {

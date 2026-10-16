@@ -4,24 +4,24 @@ import Testing
 
 nonisolated struct SquatAnalyzerTests {
     @Test func countsSixCompleteReps() {
-        let outcome = SquatAnalyzer.analyze(squatTrace(reps: 6))
+        let outcome = SquatAnalyzer.analyse(squatTrace(reps: 6))
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("Expected a measured set")
             return
         }
 
         #expect(analysis.reps.count == 6)
-        #expect(analysis.rubricVersion == "squat-side-v7")
+        #expect(analysis.rubricVersion == "squat-side-v8")
         #expect(analysis.reps.map(\.number) == [1, 2, 3, 4, 5, 6])
         #expect(analysis.reps.allSatisfy { $0.duration > 1.3 && $0.duration < 2.1 })
-        #expect(analysis.reps.allSatisfy { $0.normalizedHipTravel > 0.35 && $0.normalizedHipTravel < 0.5 })
+        #expect(analysis.reps.allSatisfy { $0.normalisedHipTravel > 0.35 && $0.normalisedHipTravel < 0.5 })
     }
 
     @Test func incompleteFinalRepIsNotCounted() {
         var frames = squatTrace(reps: 6)
         frames += squatTrace(reps: 1, startTime: 12.1).filter { $0.time <= 13.2 }
 
-        let outcome = SquatAnalyzer.analyze(frames)
+        let outcome = SquatAnalyzer.analyse(frames)
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("Expected a measured set")
             return
@@ -36,7 +36,7 @@ nonisolated struct SquatAnalyzerTests {
             index.isMultiple(of: 4) ? nil : frame
         }
 
-        let outcome = SquatAnalyzer.analyze(frames)
+        let outcome = SquatAnalyzer.analyse(frames)
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("Expected a measured set")
             return
@@ -51,7 +51,7 @@ nonisolated struct SquatAnalyzerTests {
             frame(time: Double(index) * 0.1, hipY: 0.42)
         }
 
-        let outcome = SquatAnalyzer.analyze(frames)
+        let outcome = SquatAnalyzer.analyse(frames)
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("Expected a measured set")
             return
@@ -77,7 +77,7 @@ nonisolated struct SquatAnalyzerTests {
             }
         }
         frames.append(frame(time: time, hipY: 0.42))
-        guard case .analyzed(let analysis) = SquatAnalyzer.analyze(frames) else {
+        guard case .analyzed(let analysis) = SquatAnalyzer.analyse(frames) else {
             Issue.record("Expected a measured set")
             return
         }
@@ -91,7 +91,7 @@ nonisolated struct SquatAnalyzerTests {
     /// measured from the set's top, not from where the capture started.
     @Test func aRepUnderWayWhenTheSetStartsKeepsItsDepth() {
         let trace = squatTrace(reps: 6).dropFirst(5).map { $0 }
-        guard case .analyzed(let analysis) = SquatAnalyzer.analyze(trace) else {
+        guard case .analyzed(let analysis) = SquatAnalyzer.analyse(trace) else {
             Issue.record("Expected a measured set")
             return
         }
@@ -101,7 +101,7 @@ nonisolated struct SquatAnalyzerTests {
     }
 
     @Test func emptyTraceNeedsAnotherView() {
-        let outcome = SquatAnalyzer.analyze([])
+        let outcome = SquatAnalyzer.analyse([])
         guard case .insufficientView = outcome else {
             Issue.record("An empty trace must not become a measured set")
             return

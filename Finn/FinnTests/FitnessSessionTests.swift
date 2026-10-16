@@ -39,7 +39,7 @@ struct FitnessSessionTests {
         try await setup.measureASet()
         await setup.model.finishSession()
         #expect(setup.fitness.saveAttempts == 0)
-        #expect(setup.fitness.authorizationReads == 0)
+        #expect(setup.fitness.authorisationReads == 0)
         #expect(setup.fitness.requests == 0)
         #expect(setup.model.fitnessSave == nil)
         #expect(!setup.model.canSaveToFitness(try #require(setup.model.history.first)))
@@ -241,7 +241,7 @@ struct FitnessSessionTests {
         #expect(!setup.model.canSaveToFitness(session))
         await setup.model.saveToFitness(sessionID: session.id)
         #expect(setup.model.unfinishedSession?.id == session.id)
-        #expect(setup.fitness.authorizationReads == 0)
+        #expect(setup.fitness.authorisationReads == 0)
     }
 
     /// A set long after the previous one starts a new session, so a workout never spans a day; the
@@ -435,7 +435,7 @@ struct FitnessSessionTests {
         let empty = WorkoutSessionSummary(id: UUID(), startedAt: start, sets: [])
         #expect(empty.continues(at: start.addingTimeInterval(WorkoutSessionSummary.longestBreak)))
         #expect(!empty.continues(at: start.addingTimeInterval(WorkoutSessionSummary.longestBreak + 1)))
-        #expect(empty.continues(at: start.addingTimeInterval(-60)))
+        #expect(!empty.continues(at: start.addingTimeInterval(-60)))
     }
 
     /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
@@ -514,15 +514,15 @@ private final class FakeFitnessExporter: FitnessWorkoutSaving {
     var holdsSaves = false
     private(set) var saved: [FitnessWorkout] = []
     private(set) var saveAttempts = 0
-    private(set) var authorizationReads = 0
+    private(set) var authorisationReads = 0
     private(set) var requests = 0
     private(set) var lastWorkoutID: UUID?
     private var held: [CheckedContinuation<Void, Never>] = []
 
     init(access: FitnessAuthorization) { self.access = access }
 
-    var authorization: FitnessAuthorization {
-        authorizationReads += 1
+    var authorisation: FitnessAuthorization {
+        authorisationReads += 1
         return access
     }
 

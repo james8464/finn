@@ -20,7 +20,7 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
     /// the option on, Finn does not touch HealthKit.
     private lazy var store = HKHealthStore()
 
-    var authorization: FitnessAuthorization {
+    var authorisation: FitnessAuthorization {
         guard HKHealthStore.isHealthDataAvailable() else { return .unavailable }
         switch store.authorizationStatus(for: HKObjectType.workoutType()) {
         case .sharingAuthorized: return .authorized
@@ -39,7 +39,7 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
 // fails without the entitlement or usage description, or when Health is restricted.
             // The status read below then reports what Finn may do.
         }
-        return authorization
+        return authorisation
     }
 
     func save(_ workout: FitnessWorkout) async throws -> UUID? {

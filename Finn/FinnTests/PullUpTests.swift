@@ -30,30 +30,31 @@ private func hangingTrace(reps: Int, rise: Double, framesPerRep: Int = 24, start
 
 struct PullUpTests {
     @Test func pullUpsCountFromShoulderRise() throws {
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(hangingTrace(reps: 5, rise: 0.85), as: .pullUp) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(hangingTrace(reps: 5, rise: 0.85), as: .pullUp) else {
             Issue.record("Five pull-ups must be measured")
             return
         }
         #expect(analysis.reps.count == 5)
-        #expect(analysis.rubricVersion == "pull-up-v1")
+        #expect(analysis.rubricVersion == "pull-up-v2")
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 0.7 && $0.relativeRange < 1.0 })
     }
 
     @Test func halfPullUpsAreExplainedNotCounted() throws {
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(hangingTrace(reps: 4, rise: 0.35), as: .pullUp)
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(hangingTrace(reps: 4, rise: 0.35), as: .pullUp)
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("The set must be measured")
             return
         }
         #expect(analysis.reps.isEmpty)
         let text = try #require(diagnostics?.explanation(for: .pullUp, counted: 0))
-        #expect(text.contains("shoulders up 35% of your arm length"))
+        #expect(abs((diagnostics?.deepest ?? 0) - 0.35) < 0.02)
+        #expect(text.contains("shoulders up"))
         #expect(text.contains("shoulders up 55% of your arm length"))
     }
 
     @Test func handsSeenNowAndThenAreEnough() {
 // with the bar near the top of the picture, Vision often loses the hands.
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(
             hangingTrace(reps: 4, rise: 0.85, handsEvery: 4), as: .pullUp) else {
             Issue.record("Pull-ups with hands seen in a quarter of the frames must be measured")
             return
@@ -62,8 +63,8 @@ struct PullUpTests {
     }
 
     @Test func muscleUpsNeedTheShouldersAboveTheHands() {
-        guard case .analyzed(let high) = ExerciseAnalyzer.analyze(hangingTrace(reps: 4, rise: 1.0), as: .muscleUp),
-              case .analyzed(let muscleUps) = ExerciseAnalyzer.analyze(hangingTrace(reps: 4, rise: 1.8), as: .muscleUp)
+        guard case .analyzed(let high) = ExerciseAnalyzer.analyse(hangingTrace(reps: 4, rise: 1.0), as: .muscleUp),
+              case .analyzed(let muscleUps) = ExerciseAnalyzer.analyse(hangingTrace(reps: 4, rise: 1.8), as: .muscleUp)
         else {
             Issue.record("Both sets must be measured")
             return
@@ -74,7 +75,7 @@ struct PullUpTests {
 
     @Test func anyViewIsAcceptedForPullUps() {
         let back = withDeviation(hangingTrace(reps: 4, rise: 0.85), 88)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(back, as: .pullUp) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(back, as: .pullUp) else {
             Issue.record("A back view must be measured for pull-ups")
             return
         }
@@ -84,7 +85,7 @@ struct PullUpTests {
 
     @Test func checksSayChinStraightArmsAndSwing() throws {
         let frames = hangingTrace(reps: 4, rise: 0.85, swing: 0.06)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .pullUp) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .pullUp) else {
             Issue.record("The set must be measured")
             return
         }
@@ -94,7 +95,7 @@ struct PullUpTests {
         #expect(notes.contains { $0.hasPrefix("Your hips swung about ") })
 
         let low = hangingTrace(reps: 4, rise: 0.6, startArm: 130, nose: true)
-        guard case .analyzed(let lowAnalysis) = ExerciseAnalyzer.analyze(low, as: .pullUp) else {
+        guard case .analyzed(let lowAnalysis) = ExerciseAnalyzer.analyse(low, as: .pullUp) else {
             Issue.record("The set must be measured")
             return
         }
@@ -105,7 +106,7 @@ struct PullUpTests {
 
     @Test func noChinSentenceWithoutTheNose() {
         let frames = hangingTrace(reps: 3, rise: 0.85, nose: false)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .pullUp) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .pullUp) else {
             Issue.record("The set must be measured")
             return
         }
@@ -117,8 +118,8 @@ struct PullUpTests {
         for _ in 0..<10 {
             let pull = SyntheticExerciseMotion.sequence(label: "pull_up", using: &rng)
             let muscle = SyntheticExerciseMotion.sequence(label: "muscle_up", using: &rng)
-            #expect({ if case .recognized(.pullUp, _) = AngleRecognizer.recognize(pull, using: AngleRuleClassifier()) { return true }; return false }())
-            #expect({ if case .recognized(.muscleUp, _) = AngleRecognizer.recognize(muscle, using: AngleRuleClassifier()) { return true }; return false }())
+            #expect({ if case .recognized(.pullUp, _) = AngleRecognizer.recognise(pull, using: AngleRuleClassifier()) { return true }; return false }())
+            #expect({ if case .recognized(.muscleUp, _) = AngleRecognizer.recognise(muscle, using: AngleRuleClassifier()) { return true }; return false }())
         }
     }
 
@@ -127,7 +128,7 @@ struct PullUpTests {
         var rng = SyntheticRandom(seed: 1014)
         for _ in 0..<30 {
             let frames = SyntheticExerciseMotion.sequence(label: "other", using: &rng)
-            let result = AngleRecognizer.recognize(frames, using: AngleRuleClassifier())
+            let result = AngleRecognizer.recognise(frames, using: AngleRuleClassifier())
             #expect(result != .recognized(.pullUp, agreement: 1) && {
                 if case .recognized(let kind, _) = result { return kind != .pullUp && kind != .muscleUp }
                 return true

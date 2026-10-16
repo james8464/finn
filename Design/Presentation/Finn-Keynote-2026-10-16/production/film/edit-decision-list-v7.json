@@ -1,0 +1,59 @@
+{
+  "duration": 60,
+  "fps": 24,
+  "segments": [
+    {
+      "start": 0,
+      "out": 8,
+      "source": "morning",
+      "source_in": 0,
+      "speed": 1.25,
+      "source_out": 10
+    },
+    {
+      "start": 8,
+      "out": 18,
+      "source": "office",
+      "source_in": 0,
+      "speed": 1,
+      "source_out": 10
+    },
+    {
+      "start": 18,
+      "out": 22,
+      "source": "workout",
+      "source_in": 0,
+      "speed": 1,
+      "source_out": 4
+    },
+    {
+      "start": 26,
+      "out": 29.041667,
+      "source": "workout",
+      "source_in": 5,
+      "speed": 1,
+      "source_out": 8.041667
+    },
+    {
+      "start": 51,
+      "out": 55,
+      "source": "workout",
+      "source_in": 8.083333,
+      "speed": 0.47,
+      "source_out": 9.963333
+    }
+  ],
+  "no_reused_moving_source_ranges": true,
+  "product_camera": {
+    "source": "workout",
+    "source_range": [
+      5,
+      8.041667
+    ],
+    "film_range": [
+      26,
+      29.041667
+    ],
+    "after": "Hold last frame during cue extraction and Watch handoff. No replay."
+  }
+}

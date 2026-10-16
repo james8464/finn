@@ -6,7 +6,7 @@ struct WrappingText: UIViewRepresentable {
     let text: String
     var style: UIFont.TextStyle = .body
     var weight: UIFont.Weight?
-    var color: UIColor = .label
+    var colour: UIColor = .label
     var alignment: NSTextAlignment = .natural
 
     func makeUIView(context: Context) -> UILabel {
@@ -25,9 +25,9 @@ struct WrappingText: UIViewRepresentable {
             ? .forceRightToLeft : .forceLeftToRight
         let traits = label.traitCollection.modifyingTraits {
             $0.preferredContentSizeCategory = UIContentSizeCategory(context.environment.dynamicTypeSize)
-            $0.userInterfaceStyle = context.environment.colorScheme == .dark ? .dark : .light
+            $0.userInterfaceStyle = .dark
         }
-        label.textColor = color.resolvedColor(with: traits)
+        label.textColor = colour.resolvedColor(with: traits)
         let font = UIFont.preferredFont(forTextStyle: style, compatibleWith: traits)
         if let weight {
             let descriptor = font.fontDescriptor.addingAttributes([
@@ -40,7 +40,7 @@ struct WrappingText: UIViewRepresentable {
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: UILabel, context: Context) -> CGSize? {
-        let width = proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? ceil(uiView.intrinsicContentSize.width)
+        let width = max(1, proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? ceil(uiView.intrinsicContentSize.width))
         let fit = uiView.sizeThatFits(CGSize(width: max(1, width), height: .greatestFiniteMagnitude))
         // leave room for fractional glyph advances when a sheet scales its contents
         return CGSize(width: min(width, ceil(fit.width)), height: ceil(fit.height))

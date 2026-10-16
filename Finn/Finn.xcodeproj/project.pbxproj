@@ -7,18 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1A1437AA30755F9000CFBBF6 /* FinnWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1A1437A130755F9000CFBBF6 /* FinnWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1A14378830755F9000CFBBF6 /* FinnWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 1A14378030755F9000CFBBF6 /* FinnWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1A1437AA30755F9000CFBBF6 /* FinnWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1A1437A130755F9000CFBBF6 /* FinnWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		1A1437AB30755F9000CFBBF6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1A1436F230755F8000CFBBF6 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1A1437A030755F9000CFBBF6;
-			remoteInfo = FinnWidgets;
-		};
 		1A14370A30755F8100CFBBF6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1A1436F230755F8000CFBBF6 /* Project object */;
@@ -40,20 +33,16 @@
 			remoteGlobalIDString = 1A14378330755F9000CFBBF6;
 			remoteInfo = FinnWatch;
 		};
+		1A1437AB30755F9000CFBBF6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A1436F230755F8000CFBBF6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1A1437A030755F9000CFBBF6;
+			remoteInfo = FinnWidgets;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		1A1437A930755F9000CFBBF6 /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				1A1437AA30755F9000CFBBF6 /* FinnWidgets.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		1A14378730755F9000CFBBF6 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
@@ -63,18 +52,35 @@
 			);
 			name = "Embed Watch Content";
 		};
+		1A1437A930755F9000CFBBF6 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				1A1437AA30755F9000CFBBF6 /* FinnWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1A1437A130755F9000CFBBF6 /* FinnWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FinnWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A1436FA30755F8000CFBBF6 /* Finn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Finn.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A14370930755F8100CFBBF6 /* FinnTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FinnTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A14371330755F8100CFBBF6 /* FinnUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FinnUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A14373C3075614000CFBBF6 /* GIT guide.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "GIT guide.md"; sourceTree = "<group>"; };
 		1A14378030755F9000CFBBF6 /* FinnWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinnWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A1437A130755F9000CFBBF6 /* FinnWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FinnWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1A14378230755F9000CFBBF6 /* Exceptions for "Finn" folder in "FinnWatch" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AppIcon.icon,
+				Workout/WatchMessages.swift,
+			);
+			target = 1A14378330755F9000CFBBF6 /* FinnWatch */;
+		};
 		1A1437AD30755F9000CFBBF6 /* Exceptions for "Finn" folder in "FinnWidgets" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -84,22 +90,9 @@
 			);
 			target = 1A1437A030755F9000CFBBF6 /* FinnWidgets */;
 		};
-		1A14378230755F9000CFBBF6 /* Exceptions for "Finn" folder in "FinnWatch" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				AppIcon.icon,
-				Workout/WatchMessages.swift,
-			);
-			target = 1A14378330755F9000CFBBF6 /* FinnWatch */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		1A1437A230755F9000CFBBF6 /* FinnWidgets */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = FinnWidgets;
-			sourceTree = "<group>";
-		};
 		1A1436FC30755F8000CFBBF6 /* Finn */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -124,14 +117,14 @@
 			path = FinnWatch;
 			sourceTree = "<group>";
 		};
+		1A1437A230755F9000CFBBF6 /* FinnWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FinnWidgets;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		1A1437A430755F9000CFBBF6 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			files = (
-			);
-		};
 		1A1436F730755F8000CFBBF6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
@@ -148,6 +141,11 @@
 			);
 		};
 		1A14378530755F9000CFBBF6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		1A1437A430755F9000CFBBF6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
 			);
@@ -183,26 +181,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1A1437A030755F9000CFBBF6 /* FinnWidgets */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 1A1437A630755F9000CFBBF6 /* Build configuration list for PBXNativeTarget "FinnWidgets" */;
-			buildPhases = (
-				1A1437A330755F9000CFBBF6 /* Sources */,
-				1A1437A430755F9000CFBBF6 /* Frameworks */,
-				1A1437A530755F9000CFBBF6 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				1A1437A230755F9000CFBBF6 /* FinnWidgets */,
-			);
-			name = FinnWidgets;
-			productName = FinnWidgets;
-			productReference = 1A1437A130755F9000CFBBF6 /* FinnWidgets.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		1A1436F930755F8000CFBBF6 /* Finn */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1A14371B30755F8100CFBBF6 /* Build configuration list for PBXNativeTarget "Finn" */;
@@ -287,6 +265,24 @@
 			productReference = 1A14378030755F9000CFBBF6 /* FinnWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
+		1A1437A030755F9000CFBBF6 /* FinnWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A1437A630755F9000CFBBF6 /* Build configuration list for PBXNativeTarget "FinnWidgets" */;
+			buildPhases = (
+				1A1437A330755F9000CFBBF6 /* Sources */,
+				1A1437A430755F9000CFBBF6 /* Frameworks */,
+				1A1437A530755F9000CFBBF6 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				1A1437A230755F9000CFBBF6 /* FinnWidgets */,
+			);
+			name = FinnWidgets;
+			productName = FinnWidgets;
+			productReference = 1A1437A130755F9000CFBBF6 /* FinnWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -341,11 +337,6 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		1A1437A530755F9000CFBBF6 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			files = (
-			);
-		};
 		1A1436F830755F8000CFBBF6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
@@ -366,14 +357,14 @@
 			files = (
 			);
 		};
-/* End PBXResourcesBuildPhase section */
-
-/* Begin PBXSourcesBuildPhase section */
-		1A1437A330755F9000CFBBF6 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
+		1A1437A530755F9000CFBBF6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
 			files = (
 			);
 		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
 		1A1436F630755F8000CFBBF6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
@@ -394,14 +385,14 @@
 			files = (
 			);
 		};
+		1A1437A330755F9000CFBBF6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		1A1437AC30755F9000CFBBF6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1A1437A030755F9000CFBBF6 /* FinnWidgets */;
-			targetProxy = 1A1437AB30755F9000CFBBF6 /* PBXContainerItemProxy */;
-		};
 		1A14370B30755F8100CFBBF6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1A1436F930755F8000CFBBF6 /* Finn */;
@@ -417,75 +408,14 @@
 			target = 1A14378330755F9000CFBBF6 /* FinnWatch */;
 			targetProxy = 1A14378930755F9000CFBBF6 /* PBXContainerItemProxy */;
 		};
+		1A1437AC30755F9000CFBBF6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1A1437A030755F9000CFBBF6 /* FinnWidgets */;
+			targetProxy = 1A1437AB30755F9000CFBBF6 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		1A1437A730755F9000CFBBF6 /* Debug configuration for PBXNativeTarget "FinnWidgets" */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = FinnWidgets.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ZUQ3ZP29N4;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_FILE = "FinnWidgets-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Finn;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.mwm.build.challenge.team.08.widgets;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
-		1A1437A830755F9000CFBBF6 /* Release configuration for PBXNativeTarget "FinnWidgets" */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = FinnWidgets.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ZUQ3ZP29N4;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_FILE = "FinnWidgets-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Finn;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.mwm.build.challenge.team.08.widgets;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Release;
-		};
 		1A14371930755F8100CFBBF6 /* Debug configuration for PBXProject "Finn" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -618,8 +548,8 @@
 				DEVELOPMENT_TEAM = ZUQ3ZP29N4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "Finn-Info.plist";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Finn uses your camera to measure body position during a workout set on this iPhone. Video is not saved.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Only after you turn on Personalize with Health, Finn reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Finn saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app.";
@@ -656,8 +586,8 @@
 				DEVELOPMENT_TEAM = ZUQ3ZP29N4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "Finn-Info.plist";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Finn uses your camera to measure body position during a workout set on this iPhone. Video is not saved.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Only after you turn on Personalize with Health, Finn reads your heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height to adapt rest times and suggest lighter days. Nothing leaves your iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Finn saves each session you finish to Health as a strength training workout, with its time and measured reps, so it shows in the Fitness app.";
@@ -777,9 +707,9 @@
 				DEVELOPMENT_TEAM = ZUQ3ZP29N4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "FinnWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Finn;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Finn reads your heart rate during a set only after you enable Personalize with Health. It stays on your devices.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rhythm starts a temporary Watch workout so pacing taps can continue with your wrist down. Finn discards this workout; your iPhone controls Fitness saving.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -815,9 +745,9 @@
 				DEVELOPMENT_TEAM = ZUQ3ZP29N4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_FILE = "FinnWatch-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Finn;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Finn reads your heart rate during a set only after you enable Personalize with Health. It stays on your devices.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Rhythm starts a temporary Watch workout so pacing taps can continue with your wrist down. Finn discards this workout; your iPhone controls Fitness saving.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -843,17 +773,75 @@
 			};
 			name = Release;
 		};
+		1A1437A730755F9000CFBBF6 /* Debug configuration for PBXNativeTarget "FinnWidgets" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FinnWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZUQ3ZP29N4;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "FinnWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Finn;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.mwm.build.challenge.team.08.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		1A1437A830755F9000CFBBF6 /* Release configuration for PBXNativeTarget "FinnWidgets" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FinnWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ZUQ3ZP29N4;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "FinnWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Finn;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.mwm.build.challenge.team.08.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1A1437A630755F9000CFBBF6 /* Build configuration list for PBXNativeTarget "FinnWidgets" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				1A1437A730755F9000CFBBF6 /* Debug configuration for PBXNativeTarget "FinnWidgets" */,
-				1A1437A830755F9000CFBBF6 /* Release configuration for PBXNativeTarget "FinnWidgets" */,
-			);
-			defaultConfigurationName = Release;
-		};
 		1A1436F530755F8000CFBBF6 /* Build configuration list for PBXProject "Finn" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -891,6 +879,14 @@
 			buildConfigurations = (
 				1A14378C30755F9000CFBBF6 /* Debug configuration for PBXNativeTarget "FinnWatch" */,
 				1A14378D30755F9000CFBBF6 /* Release configuration for PBXNativeTarget "FinnWatch" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		1A1437A630755F9000CFBBF6 /* Build configuration list for PBXNativeTarget "FinnWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A1437A730755F9000CFBBF6 /* Debug configuration for PBXNativeTarget "FinnWidgets" */,
+				1A1437A830755F9000CFBBF6 /* Release configuration for PBXNativeTarget "FinnWidgets" */,
 			);
 			defaultConfigurationName = Release;
 		};

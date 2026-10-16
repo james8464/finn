@@ -1,0 +1,133 @@
+[
+  {
+    "key": "home",
+    "path": "assets/captures/home.png",
+    "source": "docs/release/screenshots/iphone-6.9-1320x2868-01-accueil.png",
+    "size": [
+      1320,
+      2868
+    ],
+    "synthetic_demo": false
+  },
+  {
+    "key": "setup",
+    "path": "assets/captures/setup.png",
+    "source": "/tmp/finn-keynote-tour/08-placement.png",
+    "size": [
+      1320,
+      2868
+    ],
+    "synthetic_demo": true
+  },
+  {
+    "key": "live",
+    "path": "assets/captures/live.png",
+    "source": "/tmp/finn-keynote-tour/09-serie-en-cours.png",
+    "size": [
+      1320,
+      2868
+    ],
+    "synthetic_demo": true
+  },
+  {
+    "key": "result",
+    "path": "assets/captures/result.png",
+    "source": "/tmp/finn-keynote-tour/10-resultat.png",
+    "size": [
+      1320,
+      2868
+    ],
+    "synthetic_demo": true
+  },
+  {
+    "key": "detail",
+    "path": "assets/captures/detail.png",
+    "source": "/tmp/finn-keynote-tour/11-resultat-bas.png",
+    "size": [
+      1320,
+      2868
+    ],
+    "synthetic_demo": true
+  },
+  {
+    "key": "history",
+    "path": "assets/captures/history.png",
+    "source": "/tmp/finn-keynote-tour/history-demo-saved-set.png",
+    "size": [
+      1320,
+      2868
+    ],
+    "synthetic_demo": true
+  },
+  {
+    "key": "coach",
+    "path": "assets/captures/coach.png",
+    "source": "/tmp/finn-keynote-tour/coach-demo-saved-set.png",
+    "size": [
+      1320,
+      2868
+    ],
+    "synthetic_demo": true
+  },
+  {
+    "key": "workout",
+    "path": "assets/captures/workout.png",
+    "source": "/tmp/finn-keynote-tour/15-accueil-apres-une-serie.png",
+    "size": [
+      1320,
+      2868
+    ],
+    "synthetic_demo": true
+  },
+  {
+    "key": "posture",
+    "path": "assets/captures/posture.png",
+    "source": "docs/design/screenshots/finn/review/posture-dark.png",
+    "size": [
+      1320,
+      2868
+    ],
+    "synthetic_demo": true
+  },
+  {
+    "key": "iphone",
+    "path": "assets/apple/iphone18promax-silver.png",
+    "source": "https://devimages-cdn.apple.com/design/resources/download/Bezel-iPhone-18.dmg",
+    "size": [
+      1470,
+      3000
+    ],
+    "screen": [
+      75,
+      66,
+      1320,
+      2868
+    ]
+  },
+  {
+    "key": "watch",
+    "path": "assets/apple/watch11-black.png",
+    "source": "https://devimages-cdn.apple.com/design/resources/download/Bezel-Apple-Watch-Series-11-2025.dmg",
+    "size": [
+      560,
+      880
+    ],
+    "screen": [
+      72,
+      192,
+      416,
+      496
+    ]
+  },
+  {
+    "key": "watch-idle",
+    "path": "assets/captures/watch-idle.png",
+    "source": "/tmp/finn-audit-dark-watch-idle-alone.png",
+    "size": [
+      416,
+      496
+    ],
+    "synthetic_demo": false,
+    "state": "Actual simulator: waiting for iPhone. Not a paired live-workout capture."
+  }
+]

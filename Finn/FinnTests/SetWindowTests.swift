@@ -9,7 +9,7 @@ nonisolated struct SetWindowTests {
 // before the set window, these frames were refused: the legs were out of view for over a second.
         #expect(EvidenceGate.assess(capture, requirement: .squat).isRejected)
 
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(capture, as: .squat) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(capture, as: .squat) else {
             Issue.record("Expected the set between walking in and out to be measured")
             return
         }
@@ -67,7 +67,7 @@ nonisolated struct SetWindowTests {
 
     /// Reps counted from the hips, the side rubric having refused the set; nil otherwise.
     private static func hipCount(_ capture: [PoseFrame]) -> Int? {
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(capture, as: .squat),
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(capture, as: .squat),
               analysis.rubricVersion == ExerciseDefinition.squatTrunk.rubricVersion else { return nil }
         return analysis.reps.count
     }
@@ -147,7 +147,7 @@ nonisolated struct SetWindowTests {
                                        wristY: 0.86 - 0.3 * progress))
             time += CaptureTraces.step
         }
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(capture, as: .pushUp) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(capture, as: .pushUp) else {
             Issue.record("Expected the push-ups between getting down and standing up to be measured")
             return
         }

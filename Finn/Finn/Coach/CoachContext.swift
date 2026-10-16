@@ -50,6 +50,31 @@ nonisolated struct CoachContext: Equatable, Sendable {
     var knownNumbers: Set<Int> { Set(facts.map(\.number)) }
     var latest: CoachSetFact? { facts.last }
 
+    /// Keep complete records and favour recent sets when history exceeds the model's budget.
+    /// Truncating the old, unbounded text dropped the newest sets and could cut a fact in half.
+    func boundedPromptText(maximumCharacters: Int) -> String {
+        guard !facts.isEmpty else { return "No saved sets." }
+        var remaining = max(0, maximumCharacters)
+        var lines: [String] = []
+        for fact in facts.reversed() {
+            var line = "\(fact.label): \(fact.exerciseName.prefix(60)), \(fact.repCount) reps, \(fact.capturedAt.formatted(.iso8601))"
+            if fact.partlyVisible { line += " | partly visible; no posture advice" }
+            if let observation = fact.observation {
+                line += " | observation: " + observation.prefix(180)
+            }
+            if let comparison = fact.comparison {
+                line += " | comparison: " + comparison.prefix(160)
+            }
+            if !fact.issues.isEmpty {
+                line += " | showed: " + fact.issues.joined(separator: "; ").prefix(100)
+            }
+            guard line.count + 1 <= remaining else { break }
+            lines.append(line)
+            remaining -= line.count + 1
+        }
+        return lines.reversed().joined(separator: "\n")
+    }
+
     /// builds the context from the saved sessions, keeping the `limit` most recent sets
     static func make(history: [WorkoutSessionSummary], limit: Int = defaultLimit,
                      now: Date = .now) -> CoachContext {
@@ -57,36 +82,46 @@ nonisolated struct CoachContext: Equatable, Sendable {
             let set: SetSummary
             let comparison: String?
         }
-        var pending: [Pending] = []
+        let retainedCount = max(0, min(limit, 32))
+        guard retainedCount > 0 else { return CoachContext(facts: []) }
+        // Sessions can overlap. A session's start does not establish when its last set happened.
+        let chronologicalSets = history.flatMap(\.sets).sorted { earlier, later in
+            if earlier.capturedAt != later.capturedAt {
+                return earlier.capturedAt < later.capturedAt
+            }
+            return earlier.id.uuidString < later.id.uuidString
+        }
+        let firstRetainedIndex = max(0, chronologicalSets.count - retainedCount)
+        var kept: [Pending] = []
+        kept.reserveCapacity(min(retainedCount, chronologicalSets.count))
+        var previousBySession: [UUID: SetSummary] = [:]
         var previousByCheck: [FormHistoryKey: SetSummary] = [:]
-        for session in history.sorted(by: { $0.startedAt < $1.startedAt }) {
-            let sets = session.sets.sorted { $0.capturedAt < $1.capturedAt }
-            var previousInSession: SetSummary?
-            for set in sets {
+        for (index, set) in chronologicalSets.enumerated() {
+            let eligible = FormTrend.eligibleMeasurements(in: set)
+            // Older sets supply comparison evidence, but do not need strings or pending facts.
+            if index >= firstRetainedIndex {
                 var comparisons: [String] = []
-                if let previousInSession,
-                   let compared = SetComparison.compare(previousInSession, set) {
+                if let previous = previousBySession[set.sessionID],
+                   let compared = SetComparison.compare(previous, set) {
                     comparisons.append(describe(compared, exercise: set.exercise))
                 }
-                let eligible = FormTrend.eligibleMeasurements(in: set)
                 let priorSets = eligible.compactMap { previousByCheck[FormHistoryKey(set, check: $0.check)] }
                     .sorted { $0.capturedAt > $1.capturedAt }
                 comparisons += FormTrend.compareLatest(to: set, among: priorSets).map(\.sentence)
-                pending.append(Pending(set: set,
-                                       comparison: comparisons.isEmpty ? nil : comparisons.joined(separator: " ")))
-                previousInSession = set
-                for measurement in eligible {
-                    previousByCheck[FormHistoryKey(set, check: measurement.check)] = set
-                }
+                kept.append(Pending(set: set,
+                                    comparison: comparisons.isEmpty ? nil : comparisons.joined(separator: " ")))
+            }
+            previousBySession[set.sessionID] = set
+            for measurement in eligible {
+                previousByCheck[FormHistoryKey(set, check: measurement.check)] = set
             }
         }
-        let kept = Array(pending.suffix(limit))
         let facts = kept.enumerated().map { offset, item -> CoachSetFact in
             let set = item.set
             let definition = set.exercise.definition
             var observation: String?
             var nextAction: String?
-            if let cue = set.cue {
+            if set.cueResponse != .notRelevant, let cue = set.cue {
                 observation = [cue.observation, cue.nextAction]
                     .filter { !$0.isEmpty }
                     .joined(separator: " ")
@@ -141,6 +176,14 @@ nonisolated enum CoachLanguage: Equatable, Sendable {
     case english
     case french
     case spanish
+
+    var locale: Locale {
+        switch self {
+        case .english: Locale(identifier: "en-GB")
+        case .french: Locale(identifier: "fr")
+        case .spanish: Locale(identifier: "es")
+        }
+    }
 
     static func current(locale: Locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? Locale.current.identifier)) -> CoachLanguage {
         switch locale.language.languageCode?.identifier {

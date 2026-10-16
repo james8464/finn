@@ -96,6 +96,7 @@ final class ScreenTourUITests: XCTestCase {
         pullUp.tap()
         Thread.sleep(forTimeInterval: 1.2)
         save("07d-choix-exercice-tractions")
+        app.returnToWorkoutRoot()
         app.buttons["home.more"].tap()
         Thread.sleep(forTimeInterval: 0.8)
         save("07c-menu-plus")
@@ -129,6 +130,13 @@ final class ScreenTourUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 1)
         save("15-accueil-apres-une-serie")
+        open(app, "History")
+        XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 5))
+        save("history-demo-saved-set")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.selectTab("Coach")
+        XCTAssertTrue(app.textViews["coach.field"].waitForExistence(timeout: 5))
+        save("coach-demo-saved-set")
     }
 
     @MainActor
@@ -189,6 +197,7 @@ final class ScreenTourUITests: XCTestCase {
     /// opens History, Options or Privacy from the first screen's More menu
     @MainActor
     private func open(_ app: XCUIApplication, _ label: String) {
+        app.returnToWorkoutRoot()
         app.buttons["home.more"].tap()
         let item = app.buttons[label].firstMatch
         XCTAssertTrue(item.waitForExistence(timeout: 3))

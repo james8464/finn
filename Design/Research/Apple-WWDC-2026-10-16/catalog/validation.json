@@ -1,0 +1,174 @@
+{
+  "media_checks": [
+    {
+      "file": "clips/wwdc2010-facetime-demo.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 40.01
+    },
+    {
+      "file": "clips/wwdc2010-retina-comparison.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 35.03
+    },
+    {
+      "file": "clips/wwdc2013-intention-geometry.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 45.01
+    },
+    {
+      "file": "clips/wwdc2013-ios7-design-film.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 45.01
+    },
+    {
+      "file": "clips/wwdc2013-mac-pro-film.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 60.03
+    },
+    {
+      "file": "clips/wwdc2019-mac-pro-reveal.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 50.02
+    },
+    {
+      "file": "clips/wwdc2019-price-sequence.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 60.03
+    },
+    {
+      "file": "clips/wwdc2019-swiftui-reveal.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 45.01
+    },
+    {
+      "file": "clips/wwdc2020-big-sur-film.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2020-silicon-transition.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 60.03
+    },
+    {
+      "file": "clips/wwdc2021-universal-control.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 60.03
+    },
+    {
+      "file": "clips/wwdc2022-macbook-air-film.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2023-opening-camera.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 40.01
+    },
+    {
+      "file": "clips/wwdc2023-vision-announcement.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 35.01
+    },
+    {
+      "file": "clips/wwdc2023-vision-product-film.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2023-vision-use-case.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 45.01
+    },
+    {
+      "file": "clips/wwdc2024-intelligence-reveal.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2024-opening-skydiving.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 45.01
+    },
+    {
+      "file": "clips/wwdc2024-privacy-compute.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2024-siri-demo.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2025-design-evolution.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2025-glass-in-ui.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2025-liquid-glass-reveal.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.0
+    },
+    {
+      "file": "clips/wwdc2025-workout-audio.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2025-workout-buddy.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    },
+    {
+      "file": "clips/wwdc2026-camera-intelligence.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 50.02
+    },
+    {
+      "file": "clips/wwdc2026-intelligence-framing.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 50.02
+    },
+    {
+      "file": "clips/wwdc2026-siri-ai-reveal.mp4",
+      "decode_ok": true,
+      "audio_stream_present": true,
+      "duration_seconds": 55.02
+    }
+  ],
+  "missing_local_links": [],
+  "note": "Decode and stream-presence checks; not an audio-content or full-viewing audit."
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "file": "iphone18promax-silver.png",
+    "size": [
+      1470,
+      3000
+    ],
+    "bbox": [
+      21,
+      20,
+      1449,
+      2979
+    ]
+  },
+  {
+    "file": "watch11-black.png",
+    "size": [
+      560,
+      880
+    ],
+    "bbox": [
+      31,
+      16,
+      552,
+      865
+    ]
+  }
+]

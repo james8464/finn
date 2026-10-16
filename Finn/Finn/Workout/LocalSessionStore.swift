@@ -3,6 +3,7 @@ import Foundation
 nonisolated enum SessionStoreError: Error, Equatable {
     case corrupted
     case notCorrupted
+    case invalidSession
 }
 
 nonisolated protocol SessionStoring {
@@ -54,11 +55,20 @@ nonisolated struct LocalSessionStore: SessionStoring {
         try protectExistingHistory()
         guard FileManager.default.fileExists(atPath: url.path) else { return [] }
         let data = try Data(contentsOf: url)
-        do { return try JSONDecoder().decode([WorkoutSessionSummary].self, from: data) }
-        catch { throw SessionStoreError.corrupted }
+        do {
+            let sessions = try JSONDecoder().decode([WorkoutSessionSummary].self, from: data)
+            guard Set(sessions.map(\.id)).count == sessions.count,
+                  sessions.allSatisfy(Self.isValid) else {
+                throw SessionStoreError.corrupted
+            }
+            return sessions
+        } catch {
+            throw SessionStoreError.corrupted
+        }
     }
 
     func save(_ session: WorkoutSessionSummary) throws {
+        guard Self.isValid(session) else { throw SessionStoreError.invalidSession }
         var sessions = try load()
         if let index = sessions.firstIndex(where: { $0.id == session.id }) {
             sessions[index] = session
@@ -108,6 +118,40 @@ nonisolated struct LocalSessionStore: SessionStoring {
         try data.write(to: url, options: [.atomic, .completeFileProtection])
         try (url as NSURL).setResourceValue(URLFileProtection.complete,
                                             forKey: .fileProtectionKey)
+    }
+
+    /// JSON can decode successfully and still contain impossible measurements or duplicate IDs.
+    /// Keep damaged history intact for the existing recovery flow instead of feeding it to charts,
+    /// comparisons or Apple Health. Failed writes must leave the last good save untouched.
+    private static func isValid(_ session: WorkoutSessionSummary) -> Bool {
+        guard session.startedAt.timeIntervalSinceReferenceDate.isFinite,
+              Set(session.sets.map(\.id)).count == session.sets.count else { return false }
+        return session.sets.allSatisfy { set in
+            guard set.sessionID == session.id, set.capturedAt.timeIntervalSinceReferenceDate.isFinite,
+                  set.analysis.confidence.isFinite, (0...1).contains(set.analysis.confidence) else { return false }
+            var previousEnd = 0.0
+            for (index, rep) in set.analysis.reps.enumerated() {
+                guard rep.isValid, rep.number == index + 1, rep.startTime >= previousEnd,
+                      rep.endTime <= 600, rep.relativeRange <= 360,
+                      abs(rep.postureValue ?? 0) <= 360 else { return false }
+                previousEnd = rep.endTime
+            }
+            let measurements = set.formMeasurements ?? []
+            guard Set(measurements.map(\.check)).count == measurements.count,
+                  measurements.allSatisfy({
+                      $0.check.exercise == set.exercise && $0.judged > 0
+                          && $0.judged <= set.analysis.reps.count
+                          && $0.faulty >= 0 && $0.faulty <= $0.judged
+                          && $0.typical.isFinite && abs($0.typical) <= 1_000
+                  }) else { return false }
+            if let cue = set.cue {
+                let knownNumbers = Set(set.analysis.reps.map(\.number))
+                guard cue.repNumbers.allSatisfy(knownNumbers.contains),
+                      cue.earlierMedian.isFinite, cue.laterMedian.isFinite,
+                      abs(cue.earlierMedian) <= 1_000, abs(cue.laterMedian) <= 1_000 else { return false }
+            }
+            return true
+        }
     }
 
     private func protectExistingHistory() throws {

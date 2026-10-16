@@ -72,6 +72,26 @@ nonisolated struct IntentsTests {
         #expect(report.whenText(now: Self.now, calendar: Self.calendar) == "12 Oct at 10:00")
     }
 
+    @Test func reportUsesTheSuppliedTimeZoneForBothDateAndClock() {
+        let report = LastSetReport.latest(in: sessions([set(minutesAgo: 60 * 24 * 3)]))!
+        var calendar = Self.calendar
+        calendar.timeZone = TimeZone(secondsFromGMT: -12 * 3_600)!
+        // This set falls on the previous calendar day in this zone.
+        #expect(report.whenText(now: Self.now, calendar: calendar) == "11 Oct at 20:00")
+    }
+
+    @Test func formattingUsesTheRequestedTimeZoneForDayAndTime() {
+        var calendar = Self.calendar
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let recent = LastSetReport.latest(in: sessions([set(minutesAgo: 5)]))!
+        #expect(recent.whenText(now: Self.now, calendar: calendar) == "today at 07:55")
+
+        // This instant is 12 October in UTC, but 13 October in Paris.
+        let older = LastSetReport.latest(in: sessions([set(minutesAgo: 60 * 56.5)]))!
+        #expect(older.whenText(now: Self.now, calendar: calendar) == "12 Oct at 23:30")
+        #expect(older.whenText(now: Self.now, calendar: Self.calendar) == "13 Oct at 01:30")
+    }
+
     @Test func noObservationIsSaidPlainly() {
         let report = LastSetReport.latest(in: sessions([set(minutesAgo: 5)]))!
         #expect(report.observation == nil)
@@ -102,7 +122,10 @@ nonisolated struct IntentsTests {
         #expect(emptyDialog == LastSetReport.nothingYet)
         #expect(emptyContent == .nothingYet)
 
-        let session = sessions([set(.staticLunge, reps: 6, minutesAgo: 10, observation: "Front knee bent less on the last two reps.")])[0]
+        let recorded = set(.staticLunge, reps: 6, minutesAgo: 10,
+                           observation: "Front knee bent less on the last two reps.")
+        let session = WorkoutSessionSummary(id: recorded.sessionID, startedAt: recorded.capturedAt,
+                                            sets: [recorded])
         try store.save(session)
         let (dialog, content) = LastSetIntent.answer(from: store, now: Self.now)
         #expect(dialog.hasPrefix("Your last set in Finn: Static lunge, 6 measured reps,"))

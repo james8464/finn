@@ -26,15 +26,15 @@ nonisolated enum SoundFeedbackStyle: String, CaseIterable, Identifiable, Sendabl
 
 /// Options a person can change in the app. Tests pass their own `UserDefaults` suite.
 nonisolated struct FinnPreferences: @unchecked Sendable {
-    static let recognizesExerciseKey = "finn.recognizesExercise"
+    static let recognisesExerciseKey = "finn.recognizesExercise"
     static let usesTrainedModelKey = "finn.usesTrainedModel"
     static let checksCameraAngleKey = "finn.checksCameraAngle"
     static let handsFreeKey = "finn.handsFree"
     static let speaksLiveKey = "finn.speaksLive"
     static let savesToFitnessKey = "finn.savesToFitness"
     static let selectedExerciseKey = "finn.selectedExercise"
-    static let personalizesWithHealthKey = "finn.personalizesWithHealth"
-    static let personalizationOfferedKey = "finn.personalizationOffered"
+    static let personalisesWithHealthKey = "finn.personalizesWithHealth"
+    static let personalisationOfferedKey = "finn.personalizationOffered"
     static let hapticFeedbackKey = "finn.hapticFeedback"
     static let soundFeedbackKey = "finn.soundFeedback"
 
@@ -79,9 +79,9 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
 
     /// On by default: the joint-angle rules recognise the exercise after a set, and the
     /// person's choice stays whenever they are not sure.
-    var recognizesExercise: Bool {
-        get { defaults.object(forKey: Self.recognizesExerciseKey) as? Bool ?? true }
-        nonmutating set { defaults.set(newValue, forKey: Self.recognizesExerciseKey) }
+    var recognisesExercise: Bool {
+        get { defaults.object(forKey: Self.recognisesExerciseKey) as? Bool ?? true }
+        nonmutating set { defaults.set(newValue, forKey: Self.recognisesExerciseKey) }
     }
 
     /// Off by default: a trained model, when a build includes one, is an experiment. The team
@@ -128,14 +128,14 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
 
     /// Off by default: Finn reads heart rate, recovery, sleep, recent activity and body measurements
     /// from Health to adapt its advice, only once the person turns this on and allows it in Health.
-    var personalizesWithHealth: Bool {
-        get { defaults.bool(forKey: Self.personalizesWithHealthKey) }
-        nonmutating set { defaults.set(newValue, forKey: Self.personalizesWithHealthKey) }
+    var personalisesWithHealth: Bool {
+        get { defaults.bool(forKey: Self.personalisesWithHealthKey) }
+        nonmutating set { defaults.set(newValue, forKey: Self.personalisesWithHealthKey) }
     }
 
     /// Whether the one-time "Make Finn more personal?" offer was shown, whatever the answer.
-    var personalizationOffered: Bool {
-        get { defaults.bool(forKey: Self.personalizationOfferedKey) }
-        nonmutating set { defaults.set(newValue, forKey: Self.personalizationOfferedKey) }
+    var personalisationOffered: Bool {
+        get { defaults.bool(forKey: Self.personalisationOfferedKey) }
+        nonmutating set { defaults.set(newValue, forKey: Self.personalisationOfferedKey) }
     }
 }

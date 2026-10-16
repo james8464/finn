@@ -73,9 +73,9 @@ struct ViewCheckTests {
         ]
         for (definition, trace) in traces {
             let front = withDeviation(trace, 85)
-            let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(front, as: definition)
+            let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(front, as: definition)
             guard case .analyzed(let analysis) = outcome,
-                  case .analyzed(let ignored) = ExerciseAnalyzer.analyze(front, as: definition, viewCheck: .ignore)
+                  case .analyzed(let ignored) = ExerciseAnalyzer.analyse(front, as: definition, viewCheck: .ignore)
             else {
                 Issue.record("\(definition.kind) should count a front view")
                 continue
@@ -91,7 +91,7 @@ struct ViewCheckTests {
 
     @Test func aFrontViewPushUpIsCountedFromTheShoulders() {
         let front = withDeviation(pushUpTrace(reps: 6), 85)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(front, as: .pushUp) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(front, as: .pushUp) else {
             Issue.record("A push-up filmed from the front is counted from the shoulders, not refused")
             return
         }
@@ -101,8 +101,8 @@ struct ViewCheckTests {
 
     @Test func anAngledViewIsMeasuredWithATip() throws {
         let trace = squatTrace()
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(withDeviation(trace, 45), as: .squat)
-        guard case .analyzed(let angled) = outcome, case .analyzed(let plain) = SquatAnalyzer.analyze(trace) else {
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(withDeviation(trace, 45), as: .squat)
+        guard case .analyzed(let angled) = outcome, case .analyzed(let plain) = SquatAnalyzer.analyse(trace) else {
             Issue.record("A 45° view must be measured")
             return
         }
@@ -117,7 +117,7 @@ struct ViewCheckTests {
             PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints,
                       profileDeviationDegrees: index.isMultiple(of: 4) ? (frame.time < 2 ? 85 : 10) : nil)
         }
-        guard case .analyzed = SquatAnalyzer.analyze(trace) else {
+        guard case .analyzed = SquatAnalyzer.analyse(trace) else {
             Issue.record("Two seconds facing the camera must not refuse the set")
             return
         }
@@ -125,9 +125,9 @@ struct ViewCheckTests {
 
     @Test func sideViewEstimatesLeaveTheSquatUnchanged() {
         let trace = squatTrace()
-        #expect(SquatAnalyzer.analyze(withDeviation(trace, 12)) == SquatAnalyzer.analyze(trace))
+        #expect(SquatAnalyzer.analyse(withDeviation(trace, 12)) == SquatAnalyzer.analyse(trace))
         // Three estimates are too few to judge, so the 2D rules decide alone.
-        #expect(SquatAnalyzer.analyze(withDeviation(trace, 70, every: 50)) == SquatAnalyzer.analyze(trace))
+        #expect(SquatAnalyzer.analyse(withDeviation(trace, 70, every: 50)) == SquatAnalyzer.analyse(trace))
     }
 
     private func frames(deviations: [Double], spacing: Double = 1) -> [PoseFrame] {
@@ -142,15 +142,6 @@ struct ViewCheckTests {
             squatFrame(time: Double(index) * 0.1,
                        hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
         }
-    }
-}
-
-/// Adds a 3D profile deviation to every `every`th frame, as the capture driver does.
-func withDeviation(_ frames: [PoseFrame], _ degrees: Double, every: Int = 4) -> [PoseFrame] {
-    frames.enumerated().map { index, frame in
-        PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: frame.joints,
-                  aspectRatio: frame.aspectRatio, keypoints: frame.keypoints,
-                  profileDeviationDegrees: index.isMultiple(of: every) ? degrees : nil)
     }
 }
 

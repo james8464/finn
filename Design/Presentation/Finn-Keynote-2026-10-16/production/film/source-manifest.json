@@ -1,0 +1,47 @@
+{
+  "source_clips": [
+    {
+      "key": "morning",
+      "file": "assets/film/morning-source.mp4",
+      "tool": "Google Flow agent",
+      "model": "Omni 1.1 Flash as quoted by Flow",
+      "cost_included_credits": 15,
+      "source_resolution": "720p",
+      "source": "AI-generated fictional person",
+      "inspection": "Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/Users/james/Developer/Hackathon/Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-source.mp4':\n  Metadata:\n    major_brand     : isom\n    minor_version   : 512\n    compatible_brands: isomiso2avc1mp41\n    encoder         : Google\n  Duration: 00:00:10.01, start: 0.000000, bitrate: 4396 kb/s\n  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, smpte170m/bt709/iec61966-2-1, progressive), 1280x720, 4258 kb/s, 24 fps, 24 tbr, 12288 tbn (default)\n      Metadata:\n        handler_name    : VideoHandler\n        vendor_id       : [0][0][0][0]\n  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 128 kb/s (default)\n      Metadata:\n        handler_name    : SoundHandler\n        vendor_id       : [0][0][0][0]\nAt least one output file must be specified\n"
+    },
+    {
+      "key": "office",
+      "file": "assets/film/office-source.mp4",
+      "tool": "Google Flow agent",
+      "model": "Omni 1.1 Flash as quoted by Flow",
+      "cost_included_credits": 15,
+      "source_resolution": "720p",
+      "source": "AI-generated fictional person",
+      "inspection": "Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/Users/james/Developer/Hackathon/Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-source.mp4':\n  Metadata:\n    major_brand     : isom\n    minor_version   : 512\n    compatible_brands: isomiso2avc1mp41\n    encoder         : Google\n  Duration: 00:00:10.01, start: 0.000000, bitrate: 2530 kb/s\n  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, smpte170m/bt709/iec61966-2-1, progressive), 1280x720, 2392 kb/s, 24 fps, 24 tbr, 12288 tbn (default)\n      Metadata:\n        handler_name    : VideoHandler\n        vendor_id       : [0][0][0][0]\n  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 128 kb/s (default)\n      Metadata:\n        handler_name    : SoundHandler\n        vendor_id       : [0][0][0][0]\nAt least one output file must be specified\n"
+    },
+    {
+      "key": "workout",
+      "file": "assets/film/workout-source.mp4",
+      "tool": "Google Flow agent",
+      "model": "Omni 1.1 Flash as quoted by Flow",
+      "cost_included_credits": 15,
+      "source_resolution": "720p",
+      "source": "AI-generated fictional person",
+      "inspection": "Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/Users/james/Developer/Hackathon/Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-source.mp4':\n  Metadata:\n    major_brand     : isom\n    minor_version   : 512\n    compatible_brands: isomiso2avc1mp41\n    encoder         : Google\n  Duration: 00:00:10.01, start: 0.000000, bitrate: 2451 kb/s\n  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, smpte170m/bt709/iec61966-2-1, progressive), 1280x720, 2311 kb/s, 24 fps, 24 tbr, 12288 tbn (default)\n      Metadata:\n        handler_name    : VideoHandler\n        vendor_id       : [0][0][0][0]\n  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 128 kb/s (default)\n      Metadata:\n        handler_name    : SoundHandler\n        vendor_id       : [0][0][0][0]\nAt least one output file must be specified\n"
+    }
+  ],
+  "finished_master": {
+    "path": "videos/finn-opening-film.mp4",
+    "duration_seconds": 60,
+    "size": [
+      1920,
+      1080
+    ],
+    "fps": 24,
+    "audio": "AAC stereo 48kHz",
+    "integrated_loudness_lufs": -16.4,
+    "true_peak_dbfs": -1.0,
+    "figma_frame": "219:2"
+  }
+}

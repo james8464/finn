@@ -41,7 +41,7 @@ struct PartialVisibilityTests {
 
     @Test func aPartlyVisibleSetCountsItsRepsAndSaysWhyThereIsNoAdvice() throws {
         let definition = ExerciseKind.bodyweightSquat.definition
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(
             Self.squats(missingKneeEvery: 4), as: definition, trimsToSet: false)
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("Expected the reps to be counted, got \(outcome)")
@@ -61,7 +61,7 @@ struct PartialVisibilityTests {
     @Test func aRepWithTheKneeHiddenIsCountedFromTheHips() throws {
         let definition = ExerciseKind.bodyweightSquat.definition
         let frames = Self.squats(missingKneeEvery: 4, hiddenRep: 6)
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: definition, trimsToSet: false)
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(frames, as: definition, trimsToSet: false)
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("Expected the reps to be counted, got \(outcome)")
             return
@@ -77,7 +77,7 @@ struct PartialVisibilityTests {
     @Test func belowSixtyFivePercentTheRepsAreCountedFromTheHips() {
         let frames = Self.squats(missingKneeEvery: 2)
         #expect(EvidenceGate.assess(frames, requirement: .squat, allowsPartial: true).isRejected)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: ExerciseKind.bodyweightSquat.definition)
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: ExerciseKind.bodyweightSquat.definition)
         else {
             Issue.record("Expected the squats to be counted from the hips")
             return
@@ -98,7 +98,7 @@ struct PartialVisibilitySessionTests {
         let model = WorkoutSessionModel(source: source,
                                         store: LocalSessionStore(url: directory.appending(path: "sessions.json")),
                                         preferences: FinnPreferences(defaults: defaults))
-        model.recognizesExercise = false
+        model.recognisesExercise = false
 
 // a clear set first, then a partly visible one.
         await model.startPreview()

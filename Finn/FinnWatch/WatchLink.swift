@@ -47,6 +47,18 @@ final class WatchLink: NSObject, WCSessionDelegate {
     }
 
     func start() {
+        #if DEBUG
+        // Scripted product-film state. No Health session, phone message, or measurement is created.
+        if ProcessInfo.processInfo.arguments.contains("-finn-presentation-tip") {
+            guard !isStarted else { return }
+            isStarted = true
+            state = WatchState(stage: .capturing, exercise: "Squat", demoInput: true,
+                               sentAt: Date().timeIntervalSince1970,
+                               coachMessage: "Sit lower")
+            isLiveCapture = true
+            return
+        }
+        #endif
         guard !isStarted, WCSession.isSupported() else { return }
         isStarted = true
         let session = WCSession.default

@@ -44,7 +44,9 @@ nonisolated struct BodySegments: Equatable, Sendable {
 
     init(frame: PoseFrame, side: BodySide, minimumConfidence: Double = supportingConfidence) {
         func point(_ role: JointRole) -> Point? {
-            guard let joint = frame.joints[role.joint(on: side)], joint.confidence >= minimumConfidence else {
+            guard frame.athleteVisible,
+                  let joint = frame.joints[role.joint(on: side)], joint.isUsable,
+                  joint.confidence >= minimumConfidence else {
                 return nil
             }
             return Point(x: joint.x, y: joint.y * frame.aspectRatio)
@@ -136,7 +138,7 @@ nonisolated struct BodySegments: Equatable, Sendable {
         let first = (x: a.x - vertex.x, y: a.y - vertex.y)
         let second = (x: c.x - vertex.x, y: c.y - vertex.y)
         let lengths = hypot(first.x, first.y) * hypot(second.x, second.y)
-        guard lengths > 0 else { return nil }
+        guard lengths.isFinite, lengths > 0 else { return nil }
         let cosine = (first.x * second.x + first.y * second.y) / lengths
         return acos(min(1, max(-1, cosine))) * 180 / .pi
     }

@@ -32,6 +32,10 @@ final class DemoPoseSource: PoseStreaming {
         let stream = AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(3)) { continuation in
             self.continuation = continuation
         }
+        if ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture") {
+            continuation?.yield(Self.frame(index: 0, setNumber: 1, exercise: exercise,
+                                            profileDeviation: profileDeviation, missingWrist: missingWrist))
+        }
         return stream
     }
 
@@ -83,17 +87,47 @@ final class DemoPoseSource: PoseStreaming {
                 .leftAnkle: point(0.51, 0.90), .rightHip: point(0.53, hipY),
                 .rightKnee: point(0.55, 0.70), .rightAnkle: point(0.57, 0.90),
             ]
+            // a full-body fixture for presentation exports, separate from regression fixtures
+            if ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture") {
+                let hip = (x: 0.48 - 0.10 * motion, y: 0.43 + amplitude * motion)
+                let ankle = (x: 0.51, y: 0.90)
+                let dx = ankle.x - hip.x, dy = ankle.y - hip.y
+                let distance = hypot(dx, dy)
+                let offset = sqrt(max(0, 0.24 * 0.24 - distance * distance / 4))
+                let knee = (x: (hip.x + ankle.x) / 2 + dy / distance * offset,
+                            y: (hip.y + ankle.y) / 2 - dx / distance * offset)
+                let shoulder = (x: hip.x + 0.05 * motion, y: hip.y - 0.25)
+                joints = [
+                    .leftHip: point(hip.x, hip.y), .rightHip: point(hip.x + 0.025, hip.y),
+                    .leftKnee: point(knee.x, knee.y), .rightKnee: point(knee.x + 0.025, knee.y),
+                    .leftAnkle: point(ankle.x, ankle.y), .rightAnkle: point(ankle.x + 0.025, ankle.y),
+                    .leftShoulder: point(shoulder.x, shoulder.y),
+                    .rightShoulder: point(shoulder.x + 0.025, shoulder.y),
+                    .leftElbow: point(shoulder.x + 0.11, shoulder.y + 0.025),
+                    .rightElbow: point(shoulder.x + 0.135, shoulder.y + 0.025),
+                    .leftWrist: point(shoulder.x + 0.22, shoulder.y + 0.03),
+                    .rightWrist: point(shoulder.x + 0.245, shoulder.y + 0.03),
+                    .nose: point(shoulder.x + 0.025, shoulder.y - 0.075)
+                ]
+            }
         case .pushUp:
             let bend = setNumber == 1 ? (late ? 55.0 : 90.0) : 95.0
             let angle = (170 - bend * motion) * .pi / 180
             let shoulderX = 0.30 + 0.14 * sin(angle)
             let shoulderY = 0.66 + 0.14 * cos(angle)
+            let bodyX = 0.85 - shoulderX
+            let bodyY = 0.80 - shoulderY
+            let bodyLength = hypot(bodyX, bodyY)
+            // Keep the first four reps straight; the last two deliberately raise the hips.
+            // Offset perpendicular to the body so the fault stays consistent as the arms bend.
+            let hipRise = setNumber == 1 && late ? 0.30 * 0.45 * bodyLength : 0
+            let hipX = shoulderX + 0.45 * bodyX + bodyY / bodyLength * hipRise
+            let hipY = shoulderY + 0.45 * bodyY - bodyX / bodyLength * hipRise
             joints = [
                 .leftWrist: point(0.30, 0.80), .leftElbow: point(0.30, 0.66),
                 .leftShoulder: point(shoulderX, shoulderY),
-                .leftHip: point(shoulderX + 0.25, shoulderY + 0.03),
-                .leftKnee: point((shoulderX + 0.25 + 0.85) / 2,
-                                 (shoulderY + 0.03 + 0.80) / 2),
+                .leftHip: point(hipX, hipY),
+                .leftKnee: point((hipX + 0.85) / 2, (hipY + 0.80) / 2),
                 .leftAnkle: point(0.85, 0.80),
             ]
         case .staticLunge:

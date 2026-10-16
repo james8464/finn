@@ -68,9 +68,9 @@ nonisolated enum VideoFileReader {
     static func play(url: URL, sink: PreviewFrameSink, looping: Bool, recordedPoses: [PoseFrame]? = nil,
                      yield: @Sendable (PoseFrame) -> Void) async {
         let asset = AVURLAsset(url: url)
-        let analyzer = PoseFrameAnalyzer()
+        let analyser = PoseFrameAnalyzer()
         // a set (played once) follows the person picked on its first frame throughout
-        if !looping { analyzer.lockAthlete() }
+        if !looping { analyser.lockAthlete() }
         repeat {
             guard let track = try? await asset.loadTracks(withMediaType: .video).first,
                   let composition = try? await AVVideoComposition.videoComposition(withPropertiesOf: asset),
@@ -83,24 +83,29 @@ nonisolated enum VideoFileReader {
             let provider = reader.outputProvider(for: output)
             guard (try? reader.start()) != nil else { return }
             let clock = ContinuousClock()
-            let start = clock.now
-            var lastAnalyzed = -Double.infinity
+            // Start the replay clock after the decoder delivers its first frame.
+            // Simulator decoder startup can otherwise compress the whole movement into a burst.
+            var start: ContinuousClock.Instant?
+            var lastAnalysed = -Double.infinity
             while !Task.isCancelled, let ready = try? await provider.next() {
                 let sample = ready.withUnsafeSampleBuffer { $0 }
                 let time = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sample))
                 guard time.isFinite else { continue }
-                try? await clock.sleep(until: start + .milliseconds(Int(time * 1000)))
+                if start == nil { start = clock.now }
+                if let start {
+                    try? await clock.sleep(until: start + .milliseconds(Int(time * 1000)))
+                }
                 guard !Task.isCancelled else { break }
                 sink.enqueue(sample)
-                if time - lastAnalyzed >= PoseFrameAnalyzer.minimumInterval,
+                if time - lastAnalysed >= PoseFrameAnalyzer.minimumInterval,
                    let pixelBuffer = CMSampleBufferGetImageBuffer(sample) {
-                    lastAnalyzed = time
+                    lastAnalysed = time
                     let frame: PoseFrame
                     if let recordedPoses {
                         guard let recorded = nearest(recordedPoses, to: time) else { continue }
                         frame = recorded.retimed(to: time)
                     } else {
-                        frame = analyzer.analyze(pixelBuffer, time: time, estimateAngle: true)
+                        frame = analyser.analyse(pixelBuffer, time: time, estimateAngle: true)
                     }
                     guard !Task.isCancelled else { break }
                     yield(frame)

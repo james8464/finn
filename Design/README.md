@@ -1,16 +1,14 @@
 # Finn brand theme
 
 - [Live Figma brand guide](https://www.figma.com/design/Y9asB4rM1J0tJcbr7Wim2q)
-- [Editable local Figma copy](Finn%20%E2%80%94%20Brand%20Theme.fig)
-- [Brand preview](Finn%20Brand%20Theme%20preview.png)
 - [Production app icon and flat artwork](../Finn/BrandArtwork/README.md)
 - [iPhone experience review and Apple design references](../docs/design/iphone-experience-review.md)
 
-The Figma guide is the identity reference for the iPhone app: purpose, mark, colour, type, voice, icon appearance, and the current Home and workout expressions. It deliberately defines a brand rather than fixed screen layouts. The local `.fig` file and preview were refreshed from the live guide on 15 October 2026.
+The live Figma guide covers the broader identity. The current production icon and its editable layers live in the Xcode project; use that source when the guide shows earlier icon concepts.
 
 ## Idea and identity
 
-**Finn** is a calm, observant workout-technique companion. The mark is a custom rounded **F**: its straight stem conveys alignment, while two open corners in the iPhone icon evoke the camera observing a set. The monogram stays legible at Home Screen size without prescribing one ideal exercise pose. The promise is **“Find your line.”** Preserve the mark's proportions and leave generous clear space. Use the layered [Icon Composer source](../Finn/Finn/AppIcon.icon) for the iPhone icon and the flat mark for editorial materials.
+**Finn** is a workout coach. Its forward-leaning F has three separate plates: a silver stem, a light upper arm and a short pink crossbar. Use the layered [Icon Composer source](../Finn/Finn/AppIcon.icon) for the iPhone and Watch icons. The matching flat artwork is for small editorial uses. The promise is **“Find your line.”**
 
 ## Colour
 
@@ -24,13 +22,13 @@ Home uses a minimalist charcoal background, borderless cards and the exact Figma
 | Grouped | `#F2F2F7` | Reference for optional grouped surfaces in Light Mode |
 | Separator | `#C6C6C8` | Reference for quiet divisions in Light Mode |
 | Pink accent | `#FF2D92` | Home selection and highlights |
-| Icon ink | `#141414` | Custom mark and dark icon ground |
+| Icon ground | `#24282D` | App icon background |
 
 The iPhone interface uses semantic iOS colours (`systemBackground`, primary labels, system separators) and a monochrome adaptive action. Supporting copy uses 72% of the adaptive primary label because the default secondary gray missed a small-text contrast audit in Light Mode. The values above are Figma references, not fixed overrides for system colours. The system resolves Light, Dark, and increased contrast appearances. Reserve colour for meaningful platform states such as a destructive action; never use colour alone to communicate a form judgement. The camera view should leave the person and their movement clearly visible.
 
 The capture **Stop set** control is white over the camera in both appearances; red would suggest that Finn is recording video. History uses contrast-tested destructive red (`#C62828` in Light Mode, `#FF453A` in Dark Mode) only for deletion. This is a functional state, not a brand accent.
 
-Use SF Symbols for interface actions where appropriate. Keep the app icon and brand mark custom; Apple's [SF Symbols guidance](https://developer.apple.com/design/human-interface-guidelines/sf-symbols) prohibits using the symbols, or confusingly similar images, in app icons and logos.
+Use SF Symbols for interface actions where appropriate. Keep the app icon custom; Apple's [SF Symbols guidance](https://developer.apple.com/design/human-interface-guidelines/sf-symbols) prohibits using the symbols, or confusingly similar images, in app icons and logos.
 
 ## Typography
 
@@ -40,7 +38,7 @@ Use SF Symbols for interface actions where appropriate. Keep the app icon and br
 
 ## Voice and imagery
 
-Describe what Finn can observe, then give one specific next step. Say “Your last two reps were shorter” rather than “Your form is wrong.” State tracking limits plainly and never imply injury prevention, diagnosis, or certainty from a single camera angle. In workout and feedback screens, prefer real movement with full-body context, fine evidence traces, and restrained motion. The Home dashboard uses a generated amber athlete backdrop as decorative artwork, not footage or evidence of a measured set. Avoid fake heatmaps and decorative AI motifs.
+Describe what Finn can observe, then give one specific next step. Say “Your last two reps were shorter” rather than “Your form is wrong.” State tracking limits plainly and never imply injury prevention, diagnosis, or certainty from a single camera angle. In workout and feedback screens, prefer real movement with full-body context, fine evidence traces, and restrained motion. Avoid fake heatmaps and decorative AI motifs.
 
 ## Apple references
 

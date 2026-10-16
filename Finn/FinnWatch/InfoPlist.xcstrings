@@ -11,7 +11,7 @@
             "value" : "Finn"
           }
         },
-        "fr" : {
+        "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finn"
@@ -23,16 +23,28 @@
             "value" : "Finn"
           }
         },
-        "en-GB" : {
+        "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finn"
           }
         },
-        "es" : {
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finn"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "FinnWatch"
           }
         }
       }
@@ -44,31 +56,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Finn reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finn lit ta fréquence cardiaque pendant une série, seulement si tu as activé Personnaliser avec Santé sur ton iPhone, pour l’afficher à ton poignet et sur ton iPhone. Elle reste sur tes appareils."
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finn reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices."
+            "value" : "Finn reads your heart rate during a set only after you enable Personalize with Health. It stays on your devices."
           }
         },
         "en-GB" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Finn reads your heart rate during a set, only after you turn on Personalise with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Finn reads your heart rate during a set, only after you turn on Personalize with Health on your iPhone, to show it on your wrist and on your iPhone. It stays on your devices."
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Finn lee tu frecuencia cardíaca durante una serie, solo después de activar Personalizar con Salud en tu iPhone, para mostrarla en tu muñeca y en tu iPhone. Se mantiene en tus dispositivos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Finn lit ta fréquence cardiaque pendant une série, seulement si tu as activé Personnaliser avec Santé sur ton iPhone, pour l’afficher à ton poignet et sur ton iPhone. Elle reste sur tes appareils."
           }
         }
       }
@@ -80,31 +92,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Finn runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finn lance un entraînement de renforcement sur ta montre pendant que la caméra de l’iPhone est ouverte, pour lire ta fréquence cardiaque. Il ne garde pas cet entraînement : ton iPhone enregistre la séance dans Forme seulement si tu l’as demandé."
-          }
-        },
-        "en-US" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finn runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to."
+            "value" : "Rhythm starts a temporary Watch workout so pacing taps can continue with your wrist down. Finn discards this workout; your iPhone controls Fitness saving."
           }
         },
         "en-GB" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
+            "value" : "Finn runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "Finn runs a strength workout on your watch while the iPhone camera is open, to read your heart rate. It does not keep that workout: your iPhone saves the session to Fitness only if you asked it to."
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Finn ejecuta un entrenamiento de fuerza en tu reloj mientras la cámara del iPhone está abierta, para leer tu frecuencia cardíaca. No guarda ese entrenamiento: tu iPhone guarda la sesión en Fitness solo si se lo pediste."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Finn lance un entraînement de renforcement sur ta montre pendant que la caméra de l’iPhone est ouverte, pour lire ta fréquence cardiaque. Il ne garde pas cet entraînement : ton iPhone enregistre la séance dans Forme seulement si tu l’as demandé."
           }
         }
       }

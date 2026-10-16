@@ -1,0 +1,43 @@
+[
+  {
+    "title": "Make room — 60-second opening film",
+    "status": "Edited film: generated human plates, actual Finn UI composites, original sound design",
+    "duration_seconds": 60,
+    "placement": "Replace slide 01’s 15-second opening; main presentation then runs 11:45",
+    "arc": "Human use case → user POV walkthrough → technical implementation",
+    "visual_direction": "AI-generated live-action-style athlete footage, carefully edited like an Apple product introduction; actual Finn UI composited into official Apple device assets",
+    "beats": [
+      {
+        "time": "00–15.5",
+        "beat": "Rapid morning, commute and office montage."
+      },
+      {
+        "time": "15.5–18.25",
+        "beat": "Personal reminder; quiet interruption."
+      },
+      {
+        "time": "18.25–30",
+        "beat": "Close laptop, prepare, exercise."
+      },
+      {
+        "time": "30–42",
+        "beat": "Actual Finn setup and live recording; pose and counter leave the phone."
+      },
+      {
+        "time": "42–51",
+        "beat": "One real result card lifts beyond the device."
+      },
+      {
+        "time": "51–60",
+        "beat": "Human resolution, Finn title and presenter handover."
+      }
+    ],
+    "production_notes": [
+      "Human footage is AI generated and is a fictional use case, not an accuracy demonstration.",
+      "Personal reminder is a story beat, not a claim that Finn schedules workouts.",
+      "Actual app recordings retain DEMO INPUT labels; all displayed metrics are synthetic demo data.",
+      "45 included Google Flow credits consumed; no paid run or subscription upgrade.",
+      "Master is 1920×1080 at 24fps; generated source plates are 1280×720."
+    ]
+  }
+]

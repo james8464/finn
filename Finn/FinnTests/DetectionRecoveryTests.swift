@@ -57,7 +57,7 @@ nonisolated enum JuryTraces {
 
 nonisolated struct HipCountTests {
     private func count(_ frames: [PoseFrame]) -> (reps: Int, version: String)? {
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .squat) else { return nil }
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .squat) else { return nil }
         return (analysis.reps.count, analysis.rubricVersion)
     }
 
@@ -65,7 +65,7 @@ nonisolated struct HipCountTests {
         let frames = JuryTraces.squats(reps: 6, from: 0)
 // the side rubric needs the knee and ankle: it refused this set.
         #expect(EvidenceGate.assess(frames, requirement: .squat).isRejected)
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyzeWithDiagnostics(frames, as: .squat)
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(frames, as: .squat)
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("Expected the squats to be counted from the hips")
             return
@@ -142,7 +142,7 @@ nonisolated struct HipCountTests {
 
     @Test func otherExercisesDoNotFallBackToTheHips() {
         #expect({
-            if case .analyzed = ExerciseAnalyzer.analyze(JuryTraces.squats(reps: 6, from: 0), as: .staticLunge) {
+            if case .analyzed = ExerciseAnalyzer.analyse(JuryTraces.squats(reps: 6, from: 0), as: .staticLunge) {
                 return false
             }
             return true
@@ -181,7 +181,7 @@ nonisolated struct LiveCountRecoveryTests {
     @Test func theResultCountsWhatTheLiveCountSaid() {
         let frames = JuryTraces.squats(reps: 3, from: 0, standing: 0, legs: true)
             + JuryTraces.squats(reps: 4, from: 6)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .squat) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .squat) else {
             Issue.record("Expected the set to be measured")
             return
         }

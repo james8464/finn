@@ -71,3 +71,6 @@ __pycache__/
 *.mp4
 *.m4v
 !tools/replay/fixtures/*.mp4
+
+# Local code-graph cache; source and integration reports remain tracked.
+graphify-out/

@@ -21,7 +21,7 @@ nonisolated struct FixtureReplayTests {
     /// used to end at that rep's top and drop it.
     @Test(.enabled(if: available)) func sixClearSquatsAreSixReps() throws {
         let frames = try poses("squat-six-reps-poses.json")
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .squat) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .squat) else {
             Issue.record("Expected the six-rep recording to be measured")
             return
         }
@@ -33,7 +33,7 @@ nonisolated struct FixtureReplayTests {
     @Test(.enabled(if: available)) func coveredFeetAreCountedFromTheHipsWithoutAdvice() throws {
         let frames = try poses("squat-feet-hidden-poses.json")
         #expect(EvidenceGate.assess(SetWindow.active(frames, requirement: .squat), requirement: .squat).isRejected)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .squat) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .squat) else {
             Issue.record("Covered feet: the squats are counted from the hips")
             return
         }

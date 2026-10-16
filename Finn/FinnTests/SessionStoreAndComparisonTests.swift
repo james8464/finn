@@ -3,6 +3,43 @@ import Testing
 @testable import Finn
 
 struct SessionStoreAndComparisonTests {
+    @Test func invalidMeasurementsCannotReplaceGoodHistory() throws {
+        let url = temporaryURL()
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        let store = LocalSessionStore(url: url)
+        let id = UUID()
+        let good = WorkoutSessionSummary(id: id, startedAt: .now, sets: [set(sessionID: id, range: 0.4)])
+        try store.save(good)
+        let original = try Data(contentsOf: url)
+        let bad = WorkoutSessionSummary(id: id, startedAt: .now,
+                                       sets: [set(sessionID: id, range: Double.greatestFiniteMagnitude)])
+        #expect(throws: SessionStoreError.invalidSession) { try store.save(bad) }
+        #expect(try Data(contentsOf: url) == original)
+    }
+
+    @Test func duplicateSavedSetIDsUseTheCorruptionRecoveryFlow() throws {
+        let url = temporaryURL()
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        let id = UUID()
+        let first = set(sessionID: id, range: 0.4)
+        let corrupt = [WorkoutSessionSummary(id: id, startedAt: .now, sets: [first, first])]
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let original = try JSONEncoder().encode(corrupt)
+        try original.write(to: url)
+        let store = LocalSessionStore(url: url)
+        #expect(throws: SessionStoreError.corrupted) { try store.load() }
+        let backup = try store.recoverCorruptStore()
+        #expect(try Data(contentsOf: backup) == original)
+        #expect(try store.load().isEmpty)
+    }
+
+    @Test func aClockMovedBackwardsStartsANewSession() {
+        let now = Date.now
+        let session = WorkoutSessionSummary(id: UUID(), startedAt: now, sets: [])
+        #expect(!session.continues(at: now.addingTimeInterval(-60)))
+        #expect(session.continues(at: now.addingTimeInterval(60)))
+    }
+
     @Test func existingHistoryAndBadgesMoveIntoFinnSupportFolder() throws {
         let support = FileManager.default.temporaryDirectory
             .appending(path: "FinnMigration-\(UUID().uuidString)", directoryHint: .isDirectory)
@@ -30,10 +67,10 @@ struct SessionStoreAndComparisonTests {
         try store.save(session)
         let loaded = try store.load()
         #expect(loaded.first?.sets.count == 2)
-        let serialized = try String(contentsOf: url, encoding: .utf8)
-        #expect(!serialized.contains("PoseFrame"))
-        #expect(!serialized.contains("clipURL"))
-        #expect(!serialized.contains("pixelBuffer"))
+        let serialised = try String(contentsOf: url, encoding: .utf8)
+        #expect(!serialised.contains("PoseFrame"))
+        #expect(!serialised.contains("clipURL"))
+        #expect(!serialised.contains("pixelBuffer"))
     }
 
     @Test(.enabled(if: fileProtectionAttributeAvailable(),
@@ -161,7 +198,7 @@ struct SessionStoreAndComparisonTests {
         var attempts: [String] = []
         let store = LocalSessionStore(url: url, removeItem: { file in
             attempts.append(file.lastPathComponent)
-            if file == backup { throw CocoaError(.fileWriteNoPermission) }
+            if file.lastPathComponent == backup.lastPathComponent { throw CocoaError(.fileWriteNoPermission) }
             try FileManager.default.removeItem(at: file)
         })
 
@@ -196,7 +233,7 @@ struct SessionStoreAndComparisonTests {
         let reps = (1...6).map { number in
             RepMetric(number: number, startTime: Double(number) * 2,
                       endTime: Double(number) * 2 + 1.5,
-                      normalizedHipTravel: range)
+                      normalisedHipTravel: range)
         }
         return SetSummary(id: UUID(), sessionID: sessionID, capturedAt: .now,
                           bodySide: side,

@@ -64,7 +64,7 @@ struct FormChecksTests {
         }
         let review = try reviewed(frames, .squat)
         #expect(review.findings.map(\.check) == [.squatDepth])
-        #expect(review.notes == ["Finn couldn’t check your chest position: your shoulder wasn’t clear enough at the bottom of the reps."])
+        #expect(review.notes == ["Finn couldn’t check your chest position: your shoulder wasn’t clear enough during the reps."])
     }
 
     @Test func angledSquatGetsNoFormAdvice() throws {
@@ -88,7 +88,7 @@ struct FormChecksTests {
     @Test func saggingHipsAreToldToLift() throws {
         let review = try reviewed(pushUps(sag: 0.4, bottomElbow: 85), .pushUp)
         #expect(review.findings.map(\.check) == [.pushUpHipsSag])
-        #expect(review.findings.first?.observation.contains("sagged below the line from your shoulders to your ankles") == true)
+        #expect(review.findings.first?.observation.contains("sagged below your body line") == true)
     }
 
     @Test func pikedHipsAreToldToLower() throws {
@@ -146,7 +146,7 @@ struct FormChecksTests {
                 settings.maximumYawDegrees = 10
                 settings.repDepth = 0.95...1.0
                 let frames = SyntheticExerciseMotion.sequence(label: label, settings: settings, using: &generator)
-                guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: definition),
+                guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: definition),
                       analysis.reps.count >= 3 else { continue }
                 measuredSets += 1
                 let review = FormChecks.review(analysis, frames: frames, definition: definition)
@@ -191,6 +191,109 @@ struct FormChecksTests {
         #expect(SetIssue.squatDepth.focus(for: .squat) == FormCheck.squatDepth.nextAction)
     }
 
+    @Test(arguments: [3...6, 13...16])
+    func sustainedSagAwayFromTheBottomIsDetected(faultFrames: ClosedRange<Int>) throws {
+        let clean = pushUps(sag: 0, bottomElbow: 85)
+        let faulty = pushUps(sag: 0.4, bottomElbow: 85)
+        let frames = clean.indices.map { index in
+            faultFrames.contains(index % 20) ? faulty[index] : clean[index]
+        }
+        let review = try reviewed(frames, .pushUp)
+        #expect(review.findings.map(\.check) == [.pushUpHipsSag])
+        #expect(review.findings.first?.reps.count == 6)
+    }
+
+    @Test func aSingleBadLandmarkPerRepIsNotAFormFault() throws {
+        let clean = pushUps(sag: 0, bottomElbow: 85)
+        let faulty = pushUps(sag: 0.8, bottomElbow: 85)
+        let frames = clean.indices.map { index in index % 20 == 5 ? faulty[index] : clean[index] }
+        #expect(try reviewed(frames, .pushUp).findings.isEmpty)
+    }
+
+    @Test func highFrameRateDoesNotTurnABriefGlitchIntoAdvice() throws {
+        let clean = pushUps(sag: 0, bottomElbow: 85)
+        let faulty = pushUps(sag: 0.8, bottomElbow: 85)
+        let frames = (0...720).map { index in
+            let source = (30...32).contains(index % 120) ? faulty : clean
+            return source[min(index / 6, 120)].retimed(to: Double(index) / 60)
+        }
+        #expect(try reviewed(frames, .pushUp).findings.isEmpty)
+    }
+
+    @Test func missingFramesCannotSupplySustainedFormEvidence() throws {
+        let full = pushUps(sag: 0.4, bottomElbow: 85)
+        let frames = full.enumerated().map { index, frame in
+            index.isMultiple(of: 4) ? frame : frame.with(joints: frame.joints.filter {
+                $0.key != .leftHip && $0.key != .rightHip
+            })
+        }
+        let review = try reviewed(frames, .pushUp)
+        #expect(!review.measurements.contains { $0.check == .pushUpHipsSag })
+        #expect(review.findings.isEmpty)
+    }
+
+    @Test func aBriefDenseBurstCannotOutvoteClearSquatDepth() throws {
+        let clean = squats(thighAtBottom: -5, extraLean: 5)
+        let analysis = try measured(clean, .squat)
+        var frames = clean
+        for rep in 0..<6 {
+            let bottom = clean[rep * 20 + 10]
+            var joints = bottom.joints
+            for joint in [BodyJoint.leftKnee, .rightKnee] {
+                if let original = joints[joint] {
+                    joints[joint] = JointPoint(x: original.x, y: original.y + 0.18, confidence: original.confidence)
+                }
+            }
+            for offset in 1...8 {
+                frames.append(PoseFrame(time: bottom.time + Double(offset) * 0.001,
+                                        subjectCount: 1, joints: joints))
+            }
+        }
+        frames.sort { $0.time < $1.time }
+        let review = FormChecks.review(analysis, frames: frames, definition: .squat)
+        #expect(!review.findings.contains { $0.check == .squatDepth })
+        #expect(review.measurements.first { $0.check == .squatDepth }?.faulty == 0)
+    }
+
+    @Test func aPassingBystanderCannotCompleteAHiddenRep() throws {
+        let full = pushUps(sag: 0, bottomElbow: 85)
+        let frames = full.map { frame in
+            let hidden = (0.4...1.4).contains(frame.time)
+            return PoseFrame(time: frame.time, subjectCount: hidden ? 2 : 1,
+                             joints: hidden ? [:] : frame.joints,
+                             athleteTracking: hidden ? .hidden : .tracked,
+                             bystanders: hidden ? [frame.joints] : [])
+        }
+        let result = ExerciseAnalyzer.analyseWithDiagnostics(frames, as: .pushUp, trimsToSet: false)
+        let analysis = try #require({ () -> SetAnalysis? in
+            if case .analyzed(let analysis) = result.outcome { return analysis }
+            return nil
+        }())
+        #expect(analysis.reps.count == 5)
+        #expect(analysis.reps.allSatisfy { $0.startTime >= 1.4 })
+    }
+
+    @Test func liveCatchUpUsesOnlyFaultsSeenByThatRep() {
+        let frames = pushUps(sag: 0.4, bottomElbow: 85)
+        var monitor = LiveSetMonitor(definition: .pushUp)
+        let events = monitor.update(with: frames)
+        let faults = events.compactMap { event -> Int? in
+            if case .formFault(_, let number) = event { return number }
+            return nil
+        }
+        #expect(faults == [2, 5])
+    }
+
+    @Test func turnedRepsDoNotBecomeTechniqueEvidence() throws {
+        let frames = pushUps(sag: 0.4, bottomElbow: 85).map { frame in
+            frame.with(deviation: frame.time < 4 ? 80 : 0)
+        }
+        let review = try reviewed(frames, .pushUp)
+        let finding = try #require(review.findings.first)
+        #expect(finding.reps == [3, 4, 5, 6])
+        #expect(finding.judged == 4)
+    }
+
     // MARK: Synthetic side views
 
     private func reviewed(_ frames: [PoseFrame], _ definition: ExerciseDefinition) throws -> FormReview {
@@ -200,7 +303,7 @@ struct FormChecksTests {
     }
 
     private func measured(_ frames: [PoseFrame], _ definition: ExerciseDefinition) throws -> SetAnalysis {
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: definition, viewCheck: .ignore) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: definition, viewCheck: .ignore) else {
             Issue.record("Expected a measured set")
             throw TraceError.notMeasured
         }
