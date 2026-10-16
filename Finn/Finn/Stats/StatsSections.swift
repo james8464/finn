@@ -160,19 +160,22 @@ struct RegularityCalendar: View {
 
     var body: some View {
         let most = max(1, days.map(\.reps).max() ?? 1)
-        let rows = Array(repeating: GridItem(.fixed(18), spacing: 3), count: 7)
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 12)
         let spoken = days.filter { $0.reps > 0 }
             .map { "\($0.day.formatted(date: .abbreviated, time: .omitted)): \($0.reps)" }.joined(separator: "; ")
         VStack(alignment: .leading, spacing: 6) {
-            LazyHGrid(rows: rows, spacing: 3) {
-                ForEach(days, id: \.day) { entry in
+            LazyVGrid(columns: columns, spacing: 4) {
+                ForEach(0..<84, id: \.self) { index in
+                    let source = (index % 12) * 7 + index / 12
+                    let entry = source < days.count ? days[source] : (day: Date.now, reps: 0)
                     RoundedRectangle(cornerRadius: 3, style: .continuous)
                         .fill(entry.reps == 0 ? Color.primary.opacity(0.08)
-                              : Color.primary.opacity(0.3 + 0.7 * Double(entry.reps) / Double(most)))
-                        .frame(width: 18, height: 18)
+                              : AppPageStyle.tint.opacity(0.4 + 0.6 * Double(entry.reps) / Double(most)))
+                        .frame(height: 12)
+                        .opacity(source < days.count ? 1 : 0)
                 }
             }
-            .frame(height: 144)
+            .frame(height: 108)
             Text("12 weeks")
                 .font(.footnote)
                 .foregroundStyle(HomeStyle.supportingText)

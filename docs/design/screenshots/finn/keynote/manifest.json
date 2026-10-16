@@ -1,0 +1,114 @@
+{
+  "figmaPage": "99:2",
+  "source": "iOS Simulator, scripted sample workout",
+  "captures": [
+    {
+      "name": "home",
+      "node": "181:5",
+      "response": {
+        "success": true,
+        "imageHash": "478fffb495fae737b6923bcab7bfafd07432590d",
+        "sizeBytes": 599591,
+        "contentType": "image/png",
+        "placedOnNodeId": "181:5"
+      },
+      "sha256": "33e4ecd7fdb08c470c2563b8955cac271f8f92aa66f71e44122dcb286bebcdc0"
+    },
+    {
+      "name": "setup",
+      "node": "181:6",
+      "response": {
+        "success": true,
+        "imageHash": "04c635c1adeb386d4e06936fe8871d8e84c8c5cf",
+        "sizeBytes": 194591,
+        "contentType": "image/png",
+        "placedOnNodeId": "181:6"
+      },
+      "sha256": "2a55b21af3aeef6220192b1ee9b9d7c58d61a30f30656b97dbb9b8c00c67cd96"
+    },
+    {
+      "name": "live",
+      "node": "181:7",
+      "response": {
+        "success": true,
+        "imageHash": "8411659b13e95710c2dd18f15c40b4f5a53a0317",
+        "sizeBytes": 204048,
+        "contentType": "image/png",
+        "placedOnNodeId": "181:7"
+      },
+      "sha256": "bdca7f1b21672fa9157d716f673e7debfc1183e17cfa69e1ab2048f673720312"
+    },
+    {
+      "name": "result",
+      "node": "181:8",
+      "response": {
+        "success": true,
+        "imageHash": "688b388d8adf0a70d8c3fabf8653f5aa6989344f",
+        "sizeBytes": 188284,
+        "contentType": "image/png",
+        "placedOnNodeId": "181:8"
+      },
+      "sha256": "4860ae80d8588f67ae1a0a4a478928c749724d8b7ca8f07981b6e2f296c623bc"
+    },
+    {
+      "name": "detail",
+      "node": "181:9",
+      "response": {
+        "success": true,
+        "imageHash": "9c8d4de520e2cdfd2e973c1ac062be7d51a1bf49",
+        "sizeBytes": 181106,
+        "contentType": "image/png",
+        "placedOnNodeId": "181:9"
+      },
+      "sha256": "726797e8a801544f8e996111e2d79c11768cc28fe0c65cbe3144a303a525c6ba"
+    },
+    {
+      "name": "history",
+      "node": "181:10",
+      "response": {
+        "success": true,
+        "imageHash": "8479f9627f78ca1bf17a8a7fe85b51415dc3931b",
+        "sizeBytes": 229511,
+        "contentType": "image/png",
+        "placedOnNodeId": "181:10"
+      },
+      "sha256": "9813b9932d59c604257a9f46a93b256e66de7b8a3710174924a2cc0d996274d3"
+    },
+    {
+      "name": "coach",
+      "node": "181:11",
+      "response": {
+        "success": true,
+        "imageHash": "381b4a60497f33553037d7445d37ccc838501ee9",
+        "sizeBytes": 217588,
+        "contentType": "image/png",
+        "placedOnNodeId": "181:11"
+      },
+      "sha256": "1fb5c54ecc915881da02c8bbe2f49ce11ffb016ff82c38b5bd1a9c82d636e3c8"
+    },
+    {
+      "name": "workout",
+      "node": "181:12",
+      "response": {
+        "success": true,
+        "imageHash": "ff67b748a8dc82e0218a27a465795d1d3d774bba",
+        "sizeBytes": 238280,
+        "contentType": "image/png",
+        "placedOnNodeId": "181:12"
+      },
+      "sha256": "e03b1c46a0515b9711a016e3526c2826247e565ad65ad4ba33c0c07016d06d30"
+    },
+    {
+      "name": "posture",
+      "node": "181:13",
+      "response": {
+        "success": true,
+        "imageHash": "9fe87bdbe71d8b404b524fb5a86abc973b24035f",
+        "sizeBytes": 243745,
+        "contentType": "image/png",
+        "placedOnNodeId": "181:13"
+      },
+      "sha256": "316f3d40bd9d01128f618fdf2cf6f5d4bc5cdd02a90fc351938793b705de9b15"
+    }
+  ]
+}

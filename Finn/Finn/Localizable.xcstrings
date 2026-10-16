@@ -6028,6 +6028,28 @@
         }
       }
     },
+    "Coach uses your question and saved set summaries. Apple Intelligence may process them on this iPhone or through Apple's Private Cloud Compute. Camera frames and raw pose points are never included.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coach uses your question and saved set summaries. Apple Intelligence may process them on this iPhone or through Apple's Private Cloud Compute. Camera frames and raw pose points are never included."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coach usa tu pregunta y los resúmenes de tus series guardadas. Apple Intelligence puede procesarlos en este iPhone o mediante Private Cloud Compute de Apple. Nunca se incluyen imágenes de la cámara ni puntos de postura sin procesar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coach utilise ta question et les résumés de tes séries enregistrées. Apple Intelligence peut les traiter sur cet iPhone ou via Private Cloud Compute d’Apple. Les images de la caméra et les points de pose bruts ne sont jamais inclus."
+          }
+        }
+      }
+    },
     "Coach uses your question and saved set summaries. When available, Apple Intelligence processes them on this iPhone. Camera frames and raw pose points are never included.": {
       "localizations": {
         "en-GB": {
@@ -6107,6 +6129,34 @@
       }
     },
     "Coming back after a break": {},
+    "Compare reps": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compare reps"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compare reps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comparar repeticiones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comparer les répétitions"
+          }
+        }
+      }
+    },
     "Compared with the previous set: %@": {
       "localizations": {
         "en-GB": {
@@ -11587,6 +11637,34 @@
       }
     },
     "Illustrated demo: a man doing a squat in a gym.": {},
+    "Illustrated guide · ranges vary": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustrated guide · ranges vary"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustrated guide · ranges vary"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guía ilustrada · las amplitudes varían"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guide illustré · amplitudes variables"
+          }
+        }
+      }
+    },
     "Illustrated movement": {
       "localizations": {
         "en-GB": {
@@ -13500,6 +13578,34 @@
         }
       }
     },
+    "Measurement limits": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measurement limits"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measurement limits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Límites de la medición"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limites de la mesure"
+          }
+        }
+      }
+    },
     "Median %@ %lld%% longer than in your previous set of that session, over %lld reps.": {
       "localizations": {
         "en": {
@@ -13794,6 +13900,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Recule le téléphone et garde ton épaule, ta hanche, ton genou et ta cheville visibles."
+          }
+        }
+      }
+    },
+    "Movement": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movement"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movement"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movimiento"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mouvement"
           }
         }
       }
@@ -15222,6 +15356,34 @@
         }
       }
     },
+    "Observation options": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observation options"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observation options"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opciones de la observación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options de l’observation"
+          }
+        }
+      }
+    },
     "Observation: %@": {
       "localizations": {
         "en-GB": {
@@ -16209,6 +16371,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lire"
+          }
+        }
+      }
+    },
+    "Pose at the bottom of each rep. No video saved.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pose at the bottom of each rep. No video saved."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pose at the bottom of each rep. No video saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posición en el punto más bajo de cada repetición. No se guarda vídeo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Position au point le plus bas de chaque répétition. Aucune vidéo enregistrée."
           }
         }
       }
@@ -17699,6 +17889,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Répétitions"
+          }
+        }
+      }
+    },
+    "Reps %@": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reps %@"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reps %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeticiones %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Répétitions %@"
           }
         }
       }
@@ -23476,6 +23694,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Utiliser plutôt le modèle entraîné (expérimental)"
+          }
+        }
+      }
+    },
+    "Using %@ instead of %@. Your next sets use %@.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Using %@ instead of %@. Your next sets use %@."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Using %@ instead of %@. Your next sets use %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se usa %@ en lugar de %@. Las próximas series usarán %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mouvement retenu : %@ au lieu de %@. Prochaines séries : %@."
           }
         }
       }

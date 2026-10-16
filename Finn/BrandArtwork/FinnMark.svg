@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="560" height="560" viewBox="230 220 560 560">
-  <title>Finn monogram mark</title>
-  <path d="M390 713V325H623M390 505H565" fill="none" stroke="#141414" stroke-width="61" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="560" viewBox="205 175 640 670">
+  <title>Finn signature mark, light surface</title>
+  <path fill="#24282D" d="M413 225H767Q783 225 779 241L760 329Q757 345 741 345H387Q371 345 375 329L394 243Q398 225 413 225Z"/>
+  <path fill="#FF2D92" d="M366 455H648Q664 455 660 471L641 559Q638 575 622 575H340Q324 575 328 559L347 473Q351 455 366 455Z"/>
+  <path fill="#59616C" d="M409 225H521Q537 225 533 241L416 779Q413 795 397 795H281Q265 795 269 779L386 245Q390 225 409 225Z"/>
 </svg>

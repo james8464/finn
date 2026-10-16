@@ -297,6 +297,7 @@ final class WorkoutSessionModel {
          announcer: (any LiveAnnouncing)? = nil,
          fitness: (any FitnessWorkoutSaving)? = nil,
          health: (any HealthReading)? = nil,
+         initialHistory: Result<[WorkoutSessionSummary], Error>? = nil,
          currentDate: @escaping () -> Date = { Date() }) {
         self.source = source
         self.store = store
@@ -320,7 +321,7 @@ final class WorkoutSessionModel {
         self.personalisesWithHealth = preferences.personalisesWithHealth
         if let remembered = preferences.selectedExercise { selectedExercise = remembered }
         if let store {
-            do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
+            do { history = try (initialHistory?.get() ?? store.load()).sorted { $0.startedAt > $1.startedAt } }
             catch { historyIssue = Self.issue(for: error) }
         }
         // iOS terminated Finn after a set without Done: the session is still open, so the first
