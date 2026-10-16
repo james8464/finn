@@ -9,18 +9,18 @@ import re
 # Approximate class durations from the October 2026 simulator runs. These only balance
 # machines; they never choose which tests run. New classes use their test count as a guide.
 APPROXIMATE_SECONDS = {
-    "WorkoutFlowUITests": 723,
-    "DashboardUITests": 355,
-    "NativeUIReviewUITests": 289,
-    "ExerciseOptionsUITests": 187,
-    "PresentationReviewUITests": 150,
-    "CoachReliabilityUITests": 140,
-    "SkeletonOverlayUITests": 113,
-    "CameraAngleUITests": 113,
-    "ClippingRegressionUITests": 110,
-    "FinnUITests": 77,
-    "WatchCompanionUITests": 42,
-    "AppleFitnessUITests": 21,
+    "WorkoutFlowUITests": 838,
+    "DashboardUITests": 381,
+    "NativeUIReviewUITests": 230,
+    "ExerciseOptionsUITests": 171,
+    "PresentationReviewUITests": 198,
+    "CoachReliabilityUITests": 128,
+    "SkeletonOverlayUITests": 137,
+    "CameraAngleUITests": 119,
+    "ClippingRegressionUITests": 184,
+    "FinnUITests": 53,
+    "WatchCompanionUITests": 50,
+    "AppleFitnessUITests": 42,
     "InterfaceAccessibilityUITests": 16,
     "ScreenTourUITests": 1,
     "OnboardingTourUITests": 1,
@@ -31,7 +31,7 @@ GROUP_COUNT = 3
 def interface_groups(root: Path) -> list[list[str]]:
     durations = {}
     for path in sorted((root / "Finn/FinnUITests").rglob("*.swift")):
-        source = path.read_text()
+        source = path.read_text(encoding="utf-8")
         classes = re.findall(r"\bclass\s+(\w+)\s*:\s*XCTestCase\b", source)
         for name in classes:
             if name in durations:

@@ -20,12 +20,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [analysis, interface-1, interface-2, interface-3]
+        suite: [analysis, replay, interface-1, interface-2, interface-3]
     # Separate machines isolate UI state; tests stay sequential within each simulator.
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
       - name: Select iOS 27 iPhone simulator
+        if: matrix.suite != 'replay'
         run: |
           xcrun simctl list devices available -j > "$RUNNER_TEMP/devices.json"
           DEVICE_ID=$(python3 - <<'PY'
@@ -41,6 +42,7 @@ jobs:
           )
           echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
       - name: Test analysis and iPhone flows
+        if: matrix.suite != 'replay'
         env:
           TEST_RUNNER_FINN_VIDEO_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps.mp4
           TEST_RUNNER_FINN_VIDEO_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps-poses.json
@@ -66,7 +68,7 @@ jobs:
             -collect-test-diagnostics never \
             CODE_SIGNING_ALLOWED=NO
       - name: Show failed test messages
-        if: failure()
+        if: failure() && matrix.suite != 'replay'
         run: |
           # The xcodebuild summary names failing tests without saying why; the result bundle does.
           xcrun xcresulttool get test-results summary --path "$RUNNER_TEMP/Finn.xcresult" > "$RUNNER_TEMP/summary.json" || exit 0
@@ -94,10 +96,11 @@ jobs:
             -only-testing:FinnUITests/DashboardUITests/testProductionLaunchRendersAllTabsAndDestinations \
             ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO
       - name: Replay generated workout videos through Vision
-        if: ${{ !cancelled() && matrix.suite == 'analysis' }}
-        run: tools/replay/test_generated_videos.sh
+        timeout-minutes: 30
+        if: ${{ !cancelled() && matrix.suite == 'replay' }}
+        run: tools/replay/test_generated_videos.sh 2>&1 | tee "$RUNNER_TEMP/replay.log"
       - name: Test validation scorer
-        if: ${{ !cancelled() && matrix.suite == 'analysis' }}
+        if: ${{ !cancelled() && matrix.suite == 'replay' }}
         run: python3 -m unittest discover -s docs/validation -p 'test_*.py'
       - name: Upload failed test report
         if: failure()
@@ -108,6 +111,7 @@ jobs:
             ${{ runner.temp }}/Finn.xcresult
             ${{ runner.temp }}/Finn-Release.xcresult
             ${{ runner.temp }}/summary.json
+            ${{ runner.temp }}/replay.log
           if-no-files-found: ignore
           retention-days: 3
           compression-level: 9
