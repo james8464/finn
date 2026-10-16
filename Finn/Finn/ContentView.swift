@@ -24,6 +24,7 @@ struct ContentView: View {
     private let routesURLsFromParent: Bool
     @Binding private var launchURL: URL?
     @State private var model: WorkoutSessionModel
+    @State private var workoutPlanDraft: PlannedWorkout?
     @State private var observationSpeaker = ObservationSpeaker()
     @State private var workoutFeedback = WorkoutFeedback()
     /// headphones and a paired Apple Watch; idle unless `connectsAccessories`
@@ -646,6 +647,25 @@ struct ContentView: View {
     }
 
     private var workoutSetup: some View {
+        workoutSetupScroll
+            .overlay(alignment: .bottomTrailing) {
+                Button { workoutPlanDraft = WorkoutPlanner.make(history: model.history) } label: {
+                    Label("New workout", systemImage: "plus")
+                        .font(.subheadline.weight(.semibold))
+                        .padding(.horizontal, 16)
+                        .frame(minHeight: 48)
+                        .background(.thinMaterial, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .padding(.trailing, 20)
+                .padding(.bottom, 16)
+                .accessibilityIdentifier("workout.new")
+                .accessibilityHint("Composes a workout from your saved sets")
+            }
+            .sheet(item: $workoutPlanDraft) { WorkoutPlanView(plan: $0) }
+    }
+
+    private var workoutSetupScroll: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 // after Done: whether the session reached Apple Fitness
@@ -666,6 +686,7 @@ struct ContentView: View {
                 if let open = model.unfinishedSession {
                     HomeCard { unfinishedSessionLine(open) }
                 }
+                NextWorkoutsSection { workoutPlanDraft = $0 }
                 ExerciseChips(selection: Binding(
                     get: { model.selectedExercise },
                     set: { model.selectedExercise = $0 }

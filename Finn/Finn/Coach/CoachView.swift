@@ -4,6 +4,7 @@ import SwiftUI
 struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var showsSource = false
+    @State private var planDraft: PlannedWorkout?
     @State private var replyTask: Task<Void, Never>?
     @State private var followsLatestReply = true
     @State private var isUserScrolling = false
@@ -26,6 +27,14 @@ struct CoachView: View {
         VStack(spacing: 0) {
             transcript
             composer
+            Button { planDraft = WorkoutPlanner.make(history: history) } label: {
+                Label("Plan a workout", systemImage: "list.bullet.clipboard")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("coach.planWorkout")
+            .accessibilityHint("Composes a workout from your saved sets")
         }
         .background(AppPageStyle.background.ignoresSafeArea())
         .navigationTitle("Coach")
@@ -45,6 +54,7 @@ struct CoachView: View {
             }
 
         }
+        .sheet(item: $planDraft) { WorkoutPlanView(plan: $0) }
         .sheet(isPresented: $showsSource) {
             NavigationStack {
                 List {
