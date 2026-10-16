@@ -7,7 +7,9 @@ Combined the current main cleanup and presentation work with personalised guided
 - Previous feature run: 598 Swift tests passed; native coach generation and recorded-set coach UI passed.
 - Native personalised planner and manual suggested-workout completion passed in the final targeted run.
 - Guided workout accessibility and Reduce Motion flow passed in English UK, English US, French and Spanish.
-- Final onboarding/first-workout integration receives a fresh compilation and complete unit test run.
+- Final onboarding/first-workout integration compiled; all 605 Swift tests across 72 suites passed.
+- Final Try Finn UI smoke passed in 42 seconds: capture, result, coach card and workout suggestion.
+- Release compilation exposed editor previews calling a debug-only helper. Preview blocks are now excluded from Release builds.
 - A Release archive and automatic App Store Connect upload are attempted separately. Upload success requires Apple's acceptance; archive success alone does not confirm TestFlight availability.
 
 ## Preserved behaviour
