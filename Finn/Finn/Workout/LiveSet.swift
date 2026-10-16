@@ -184,6 +184,33 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
     }
 }
 
+/// Holds a lower reading until it persists. A brief change in Vision's chosen joints or counting
+/// method can revise the whole set for one review, then recover at the next review.
+nonisolated struct LiveRepCountStabilizer {
+    static let revisionHold: TimeInterval = 0.8
+    private var lowerReading: Int?
+    private var lowerSince: TimeInterval?
+
+    mutating func accept(measured: Int, shown: Int, at time: TimeInterval) -> Int {
+        guard measured < shown else {
+            lowerReading = nil
+            lowerSince = nil
+            return measured
+        }
+        if lowerReading != measured || lowerSince == nil {
+            lowerReading = measured
+            lowerSince = time
+            return shown
+        }
+        guard let lowerSince, time - lowerSince >= Self.revisionHold else {
+            return shown
+        }
+        lowerReading = nil
+        self.lowerSince = nil
+        return measured
+    }
+}
+
 /// Follows a set while it runs: counts reps with the same analysis as the result, notices when a
 /// rep is clearly faster or shorter than the person's own first reps, and tells when the set is
 /// over (the athlete walked away, or stopped moving after their reps).
@@ -211,6 +238,8 @@ nonisolated struct LiveSetMonitor {
     /// The reps of the latest accepted analysis of the set so far: what the result would say if the
     /// set ended now. It can go down (see `update`).
     private(set) var countedReps = 0
+    /// A single noisy review must not make the live number jump down and back up.
+    private var countStabilizer = LiveRepCountStabilizer()
     /// The highest count said aloud so far, so a number is never announced twice.
     private var highestSaid = 0
     /// The set looks over (see `shouldStop`), as of the latest analysis.
@@ -286,11 +315,16 @@ nonisolated struct LiveSetMonitor {
             // to keep every rep ever said: it reached 29 and froze there while the result gave 18.
             // Now it follows the analysis, down as well as up, and a number already said is shown
             // again without being spoken.
-            if reps.count < countedReps {
-                countedReps = reps.count
+            let stableCount = countStabilizer.accept(
+                measured: reps.count,
+                shown: countedReps,
+                at: last.time
+            )
+            if stableCount < countedReps {
+                countedReps = stableCount
                 events.append(.repCountRevised(countedReps))
             }
-            while countedReps < reps.count {
+            while countedReps < stableCount {
                 countedReps += 1
                 if countedReps > highestSaid {
                     highestSaid = countedReps

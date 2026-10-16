@@ -74,25 +74,25 @@ struct PaywallView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: OnboardingMetrics.sectionSpacing) {
                     heading
+                    FinnOutline(topRadius: Self.rowRadius, bottomRadius: Self.rowRadius) {
+                        VStack(alignment: .leading, spacing: OnboardingMetrics.rowSpacing) {
+                            features
+                                .padding(.horizontal, OnboardingMetrics.cardPadding)
+                                .padding(.vertical, OnboardingMetrics.titleSpacing)
+                            planRow(.weekly)
+                            planRow(.annual)
+                        }
+                    }
+                    if eligibleForFreeTrial || usesDemoPurchase {
+                        planRow(.trial)
+                            .padding(.horizontal, DashboardStyle.cardSpacing)
+                    }
                     if hasLoadedProducts && !hasPurchasableOffers && !usesDemoPurchase {
                         freePlan
                     } else if !hasLoadedProducts && !usesDemoPurchase {
                         ProgressView("Checking available plans")
-                            .frame(maxWidth: .infinity, minHeight: 120)
+                            .frame(maxWidth: .infinity)
                     } else {
-                        FinnOutline(topRadius: Self.rowRadius, bottomRadius: Self.rowRadius) {
-                            VStack(alignment: .leading, spacing: OnboardingMetrics.rowSpacing) {
-                                features
-                                    .padding(.horizontal, OnboardingMetrics.cardPadding)
-                                    .padding(.vertical, OnboardingMetrics.titleSpacing)
-                                planRow(.weekly)
-                                planRow(.annual)
-                            }
-                        }
-                        if eligibleForFreeTrial || usesDemoPurchase {
-                            planRow(.trial)
-                                .padding(.horizontal, DashboardStyle.cardSpacing)
-                        }
                         terms
                     }
                 }
@@ -158,6 +158,9 @@ struct PaywallView: View {
             Text("Subscriptions are not available yet. Continue with Finn Free to start your workout plan and use the coach.")
                 .font(.body)
                 .foregroundStyle(HomeStyle.supportingText)
+            Button("Try again") { Task { await loadProducts() } }
+                .font(.body.weight(.medium))
+                .accessibilityIdentifier("plan.retry")
         }
         .padding(OnboardingMetrics.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -189,7 +192,7 @@ struct PaywallView: View {
                     }
                     .fixedSize(horizontal: false, vertical: true)
                     if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                    Text(billedPrice(rowPlan))
+                    Text(priceLabel(for: rowPlan))
                         .font(.headline)
                         .monospacedDigit()
                 }
@@ -204,6 +207,7 @@ struct PaywallView: View {
             .contentShape(shape)
         }
         .buttonStyle(PressableStyle())
+        .disabled(hasLoadedProducts && !offerIsAvailable(rowPlan))
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("plan.\(rowPlan.rawValue)")
     }
@@ -231,6 +235,12 @@ struct PaywallView: View {
         case .annual: String(localized: "\(price(.annual)) / year")
         case .trial: String(localized: "\(price(.trial)) / year")
         }
+    }
+
+    private func priceLabel(for offer: CoachPlan) -> String {
+        if !hasLoadedProducts && !usesDemoPurchase { return "…" }
+        if !offerIsAvailable(offer) { return String(localized: "Not available yet") }
+        return billedPrice(offer)
     }
 
     /// what the chosen plan costs and how it renews
@@ -323,6 +333,7 @@ struct PaywallView: View {
     // MARK: StoreKit
 
     private func choose(_ chosen: CoachPlan) {
+        guard offerIsAvailable(chosen) else { return }
         withAnimation(reduceMotion ? nil : HomeStyle.spring) { plan = chosen }
     }
 
@@ -332,7 +343,11 @@ struct PaywallView: View {
     }
 
     private var hasPurchasableOffers: Bool {
-        products[CoachPlan.weekly.productID] != nil && products[CoachPlan.annual.productID] != nil
+        products[CoachPlan.weekly.productID] != nil || products[CoachPlan.annual.productID] != nil
+    }
+
+    private func offerIsAvailable(_ offer: CoachPlan) -> Bool {
+        usesDemoPurchase || products[offer.productID] != nil
     }
 
     private var usesDemoPurchase: Bool {

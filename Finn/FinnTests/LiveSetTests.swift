@@ -145,6 +145,19 @@ nonisolated struct StartReadinessTests {
 }
 
 nonisolated struct LiveSetMonitorTests {
+    @Test func aBriefLowerReadingDoesNotMakeTheLiveCountBounce() {
+        var stabilizer = LiveRepCountStabilizer()
+        var shown = 4
+        shown = stabilizer.accept(measured: 3, shown: shown, at: 1.0)
+        #expect(shown == 4)
+        shown = stabilizer.accept(measured: 4, shown: shown, at: 1.4)
+        #expect(shown == 4)
+        shown = stabilizer.accept(measured: 3, shown: shown, at: 1.8)
+        #expect(shown == 4)
+        shown = stabilizer.accept(measured: 3, shown: shown, at: 2.7)
+        #expect(shown == 3)
+    }
+
     /// Feeds the frames one by one, as the camera does, and collects every event.
     private func run(_ frames: [PoseFrame], definition: ExerciseDefinition = .squat)
         -> (events: [LiveSetEvent], monitor: LiveSetMonitor, stoppedAt: Double?) {

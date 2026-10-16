@@ -16774,6 +16774,14 @@
         }
       }
     },
+    "Not available yet": {
+      "localizations": {
+        "en-GB": { "stringUnit": { "state": "translated", "value": "Not available yet" } },
+        "en-US": { "stringUnit": { "state": "translated", "value": "Not available yet" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Aún no disponible" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Pas encore disponible" } }
+      }
+    },
     "Nothing to restore": {
       "localizations": {
         "es": {
