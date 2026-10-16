@@ -108,7 +108,7 @@ struct PlanSummaryView: View {
 
     private var sentence: String { profile.coachSummary() }
 
-    private var spokenSummary: String { String(localized: "\(profile.coach.name): \(sentence)") }
+    private var spokenSummary: String { String(localized: "Finn: \(sentence)") }
 
     private var summary: some View {
         VStack(alignment: .leading, spacing: OnboardingMetrics.sectionSpacing) {
@@ -127,7 +127,8 @@ struct PlanSummaryView: View {
                     ForEach(Array(recap.enumerated()), id: \.element.question) { index, row in
                         VStack(alignment: .leading, spacing: OnboardingMetrics.rowSpacing) {
                             if index > 0 { Divider() }
-                            RecapRow(question: row.question, answer: row.answer)
+                            RecapRow(question: row.question, answer: row.answer,
+                                     picture: row.question == coachQuestion ? profile.coach : nil)
                         }
                     }
                 }
@@ -135,6 +136,8 @@ struct PlanSummaryView: View {
             }
         }
     }
+
+    private var coachQuestion: String { String(localized: "Choose your coach") }
 
     /// every question, as it was asked, with its answer
     private var recap: [(question: String, answer: String)] {
@@ -153,7 +156,7 @@ struct PlanSummaryView: View {
         rows += [
             (String(localized: "How hard do you want me to push you?"), profile.intensity?.title ?? skipped),
             (String(localized: "How many days a week are you ready to train?"), profile.days?.title ?? skipped),
-            (String(localized: "Choose your coach"), profile.coach.name),
+            (coachQuestion, "Finn"),
         ]
         return rows
     }
@@ -163,18 +166,26 @@ struct PlanSummaryView: View {
 private struct RecapRow: View {
     let question: String
     let answer: String
+    /// Finn's picture, beside the coach answer
+    var picture: Coach?
+    @ScaledMetric(relativeTo: .headline) private var pictureSize = 32.0
 
     var body: some View {
-        VStack(alignment: .leading, spacing: OnboardingMetrics.titleSpacing / 2) {
-            Text(question)
-                .font(.subheadline)
-                .foregroundStyle(HomeStyle.supportingText)
-                .fixedSize(horizontal: false, vertical: true)
-            Text(answer)
-                .font(.headline)
-                .fixedSize(horizontal: false, vertical: true)
+        HStack(spacing: OnboardingMetrics.rowSpacing) {
+            VStack(alignment: .leading, spacing: OnboardingMetrics.titleSpacing / 2) {
+                Text(question)
+                    .font(.subheadline)
+                    .foregroundStyle(HomeStyle.supportingText)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(answer)
+                    .font(.headline)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if let picture {
+                CoachAvatar(coach: picture, size: pictureSize)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
     }
 }

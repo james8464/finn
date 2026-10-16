@@ -7,7 +7,6 @@ struct CoachView: View {
     @State private var showsSource = false
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.coach) private var coach
     @FocusState private var fieldFocused: Bool
     private let history: [WorkoutSessionSummary]
 
@@ -28,7 +27,7 @@ struct CoachView: View {
                     // who the person talks to, and the one-tap analysis. They scroll away with the turns
                     CoachBadge(showsOutline: true)
                         .frame(maxWidth: .infinity)
-                        .accessibilityLabel(Text("\(coach.name), your coach"))
+                        .accessibilityLabel("Finn, your coach")
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityIdentifier("coach.finn")
                     analysisCard.padding(.bottom, 4)

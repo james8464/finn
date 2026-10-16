@@ -53,7 +53,7 @@ final class OnboardingFlowUITests: XCTestCase {
 
     @MainActor
     func testSkipOffersFreeWorkoutThatATapOutsideCloses() throws {
-        let app = try walkToPlanOffer(coach: "Nova")
+        let app = try walkToPlanOffer(coach: "nova")
         app.buttons["plan.skip"].tap()
         let accept = app.buttons["freeWorkout.accept"]
         XCTAssertTrue(accept.waitForExistence(timeout: 8))
@@ -73,12 +73,13 @@ final class OnboardingFlowUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 1)
         save("flow-42-home-coach-card")
         app.selectTab("Workout")
-        let badge = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Nova, your coach")).firstMatch
+        let badge = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Finn, your coach")).firstMatch
         XCTAssertTrue(badge.waitForExistence(timeout: 5))
         save("flow-43-workout")
         app.selectTab("Coach")
         XCTAssertTrue(app.descendants(matching: .any)["coach.finn"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.descendants(matching: .any)["coach.finn"].label, "Nova, your coach")
+        // the picture changes, the name stays Finn
+        XCTAssertEqual(app.descendants(matching: .any)["coach.finn"].label, "Finn, your coach")
         save("flow-44-coach")
     }
 
@@ -96,7 +97,7 @@ final class OnboardingFlowUITests: XCTestCase {
     // MARK: Steps
 
     /// from the welcome to the plan offer: a name, a goal and a level, the other questions
-    /// skipped, then `coach` picked on the wheel (Finn when nil), and the summary.
+    /// skipped, then the picture `coach` (an id) picked for Finn (the F when nil), and the summary.
     /// `-finn-ui-demo-purchase` makes Pay with Apple Pay stand for a verified purchase
     @MainActor
     private func walkToPlanOffer(coach: String?, extraArguments: [String] = []) throws -> XCUIApplication {
@@ -135,12 +136,14 @@ final class OnboardingFlowUITests: XCTestCase {
         skip.tap()
         waitUntilHittable(app.buttons["onboarding.days.oneToTwo"])
         skip.tap()
-        let wheel = app.pickerWheels.firstMatch
-        XCTAssertTrue(wheel.waitForExistence(timeout: 5))
-        XCTAssertEqual(wheel.value as? String, "Finn")
+        let monogram = app.buttons["onboarding.coach.finn"]
+        XCTAssertTrue(monogram.waitForExistence(timeout: 5))
+        XCTAssertTrue(monogram.isSelected)
         if let coach {
-            wheel.adjust(toPickerWheelValue: coach)
-            XCTAssertEqual(wheel.value as? String, coach)
+            let picture = app.buttons["onboarding.coach.\(coach)"]
+            picture.tap()
+            XCTAssertTrue(picture.isSelected)
+            XCTAssertFalse(monogram.isSelected)
         }
         Thread.sleep(forTimeInterval: 0.6)
         save("flow-10-coach")

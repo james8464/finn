@@ -110,7 +110,7 @@ final class InterfaceAccessibilityUITests: XCTestCase {
             case 6: last = app.buttons["onboarding.program.no"]
             case 7: last = app.buttons["onboarding.intensity.finnDecides"]
             case 8: last = app.buttons["onboarding.days.fivePlus"]
-            case 9: last = app.pickerWheels.firstMatch
+            case 9: last = app.buttons["onboarding.coach.dede"]
             default: last = app.buttons["onboarding.continue"]
             }
             for _ in 0..<16 where !last.isHittable { app.scrollViews.firstMatch.swipeUp() }

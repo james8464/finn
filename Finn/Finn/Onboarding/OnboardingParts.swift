@@ -50,7 +50,7 @@ struct FinnReaction: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(speaks ? Text("\(coach.name): \(line)") : Text("\(coach.name) is replying"))
+        .accessibilityLabel(speaks ? Text("Finn: \(line)") : Text("Finn is replying"))
         .accessibilityIdentifier("onboarding.finnReaction")
     }
 }
@@ -69,6 +69,8 @@ enum OnboardingMetrics {
     static let rowSpacing: CGFloat = 10
     /// between a title and its subtitle
     static let titleSpacing: CGFloat = 6
+    /// inside a card or a row
+    static let cardPadding: CGFloat = 16
     /// below the bottom action
     static let bottomInset: CGFloat = 8
     /// the large coach circle of the coach question and the summary

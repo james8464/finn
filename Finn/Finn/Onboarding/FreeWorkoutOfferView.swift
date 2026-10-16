@@ -19,7 +19,7 @@ struct FreeWorkoutOfferView: View {
                     .font(.title3.weight(.semibold))
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityLabel(String(localized: "\(coach.name): \(line)"))
+                    .accessibilityLabel(String(localized: "Finn: \(line)"))
                     .accessibilityIdentifier("freeWorkout.line")
                 Button(action: accept) {
                     PrimaryActionLabel(title: "Start my free workout")

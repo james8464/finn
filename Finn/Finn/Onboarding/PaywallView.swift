@@ -37,7 +37,6 @@ struct PaywallView: View {
     @Environment(\.purchase) private var purchase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
-    @ScaledMetric(relativeTo: .subheadline) private var planLabelWidth = 80.0
 
     private static let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
     private static let privacyURL = URL(string: "https://james8464.github.io/finn/privacy.html")!
@@ -70,24 +69,25 @@ struct PaywallView: View {
             .padding(.horizontal, OnboardingMetrics.gutter)
             .padding(.top, OnboardingMetrics.headerTop)
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: OnboardingMetrics.sectionSpacing) {
                     heading
-                    coachPlusCard
-                    trialCard
-                    if plan != .trial {
-                        terms
+                    features
+                    VStack(spacing: OnboardingMetrics.rowSpacing) {
+                        ForEach(CoachPlan.allCases, id: \.self) { planRow($0) }
                     }
+                    .sensoryFeedback(.selection, trigger: plan)
+                    terms
                     links
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 16)
+                .padding(.horizontal, OnboardingMetrics.gutter)
+                .padding(.vertical, OnboardingMetrics.sectionSpacing)
             }
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
             actions
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
+                .padding(.horizontal, OnboardingMetrics.gutter)
+                .padding(.bottom, OnboardingMetrics.bottomInset)
         }
         .disabled(isBusy)
         .sensoryFeedback(.success, trigger: purchases)
@@ -104,127 +104,100 @@ struct PaywallView: View {
     // MARK: Content
 
     private var heading: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: OnboardingMetrics.titleSpacing) {
             Text("Your plan is ready.")
                 .font(.largeTitle.bold())
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
-            VStack(alignment: .trailing, spacing: 6) {
-                Text(verbatim: 1.0.formatted(.percent))
-                    .font(.subheadline.weight(.semibold))
-                    .monospacedDigit()
-                ProgressView(value: 1)
-                    .tint(DashboardStyle.accent)
-                    .accessibilityHidden(true)
-            }
             Text("Finn can't wait to coach you.")
                 .font(.body)
                 .foregroundStyle(HomeStyle.supportingText)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 7)
         }
     }
 
-    private var coachPlusCard: some View {
-        VStack(alignment: .leading, spacing: 0) {
+    /// what Finn Coach+ adds, one line each, in the plain style of Apple's own offers
+    private var features: some View {
+        VStack(alignment: .leading, spacing: OnboardingMetrics.rowSpacing) {
             Text(verbatim: "Finn Coach+")
-                .font(.title2.weight(.semibold))
-                .padding(.horizontal, 4)
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 10) {
-                    Text("Full experience")
-                        .accessibilityValue(Text("Apple Watch and AirPods"))
-                    Group {
-                        Image(systemName: "applewatch")
-                        Image(systemName: "airpodspro")
-                    }
-                    .accessibilityHidden(true)
-                }
-                Text("Unlimited workouts")
-                Text("Talk to your coach")
-            }
-            .font(.subheadline)
-            .foregroundStyle(Color.primary.opacity(0.85))
-            .padding(.horizontal, 4)
-            .padding(.top, 10)
-            VStack(spacing: 10) {
-                planRow(.weekly, title: String(localized: "Weekly"),
-                        price: String(localized: "\(price(.weekly)) / week"))
-                planRow(.annual, title: String(localized: "Annual"),
-                        price: String(localized: "\(price(.annual)) / year"))
-            }
-            .padding(.top, 7)
+                .font(.title2.bold())
+                .accessibilityAddTraits(.isHeader)
+            Label("Full experience", systemImage: "applewatch")
+                .accessibilityValue(Text("Apple Watch and AirPods"))
+            Label("Unlimited workouts", systemImage: "infinity")
+            Label("Talk to your coach", systemImage: "bubble.left.and.text.bubble.right")
         }
-        .padding(EdgeInsets(top: 20, leading: 16, bottom: 12, trailing: 16))
-        .offerCard()
+        .font(.body)
+        .foregroundStyle(Color.primary)
     }
 
-    private var trialCard: some View {
-        let selected = plan == .trial
-        return VStack(alignment: .leading, spacing: 12) {
-            Button { choose(.trial) } label: {
-                HStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Free trial · 2 weeks")
-                            .font(.headline)
-                        Text("Then \(price(.trial)) / year")
-                            .font(.footnote)
-                            .foregroundStyle(selected ? Color.black : HomeStyle.supportingText)
-                    }
-                    Spacer(minLength: 0)
-                    checkBox(selected)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .frame(maxWidth: .infinity, minHeight: 66, alignment: .leading)
-                .planSurface(selected)
-            }
-            .buttonStyle(PressableStyle())
-            .accessibilityAddTraits(selected ? .isSelected : [])
-            .accessibilityIdentifier("plan.trial")
-            if selected {
-                terms
-                    .transition(.opacity)
-            }
-        }
-        .padding(16)
-        .offerCard()
-        .sensoryFeedback(.selection, trigger: selected)
-    }
-
-    private func planRow(_ rowPlan: CoachPlan, title: String, price: String) -> some View {
+    /// one plan: a neutral row, every price in the same type; only the chosen one turns pink
+    private func planRow(_ rowPlan: CoachPlan) -> some View {
         let selected = plan == rowPlan
+        let shape = RoundedRectangle(cornerRadius: Self.rowRadius, style: .continuous)
         let layout = typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-            : AnyLayout(HStackLayout(spacing: 12))
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: OnboardingMetrics.titleSpacing))
+            : AnyLayout(HStackLayout(spacing: OnboardingMetrics.rowSpacing))
         return Button { choose(rowPlan) } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: OnboardingMetrics.rowSpacing) {
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(selected ? DashboardStyle.accent : HomeStyle.supportingText)
+                    .accessibilityHidden(true)
                 layout {
-                    Text(title)
-                        .font(.subheadline.weight(.semibold))
-                        .frame(minWidth: typeSize.isAccessibilitySize ? nil : planLabelWidth, alignment: .leading)
-                    Text(price)
+                    VStack(alignment: .leading, spacing: OnboardingMetrics.titleSpacing / 2) {
+                        Text(title(rowPlan))
+                            .font(.headline)
+                        if let detail = detail(rowPlan) {
+                            Text(detail)
+                                .font(.subheadline)
+                                .foregroundStyle(HomeStyle.supportingText)
+                        }
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                    if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
+                    Text(billedPrice(rowPlan))
                         .font(.headline)
+                        .monospacedDigit()
                 }
-                Spacer(minLength: 0)
-                checkBox(selected)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
-            .planSurface(selected)
+            .padding(OnboardingMetrics.cardPadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .foregroundStyle(Color.primary)
+            .background(HomeStyle.card, in: shape)
+            .overlay {
+                if selected { shape.strokeBorder(DashboardStyle.accent, lineWidth: Self.selectionWidth) }
+            }
+            .contentShape(shape)
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("plan.\(rowPlan.rawValue)")
-        .sensoryFeedback(.selection, trigger: selected)
     }
 
-    private func checkBox(_ selected: Bool) -> some View {
-        Image(systemName: selected ? "checkmark.square.fill" : "square")
-            .font(.system(size: 20))
-            .foregroundStyle(selected ? Color.black : HomeStyle.supportingText)
-            .accessibilityHidden(true)
+    private static let rowRadius: CGFloat = 20
+    private static let selectionWidth: CGFloat = 2
+
+    private func title(_ plan: CoachPlan) -> String {
+        switch plan {
+        case .weekly: String(localized: "Weekly")
+        case .annual: String(localized: "Annual")
+        case .trial: String(localized: "Free trial · 2 weeks")
+        }
+    }
+
+    /// the trial says what follows it; the price beside it is the one billed
+    private func detail(_ plan: CoachPlan) -> String? {
+        plan == .trial ? String(localized: "Then billed yearly") : nil
+    }
+
+    /// what the plan bills, the same size for every plan, the trial included
+    private func billedPrice(_ plan: CoachPlan) -> String {
+        switch plan {
+        case .weekly: String(localized: "\(price(.weekly)) / week")
+        case .annual: String(localized: "\(price(.annual)) / year")
+        case .trial: String(localized: "\(price(.trial)) / year")
+        }
     }
 
     /// what the chosen plan costs and how it renews
@@ -378,24 +351,6 @@ struct PaywallView: View {
             }
         }
         notice = .nothingToRestore
-    }
-}
-
-private extension View {
-    /// the black card with a thin pink outline around each offer
-    func offerCard() -> some View {
-        frame(maxWidth: .infinity, alignment: .leading)
-            .background(HomeStyle.background, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .strokeBorder(DashboardStyle.accent, lineWidth: 0.5))
-    }
-
-    /// a plan inside an offer: grey, or pink with black type once chosen
-    func planSurface(_ selected: Bool) -> some View {
-        foregroundStyle(selected ? Color.black : Color.primary)
-            .background(selected ? DashboardStyle.accent : HomeStyle.card,
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }
 

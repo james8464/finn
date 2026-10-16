@@ -144,7 +144,7 @@ struct FinnCardSurface: ViewModifier {
 }
 
 /// the chosen coach in a 40-point badge: who speaks on the coach card, the Try Finn card, the
-/// Workout tab and the Coach tab. Finn keeps his F; the other coaches show their portrait
+/// Workout tab and the Coach tab: the F, or the portrait picked for Finn
 struct CoachBadge: View {
     /// the thin pink ring, for the badge away from the pink card, on a dark background
     var showsOutline = false
@@ -162,7 +162,7 @@ struct CoachBadge: View {
             }
             // one picture named after the coach; callers may say more
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text(verbatim: coach.name))
+            .accessibilityLabel(Text(verbatim: "Finn"))
             .accessibilityAddTraits(.isImage)
     }
 
