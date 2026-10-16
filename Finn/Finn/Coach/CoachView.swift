@@ -5,6 +5,7 @@ struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var draft = ""
     @State private var showsSource = false
+    @State private var planDraft: PlannedWorkout?
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var fieldFocused: Bool
@@ -77,6 +78,15 @@ struct CoachView: View {
                     .accessibilityLabel("Send")
                     .accessibilityIdentifier("coach.send")
                 }
+                Button { planDraft = WorkoutPlanner.make(history: history) } label: {
+                    Label("Plan a workout", systemImage: "list.bullet.clipboard")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("coach.planWorkout")
+                .accessibilityHint("Composes a workout from your saved sets")
                 Button { showsSource = true } label: {
                     Label("About Coach", systemImage: "info.circle")
                         .fixedSize(horizontal: false, vertical: true)
@@ -96,6 +106,7 @@ struct CoachView: View {
         }
         .background(HomeStyle.background.ignoresSafeArea())
         .navigationTitle("Coach")
+        .sheet(item: $planDraft) { WorkoutPlanView(plan: $0) }
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
