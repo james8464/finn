@@ -1,0 +1,67 @@
+{
+  "revision": "native-progress-walkthrough",
+  "total_scenes": 10,
+  "durations_seconds": {
+    "scene_7": 30.0,
+    "playback": 300.0
+  },
+  "native_Keynote_playback_observed": true,
+  "autoplay_preserved": true,
+  "all_native_movies_match_masters": true,
+  "matches": [
+    {
+      "scene": 1,
+      "embedded": "Data/finn-opening-film-81.mp4",
+      "sha256": "423078faa1a4c088e81d5818f7d0a866687891fc5dd3293e101d8db45386d1a4"
+    },
+    {
+      "scene": 2,
+      "embedded": "Data/motion-02-13.mp4",
+      "sha256": "6ec80263023e909cd394c83b2acd862a0e85d0e5bb880976914eccb76573cac0"
+    },
+    {
+      "scene": 3,
+      "embedded": "Data/motion-03-16.mp4",
+      "sha256": "b1b920b3a9817c078e3ab17d4d9557304e1c3a4909bab2ae394d47550a7feb11"
+    },
+    {
+      "scene": 4,
+      "embedded": "Data/motion-04-20.mp4",
+      "sha256": "a1e46089e55b001dd1545a96c4eda055c1c967d5827afc5349f9ec8196d58fc6"
+    },
+    {
+      "scene": 5,
+      "embedded": "Data/motion-05-25.mp4",
+      "sha256": "653fef49b8f1b441e488bb72a9acf7d13e44b1e05bd1aecec7b740cdfca1cb72"
+    },
+    {
+      "scene": 6,
+      "embedded": "Data/06-76.mp4",
+      "sha256": "7e2ec502d2a6c2059cc6fc6115b07f91cf1214fc4f5ac8078190e26c76634fd6"
+    },
+    {
+      "scene": 7,
+      "embedded": "Data/07-85.mp4",
+      "sha256": "e679ecff6e15a6e7e66453d1ab6e93ab0b3228f285f79564d365fabebd1325b4"
+    },
+    {
+      "scene": 8,
+      "embedded": "Data/motion-08-36.mp4",
+      "sha256": "7e4f1b3b377ca8d427779fdcabfa1e5a785737aa58b5b4bebbcccd6244284d6d"
+    },
+    {
+      "scene": 9,
+      "embedded": "Data/motion-09-40.mp4",
+      "sha256": "92a9ec27006f606edae63b0e7e275c884cec6ef9487f08c34c258a605f67549f"
+    },
+    {
+      "scene": 10,
+      "embedded": "Data/motion-10-43.mp4",
+      "sha256": "1f00b592c621f99ae076b851a1c96e9ce64bb7e9867dee99e3ab28494792115d"
+    }
+  ],
+  "portable_notes_match_current_implementation": true,
+  "updated_media_full_decode": "passed",
+  "data": "Isolated ProgressDemo fixture: latest saved best set 11 reps, two-week estimate 13 reps. Illustrative, not participant data.",
+  "motion": "Current native Swift Charts history/projection animation. Fixed Apple iPhone bezel; SF Pro stage typography. History precedes the clearly labelled estimate."
+}

@@ -74,3 +74,6 @@ __pycache__/
 
 # Local code-graph cache; source and integration reports remain tracked.
 graphify-out/
+
+# Regenerable presentation render cache
+/Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/progress/
