@@ -94,6 +94,10 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         try requireCaptureDirectory()
         let prefix = large ? "large" : "regular"
         let app = launch(large: large, extra: ["-finn-ui-onboarding"])
+        let welcome = app.buttons["onboarding.welcome.continue"]
+        XCTAssertTrue(welcome.waitForExistence(timeout: 8))
+        try check(app, "\(prefix)-19-welcome")
+        welcome.tap()
         XCTAssertTrue(app.buttons["onboarding.continue"].waitForExistence(timeout: 8))
         for step in 1...5 {
             try check(app, "\(prefix)-20-welcome-\(step)")

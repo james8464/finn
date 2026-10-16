@@ -1,12 +1,13 @@
 import SwiftUI
 
-/// the five first-launch screens. Each one can be skipped; the answers go to `FinnPreferences`
+/// the welcome, then the five first-launch screens. Each one can be skipped; the answers go to `FinnPreferences`
 /// when the person taps Start, and the camera is asked for later, when a set starts
 struct OnboardingView: View {
     let preferences: FinnPreferences
     /// called once the answers are saved (or the whole thing was skipped)
     let finished: (OnboardingProfile) -> Void
 
+    @State private var showsWelcome = true
     @State private var step = 0
     @State private var profile: OnboardingProfile
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -21,6 +22,25 @@ struct OnboardingView: View {
     }
 
     var body: some View {
+        Group {
+            if showsWelcome {
+                OnboardingWelcomeView {
+                    withAnimation(reduceMotion ? nil : HomeStyle.spring) { showsWelcome = false }
+                }
+                .transition(.opacity)
+            } else {
+                steps
+                    .transition(.opacity)
+            }
+        }
+        .background(HomeStyle.background.ignoresSafeArea())
+        .tint(HomeStyle.accent)
+        .interactiveDismissDisabled()
+    }
+
+    // MARK: Chrome
+
+    private var steps: some View {
         VStack(spacing: 0) {
             progress
                 .padding(.horizontal, 20)
@@ -38,12 +58,7 @@ struct OnboardingView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
         }
-        .background(HomeStyle.background.ignoresSafeArea())
-        .tint(HomeStyle.accent)
-        .interactiveDismissDisabled()
     }
-
-    // MARK: Chrome
 
     private var progress: some View {
         Group {

@@ -4,10 +4,19 @@ extension XCUIApplication {
     /// a fresh simulator shows the welcome screens first; tests that want the app itself skip them
     @MainActor
     func skipOnboardingIfShown() {
+        passWelcomeIfShown()
         let skip = buttons["onboarding.finish"]
         guard skip.waitForExistence(timeout: 2) else { return }
         skip.tap()
         XCTAssertTrue(buttons["tab.home"].waitForExistence(timeout: 8))
+    }
+
+    /// the onboarding opens on the welcome; its Continue leads to the first step
+    @MainActor
+    func passWelcomeIfShown() {
+        let welcome = buttons["onboarding.welcome.continue"]
+        guard welcome.waitForExistence(timeout: 2) else { return }
+        welcome.tap()
     }
 
     /// workout setup: the Workout tab, then Launch workout

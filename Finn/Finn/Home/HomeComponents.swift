@@ -202,6 +202,9 @@ struct HomeCard<Content: View>: View {
 struct PrimaryActionLabel: View {
     let title: LocalizedStringResource
     var symbol = "arrow.right"
+    /// the circle and its symbol invert with the appearance unless a screen sets them
+    var symbolBackground = Color(uiColor: .systemBackground)
+    var symbolColor = Color.primary
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
@@ -212,9 +215,9 @@ struct PrimaryActionLabel: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: symbol)
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(symbolColor)
                 .frame(width: 44, height: 44)
-                .background(Color(uiColor: .systemBackground), in: Circle())
+                .background(symbolBackground, in: Circle())
                 .accessibilityHidden(true)
         }
         .padding(.leading, 24)
