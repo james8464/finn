@@ -17,6 +17,8 @@ struct ProgressTabView: View {
     let history: [WorkoutSessionSummary]
     @Binding var section: ProgressSection
     @Binding var exercise: ExerciseKind
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     var body: some View {
         ScrollView {
@@ -27,10 +29,15 @@ struct ProgressTabView: View {
                 .pickerStyle(.segmented)
                 .accessibilityIdentifier("progress.section")
                 ExercisePicker(selection: $exercise)
-                switch section {
-                case .posture: PostureSection(history: history, exercise: exercise)
-                case .strength: StrengthSection(history: history, exercise: exercise)
+                Group {
+                    switch section {
+                    case .posture: PostureSection(history: history, exercise: exercise)
+                    case .strength: StrengthSection(history: history, exercise: exercise)
+                    }
                 }
+                .id(section)
+                .transition(.opacity)
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: section)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)

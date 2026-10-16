@@ -182,7 +182,6 @@ struct PaywallView: View {
         }
         .padding(16)
         .offerCard()
-        .finnFeedback(.selection, trigger: selected)
     }
 
     private func planRow(_ rowPlan: CoachPlan, title: String, price: String) -> some View {
@@ -210,7 +209,6 @@ struct PaywallView: View {
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("plan.\(rowPlan.rawValue)")
-        .finnFeedback(.selection, trigger: selected)
     }
 
     private func checkBox(_ selected: Bool) -> some View {
@@ -292,7 +290,9 @@ struct PaywallView: View {
     // MARK: StoreKit
 
     private func choose(_ chosen: CoachPlan) {
+        guard plan != chosen else { return }
         withAnimation(reduceMotion ? nil : HomeStyle.spring) { plan = chosen }
+        FinnHaptics.play(.selection)
     }
 
     private func price(_ plan: CoachPlan) -> String {
