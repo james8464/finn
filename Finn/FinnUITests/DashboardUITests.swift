@@ -49,6 +49,10 @@ final class DashboardUITests: XCTestCase {
         let replay = app.buttons["account.replayOnboarding"]
         XCTAssertTrue(replay.waitForExistence(timeout: 3))
         replay.tap()
+        // the replay starts from the very beginning: the welcome, then the first step
+        let welcome = app.buttons["onboarding.welcome.continue"]
+        XCTAssertTrue(welcome.waitForExistence(timeout: 3))
+        welcome.tap()
         let finish = app.buttons["onboarding.finish"]
         XCTAssertTrue(finish.waitForExistence(timeout: 3))
         finish.tap()
