@@ -10,7 +10,7 @@ final class DashboardUITests: XCTestCase {
         app.skipOnboardingIfShown()
         XCTAssertTrue(app.scrollViews["summary.scroll"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.buttons["home.tryFinn"].isHittable)
-        app.selectTab("Posture")
+        app.selectTab("Progress")
         XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 5))
         app.selectTab("Coach")
         XCTAssertTrue(app.textViews["coach.field"].waitForExistence(timeout: 5))

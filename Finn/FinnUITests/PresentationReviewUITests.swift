@@ -11,7 +11,7 @@ final class PresentationReviewUITests: XCTestCase {
                 let app = XCUIApplication()
                 app.launchArguments = ["-finn-ui-demo", "-finn-open", page]
                 app.launch()
-                if page == "posture" { app.selectTab("Posture") }
+                if page == "posture" { app.selectTab("Progress") }
                 XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 8))
                 // The runner sets the simulator to light: the app must still render dark.
                 let screenshot = try XCTUnwrap(app.screenshot().image.cgImage)
@@ -103,7 +103,7 @@ final class PresentationReviewUITests: XCTestCase {
                                    "-finn-open", page]
             app.launch()
             if page == "posture" {
-                app.selectTab("Posture")
+                app.selectTab("Progress")
                 let note = app.staticTexts["Motion paused for Reduce Motion"]
                 app.reveal(note)
                 XCTAssertTrue(note.exists)
@@ -132,7 +132,7 @@ final class PresentationReviewUITests: XCTestCase {
         }
         app.selectTab("Home")
         try capture("home")
-        app.selectTab("Posture")
+        app.selectTab("Progress")
         app.buttons["posture.playback"].tap()
         try capture("posture")
         app.openWorkoutTab()
