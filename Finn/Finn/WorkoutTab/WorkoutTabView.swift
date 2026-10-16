@@ -3,6 +3,7 @@ import SwiftUI
 /// the Workout tab: Finn's next workout and its exercises, the sessions before it, and the button
 /// that sets up a new one
 struct WorkoutTabView: View {
+    @State private var planDraft: PlannedWorkout?
     let message: FinnCoachMessage
     let history: [WorkoutSessionSummary]
     /// set when Home's coach card opened the tab: the previous workouts stay blurred until tapped
@@ -22,6 +23,7 @@ struct WorkoutTabView: View {
                     .padding(.leading, DashboardStyle.cardSpacing + 20)
                     .accessibilityLabel("Finn, your coach")
                 nextWorkoutOutline
+                NextWorkoutsSection { planDraft = $0 }
                 previousWorkouts
                     .blur(radius: blursPreviousWorkouts ? 6 : 0)
                     .accessibilityHidden(blursPreviousWorkouts)
@@ -56,6 +58,15 @@ struct WorkoutTabView: View {
             LaunchWorkoutButton(action: launch)
                 .padding(.trailing, 21)
                 .padding(.bottom, 16)
+        }
+        .sheet(item: $planDraft) { WorkoutPlanView(plan: $0) }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { planDraft = WorkoutPlanner.make(history: history) } label: {
+                    Label("New workout", systemImage: "plus")
+                }
+                .accessibilityIdentifier("workout.new")
+            }
         }
         .navigationTitle("Workout")
         .navigationBarTitleDisplayMode(.large)

@@ -13,6 +13,33 @@ final class ProgressAndWorkoutUITests: XCTestCase {
         return app
     }
 
+    @MainActor
+    func testCoachPlanCanBeCompletedAndReopenedFromWorkout() {
+        let app = launch()
+        app.selectTab("Coach")
+        app.buttons["coach.planWorkout"].tap()
+        let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan.exercise."))
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertEqual(rows.count, 4)
+        for index in 0..<rows.count {
+            let row = rows.element(boundBy: index)
+            if !row.isHittable { app.scrollViews.firstMatch.swipeUp() }
+            row.tap()
+        }
+        let validate = app.buttons["plan.validate"]
+        if !validate.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        XCTAssertTrue(validate.isEnabled)
+        validate.tap()
+        app.selectTab("Workout")
+        let saved = app.buttons["nextWorkout.row"].firstMatch
+        XCTAssertTrue(saved.waitForExistence(timeout: 5))
+        if !saved.isHittable { app.scrollViews["workout.scroll"].swipeUp() }
+        saved.tap()
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(rows.allElementsBoundByIndex.allSatisfy { $0.value as? String == "Not done" })
+        XCTAssertFalse(app.buttons["plan.validate"].isEnabled)
+    }
+
     /// Home's Posture card lands on Posture even after the person left Progress on Strength
     @MainActor
     func testPostureCardAlwaysOpensThePostureSection() {

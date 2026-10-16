@@ -70,6 +70,7 @@ struct WorkoutPlanView: View {
         .accessibilityElement(children: .combine)
         .accessibilityValue(item.wrappedValue.isDone ? "Done" : "Not done")
         .accessibilityHint("Double tap to change")
+        .accessibilityIdentifier("plan.exercise.\(item.wrappedValue.exercise.rawValue)")
     }
 }
 
