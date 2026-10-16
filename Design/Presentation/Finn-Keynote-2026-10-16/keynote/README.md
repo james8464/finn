@@ -15,3 +15,7 @@ Revision 7 uses the actual Apple Figma notification component with Finn identity
 ## Storage cleanup
 
 Superseded exports and decoded frame/build caches were removed on 16 October 2026. The three current delivery files remain in output. Source footage, original score, final mix, device assets, native UI source, selected video input, pose data, and rendering scripts remain under assets and production. Regenerate decoded frames before rendering again; source-inputs contains the selected portrait recording and cue image formerly stored in /tmp.
+
+## Progress walkthrough
+
+Scene 7 now ends with ten seconds of the current native Progress screen: saved history, the latest best set, then a separate two-week projection. History is the isolated ProgressDemo fixture, with a latest best set of 11 reps and an estimated 13 reps. The projection is an estimate, not a promised improvement. Apple bezel artwork and SF Pro match the existing deck. Total duration remains 5:00.
