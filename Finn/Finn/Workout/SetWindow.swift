@@ -36,15 +36,21 @@ nonisolated enum SetWindow {
     /// The frames of the set, or all of them when no in-position stretch long enough for a set
     /// exists, so the evidence gate explains the whole capture.
     static func active(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> [PoseFrame] {
-        guard let range = activeRange(frames, requirement: requirement) else { return frames }
+        guard let range = activeRange(frames, requirement: requirement) else {
+            return frames
+        }
         return Array(frames[range])
     }
 
     /// Indices of the set within the capture; nil when nothing needs trimming or no set was found.
     static func activeRange(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> ClosedRange<Int>? {
-        guard frames.count >= 2 else { return nil }
+        guard frames.count >= 2 else {
+            return nil
+        }
         let side = trackedSide(frames, requirement: requirement)
-        guard let inPosition = positions(frames, requirement: requirement, side: side) else { return nil }
+        guard let inPosition = positions(frames, requirement: requirement, side: side) else {
+            return nil
+        }
         return activeRange(frames, inPosition: inPosition, standing: requirement.joints.contains(.hip)) {
             spots(frames, requirement: requirement, inPosition: inPosition)
         }
@@ -57,31 +63,45 @@ nonisolated enum SetWindow {
     static func layout(_ frames: [PoseFrame], requirement: EvidenceRequirement)
         -> (range: ClosedRange<Int>?, spots: [Spot]?) {
         let side = trackedSide(frames, requirement: requirement)
-        guard let inPosition = positions(frames, requirement: requirement, side: side) else { return (nil, nil) }
+        guard let inPosition = positions(frames, requirement: requirement, side: side)
+        else {
+            return (nil, nil)
+        }
         let places = spots(frames, requirement: requirement, inPosition: inPosition)
         let range = frames.count >= 2
-            ? activeRange(frames, inPosition: inPosition, standing: requirement.joints.contains(.hip)) { places } : nil
+            ?
+            activeRange(frames, inPosition: inPosition, standing: requirement.joints.contains(.hip)) {
+                places } : nil
         return (range, places)
     }
 
     /// `makeSpots` is called only once a set was found.
     /// `standing`: the exercise is done on the feet, with the hip as the athlete's reference joint.
-    private static func activeRange(_ frames: [PoseFrame], inPosition: [Bool], standing: Bool,
-                                    makeSpots: () -> [Spot]) -> ClosedRange<Int>? {
-        guard var start = frames.indices.first(where: { index in
-            inPosition[index] && settled(frames, inPosition, from: index, forward: true)
-        }), var end = frames.indices.last(where: { index in
-            inPosition[index] && settled(frames, inPosition, from: index, forward: false)
-        }), start < end,
-              frames[end].time - frames[start].time >= EvidenceRubric.minimumSetDuration else { return nil }
-// reps at the spot with a joint unclear, or with Vision missing the athlete for a moment,
+    private static func activeRange(
+        _ frames: [PoseFrame],
+        inPosition: [Bool],
+        standing: Bool,
+        makeSpots: () -> [Spot]
+    ) -> ClosedRange<Int>? {
+        guard
+            var start = frames.indices.first(where: { index in
+                inPosition[index] && settled(frames, inPosition, from: index, forward: true)
+            }), var end = frames.indices.last(where: { index in
+                inPosition[index] && settled(frames, inPosition, from: index, forward: false)
+            }), start < end,
+            frames[end].time - frames[start].time >= EvidenceRubric.minimumSetDuration else {
+            return nil
+        }
+        // reps at the spot with a joint unclear, or with Vision missing the athlete for a moment,
         // stay in the set, so the gate judges them. A dropout of a few frames right after the last
         // rep used to end the set at that rep's top and drop it.
         let places = makeSpots()
         start = extended(from: start, by: -1, spots: places, frames: frames, standing: standing)
         end = extended(from: end, by: 1, spots: places, frames: frames, standing: standing)
-        guard start > 0 || end < frames.count - 1 else { return nil }
-        return start...end
+        guard start > 0 || end < frames.count - 1 else {
+            return nil
+        }
+        return start ... end
     }
 
     /// Moves `index` outward while the athlete is at the spot, across stretches where they are unseen
@@ -90,8 +110,13 @@ nonisolated enum SetWindow {
     /// Stops where they leave for longer, or for good: walking in before the set and back to the
     /// phone after it. Until 15 October one frame seen away ended a squat set there, and the reps
     /// done after stepping out of the picture and back were never counted.
-    private static func extended(from index: Int, by step: Int, spots: [Spot], frames: [PoseFrame],
-                                 standing: Bool) -> Int {
+    private static func extended(
+        from index: Int,
+        by step: Int,
+        spots: [Spot],
+        frames: [PoseFrame],
+        standing: Bool
+    ) -> Int {
         let absence = standing ? maximumAbsence : EvidenceRubric.maximumTrackingGap
         var edge = index
         var cursor = index + step
@@ -101,14 +126,19 @@ nonisolated enum SetWindow {
                 cursor += step
                 continue
             }
-            if !standing, spots[cursor] == .away { return edge }
+            if !standing, spots[cursor] == .away {
+                return edge
+            }
             var probe = cursor
-            while frames.indices.contains(probe), !spots[probe].isAtSpot,
-                  standing || spots[probe] == .unseen,
-                  abs(frames[probe].time - frames[edge].time) <= absence {
+            while
+                frames.indices.contains(probe), !spots[probe].isAtSpot,
+                standing || spots[probe] == .unseen,
+                abs(frames[probe].time - frames[edge].time) <= absence {
                 probe += step
             }
-            guard frames.indices.contains(probe), spots[probe].isAtSpot else { return edge }
+            guard frames.indices.contains(probe), spots[probe].isAtSpot else {
+                return edge
+            }
             edge = probe
             cursor = probe + step
         }
@@ -128,20 +158,27 @@ nonisolated enum SetWindow {
         /// Not seen well enough to tell (hidden behind someone, out of view, joints unclear).
         case unseen
 
-        var isAtSpot: Bool { self == .inPosition || self == .atSpot }
+        var isAtSpot: Bool {
+            self == .inPosition || self == .atSpot
+        }
     }
 
     static func spots(_ frames: [PoseFrame], requirement: EvidenceRequirement) -> [Spot]? {
         let side = trackedSide(frames, requirement: requirement)
-        guard let inPosition = positions(frames, requirement: requirement, side: side) else { return nil }
+        guard let inPosition = positions(frames, requirement: requirement, side: side) else {
+            return nil
+        }
         return spots(frames, requirement: requirement, inPosition: inPosition)
     }
 
     /// `inPosition` is measured on one side; where the athlete stands is read from both. A person
     /// turning from the front to their side hides the hip that was followed, and frames at the spot
     /// read as unseen: the live count stopped at the last frame in position.
-    private static func spots(_ frames: [PoseFrame], requirement: EvidenceRequirement,
-                              inPosition: [Bool]) -> [Spot] {
+    private static func spots(
+        _ frames: [PoseFrame],
+        requirement: EvidenceRequirement,
+        inPosition: [Bool]
+    ) -> [Spot] {
         let reference: JointRole = requirement.joints.contains(.hip) ? .hip : .shoulder
         let atSpot = frames.indices.filter { inPosition[$0] }
         let places = atSpot.compactMap { centreX(frames[$0], reference) }
@@ -149,12 +186,21 @@ nonisolated enum SetWindow {
         let placeX = places.isEmpty ? nil : median(places)
         let placeTorso = torsos.isEmpty ? nil : median(torsos)
         return frames.indices.map { index -> Spot in
-            if inPosition[index] { return .inPosition }
+            if inPosition[index] {
+                return .inPosition
+            }
             let frame = frames[index]
-            guard frame.athleteVisible, let placeX, let placeTorso, placeTorso > 0,
-                  let x = centreX(frame, reference) else { return .unseen }
-            if abs(x - placeX) > spotRadius { return .away }
-            guard let length = torso(frame) else { return .unseen }
+            guard
+                frame.athleteVisible, let placeX, let placeTorso, placeTorso > 0,
+                let x = centreX(frame, reference) else {
+                return .unseen
+            }
+            if abs(x - placeX) > spotRadius {
+                return .away
+            }
+            guard let length = torso(frame) else {
+                return .unseen
+            }
             return abs(length / placeTorso - 1) <= torsoTolerance ? .atSpot : .away
         }
     }
@@ -166,15 +212,22 @@ nonisolated enum SetWindow {
     }
 
     private static func clear(_ frame: PoseFrame, _ role: JointRole, _ side: BodySide) -> JointPoint? {
-        guard let point = frame.joints[role.joint(on: side)],
-              point.confidence >= EvidenceRubric.minimumJointConfidence else { return nil }
+        guard
+            let point = frame.joints[role.joint(on: side)],
+            point.confidence >= EvidenceRubric.minimumJointConfidence else {
+            return nil
+        }
         return point
     }
 
     /// Shoulder-to-hip length, with y in the same unit as x: the mean of the sides where both are clear.
     private static func torso(_ frame: PoseFrame) -> Double? {
         let lengths = [BodySide.left, .right].compactMap { side -> Double? in
-            guard let shoulder = clear(frame, .shoulder, side), let hip = clear(frame, .hip, side) else { return nil }
+            guard
+                let shoulder = clear(frame, .shoulder, side),
+                let hip = clear(frame, .hip, side) else {
+                return nil
+            }
             return hypot(shoulder.x - hip.x, (shoulder.y - hip.y) * frame.aspectRatio)
         }
         return lengths.isEmpty ? nil : lengths.reduce(0, +) / Double(lengths.count)
@@ -188,25 +241,37 @@ nonisolated enum SetWindow {
     }
 
     /// `side` is `trackedSide` of these frames.
-    private static func positions(_ frames: [PoseFrame], requirement: EvidenceRequirement,
-                                  side: BodySide) -> [Bool]? {
+    private static func positions(
+        _ frames: [PoseFrame],
+        requirement: EvidenceRequirement,
+        side: BodySide
+    ) -> [Bool]? {
         let anchor = requirement.anchor.joint(on: side)
         let anchors = frames.filter { visible($0, requirement: requirement, side: side) }
             .compactMap { $0.joints[anchor] }
-        guard anchors.count >= 3 else { return nil }
+        guard anchors.count >= 3 else {
+            return nil
+        }
         let homeX = median(anchors.map(\.x))
         let homeY = median(anchors.map(\.y))
         return frames.map { frame -> Bool in
-            guard visible(frame, requirement: requirement, side: side),
-                  let point = frame.joints[anchor] else { return false }
+            guard
+                visible(frame, requirement: requirement, side: side),
+                let point = frame.joints[anchor] else {
+                return false
+            }
             return abs(point.x - homeX) <= anchorRadius && abs(point.y - homeY) <= anchorRadius
         }
     }
 
     /// At least `settleShare` of the frames within `settleDuration` after (or before) `index`
     /// are in position.
-    private static func settled(_ frames: [PoseFrame], _ inPosition: [Bool], from index: Int,
-                                forward: Bool) -> Bool {
+    private static func settled(
+        _ frames: [PoseFrame],
+        _ inPosition: [Bool],
+        from index: Int,
+        forward: Bool
+    ) -> Bool {
         let origin = frames[index].time
         var total = 0
         var held = 0
@@ -214,11 +279,13 @@ nonisolated enum SetWindow {
         var cursor = index
         while frames.indices.contains(cursor), abs(frames[cursor].time - origin) <= settleDuration {
             total += 1
-            if inPosition[cursor] { held += 1 }
+            if inPosition[cursor] {
+                held += 1
+            }
             last = cursor
             cursor += forward ? 1 : -1
         }
-// the stretch must actually last: a capture that stops just after this frame is not settled.
+        // the stretch must actually last: a capture that stops just after this frame is not settled.
         return abs(frames[last].time - origin) >= settleDuration * 0.75
             && Double(held) >= settleShare * Double(total)
     }

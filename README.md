@@ -1,12 +1,12 @@
 # Finn
 
-Finn reviews strength sets through your iPhone camera. It counts reps and, when the evidence supports it, gives one specific observation to try on the next set. Video is processed on the phone and is not saved. The longer-term product pairs iPhone with Apple Watch for timely feedback.
+Finn reviews strength sets through your iPhone camera. It counts reps and, when the evidence supports it, gives one specific observation to try on the next set. Video is processed on the phone and is not saved. The Apple Watch companion mirrors the active set and short cues from the iPhone.
 
 The editable iPhone and Watch app icon is [Finn/Finn/AppIcon.icon](Finn/Finn/AppIcon.icon). Open the package with Xcode 27’s Icon Composer. Its three vector layers are the source for the launch mark, onboarding mark and website favicon.
 
 | Status | Details |
 |--------|---------|
-| **Date** | 15 October 2026 |
+| **Date** | 16 October 2026 |
 | **Coverage** | Simulator + replay |
 | **Device testing** | Development-signed build launched on iPhone 16 Pro Max; live camera opened after permission |
 | **Gaps** | No real-person set or independent expert review of coaching accuracy |
@@ -48,11 +48,11 @@ History stores local summaries, compares compatible sets, identifies a recurring
 
 ### Interface and Coach
 
-The Home, Posture, Coach and Workout tabs keep their navigation state. Home shows recent sessions, measured progress and awards. Posture shows looping illustrated exercise movements, short cues and comparisons with eligible saved measurements. The illustrations are guidance, not validated video of a person. System text and adaptive layouts support larger text. See the [design research](docs/architecture/specs/2026-10-15-native-ui-design.md) and [HIG review](docs/design/hig-ui-coverage.md).
+The Home, Progress, Coach and Workout tabs keep their navigation state. Home shows recent sessions, measured progress and awards. Progress combines posture guidance with saved strength history and a separately labelled projection. Posture shows looping illustrated exercise movements, short cues and comparisons with eligible saved measurements. The illustrations are guidance, not validated video of a person. System text and adaptive layouts support larger text. See the [design research](docs/architecture/specs/2026-10-15-native-ui-design.md) and [HIG review](docs/design/hig-ui-coverage.md).
 
 First launch asks for a goal, experience level, favourite exercises, and spoken feedback preference; these choices stay on the iPhone. Awards mark measured milestones, including a set with no pattern flagged by Finn's current checks; they do not certify perfect form.
 
-Coach uses Apple Intelligence, when available, to select up to two relevant saved sets. The selected goal and level can guide that selection; Finn writes the displayed response from recorded counts and observations. Invalid model output and unavailable models use fixed text. A Claude demo is Debug-only. Source information is available beside the composer. Finn+ stays hidden until its subscription exists.
+Coach uses Apple Intelligence, when available, to select up to two relevant saved sets. The selected goal and level can guide that selection; Finn writes the displayed response from recorded counts and observations. Invalid model output and unavailable models use fixed text. A Claude demo is Debug-only. Source information is available beside the composer. Onboarding includes a StoreKit paywall with a local test catalog; App Store purchase behavior still needs production verification.
 
 ### Apple Watch
 
@@ -77,7 +77,7 @@ The embedded extension shows the last measured set and can open the camera on it
 | Bundle ID | `ai.mwm.build.challenge.team.08` |
 | Apple Developer team in the project | `2FN6Y5NHS5` |
 | Analytics SDK | None in the checked-in project |
-| StoreKit catalog and paywall | Not implemented |
+| StoreKit catalog and paywall | Onboarding flow and local test catalog implemented; production verification pending |
 | Privacy draft | [docs/release/app-privacy-answers.md](docs/release/app-privacy-answers.md) — review against the final signed archive before publication |
 
 If the team adopts MWM signing or an SDK, update the code and privacy documents before submission.
@@ -86,7 +86,7 @@ If the team adopts MWM signing or an SDK, update the code and privacy documents 
 
 ## Evidence and Limits
 
-Automated checks cover Swift logic, simulator flows, and generated video replays; the [15 October automated report](docs/validation/automated-checks-2026-10-15.md) records current passes and failures. A small public-video spot check has no independent rep or cue annotation. No consenting, varied-person test set or qualified trainer review has established:
+Automated checks cover Swift logic, simulator flows, and generated video replays; the [16 October cleanup checks](docs/maintenance/project-cleanup-2026-10-16.md) record the latest 562 unit-test passes and focused UI checks. The [15 October report](docs/validation/automated-checks-2026-10-15.md) remains historical evidence for that build. A small public-video spot check has no independent rep or cue annotation. No consenting, varied-person test set or qualified trainer review has established:
 
 - Rep-count accuracy
 - Cue quality

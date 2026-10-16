@@ -22,21 +22,26 @@ struct StrengthChart: View {
     var body: some View {
         Chart(Array(bars.enumerated()), id: \.element.id) { index, bar in
             let stands = !collapsed && index < revealed
-            BarMark(x: .value("Workout", bar.id), y: .value("Reps", stands ? bar.value : 0), width: .ratio(0.6))
-                .foregroundStyle(DashboardStyle.accent.opacity(bar.isProjected ? 0.35 : 1))
-                .cornerRadius(4)
-                .opacity(stands ? 1 : 0)
-                .accessibilityLabel(bar.date.formatted(date: .abbreviated, time: .omitted))
-                .accessibilityValue(describe(bar))
+            BarMark(
+                x: .value("Workout", bar.id),
+                y: .value("Reps", stands ? bar.value : 0),
+                width: .ratio(0.6)
+            )
+            .foregroundStyle(DashboardStyle.accent.opacity(bar.isProjected ? 0.35 : 1))
+            .cornerRadius(4)
+            .opacity(stands ? 1 : 0)
+            .accessibilityLabel(bar.date.formatted(date: .abbreviated, time: .omitted))
+            .accessibilityValue(describe(bar))
         }
-        .chartYScale(domain: 0...top)
+        .chartYScale(domain: 0 ... top)
         .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) }
         .chartXAxis {
             AxisMarks { value in
                 AxisValueLabel {
                     // a categorical axis labels every bar, so only some get a date
-                    if let id = value.as(String.self), labelled.contains(id),
-                       let bar = bars.first(where: { $0.id == id }) {
+                    if
+                        let id = value.as(String.self), labelled.contains(id),
+                        let bar = bars.first(where: { $0.id == id }) {
                         Text(bar.date, format: .dateTime.month(.abbreviated).day())
                     }
                 }
@@ -50,11 +55,15 @@ struct StrengthChart: View {
     }
 
     /// room above the tallest bar, so growing bars never rescale the axis
-    private var top: Double { max(1, ((bars.map(\.value).max() ?? 0) * 1.15).rounded(.up)) }
+    private var top: Double {
+        max(1, ((bars.map(\.value).max() ?? 0) * 1.15).rounded(.up))
+    }
 
     /// at most four dates under the bars: the first, the last and two between
     private var labelled: Set<String> {
-        guard bars.count > 4 else { return Set(bars.map(\.id)) }
+        guard bars.count > 4 else {
+            return Set(bars.map(\.id))
+        }
         let last = bars.count - 1
         return Set([0, last / 3, 2 * last / 3, last].map { bars[$0].id })
     }
@@ -74,16 +83,22 @@ struct StrengthChart: View {
 enum StrengthUnit {
     static func title(_ metric: StrengthMetric) -> String {
         switch metric {
-        case .reps: String(localized: "reps")
-        case .kilograms: String(localized: "kg")
-        case .seconds: String(localized: "seconds")
+        case .reps:
+            String(localized: "reps")
+        case .kilograms:
+            String(localized: "kg")
+        case .seconds:
+            String(localized: "seconds")
         }
     }
 
     static func format(_ value: Double, _ metric: StrengthMetric) -> String {
         switch metric {
-        case .reps, .seconds: value.formatted(.number.precision(.fractionLength(0)))
-        case .kilograms: value.formatted(.number.precision(.fractionLength(0...1)))
+        case .reps,
+             .seconds:
+            value.formatted(.number.precision(.fractionLength(0)))
+        case .kilograms:
+            value.formatted(.number.precision(.fractionLength(0 ... 1)))
         }
     }
 }

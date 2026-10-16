@@ -14,10 +14,15 @@ struct FinnOutline<Content: View>: View {
         content
             .padding(padding)
             .overlay {
-                UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
-                                       bottomTrailingRadius: bottom, topTrailingRadius: top, style: .continuous)
-                    .strokeBorder(DashboardStyle.accent.opacity(DashboardStyle.outlineOpacity), lineWidth: 1)
-                    .accessibilityHidden(true)
+                UnevenRoundedRectangle(
+                    topLeadingRadius: top,
+                    bottomLeadingRadius: bottom,
+                    bottomTrailingRadius: bottom,
+                    topTrailingRadius: top,
+                    style: .continuous
+                )
+                .strokeBorder(DashboardStyle.accent.opacity(DashboardStyle.outlineOpacity), lineWidth: 1)
+                .accessibilityHidden(true)
             }
     }
 }
@@ -37,7 +42,9 @@ struct DashboardCard: ViewModifier {
 struct DashboardHeading: View {
     let text: LocalizedStringKey
 
-    init(_ text: LocalizedStringKey) { self.text = text }
+    init(_ text: LocalizedStringKey) {
+        self.text = text
+    }
 
     var body: some View {
         Text(text).font(.title3.weight(.semibold)).fixedSize(horizontal: false, vertical: true)

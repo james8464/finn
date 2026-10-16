@@ -25,7 +25,9 @@ nonisolated final class PoseFrameAnalyzer {
     private var lastRefutedJoints: Set<BodyJoint> = []
 
     /// keep following the current athlete until `releaseAthlete()`; called when a set starts
-    func lockAthlete() { tracker.lock() }
+    func lockAthlete() {
+        tracker.lock()
+    }
 
     /// pick the most prominent person again on the next frame
     func releaseAthlete() {
@@ -44,8 +46,13 @@ nonisolated final class PoseFrameAnalyzer {
         do {
             try handler.perform([request])
         } catch {
-            return PoseFrame(time: time, subjectCount: 0, joints: [:], aspectRatio: aspectRatio,
-                             athleteTracking: .hidden)
+            return PoseFrame(
+                time: time,
+                subjectCount: 0,
+                joints: [:],
+                aspectRatio: aspectRatio,
+                athleteTracking: .hidden
+            )
         }
 
         let observations = request.results ?? []
@@ -83,11 +90,16 @@ nonisolated final class PoseFrameAnalyzer {
             profileDeviation = cameraAngle(in: pixelBuffer, athlete: joints)
         }
         let bystanders = people.indices.filter { $0 != athlete }.map { people[$0] }.filter { !$0.isEmpty }
-        return PoseFrame(time: time, subjectCount: observations.count, joints: joints,
-                         aspectRatio: aspectRatio, keypoints: keypoints,
-                         profileDeviationDegrees: profileDeviation,
-                         athleteTracking: athlete == nil ? .hidden : .tracked,
-                         bystanders: bystanders)
+        return PoseFrame(
+            time: time,
+            subjectCount: observations.count,
+            joints: joints,
+            aspectRatio: aspectRatio,
+            keypoints: keypoints,
+            profileDeviationDegrees: profileDeviation,
+            athleteTracking: athlete == nil ? .hidden : .tracked,
+            bystanders: bystanders
+        )
     }
 
     /// Vision's fast person mask for the image the handler holds, nil when the request fails (the
@@ -106,8 +118,11 @@ nonisolated final class PoseFrameAnalyzer {
 
     /// copies Vision's one-byte person mask; nil when there is none or it has another format
     private static func personMask(_ buffer: CVPixelBuffer?) -> PersonMask? {
-        guard let buffer, CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_OneComponent8,
-              CVPixelBufferLockBaseAddress(buffer, .readOnly) == kCVReturnSuccess else { return nil }
+        guard
+            let buffer, CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_OneComponent8,
+            CVPixelBufferLockBaseAddress(buffer, .readOnly) == kCVReturnSuccess else {
+            return nil
+        }
         defer { CVPixelBufferUnlockBaseAddress(buffer, .readOnly) }
         guard let base = CVPixelBufferGetBaseAddress(buffer)?.assumingMemoryBound(to: UInt8.self) else {
             return nil
@@ -115,10 +130,12 @@ nonisolated final class PoseFrameAnalyzer {
         let width = CVPixelBufferGetWidth(buffer)
         let height = CVPixelBufferGetHeight(buffer)
         let stride = CVPixelBufferGetBytesPerRow(buffer)
-        guard width > 0, height > 0, stride >= width else { return nil }
+        guard width > 0, height > 0, stride >= width else {
+            return nil
+        }
         var pixels = [UInt8](repeating: 0, count: width * height)
-        for row in 0..<height {
-            for column in 0..<width {
+        for row in 0 ..< height {
+            for column in 0 ..< width {
                 pixels[row * width + column] = base[row * stride + column]
             }
         }
@@ -136,13 +153,19 @@ nonisolated final class PoseFrameAnalyzer {
         ]
         var joints: [BodyJoint: JointPoint] = [:]
         for (name, visionName) in mapping {
-            guard let point = try? observation.recognizedPoint(visionName), point.confidence > 0 else { continue }
+            guard
+                let point = try? observation.recognizedPoint(visionName),
+                point.confidence > 0 else {
+                continue
+            }
             let measured = JointPoint(
                 x: Double(point.location.x),
                 y: 1 - Double(point.location.y),
                 confidence: Double(point.confidence)
             )
-            if measured.isUsable { joints[name] = measured }
+            if measured.isUsable {
+                joints[name] = measured
+            }
         }
         return joints
     }
@@ -155,26 +178,43 @@ nonisolated final class PoseFrameAnalyzer {
     /// the body always looked square to the camera: every set read as filmed from the front
     /// (74 to 89° on 50 side-view videos)
     private func cameraAngle(in pixelBuffer: CVPixelBuffer, athlete: [BodyJoint: JointPoint]) -> Double? {
-        guard (try? sequenceHandler.perform([poseRequest3D], on: pixelBuffer, orientation: .up)) != nil,
-              let body = poseRequest3D.results?.first,
-              let root = try? body.pointInImage(.root) else { return nil }
+        guard
+            (try? sequenceHandler.perform([poseRequest3D], on: pixelBuffer, orientation: .up)) != nil,
+            let body = poseRequest3D.results?.first,
+            let root = try? body.pointInImage(.root) else {
+            return nil
+        }
         let xs = athlete.values.map(\.x)
         let ys = athlete.values.map(\.y)
-        guard let minX = xs.min(), let maxX = xs.max(), let minY = ys.min(), let maxY = ys.max() else { return nil }
+        guard
+            let minX = xs.min(), let maxX = xs.max(), let minY = ys.min(),
+            let maxY = ys.max() else {
+            return nil
+        }
         let margin = 0.1 * max(maxX - minX, maxY - minY)
         let rootX = Double(root.location.x)
         let rootY = 1 - Double(root.location.y)
-        guard (minX - margin...maxX + margin).contains(rootX),
-              (minY - margin...maxY + margin).contains(rootY) else { return nil }
+        guard
+            (minX - margin ... maxX + margin).contains(rootX),
+            (minY - margin ... maxY + margin).contains(rootY) else {
+            return nil
+        }
         let toCamera = body.cameraOriginMatrix
         func position(_ joint: VNHumanBodyPose3DObservation.JointName) -> SIMD3<Double>? {
-            guard let local = try? body.recognizedPoint(joint).position.columns.3 else { return nil }
+            guard let local = try? body.recognizedPoint(joint).position.columns.3 else {
+                return nil
+            }
             let camera = toCamera * SIMD4<Float>(local.x, local.y, local.z, 1)
             return SIMD3(Double(camera.x), Double(camera.y), Double(camera.z))
         }
-        guard let leftHip = position(.leftHip), let rightHip = position(.rightHip) else { return nil }
-        return ViewCheck.profileDeviation(leftHip: leftHip, rightHip: rightHip,
-                                          leftShoulder: position(.leftShoulder),
-                                          rightShoulder: position(.rightShoulder))
+        guard let leftHip = position(.leftHip), let rightHip = position(.rightHip) else {
+            return nil
+        }
+        return ViewCheck.profileDeviation(
+            leftHip: leftHip,
+            rightHip: rightHip,
+            leftShoulder: position(.leftShoulder),
+            rightShoulder: position(.rightShoulder)
+        )
     }
 }

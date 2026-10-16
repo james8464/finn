@@ -21,9 +21,13 @@ nonisolated struct StartReadiness: Equatable {
     /// From 0 when not in position to 1 when the set can start.
     private(set) var progress = 0.0
 
-    var isReady: Bool { progress >= 1 }
+    var isReady: Bool {
+        progress >= 1
+    }
 
-    mutating func reset() { self = StartReadiness() }
+    mutating func reset() {
+        self = StartReadiness()
+    }
 
     /// Takes the next framing frame and returns the updated progress.
     @discardableResult
@@ -32,21 +36,23 @@ nonisolated struct StartReadiness: Equatable {
             reset()
             return progress
         }
-        if let previousFrameTime,
-           frame.time <= previousFrameTime || frame.time - previousFrameTime > Self.maximumFrameGap {
+        if
+            let previousFrameTime,
+            frame.time <= previousFrameTime || frame.time - previousFrameTime > Self.maximumFrameGap {
             reset()
         }
         previousFrameTime = frame.time
         let requirement = definition.evidence
-// once a side is followed, a frame where it is unclear is a miss, not a switch to the far
+        // once a side is followed, a frame where it is unclear is a miss, not a switch to the far
         // side, which restarted the hold. Before that, the side seen with more confidence is tried
         // first, and each side is checked for the starting position, not only for visibility.
         let sides = side.map { [$0] } ?? Self.sidesByConfidence(frame, requirement: requirement)
-        guard let visibleSide = sides.first(where: {
-                  SetWindow.visible(frame, requirement: requirement, side: $0)
-                      && Self.isStartingPosture(frame, definition: definition, side: $0)
-              }),
-              let anchor = frame.joints[requirement.anchor.joint(on: visibleSide)] else {
+        guard
+            let visibleSide = sides.first(where: {
+                SetWindow.visible(frame, requirement: requirement, side: $0)
+                    && Self.isStartingPosture(frame, definition: definition, side: $0)
+            }),
+            let anchor = frame.joints[requirement.anchor.joint(on: visibleSide)] else {
             misses += 1
             if misses > Self.toleratedMisses {
                 since = nil
@@ -56,8 +62,9 @@ nonisolated struct StartReadiness: Equatable {
             return progress
         }
         misses = 0
-        if let since, visibleSide == side,
-           abs(anchor.x - anchorX) <= Self.stillRadius, abs(anchor.y - anchorY) <= Self.stillRadius {
+        if
+            let since, visibleSide == side,
+            abs(anchor.x - anchorX) <= Self.stillRadius, abs(anchor.y - anchorY) <= Self.stillRadius {
             progress = min(1, max(0, (frame.time - since) / Self.hold))
         } else {
             since = frame.time
@@ -82,14 +89,27 @@ nonisolated struct StartReadiness: Equatable {
     /// push-up, a plank: the torso closer to horizontal than vertical and the hands below the
     /// shoulders. A person standing with their arms down shows the same shoulder, elbow and wrist,
     /// and must not start a push-up set.
-    static func isStartingPosture(_ frame: PoseFrame, definition: ExerciseDefinition, side: BodySide) -> Bool {
-        guard definition.kind == .pushUp else { return true }
+    static func isStartingPosture(
+        _ frame: PoseFrame,
+        definition: ExerciseDefinition,
+        side: BodySide
+    ) -> Bool {
+        guard definition.kind == .pushUp else {
+            return true
+        }
         func clear(_ role: JointRole) -> JointPoint? {
-            guard let point = frame.joints[role.joint(on: side)],
-                  point.confidence >= EvidenceRubric.minimumJointConfidence else { return nil }
+            guard
+                let point = frame.joints[role.joint(on: side)],
+                point.confidence >= EvidenceRubric.minimumJointConfidence else {
+                return nil
+            }
             return point
         }
-        guard let shoulder = clear(.shoulder), let hip = clear(.hip), let wrist = clear(.wrist) else { return false }
+        guard
+            let shoulder = clear(.shoulder), let hip = clear(.hip),
+            let wrist = clear(.wrist) else {
+            return false
+        }
         let horizontal = abs(shoulder.x - hip.x)
         let vertical = abs(shoulder.y - hip.y) * frame.aspectRatio
         return horizontal > vertical && wrist.y > shoulder.y
@@ -116,11 +136,16 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
     /// never a reading, so the athlete knows what to change without thinking.
     func spoken(for definition: ExerciseDefinition) -> String {
         switch self {
-        case .repCounted(let count): "\(count)"
-        case .repCountRevised: ""
-        case .fasterThanFirstReps: String(localized: "Slow down")
-        case .shorterThanFirstReps: definition.copy.liveShorterCue
-        case .formFault(let check, _): check.liveCue
+        case .repCounted(let count):
+            "\(count)"
+        case .repCountRevised:
+            ""
+        case .fasterThanFirstReps:
+            String(localized: "Slow down")
+        case .shorterThanFirstReps:
+            definition.copy.liveShorterCue
+        case .formFault(let check, _):
+            check.liveCue
         }
     }
 
@@ -132,9 +157,12 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
         var observations: [String] = []
         for event in events {
             switch event {
-            case .repCounted: count = event.spoken(for: definition)
-            case .repCountRevised: break
-            default: observations.append(event.spoken(for: definition))
+            case .repCounted:
+                count = event.spoken(for: definition)
+            case .repCountRevised:
+                break
+            default:
+                observations.append(event.spoken(for: definition))
             }
         }
         let parts = (count.map { [$0] } ?? []) + observations
@@ -145,8 +173,13 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
     /// few words that are said.
     func caption(for definition: ExerciseDefinition) -> String? {
         switch self {
-        case .repCounted, .repCountRevised: nil
-        case .fasterThanFirstReps, .shorterThanFirstReps, .formFault: spoken(for: definition)
+        case .repCounted,
+             .repCountRevised:
+            nil
+        case .fasterThanFirstReps,
+             .shorterThanFirstReps,
+             .formFault:
+            spoken(for: definition)
         }
     }
 }
@@ -202,7 +235,9 @@ nonisolated struct LiveSetMonitor {
     /// bend is smaller" during front-on push-ups, then "no form advice for this set").
     private var rangeAdviceFromSide = true
     /// Only praise consistency when the latest accepted view supports a side-on range comparison.
-    var supportsRangeCoaching: Bool { analysisAccepted && rangeAdviceFromSide }
+    var supportsRangeCoaching: Bool {
+        analysisAccepted && rangeAdviceFromSide
+    }
 
     init(definition: ExerciseDefinition) {
         self.definition = definition
@@ -211,7 +246,9 @@ nonisolated struct LiveSetMonitor {
     /// Takes every frame of the set so far and returns what happened since the last call. The
     /// analysis runs every `analysisInterval` seconds of frames, not on every frame.
     mutating func update(with frames: [PoseFrame]) -> [LiveSetEvent] {
-        guard let last = frames.last, last.time - lastAnalysisTime >= Self.analysisInterval else { return [] }
+        guard let last = frames.last, last.time - lastAnalysisTime >= Self.analysisInterval else {
+            return []
+        }
         guard PoseFrame.hasIncreasingTimestamps(frames) else {
             analysisAccepted = false
             return []
@@ -219,17 +256,22 @@ nonisolated struct LiveSetMonitor {
         lastAnalysisTime = last.time
         var events: [LiveSetEvent] = []
         analysisAccepted = false
-// one pass gives both the set's frames and where the athlete is in each, for the count and
+        // one pass gives both the set's frames and where the athlete is in each, for the count and
         // the stop; this runs over the whole set so far every 0.4 s.
         let layout = SetWindow.layout(frames, requirement: definition.evidence)
         let set = layout.range.map { Array(frames[$0]) } ?? frames
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(set, as: definition, viewCheck: .ignore,
-                                                                             trimsToSet: false)
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(
+            set,
+            as: definition,
+            viewCheck: .ignore,
+            trimsToSet: false
+        )
         if case .analyzed(let analysis) = outcome {
             analysisAccepted = true
             midMovement = diagnostics?.unfinished ?? false
             reps = analysis.reps
-            rangeAdviceFromSide = diagnostics?.partialVisibility == nil && diagnostics?.countedFromShoulders != true
+            rangeAdviceFromSide = diagnostics?.partialVisibility == nil && diagnostics?
+                .countedFromShoulders != true
                 && diagnostics?.countedFromHips != true
                 && Self.seenFromTheSide(set)
             if reps.count > highestSaid {
@@ -237,7 +279,7 @@ nonisolated struct LiveSetMonitor {
                     ? FormChecks.review(analysis, frames: set, definition: definition)
                     : FormReview()
             }
-// the count is the analysis of the whole set so far, the same the result makes at the
+            // the count is the analysis of the whole set so far, the same the result makes at the
             // end. Measured over a longer set, a movement said as a rep can stop counting (on
             // 15 October, fast push-ups: the top the set is measured from settled lower as the set
             // went on, and reps measured from it became too fast or too shallow). The count used
@@ -269,31 +311,44 @@ nonisolated struct LiveSetMonitor {
     }
 
     /// `spots` is `SetWindow.spots(frames, ...)`, worked out only when needed.
-    private func shouldStop(_ frames: [PoseFrame], spots makeSpots: @autoclosure () -> [SetWindow.Spot]?) -> Bool {
-        guard let last = frames.last else { return false }
-// idle only by a measurement that accepts the set and sees the person at the top, for longer
+    private func shouldStop(
+        _ frames: [PoseFrame],
+        spots makeSpots: @autoclosure () -> [SetWindow.Spot]?
+    ) -> Bool {
+        guard let last = frames.last else {
+            return false
+        }
+        // idle only by a measurement that accepts the set and sees the person at the top, for longer
         // than the slowest rep may take: a refusal after a gap, or a slow rep under way, is not idleness.
         let idleLimit = max(Self.idleAfter, definition.phases.maximumDuration + 2)
-        if countedReps > 0, analysisAccepted, !midMovement, let lastRep = reps.last,
-           last.time - lastRep.endTime >= idleLimit {
+        if
+            countedReps > 0, analysisAccepted, !midMovement, let lastRep = reps.last,
+            last.time - lastRep.endTime >= idleLimit {
             return true
         }
-// away from the spot, not merely with a joint unclear at it (`SetWindow.spots`).
-        guard let spots = makeSpots() else { return false }
-        guard let lastIndex = spots.lastIndex(where: \.isAtSpot) else { return countedReps > 0 }
+        // away from the spot, not merely with a joint unclear at it (`SetWindow.spots`).
+        guard let spots = makeSpots() else {
+            return false
+        }
+        guard let lastIndex = spots.lastIndex(where: \.isAtSpot) else {
+            return countedReps > 0
+        }
         let gone = last.time - frames[lastIndex].time
-// seen walking off: two seconds. Only hidden (someone in front, Vision missing them): longer
+        // seen walking off: two seconds. Only hidden (someone in front, Vision missing them): longer
         // than the gap the evidence gate allows for a person passing in front, so it does not end a
         // set the gate would measure.
         let seenLeaving = spots[(lastIndex + 1)...].contains(.away)
         guard countedReps > 0 else {
-// no rep counted (every movement too shallow, or the person changed their mind): the set
+            // no rep counted (every movement too shallow, or the person changed their mind): the set
             // still ends when the athlete, after standing at their spot for a set's minimum length,
             // is seen walking away. Never for being unseen, which getting down into a push-up can
             // cause, and never while walking in and out without stopping at the spot.
-            guard seenLeaving, let firstIndex = spots.firstIndex(of: .inPosition),
-                  frames[lastIndex].time - frames[firstIndex].time >= EvidenceRubric.minimumSetDuration
-            else { return false }
+            guard
+                seenLeaving, let firstIndex = spots.firstIndex(of: .inPosition),
+                frames[lastIndex].time - frames[firstIndex].time >= EvidenceRubric.minimumSetDuration
+            else {
+                return false
+            }
             return gone >= Self.leftAfter
         }
         return gone >= (seenLeaving ? Self.leftAfter : Self.hiddenAfter)
@@ -303,7 +358,9 @@ nonisolated struct LiveSetMonitor {
     /// reading as the end-of-set observation; a quicker rep not pointed out then is pointed out on
     /// the next one if it is still quicker.
     private mutating func cues(forRep number: Int) -> [LiveSetEvent] {
-        guard reps.indices.contains(number - 1) else { return [] }
+        guard reps.indices.contains(number - 1) else {
+            return []
+        }
         let rep = reps[number - 1]
         if let fault = formFault(onRep: number) {
             lastFormCue[fault] = number
@@ -314,7 +371,9 @@ nonisolated struct LiveSetMonitor {
             let first = reps.prefix(3).map(\.duration).sorted()[1]
             faster = first > 0 && rep.duration < Self.fasterShare * first
         }
-        if faster { sawFasterRep = true }
+        if faster {
+            sawFasterRep = true
+        }
         if rangeAdviceFromSide, number >= 3, number - lastShorterCue >= Self.cueSpacing {
             let first = (reps[0].relativeRange + reps[1].relativeRange) / 2
             if first > 0, rep.relativeRange <= Self.shorterShare * first {
@@ -334,8 +393,12 @@ nonisolated extension LiveSetMonitor {
     /// The same camera-angle reading as the form checks: side-on, or no 3D estimate to say otherwise.
     fileprivate static func seenFromTheSide(_ frames: [PoseFrame]) -> Bool {
         switch ViewCheck.assess(frames, expected: .side) {
-        case .matches, .unavailable: true
-        case .angled, .mismatch: false
+        case .matches,
+             .unavailable:
+            true
+        case .angled,
+             .mismatch:
+            false
         }
     }
 
@@ -344,9 +407,12 @@ nonisolated extension LiveSetMonitor {
     /// same checks as the result, on the set so far, and silent for a partly visible set, a push-up
     /// counted from the shoulders, or a person filmed at an angle.
     fileprivate func formFault(onRep number: Int) -> FormCheck? {
-        guard rangeAdviceFromSide else { return nil }
+        guard rangeAdviceFromSide else {
+            return nil
+        }
         return latestReview.findings(through: number, exercise: definition.kind).first { finding in
-            finding.reps.contains(number) && number - (lastFormCue[finding.check] ?? Int.min / 2) >= Self.cueSpacing
+            finding.reps.contains(number) && number - (lastFormCue[finding.check] ?? Int.min / 2) >= Self
+                .cueSpacing
         }?.check
     }
 }

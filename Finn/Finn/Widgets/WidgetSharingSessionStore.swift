@@ -7,11 +7,13 @@ nonisolated extension LastSetSnapshot {
         guard let set = sessions.flatMap(\.sets).max(by: { $0.capturedAt < $1.capturedAt }) else {
             return nil
         }
-        return LastSetSnapshot(exerciseName: set.exercise.definition.copy.name,
-                               exerciseKey: set.exercise.rawValue,
-                               reps: set.analysis.reps.count,
-                               capturedAt: set.capturedAt,
-                               partlyVisible: set.partlyVisible == true)
+        return LastSetSnapshot(
+            exerciseName: set.exercise.definition.copy.name,
+            exerciseKey: set.exercise.rawValue,
+            reps: set.analysis.reps.count,
+            capturedAt: set.capturedAt,
+            partlyVisible: set.partlyVisible == true
+        )
     }
 }
 
@@ -24,14 +26,19 @@ nonisolated struct WidgetSharingSessionStore: SessionStoring {
     private let shared: SharedSetStore?
     private let widgetsChanged: @Sendable () -> Void
 
-    init(base: any SessionStoring, shared: SharedSetStore? = SharedSetStore.appGroup,
-         widgetsChanged: @escaping @Sendable () -> Void = { WidgetCenter.shared.reloadAllTimelines() }) {
+    init(
+        base: any SessionStoring,
+        shared: SharedSetStore? = SharedSetStore.appGroup,
+        widgetsChanged: @escaping @Sendable () -> Void = { WidgetCenter.shared.reloadAllTimelines() }
+    ) {
         self.base = base
         self.shared = shared
         self.widgetsChanged = widgetsChanged
     }
 
-    func load() throws -> [WorkoutSessionSummary] { try base.load() }
+    func load() throws -> [WorkoutSessionSummary] {
+        try base.load()
+    }
 
     func save(_ session: WorkoutSessionSummary) throws {
         try base.save(session)
@@ -57,9 +64,13 @@ nonisolated struct WidgetSharingSessionStore: SessionStoring {
     /// rereads the history after a write, so the widget shows what is saved rather than what was
     /// about to be. A history that cannot be read leaves the widget empty rather than stale.
     private func publish() {
-        guard let shared else { return }
+        guard let shared else {
+            return
+        }
         let snapshot = (try? base.load()).flatMap { LastSetSnapshot.latest(in: $0) }
-        guard snapshot != shared.read() else { return }
+        guard snapshot != shared.read() else {
+            return
+        }
         shared.write(snapshot)
         widgetsChanged()
     }

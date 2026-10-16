@@ -11,11 +11,21 @@ struct PersonalizationOfferView: View {
                     .font(.largeTitle)
                     .foregroundStyle(DashboardStyle.accent)
                     .accessibilityHidden(true)
-                WrappingText(text: String(localized: "Personalize with Health"), style: .title2, weight: .bold)
-                    .accessibilityAddTraits(.isHeader)
-                WrappingText(text: String(localized: "Use heart rate, recovery, sleep, workouts, age, weight and height from Health to tailor rest times and suggest lighter days."))
-                WrappingText(text: String(localized: "Data stays on this iPhone. Change access anytime in Options."),
-                             colour: .secondaryLabel)
+                WrappingText(
+                    text: String(localized: "Personalize with Health"),
+                    style: .title2,
+                    weight: .bold
+                )
+                .accessibilityAddTraits(.isHeader)
+                WrappingText(
+                    text: String(
+                        localized: "Use heart rate, recovery, sleep, workouts, age, weight and height from Health to tailor rest times and suggest lighter days."
+                    )
+                )
+                WrappingText(
+                    text: String(localized: "Data stays on this iPhone. Change access anytime in Options."),
+                    colour: .secondaryLabel
+                )
             }
             .frame(maxWidth: 600, alignment: .leading)
             .padding(24)
@@ -36,8 +46,8 @@ struct PersonalizationOfferView: View {
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .contentShape(Rectangle())
                 }
-                    .accessibilityLabel("Later")
-                    .accessibilityIdentifier("offer.later")
+                .accessibilityLabel("Later")
+                .accessibilityIdentifier("offer.later")
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 12)

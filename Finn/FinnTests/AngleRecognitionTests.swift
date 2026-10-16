@@ -15,9 +15,13 @@ struct AngleRuleRecognitionTests {
     @Test func rulesNameEachExerciseOnSyntheticSets() {
         var rng = SyntheticRandom(seed: 101)
         for (label, kind) in exercises {
-            let hits = (0..<30).filter { _ in
+            let hits = (0 ..< 30).filter { _ in
                 let frames = SyntheticExerciseMotion.sequence(label: label, using: &rng)
-                if case .recognized(kind, _) = AngleRecognizer.recognise(frames, using: AngleRuleClassifier()) {
+                if
+                    case .recognized(kind, _) = AngleRecognizer.recognise(
+                        frames,
+                        using: AngleRuleClassifier()
+                    ) {
                     return true
                 }
                 return false
@@ -29,7 +33,7 @@ struct AngleRuleRecognitionTests {
     @Test func rulesStayUncertainForOtherMovementAndStillness() {
         var rng = SyntheticRandom(seed: 202)
         for label in ["other", "none"] {
-            let uncertain = (0..<30).filter { _ in
+            let uncertain = (0 ..< 30).filter { _ in
                 let frames = SyntheticExerciseMotion.sequence(label: label, using: &rng)
                 return AngleRecognizer.recognise(frames, using: AngleRuleClassifier()) == .uncertain
             }.count
@@ -43,11 +47,16 @@ struct AngleRuleRecognitionTests {
         let farAnkle: BodyJoint = PoseWindowFeatureExtractor.trackedSide(in: full) == .left
             ? .rightAnkle : .leftAnkle
         let frames = full.map { frame in
-            PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints.filter { $0.key != farAnkle },
-                      aspectRatio: frame.aspectRatio)
+            PoseFrame(
+                time: frame.time,
+                subjectCount: 1,
+                joints: frame.joints.filter { $0.key != farAnkle },
+                aspectRatio: frame.aspectRatio
+            )
         }
-// with one ankle left, the stance is unknown and a squat cannot be told from a lunge.
-        let features = PoseWindowFeatureExtractor.windows(frames).compactMap(PoseWindowFeatureExtractor.features)
+        // with one ankle left, the stance is unknown and a squat cannot be told from a lunge.
+        let features = PoseWindowFeatureExtractor.windows(frames)
+            .compactMap(PoseWindowFeatureExtractor.features)
         #expect(features.allSatisfy { $0.stance == -1 })
         #expect(AngleRecognizer.recognise(frames, using: AngleRuleClassifier()) == .uncertain)
     }
@@ -59,7 +68,8 @@ struct AngleRuleRecognitionTests {
         #expect(windows.count >= 4)
         let armsOnly = windows[0].map { frame in
             PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints.filter {
-                [.leftShoulder, .leftElbow, .leftWrist, .rightShoulder, .rightElbow, .rightWrist].contains($0.key)
+                [.leftShoulder, .leftElbow, .leftWrist, .rightShoulder, .rightElbow, .rightWrist]
+                    .contains($0.key)
             })
         }
         #expect(PoseWindowFeatureExtractor.features(armsOnly) == nil)
@@ -76,7 +86,9 @@ struct AngleRuleRecognitionTests {
 
     /// Runs only once the team adds a trained FinnAngleClassifier.mlmodel to the app target.
     @Test func bundledAngleModelRecognizesSyntheticSetsWhenPresent() {
-        guard let model = CoreMLAngleClassifier.bundled() else { return }
+        guard let model = CoreMLAngleClassifier.bundled() else {
+            return
+        }
         var rng = SyntheticRandom(seed: 606)
         for (label, kind) in exercises {
             let frames = SyntheticExerciseMotion.sequence(label: label, using: &rng)
@@ -97,15 +109,21 @@ struct AngleRuleSessionTests {
         let preferences = FinnPreferences(defaults: defaults)
         preferences.recognisesExercise = true
         let source = RuleSessionSource()
-        let model = WorkoutSessionModel(source: source, exerciseClassifier: nil, angleClassifier: nil,
-                                        preferences: preferences)
+        let model = WorkoutSessionModel(
+            source: source,
+            exerciseClassifier: nil,
+            angleClassifier: nil,
+            preferences: preferences
+        )
         #expect(model.recognitionMethod == .angleRules)
         #expect(model.usesExerciseRecognition)
         model.selectedExercise = .bodyweightSquat
         var rng = SyntheticRandom(seed: 505)
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in SyntheticExerciseMotion.sequence(label: "push_up", using: &rng) { source.emit(frame) }
+        for frame in SyntheticExerciseMotion.sequence(label: "push_up", using: &rng) {
+            source.emit(frame)
+        }
         await model.endSet()
         guard case .recognized(.pushUp, _) = model.recognition else {
             Issue.record("Expected the rules to recognise a push-up, got \(model.recognition)")
@@ -131,5 +149,7 @@ private final class RuleSessionSource: PoseStreaming {
         continuation = nil
     }
 
-    func emit(_ frame: PoseFrame) { continuation?.yield(frame) }
+    func emit(_ frame: PoseFrame) {
+        continuation?.yield(frame)
+    }
 }

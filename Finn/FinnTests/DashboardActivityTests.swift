@@ -14,11 +14,22 @@ struct DashboardActivityTests {
     }
 
     private func set(at date: Date, reps: Int) -> SetSummary {
-        SetSummary(id: UUID(), sessionID: UUID(), capturedAt: date, bodySide: .left,
-                   analysis: SetAnalysis(reps: (0..<reps).map {
-                       RepMetric(number: $0 + 1, startTime: Double($0) * 2,
-                                 endTime: Double($0) * 2 + 1.5, relativeRange: 0.4)
-                   }, confidence: 0.9, rubricVersion: "test"), cue: nil, cueResponse: .unanswered)
+        SetSummary(
+            id: UUID(),
+            sessionID: UUID(),
+            capturedAt: date,
+            bodySide: .left,
+            analysis: SetAnalysis(reps: (0 ..< reps).map {
+                RepMetric(
+                    number: $0 + 1,
+                    startTime: Double($0) * 2,
+                    endTime: Double($0) * 2 + 1.5,
+                    relativeRange: 0.4
+                )
+            }, confidence: 0.9, rubricVersion: "test"),
+            cue: nil,
+            cueResponse: .unanswered
+        )
     }
 
     @Test func captureDateDeterminesTheDayAndFutureSetsAreExcluded() {
@@ -34,7 +45,7 @@ struct DashboardActivityTests {
 
     @Test func sevenLocalCalendarDaysSurviveTheAutumnClockChange() {
         let days = DashboardActivityDay.recent(history: [], now: date(27), calendar: calendar)
-        #expect(days.map { calendar.component(.day, from: $0.date) } == Array(21...27))
+        #expect(days.map { calendar.component(.day, from: $0.date) } == Array(21 ... 27))
         #expect(Set(days.map(\.date)).count == 7)
         #expect(days.allSatisfy { $0.reps == 0 })
         #expect(days[5].date.timeIntervalSince(days[4].date) == 25 * 3600)

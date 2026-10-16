@@ -84,7 +84,9 @@ final class OnboardingTourUITests: XCTestCase {
         save("onboarding-10-a-propos-materiel")
         // the equipment menu stays open while ticking; a tap outside closes it
         app.staticTexts["A little more about you."].tap()
-        for _ in 0..<6 where !access.isHittable { app.swipeUp() }
+        for _ in 0 ..< 6 where !access.isHittable {
+            app.swipeUp()
+        }
         XCTAssertFalse(access.isEnabled)
         app.buttons["aboutYou.noInjuries"].tap()
         XCTAssertTrue(access.isEnabled)
@@ -119,12 +121,15 @@ final class OnboardingTourUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 8))
         let awards = app.buttons["home.awards"]
-        for _ in 0..<4 where !awards.isHittable { app.swipeUp() }
+        for _ in 0 ..< 4 where !awards.isHittable {
+            app.swipeUp()
+        }
         XCTAssertTrue(awards.isHittable)
         Thread.sleep(forTimeInterval: 1)
         save("accueil-carte-awards")
         app.buttons["home.awards"].tap()
-        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "badges.summary").firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "badges.summary").firstMatch
+            .waitForExistence(timeout: 5))
         Thread.sleep(forTimeInterval: 0.8)
         save("badges-1-haut")
         app.swipeUp()
@@ -135,7 +140,8 @@ final class OnboardingTourUITests: XCTestCase {
         let empty = XCUIApplication()
         empty.launchArguments = ["-finn-ui-demo", "-finn-open", "awards"]
         empty.launch()
-        XCTAssertTrue(empty.descendants(matching: .any).matching(identifier: "badges.empty").firstMatch.waitForExistence(timeout: 8))
+        XCTAssertTrue(empty.descendants(matching: .any).matching(identifier: "badges.empty").firstMatch
+            .waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 0.8)
         save("badges-0-vide")
     }

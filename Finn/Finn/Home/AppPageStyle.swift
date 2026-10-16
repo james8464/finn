@@ -22,9 +22,9 @@ struct AppSurface: ViewModifier {
 enum AppMotion {
     static func reduces(_ systemPreference: Bool) -> Bool {
         #if DEBUG
-        systemPreference || ProcessInfo.processInfo.arguments.contains("-finn-ui-reduce-motion")
+            systemPreference || ProcessInfo.processInfo.arguments.contains("-finn-ui-reduce-motion")
         #else
-        systemPreference
+            systemPreference
         #endif
     }
 }

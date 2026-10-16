@@ -44,20 +44,24 @@ nonisolated enum ExerciseRecognizer {
     static let minimumAgreement = 0.6
     static let maximumWindows = 40
 
-    static func recognise(_ frames: [PoseFrame],
-                          using classifier: any ExerciseClassifying) -> ExerciseRecognition {
+    static func recognise(
+        _ frames: [PoseFrame],
+        using classifier: any ExerciseClassifying
+    ) -> ExerciseRecognition {
         let length = classifier.windowLength
         let poses = resample(frames, rate: classifier.frameRate)
-        guard length > 0, poses.count >= length else { return .uncertain }
+        guard length > 0, poses.count >= length else {
+            return .uncertain
+        }
 
         var starts = Array(stride(from: 0, through: poses.count - length, by: max(1, length / 2)))
         if starts.count > maximumWindows {
             let step = Double(starts.count - 1) / Double(maximumWindows - 1)
-            starts = (0..<maximumWindows).map { starts[Int((Double($0) * step).rounded())] }
+            starts = (0 ..< maximumWindows).map { starts[Int((Double($0) * step).rounded())] }
         }
 
         let predictions = starts.compactMap {
-            try? classifier.classify(window: Array(poses[$0..<($0 + length)]))
+            try? classifier.classify(window: Array(poses[$0 ..< ($0 + length)]))
         }
         return decide(predictions)
     }
@@ -70,11 +74,15 @@ nonisolated enum ExerciseRecognizer {
             votes[prediction.label, default: 0] += 1
         }
         let ranked = votes.sorted { $0.value > $1.value }
-        guard !predictions.isEmpty, let winner = ranked.first,
-              ranked.dropFirst().first?.value != winner.value else { return .uncertain }
+        guard
+            !predictions.isEmpty, let winner = ranked.first,
+            ranked.dropFirst().first?.value != winner.value else {
+            return .uncertain
+        }
         let agreement = Double(winner.value) / Double(predictions.count)
-        guard agreement >= minimumAgreement,
-              let definition = ExerciseDefinition.definition(forClassifierLabel: winner.key) else {
+        guard
+            agreement >= minimumAgreement,
+            let definition = ExerciseDefinition.definition(forClassifierLabel: winner.key) else {
             return .uncertain
         }
         return .recognized(definition.kind, agreement: agreement)
@@ -83,21 +91,25 @@ nonisolated enum ExerciseRecognizer {
     /// Takes the pose nearest each tick at `rate` Hz so windows match the training frame rate.
     /// A tick with no pose within one tick is zero-filled, as for a frame without a person.
     static func resample(_ frames: [PoseFrame], rate: Double) -> [[Float]] {
-        guard let first = frames.first, let last = frames.last, rate > 0 else { return [] }
+        guard let first = frames.first, let last = frames.last, rate > 0 else {
+            return []
+        }
         let empty = [Float](repeating: 0, count: keypointCount)
         let tickCount = Int(((last.time - first.time) * rate).rounded(.down)) + 1
         var result: [[Float]] = []
         result.reserveCapacity(tickCount)
         var index = 0
-        for tick in 0..<tickCount {
+        for tick in 0 ..< tickCount {
             let time = first.time + Double(tick) / rate
-            while index + 1 < frames.count,
-                  abs(frames[index + 1].time - time) <= abs(frames[index].time - time) {
+            while
+                index + 1 < frames.count,
+                abs(frames[index + 1].time - time) <= abs(frames[index].time - time) {
                 index += 1
             }
             let frame = frames[index]
-            if abs(frame.time - time) <= 1 / rate, let keypoints = frame.keypoints,
-               keypoints.count == keypointCount {
+            if
+                abs(frame.time - time) <= 1 / rate, let keypoints = frame.keypoints,
+                keypoints.count == keypointCount {
                 result.append(keypoints)
             } else {
                 result.append(empty)
@@ -131,8 +143,9 @@ nonisolated final class CoreMLExerciseClassifier: ExerciseClassifying, @unchecke
 
     init(model: MLModel) throws {
         let description = model.modelDescription
-        guard let input = description.inputDescriptionsByName.values.first(where: { $0.type == .multiArray }),
-              let constraint = input.multiArrayConstraint else {
+        guard
+            let input = description.inputDescriptionsByName.values.first(where: { $0.type == .multiArray }),
+            let constraint = input.multiArrayConstraint else {
             throw ExerciseClassifierError.unsupportedModel("no pose array input")
         }
         let shape = constraint.shape.map(\.intValue)
@@ -141,7 +154,9 @@ nonisolated final class CoreMLExerciseClassifier: ExerciseClassifying, @unchecke
         }
         let probabilities = description.predictedProbabilitiesName
             ?? description.outputDescriptionsByName.values.first { $0.type == .dictionary }?.name
-        guard let probabilities else { throw ExerciseClassifierError.noProbabilities }
+        guard let probabilities else {
+            throw ExerciseClassifierError.noProbabilities
+        }
         let metadata = description.metadata[.creatorDefinedKey] as? [String: String]
 
         self.model = model
@@ -157,14 +172,18 @@ nonisolated final class CoreMLExerciseClassifier: ExerciseClassifying, @unchecke
 
     /// The trained model compiled into the app, or nil when none ships with this build.
     static func bundled(in bundle: Bundle = .main) -> CoreMLExerciseClassifier? {
-        guard let url = bundle.url(forResource: bundledModelName, withExtension: "mlmodelc"),
-              let model = try? MLModel(contentsOf: url) else { return nil }
+        guard
+            let url = bundle.url(forResource: bundledModelName, withExtension: "mlmodelc"),
+            let model = try? MLModel(contentsOf: url) else {
+            return nil
+        }
         return try? CoreMLExerciseClassifier(model: model)
     }
 
     func classify(window: [[Float]]) throws -> ClassifierPrediction {
-        guard window.count == windowLength,
-              window.allSatisfy({ $0.count == ExerciseRecognizer.keypointCount }) else {
+        guard
+            window.count == windowLength,
+            window.allSatisfy({ $0.count == ExerciseRecognizer.keypointCount }) else {
             throw ExerciseClassifierError.wrongWindow
         }
         let poses = try MLMultiArray(shape: inputShape, dataType: dataType)
@@ -173,10 +192,12 @@ nonisolated final class CoreMLExerciseClassifier: ExerciseClassifying, @unchecke
                 poses[frameIndex * ExerciseRecognizer.keypointCount + valueIndex] = NSNumber(value: value)
             }
         }
-        let input = try MLDictionaryFeatureProvider(dictionary: [inputName: MLFeatureValue(multiArray: poses)])
+        let input =
+            try MLDictionaryFeatureProvider(dictionary: [inputName: MLFeatureValue(multiArray: poses)])
         let output = try model.prediction(from: input)
-        guard let probabilities = output.featureValue(for: probabilitiesName)?.dictionaryValue,
-              let best = probabilities.max(by: { $0.value.doubleValue < $1.value.doubleValue }) else {
+        guard
+            let probabilities = output.featureValue(for: probabilitiesName)?.dictionaryValue,
+            let best = probabilities.max(by: { $0.value.doubleValue < $1.value.doubleValue }) else {
             throw ExerciseClassifierError.noProbabilities
         }
         return ClassifierPrediction(label: "\(best.key)", confidence: best.value.doubleValue)

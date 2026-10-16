@@ -22,12 +22,16 @@ struct FitnessSessionTests {
         #expect(record.workoutID == setup.fitness.lastWorkoutID)
         #expect(setup.model.history.first?.fitnessWorkout == record)
 
-// neither a retry from History nor a reopened app saves it again.
+        // neither a retry from History nor a reopened app saves it again.
         let saved = try #require(setup.model.history.first)
         #expect(!setup.model.canSaveToFitness(saved))
         await setup.model.saveToFitness(sessionID: sessionID)
-        let reopened = WorkoutSessionModel(source: TestSource(), store: setup.store,
-                                           preferences: setup.preferences, fitness: setup.fitness)
+        let reopened = WorkoutSessionModel(
+            source: TestSource(),
+            store: setup.store,
+            preferences: setup.preferences,
+            fitness: setup.fitness
+        )
         await reopened.saveToFitness(sessionID: sessionID)
         #expect(!reopened.canSaveToFitness(try #require(reopened.history.first)))
         #expect(setup.fitness.saveAttempts == 1)
@@ -49,7 +53,9 @@ struct FitnessSessionTests {
         let setup = try Setup(savesToFitness: true)
         await setup.model.startPreview()
         await setup.model.beginSet(countdown: 0)
-        for frame in CaptureTraces.squats(reps: 0, from: 0, standing: 3) { setup.source.emit(frame) }
+        for frame in CaptureTraces.squats(reps: 0, from: 0, standing: 3) {
+            setup.source.emit(frame)
+        }
         await setup.model.endSet()
         #expect(setup.model.history.isEmpty)
         await setup.model.finishSession()
@@ -168,13 +174,18 @@ struct FitnessSessionTests {
         let preferences = FinnPreferences(defaults: defaults)
         preferences.savesToFitness = true
         let source = TestSource()
-        let model = WorkoutSessionModel(source: source,
-                                        store: LocalSessionStore(url: directory.appending(path: "sessions.json")),
-                                        preferences: preferences)
+        let model = WorkoutSessionModel(
+            source: source,
+            store: LocalSessionStore(url: directory
+                .appending(path: "sessions.json")),
+            preferences: preferences
+        )
         #expect(!model.offersFitness)
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in CaptureTraces.squats(reps: 6, from: 0) { source.emit(frame) }
+        for frame in CaptureTraces.squats(reps: 6, from: 0) {
+            source.emit(frame)
+        }
         await model.endSet()
         await model.finishSession()
         #expect(model.fitnessSave == nil)
@@ -210,7 +221,7 @@ struct FitnessSessionTests {
         try await setup.measureASet()
         let session = try #require(setup.model.history.first)
         await setup.model.startPreview()
-// during a capture, the session in progress is saved at Done only.
+        // during a capture, the session in progress is saved at Done only.
         #expect(!setup.model.canSaveToFitness(session))
         await setup.model.saveToFitness(sessionID: session.id)
         #expect(setup.fitness.saveAttempts == 0)
@@ -295,13 +306,17 @@ struct FitnessSessionTests {
         #expect(!setup.model.leavesHealthWorkout(forSession: unsaved))
         #expect(setup.model.leavesHealthWorkouts)
 
-        let reopened = WorkoutSessionModel(source: TestSource(), store: setup.store,
-                                           preferences: setup.preferences, fitness: setup.fitness)
+        let reopened = WorkoutSessionModel(
+            source: TestSource(),
+            store: setup.store,
+            preferences: setup.preferences,
+            fitness: setup.fitness
+        )
         #expect(reopened.leavesHealthWorkout(forSession: saved))
         #expect(!reopened.leavesHealthWorkout(forSession: unsaved))
         #expect(reopened.leavesHealthWorkouts)
 
-// once the saved session is deleted, deleting the rest leaves nothing more in Health.
+        // once the saved session is deleted, deleting the rest leaves nothing more in Health.
         setup.model.deleteHistory(id: saved)
         #expect(!setup.model.leavesHealthWorkouts)
         #expect(setup.model.history.map(\.id) == [unsaved])
@@ -338,14 +353,21 @@ struct FitnessSessionTests {
 
         let clock = setup.clock
         let source = TestSource()
-        let relaunched = WorkoutSessionModel(source: source, store: setup.store, preferences: setup.preferences,
-                                             fitness: setup.fitness, currentDate: { clock.date })
+        let relaunched = WorkoutSessionModel(
+            source: source,
+            store: setup.store,
+            preferences: setup.preferences,
+            fitness: setup.fitness,
+            currentDate: { clock.date }
+        )
         #expect(relaunched.unfinishedSession?.id == id)
 
         clock.advance(by: 5 * 60)
         await relaunched.startPreview()
         await relaunched.beginSet(countdown: 0)
-        for frame in CaptureTraces.squats(reps: 6, from: 0) { source.emit(frame) }
+        for frame in CaptureTraces.squats(reps: 6, from: 0) {
+            source.emit(frame)
+        }
         await relaunched.endSet()
         #expect(relaunched.currentSession?.id == id)
         #expect(relaunched.currentSession?.sets.count == 2)
@@ -353,8 +375,13 @@ struct FitnessSessionTests {
 
         await relaunched.finishSession()
         #expect(setup.fitness.saved.map(\.sessionID) == [id])
-        let again = WorkoutSessionModel(source: TestSource(), store: setup.store, preferences: setup.preferences,
-                                        fitness: setup.fitness, currentDate: { clock.date })
+        let again = WorkoutSessionModel(
+            source: TestSource(),
+            store: setup.store,
+            preferences: setup.preferences,
+            fitness: setup.fitness,
+            currentDate: { clock.date }
+        )
         #expect(again.unfinishedSession == nil)
     }
 
@@ -364,8 +391,12 @@ struct FitnessSessionTests {
         let setup = try Setup(savesToFitness: true)
         let old = WorkoutSessionSummary(id: UUID(), startedAt: setup.clock.date, sets: [])
         try setup.store.save(old)
-        let relaunched = WorkoutSessionModel(source: TestSource(), store: setup.store, preferences: setup.preferences,
-                                             fitness: setup.fitness)
+        let relaunched = WorkoutSessionModel(
+            source: TestSource(),
+            store: setup.store,
+            preferences: setup.preferences,
+            fitness: setup.fitness
+        )
         #expect(relaunched.history.map(\.id) == [old.id])
         #expect(relaunched.unfinishedSession == nil)
     }
@@ -381,7 +412,11 @@ struct FitnessSessionTests {
             let id = try #require(setup.model.currentSession?.id)
             await setup.model.finishSession()
             #expect(setup.model.fitnessSave == FitnessSaveReport(sessionID: id, status: .failed))
-            if deletesAll { setup.model.deleteAllData() } else { setup.model.deleteHistory(id: id) }
+            if deletesAll {
+                setup.model.deleteAllData()
+            } else {
+                setup.model.deleteHistory(id: id)
+            }
             #expect(setup.model.fitnessSave == nil, "delete all: \(deletesAll)")
         }
     }
@@ -441,7 +476,10 @@ struct FitnessSessionTests {
     /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
     /// simulator, with many main-actor tests running at once, the live analysis of a whole set can
     /// take several seconds.
-    private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(30)) async throws {
+    private func waitUntil(
+        _ condition: @MainActor () -> Bool,
+        timeout: Duration = .seconds(30)
+    ) async throws {
         let deadline = ContinuousClock.now.advanced(by: timeout)
         while !condition() {
             guard ContinuousClock.now < deadline else {
@@ -473,8 +511,13 @@ private final class Setup {
         preferences.savesToFitness = savesToFitness
         fitness = FakeFitnessExporter(access: access)
         let clock = clock
-        model = WorkoutSessionModel(source: source, store: store, preferences: preferences, fitness: fitness,
-                                    currentDate: { clock.date })
+        model = WorkoutSessionModel(
+            source: source,
+            store: store,
+            preferences: preferences,
+            fitness: fitness,
+            currentDate: { clock.date }
+        )
     }
 
     deinit { try? FileManager.default.removeItem(at: directory) }
@@ -483,7 +526,9 @@ private final class Setup {
     func measureASet(setsInSession: Int = 1) async throws {
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in CaptureTraces.squats(reps: 6, from: 0) { source.emit(frame) }
+        for frame in CaptureTraces.squats(reps: 6, from: 0) {
+            source.emit(frame)
+        }
         await model.endSet()
         guard case .measured(let analysis, _) = model.result, analysis.reps.count == 6 else {
             Issue.record("Expected six measured reps, got \(String(describing: model.result))")
@@ -499,7 +544,9 @@ private final class Setup {
 @MainActor
 private final class TestClock {
     var date = Date(timeIntervalSince1970: 1_800_000_000)
-    func advance(by interval: TimeInterval) { date = date.addingTimeInterval(interval) }
+    func advance(by interval: TimeInterval) {
+        date = date.addingTimeInterval(interval)
+    }
 }
 
 @MainActor
@@ -519,7 +566,9 @@ private final class FakeFitnessExporter: FitnessWorkoutSaving {
     private(set) var lastWorkoutID: UUID?
     private var held: [CheckedContinuation<Void, Never>] = []
 
-    init(access: FitnessAuthorization) { self.access = access }
+    init(access: FitnessAuthorization) {
+        self.access = access
+    }
 
     var authorisation: FitnessAuthorization {
         authorisationReads += 1
@@ -528,14 +577,20 @@ private final class FakeFitnessExporter: FitnessWorkoutSaving {
 
     func requestAuthorization() async -> FitnessAuthorization {
         requests += 1
-        if access == .notDetermined { access = grantsOnRequest }
+        if access == .notDetermined {
+            access = grantsOnRequest
+        }
         return access
     }
 
     func save(_ workout: FitnessWorkout) async throws -> UUID? {
         saveAttempts += 1
-        if holdsSaves { await withCheckedContinuation { held.append($0) } }
-        if !failures.isEmpty { throw failures.removeFirst() }
+        if holdsSaves {
+            await withCheckedContinuation { held.append($0) }
+        }
+        if !failures.isEmpty {
+            throw failures.removeFirst()
+        }
         saved.append(workout)
         let id = returnsIdentifier ? UUID() : nil
         lastWorkoutID = id
@@ -546,7 +601,9 @@ private final class FakeFitnessExporter: FitnessWorkoutSaving {
         holdsSaves = false
         let waiting = held
         held = []
-        for continuation in waiting { continuation.resume() }
+        for continuation in waiting {
+            continuation.resume()
+        }
     }
 }
 
@@ -557,7 +614,9 @@ private final class TestSource: PoseStreaming {
     private var continuation: AsyncStream<PoseFrame>.Continuation?
 
     func start() async throws -> AsyncStream<PoseFrame> {
-        if let startError { throw startError }
+        if let startError {
+            throw startError
+        }
         return AsyncStream { continuation in self.continuation = continuation }
     }
 
@@ -566,5 +625,7 @@ private final class TestSource: PoseStreaming {
         continuation = nil
     }
 
-    func emit(_ frame: PoseFrame) { continuation?.yield(frame) }
+    func emit(_ frame: PoseFrame) {
+        continuation?.yield(frame)
+    }
 }

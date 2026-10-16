@@ -64,7 +64,8 @@ struct WatchSetView: View {
             .lineLimit(2)
             .minimumScaleFactor(0.8)
         switch state.stage {
-        case .ready, .framing:
+        case .ready,
+             .framing:
             Image(systemName: "iphone.gen3")
                 .font(.title2)
                 .foregroundStyle(accent)
@@ -99,7 +100,8 @@ struct WatchSetView: View {
                     .font(.footnote)
                     .foregroundStyle(accent)
             }
-        case .analyzing, .result:
+        case .analyzing,
+             .result:
             Text("Set complete")
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(accent)
@@ -122,13 +124,15 @@ struct WatchSetView: View {
                     get: { link.rhythmInterval },
                     set: { link.setRhythmInterval($0) }
                 )) {
-                    ForEach(2...5, id: \.self) { seconds in
+                    ForEach(2 ... 5, id: \.self) { seconds in
                         Text("\(seconds) seconds").tag(seconds)
                     }
                 }
                 .disabled(!link.rhythmEnabled)
             } footer: {
-                Text("Rhythm is a pacing guide, not a form judgement. It starts a temporary Watch workout for taps with your wrist down. That workout is discarded; your iPhone controls Fitness saving.")
+                Text(
+                    "Rhythm is a pacing guide, not a form judgement. It starts a temporary Watch workout for taps with your wrist down. That workout is discarded; your iPhone controls Fitness saving."
+                )
             }
             if link.state?.hapticsEnabled == false {
                 Text("Turn on haptics in iPhone settings to use Watch rhythm.")

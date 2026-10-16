@@ -9,17 +9,27 @@ struct CoachComposerField: UIViewRepresentable {
     var onStop: () -> Void
     var onFocus: () -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(self) }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
 
     func makeUIView(context: Context) -> ComposerView {
         let view = ComposerView()
         view.editor.delegate = context.coordinator
-        view.action.addTarget(context.coordinator, action: #selector(Coordinator.performAction), for: .touchUpInside)
+        view.action.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.performAction),
+            for: .touchUpInside
+        )
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
         toolbar.tintColor = UIColor(AppPageStyle.tint)
-        let done = UIBarButtonItem(title: String(localized: "Done"), style: .prominent,
-                                   target: context.coordinator, action: #selector(Coordinator.dismissKeyboard))
+        let done = UIBarButtonItem(
+            title: String(localized: "Done"),
+            style: .prominent,
+            target: context.coordinator,
+            action: #selector(Coordinator.dismissKeyboard)
+        )
         done.accessibilityIdentifier = "coach.dismissKeyboard"
         toolbar.items = [.flexibleSpace(), done]
         view.editor.inputAccessoryView = toolbar
@@ -39,7 +49,9 @@ struct CoachComposerField: UIViewRepresentable {
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: ComposerView, context: Context) -> CGSize? {
-        guard let width = proposal.width, width.isFinite, width > 0 else { return nil }
+        guard let width = proposal.width, width.isFinite, width > 0 else {
+            return nil
+        }
         return CGSize(width: width, height: uiView.height(for: width))
     }
 
@@ -72,14 +84,19 @@ struct CoachComposerField: UIViewRepresentable {
             placeholder.isUserInteractionEnabled = false
             placeholder.isAccessibilityElement = false
             action.tintColor = UIColor(AppPageStyle.tint)
-            action.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 28), forImageIn: .normal)
+            action.setPreferredSymbolConfiguration(
+                UIImage.SymbolConfiguration(pointSize: 28),
+                forImageIn: .normal
+            )
             let row = UIStackView(arrangedSubviews: [card, action])
             row.spacing = 10
             row.alignment = .center
             addSubview(row)
             card.addSubview(editor)
             card.addSubview(placeholder)
-            for child in [row, editor, placeholder] { child.translatesAutoresizingMaskIntoConstraints = false }
+            for child in [row, editor, placeholder] {
+                child.translatesAutoresizingMaskIntoConstraints = false
+            }
             NSLayoutConstraint.activate([
                 row.leadingAnchor.constraint(equalTo: leadingAnchor),
                 row.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -98,7 +115,9 @@ struct CoachComposerField: UIViewRepresentable {
             ])
         }
 
-        required init?(coder: NSCoder) { return nil }
+        required init?(coder: NSCoder) {
+            return nil
+        }
 
         override var intrinsicContentSize: CGSize {
             CGSize(width: UIView.noIntrinsicMetric, height: height(for: max(1, bounds.width)))
@@ -107,16 +126,23 @@ struct CoachComposerField: UIViewRepresentable {
         func height(for width: CGFloat) -> CGFloat {
             let textWidth = max(1, width - 44 - 10 - 28)
             let lineHeight = editor.font?.lineHeight ?? 22
-            let measured = editor.sizeThatFits(CGSize(width: textWidth, height: .greatestFiniteMagnitude)).height
+            let measured = editor.sizeThatFits(CGSize(width: textWidth, height: .greatestFiniteMagnitude))
+                .height
             return ceil(max(44, min(max(lineHeight, measured), lineHeight * 4) + 20))
         }
 
         func refresh(isAnswering: Bool) {
             let currentText = editor.text ?? ""
             placeholder.isHidden = !currentText.isEmpty
-            action.isEnabled = isAnswering || !currentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            action.setImage(UIImage(systemName: isAnswering ? "stop.circle.fill" : "arrow.up.circle.fill"), for: .normal)
-            action.accessibilityLabel = isAnswering ? String(localized: "Stop response") : String(localized: "Send")
+            action.isEnabled = isAnswering || !currentText.trimmingCharacters(in: .whitespacesAndNewlines)
+                .isEmpty
+            action.setImage(
+                UIImage(systemName: isAnswering ? "stop.circle.fill" : "arrow.up.circle.fill"),
+                for: .normal
+            )
+            action
+                .accessibilityLabel = isAnswering ? String(localized: "Stop response") :
+                String(localized: "Send")
             action.accessibilityIdentifier = isAnswering ? "coach.stop" : "coach.send"
             invalidateIntrinsicContentSize()
         }
@@ -126,29 +152,43 @@ struct CoachComposerField: UIViewRepresentable {
         var parent: CoachComposerField
         weak var view: ComposerView?
 
-        init(_ parent: CoachComposerField) { self.parent = parent }
+        init(_ parent: CoachComposerField) {
+            self.parent = parent
+        }
 
-        func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange,
-                      replacementText text: String) -> Bool {
+        func textView(
+            _ textView: UITextView,
+            shouldChangeTextIn range: NSRange,
+            replacementText text: String
+        ) -> Bool {
             // A pasted paragraph remains editable. Only the keyboard's single newline sends;
             // an input method must finish composing its marked text first.
-            guard text == "\n", textView.markedTextRange == nil else { return true }
+            guard text == "\n", textView.markedTextRange == nil else {
+                return true
+            }
             submit()
             return false
         }
 
         func textViewDidChange(_ textView: UITextView) {
             if textView.markedTextRange == nil {
-                let bounded = String((textView.text ?? "").prefix(FoundationModelsCoachPrompt.maximumQuestionCharacters))
-                if textView.text != bounded { textView.text = bounded }
+                let bounded = String((textView.text ?? "")
+                    .prefix(FoundationModelsCoachPrompt.maximumQuestionCharacters))
+                if textView.text != bounded {
+                    textView.text = bounded
+                }
             }
             view?.refresh(isAnswering: parent.isAnswering)
         }
 
-        func textViewDidBeginEditing(_ textView: UITextView) { parent.onFocus() }
+        func textViewDidBeginEditing(_ textView: UITextView) {
+            parent.onFocus()
+        }
 
         private func submit() {
-            guard !parent.isAnswering, let view, parent.onSubmit(view.editor.text ?? "") else { return }
+            guard !parent.isAnswering, let view, parent.onSubmit(view.editor.text ?? "") else {
+                return
+            }
             view.editor.text = ""
             view.refresh(isAnswering: false)
             // At accessibility sizes the keyboard leaves very little space for a reply.
@@ -158,9 +198,15 @@ struct CoachComposerField: UIViewRepresentable {
         }
 
         @objc func performAction() {
-            if parent.isAnswering { parent.onStop() } else { submit() }
+            if parent.isAnswering {
+                parent.onStop()
+            } else {
+                submit()
+            }
         }
 
-        @objc func dismissKeyboard() { view?.editor.resignFirstResponder() }
+        @objc func dismissKeyboard() {
+            view?.editor.resignFirstResponder()
+        }
     }
 }

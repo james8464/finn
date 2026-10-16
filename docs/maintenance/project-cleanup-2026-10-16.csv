@@ -1,0 +1,1155 @@
+path,action,reason
+.github/workflows/ios-tests.yml,retained,"Project source, tooling, website or configuration"
+.github/workflows/pages.yml,retained,"Project source, tooling, website or configuration"
+.gitignore,retained,"Project source, tooling, website or configuration"
+AGENTS.md,retained,"Project source, tooling, website or configuration"
+CONTRIBUTORS.md,retained,"Project source, tooling, website or configuration"
+Design/Finn.pen,retained,"Project source, tooling, website or configuration"
+Design/Plumb-full-export-2026-10-15.fig,removed,Superseded Plumb design export; current editable design is Finn.pen and live Figma
+Design/Presentation/.DS_Store,removed,Finder metadata
+Design/Presentation/Finn-Keynote-2026-10-16/.DS_Store,removed,Finder metadata
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/Apple Design Resources License.rtf,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/finn-notification-official.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/fitness-custom-plans-2x.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/fitness-custom-plans.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/fitness-plus-official-2x.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/fitness-plus-official.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/foundation-models.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/geometry-source.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/iphone18promax-silver.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/reminders-icon.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/apple/watch11-black.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/coach-context.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/coach.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/detail-comparison.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/detail.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/finn-app-icon.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/history.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/home.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/live.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/posture-cue-detail.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/posture-guide.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/posture.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/result-observation.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/result.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/setup.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/watch-coach.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/watch-idle.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/workout.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-contact.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/01.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/03.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/04.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/05.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/06.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/07.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/08.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/09.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-frames/10.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/morning-source.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-contact.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/01.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/03.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/04.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/05.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/06.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/07.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/08.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/09.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-frames/10.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/office-source.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/portrait-preview-source.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-contact.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/01.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/03.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/04.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/05.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/06.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/07.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/08.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/09.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-frames/10.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/assets/film/workout-source.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/index.html,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/.DS_Store,removed,Finder metadata
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/README.md,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/REVISION-TODO.md,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/apple-notification-source.md,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/create.mjs,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/final-validation.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/finalize-polished.mjs,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/finalize.mjs,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/keynote-validation.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/node_modules,removed,Machine-specific dependency symlink
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/refined-validation.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/Painter.swift,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0001.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0002.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0003.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0004.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0005.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0006.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0007.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0008.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0009.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0010.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0011.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0012.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0013.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0014.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0015.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0016.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0017.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0018.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0019.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0020.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0021.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0022.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0023.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0024.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0025.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0026.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0027.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0028.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0029.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0030.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0031.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0032.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0033.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0034.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0035.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0036.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0037.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0038.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0039.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0040.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0041.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0042.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0043.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0044.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0045.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0046.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0047.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0048.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0049.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0050.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0051.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0052.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0053.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0054.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0055.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0056.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0057.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0058.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0059.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0060.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0061.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0062.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0063.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0064.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0065.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0066.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0067.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0068.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0069.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0070.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0071.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0072.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0073.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0074.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0075.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0076.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0077.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0078.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0079.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0080.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0081.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0082.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0083.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0084.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0085.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0086.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0087.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0088.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0089.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0090.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0091.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0092.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0093.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0094.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0095.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0096.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0097.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/plates/0098.jpg,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/poses.json,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/status.png,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/stop.png,removed,Regenerable native render cache; source and raw inputs retained
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/wwdc-polished-validation.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/wwdc-validation.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/delivery-checks-progress.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/delivery-checks-refined.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/delivery-checks.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/five-minute-scenes.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/media/02.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/media/03.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/media/04.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/media/05.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/media/06.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/media/07.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/media/08.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/media/09.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/media/10.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/motion-direction.md,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/output/Finn-WWDC-5min-Playback.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/output/Finn-WWDC-5min-Polished.key,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/output/Finn-WWDC-5min-Polished.pptx,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/01.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/02-02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/02-12.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/02-poster.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/02.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/03-02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/03-12.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/03-poster.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/03.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/04-00.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/04-02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/04-05.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/04-08.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/04-16.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/04-poster.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/04.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/05-00.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/05-02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/05-05.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/05-08.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/05-16.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/05-poster.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/05.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/06-00.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/06-02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/06-05.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/06-08.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/06-16.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/06-27.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/06-poster.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/06.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/07-00.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/07-02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/07-05.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/07-08.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/07-16.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/07-27.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/07-poster.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/07-progress.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/07.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/08-02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/08-12.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/08-poster.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/08.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/09-00.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/09-02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/09-05.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/09-08.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/09-16.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/09-27.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/09-poster.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/09.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/10-02.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/10-12.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/10-poster.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/10.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/contact-sheet-v5.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/contact-sheet.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-00.4.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-01.3.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-02.2.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-04.3.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-07.4.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-08.8.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-11.3.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-13.8.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-16.0.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-19.0.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-23.7.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-27.6.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-29.7.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-33.7.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-40.8.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-47.0.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-52.5.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v6-57.7.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-13.8.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-28.7.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-30.2.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-30.7.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-31.4.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-32.2.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-37.8.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-38.5.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-39.2.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-39.8.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-40.3.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/film-v7-43.0.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/finn-notification.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/keynote-technical-proof.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/motion-review-v5.jpg,removed,Superseded preview
+Design/Presentation/Finn-Keynote-2026-10-16/keynote/preview/notification-updated.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/preview/00-film-figma.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/01.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/02.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/03.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/04.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/05.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/06.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/07.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/08.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/09.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/10.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/11.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/12.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/13.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/14.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/15.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/16.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/17.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/18.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/19.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/20.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/contact-sheet-v2.jpg,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/contact-sheet-v3.jpg,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/contact-sheet.jpg,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/preview/figma-final-review.png,removed,Superseded 18/20-slide previews; current 10-slide previews live in keynote/preview
+Design/Presentation/Finn-Keynote-2026-10-16/production/asset-manifest.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/attach-videos.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-01.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-02.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-03.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-04.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-05.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-06.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-07.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-08.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-09.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-10.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-11.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-12.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-13.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-14.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-15.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-16.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-17.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/build-slide-18.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/production/cinematic-scenes.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/creative-ideas.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/delivery-checks.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/figma-assets.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film-concept.html,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/directors-treatment.md,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/edit-decision-list-v6.json,removed,Superseded film review output
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/edit-decision-list-v7.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/edit-decision-list.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/film-poster-v3.jpg,removed,Superseded film review output
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/film-poster.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/film-storyboard-v3.jpg,removed,Superseded film review output
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/film-storyboard-v6.jpg,removed,Superseded film review output
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/film-storyboard-v7.jpg,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/film-storyboard.jpg,removed,Superseded film review output
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/mix-v6.wav,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/original-score.wav,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/portrait-vision-poses.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/quality-check.log,removed,Superseded film review output
+Design/Presentation/Finn-Keynote-2026-10-16/production/film/source-manifest.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-stills/182-31-n8.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-stills/182-515-n32.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-stills/182-542-n36.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-stills/182-542-n39.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-stills/182-627-n52.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-stills/182-627-n54.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-stills/182-647-n62.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-stills/182-667-n66.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-stills/182-667-n69.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/native-videos.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/01.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/02.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/03.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/04.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/05.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/06.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/07.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/08.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/09.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/10.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/11.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/12.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/13.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/14.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/15.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/16.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/17.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/notes/18.png,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/01.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/02.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/03.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/04.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/05.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/06.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/07.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/08.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/09.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/10.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/11.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/12.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/13.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/14.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/15.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/16.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/17.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/18.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/19.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/20.svg,removed,Generated earlier long-deck output
+Design/Presentation/Finn-Keynote-2026-10-16/production/result-motion-v2-proof.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/slide-plan.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source-inputs/README.md,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source-inputs/finn-clean-posture-tip.png,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source-inputs/finn-keynote-portrait-poses.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source-inputs/finn-keynote-portrait.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source-inputs/progress/native-capture.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source-inputs/progress/watch-prefix.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-coach-frame.swift,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-custom-motion-measure.swift,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-fix-tests.py,removed,Completed one-off maintenance/patch script; resulting source already checked in
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-history-detail.swift,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-image-labels.swift,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-launch-frames.swift,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-measure-animation-verified.swift,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-measure-animation.swift,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-monitor-ci.py,removed,Completed one-off maintenance/patch script; resulting source already checked in
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-options-page.swift,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-refresh-figma-ui.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn-update-ui-assets.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_attach_videos.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_delivery.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_embed_media.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_export_launch.swift,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_finn_notification.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_inspect.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_v3.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_v6.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_v7.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_finish_refined.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_five_min.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_github_cleanup.py,removed,Completed one-off maintenance/patch script; resulting source already checked in
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_keynote_handoff.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_notification_type.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_notification_type_fast.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_ocr.swift,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_progress_walkthrough.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_quality_deck.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_quality_delivery.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_quality_finish_assets.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_quality_player.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_render.swift,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_render_keynote.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_render_keynote_v5.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_render_scenes.cjs,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_revision5.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_revision7.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_scene_layers.cjs,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_smooth_export.swift,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_smooth_native.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_static_fix.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_storage_cleanup.py,removed,Completed one-off maintenance/patch script; resulting source already checked in
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_update_notification_copy.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_upgrade_v7.py,removed,Completed one-off maintenance/patch script; resulting source already checked in
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_v2.py,replaced,Shared helpers retained as finn_layout_helpers.py; obsolete long-deck generator removed
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_v2_player.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_verify_v7.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/make_finn_notes.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
+Design/Presentation/Finn-Keynote-2026-10-16/production/static-image-fixes.json,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/technology-motion-proof.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/update-notes.js,removed,One-off upload scripts for superseded Figma deck
+Design/Presentation/Finn-Keynote-2026-10-16/speaker-notes.html,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/videos/finn-launch-animation.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/videos/finn-opening-film.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/videos/history-coach.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/videos/live.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/videos/result.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/videos/set-walkthrough.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/videos/setup.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/videos/watch-coach.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/videos/watch-linked.mp4,retained,"Current delivery, source asset, render dependency or provenance"
+Design/README.md,retained,"Project source, tooling, website or configuration"
+Design/Research/Apple-WWDC-2026-10-16/START-HERE.txt,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/analysis/research-report.html,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/analysis/research-report.txt,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/catalog/assets.csv,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/catalog/assets.json,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/catalog/font-evidence.json,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/catalog/keynotes.json,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/catalog/library-summary.json,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/catalog/moments.json,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/catalog/press-assets.json,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/catalog/validation.json,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2010-facetime-demo.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2010-retina-comparison.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2013-intention-geometry.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2013-ios7-design-film.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2013-mac-pro-film.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2019-mac-pro-reveal.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2019-price-sequence.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2019-swiftui-reveal.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2020-big-sur-film.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2020-silicon-transition.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2021-universal-control.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2022-macbook-air-film.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2023-opening-camera.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2023-vision-announcement.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2023-vision-product-film.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2023-vision-use-case.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2024-intelligence-reveal.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2024-opening-skydiving.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2024-privacy-compute.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2024-siri-demo.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2025-design-evolution.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2025-glass-in-ui.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2025-liquid-glass-reveal.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2025-workout-audio.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2025-workout-buddy.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2026-camera-intelligence.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2026-intelligence-framing.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/clips/wwdc2026-siri-ai-reveal.mp4,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/index.html,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2019-mac-pro-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2019-mac-pro-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2019-mac-pro-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2019-mac-pro-04.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2020-silicon-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2020-silicon-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2023-highlights-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2023-highlights-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2023-highlights-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2023-highlights-04.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2024-highlights-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2024-highlights-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2024-highlights-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2024-highlights-04.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2025-design-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2025-design-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2025-design-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2025-design-04.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2026-highlights-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2026-highlights-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2026-highlights-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/press-photos/2026-highlights-04.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2010-facetime-demo-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2010-facetime-demo-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2010-facetime-demo-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2010-retina-comparison-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2010-retina-comparison-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2010-retina-comparison-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2013-intention-geometry-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2013-intention-geometry-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2013-intention-geometry-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2013-ios7-design-film-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2013-ios7-design-film-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2013-ios7-design-film-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2013-mac-pro-film-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2013-mac-pro-film-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2013-mac-pro-film-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2019-mac-pro-reveal-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2019-mac-pro-reveal-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2019-mac-pro-reveal-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2019-price-sequence-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2019-price-sequence-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2019-price-sequence-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2019-swiftui-reveal-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2019-swiftui-reveal-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2019-swiftui-reveal-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2020-big-sur-film-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2020-big-sur-film-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2020-big-sur-film-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2020-silicon-transition-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2020-silicon-transition-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2020-silicon-transition-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2021-universal-control-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2021-universal-control-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2021-universal-control-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2022-macbook-air-film-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2022-macbook-air-film-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2022-macbook-air-film-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-opening-camera-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-opening-camera-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-opening-camera-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-vision-announcement-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-vision-announcement-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-vision-announcement-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-vision-product-film-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-vision-product-film-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-vision-product-film-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-vision-use-case-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-vision-use-case-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2023-vision-use-case-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-intelligence-reveal-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-intelligence-reveal-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-intelligence-reveal-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-opening-skydiving-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-opening-skydiving-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-opening-skydiving-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-privacy-compute-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-privacy-compute-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-privacy-compute-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-siri-demo-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-siri-demo-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2024-siri-demo-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-design-evolution-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-design-evolution-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-design-evolution-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-glass-in-ui-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-glass-in-ui-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-glass-in-ui-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-liquid-glass-reveal-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-liquid-glass-reveal-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-liquid-glass-reveal-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-workout-audio-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-workout-audio-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-workout-audio-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-workout-buddy-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-workout-buddy-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2025-workout-buddy-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2026-camera-intelligence-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2026-camera-intelligence-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2026-camera-intelligence-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2026-intelligence-framing-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2026-intelligence-framing-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2026-intelligence-framing-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2026-siri-ai-reveal-01.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2026-siri-ai-reveal-02.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/stills/wwdc2026-siri-ai-reveal-03.jpg,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/supporting-slides/fluid-interfaces.pdf,retained,Requested Apple keynote research and references
+Design/Research/Apple-WWDC-2026-10-16/supporting-slides/presenting-design.pdf,retained,Requested Apple keynote research and references
+Design/images/finn-onboarding/airpodspro-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/airpodspro-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/apple-pay-plain-official.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/apple-pay-subscribe-official.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/applewatch-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/applewatch-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/battery.100percent-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/battery.100percent-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/cellularbars-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/cellularbars-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/checkmark-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/checkmark-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/checkmark.circle.fill-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/checkmark.circle.fill-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/checkmark.square.fill-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/checkmark.square.fill-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/chevron.left-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/chevron.left-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/chevron.right-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/chevron.right-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/creditcard.fill-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/creditcard.fill-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/faceid-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/faceid-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/figure.strengthtraining.functional-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/figure.strengthtraining.functional-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/ios-keyboard-empty.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/ios-keyboard-filled.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/iphone.gen3.radiowaves.left.and.right-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/iphone.gen3.radiowaves.left.and.right-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/lock.fill-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/lock.fill-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/name-continue-empty.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/name-continue-filled.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/speaker.wave.2.fill-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/speaker.wave.2.fill-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/square-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/square-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/wifi-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/wifi-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/xmark-black.png,retained,"Project source, tooling, website or configuration"
+Design/images/finn-onboarding/xmark-white.png,retained,"Project source, tooling, website or configuration"
+Design/images/onboarding-squat.png,retained,"Project source, tooling, website or configuration"
+Design/images/welcome-athletes.png,retained,"Project source, tooling, website or configuration"
+Finn/BrandArtwork/AppIconAppearances.png,retained,"Application, extension, tests, project configuration or current branding"
+Finn/BrandArtwork/AppIconPreview.png,retained,"Application, extension, tests, project configuration or current branding"
+Finn/BrandArtwork/AppIconPreview.svg,retained,"Application, extension, tests, project configuration or current branding"
+Finn/BrandArtwork/FinnMark-Reversed.svg,retained,"Application, extension, tests, project configuration or current branding"
+Finn/BrandArtwork/FinnMark.svg,retained,"Application, extension, tests, project configuration or current branding"
+Finn/BrandArtwork/LaunchMotion.mp4,retained,"Application, extension, tests, project configuration or current branding"
+Finn/BrandArtwork/LaunchMotion.png,retained,"Application, extension, tests, project configuration or current branding"
+Finn/BrandArtwork/README.md,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn-Info.plist,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn.entitlements,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn.xcodeproj/project.pbxproj,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn.xcodeproj/project.xcworkspace/contents.xcworkspacedata,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn.xcodeproj/xcshareddata/xcschemes/Finn-ReleaseSmoke.xcscheme,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn.xcodeproj/xcshareddata/xcschemes/Finn.xcscheme,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/AppIcon.icon/Assets/Crown.svg,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/AppIcon.icon/Assets/Middle.svg,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/AppIcon.icon/Assets/Stem.svg,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/AppIcon.icon/icon.json,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/AccentColor.colorset/Contents.json,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/AppIcon.appiconset/Contents.json,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Finn/Assets.xcassets/Contents.json,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/DemoAthlete.imageset/Contents.json,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/DemoAthlete.imageset/demo-athlete.png,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/FinnMark.imageset/Contents.json,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/FinnMark.imageset/FinnMark-Dark.png,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/FinnMark.imageset/FinnMark.png,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/HomeBackdrop.imageset/Contents.json,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/HomeBackdrop.imageset/home-backdrop.png,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/LaunchBackground.colorset/Contents.json,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/OnboardingDemoPhone.imageset/Contents.json,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Assets.xcassets/OnboardingDemoWatch.imageset/Contents.json,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Badges/BadgeDemo.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Badges/BadgeLedger.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Badges/BadgeRules.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Badges/BadgesView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Capture/AVCameraCaptureDriver.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Capture/CameraFeedView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Capture/CameraPoseSource.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Capture/PoseFrameAnalyzer.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Capture/PreviewFeed.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Capture/VideoFilePoseSource.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Coach/ClaudeDemoEngine.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Coach/CoachComposerField.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Coach/CoachContext.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Coach/CoachConversation.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Coach/CoachDeveloperSection.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Coach/CoachEngine.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Coach/CoachView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Coach/WorkoutPlanView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/ContentView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/FinnApp.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/AppPageStyle.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/DashboardActivity.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/DashboardSection.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/DashboardView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/ExerciseFigure.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/FinnCoachCard.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/FinnFirstTryTrigger.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/HomeComponents.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/HomeTabBar.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/PostureGuideEvidence.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Home/WrappingText.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/InfoPlist.xcstrings,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Intents/AppShortcuts.xcstrings,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Intents/ExerciseChoice.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Intents/FinnShortcuts.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Intents/LastSetIntent.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Intents/LastSetReport.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Intents/LastSetSnippet.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Intents/ShowHistoryIntent.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Intents/SiriLaunchRequests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Intents/StartSetIntent.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Launch/FinnLogoMotionFrame.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Launch/FinnLogoPlate.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Launch/FinnStartupView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Localizable.xcstrings,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Onboarding/AboutYouView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Onboarding/FinnDemoView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Onboarding/IntroComponents.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Onboarding/OnboardingDemoPages.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Onboarding/OnboardingParts.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Onboarding/OnboardingProfile.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Onboarding/OnboardingView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Onboarding/OnboardingWelcomeView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Onboarding/PaywallView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/PersonalizationOfferView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/PrivacyInfo.xcprivacy,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/ExercisePicker.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/MeasuredFormCard.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/MovementGuide.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/PostureMomentsCard.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/PostureSection.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/ProgressDemo.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/ProgressTabView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/StrengthChart.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/StrengthSection.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Progress/StrengthTrend.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Sounds/feedback-bright-finish.wav,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Sounds/feedback-bright-start.wav,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Sounds/feedback-soft-finish.wav,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Sounds/feedback-soft-start.wav,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Stats/StatsSections.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Widgets/LastSetSnapshot.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Widgets/SetActivityAttributes.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Widgets/SetLiveActivity.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Widgets/WidgetSharingSessionStore.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Widgets/WidgetViews.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/Accessories.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/AccessoryMonitor.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/AngleRecognition.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/AthleteTracker.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/BodySegments.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/ComparisonNarrator.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/CueSelector.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/DemoPoseSource.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/EvidenceGate.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/ExerciseDefinition.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/ExerciseRecognition.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/FinnPreferences.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/FitnessWorkout.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/FormChecks.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/FormTrend.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/HealthKitReader.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/HealthKitWorkoutExporter.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/HealthPersonalization.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/LiveSet.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/LocalSessionStore.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/MistakeProfile.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/ModelGenerationGate.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/PlannedWorkout.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/PoseWindowFeatures.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/SetComparison.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/SetShareSummary.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/SetWindow.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/SilhouetteCheck.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/SkeletonGeometry.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/SpokenLanguage.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/SpokenObservation.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/SquatAnalyzer.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/SyntheticExerciseMotion.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/ViewCheck.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/WatchBridge.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/WatchCoachRules.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/WatchMessages.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/WatchSync.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/WorkoutFeedback.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/WorkoutModels.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/WorkoutSessionModel+Health.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/Workout/WorkoutSessionModel.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/WorkoutTab/LaunchWorkoutButton.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/WorkoutTab/NextWorkoutCard.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/WorkoutTab/WorkoutHistoryRow.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Finn/WorkoutTab/WorkoutTabView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/AccessoriesTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/AngleRecognitionTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/AthleteTrackingTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/BadgeRulesTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/CameraStateTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/CoachTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/ComparisonNarratorTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/DashboardActivityTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/DetectionRecoveryTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/EvidenceAndCueTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/ExerciseAnalyzerTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/ExerciseComparisonNarratorTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/ExerciseRecognitionTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/FinnTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/FitnessSessionTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/FitnessWorkoutTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/FixtureReplayTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/Fixtures/ConstantPushUpClassifierFixture.mlmodel,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/FormChecksTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/FormFrameSelectionTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/FormTrendTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/HealthPersonalizationTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/IntentsTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/LiveSetTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/MistakeProfileTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/ModelGenerationGateTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/MultiExerciseSessionTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/NativeCoachIntegrationTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/OnboardingProfileTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/PaletteAccessibilityTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/PartialVisibilityTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/PoseIntegrityTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/PoseTestHelpers.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/PostureAdviceTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/PostureGuideTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/PreviewFeedTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/PullUpTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/PushUpShouldersTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/RepExtremesAndHintTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/SessionStoreAndComparisonTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/SetShareSummaryTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/SetWindowTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/SilhouetteCheckTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/SkeletonOverlayTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/SpokenObservationTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/SquatAnalyzerTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/StartupTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/StrengthTrendTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/ViewCheckTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/WatchCoachRulesTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/WatchMessagesTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/WatchSyncTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/WidgetSharingTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/WorkoutFeedbackTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/WorkoutPlannerTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnTests/WorkoutSessionModelTests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/AppleFitnessUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/CameraAngleUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/ClippingRegressionUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/CoachReliabilityUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/DashboardUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/ExerciseOptionsUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/FinnUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/HomeNavigation.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/InterfaceAccessibilityUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/NativeUIReviewUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/OnboardingTourUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/PresentationReviewUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/ProgressAndWorkoutUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/ScreenTourUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/SkeletonOverlayUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/StartupUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/WatchCompanionUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnUITests/WorkoutFlowUITests.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWatch-Info.plist,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWatch.entitlements,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWatch/FinnWatchApp.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWatch/InfoPlist.xcstrings,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWatch/Localizable.xcstrings,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWatch/RhythmWorkoutSession.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWatch/WatchLink.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWatch/WatchSetView.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWidgets-Info.plist,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWidgets.entitlements,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWidgets/FinnWidgetsBundle.swift,retained,"Application, extension, tests, project configuration or current branding"
+Finn/FinnWidgets/Localizable.xcstrings,retained,"Application, extension, tests, project configuration or current branding"
+Finn/GIT guide.md,retained,"Application, extension, tests, project configuration or current branding"
+Finn/TestConfig.storekit,retained,"Application, extension, tests, project configuration or current branding"
+Finn/Vendor/Spark/.gitignore,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/CHANGELOG.md,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/IDENTITY.json,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/Package.swift,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/Sources/Resources/PrivacyInfo.xcprivacy,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/Sources/SparkFlash.swift,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/Info.plist,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64/SparkLib.framework/Headers/SparkLib-Swift.h,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64/SparkLib.framework/Info.plist,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64/SparkLib.framework/Modules/SparkLib.swiftmodule/arm64-apple-ios.abi.json,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64/SparkLib.framework/Modules/SparkLib.swiftmodule/arm64-apple-ios.private.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64/SparkLib.framework/Modules/SparkLib.swiftmodule/arm64-apple-ios.swiftdoc,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64/SparkLib.framework/Modules/SparkLib.swiftmodule/arm64-apple-ios.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64/SparkLib.framework/Modules/module.modulemap,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64/SparkLib.framework/SparkLib,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Headers,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Modules,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Resources,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/SparkLib,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Headers/SparkLib-Swift.h,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Modules/SparkLib.swiftmodule/arm64-apple-ios-macabi.abi.json,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Modules/SparkLib.swiftmodule/arm64-apple-ios-macabi.private.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Modules/SparkLib.swiftmodule/arm64-apple-ios-macabi.swiftdoc,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Modules/SparkLib.swiftmodule/arm64-apple-ios-macabi.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Modules/SparkLib.swiftmodule/x86_64-apple-ios-macabi.abi.json,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Modules/SparkLib.swiftmodule/x86_64-apple-ios-macabi.private.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Modules/SparkLib.swiftmodule/x86_64-apple-ios-macabi.swiftdoc,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Modules/SparkLib.swiftmodule/x86_64-apple-ios-macabi.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Modules/module.modulemap,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/Resources/Info.plist,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/A/SparkLib,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-maccatalyst/SparkLib.framework/Versions/Current,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Headers/SparkLib-Swift.h,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Info.plist,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Modules/SparkLib.swiftmodule/arm64-apple-ios-simulator.abi.json,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Modules/SparkLib.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Modules/SparkLib.swiftmodule/arm64-apple-ios-simulator.swiftdoc,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Modules/SparkLib.swiftmodule/arm64-apple-ios-simulator.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Modules/SparkLib.swiftmodule/x86_64-apple-ios-simulator.abi.json,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Modules/SparkLib.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Modules/SparkLib.swiftmodule/x86_64-apple-ios-simulator.swiftdoc,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Modules/SparkLib.swiftmodule/x86_64-apple-ios-simulator.swiftinterface,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/Modules/module.modulemap,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/SparkLib,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/_CodeSignature/CodeDirectory,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/_CodeSignature/CodeRequirements,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/_CodeSignature/CodeResources,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+Finn/Vendor/Spark/SparkLib.xcframework/ios-arm64_x86_64-simulator/SparkLib.framework/_CodeSignature/CodeSignature,removed,"Unlinked SDK, empty legacy icon catalog, or superseded deck finalizer; current targets use AppIcon.icon"
+LICENSE,retained,"Project source, tooling, website or configuration"
+README.md,retained,"Project source, tooling, website or configuration"
+docs/README.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/architecture/plans/2026-10-11-finn-iphone-squat-mvp.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/architecture/plans/2026-10-12-workout-replay-and-capture.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/architecture/plans/2026-10-13-posture-advice.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/architecture/plans/2026-10-13-release-gap-closure.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/architecture/plans/2026-10-15-native-ui.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/architecture/specs/2026-10-12-workout-replay-and-capture-design.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/architecture/specs/2026-10-15-native-ui-design.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/business/freemium.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/apple-hig-agent-reference.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/apple-watch-and-airpods.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/hig-ui-coverage.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/home-dashboard.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/iphone-experience-review.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/motion-haptics.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/native-ui-verification.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/00-home-dark.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/00-home-largest-text.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/00-home.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/01-premier-lancement-accueil.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/02-premier-lancement-accueil-bas.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/03-premier-lancement-avant-camera.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/04-premier-lancement-autorisation-camera.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/05-accueil-sombre.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/06-choix-exercice-pompes.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/07-choix-exercice-souleve.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/07b-choix-exercice-fente.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/07c-menu-plus.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/07d-choix-exercice-tractions.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/08-placement.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/09-serie-en-cours.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/10-resultat.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/11-resultat-bas.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/12-options.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/13-confidentialite.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/14-historique.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/15-accueil-apres-une-serie.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/README.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/coach.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/detail.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/history.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/home.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/live.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/manifest.json,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/posture.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/result.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/setup.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/keynote/workout.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/00-home-dark.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/00-home-largest-text.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/audit-demo-header-crop.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/audit-scrolled-result-crop.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/awards-dark.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/camera-primer-largest-text-bottom.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/camera-primer-largest-text.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/coach-dark.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/coach-demo-saved-set.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/coach-largest-text-end.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/coach-largest-text-keyboard.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/coach-largest-text-reduced-motion.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/contrast-result-passed.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/contrast-result-scrolled-passed.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/contrast-saved-history-passed.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/history-dark.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/history-demo-saved-set.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/options-dark.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/options-largest-text-end.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/options-largest-text-reduced-motion.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/posture-dark.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/posture-largest-text-end.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/posture-largest-text-reduced-motion.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/privacy-camera-details.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/privacy-dark.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/privacy-largest-text-end.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/privacy-largest-text-reduced-motion.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/verification.json,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/workout-dark.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/workout-largest-text-end.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/workout-largest-text-reduced-motion.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/screenshots/finn/review/workout-largest-text.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/design/welcome-hig.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/maintenance/branch-integration-2026-10-16.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/maintenance/branch-integration-inventory.json,retained,"Current documentation, validation evidence or integration provenance"
+docs/maintenance/github-storage-cleanup-2026-10-16.json,retained,"Current documentation, validation evidence or integration provenance"
+docs/maintenance/legacy-integration-parents.json,retained,"Current documentation, validation evidence or integration provenance"
+docs/maintenance/storage-cleanup-2026-10-16.json,retained,"Current documentation, validation evidence or integration provenance"
+docs/maintenance/storage-cleanup-2026-10-16.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/product/brief.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/product/market-research.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/product/pitch.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/product/rationale.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/product/user-needs.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/app-privacy-answers.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/app-store-fiche.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/app-store-submission.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/finn-rename-status.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/listing-copy.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/marche-a-suivre-15-octobre.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/privacy-policy.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/public-pages.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/README.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/iphone-6.9-1320x2868-01-accueil.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/iphone-6.9-1320x2868-02-accueil-pompes.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/iphone-6.9-1320x2868-03-accueil-tractions.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/iphone-6.9-1320x2868-04-avant-camera.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/iphone-6.9-1320x2868-05-options.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/iphone-6.9-1320x2868-06-confidentialite.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/simulateur-demo/iphone-6.9-1320x2868-accueil-apres-serie-DEMO.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/simulateur-demo/iphone-6.9-1320x2868-resultat-DEMO.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/simulateur-demo/iphone-6.9-1320x2868-resultat-bas-DEMO.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/screenshots/simulateur-demo/iphone-6.9-1320x2868-serie-en-cours-DEMO.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/support.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/release/verify-archive.sh,retained,"Current documentation, validation evidence or integration provenance"
+docs/superpowers/plans/2026-10-11-finn-iphone-squat-mvp.md,removed,Exact duplicate of docs/architecture/plans document
+docs/superpowers/plans/2026-10-12-workout-replay-and-capture.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/superpowers/plans/2026-10-13-posture-advice.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/superpowers/plans/2026-10-13-release-gap-closure.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/superpowers/specs/2026-10-12-workout-replay-and-capture-design.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/automated-checks-2026-10-15.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/backend-reliability-2026-10-16.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/branch-cleanup-2026-10-15.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/branch-integration-2026-10-15.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/clean-pair-phone-six-rep-result.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/clean-pair-watch-after-six-rep.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/clean-pair-watch-after-xcode-test.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/clean-pair-xcode-test-summary.json,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/front-view-result.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/live-set.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/paired-phone-result.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/paired-watch-idle.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/range-result.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/spanish-home.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/evidence/finn-device-audit/watch-idle.png,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/exercise-rules-v1.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/form-analysis-v2.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/form-checks-v1.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/full-app-ui-review-2026-10-15.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/full-device-audit-2026-10-16.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/github-cleanup-2026-10-16.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/physical-iphone-run.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/score_squat_v1.py,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/squat-v1-protocol.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/squat-v1-results.md,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/squat-v1-template.csv,retained,"Current documentation, validation evidence or integration provenance"
+docs/validation/test_score_squat_v1.py,retained,"Current documentation, validation evidence or integration provenance"
+planning.md,retained,"Project source, tooling, website or configuration"
+site/favicon.svg,retained,"Project source, tooling, website or configuration"
+site/index.html,retained,"Project source, tooling, website or configuration"
+site/privacy.html,retained,"Project source, tooling, website or configuration"
+site/styles.css,retained,"Project source, tooling, website or configuration"
+site/support.html,retained,"Project source, tooling, website or configuration"
+tests/test_score_squat_v1.py,retained,"Project source, tooling, website or configuration"
+tools/ci_test_groups.py,retained,"Project source, tooling, website or configuration"
+tools/exercise-classifier/README.md,retained,"Project source, tooling, website or configuration"
+tools/exercise-classifier/angle-model/ExtractPoses/main.swift,retained,"Project source, tooling, website or configuration"
+tools/exercise-classifier/angle-model/README.md,retained,"Project source, tooling, website or configuration"
+tools/exercise-classifier/angle-model/TrainAngleClassifier/main.swift,retained,"Project source, tooling, website or configuration"
+tools/exercise-classifier/angle-model/build.sh,retained,"Project source, tooling, website or configuration"
+tools/exercise-classifier/make_test_fixture.py,retained,"Project source, tooling, website or configuration"
+tools/exercise-classifier/prepare_clips.py,retained,"Project source, tooling, website or configuration"
+tools/exercise-classifier/test_prepare_clips.py,retained,"Project source, tooling, website or configuration"
+tools/exercise-classifier/train_exercise_classifier.swift,retained,"Project source, tooling, website or configuration"
+tools/replay/README.md,retained,"Project source, tooling, website or configuration"
+tools/replay/ReplayVideo.swift,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-angled-phone.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-dim.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-far.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-feet-hidden-poses.json,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-feet-hidden.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-low-resolution.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-lower-body-hidden.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-mirrored.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-motion-blur.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-off-center.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-overexposed.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-phone-shake.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-six-reps-poses.json,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-six-reps.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-slow.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-too-far.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/squat-warm-indoor.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/fixtures/standing-no-reps.mp4,retained,"Project source, tooling, website or configuration"
+tools/replay/generate_video_variants.py,retained,"Project source, tooling, website or configuration"
+tools/replay/replay.sh,retained,"Project source, tooling, website or configuration"
+tools/replay/test_generated_videos.sh,retained,"Project source, tooling, website or configuration"
+tools/test_backend.sh,retained,"Project source, tooling, website or configuration"

@@ -17,7 +17,11 @@ final class AppleFitnessUITests: XCTestCase {
         XCTAssertTrue(toggle.exists)
         XCTAssertEqual(toggle.value as? String, "0")
         XCTAssertFalse(toggle.isEnabled)
-        XCTAssertTrue(app.staticTexts["Saves finished sessions with duration and reps, without calorie or heart-rate estimates."].exists)
+        XCTAssertTrue(app
+            .staticTexts[
+                "Saves finished sessions with duration and reps, without calorie or heart-rate estimates."
+            ]
+            .exists)
         XCTAssertTrue(app.staticTexts["Demo and recorded input are never saved to Apple Health."].exists)
     }
 }

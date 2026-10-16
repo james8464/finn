@@ -7,21 +7,31 @@ nonisolated struct StatsSummary {
     let sessions: [WorkoutSessionSummary]
     let calendar = Calendar.current
 
-    var totalReps: Int { sessions.flatMap(\.sets).reduce(0) { $0 + $1.analysis.reps.count } }
+    var totalReps: Int {
+        sessions.flatMap(\.sets).reduce(0) { $0 + $1.analysis.reps.count }
+    }
 
     /// days in a row with a session, counting today or yesterday as the start
     var streakDays: Int {
         let days = Set(sessions.map { calendar.startOfDay(for: $0.startedAt) })
-        guard !days.isEmpty else { return 0 }
+        guard !days.isEmpty else {
+            return 0
+        }
         var day = calendar.startOfDay(for: .now)
         if !days.contains(day) {
-            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: day), days.contains(yesterday) else { return 0 }
+            guard
+                let yesterday = calendar.date(byAdding: .day, value: -1, to: day),
+                days.contains(yesterday) else {
+                return 0
+            }
             day = yesterday
         }
         var streak = 0
         while days.contains(day) {
             streak += 1
-            guard let previous = calendar.date(byAdding: .day, value: -1, to: day) else { break }
+            guard let previous = calendar.date(byAdding: .day, value: -1, to: day) else {
+                break
+            }
             day = previous
         }
         return streak
@@ -31,7 +41,9 @@ nonisolated struct StatsSummary {
     var dailyReps: [(day: Date, reps: Int)] {
         let today = calendar.startOfDay(for: .now)
         let weekStart = calendar.dateInterval(of: .weekOfYear, for: today)?.start ?? today
-        guard let first = calendar.date(byAdding: .weekOfYear, value: -11, to: weekStart) else { return [] }
+        guard let first = calendar.date(byAdding: .weekOfYear, value: -11, to: weekStart) else {
+            return []
+        }
         var byDay: [Date: Int] = [:]
         for session in sessions {
             let day = calendar.startOfDay(for: session.startedAt)
@@ -41,7 +53,9 @@ nonisolated struct StatsSummary {
         var day = first
         while day <= today {
             days.append((day, byDay[day] ?? 0))
-            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else {
+                break
+            }
             day = next
         }
         return days
@@ -50,9 +64,17 @@ nonisolated struct StatsSummary {
     /// this week's reps against last week's, as a share; nil without a previous week
     var weekTrend: (thisWeek: Int, lastWeek: Int, change: Double?) {
         let today = Date.now
-        let thisWeek = sessions.filter { calendar.isDate($0.startedAt, equalTo: today, toGranularity: .weekOfYear) }
+        let thisWeek = sessions.filter { calendar.isDate(
+            $0.startedAt,
+            equalTo: today,
+            toGranularity: .weekOfYear
+        ) }
         let lastWeekDate = calendar.date(byAdding: .weekOfYear, value: -1, to: today) ?? today
-        let lastWeek = sessions.filter { calendar.isDate($0.startedAt, equalTo: lastWeekDate, toGranularity: .weekOfYear) }
+        let lastWeek = sessions.filter { calendar.isDate(
+            $0.startedAt,
+            equalTo: lastWeekDate,
+            toGranularity: .weekOfYear
+        ) }
         let a = thisWeek.flatMap(\.sets).reduce(0) { $0 + $1.analysis.reps.count }
         let b = lastWeek.flatMap(\.sets).reduce(0) { $0 + $1.analysis.reps.count }
         return (a, b, b > 0 ? Double(a - b) / Double(b) : nil)
@@ -63,9 +85,13 @@ nonisolated struct StatsSummary {
     var qualityPerSession: [(date: Date, share: Double)] {
         sessions.compactMap { session in
             let reps = session.sets.reduce(0) { $0 + $1.analysis.reps.count }
-            guard reps > 0 else { return nil }
+            guard reps > 0 else {
+                return nil
+            }
             let flagged = session.sets.reduce(0) { total, set in
-                guard let cue = set.cue, set.cueResponse != .notRelevant else { return total }
+                guard let cue = set.cue, set.cueResponse != .notRelevant else {
+                    return total
+                }
                 return total + Set(cue.repNumbers).count
             }
             return (session.startedAt, Double(reps - flagged) / Double(reps))
@@ -88,7 +114,9 @@ nonisolated struct StatsSummary {
 
     func facts(for kind: ExerciseKind) -> ExerciseFacts? {
         let withKind = sessions.filter { $0.sets.contains { $0.exercise == kind } }
-        guard !withKind.isEmpty else { return nil }
+        guard !withKind.isEmpty else {
+            return nil
+        }
         let sets = withKind.flatMap(\.sets).filter { $0.exercise == kind }
         let reps = sets.flatMap(\.analysis.reps)
         let best = withKind.flatMap { session in
@@ -102,11 +130,17 @@ nonisolated struct StatsSummary {
             tempo: reps.isEmpty ? 0 : reps.map(\.duration).reduce(0, +) / Double(reps.count),
             medianRange: ranges.isEmpty ? 0 : ranges[ranges.count / 2],
             repsPerSession: withKind.map { session in
-                (session.startedAt, session.sets.filter { $0.exercise == kind }.reduce(0) { $0 + $1.analysis.reps.count })
-            }.sorted { $0.date < $1.date })
+                (
+                    session.startedAt,
+                    session.sets.filter { $0.exercise == kind }.reduce(0) { $0 + $1.analysis.reps.count }
+                )
+            }.sorted { $0.date < $1.date }
+        )
     }
 
-    var exercises: [ExerciseFacts] { ExerciseKind.allCases.compactMap(facts(for:)) }
+    var exercises: [ExerciseFacts] {
+        ExerciseKind.allCases.compactMap(facts(for:))
+    }
 }
 
 /// a number that says where it comes from: tap it and the sessions behind it unfold
@@ -117,7 +151,9 @@ struct MeasuredFigure<Content: View>: View {
     @ViewBuilder var content: Content
     @State private var showsSources = false
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -142,9 +178,9 @@ struct MeasuredFigure<Content: View>: View {
             content
             if showsSources {
                 Text(sources.isEmpty ? String(localized: "No session yet.")
-                     : String(localized: "From \(sources.count) sessions: ")
-                     + sources.prefix(6).map { $0.startedAt.formatted(date: .abbreviated, time: .omitted) }
-                        .joined(separator: ", ") + (sources.count > 6 ? "…" : ""))
+                    : String(localized: "From \(sources.count) sessions: ")
+                    + sources.prefix(6).map { $0.startedAt.formatted(date: .abbreviated, time: .omitted) }
+                    .joined(separator: ", ") + (sources.count > 6 ? "…" : ""))
                     .font(.footnote)
                     .foregroundStyle(HomeStyle.supportingText)
                     .transition(.opacity)
@@ -162,15 +198,16 @@ struct RegularityCalendar: View {
         let most = max(1, days.map(\.reps).max() ?? 1)
         let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 12)
         let spoken = days.filter { $0.reps > 0 }
-            .map { "\($0.day.formatted(date: .abbreviated, time: .omitted)): \($0.reps)" }.joined(separator: "; ")
+            .map { "\($0.day.formatted(date: .abbreviated, time: .omitted)): \($0.reps)" }
+            .joined(separator: "; ")
         VStack(alignment: .leading, spacing: 6) {
             LazyVGrid(columns: columns, spacing: 4) {
-                ForEach(0..<84, id: \.self) { index in
+                ForEach(0 ..< 84, id: \.self) { index in
                     let source = (index % 12) * 7 + index / 12
                     let entry = source < days.count ? days[source] : (day: Date.now, reps: 0)
                     RoundedRectangle(cornerRadius: 3, style: .continuous)
                         .fill(entry.reps == 0 ? Color.primary.opacity(0.08)
-                              : AppPageStyle.tint.opacity(0.4 + 0.6 * Double(entry.reps) / Double(most)))
+                            : AppPageStyle.tint.opacity(0.4 + 0.6 * Double(entry.reps) / Double(most)))
                         .frame(height: 12)
                         .opacity(source < days.count ? 1 : 0)
                 }
@@ -195,16 +232,21 @@ struct QualityChart: View {
             LineMark(x: .value("Date", point.date), y: .value("Reps without observations", point.share * 100))
                 .foregroundStyle(Color.primary)
                 .interpolationMethod(.monotone)
-            PointMark(x: .value("Date", point.date), y: .value("Reps without observations", point.share * 100))
-                .foregroundStyle(Color.primary)
+            PointMark(
+                x: .value("Date", point.date),
+                y: .value("Reps without observations", point.share * 100)
+            )
+            .foregroundStyle(Color.primary)
         }
-        .chartYScale(domain: 0...100)
+        .chartYScale(domain: 0 ... 100)
         .chartYAxis { AxisMarks(position: .leading, values: [0, 50, 100]) }
         .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) }
         .frame(height: 120)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Reps without observations per session")
-        .accessibilityValue(points.map { "\($0.date.formatted(date: .abbreviated, time: .omitted)): \(Int($0.share * 100)) percent" }
+        .accessibilityValue(points
+            .map { "\($0.date.formatted(date: .abbreviated, time: .omitted)): \(Int($0.share * 100)) percent"
+            }
             .joined(separator: "; "))
     }
 }
@@ -233,8 +275,11 @@ struct ExerciseStatsCard: View {
                         .foregroundStyle(Color.primary)
                         .interpolationMethod(.monotone)
                     AreaMark(x: .value("Date", point.date), y: .value("Reps", point.reps))
-                        .foregroundStyle(.linearGradient(colors: [Color.primary.opacity(0.25), .clear],
-                                                         startPoint: .top, endPoint: .bottom))
+                        .foregroundStyle(.linearGradient(
+                            colors: [Color.primary.opacity(0.25), .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ))
                         .interpolationMethod(.monotone)
                 }
                 .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) }
@@ -246,8 +291,13 @@ struct ExerciseStatsCard: View {
                     "\($0.date.formatted(date: .abbreviated, time: .omitted)): \($0.reps)"
                 }.joined(separator: "; "))
             }
-            WrappingText(text: String(localized: "Tempo \(facts.tempo.formatted(.number.precision(.fractionLength(1)))) s per rep · median \(definition.copy.rangeNoun) \(definition.formattedRange(facts.medianRange))"),
-                         style: .footnote, colour: .label.withAlphaComponent(0.72))
+            WrappingText(
+                text: String(
+                    localized: "Tempo \(facts.tempo.formatted(.number.precision(.fractionLength(1)))) s per rep · median \(definition.copy.rangeNoun) \(definition.formattedRange(facts.medianRange))"
+                ),
+                style: .footnote,
+                colour: .label.withAlphaComponent(0.72)
+            )
         }
         .padding(.vertical, 4)
         .accessibilityIdentifier("stats.exercise.\(facts.kind.rawValue)")
@@ -256,26 +306,12 @@ struct ExerciseStatsCard: View {
     private func figure(_ value: String, _ label: String.LocalizationValue) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             WrappingText(text: value, style: .title2, weight: .bold)
-            WrappingText(text: String(localized: label), style: .caption1,
-                         colour: .label.withAlphaComponent(0.72))
+            WrappingText(
+                text: String(localized: label),
+                style: .caption1,
+                colour: .label.withAlphaComponent(0.72)
+            )
         }
         .accessibilityElement(children: .combine)
-    }
-}
-
-/// the small curve on the first screen's progress card: reps per session, the last eight
-struct Sparkline: View {
-    let values: [Int]
-
-    var body: some View {
-        Chart(Array(values.enumerated()), id: \.offset) { index, value in
-            LineMark(x: .value("Session", index), y: .value("Reps", value))
-                .foregroundStyle(Color.primary)
-                .interpolationMethod(.monotone)
-        }
-        .chartXAxis(.hidden)
-        .chartYAxis(.hidden)
-        .chartLegend(.hidden)
-        .accessibilityHidden(true)
     }
 }

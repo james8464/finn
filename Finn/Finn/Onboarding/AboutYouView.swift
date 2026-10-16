@@ -16,8 +16,11 @@ struct AboutYouView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private enum BodyValue: Identifiable {
-        case height, weight
-        var id: Self { self }
+        case height
+        case weight
+        var id: Self {
+            self
+        }
     }
 
     private static let usesUSUnits = Locale.current.measurementSystem == .us
@@ -50,9 +53,13 @@ struct AboutYouView: View {
                     locationField
                     equipmentField
                     section("Past injuries")
-                    FinnReaction(line: String(localized: "Training is a marathon, not a sprint. Tell me what I should keep in mind."),
-                                 speaks: true)
-                        .padding(.bottom, 8)
+                    FinnReaction(
+                        line: String(
+                            localized: "Training is a marathon, not a sprint. Tell me what I should keep in mind."
+                        ),
+                        speaks: true
+                    )
+                    .padding(.bottom, 8)
                     injuriesField
                     noInjuriesToggle
                     access
@@ -68,13 +75,21 @@ struct AboutYouView: View {
         .sheet(item: $editing) { value in
             switch value {
             case .height:
-                BodyValueSheet(title: "Height", options: Self.heightOptions, usage: .personHeight,
-                               initial: height ?? Self.heightOptions[Self.heightOptions.count / 2]) {
+                BodyValueSheet(
+                    title: "Height",
+                    options: Self.heightOptions,
+                    usage: .personHeight,
+                    initial: height ?? Self.heightOptions[Self.heightOptions.count / 2]
+                ) {
                     profile.heightCentimeters = Int($0.converted(to: .centimeters).value.rounded())
                 }
             case .weight:
-                BodyValueSheet(title: "Weight", options: Self.weightOptions, usage: .personWeight,
-                               initial: weight ?? Self.weightOptions[Self.weightOptions.count / 4]) {
+                BodyValueSheet(
+                    title: "Weight",
+                    options: Self.weightOptions,
+                    usage: .personWeight,
+                    initial: weight ?? Self.weightOptions[Self.weightOptions.count / 4]
+                ) {
                     profile.weightKilograms = ($0.converted(to: .kilograms).value * 10).rounded() / 10
                 }
             }
@@ -114,7 +129,7 @@ struct AboutYouView: View {
             .accessibilityIdentifier("aboutYou.health")
             VStack(alignment: .leading, spacing: 4) {
                 Text(importedFromHealth ? "Sex, height and weight imported. You can edit them."
-                                        : "Import sex, height and weight, or enter them below.")
+                    : "Import sex, height and weight, or enter them below.")
                 if importedFromHealth && !profile.aboutYouIsComplete {
                     Text("Your training details still need your input.")
                 }
@@ -151,7 +166,11 @@ struct AboutYouView: View {
                 ForEach(TrainingLocation.allCases, id: \.self) { Text($0.title).tag(Optional($0)) }
             }
         } label: {
-            fieldRow("Training location", value: profile.location?.title, placeholder: "Choose where you train")
+            fieldRow(
+                "Training location",
+                value: profile.location?.title,
+                placeholder: "Choose where you train"
+            )
         }
         .accessibilityIdentifier("aboutYou.location")
     }
@@ -163,9 +182,12 @@ struct AboutYouView: View {
                 Toggle(item.title, isOn: equipmentBinding(item))
             }
         } label: {
-            fieldRow("Available equipment",
-                     value: profile.equipment.isEmpty ? nil : profile.equipment.map(\.title).formatted(.list(type: .and)),
-                     placeholder: "Choose your equipment")
+            fieldRow(
+                "Available equipment",
+                value: profile.equipment.isEmpty ? nil : profile.equipment.map(\.title)
+                    .formatted(.list(type: .and)),
+                placeholder: "Choose your equipment"
+            )
         }
         .menuActionDismissBehavior(.disabled)
         .accessibilityIdentifier("aboutYou.equipment")
@@ -173,7 +195,7 @@ struct AboutYouView: View {
 
     private var injuriesField: some View {
         TextField("Past injuries or areas to be careful with", text: $profile.injuries, axis: .vertical)
-            .lineLimit(3...8)
+            .lineLimit(3 ... 8)
             .focused($injuriesFocused)
             .padding(.horizontal, 20)
             .padding(.vertical, 18)
@@ -181,7 +203,11 @@ struct AboutYouView: View {
             .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
             .onChange(of: profile.injuries) { _, text in
                 // writing an injury and "No past injuries" can't both be true
-                if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { profile.noPastInjuries = false }
+                if
+                    !text.trimmingCharacters(in: .whitespacesAndNewlines)
+                        .isEmpty {
+                    profile.noPastInjuries = false
+                }
             }
             .accessibilityIdentifier("aboutYou.injuries")
     }
@@ -197,7 +223,8 @@ struct AboutYouView: View {
             HStack(spacing: 14) {
                 Image(systemName: profile.noPastInjuries ? "checkmark.square.fill" : "square")
                     .font(.system(size: 22))
-                    .foregroundStyle(profile.noPastInjuries ? DashboardStyle.accent : HomeStyle.supportingText)
+                    .foregroundStyle(profile.noPastInjuries ? DashboardStyle.accent : HomeStyle
+                        .supportingText)
                     .accessibilityHidden(true)
                 Text("No past injuries")
                     .font(.body)
@@ -236,7 +263,11 @@ struct AboutYouView: View {
     }
 
     /// a label, the value or a grey prompt, and a chevron, on a rounded card
-    private func fieldRow(_ label: LocalizedStringKey, value: String?, placeholder: LocalizedStringKey) -> some View {
+    private func fieldRow(
+        _ label: LocalizedStringKey,
+        value: String?,
+        placeholder: LocalizedStringKey
+    ) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(label)
@@ -285,14 +316,20 @@ struct AboutYouView: View {
     private var height: Measurement<UnitLength>? {
         profile.heightCentimeters.map {
             let value = Measurement(value: Double($0), unit: UnitLength.centimeters)
-            return Self.usesUSUnits ? Measurement(value: value.converted(to: .inches).value.rounded(), unit: .inches) : value
+            return Self.usesUSUnits ? Measurement(
+                value: value.converted(to: .inches).value.rounded(),
+                unit: .inches
+            ) : value
         }
     }
 
     private var weight: Measurement<UnitMass>? {
         profile.weightKilograms.map {
             let value = Measurement(value: $0, unit: UnitMass.kilograms)
-            return Self.usesUSUnits ? Measurement(value: value.converted(to: .pounds).value.rounded(), unit: .pounds) : value
+            return Self.usesUSUnits ? Measurement(
+                value: value.converted(to: .pounds).value.rounded(),
+                unit: .pounds
+            ) : value
         }
     }
 
@@ -301,23 +338,33 @@ struct AboutYouView: View {
     }
 
     private func format(_ value: Measurement<UnitMass>) -> String {
-        value.formatted(.measurement(width: .abbreviated, usage: .personWeight, numberFormatStyle: .number.precision(.fractionLength(0...1))))
+        value.formatted(.measurement(
+            width: .abbreviated,
+            usage: .personWeight,
+            numberFormatStyle: .number.precision(.fractionLength(0 ... 1))
+        ))
     }
 
     private static let heightOptions: [Measurement<UnitLength>] = usesUSUnits
-        ? (48...90).map { Measurement(value: Double($0), unit: .inches) }
-        : (120...220).map { Measurement(value: Double($0), unit: .centimeters) }
+        ? (48 ... 90).map { Measurement(value: Double($0), unit: .inches) }
+        : (120 ... 220).map { Measurement(value: Double($0), unit: .centimeters) }
 
     private static let weightOptions: [Measurement<UnitMass>] = usesUSUnits
-        ? (66...440).map { Measurement(value: Double($0), unit: .pounds) }
-        : (30...200).map { Measurement(value: Double($0), unit: .kilograms) }
+        ? (66 ... 440).map { Measurement(value: Double($0), unit: .pounds) }
+        : (30 ... 200).map { Measurement(value: Double($0), unit: .kilograms) }
 
     private func importFromHealth() async {
         let values = await HealthProfileImport.read()
         withAnimation(reduceMotion ? nil : HomeStyle.spring) {
-            if let sex = values.sex { profile.sex = sex }
-            if let height = values.heightCentimeters { profile.heightCentimeters = height }
-            if let weight = values.weightKilograms { profile.weightKilograms = weight }
+            if let sex = values.sex {
+                profile.sex = sex
+            }
+            if let height = values.heightCentimeters {
+                profile.heightCentimeters = height
+            }
+            if let weight = values.weightKilograms {
+                profile.weightKilograms = weight
+            }
             importedFromHealth = importedFromHealth || values.sex != nil
                 || values.heightCentimeters != nil || values.weightKilograms != nil
         }
@@ -333,8 +380,13 @@ private struct BodyValueSheet<UnitType: Dimension>: View {
     @State private var selection: Measurement<UnitType>
     @Environment(\.dismiss) private var dismiss
 
-    init(title: LocalizedStringKey, options: [Measurement<UnitType>], usage: MeasurementFormatUnitUsage<UnitType>,
-         initial: Measurement<UnitType>, done: @escaping (Measurement<UnitType>) -> Void) {
+    init(
+        title: LocalizedStringKey,
+        options: [Measurement<UnitType>],
+        usage: MeasurementFormatUnitUsage<UnitType>,
+        initial: Measurement<UnitType>,
+        done: @escaping (Measurement<UnitType>) -> Void
+    ) {
         self.title = title
         self.options = options
         self.usage = usage
@@ -379,18 +431,26 @@ enum HealthProfileImport {
         var weightKilograms: Double?
     }
 
-    static var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
+    static var isAvailable: Bool {
+        HKHealthStore.isHealthDataAvailable()
+    }
 
     static func read() async -> Values {
         let store = HKHealthStore()
         let height = HKQuantityType(.height)
         let bodyMass = HKQuantityType(.bodyMass)
-        try? await store.requestAuthorization(toShare: [], read: [HKCharacteristicType(.biologicalSex), height, bodyMass])
+        try? await store.requestAuthorization(
+            toShare: [],
+            read: [HKCharacteristicType(.biologicalSex), height, bodyMass]
+        )
         var values = Values()
         switch (try? store.biologicalSex())?.biologicalSex {
-        case .female?: values.sex = .female
-        case .male?: values.sex = .male
-        default: break
+        case .female?:
+            values.sex = .female
+        case .male?:
+            values.sex = .male
+        default:
+            break
         }
         if let quantity = await latest(height, in: store) {
             values.heightCentimeters = Int(quantity.doubleValue(for: .meterUnit(with: .centi)).rounded())
@@ -402,9 +462,11 @@ enum HealthProfileImport {
     }
 
     private static func latest(_ type: HKQuantityType, in store: HKHealthStore) async -> HKQuantity? {
-        let query = HKSampleQueryDescriptor(predicates: [.quantitySample(type: type)],
-                                            sortDescriptors: [SortDescriptor(\.endDate, order: .reverse)],
-                                            limit: 1)
+        let query = HKSampleQueryDescriptor(
+            predicates: [.quantitySample(type: type)],
+            sortDescriptors: [SortDescriptor(\.endDate, order: .reverse)],
+            limit: 1
+        )
         return try? await query.result(for: store).first?.quantity
     }
 }

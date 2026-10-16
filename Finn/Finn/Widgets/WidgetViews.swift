@@ -22,8 +22,10 @@ struct LastSetWidgetView: View {
     var body: some View {
         Group {
             switch family {
-            case .systemMedium: medium
-            default: small
+            case .systemMedium:
+                medium
+            default:
+                small
             }
         }
         .containerBackground(for: .widget) { Color(uiColor: .systemBackground) }
@@ -43,7 +45,13 @@ struct LastSetWidgetView: View {
                     .font(.headline)
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
-                Text(snapshot.partlyVisible ? String(localized: "Partly visible · \(Self.when(snapshot.capturedAt, now: now))") : Self.when(snapshot.capturedAt, now: now))
+                Text(snapshot
+                    .partlyVisible ?
+                    String(localized: "Partly visible · \(Self.when(snapshot.capturedAt, now: now))") : Self
+                    .when(
+                        snapshot.capturedAt,
+                        now: now
+                    ))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -73,7 +81,9 @@ struct LastSetWidgetView: View {
                     }
                     HStack(spacing: 0) {
                         Text(Self.when(snapshot.capturedAt, now: now))
-                        if snapshot.partlyVisible { Text(" · partly visible") }
+                        if snapshot.partlyVisible {
+                            Text(" · partly visible")
+                        }
                     }
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -124,9 +134,14 @@ struct LastSetWidgetView: View {
     static func when(_ date: Date, now: Date) -> String {
         let calendar = Calendar.current
         let time = date.formatted(date: .omitted, time: .shortened)
-        if calendar.isDate(date, inSameDayAs: now) { return String(localized: "Today \(time)") }
-        if let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
-           calendar.isDate(date, inSameDayAs: yesterday) { return String(localized: "Yesterday \(time)") }
+        if calendar.isDate(date, inSameDayAs: now) {
+            return String(localized: "Today \(time)")
+        }
+        if
+            let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
+            calendar.isDate(date, inSameDayAs: yesterday) {
+            return String(localized: "Yesterday \(time)")
+        }
         return date.formatted(date: .abbreviated, time: .omitted)
     }
 }
@@ -144,7 +159,9 @@ struct SetActivityLockScreenView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "figure.strengthtraining.functional")
                     Text("Finn · \(attributes.exerciseName)")
-                    if attributes.demoInput { DemoTag() }
+                    if attributes.demoInput {
+                        DemoTag()
+                    }
                 }
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)

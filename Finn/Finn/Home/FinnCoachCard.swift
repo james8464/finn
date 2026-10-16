@@ -4,25 +4,39 @@ import SwiftUI
 /// as the plan grows. `start` carries both the day and the time.
 struct NextWorkout: Equatable {
     enum Intensity: String, CaseIterable {
-        case light, moderate, hard
+        case light
+        case moderate
+        case hard
 
         var title: String {
             switch self {
-            case .light: String(localized: "Light", comment: "Intensity of the next workout.")
-            case .moderate: String(localized: "Moderate", comment: "Intensity of the next workout.")
-            case .hard: String(localized: "Hard", comment: "Intensity of the next workout.")
+            case .light:
+                String(localized: "Light", comment: "Intensity of the next workout.")
+            case .moderate:
+                String(localized: "Moderate", comment: "Intensity of the next workout.")
+            case .hard:
+                String(localized: "Hard", comment: "Intensity of the next workout.")
             }
         }
 
         /// one line on how to train at this intensity, under it on the Workout card
         var encouragement: String {
             switch self {
-            case .light: String(localized: "Easy pace, focus on clean reps.",
-                                comment: "How to train at light intensity, on the next workout card.")
-            case .moderate: String(localized: "Steady pace, leave 2 reps in the tank.",
-                                   comment: "How to train at moderate intensity, on the next workout card.")
-            case .hard: String(localized: "Push hard, stop when form slips.",
-                               comment: "How to train at hard intensity, on the next workout card.")
+            case .light:
+                String(
+                    localized: "Easy pace, focus on clean reps.",
+                    comment: "How to train at light intensity, on the next workout card."
+                )
+            case .moderate:
+                String(
+                    localized: "Steady pace, leave 2 reps in the tank.",
+                    comment: "How to train at moderate intensity, on the next workout card."
+                )
+            case .hard:
+                String(
+                    localized: "Push hard, stop when form slips.",
+                    comment: "How to train at hard intensity, on the next workout card."
+                )
             }
         }
     }
@@ -45,24 +59,44 @@ struct NextWorkout: Equatable {
     static func sample(now: Date = .now, calendar: Calendar = .current) -> NextWorkout {
         let day = calendar.date(byAdding: .day, value: 2, to: now) ?? now
         let start = calendar.date(bySettingHour: 18, minute: 30, second: 0, of: day) ?? day
-        return NextWorkout(start: start, intensity: .moderate, estimatedDuration: 55 * 60,
-                           exercises: [Exercise(kind: .bodyweightSquat, sets: 3, reps: 12),
-                                       Exercise(kind: .pushUp, sets: 3, reps: 10),
-                                       Exercise(kind: .staticLunge, sets: 3, reps: 10)])
+        return NextWorkout(
+            start: start,
+            intensity: .moderate,
+            estimatedDuration: 55 * 60,
+            exercises: [Exercise(kind: .bodyweightSquat, sets: 3, reps: 12),
+                        Exercise(kind: .pushUp, sets: 3, reps: 10),
+                        Exercise(kind: .staticLunge, sets: 3, reps: 10)]
+        )
     }
 
-    var end: Date { start.addingTimeInterval(estimatedDuration) }
+    var end: Date {
+        start.addingTimeInterval(estimatedDuration)
+    }
 
     /// "Thu, Oct 17", in the person's locale.
-    var dayText: String { start.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()) }
+    var dayText: String {
+        start.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
+    }
+
     /// "6:30 PM", or "18:30", as the person's settings say.
-    var timeText: String { start.formatted(date: .omitted, time: .shortened) }
+    var timeText: String {
+        start.formatted(date: .omitted, time: .shortened)
+    }
+
     /// "18:30 – 19:25", or "6:30 – 7:25 PM", as the person's settings say.
-    var timeRangeText: String { (start..<end).formatted(.interval.hour().minute()) }
+    var timeRangeText: String {
+        (start ..< end).formatted(.interval.hour().minute())
+    }
+
     /// "7:25 PM", for VoiceOver.
-    var endTimeText: String { end.formatted(date: .omitted, time: .shortened) }
+    var endTimeText: String {
+        end.formatted(date: .omitted, time: .shortened)
+    }
+
     /// "Thursday, October 17", for VoiceOver.
-    var spokenDayText: String { start.formatted(.dateTime.weekday(.wide).month(.wide).day()) }
+    var spokenDayText: String {
+        start.formatted(.dateTime.weekday(.wide).month(.wide).day())
+    }
 }
 
 /// Finn's encouragement on the coach card: short, energetic, no emoji.
@@ -88,7 +122,7 @@ enum FinnQuotes {
 
     /// A random line other than `previous`, so the same one never shows twice in a row.
     static func next(after previous: Int?, count: Int = all.count) -> Int {
-        let choices = (0..<count).filter { $0 != previous }
+        let choices = (0 ..< count).filter { $0 != previous }
         return choices.randomElement() ?? 0
     }
 }
@@ -105,7 +139,9 @@ struct FinnCoachMessage: Equatable {
     }
 
     /// a new line, never the same one twice in a row
-    mutating func nextQuote() { quoteIndex = FinnQuotes.next(after: quoteIndex) }
+    mutating func nextQuote() {
+        quoteIndex = FinnQuotes.next(after: quoteIndex)
+    }
 }
 
 /// Finn's neon glass: see-through pink, brighter at the top, with a bright pink edge and a soft glow,
@@ -127,18 +163,23 @@ struct FinnCardSurface: ViewModifier {
             .contentShape(RoundedRectangle(cornerRadius: DashboardStyle.finnCardRadius, style: .continuous))
     }
 
-    private var isSolid: Bool { reduceTransparency || contrast == .increased }
+    private var isSolid: Bool {
+        reduceTransparency || contrast == .increased
+    }
 
     @ViewBuilder private var surface: some View {
         let shape = RoundedRectangle(cornerRadius: DashboardStyle.finnCardRadius, style: .continuous)
         if isSolid {
             shape.fill(DashboardStyle.accent)
         } else {
-            shape.fill(LinearGradient(colors: [DashboardStyle.accent.opacity(fillTop),
-                                               DashboardStyle.accent.opacity(fillBottom)],
-                                      startPoint: .topLeading, endPoint: .bottomTrailing))
-                .overlay { shape.strokeBorder(DashboardStyle.accent, lineWidth: edgeWidth) }
-                .shadow(color: DashboardStyle.accent.opacity(glow), radius: glowRadius)
+            shape.fill(LinearGradient(
+                colors: [DashboardStyle.accent.opacity(fillTop),
+                         DashboardStyle.accent.opacity(fillBottom)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ))
+            .overlay { shape.strokeBorder(DashboardStyle.accent, lineWidth: edgeWidth) }
+            .shadow(color: DashboardStyle.accent.opacity(glow), radius: glowRadius)
         }
     }
 }
@@ -158,7 +199,10 @@ struct FinnBadge: View {
             .overlay {
                 if showsOutline {
                     Circle()
-                        .strokeBorder(DashboardStyle.accent.opacity(DashboardStyle.outlineOpacity), lineWidth: 1)
+                        .strokeBorder(
+                            DashboardStyle.accent.opacity(DashboardStyle.outlineOpacity),
+                            lineWidth: 1
+                        )
                         .accessibilityHidden(true)
                 }
             }
@@ -215,7 +259,9 @@ struct FinnCoachCard: View {
         }
     }
 
-    private var badge: some View { FinnBadge() }
+    private var badge: some View {
+        FinnBadge()
+    }
 
     private var title: some View {
         Text("Your next workout")
@@ -243,7 +289,9 @@ struct FinnCoachCard: View {
     private var spokenLabel: String {
         let day = workout.spokenDayText, time = workout.timeText
         let intensity = workout.intensity.title.localizedLowercase
-        return String(localized: "Finn: your next workout, \(day), \(time), \(intensity). \(quote)",
-                      comment: "VoiceOver label of the coach card: day, time, intensity, then Finn's encouragement.")
+        return String(
+            localized: "Finn: your next workout, \(day), \(time), \(intensity). \(quote)",
+            comment: "VoiceOver label of the coach card: day, time, intensity, then Finn's encouragement."
+        )
     }
 }

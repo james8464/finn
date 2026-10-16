@@ -21,7 +21,10 @@ final class ScreenTourUITests: XCTestCase {
         for (name, arguments) in [
             ("00-home", [String]()),
             ("00-home-dark", ["-finn-ui-dark"]),
-            ("00-home-largest-text", ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
+            (
+                "00-home-largest-text",
+                ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+            )
         ] {
             let app = XCUIApplication()
             app.launchArguments = arguments
@@ -59,7 +62,8 @@ final class ScreenTourUITests: XCTestCase {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         // the simulator may run in English or French
         let allow = springboard.buttons.matching(NSPredicate(
-            format: "(label ==[c] %@ OR label ==[c] %@ OR label ==[c] %@)", "Allow", "OK", "Autoriser")
+            format: "(label ==[c] %@ OR label ==[c] %@ OR label ==[c] %@)", "Allow", "OK", "Autoriser"
+        )
         ).firstMatch
         if allow.waitForExistence(timeout: 8) {
             save("04-premier-lancement-autorisation-camera")
@@ -92,7 +96,9 @@ final class ScreenTourUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.2)
         save("07b-choix-exercice-fente")
         let pullUp = app.buttons["Pull-up"]
-        if !pullUp.isHittable { app.buttons["Stiff-leg deadlift"].swipeLeft() }
+        if !pullUp.isHittable {
+            app.buttons["Stiff-leg deadlift"].swipeLeft()
+        }
         pullUp.tap()
         Thread.sleep(forTimeInterval: 1.2)
         save("07d-choix-exercice-tractions")
@@ -186,7 +192,10 @@ final class ScreenTourUITests: XCTestCase {
             waitForExpectations(timeout: 10)
             Thread.sleep(forTimeInterval: 1)
             save(name)
-            FileManager.default.createFile(atPath: folder.appending(path: "ready-\(name)").path, contents: nil)
+            FileManager.default.createFile(
+                atPath: folder.appending(path: "ready-\(name)").path,
+                contents: nil
+            )
             Thread.sleep(forTimeInterval: 12)
             app.terminate()
         }

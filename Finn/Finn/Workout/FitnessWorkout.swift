@@ -20,7 +20,13 @@ nonisolated extension ExerciseKind {
     /// strength and flexibility, and `mixedCardio` is cardio. Neither describes a strength set.
     var fitnessActivity: FitnessActivity {
         switch self {
-        case .bodyweightSquat, .pushUp, .staticLunge, .stiffLegDeadlift, .pullUp, .muscleUp: .functionalStrengthTraining
+        case .bodyweightSquat,
+             .pushUp,
+             .staticLunge,
+             .stiffLegDeadlift,
+             .pullUp,
+             .muscleUp:
+            .functionalStrengthTraining
         }
     }
 }
@@ -51,7 +57,9 @@ nonisolated struct FitnessWorkout: Equatable, Sendable {
     let exerciseNames: [String]
 
     /// Finn sets are filmed with the iPhone propped up a few steps away, at home or in a gym.
-    var isIndoor: Bool { true }
+    var isIndoor: Bool {
+        true
+    }
 
     /// Rest between sets that still counts as workout time. A strength workout includes its rests,
     /// as Apple Watch records them; a longer break (the person left the app open) is paused after it.
@@ -75,7 +83,9 @@ nonisolated struct FitnessWorkout: Equatable, Sendable {
     }
 
     /// HealthKit's sync identifier: one workout per Finn session, even if a save were repeated.
-    var syncIdentifier: String { "ai.mwm.build.challenge.team.08.session.\(sessionID.uuidString)" }
+    var syncIdentifier: String {
+        "ai.mwm.build.challenge.team.08.session.\(sessionID.uuidString)"
+    }
 
     /// Time counted as workout, without the pauses.
     var activeDuration: TimeInterval {
@@ -92,7 +102,9 @@ nonisolated struct FitnessWorkout: Equatable, Sendable {
         let measured = session.sets
             .filter { !$0.analysis.reps.isEmpty }
             .sorted { $0.capturedAt < $1.capturedAt }
-        guard let first = measured.first, let last = measured.last else { return nil }
+        guard let first = measured.first, let last = measured.last else {
+            return nil
+        }
         let spans = measured.map { set in
             DateInterval(start: set.capturedAt.addingTimeInterval(-repSpan(of: set)), end: set.capturedAt)
         }
@@ -107,11 +119,15 @@ nonisolated struct FitnessWorkout: Equatable, Sendable {
         }
         let start = spans.map(\.start).min() ?? first.capturedAt
         let end = last.capturedAt
-        guard end > start else { return nil }
+        guard end > start else {
+            return nil
+        }
         var names: [String] = []
         for set in measured {
             let name = set.exercise.definition.copy.name
-            if !names.contains(name) { names.append(name) }
+            if !names.contains(name) {
+                names.append(name)
+            }
         }
         return FitnessWorkout(
             sessionID: session.id,
@@ -127,10 +143,15 @@ nonisolated struct FitnessWorkout: Equatable, Sendable {
 
     /// From the first measured rep's start to the last one's end, clamped to a set's capture limit.
     private static func repSpan(of set: SetSummary) -> TimeInterval {
-        guard let firstStart = set.analysis.reps.map(\.startTime).min(),
-              let lastEnd = set.analysis.reps.map(\.endTime).max() else { return 0 }
+        guard
+            let firstStart = set.analysis.reps.map(\.startTime).min(),
+            let lastEnd = set.analysis.reps.map(\.endTime).max() else {
+            return 0
+        }
         let span = lastEnd - firstStart
-        guard span.isFinite, span > 0 else { return 0 }
+        guard span.isFinite, span > 0 else {
+            return 0
+        }
         return min(span, longestSet)
     }
 
@@ -138,7 +159,9 @@ nonisolated struct FitnessWorkout: Equatable, Sendable {
     private static func mostFrequentActivity(in sets: [SetSummary]) -> FitnessActivity {
         let activities = sets.map(\.exercise.fitnessActivity)
         var counts: [FitnessActivity: Int] = [:]
-        for activity in activities { counts[activity, default: 0] += 1 }
+        for activity in activities {
+            counts[activity, default: 0] += 1
+        }
         let most = counts.values.max() ?? 0
         return activities.first { counts[$0] == most } ?? .functionalStrengthTraining
     }
@@ -179,16 +202,23 @@ nonisolated enum FitnessSaveStatus: Equatable, Sendable {
 
     var text: String {
         switch self {
-        case .saving: String(localized: "Saving to Fitness…")
-        case .saved: String(localized: "Saved to Fitness")
-        case .failed: String(localized: "Couldn’t save to Fitness")
-        case .needsPermission: String(localized: "Allow Finn in Health settings")
-        case .unavailable: String(localized: "Apple Health isn’t available on this iPhone")
+        case .saving:
+            String(localized: "Saving to Fitness…")
+        case .saved:
+            String(localized: "Saved to Fitness")
+        case .failed:
+            String(localized: "Couldn’t save to Fitness")
+        case .needsPermission:
+            String(localized: "Allow Finn in Health settings")
+        case .unavailable:
+            String(localized: "Apple Health isn’t available on this iPhone")
         }
     }
 
     /// Saving again can help: the save failed, or Health has not allowed it yet.
-    var offersRetry: Bool { self == .failed || self == .needsPermission }
+    var offersRetry: Bool {
+        self == .failed || self == .needsPermission
+    }
 }
 
 /// The latest save to Apple Health and the session it concerns.

@@ -30,17 +30,21 @@ nonisolated final class AngleRuleClassifier: AngleWindowClassifying {
 
 /// Runs an angle-window classifier over a set and votes like the keypoint classifier does.
 nonisolated enum AngleRecognizer {
-    static func recognise(_ frames: [PoseFrame],
-                          using classifier: any AngleWindowClassifying) -> ExerciseRecognition {
+    static func recognise(
+        _ frames: [PoseFrame],
+        using classifier: any AngleWindowClassifying
+    ) -> ExerciseRecognition {
         var windows = PoseWindowFeatureExtractor.windows(frames)
         if windows.count > ExerciseRecognizer.maximumWindows {
             let step = Double(windows.count - 1) / Double(ExerciseRecognizer.maximumWindows - 1)
-            windows = (0..<ExerciseRecognizer.maximumWindows).map {
+            windows = (0 ..< ExerciseRecognizer.maximumWindows).map {
                 windows[Int((Double($0) * step).rounded())]
             }
         }
         let predictions = windows.compactMap { window -> ClassifierPrediction? in
-            guard let features = PoseWindowFeatureExtractor.features(window) else { return nil }
+            guard let features = PoseWindowFeatureExtractor.features(window) else {
+                return nil
+            }
             return try? classifier.classify(features)
         }
         return ExerciseRecognizer.decide(mergingHangingWindows(predictions))
@@ -51,7 +55,9 @@ nonisolated enum AngleRecognizer {
     /// quarter of that family's windows saw the shoulders pass above the hands.
     static func mergingHangingWindows(_ predictions: [ClassifierPrediction]) -> [ClassifierPrediction] {
         let family = predictions.filter { $0.label == "pull_up" || $0.label == "muscle_up" }
-        guard !family.isEmpty else { return predictions }
+        guard !family.isEmpty else {
+            return predictions
+        }
         let muscleUps = family.filter { $0.label == "muscle_up" }.count
         let label = Double(muscleUps) >= 0.25 * Double(family.count) ? "muscle_up" : "pull_up"
         return predictions.map { prediction in
@@ -78,15 +84,20 @@ nonisolated final class CoreMLAngleClassifier: AngleWindowClassifying, @unchecke
         }
         let probabilities = description.predictedProbabilitiesName
             ?? description.outputDescriptionsByName.values.first { $0.type == .dictionary }?.name
-        guard let probabilities else { throw ExerciseClassifierError.noProbabilities }
+        guard let probabilities else {
+            throw ExerciseClassifierError.noProbabilities
+        }
         self.model = model
         self.inputNames = inputs
         self.probabilitiesName = probabilities
     }
 
     static func bundled(in bundle: Bundle = .main) -> CoreMLAngleClassifier? {
-        guard let url = bundle.url(forResource: bundledModelName, withExtension: "mlmodelc"),
-              let model = try? MLModel(contentsOf: url) else { return nil }
+        guard
+            let url = bundle.url(forResource: bundledModelName, withExtension: "mlmodelc"),
+            let model = try? MLModel(contentsOf: url) else {
+            return nil
+        }
         return try? CoreMLAngleClassifier(model: model)
     }
 
@@ -94,8 +105,9 @@ nonisolated final class CoreMLAngleClassifier: AngleWindowClassifying, @unchecke
         let values = features.values.filter { inputNames.contains($0.key) }
         let input = try MLDictionaryFeatureProvider(dictionary: values.mapValues { $0 as NSNumber })
         let output = try model.prediction(from: input)
-        guard let probabilities = output.featureValue(for: probabilitiesName)?.dictionaryValue,
-              let best = probabilities.max(by: { $0.value.doubleValue < $1.value.doubleValue }) else {
+        guard
+            let probabilities = output.featureValue(for: probabilitiesName)?.dictionaryValue,
+            let best = probabilities.max(by: { $0.value.doubleValue < $1.value.doubleValue }) else {
             throw ExerciseClassifierError.noProbabilities
         }
         return ClassifierPrediction(label: "\(best.key)", confidence: best.value.doubleValue)

@@ -12,8 +12,8 @@ struct BadgesView: View {
                         .font(.largeTitle).foregroundStyle(HomeStyle.accent)
                         .accessibilityHidden(true)
                     Text(ledger.count == 0
-                         ? "No awards yet"
-                         : "\(ledger.count) awards earned")
+                        ? "No awards yet"
+                        : "\(ledger.count) awards earned")
                         .foregroundStyle(AppPageStyle.secondaryText)
                         .accessibilityIdentifier("badges.count")
                 }
@@ -67,8 +67,11 @@ struct BadgeRow: View {
                     .font(.subheadline).foregroundStyle(AppPageStyle.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
                 if let earned {
-                    Label(earned.earnedAt.formatted(date: .abbreviated, time: .omitted), systemImage: "checkmark")
-                        .font(.footnote).foregroundStyle(AppPageStyle.secondaryText)
+                    Label(
+                        earned.earnedAt.formatted(date: .abbreviated, time: .omitted),
+                        systemImage: "checkmark"
+                    )
+                    .font(.footnote).foregroundStyle(AppPageStyle.secondaryText)
                 }
             }
         }
@@ -88,7 +91,10 @@ struct BadgeMark: View {
             if earned {
                 Circle().fill(DashboardStyle.accent)
             } else {
-                Circle().strokeBorder(Color.secondary.opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [3, 4]))
+                Circle().strokeBorder(
+                    Color.secondary.opacity(0.5),
+                    style: StrokeStyle(lineWidth: 1.5, dash: [3, 4])
+                )
             }
             Image(systemName: kind.symbol)
                 .font(.system(size: size * 0.42, weight: .semibold))
@@ -119,7 +125,7 @@ struct AwardsCardContent<Heading: View>: View {
                 }
             }
             Text(badges.isEmpty ? "No awards yet"
-                 : (badges.count == 1 ? "1 badge · \(badges.last!.kind.title)"
+                : (badges.count == 1 ? "1 badge · \(badges.last!.kind.title)"
                     : "\(badges.count) badges · latest: \(badges.last!.kind.title)"))
                 .font(.footnote)
                 .foregroundStyle(DashboardStyle.secondary)
@@ -139,13 +145,19 @@ struct BadgeUnlockCard: View {
         Button(action: open) {
             HomeCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    Label(badges.count == 1 ? "Award earned" : "\(badges.count) awards earned", systemImage: "rosette")
-                        .font(.headline).foregroundStyle(HomeStyle.accent)
+                    Label(
+                        badges.count == 1 ? "Award earned" : "\(badges.count) awards earned",
+                        systemImage: "rosette"
+                    )
+                    .font(.headline).foregroundStyle(HomeStyle.accent)
                     ForEach(badges) { badge in
                         VStack(alignment: .leading, spacing: 4) {
                             WrappingText(text: badge.kind.title, style: .headline)
-                            WrappingText(text: badge.detail, style: .subheadline,
-                                         colour: .label.withAlphaComponent(0.72))
+                            WrappingText(
+                                text: badge.detail,
+                                style: .subheadline,
+                                colour: .label.withAlphaComponent(0.72)
+                            )
                         }
                     }
                     Label("View awards", systemImage: "chevron.right").font(.subheadline)
@@ -164,7 +176,9 @@ struct BadgeUnlockCard: View {
 struct BadgeEntry: Identifiable, Equatable {
     let kind: BadgeKind
     let earned: EarnedBadge?
-    var id: BadgeKind { kind }
+    var id: BadgeKind {
+        kind
+    }
 }
 
 /// one badge on its own sheet: the mark large, the measured fact and the date when earned, the
@@ -177,30 +191,35 @@ struct BadgeDetailView: View {
 
     var body: some View {
         ScrollView {
-        VStack(spacing: 0) {
-            VStack(spacing: 18) {
-                BadgeMark(kind: kind, earned: earned != nil, size: 120)
-                    .padding(.top, 36)
-                WrappingText(text: kind.title, style: .title1, weight: .bold, alignment: .center)
-                    .accessibilityAddTraits(.isHeader)
-                if let earned {
-                    WrappingText(text: earned.detail, alignment: .center)
-                    WrappingText(text: earned.earnedAt.formatted(.dateTime.day().month(.wide).year().hour().minute()),
-                                 style: .footnote, colour: .secondaryLabel, alignment: .center)
-                } else {
-                    WrappingText(text: kind.rule, colour: .secondaryLabel, alignment: .center)
+            VStack(spacing: 0) {
+                VStack(spacing: 18) {
+                    BadgeMark(kind: kind, earned: earned != nil, size: 120)
+                        .padding(.top, 36)
+                    WrappingText(text: kind.title, style: .title1, weight: .bold, alignment: .center)
+                        .accessibilityAddTraits(.isHeader)
+                    if let earned {
+                        WrappingText(text: earned.detail, alignment: .center)
+                        WrappingText(
+                            text: earned.earnedAt
+                                .formatted(.dateTime.day().month(.wide).year().hour().minute()),
+                            style: .footnote,
+                            colour: .secondaryLabel,
+                            alignment: .center
+                        )
+                    } else {
+                        WrappingText(text: kind.rule, colour: .secondaryLabel, alignment: .center)
+                    }
                 }
+                .padding(.horizontal, 32)
+                Spacer(minLength: 24)
+                Button { dismiss() } label: {
+                    PrimaryActionLabel(title: "Done")
+                }
+                .buttonStyle(PressableStyle())
+                .padding(.horizontal, 20)
+                .padding(.bottom, 12)
             }
-            .padding(.horizontal, 32)
-            Spacer(minLength: 24)
-            Button { dismiss() } label: {
-                PrimaryActionLabel(title: "Done")
-            }
-            .buttonStyle(PressableStyle())
-            .padding(.horizontal, 20)
-            .padding(.bottom, 12)
-        }
-        .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity)
         }
         .background(HomeStyle.background)
         .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])

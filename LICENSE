@@ -139,9 +139,7 @@ between you and the Project Members.
 
    This License cannot and does not relicense third-party components or platform
    software, including without limitation: the Apple software, frameworks, SDKs and
-   documentation used to build and run the Software, and the binary components
-   under "Finn/Vendor/" (for example the Spark components exported by MWM),
-   including any files under "Finn/Vendor/Spark/". Those remain governed solely by
+   documentation used to build and run the Software. Those remain governed solely by
    their own respective licences and by Apple's terms. Your use of them is
    subject to those terms and to this License in respect of everything else.
 

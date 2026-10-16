@@ -4,7 +4,9 @@ import Observation
 
 nonisolated enum SpokenObservation {
     static func text(for analysis: SetAnalysis, cue: Cue?) -> String? {
-        guard let cue else { return nil }
+        guard let cue else {
+            return nil
+        }
         return String(localized: "\(analysis.reps.count) measured reps. \(cue.observation) \(cue.nextAction)")
     }
 }
@@ -36,14 +38,22 @@ final class ObservationSpeaker: NSObject, AVSpeechSynthesizerDelegate {
     func stop() {
         currentUtteranceID = nil
         isSpeaking = false
-        if synthesizer.isSpeaking { synthesizer.stopSpeaking(at: .immediate) }
+        if synthesizer.isSpeaking {
+            synthesizer.stopSpeaking(at: .immediate)
+        }
     }
 
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(
+        _ synthesizer: AVSpeechSynthesizer,
+        didFinish utterance: AVSpeechUtterance
+    ) {
         finishIfCurrent(utterance)
     }
 
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(
+        _ synthesizer: AVSpeechSynthesizer,
+        didCancel utterance: AVSpeechUtterance
+    ) {
         finishIfCurrent(utterance)
     }
 
@@ -68,7 +78,7 @@ final class LiveAnnouncer: NSObject, LiveAnnouncing, AVSpeechSynthesizerDelegate
 
     override init() {
         let synthesizer = AVSpeechSynthesizer()
-// plays through the current route (AirPods or other headphones when connected) without
+        // plays through the current route (AirPods or other headphones when connected) without
         // taking over the app's audio session.
         synthesizer.usesApplicationAudioSession = false
         self.synthesizer = synthesizer
@@ -88,12 +98,18 @@ final class LiveAnnouncer: NSObject, LiveAnnouncing, AVSpeechSynthesizerDelegate
         synthesizer.speak(utterance)
     }
 
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(
+        _ synthesizer: AVSpeechSynthesizer,
+        didFinish utterance: AVSpeechUtterance
+    ) {
         Task { @MainActor [weak self] in self?.finishOne() }
     }
 
     /// Only `announce` cancels, and it resets the count itself.
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {}
+    nonisolated func speechSynthesizer(
+        _ synthesizer: AVSpeechSynthesizer,
+        didCancel utterance: AVSpeechUtterance
+    ) {}
 
     private func finishOne() {
         queued = max(0, queued - 1)

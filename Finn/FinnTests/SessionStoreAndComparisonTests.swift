@@ -11,8 +11,11 @@ struct SessionStoreAndComparisonTests {
         let good = WorkoutSessionSummary(id: id, startedAt: .now, sets: [set(sessionID: id, range: 0.4)])
         try store.save(good)
         let original = try Data(contentsOf: url)
-        let bad = WorkoutSessionSummary(id: id, startedAt: .now,
-                                       sets: [set(sessionID: id, range: Double.greatestFiniteMagnitude)])
+        let bad = WorkoutSessionSummary(
+            id: id,
+            startedAt: .now,
+            sets: [set(sessionID: id, range: Double.greatestFiniteMagnitude)]
+        )
         #expect(throws: SessionStoreError.invalidSession) { try store.save(bad) }
         #expect(try Data(contentsOf: url) == original)
     }
@@ -23,7 +26,10 @@ struct SessionStoreAndComparisonTests {
         let id = UUID()
         let first = set(sessionID: id, range: 0.4)
         let corrupt = [WorkoutSessionSummary(id: id, startedAt: .now, sets: [first, first])]
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
         let original = try JSONEncoder().encode(corrupt)
         try original.write(to: url)
         let store = LocalSessionStore(url: url)
@@ -73,27 +79,40 @@ struct SessionStoreAndComparisonTests {
         #expect(!serialised.contains("pixelBuffer"))
     }
 
-    @Test(.enabled(if: fileProtectionAttributeAvailable(),
-                   "This simulator does not expose file protection metadata"))
+    @Test(.enabled(
+        if: fileProtectionAttributeAvailable(),
+        "This simulator does not expose file protection metadata"
+    ))
     func savedHistoryUsesCompleteFileProtection() throws {
         let url = temporaryURL()
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
         let store = LocalSessionStore(url: url)
         let id = UUID()
-        try store.save(WorkoutSessionSummary(id: id, startedAt: .now,
-                                             sets: [set(sessionID: id, range: 0.4)]))
+        try store.save(WorkoutSessionSummary(
+            id: id,
+            startedAt: .now,
+            sets: [set(sessionID: id, range: 0.4)]
+        ))
         #expect(try url.resourceValues(forKeys: [.fileProtectionKey]).fileProtection == .complete)
-        try store.save(WorkoutSessionSummary(id: id, startedAt: .now,
-                                             sets: [set(sessionID: id, range: 0.3)]))
+        try store.save(WorkoutSessionSummary(
+            id: id,
+            startedAt: .now,
+            sets: [set(sessionID: id, range: 0.3)]
+        ))
         #expect(try url.resourceValues(forKeys: [.fileProtectionKey]).fileProtection == .complete)
     }
 
-    @Test(.enabled(if: fileProtectionAttributeAvailable(),
-                   "This simulator does not expose file protection metadata"))
+    @Test(.enabled(
+        if: fileProtectionAttributeAvailable(),
+        "This simulator does not expose file protection metadata"
+    ))
     func loadingLegacyHistoryUpgradesFileProtection() throws {
         let url = temporaryURL()
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
         try Data("[]".utf8).write(to: url, options: .atomic)
         let store = LocalSessionStore(url: url)
         #expect(try store.load().isEmpty)
@@ -101,8 +120,10 @@ struct SessionStoreAndComparisonTests {
         #expect(protection == .complete)
     }
 
-    @Test(.enabled(if: fileProtectionAttributeAvailable(),
-                   "This simulator does not expose file protection metadata"))
+    @Test(.enabled(
+        if: fileProtectionAttributeAvailable(),
+        "This simulator does not expose file protection metadata"
+    ))
     func loadingHistoryUpgradesExistingCorruptBackupProtection() throws {
         let url = temporaryURL()
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
@@ -151,8 +172,16 @@ struct SessionStoreAndComparisonTests {
         let store = LocalSessionStore(url: url)
         let firstID = UUID()
         let secondID = UUID()
-        try store.save(WorkoutSessionSummary(id: firstID, startedAt: .now, sets: [set(sessionID: firstID, range: 0.4)]))
-        try store.save(WorkoutSessionSummary(id: secondID, startedAt: .now, sets: [set(sessionID: secondID, range: 0.4)]))
+        try store.save(WorkoutSessionSummary(
+            id: firstID,
+            startedAt: .now,
+            sets: [set(sessionID: firstID, range: 0.4)]
+        ))
+        try store.save(WorkoutSessionSummary(
+            id: secondID,
+            startedAt: .now,
+            sets: [set(sessionID: secondID, range: 0.4)]
+        ))
         try store.delete(id: firstID)
         #expect(try store.load().map(\.id) == [secondID])
     }
@@ -160,7 +189,10 @@ struct SessionStoreAndComparisonTests {
     @Test func corruptStoreCanBeRecoveredWithoutSilentDataLoss() throws {
         let url = temporaryURL()
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
         try Data("broken".utf8).write(to: url)
         let store = LocalSessionStore(url: url)
         #expect(throws: SessionStoreError.corrupted) { try store.load() }
@@ -175,13 +207,19 @@ struct SessionStoreAndComparisonTests {
     @Test func deleteAllRemovesRecoveredBackupToo() throws {
         let url = temporaryURL()
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
         try Data("broken".utf8).write(to: url)
         let store = LocalSessionStore(url: url)
         let backup = try store.recoverCorruptStore()
         let id = UUID()
-        try store.save(WorkoutSessionSummary(id: id, startedAt: .now,
-                                             sets: [set(sessionID: id, range: 0.4)]))
+        try store.save(WorkoutSessionSummary(
+            id: id,
+            startedAt: .now,
+            sets: [set(sessionID: id, range: 0.4)]
+        ))
         try store.deleteAll()
         #expect(try store.load().isEmpty)
         #expect(!FileManager.default.fileExists(atPath: backup.path))
@@ -198,7 +236,9 @@ struct SessionStoreAndComparisonTests {
         var attempts: [String] = []
         let store = LocalSessionStore(url: url, removeItem: { file in
             attempts.append(file.lastPathComponent)
-            if file.lastPathComponent == backup.lastPathComponent { throw CocoaError(.fileWriteNoPermission) }
+            if file.lastPathComponent == backup.lastPathComponent {
+                throw CocoaError(.fileWriteNoPermission)
+            }
             try FileManager.default.removeItem(at: file)
         })
 
@@ -227,18 +267,33 @@ struct SessionStoreAndComparisonTests {
         #expect(SetComparison.compare(squatLeft, squatRight) == nil)
     }
 
-    private func set(sessionID: UUID, range: Double, side: BodySide = .left,
-                     view: CameraView = .side,
-                     rubric: String = SquatRubric.version, exercise: ExerciseKind = .bodyweightSquat) -> SetSummary {
-        let reps = (1...6).map { number in
-            RepMetric(number: number, startTime: Double(number) * 2,
-                      endTime: Double(number) * 2 + 1.5,
-                      normalisedHipTravel: range)
+    private func set(
+        sessionID: UUID,
+        range: Double,
+        side: BodySide = .left,
+        view: CameraView = .side,
+        rubric: String = SquatRubric.version,
+        exercise: ExerciseKind = .bodyweightSquat
+    ) -> SetSummary {
+        let reps = (1 ... 6).map { number in
+            RepMetric(
+                number: number,
+                startTime: Double(number) * 2,
+                endTime: Double(number) * 2 + 1.5,
+                normalisedHipTravel: range
+            )
         }
-        return SetSummary(id: UUID(), sessionID: sessionID, capturedAt: .now,
-                          bodySide: side,
-                          analysis: SetAnalysis(reps: reps, confidence: 0.95, rubricVersion: rubric),
-                          cue: nil, cueResponse: .unanswered, exercise: exercise, cameraView: view)
+        return SetSummary(
+            id: UUID(),
+            sessionID: sessionID,
+            capturedAt: .now,
+            bodySide: side,
+            analysis: SetAnalysis(reps: reps, confidence: 0.95, rubricVersion: rubric),
+            cue: nil,
+            cueResponse: .unanswered,
+            exercise: exercise,
+            cameraView: view
+        )
     }
 }
 

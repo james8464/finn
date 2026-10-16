@@ -1,5 +1,7 @@
 # Automated checks — 15 October 2026
 
+This is a historical record of the 15 October build. Current main no longer links Spark; current checks are listed in the [16 October cleanup report](../maintenance/project-cleanup-2026-10-16.md).
+
 ## MWM-configured working tree
 
 - Xcode Debug simulator build: passed. Bundles Spark and its privacy manifest; the binary contains the sandbox key and not the production key.

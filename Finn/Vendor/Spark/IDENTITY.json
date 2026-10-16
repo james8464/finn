@@ -1,7 +1,0 @@
-{
-  "commandLine" : "binary-release --sdk-path SDKs\/Spark\/Flash --derived-data-path .build --product-config sparkFlashBinary --version 0.5.8 --verbose",
-  "exportedAt" : "2026-10-13T17:51:18Z",
-  "hostname" : "mwm-ci-runner.local",
-  "monorepoCommitSHA" : "da219e44eeb7f2e5b216443d77b2c08dc57cc972",
-  "version" : "0.5.8"
-}

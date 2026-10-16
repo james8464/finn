@@ -2,12 +2,15 @@ import SwiftUI
 
 /// the two parts of the Progress tab. Home's Posture card always opens `.posture`
 enum ProgressSection: String, CaseIterable, Hashable {
-    case posture, strength
+    case posture
+    case strength
 
     var title: LocalizedStringKey {
         switch self {
-        case .posture: "Posture"
-        case .strength: "Strength"
+        case .posture:
+            "Posture"
+        case .strength:
+            "Strength"
         }
     }
 }
@@ -18,7 +21,9 @@ struct ProgressTabView: View {
     @Binding var section: ProgressSection
     @Binding var exercise: ExerciseKind
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
 
     var body: some View {
         ScrollView {
@@ -31,8 +36,10 @@ struct ProgressTabView: View {
                 ExercisePicker(selection: $exercise)
                 Group {
                     switch section {
-                    case .posture: PostureSection(history: history, exercise: exercise)
-                    case .strength: StrengthSection(history: history, exercise: exercise)
+                    case .posture:
+                        PostureSection(history: history, exercise: exercise)
+                    case .strength:
+                        StrengthSection(history: history, exercise: exercise)
                     }
                 }
                 .id(section)

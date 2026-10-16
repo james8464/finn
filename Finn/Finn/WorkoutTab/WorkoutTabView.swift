@@ -14,7 +14,9 @@ struct WorkoutTabView: View {
     let launch: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
 
     var body: some View {
         ScrollView {
@@ -102,11 +104,16 @@ struct WorkoutTabView: View {
     /// Last workout
     private var nextWorkoutOutline: some View {
         let hasExercises = !message.workout.exercises.isEmpty
-        return FinnOutline(topRadius: DashboardStyle.finnCardRadius,
-                           bottomRadius: hasExercises ? DashboardStyle.cardRadius : DashboardStyle.finnCardRadius) {
+        return FinnOutline(
+            topRadius: DashboardStyle.finnCardRadius,
+            bottomRadius: hasExercises ? DashboardStyle.cardRadius : DashboardStyle
+                .finnCardRadius
+        ) {
             VStack(spacing: DashboardStyle.cardSpacing) {
                 NextWorkoutCard(workout: message.workout)
-                if hasExercises { exercises }
+                if hasExercises {
+                    exercises
+                }
             }
         }
     }
@@ -130,7 +137,9 @@ struct WorkoutTabView: View {
             : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
         return layout {
             Text(exercise.kind.chipName).font(.body.weight(.medium))
-            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
+            if !dynamicTypeSize.isAccessibilitySize {
+                Spacer(minLength: 8)
+            }
             Text(verbatim: "\(exercise.sets) × \(exercise.reps)")
                 .font(.body)
                 .monospacedDigit()
@@ -138,7 +147,9 @@ struct WorkoutTabView: View {
         }
         .fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "\(exercise.kind.chipName), \(exercise.sets) sets of \(exercise.reps) reps",
-                                   comment: "VoiceOver: one exercise of the next workout, with its sets and reps."))
+        .accessibilityLabel(String(
+            localized: "\(exercise.kind.chipName), \(exercise.sets) sets of \(exercise.reps) reps",
+            comment: "VoiceOver: one exercise of the next workout, with its sets and reps."
+        ))
     }
 }

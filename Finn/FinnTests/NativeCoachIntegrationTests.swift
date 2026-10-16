@@ -7,17 +7,35 @@ import XCTest
 final class NativeCoachIntegrationTests: XCTestCase {
     @MainActor
     func testNativeModelSelectsRecordedFactsAcrossSupportedLanguages() async throws {
-        try XCTSkipUnless(ProcessInfo.processInfo.environment["FINN_NATIVE_COACH_TESTS"] == "1",
-                          "Set TEST_RUNNER_FINN_NATIVE_COACH_TESTS=1 to test real Apple Intelligence.")
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["FINN_NATIVE_COACH_TESTS"] == "1",
+            "Set TEST_RUNNER_FINN_NATIVE_COACH_TESTS=1 to test real Apple Intelligence."
+        )
         let engine = OnDeviceCoachEngine()
         try XCTSkipUnless(engine.available, engine.unavailableReason ?? "Apple Intelligence unavailable")
         let context = CoachContext(facts: [
-            CoachSetFact(number: 1, id: UUID(), exerciseName: "Squat", repCount: 6,
-                         capturedAt: .now, observation: nil, issues: [], comparison: nil,
-                         partlyVisible: false),
-            CoachSetFact(number: 2, id: UUID(), exerciseName: "Push-up", repCount: 8,
-                         capturedAt: .now, observation: nil, issues: [], comparison: nil,
-                         partlyVisible: false)
+            CoachSetFact(
+                number: 1,
+                id: UUID(),
+                exerciseName: "Squat",
+                repCount: 6,
+                capturedAt: .now,
+                observation: nil,
+                issues: [],
+                comparison: nil,
+                partlyVisible: false
+            ),
+            CoachSetFact(
+                number: 2,
+                id: UUID(),
+                exerciseName: "Push-up",
+                repCount: 8,
+                capturedAt: .now,
+                observation: nil,
+                issues: [],
+                comparison: nil,
+                partlyVisible: false
+            )
         ])
         let questions: [(String, CoachLanguage, String)] = [
             ("en-GB", .english, "How many repetitions did I do in squat set 1?"),
@@ -27,8 +45,11 @@ final class NativeCoachIntegrationTests: XCTestCase {
         ]
         for (locale, language, question) in questions {
             XCTAssertTrue(SystemLanguageModel.default.supportsLocale(Locale(identifier: locale)))
-            let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]),
-                                           timeout: .seconds(30), language: language)
+            let responder = CoachResponder(
+                selector: CoachEngineSelector(engines: [engine]),
+                timeout: .seconds(30),
+                language: language
+            )
             responder.prepare()
             let answer = await responder.answer(question, context: context, history: [])
             XCTAssertEqual(answer.engine, .onDevice, "\(locale): a fallback is not a model pass")

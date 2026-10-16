@@ -16,23 +16,50 @@ nonisolated struct WatchSyncRulesTests {
     }
 
     @Test func stateCarriesOnlyWhatTheStageShows() {
-        func state(_ stage: WorkoutStage, _ exercise: ExerciseKind = .bodyweightSquat,
-                   result: WorkoutResult? = nil) -> WatchState {
-            WatchSyncRules.state(stage: stage, exercise: exercise, liveReps: 4, caption: "Rep 4 was faster",
-                                 result: result, cueDismissed: false, handsFree: true, demoInput: false)
+        func state(
+            _ stage: WorkoutStage,
+            _ exercise: ExerciseKind = .bodyweightSquat,
+            result: WorkoutResult? = nil
+        ) -> WatchState {
+            WatchSyncRules.state(
+                stage: stage,
+                exercise: exercise,
+                liveReps: 4,
+                caption: "Rep 4 was faster",
+                result: result,
+                cueDismissed: false,
+                handsFree: true,
+                demoInput: false
+            )
         }
-        #expect(state(.framing) == WatchState(stage: .framing, exercise: "Squat",
-                                              wristControls: false, handsFree: true))
+        #expect(state(.framing) == WatchState(
+            stage: .framing,
+            exercise: "Squat",
+            wristControls: false,
+            handsFree: true
+        ))
         #expect(state(.countdown(3)).countdown == 3)
-        #expect(state(.capturing) == WatchState(stage: .capturing, exercise: "Squat", reps: 4,
-                                                caption: "Rep 4 was faster", wristControls: false,
-                                                handsFree: true))
+        #expect(state(.capturing) == WatchState(
+            stage: .capturing,
+            exercise: "Squat",
+            reps: 4,
+            caption: "Rep 4 was faster",
+            wristControls: false,
+            handsFree: true
+        ))
         #expect(state(.capturing, .pushUp).wristControls == false)
         #expect(state(.capturing, .pushUp).exercise == "Push-up")
-        let coached = WatchSyncRules.state(stage: .capturing, exercise: .bodyweightSquat,
-                                           liveReps: 5, caption: nil, result: nil,
-                                           cueDismissed: false, handsFree: false, demoInput: false,
-                                           coachMessage: "Five reps counted. Stay with me for the next one.")
+        let coached = WatchSyncRules.state(
+            stage: .capturing,
+            exercise: .bodyweightSquat,
+            liveReps: 5,
+            caption: nil,
+            result: nil,
+            cueDismissed: false,
+            handsFree: false,
+            demoInput: false,
+            coachMessage: "Five reps counted. Stay with me for the next one."
+        )
         #expect(coached.coachMessage?.contains("Five") == true)
         let measured = state(.result, result: .measured(analysis(reps: 6), nil))
         #expect(measured.reps == 6)
@@ -44,17 +71,22 @@ nonisolated struct WatchSyncRulesTests {
     }
 
     @Test func summaryNamesRepsAndTheObservationUnlessDismissed() {
-        let cue = Cue(kind: .rangeDecreased, repNumbers: [5, 6], earlierMedian: 0.2, laterMedian: 0.1,
-                      observation: "Your range became shorter in the last two reps.",
-                      nextAction: "Choose a range you can repeat on each rep.")
+        let cue = Cue(
+            kind: .rangeDecreased,
+            repNumbers: [5, 6],
+            earlierMedian: 0.2,
+            laterMedian: 0.1,
+            observation: "Your range became shorter in the last two reps.",
+            nextAction: "Choose a range you can repeat on each rep."
+        )
         #expect(WatchSyncRules.summary(for: .measured(analysis(reps: 6), cue), cueDismissed: false)
-                == "6 reps measured. Your range became shorter in the last two reps.")
+            == "6 reps measured. Your range became shorter in the last two reps.")
         #expect(WatchSyncRules.summary(for: .measured(analysis(reps: 6), cue), cueDismissed: true)
-                == "6 reps measured.")
+            == "6 reps measured.")
         #expect(WatchSyncRules.summary(for: .measured(analysis(reps: 1), nil), cueDismissed: false)
-                == "1 rep measured.")
+            == "1 rep measured.")
         #expect(WatchSyncRules.summary(for: .interrupted, cueDismissed: false)
-                == "The set stopped before it was complete.")
+            == "The set stopped before it was complete.")
         #expect(WatchSyncRules.summary(for: nil, cueDismissed: false) == nil)
     }
 
@@ -70,7 +102,7 @@ nonisolated struct WatchSyncRulesTests {
     }
 
     private func analysis(reps: Int) -> SetAnalysis {
-        SetAnalysis(reps: (1...reps).map {
+        SetAnalysis(reps: (1 ... reps).map {
             RepMetric(number: $0, startTime: Double($0 - 1) * 2, endTime: Double($0) * 2, relativeRange: 0.2)
         }, confidence: 0.9, rubricVersion: "squat-side-v7")
     }
@@ -84,7 +116,8 @@ struct WatchSyncSessionTests {
         let model = WorkoutSessionModel(source: source)
         var sent: [WatchState] = []
         var now = 1_000.0
-        let sync = WatchSync(model: model, clock: { now += 1; return now }) { sent.append($0) }
+        let sync = WatchSync(model: model, clock: { now += 1
+            return now }) { sent.append($0) }
         #expect(sent.map(\.stage) == [.ready])
         #expect(sent.first?.exercise == "Squat")
 
@@ -95,13 +128,15 @@ struct WatchSyncSessionTests {
         #expect(sent.last?.haptic == WatchHaptic.none)
 
         let frames = trace(reps: 6)
-        for frame in frames { source.emit(frame) }
+        for frame in frames {
+            source.emit(frame)
+        }
         try await waitUntil { model.frameCount == frames.count }
         try await waitUntil { (sent.last?.reps ?? 0) >= 5 }
         await model.endSet()
         try await waitUntil { sent.last?.stage == .result }
 
-// observation may fold two quick changes into one update, so reps rise but may skip a number.
+        // observation may fold two quick changes into one update, so reps rise but may skip a number.
         let running = sent.filter { $0.stage == .capturing }
         #expect(running.count >= 2)
         #expect(zip(running, running.dropFirst()).allSatisfy { $1.reps > $0.reps })
@@ -147,8 +182,10 @@ struct WatchSyncSessionTests {
         let suite = "WatchSyncTests.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        let model = WorkoutSessionModel(source: WatchTestPoseSource(),
-                                        preferences: FinnPreferences(defaults: defaults))
+        let model = WorkoutSessionModel(
+            source: WatchTestPoseSource(),
+            preferences: FinnPreferences(defaults: defaults)
+        )
         var sent: [WatchState] = []
         let sync = WatchSync(model: model) { sent.append($0) }
         await model.startPreview()
@@ -166,7 +203,10 @@ struct WatchSyncSessionTests {
     /// Returns as soon as the condition holds. The limit only bounds a real hang: on a loaded CI
     /// simulator, with many main-actor tests running at once, the live analysis of a whole set can
     /// take several seconds.
-    private func waitUntil(_ condition: @MainActor () -> Bool, timeout: Duration = .seconds(30)) async throws {
+    private func waitUntil(
+        _ condition: @MainActor () -> Bool,
+        timeout: Duration = .seconds(30)
+    ) async throws {
         let deadline = ContinuousClock.now.advanced(by: timeout)
         while !condition() {
             guard ContinuousClock.now < deadline else {
@@ -178,7 +218,7 @@ struct WatchSyncSessionTests {
     }
 
     private func trace(reps: Int) -> [PoseFrame] {
-        (0...(reps * 20)).map { index in
+        (0 ... (reps * 20)).map { index in
             let phase = Double(index % 20) / 20
             let hipY = 0.42 + 0.20 * (1 - cos(2 * .pi * phase)) / 2
             return PoseFrame(time: Double(index) * 0.1, subjectCount: 1, joints: [
@@ -207,5 +247,7 @@ private final class WatchTestPoseSource: PoseStreaming {
         continuation = nil
     }
 
-    func emit(_ frame: PoseFrame) { continuation?.yield(frame) }
+    func emit(_ frame: PoseFrame) {
+        continuation?.yield(frame)
+    }
 }

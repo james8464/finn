@@ -14,7 +14,10 @@ nonisolated struct FixtureReplayTests {
     }
 
     private func poses(_ name: String) throws -> [PoseFrame] {
-        try JSONDecoder().decode([PoseFrame].self, from: Data(contentsOf: Self.fixtures.appending(path: name)))
+        try JSONDecoder().decode(
+            [PoseFrame].self,
+            from: Data(contentsOf: Self.fixtures.appending(path: name))
+        )
     }
 
     /// The recording loses the athlete for three frames right after the sixth rep. The set window
@@ -32,7 +35,8 @@ nonisolated struct FixtureReplayTests {
     /// leg lengths and no posture advice. The hips still show each squat (since 15 October).
     @Test(.enabled(if: available)) func coveredFeetAreCountedFromTheHipsWithoutAdvice() throws {
         let frames = try poses("squat-feet-hidden-poses.json")
-        #expect(EvidenceGate.assess(SetWindow.active(frames, requirement: .squat), requirement: .squat).isRejected)
+        #expect(EvidenceGate.assess(SetWindow.active(frames, requirement: .squat), requirement: .squat)
+            .isRejected)
         guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .squat) else {
             Issue.record("Covered feet: the squats are counted from the hips")
             return

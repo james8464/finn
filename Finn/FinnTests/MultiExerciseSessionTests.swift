@@ -16,7 +16,9 @@ struct MultiExerciseSessionTests {
 
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in pushUpTrace(reps: 6) { source.emit(frame) }
+        for frame in pushUpTrace(reps: 6) {
+            source.emit(frame)
+        }
         await model.endSet()
 
         guard case .measured(let analysis, _) = model.result else {
@@ -36,7 +38,9 @@ struct MultiExerciseSessionTests {
         await model.startPreview()
         await model.beginSet(countdown: 0)
         model.selectedExercise = .bodyweightSquat
-        for frame in hingeTrace(reps: 5) { source.emit(frame) }
+        for frame in hingeTrace(reps: 5) {
+            source.emit(frame)
+        }
         await model.endSet()
         #expect(model.resultExercise == .stiffLegDeadlift)
         guard case .measured(let analysis, _) = model.result else {
@@ -52,16 +56,24 @@ struct MultiExerciseSessionTests {
     @Test func aRecognizedExerciseBecomesTheChoiceForTheNextSet() async throws {
         let source = StubPoseSource()
         let preferences = FinnPreferences(defaults: UserDefaults(suiteName: "FinnCarryOver-\(UUID())")!)
-        let model = WorkoutSessionModel(source: source, exerciseClassifier: nil, angleClassifier: nil,
-                                        preferences: preferences)
+        let model = WorkoutSessionModel(
+            source: source,
+            exerciseClassifier: nil,
+            angleClassifier: nil,
+            preferences: preferences
+        )
         #expect(model.usesExerciseRecognition)
         #expect(model.selectedExercise == .bodyweightSquat)
         var rng = SyntheticRandom(seed: 505)
         let frames = SyntheticExerciseMotion.sequence(
-            label: "push_up", settings: .init(duration: 20...20, maximumYawDegrees: 5, dropRate: 0...0), using: &rng)
+            label: "push_up", settings: .init(duration: 20 ... 20, maximumYawDegrees: 5, dropRate: 0 ... 0),
+            using: &rng
+        )
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in frames { source.emit(frame) }
+        for frame in frames {
+            source.emit(frame)
+        }
         await model.endSet()
         guard case .recognized(.pushUp, _) = model.recognition else {
             Issue.record("Expected the push-ups to be recognized, got \(model.recognition)")
@@ -114,8 +126,12 @@ struct MultiExerciseSessionTests {
         var time = 0.0
         while time < 2 + Double(reps) * 1.6 {
             let phase = time < 2 ? 0 : (time - 2).truncatingRemainder(dividingBy: 1.6) / 1.6
-            frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: bend * (1 - cos(2 * .pi * phase)) / 2,
-                                                    wristX: 0.62, wristY: 0.86))
+            frames.append(CaptureTraces.pushUpFrame(
+                time: time,
+                elbowBend: bend * (1 - cos(2 * .pi * phase)) / 2,
+                wristX: 0.62,
+                wristY: 0.86
+            ))
             time += CaptureTraces.step
         }
         return frames
@@ -127,9 +143,18 @@ struct MultiExerciseSessionTests {
                                              .leftShoulder: .rightShoulder, .leftHip: .rightHip]
         var joints: [BodyJoint: JointPoint] = [:]
         for (joint, point) in frame.joints {
-            joints[pairs[joint] ?? joint] = JointPoint(x: 1 - point.x, y: point.y, confidence: point.confidence)
+            joints[pairs[joint] ?? joint] = JointPoint(
+                x: 1 - point.x,
+                y: point.y,
+                confidence: point.confidence
+            )
         }
-        return PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: joints, athleteTracking: .tracked)
+        return PoseFrame(
+            time: frame.time,
+            subjectCount: frame.subjectCount,
+            joints: joints,
+            athleteTracking: .tracked
+        )
     }
 
     @Test func noRepsMessageNamesTheSelectedExercise() async throws {
@@ -152,10 +177,12 @@ struct MultiExerciseSessionTests {
         await model.startPreview()
         #expect(model.captureExercise == .pushUp)
         let requirement = model.captureExercise.definition.evidence
-        let squatFrames = (0..<5).map { squatFrame(time: Double($0) * 0.1, hipY: 0.42) }
+        let squatFrames = (0 ..< 5).map { squatFrame(time: Double($0) * 0.1, hipY: 0.42) }
         #expect(EvidenceGate.previewStatus(squatFrames, requirement: requirement) == .adjustPosition)
-        #expect(EvidenceGate.previewStatus(Array(pushUpTrace(reps: 1).prefix(5)),
-                                           requirement: requirement) == .landmarksVisible)
+        #expect(EvidenceGate.previewStatus(
+            Array(pushUpTrace(reps: 1).prefix(5)),
+            requirement: requirement
+        ) == .landmarksVisible)
         await model.cancel()
     }
 
@@ -166,42 +193,71 @@ struct MultiExerciseSessionTests {
         let comparison = SetComparison.compare(first, second)
         #expect(comparison?.rangeDirection == .shorter)
         #expect(comparison?.exercise == .pushUp)
-        #expect(SetComparison.compare(first, summary(session: session, exercise: .bodyweightSquat,
-                                                     range: 0.4)) == nil)
+        #expect(SetComparison.compare(first, summary(
+            session: session,
+            exercise: .bodyweightSquat,
+            range: 0.4
+        )) == nil)
 
-        let text = SetShareSummary.text(for: second.analysis, cue: nil, cueDismissed: false,
-                                        comparison: comparison, exercise: .pushUp)
+        let text = SetShareSummary.text(
+            for: second.analysis,
+            cue: nil,
+            cueDismissed: false,
+            comparison: comparison,
+            exercise: .pushUp
+        )
         #expect(text.hasPrefix("Finn push-up sets"))
         #expect(text.contains("Camera-measured elbow bend was smaller in set 2."))
         #expect(!text.localizedCaseInsensitiveContains("squat"))
         #expect(SetShareSummary.statement(for: .longer, exercise: .bodyweightSquat)
-                == "Camera-measured range was longer in set 2.")
+            == "Camera-measured range was longer in set 2.")
     }
 
-    private func capture(_ model: WorkoutSessionModel, _ source: StubPoseSource,
-                         _ frames: [PoseFrame]) async {
+    private func capture(
+        _ model: WorkoutSessionModel,
+        _ source: StubPoseSource,
+        _ frames: [PoseFrame]
+    ) async {
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in frames { source.emit(frame) }
+        for frame in frames {
+            source.emit(frame)
+        }
         await model.endSet()
     }
 
     private func squatTrace(amplitude: Double) -> [PoseFrame] {
-        (0...120).map { index in
-            squatFrame(time: Double(index) * 0.1,
-                       hipY: 0.42 + amplitude * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
+        (0 ... 120).map { index in
+            squatFrame(
+                time: Double(index) * 0.1,
+                hipY: 0.42 + amplitude * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
+            )
         }
     }
 
     private func summary(session: UUID, exercise: ExerciseKind, range: Double) -> SetSummary {
-        let reps = (1...6).map {
-            RepMetric(number: $0, startTime: Double($0) * 2, endTime: Double($0) * 2 + 1.5,
-                      relativeRange: range)
+        let reps = (1 ... 6).map {
+            RepMetric(
+                number: $0,
+                startTime: Double($0) * 2,
+                endTime: Double($0) * 2 + 1.5,
+                relativeRange: range
+            )
         }
-        return SetSummary(id: UUID(), sessionID: session, capturedAt: .now, bodySide: .left,
-                          analysis: SetAnalysis(reps: reps, confidence: 0.9,
-                                                rubricVersion: exercise.definition.rubricVersion),
-                          cue: nil, cueResponse: .unanswered, exercise: exercise)
+        return SetSummary(
+            id: UUID(),
+            sessionID: session,
+            capturedAt: .now,
+            bodySide: .left,
+            analysis: SetAnalysis(
+                reps: reps,
+                confidence: 0.9,
+                rubricVersion: exercise.definition.rubricVersion
+            ),
+            cue: nil,
+            cueResponse: .unanswered,
+            exercise: exercise
+        )
     }
 }
 
@@ -219,5 +275,7 @@ private final class StubPoseSource: PoseStreaming {
         continuation = nil
     }
 
-    func emit(_ frame: PoseFrame) { continuation?.yield(frame) }
+    func emit(_ frame: PoseFrame) {
+        continuation?.yield(frame)
+    }
 }

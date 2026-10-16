@@ -5,8 +5,9 @@ import Testing
 /// A capture on a real phone: walk from the phone to the spot, do the set, walk back to stop.
 nonisolated struct SetWindowTests {
     @Test func walkingInAndOutNoLongerRefusesTheSet() {
-        let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0)
-// before the set window, these frames were refused: the legs were out of view for over a second.
+        let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces
+            .walkOut(from: 14.0)
+        // before the set window, these frames were refused: the legs were out of view for over a second.
         #expect(EvidenceGate.assess(capture, requirement: .squat).isRejected)
 
         guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(capture, as: .squat) else {
@@ -17,7 +18,8 @@ nonisolated struct SetWindowTests {
     }
 
     @Test func theWindowStartsWhenTheAthleteSettlesAndEndsWhenTheyLeave() {
-        let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0)
+        let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces
+            .walkOut(from: 14.0)
         let set = SetWindow.active(capture, requirement: .squat)
         let start = set.first?.time ?? 0
         let end = set.last?.time ?? 0
@@ -33,42 +35,61 @@ nonisolated struct SetWindowTests {
     }
 
     @Test func trimmingTwiceChangesNothing() {
-        let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0)
+        let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces
+            .walkOut(from: 14.0)
         let once = SetWindow.active(capture, requirement: .squat)
         #expect(SetWindow.active(once, requirement: .squat) == once)
     }
 
     @Test func noTimeInPositionKeepsTheWholeCaptureSoTheGateExplainsIt() {
-// legs never in view: nothing to trim to, and the refusal still names the missing joints.
-        let capture = (0..<150).map { index in
-            CaptureTraces.frame(time: Double(index) * CaptureTraces.step, hipY: 0.42, ankleX: 0.51, legs: false)
+        // legs never in view: nothing to trim to, and the refusal still names the missing joints.
+        let capture = (0 ..< 150).map { index in
+            CaptureTraces.frame(
+                time: Double(index) * CaptureTraces.step,
+                hipY: 0.42,
+                ankleX: 0.51,
+                legs: false
+            )
         }
         #expect(SetWindow.active(capture, requirement: .squat) == capture)
         #expect(EvidenceGate.assess(capture, requirement: .squat) == .reject(.missingJoints))
     }
 
     @Test func aBriefMomentInPositionIsNotASet() {
-// in position for one second only: shorter than a set, so nothing is trimmed.
-        let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 0, from: 2.0, standing: 1.0) + CaptureTraces.walkOut(from: 3.0)
+        // in position for one second only: shorter than a set, so nothing is trimmed.
+        let capture = CaptureTraces.walkIn() + CaptureTraces
+            .squats(reps: 0, from: 2.0, standing: 1.0) + CaptureTraces.walkOut(from: 3.0)
         #expect(SetWindow.activeRange(capture, requirement: .squat) == nil)
     }
 
     @Test func aGapInsideTheSetStillCounts() {
-        var capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0)
-// legs hidden for 1.5 s in the middle of the set.
+        var capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces
+            .walkOut(from: 14.0)
+        // legs hidden for 1.5 s in the middle of the set.
         capture = capture.map { frame in
-            guard frame.time > 7.0 && frame.time < 8.5 else { return frame }
-            return CaptureTraces.frame(time: frame.time, hipY: frame.joints[.leftHip]?.y ?? 0.42, ankleX: 0.51, legs: false)
+            guard frame.time > 7.0 && frame.time < 8.5 else {
+                return frame
+            }
+            return CaptureTraces.frame(
+                time: frame.time,
+                hipY: frame.joints[.leftHip]?.y ?? 0.42,
+                ankleX: 0.51,
+                legs: false
+            )
         }
-// the side rubric still refuses it; the hips, seen throughout, count the six squats.
-        #expect(EvidenceGate.assess(SetWindow.active(capture, requirement: .squat), requirement: .squat).isRejected)
+        // the side rubric still refuses it; the hips, seen throughout, count the six squats.
+        #expect(EvidenceGate.assess(SetWindow.active(capture, requirement: .squat), requirement: .squat)
+            .isRejected)
         #expect(Self.hipCount(capture) == 6)
     }
 
     /// Reps counted from the hips, the side rubric having refused the set; nil otherwise.
     private static func hipCount(_ capture: [PoseFrame]) -> Int? {
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(capture, as: .squat),
-              analysis.rubricVersion == ExerciseDefinition.squatTrunk.rubricVersion else { return nil }
+        guard
+            case .analyzed(let analysis) = ExerciseAnalyzer.analyse(capture, as: .squat),
+            analysis.rubricVersion == ExerciseDefinition.squatTrunk.rubricVersion else {
+            return nil
+        }
         return analysis.reps.count
     }
 
@@ -77,9 +98,16 @@ nonisolated struct SetWindowTests {
     /// reps and shown as measured from the side. All eight are counted from the hips.
     @Test func repsAtTheSpotWithAnUnclearAnkleAreNotDropped() {
         let reps = CaptureTraces.squats(reps: 8, from: 0).map { frame -> PoseFrame in
-            guard frame.time > 10.0 else { return frame }
-            return CaptureTraces.frame(time: frame.time, hipY: frame.joints[.leftHip]?.y ?? 0.42,
-                                       ankleX: 0.51, legs: true, ankle: false)
+            guard frame.time > 10.0 else {
+                return frame
+            }
+            return CaptureTraces.frame(
+                time: frame.time,
+                hipY: frame.joints[.leftHip]?.y ?? 0.42,
+                ankleX: 0.51,
+                legs: true,
+                ankle: false
+            )
         }
         let capture = reps + CaptureTraces.walkOut(from: 16.0)
         let window = SetWindow.active(capture, requirement: .squat)
@@ -90,12 +118,20 @@ nonisolated struct SetWindowTests {
 
     @Test func firstRepsWithAnUnclearAnkleAreNotDroppedEither() {
         let reps = CaptureTraces.squats(reps: 8, from: 2.0).map { frame -> PoseFrame in
-            guard frame.time < 8.0 else { return frame }
-            return CaptureTraces.frame(time: frame.time, hipY: frame.joints[.leftHip]?.y ?? 0.42,
-                                       ankleX: 0.51, legs: true, ankle: false)
+            guard frame.time < 8.0 else {
+                return frame
+            }
+            return CaptureTraces.frame(
+                time: frame.time,
+                hipY: frame.joints[.leftHip]?.y ?? 0.42,
+                ankleX: 0.51,
+                legs: true,
+                ankle: false
+            )
         }
         let capture = CaptureTraces.walkIn() + reps
-        #expect(EvidenceGate.assess(SetWindow.active(capture, requirement: .squat), requirement: .squat).isRejected)
+        #expect(EvidenceGate.assess(SetWindow.active(capture, requirement: .squat), requirement: .squat)
+            .isRejected)
         #expect(Self.hipCount(capture) == 8)
     }
 
@@ -103,11 +139,17 @@ nonisolated struct SetWindowTests {
     /// (`layout`) every 0.4 s; it must give exactly what `activeRange` and `spots` give apart, on
     /// every prefix of a capture as the live count sees it.
     @Test func oneLayoutPassGivesTheSameWindowAndSpots() {
-        let legsHidden = (0..<60).map { index in
-            CaptureTraces.frame(time: Double(index) * CaptureTraces.step, hipY: 0.42, ankleX: 0.51, legs: false)
+        let legsHidden = (0 ..< 60).map { index in
+            CaptureTraces.frame(
+                time: Double(index) * CaptureTraces.step,
+                hipY: 0.42,
+                ankleX: 0.51,
+                legs: false
+            )
         }
         let captures = [
-            CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces.walkOut(from: 14.0),
+            CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0) + CaptureTraces
+                .walkOut(from: 14.0),
             CaptureTraces.walkIn() + CaptureTraces.walkOut(from: 2.0),
             CaptureTraces.tiringSquats(),
             legsHidden,
@@ -123,19 +165,29 @@ nonisolated struct SetWindowTests {
     }
 
     @Test func pushUpGettingDownAndStandingUpIsTrimmed() {
-// walk in standing (wrists by the hips), get down, six push-ups, stand up and leave.
+        // walk in standing (wrists by the hips), get down, six push-ups, stand up and leave.
         var capture: [PoseFrame] = []
         var time = 0.0
         while time < 2.0 {
             let progress = time / 2.0
-            capture.append(CaptureTraces.pushUpFrame(time: time, elbowBend: 0, wristX: 0.2 + 0.1 * progress, wristY: 0.55))
+            capture.append(CaptureTraces.pushUpFrame(
+                time: time,
+                elbowBend: 0,
+                wristX: 0.2 + 0.1 * progress,
+                wristY: 0.55
+            ))
             time += CaptureTraces.step
         }
-        for _ in 0..<6 {
+        for _ in 0 ..< 6 {
             var t = 0.0
             while t < 2.0 {
                 let bend = 70 * (1 - cos(2 * .pi * t / 2.0)) / 2
-                capture.append(CaptureTraces.pushUpFrame(time: time, elbowBend: bend, wristX: 0.62, wristY: 0.86))
+                capture.append(CaptureTraces.pushUpFrame(
+                    time: time,
+                    elbowBend: bend,
+                    wristX: 0.62,
+                    wristY: 0.86
+                ))
                 t += CaptureTraces.step
                 time += CaptureTraces.step
             }
@@ -143,8 +195,12 @@ nonisolated struct SetWindowTests {
         let end = time
         while time < end + 2.0 {
             let progress = (time - end) / 2.0
-            capture.append(CaptureTraces.pushUpFrame(time: time, elbowBend: 0, wristX: 0.62 - 0.3 * progress,
-                                       wristY: 0.86 - 0.3 * progress))
+            capture.append(CaptureTraces.pushUpFrame(
+                time: time,
+                elbowBend: 0,
+                wristX: 0.62 - 0.3 * progress,
+                wristY: 0.86 - 0.3 * progress
+            ))
             time += CaptureTraces.step
         }
         guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(capture, as: .pushUp) else {
@@ -194,7 +250,10 @@ nonisolated enum CaptureTraces {
     static func tiringSquats() -> [PoseFrame] {
         var frames: [PoseFrame] = []
         var time = 0.0
-        for (duration, amplitude) in Array(repeating: (2.0, 0.20), count: 3) + Array(repeating: (1.2, 0.14), count: 3)
+        for (duration, amplitude) in Array(repeating: (2.0, 0.20), count: 3) + Array(
+            repeating: (1.2, 0.14),
+            count: 3
+        )
             + [(2.0, 0.0)] {
             let start = time
             while time < start + duration - 1e-9 {
@@ -222,7 +281,13 @@ nonisolated enum CaptureTraces {
         return frames
     }
 
-    static func frame(time: Double, hipY: Double, ankleX: Double, legs: Bool, ankle: Bool = true) -> PoseFrame {
+    static func frame(
+        time: Double,
+        hipY: Double,
+        ankleX: Double,
+        legs: Bool,
+        ankle: Bool = true
+    ) -> PoseFrame {
         var joints: [BodyJoint: JointPoint] = [
             .leftHip: JointPoint(x: ankleX - 0.04, y: hipY, confidence: 0.6),
             .leftShoulder: JointPoint(x: ankleX - 0.05, y: hipY - 0.25, confidence: 0.6),
@@ -231,7 +296,9 @@ nonisolated enum CaptureTraces {
         ]
         if legs {
             joints[.leftKnee] = JointPoint(x: ankleX - 0.02, y: 0.70, confidence: 0.6)
-            if ankle { joints[.leftAnkle] = JointPoint(x: ankleX, y: 0.90, confidence: 0.6) }
+            if ankle {
+                joints[.leftAnkle] = JointPoint(x: ankleX, y: 0.90, confidence: 0.6)
+            }
             joints[.rightKnee] = JointPoint(x: ankleX + 0.04, y: 0.70, confidence: 0.2)
             joints[.rightAnkle] = JointPoint(x: ankleX + 0.06, y: 0.90, confidence: 0.2)
         }

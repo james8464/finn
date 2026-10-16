@@ -107,14 +107,18 @@ def plan_warnings(clips, validation_participants) -> list[str]:
     warnings = []
     for label in LABELS:
         if counts["train", label] < MIN_TRAINING_CLIPS:
-            warnings.append(f"{label}: {counts['train', label]} training clips "
-                            f"(aim for at least {MIN_TRAINING_CLIPS})")
+            warnings.append(
+                f"{label}: {counts['train', label]} training clips "
+                f"(aim for at least {MIN_TRAINING_CLIPS})"
+            )
         if validation_participants and counts["validation", label] == 0:
             warnings.append(f"{label}: no validation clip, so its validation score is unknown")
     participants = {c.take.participant for c in clips}
     if not validation_participants:
-        warnings.append("no held-out participant: Create ML will split clips at random, and clips "
-                        "cut from one recording will sit in both sets, which inflates the score")
+        warnings.append(
+            "no held-out participant: Create ML will split clips at random, and clips "
+            "cut from one recording will sit in both sets, which inflates the score"
+        )
     elif participants <= set(validation_participants):
         warnings.append("every participant is in validation; nothing is left to train on")
     return warnings
@@ -129,7 +133,10 @@ def ensure_outside_repo(output: Path) -> None:
 def probe_duration(path: Path) -> float:
     result = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
-        check=True, capture_output=True, text=True, stdin=subprocess.DEVNULL,
+        check=True,
+        capture_output=True,
+        text=True,
+        stdin=subprocess.DEVNULL,
     )
     return float(result.stdout.strip())
 
@@ -138,11 +145,34 @@ def cut_clip(clip: Clip, output: Path, frame_rate: int) -> None:
     destination = output / clip.relative_path()
     destination.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(
-        ["ffmpeg", "-nostdin", "-loglevel", "error", "-ss", f"{clip.start:.3f}",
-         "-i", str(clip.take.path), "-t", f"{clip.duration:.3f}", "-an",
-         "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-r", str(frame_rate),
-         "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(destination)],
-        check=True, stdin=subprocess.DEVNULL,
+        [
+            "ffmpeg",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-ss",
+            f"{clip.start:.3f}",
+            "-i",
+            str(clip.take.path),
+            "-t",
+            f"{clip.duration:.3f}",
+            "-an",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "20",
+            "-r",
+            str(frame_rate),
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            str(destination),
+        ],
+        check=True,
+        stdin=subprocess.DEVNULL,
     )
 
 
@@ -151,9 +181,17 @@ def write_manifest(clips, output: Path) -> None:
         writer = csv.writer(file)
         writer.writerow(MANIFEST_COLUMNS)
         for clip in clips:
-            writer.writerow([clip.relative_path().as_posix(), clip.split, clip.take.label,
-                             clip.take.participant, clip.take.path.name,
-                             f"{clip.start:.3f}", f"{clip.duration:.3f}"])
+            writer.writerow(
+                [
+                    clip.relative_path().as_posix(),
+                    clip.split,
+                    clip.take.label,
+                    clip.take.participant,
+                    clip.take.path.name,
+                    f"{clip.start:.3f}",
+                    f"{clip.duration:.3f}",
+                ]
+            )
 
 
 def summary_table(clips) -> str:
@@ -168,11 +206,16 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("raw", type=Path, help="folder of recordings named p01_squat_01.mov")
     parser.add_argument("output", type=Path, help="new dataset folder, outside the repository")
-    parser.add_argument("--validation-participants", nargs="*", default=[],
-                        help="participant IDs held out for validation, for example p04")
+    parser.add_argument(
+        "--validation-participants",
+        nargs="*",
+        default=[],
+        help="participant IDs held out for validation, for example p04",
+    )
     parser.add_argument("--window", type=float, default=3.0, help="clip length in seconds")
-    parser.add_argument("--trim", type=float, default=0.5,
-                        help="seconds skipped at the start and end of each recording")
+    parser.add_argument(
+        "--trim", type=float, default=0.5, help="seconds skipped at the start and end of each recording"
+    )
     parser.add_argument("--frame-rate", type=int, default=30)
     parser.add_argument("--dry-run", action="store_true", help="print the plan without cutting")
     args = parser.parse_args(argv)
@@ -186,8 +229,7 @@ def main(argv=None) -> int:
                 raise PrepareError(f"{tool} is not on PATH (brew install ffmpeg)")
         takes = find_takes(args.raw)
         durations = {take.path: probe_duration(take.path) for take in takes}
-        clips = plan_clips(takes, durations, args.window, args.trim,
-                           set(args.validation_participants))
+        clips = plan_clips(takes, durations, args.window, args.trim, set(args.validation_participants))
     except (PrepareError, subprocess.CalledProcessError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

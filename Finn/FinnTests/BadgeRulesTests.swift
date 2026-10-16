@@ -6,17 +6,41 @@ struct BadgeRulesTests {
     private let day: TimeInterval = 86_400
     private let origin = Date(timeIntervalSinceReferenceDate: 800_000_000)
 
-    private func set(_ exercise: ExerciseKind = .bodyweightSquat, reps: Int, range: Double = 0.4,
-                     at offset: TimeInterval, session: UUID = UUID(), cue: Cue? = nil,
-                     issues: [SetIssue] = [], partlyVisible: Bool? = nil, side: BodySide = .left) -> SetSummary {
-        let metrics = (0..<reps).map { index in
-            RepMetric(number: index + 1, startTime: Double(index) * 2, endTime: Double(index) * 2 + 1.5,
-                      relativeRange: range)
+    private func set(
+        _ exercise: ExerciseKind = .bodyweightSquat,
+        reps: Int,
+        range: Double = 0.4,
+        at offset: TimeInterval,
+        session: UUID = UUID(),
+        cue: Cue? = nil,
+        issues: [SetIssue] = [],
+        partlyVisible: Bool? = nil,
+        side: BodySide = .left
+    ) -> SetSummary {
+        let metrics = (0 ..< reps).map { index in
+            RepMetric(
+                number: index + 1,
+                startTime: Double(index) * 2,
+                endTime: Double(index) * 2 + 1.5,
+                relativeRange: range
+            )
         }
-        return SetSummary(id: UUID(), sessionID: session, capturedAt: origin.addingTimeInterval(offset),
-                          bodySide: side, analysis: SetAnalysis(reps: metrics, confidence: 0.9, rubricVersion: "t"),
-                          cue: cue, cueResponse: .unanswered, exercise: exercise, issues: issues,
-                          partlyVisible: partlyVisible)
+        return SetSummary(
+            id: UUID(),
+            sessionID: session,
+            capturedAt: origin.addingTimeInterval(offset),
+            bodySide: side,
+            analysis: SetAnalysis(
+                reps: metrics,
+                confidence: 0.9,
+                rubricVersion: "t"
+            ),
+            cue: cue,
+            cueResponse: .unanswered,
+            exercise: exercise,
+            issues: issues,
+            partlyVisible: partlyVisible
+        )
     }
 
     private func history(_ sets: [SetSummary]) -> [WorkoutSessionSummary] {
@@ -30,7 +54,9 @@ struct BadgeRulesTests {
         return Array(sessions.values)
     }
 
-    private func kinds(_ badges: [EarnedBadge]) -> Set<BadgeKind> { Set(badges.map(\.kind)) }
+    private func kinds(_ badges: [EarnedBadge]) -> Set<BadgeKind> {
+        Set(badges.map(\.kind))
+    }
 
     @Test func nothingWithoutAMeasuredSet() {
         #expect(BadgeRules.evaluate(history: []).isEmpty)
@@ -48,7 +74,7 @@ struct BadgeRulesTests {
     @Test func threeDaysNeedThreeDistinctDaysWithinAWeek() {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "UTC")!
-// three sets on one day: no.
+        // three sets on one day: no.
         let sameDay = history([set(reps: 5, at: 0), set(reps: 5, at: 3600), set(reps: 5, at: 7200)])
         #expect(!kinds(BadgeRules.evaluate(history: sameDay, calendar: calendar)).contains(.threeDaysInAWeek))
         // Three days spread over nine days: no.
@@ -56,13 +82,20 @@ struct BadgeRulesTests {
         #expect(!kinds(BadgeRules.evaluate(history: spread, calendar: calendar)).contains(.threeDaysInAWeek))
         // Monday, Wednesday, Sunday: yes, dated by the third day.
         let week = history([set(reps: 5, at: 0), set(reps: 5, at: 2 * day), set(reps: 5, at: 6 * day)])
-        let badge = BadgeRules.evaluate(history: week, calendar: calendar).first { $0.kind == .threeDaysInAWeek }
+        let badge = BadgeRules.evaluate(history: week, calendar: calendar)
+            .first { $0.kind == .threeDaysInAWeek }
         #expect(badge?.earnedAt == origin.addingTimeInterval(6 * day))
     }
 
     @Test func cleanSetNeedsEnoughRepsFullyVisibleAndNoObservation() {
-        let cue = Cue(kind: .rangeDecreased, repNumbers: [5, 6], earlierMedian: 0.4, laterMedian: 0.3,
-                      observation: "Shorter", nextAction: "Keep it")
+        let cue = Cue(
+            kind: .rangeDecreased,
+            repNumbers: [5, 6],
+            earlierMedian: 0.4,
+            laterMedian: 0.3,
+            observation: "Shorter",
+            nextAction: "Keep it"
+        )
         let withCue = history([set(reps: 6, at: 0, cue: cue)])
         #expect(!kinds(BadgeRules.evaluate(history: withCue)).contains(.cleanSet))
         let tooShort = history([set(reps: SetComparison.minimumReps - 1, at: 0)])
@@ -94,7 +127,11 @@ struct BadgeRulesTests {
         #expect(!kinds(BadgeRules.evaluate(history: equal)).contains(.repRecord(.bodyweightSquat)))
         let fewer = history([set(reps: 8, at: 0), set(reps: 6, at: day)])
         #expect(!kinds(BadgeRules.evaluate(history: fewer)).contains(.repRecord(.bodyweightSquat)))
-        let record = history([set(reps: 8, at: 0), set(reps: 9, at: day), set(.pushUp, reps: 20, at: 2 * day)])
+        let record = history([
+            set(reps: 8, at: 0),
+            set(reps: 9, at: day),
+            set(.pushUp, reps: 20, at: 2 * day)
+        ])
         let badges = BadgeRules.evaluate(history: record)
         let squat = badges.first { $0.kind == .repRecord(.bodyweightSquat) }
         #expect(squat?.detail == "9 squat reps, up from 8 in your best earlier set.")
@@ -104,7 +141,7 @@ struct BadgeRulesTests {
 
     @Test func longerRangeFollowsTheComparisonRules() {
         let session = UUID()
-// same session, same side, enough reps, +25%: yes.
+        // same session, same side, enough reps, +25%: yes.
         let longer = history([set(reps: 5, range: 0.40, at: 0, session: session),
                               set(reps: 5, range: 0.50, at: 300, session: session)])
         let badge = BadgeRules.evaluate(history: longer).first { $0.kind == .longerRange(.bodyweightSquat) }
@@ -154,7 +191,11 @@ struct BadgeRulesTests {
     /// announced "First set, 7 pull-up reps" and a 27-rep push-up record, both from older sets.
     @MainActor @Test func badgesFoundAtLaunchAreRecordedWithoutCelebration() {
         let ledger = BadgeLedger(store: MemoryBadgeStore())
-        let older = [set(.pullUp, reps: 7, at: 0), set(.pushUp, reps: 19, at: day), set(.pushUp, reps: 27, at: 2 * day)]
+        let older = [
+            set(.pullUp, reps: 7, at: 0),
+            set(.pushUp, reps: 19, at: day),
+            set(.pushUp, reps: 27, at: 2 * day)
+        ]
         let found = ledger.update(history: history(older))
         #expect(kinds(found).isSuperset(of: [.firstSet, .repRecord(.pushUp)]))
         #expect(ledger.justEarned.isEmpty)

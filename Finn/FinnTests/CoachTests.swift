@@ -7,35 +7,76 @@ struct CoachTests {
     // MARK: Fixtures
 
     private func rep(_ number: Int, range: Double = 0.4) -> RepMetric {
-        RepMetric(number: number, startTime: Double(number) * 2, endTime: Double(number) * 2 + 1.5, relativeRange: range)
+        RepMetric(
+            number: number,
+            startTime: Double(number) * 2,
+            endTime: Double(number) * 2 + 1.5,
+            relativeRange: range
+        )
     }
 
-    private func set(session: UUID, at date: Date, exercise: ExerciseKind = .bodyweightSquat,
-                     reps: Int = 6, range: Double = 0.4, cue: Cue? = nil,
-                     issues: [SetIssue]? = nil, partlyVisible: Bool? = nil,
-                     formMeasurements: [FormMeasurement]? = nil) -> SetSummary {
-        SetSummary(id: UUID(), sessionID: session, capturedAt: date, bodySide: .left,
-                   analysis: SetAnalysis(reps: (1...reps).map { rep($0, range: range) },
-                                         confidence: 0.95, rubricVersion: "squat-side-v7"),
-                   cue: cue, cueResponse: .unanswered, exercise: exercise, cameraView: .side,
-                   issues: issues, formMeasurements: formMeasurements, partlyVisible: partlyVisible)
+    private func set(
+        session: UUID,
+        at date: Date,
+        exercise: ExerciseKind = .bodyweightSquat,
+        reps: Int = 6,
+        range: Double = 0.4,
+        cue: Cue? = nil,
+        issues: [SetIssue]? = nil,
+        partlyVisible: Bool? = nil,
+        formMeasurements: [FormMeasurement]? = nil
+    ) -> SetSummary {
+        SetSummary(
+            id: UUID(),
+            sessionID: session,
+            capturedAt: date,
+            bodySide: .left,
+            analysis: SetAnalysis(
+                reps: (1 ... reps).map { rep($0, range: range) },
+                confidence: 0.95,
+                rubricVersion: "squat-side-v7"
+            ),
+            cue: cue,
+            cueResponse: .unanswered,
+            exercise: exercise,
+            cameraView: .side,
+            issues: issues,
+            formMeasurements: formMeasurements,
+            partlyVisible: partlyVisible
+        )
     }
 
     private var rangeCue: Cue {
-        Cue(kind: .rangeDecreased, repNumbers: [5, 6], earlierMedian: 0.4, laterMedian: 0.3,
+        Cue(
+            kind: .rangeDecreased,
+            repNumbers: [5, 6],
+            earlierMedian: 0.4,
+            laterMedian: 0.3,
             observation: "Your last two reps were shallower than your first two.",
-            nextAction: "Try reaching the same depth on every rep.")
+            nextAction: "Try reaching the same depth on every rep."
+        )
     }
 
     private func history() -> [WorkoutSessionSummary] {
         let session = UUID()
         let start = Date(timeIntervalSince1970: 1_760_000_000)
         let first = set(session: session, at: start, range: 0.4, issues: [])
-        let second = set(session: session, at: start.addingTimeInterval(300), range: 0.3,
-                         cue: rangeCue, issues: [.rangeDropped])
+        let second = set(
+            session: session,
+            at: start.addingTimeInterval(300),
+            range: 0.3,
+            cue: rangeCue,
+            issues: [.rangeDropped]
+        )
         let later = UUID()
-        let third = set(session: later, at: start.addingTimeInterval(90_000), exercise: .pushUp,
-                        reps: 8, issues: [.partlyVisible], partlyVisible: true)
+        let third = set(
+            session: later,
+            at: start.addingTimeInterval(90_000),
+            exercise: .pushUp,
+            reps: 8,
+            issues: [.partlyVisible],
+            partlyVisible: true
+        )
         return [WorkoutSessionSummary(id: later, startedAt: start.addingTimeInterval(90_000), sets: [third]),
                 WorkoutSessionSummary(id: session, startedAt: start, sets: [first, second])]
     }
@@ -48,7 +89,9 @@ struct CoachTests {
         #expect(context.facts.map(\.number) == [1, 2, 3])
         #expect(context.facts[0].exerciseName == "Squat")
         #expect(context.facts[0].observation == nil)
-        #expect(context.facts[1].observation == "Your last two reps were shallower than your first two. Try reaching the same depth on every rep.")
+        #expect(context.facts[1]
+            .observation ==
+            "Your last two reps were shallower than your first two. Try reaching the same depth on every rep.")
         #expect(context.facts[1].comparison?.contains("shorter") == true)
         #expect(context.facts[2].exerciseName == "Push-up")
         #expect(context.facts[2].repCount == 8)
@@ -93,8 +136,15 @@ struct CoachTests {
     @Test func contextKeepsOnlyTheMostRecentSets() {
         let session = UUID()
         let start = Date(timeIntervalSince1970: 1_760_000_000)
-        let sets = (0..<12).map { set(session: session, at: start.addingTimeInterval(Double($0) * 200), reps: $0 + 1) }
-        let context = CoachContext.make(history: [WorkoutSessionSummary(id: session, startedAt: start, sets: sets)], limit: 5)
+        let sets = (0 ..< 12).map { set(
+            session: session,
+            at: start.addingTimeInterval(Double($0) * 200),
+            reps: $0 + 1
+        ) }
+        let context = CoachContext.make(
+            history: [WorkoutSessionSummary(id: session, startedAt: start, sets: sets)],
+            limit: 5
+        )
         #expect(context.facts.count == 5)
         #expect(context.facts.map(\.repCount) == [8, 9, 10, 11, 12])
         #expect(context.facts.first?.number == 1)
@@ -104,12 +154,26 @@ struct CoachTests {
         let firstID = UUID()
         let secondID = UUID()
         let date = Date(timeIntervalSince1970: 1_760_000_000)
-        let first = set(session: firstID, at: date,
-                        formMeasurements: [FormMeasurement(check: .squatDepth, judged: 6,
-                                                           faulty: 5, typical: 40)])
-        let second = set(session: secondID, at: date.addingTimeInterval(90_000),
-                         formMeasurements: [FormMeasurement(check: .squatDepth, judged: 6,
-                                                            faulty: 1, typical: 20)])
+        let first = set(
+            session: firstID,
+            at: date,
+            formMeasurements: [FormMeasurement(
+                check: .squatDepth,
+                judged: 6,
+                faulty: 5,
+                typical: 40
+            )]
+        )
+        let second = set(
+            session: secondID,
+            at: date.addingTimeInterval(90_000),
+            formMeasurements: [FormMeasurement(
+                check: .squatDepth,
+                judged: 6,
+                faulty: 1,
+                typical: 20
+            )]
+        )
         let context = CoachContext.make(history: [
             WorkoutSessionSummary(id: secondID, startedAt: second.capturedAt, sets: [second]),
             WorkoutSessionSummary(id: firstID, startedAt: first.capturedAt, sets: [first]),
@@ -121,37 +185,89 @@ struct CoachTests {
     @Test func coachSkipsIncompatibleMeasuredSetForFormTrend() {
         let session = UUID()
         let date = Date(timeIntervalSince1970: 1_760_000_000)
-        let first = set(session: session, at: date,
-                        formMeasurements: [FormMeasurement(check: .squatDepth, judged: 6,
-                                                           faulty: 5, typical: 40)])
-        let obscured = set(session: session, at: date.addingTimeInterval(100),
-                           partlyVisible: true,
-                           formMeasurements: [FormMeasurement(check: .squatDepth, judged: 6,
-                                                              faulty: 5, typical: 40)])
-        let last = set(session: session, at: date.addingTimeInterval(200),
-                       formMeasurements: [FormMeasurement(check: .squatDepth, judged: 6,
-                                                          faulty: 1, typical: 20)])
-        let context = CoachContext.make(history: [WorkoutSessionSummary(id: session, startedAt: date,
-                                                                        sets: [first, obscured, last])])
+        let first = set(
+            session: session,
+            at: date,
+            formMeasurements: [FormMeasurement(
+                check: .squatDepth,
+                judged: 6,
+                faulty: 5,
+                typical: 40
+            )]
+        )
+        let obscured = set(
+            session: session,
+            at: date.addingTimeInterval(100),
+            partlyVisible: true,
+            formMeasurements: [FormMeasurement(
+                check: .squatDepth,
+                judged: 6,
+                faulty: 5,
+                typical: 40
+            )]
+        )
+        let last = set(
+            session: session,
+            at: date.addingTimeInterval(200),
+            formMeasurements: [FormMeasurement(
+                check: .squatDepth,
+                judged: 6,
+                faulty: 1,
+                typical: 20
+            )]
+        )
+        let context = CoachContext.make(history: [WorkoutSessionSummary(
+            id: session,
+            startedAt: date,
+            sets: [first, obscured, last]
+        )])
         #expect(context.facts.last?.comparison?.contains("down from 5 of 6") == true)
     }
 
     @Test func coachKeepsLatestPriorForEachFormCheck() {
         let session = UUID()
         let date = Date(timeIntervalSince1970: 1_760_000_000)
-        let depth = set(session: session, at: date,
-                        formMeasurements: [FormMeasurement(check: .squatDepth, judged: 6,
-                                                           faulty: 5, typical: 40)])
-        let chest = set(session: session, at: date.addingTimeInterval(100),
-                        formMeasurements: [FormMeasurement(check: .squatChestDrop, judged: 6,
-                                                           faulty: 5, typical: 50)])
-        let latest = set(session: session, at: date.addingTimeInterval(200),
-                         formMeasurements: [FormMeasurement(check: .squatDepth, judged: 6,
-                                                            faulty: 1, typical: 20),
-                                            FormMeasurement(check: .squatChestDrop, judged: 6,
-                                                            faulty: 1, typical: 20)])
-        let context = CoachContext.make(history: [WorkoutSessionSummary(id: session, startedAt: date,
-                                                                        sets: [depth, chest, latest])])
+        let depth = set(
+            session: session,
+            at: date,
+            formMeasurements: [FormMeasurement(
+                check: .squatDepth,
+                judged: 6,
+                faulty: 5,
+                typical: 40
+            )]
+        )
+        let chest = set(
+            session: session,
+            at: date.addingTimeInterval(100),
+            formMeasurements: [FormMeasurement(
+                check: .squatChestDrop,
+                judged: 6,
+                faulty: 5,
+                typical: 50
+            )]
+        )
+        let latest = set(
+            session: session,
+            at: date.addingTimeInterval(200),
+            formMeasurements: [FormMeasurement(
+                check: .squatDepth,
+                judged: 6,
+                faulty: 1,
+                typical: 20
+            ),
+            FormMeasurement(
+                check: .squatChestDrop,
+                judged: 6,
+                faulty: 1,
+                typical: 20
+            )]
+        )
+        let context = CoachContext.make(history: [WorkoutSessionSummary(
+            id: session,
+            startedAt: date,
+            sets: [depth, chest, latest]
+        )])
         let comparison = context.facts.last?.comparison ?? ""
         #expect(comparison.contains("depth check flagged"))
         #expect(comparison.contains("chest position check flagged"))
@@ -188,7 +304,11 @@ struct CoachTests {
 
     @Test func frenchFallbackSpeaksFrench() async {
         let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: .french)
-        let answer = await responder.answer("Alors ?", context: CoachContext.make(history: history()), history: [])
+        let answer = await responder.answer(
+            "Alors ?",
+            context: CoachContext.make(history: history()),
+            history: []
+        )
         #expect(answer.text.contains("Série 3 : 8 répétitions, push-up."))
     }
 
@@ -220,7 +340,11 @@ struct CoachTests {
     @Test func answerCitingAnUnknownSetFallsBack() async {
         let engine = StubCoachEngine(output: "Set 7")
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
-        let answer = await responder.answer("Which was best?", context: CoachContext.make(history: history()), history: [])
+        let answer = await responder.answer(
+            "Which was best?",
+            context: CoachContext.make(history: history()),
+            history: []
+        )
         #expect(answer.engine == .fallback)
         #expect(!answer.text.contains("Set 7"))
     }
@@ -228,7 +352,11 @@ struct CoachTests {
     @Test func generatedUnsupportedPostureClaimIsNeverShown() async {
         let engine = StubCoachEngine(output: "Set 2 had perfect posture and prevents knee injury.")
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
-        let answer = await responder.answer("How was set 2?", context: CoachContext.make(history: history()), history: [])
+        let answer = await responder.answer(
+            "How was set 2?",
+            context: CoachContext.make(history: history()),
+            history: []
+        )
         #expect(answer.engine == .fallback)
         #expect(!answer.text.contains("perfect posture"))
         #expect(!answer.text.contains("prevents knee injury"))
@@ -237,7 +365,11 @@ struct CoachTests {
     @Test func noRelevantSetDoesNotReciteUnrelatedHistory() async {
         let engine = StubCoachEngine(output: "NONE")
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
-        let answer = await responder.answer("Did I injure my knee?", context: CoachContext.make(history: history()), history: [])
+        let answer = await responder.answer(
+            "Did I injure my knee?",
+            context: CoachContext.make(history: history()),
+            history: []
+        )
         #expect(answer.engine == .fallback)
         #expect(answer.text.contains("didn't measure that"))
         #expect(!answer.text.contains("Set 3"))
@@ -250,15 +382,21 @@ struct CoachTests {
             .answer("Hi", context: context, history: [])
         #expect(first.engine == .fallback)
         let failing = StubCoachEngine(output: nil)
-        let second = await CoachResponder(selector: CoachEngineSelector(engines: [failing]), language: .english)
-            .answer("Hi", context: context, history: [])
+        let second = await CoachResponder(
+            selector: CoachEngineSelector(engines: [failing]),
+            language: .english
+        )
+        .answer("Hi", context: context, history: [])
         #expect(second.engine == .fallback)
     }
 
     @Test func slowEngineFallsBackAfterTimeout() async {
         let engine = StubCoachEngine(output: "Set 1 was fine.", delay: .seconds(5))
-        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]),
-                                       timeout: .milliseconds(100), language: .english)
+        let responder = CoachResponder(
+            selector: CoachEngineSelector(engines: [engine]),
+            timeout: .milliseconds(100),
+            language: .english
+        )
         let answer = await responder.answer("Hi", context: CoachContext.make(history: history()), history: [])
         #expect(answer.engine == .fallback)
     }
@@ -267,7 +405,10 @@ struct CoachTests {
         let first = StubCoachEngine(kind: .claudeDemo, available: false, output: "Set 1 was fine.")
         let second = StubCoachEngine(kind: .privateCloudCompute, output: "Set 1 was fine.")
         let third = StubCoachEngine(kind: .onDevice, output: "Set 1 was fine.")
-        let responder = CoachResponder(selector: CoachEngineSelector(engines: [first, second, third]), language: .english)
+        let responder = CoachResponder(
+            selector: CoachEngineSelector(engines: [first, second, third]),
+            language: .english
+        )
         #expect(responder.currentEngineKind == .privateCloudCompute)
         _ = await responder.answer("Hi", context: CoachContext.make(history: history()), history: [])
         #expect(first.calls == 0 && second.calls == 1 && third.calls == 0)
@@ -292,7 +433,11 @@ struct CoachTests {
         for language in [CoachLanguage.english, .french, .spanish] {
             let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: language)
             let conversation = CoachConversation(history: history(), responder: responder)
-            #expect(conversation.suggestedQuestions.map(CoachFallback.intent(of:)) == [.recap, .progress, .advice])
+            #expect(conversation.suggestedQuestions.map(CoachFallback.intent(of:)) == [
+                .recap,
+                .progress,
+                .advice
+            ])
             #expect(CoachFallback.intent(of: conversation.analysisRequest) == .advice)
         }
     }
@@ -311,9 +456,10 @@ struct CoachTests {
 
     @Test func promptSizeStaysBoundedForLongQuestionsAndHistory() {
         let huge = String(repeating: "more context ", count: 10_000)
-        let turns = (0..<20).map { _ in CoachMessage(role: .person, text: huge) }
+        let turns = (0 ..< 20).map { _ in CoachMessage(role: .person, text: huge) }
         let prompt = FoundationModelsCoachPrompt.prompt(
-            question: huge, context: CoachContext.make(history: history()), history: turns)
+            question: huge, context: CoachContext.make(history: history()), history: turns
+        )
         #expect(prompt.count <= FoundationModelsCoachPrompt.maximumPromptCharacters)
         #expect(prompt.contains("Person now asks:"))
     }
@@ -323,10 +469,18 @@ struct CoachTests {
     }
 
     @Test func promptBudgetKeepsTheLatestSetsWhenOldObservationsAreLong() {
-        let facts = (1...32).map { number in
-            CoachSetFact(number: number, id: UUID(), exerciseName: "Squat", repCount: number,
-                         capturedAt: .now, observation: String(repeating: "Recorded fact. ", count: 1_000),
-                         issues: [], comparison: nil, partlyVisible: false)
+        let facts = (1 ... 32).map { number in
+            CoachSetFact(
+                number: number,
+                id: UUID(),
+                exerciseName: "Squat",
+                repCount: number,
+                capturedAt: .now,
+                observation: String(repeating: "Recorded fact. ", count: 1_000),
+                issues: [],
+                comparison: nil,
+                partlyVisible: false
+            )
         }
         let prompt = CoachContext(facts: facts).boundedPromptText(maximumCharacters: 4_000)
         #expect(prompt.count <= 4_000)
@@ -340,7 +494,9 @@ struct CoachTests {
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
         let conversation = CoachConversation(history: history(), responder: responder)
         let request = Task { await conversation.send("How was set 1?") }
-        while !conversation.isAnswering { await Task.yield() }
+        while !conversation.isAnswering {
+            await Task.yield()
+        }
         conversation.refresh(history: [])
         await request.value
         #expect(conversation.messages.count == 2)
@@ -352,7 +508,10 @@ struct CoachTests {
         let conversation = CoachConversation(history: [], responder: responder)
         let greetingID = conversation.messages.first?.id
         conversation.refresh(history: history())
-        #expect(conversation.messages.first?.text == CoachFallback.opening(context: conversation.context, language: .english))
+        #expect(conversation.messages.first?.text == CoachFallback.opening(
+            context: conversation.context,
+            language: .english
+        ))
         #expect(conversation.messages.first?.id == greetingID)
         #expect(conversation.messages.first?.engine == nil)
     }
@@ -362,7 +521,9 @@ struct CoachTests {
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
         let conversation = CoachConversation(history: history(), responder: responder)
         let request = Task { await conversation.send("How was set 1?") }
-        while !conversation.isAnswering { await Task.yield() }
+        while !conversation.isAnswering {
+            await Task.yield()
+        }
         request.cancel()
         await request.value
         #expect(conversation.messages.count == 2)
@@ -371,8 +532,11 @@ struct CoachTests {
 
     @Test func aTimedOutUncooperativeModelCannotStartOverlappingInference() async {
         let engine = SuspendedCoachEngine()
-        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]),
-                                       timeout: .milliseconds(30), language: .english)
+        let responder = CoachResponder(
+            selector: CoachEngineSelector(engines: [engine]),
+            timeout: .milliseconds(30),
+            language: .english
+        )
         let context = CoachContext.make(history: history())
         let first = await responder.answer("First", context: context, history: [])
         #expect(first.engine == .fallback)
@@ -386,7 +550,12 @@ struct CoachTests {
     // MARK: Validator and prompt
 
     @Test func answerCheckReadsSetReferencesInBothLanguages() {
-        #expect(CoachAnswerCheck.referencedSetNumbers(in: "Set 2 and set #3, then Série 4 and série 5.") == [2, 3, 4, 5])
+        #expect(CoachAnswerCheck.referencedSetNumbers(in: "Set 2 and set #3, then Série 4 and série 5.") == [
+            2,
+            3,
+            4,
+            5
+        ])
         #expect(CoachAnswerCheck.referencedSetNumbers(in: "A set of 8 reps.") == [])
         let context = CoachContext.make(history: history())
         #expect(CoachAnswerCheck.selectedFacts(in: "Set 2, Série 3", for: context)?.map(\.number) == [2, 3])
@@ -424,22 +593,25 @@ struct CoachTests {
     }
 
     #if DEBUG
-    @Test func claudeDemoBodyUsesSonnetWithTheSameInstructions() throws {
-        let context = CoachContext.make(history: history())
-        let body = ClaudeDemoCoachEngine.body(question: "How did set 3 go?", context: context, history: [
-            CoachMessage(role: .coach, text: "Opening line", engine: .claudeDemo),
-            CoachMessage(role: .person, text: "First question"),
-            CoachMessage(role: .coach, text: "Set 1 was fine.", engine: .claudeDemo),
-        ], language: .english)
-        #expect(body["model"] as? String == "claude-sonnet-5-5")
-        #expect((body["system"] as? String)?.contains("Set 3: Push-up") == false)
-        let messages = body["messages"] as? [[String: String]]
-        #expect(messages?.map { $0["role"] } == ["user", "assistant", "user"])
-        #expect(messages?.last?["content"]?.contains("Set 3: Push-up") == true)
-        #expect(messages?.last?["content"]?.hasSuffix("Person now asks: How did set 3 go?") == true)
-        let data = try JSONSerialization.data(withJSONObject: ["content": [["type": "text", "text": "Set 3: 8 push-ups."]]])
-        #expect(try ClaudeDemoCoachEngine.text(from: data) == "Set 3: 8 push-ups.")
-    }
+        @Test func claudeDemoBodyUsesSonnetWithTheSameInstructions() throws {
+            let context = CoachContext.make(history: history())
+            let body = ClaudeDemoCoachEngine.body(question: "How did set 3 go?", context: context, history: [
+                CoachMessage(role: .coach, text: "Opening line", engine: .claudeDemo),
+                CoachMessage(role: .person, text: "First question"),
+                CoachMessage(role: .coach, text: "Set 1 was fine.", engine: .claudeDemo),
+            ], language: .english)
+            #expect(body["model"] as? String == "claude-sonnet-5-5")
+            #expect((body["system"] as? String)?.contains("Set 3: Push-up") == false)
+            let messages = body["messages"] as? [[String: String]]
+            #expect(messages?.map { $0["role"] } == ["user", "assistant", "user"])
+            #expect(messages?.last?["content"]?.contains("Set 3: Push-up") == true)
+            #expect(messages?.last?["content"]?.hasSuffix("Person now asks: How did set 3 go?") == true)
+            let data = try JSONSerialization.data(withJSONObject: ["content": [[
+                "type": "text",
+                "text": "Set 3: 8 push-ups."
+            ]]])
+            #expect(try ClaudeDemoCoachEngine.text(from: data) == "Set 3: 8 push-ups.")
+        }
     #endif
 }
 
@@ -462,13 +634,21 @@ private final class StubCoachEngine: CoachEngine {
         self.delay = delay
     }
 
-    func reply(to question: String, context: CoachContext, history: [CoachMessage],
-               language: CoachLanguage) async throws -> String {
+    func reply(
+        to question: String,
+        context: CoachContext,
+        history: [CoachMessage],
+        language: CoachLanguage
+    ) async throws -> String {
         calls += 1
         lastHistory = history
         lastInstructionsContext = context
-        if let delay { try await Task.sleep(for: delay) }
-        guard let output else { throw Failure() }
+        if let delay {
+            try await Task.sleep(for: delay)
+        }
+        guard let output else {
+            throw Failure()
+        }
         return output
     }
 }
@@ -481,8 +661,12 @@ private final class SuspendedCoachEngine: CoachEngine {
     private(set) var calls = 0
     private var continuation: CheckedContinuation<String, Never>?
 
-    func reply(to question: String, context: CoachContext, history: [CoachMessage],
-               language: CoachLanguage) async throws -> String {
+    func reply(
+        to question: String,
+        context: CoachContext,
+        history: [CoachMessage],
+        language: CoachLanguage
+    ) async throws -> String {
         calls += 1
         return await withCheckedContinuation { continuation = $0 }
     }

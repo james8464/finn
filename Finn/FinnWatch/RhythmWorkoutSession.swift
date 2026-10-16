@@ -32,9 +32,13 @@ final class RhythmWorkoutSession {
     }
 
     func start() async -> Bool {
-        if isRunning { return true }
+        if isRunning {
+            return true
+        }
         guard !isStarting, store.authorizationStatus(for: HKObjectType.workoutType()) == .sharingAuthorized
-        else { return false }
+        else {
+            return false
+        }
         isStarting = true
         let currentGeneration = generation
         defer { isStarting = false }
@@ -67,7 +71,9 @@ final class RhythmWorkoutSession {
 
     func stop() {
         generation += 1
-        guard let session, let builder else { return }
+        guard let session, let builder else {
+            return
+        }
         self.session = nil
         self.builder = nil
         isRunning = false

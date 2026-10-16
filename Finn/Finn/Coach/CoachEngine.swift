@@ -15,10 +15,14 @@ nonisolated enum CoachEngineKind: String, Equatable, Sendable {
 
     var label: String {
         switch self {
-        case .privateCloudCompute: String(localized: "Apple Private Cloud Compute")
-        case .onDevice: String(localized: "On-device Apple Intelligence")
-        case .fallback: String(localized: "Saved observations only")
-        case .claudeDemo: String(localized: "Claude Sonnet (debug demo)")
+        case .privateCloudCompute:
+            String(localized: "Apple Private Cloud Compute")
+        case .onDevice:
+            String(localized: "On-device Apple Intelligence")
+        case .fallback:
+            String(localized: "Saved observations only")
+        case .claudeDemo:
+            String(localized: "Claude Sonnet (debug demo)")
         }
     }
 }
@@ -52,8 +56,12 @@ protocol CoachEngine: AnyObject {
     var unavailableReason: String? { get }
     func prepare(language: CoachLanguage)
     /// selects relevant saved-set labels for `question`; the returned text is never displayed
-    func reply(to question: String, context: CoachContext, history: [CoachMessage],
-               language: CoachLanguage) async throws -> String
+    func reply(
+        to question: String,
+        context: CoachContext,
+        history: [CoachMessage],
+        language: CoachLanguage
+    ) async throws -> String
 }
 
 /// picks the engine for a turn: the first available one in order, or nil for the fixed text
@@ -80,13 +88,18 @@ final class CoachEngineSelector {
 
     /// when no engine can answer: the first reason an engine gives, logged for the Xcode console
     func unavailableReason() -> String? {
-        guard current() == nil else { return nil }
+        guard current() == nil else {
+            return nil
+        }
         return engines.compactMap(\.unavailableReason).first
     }
 }
 
 extension CoachEngine {
-    var unavailableReason: String? { nil }
+    var unavailableReason: String? {
+        nil
+    }
+
     func prepare(language: CoachLanguage) {}
 }
 
@@ -100,16 +113,27 @@ enum CoachModelAvailability {
         case .available:
             return nil
         case .unavailable(let reason):
-            log.notice("\(engine, privacy: .public) unavailable: \(String(describing: reason), privacy: .public)")
+            log
+                .notice(
+                    "\(engine, privacy: .public) unavailable: \(String(describing: reason), privacy: .public)"
+                )
             switch reason {
             case .deviceNotEligible:
-                return String(localized: "This iPhone cannot run Apple Intelligence, so the coach answers from Finn's records only.")
+                return String(
+                    localized: "This iPhone cannot run Apple Intelligence, so the coach answers from Finn's records only."
+                )
             case .appleIntelligenceNotEnabled:
-                return String(localized: "Turn on Apple Intelligence in Settings > Apple Intelligence & Siri, and the coach will pick the sets for you.")
+                return String(
+                    localized: "Turn on Apple Intelligence in Settings > Apple Intelligence & Siri, and the coach will pick the sets for you."
+                )
             case .modelNotReady:
-                return String(localized: "Apple Intelligence is still downloading its model. Until then the coach answers from Finn's records only.")
+                return String(
+                    localized: "Apple Intelligence is still downloading its model. Until then the coach answers from Finn's records only."
+                )
             @unknown default:
-                return String(localized: "No language model is available right now, so the coach answers from Finn's records only.")
+                return String(
+                    localized: "No language model is available right now, so the coach answers from Finn's records only."
+                )
             }
         }
     }
@@ -124,8 +148,11 @@ final class CoachResponder {
     private let generation = ModelGenerationGate<String>()
     let language: CoachLanguage
 
-    init(selector: CoachEngineSelector, timeout: Duration = .seconds(20),
-         language: CoachLanguage = .current()) {
+    init(
+        selector: CoachEngineSelector,
+        timeout: Duration = .seconds(20),
+        language: CoachLanguage = .current()
+    ) {
         self.selector = selector
         self.timeout = timeout
         self.language = language
@@ -136,32 +163,50 @@ final class CoachResponder {
     }
 
     /// why no model answers, when none does
-    var unavailableReason: String? { selector.unavailableReason() }
+    var unavailableReason: String? {
+        selector.unavailableReason()
+    }
 
     func prepare() {
         selector.current()?.prepare(language: language)
     }
 
     func answer(_ question: String, context: CoachContext, history: [CoachMessage]) async -> CoachMessage {
-        let fallback = CoachMessage(role: .coach,
-                                    text: CoachFallback.reply(to: question, context: context, language: language),
-                                    engine: .fallback)
-        guard !Task.isCancelled, !context.isEmpty,
-              let engine = selector.current() else { return fallback }
+        let fallback = CoachMessage(
+            role: .coach,
+            text: CoachFallback.reply(
+                to: question,
+                context: context,
+                language: language
+            ),
+            engine: .fallback
+        )
+        guard
+            !Task.isCancelled, !context.isEmpty,
+            let engine = selector.current() else {
+            return fallback
+        }
         let generated = await generation.response(timeout: timeout) { [language] in
             try await engine.reply(to: question, context: context, history: history, language: language)
         }
         if generated?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == "NONE" {
-            return CoachMessage(role: .coach,
-                                text: CoachFallback.noRelevantAnswer(language: language),
-                                engine: .fallback)
+            return CoachMessage(
+                role: .coach,
+                text: CoachFallback.noRelevantAnswer(language: language),
+                engine: .fallback
+            )
         }
         guard let generated, let selected = CoachAnswerCheck.selectedFacts(in: generated, for: context)
-        else { return fallback }
+        else {
+            return fallback
+        }
         let recordedAnswer = selected.map { CoachFallback.summary(of: $0, language: language) }
             .joined(separator: " ")
-        return CoachMessage(role: .coach, text: recordedAnswer,
-                            engine: engine.kind)
+        return CoachMessage(
+            role: .coach,
+            text: recordedAnswer,
+            engine: engine.kind
+        )
     }
 
 }
@@ -197,15 +242,21 @@ enum FoundationModelsCoachPrompt {
     }
 
     static func labels(for numbers: [Int], context: CoachContext) -> String? {
-        guard (1...2).contains(numbers.count), Set(numbers).count == numbers.count,
-              numbers.allSatisfy(context.knownNumbers.contains) else { return nil }
+        guard
+            (1 ... 2).contains(numbers.count), Set(numbers).count == numbers.count,
+            numbers.allSatisfy(context.knownNumbers.contains) else {
+            return nil
+        }
         return numbers.map { "Set \($0)" }.joined(separator: ", ")
     }
 }
 
 @Generable
 private struct AppleCoachSelection {
-    @Guide(description: "Zero, one, or two numbered saved sets relevant to the person's question; use an empty list when no set supports an answer.", .count(0...2))
+    @Guide(
+        description: "Zero, one, or two numbered saved sets relevant to the person's question; use an empty list when no set supports an answer.",
+        .count(0 ... 2)
+    )
     var setNumbers: [Int]
 }
 
@@ -216,8 +267,12 @@ final class OnDeviceCoachEngine: CoachEngine {
     private var preparedLanguage: CoachLanguage?
 
     func prepare(language: CoachLanguage) {
-        guard available, SystemLanguageModel.default.supportsLocale(language.locale) else { return }
-        guard preparedSession == nil || preparedLanguage != language else { return }
+        guard available, SystemLanguageModel.default.supportsLocale(language.locale) else {
+            return
+        }
+        guard preparedSession == nil || preparedLanguage != language else {
+            return
+        }
         let session = makeSession(language: language)
         session.prewarm()
         preparedSession = session
@@ -225,21 +280,32 @@ final class OnDeviceCoachEngine: CoachEngine {
     }
 
     private func makeSession(language: CoachLanguage) -> LanguageModelSession {
-        LanguageModelSession(model: SystemLanguageModel.default,
-                             instructions: FoundationModelsCoachPrompt.instructions(language: language))
+        LanguageModelSession(
+            model: SystemLanguageModel.default,
+            instructions: FoundationModelsCoachPrompt.instructions(language: language)
+        )
     }
 
     var available: Bool {
-        if case .available = SystemLanguageModel.default.availability { return true }
+        if case .available = SystemLanguageModel.default.availability {
+            return true
+        }
         return false
     }
 
     var unavailableReason: String? {
-        CoachModelAvailability.reason(for: SystemLanguageModel.default.availability, engine: "On-device model")
+        CoachModelAvailability.reason(
+            for: SystemLanguageModel.default.availability,
+            engine: "On-device model"
+        )
     }
 
-    func reply(to question: String, context: CoachContext, history: [CoachMessage],
-               language: CoachLanguage) async throws -> String {
+    func reply(
+        to question: String,
+        context: CoachContext,
+        history: [CoachMessage],
+        language: CoachLanguage
+    ) async throws -> String {
         guard available, SystemLanguageModel.default.supportsLocale(language.locale) else {
             throw CoachGenerationError.unavailable
         }
@@ -253,7 +319,8 @@ final class OnDeviceCoachEngine: CoachEngine {
         let response = try await session.respond(
             to: FoundationModelsCoachPrompt.prompt(question: question, context: context, history: history),
             generating: AppleCoachSelection.self,
-            options: GenerationOptions(samplingMode: .greedy, maximumResponseTokens: 128))
+            options: GenerationOptions(samplingMode: .greedy, maximumResponseTokens: 128)
+        )
         return FoundationModelsCoachPrompt.labels(for: response.content.setNumbers, context: context) ?? "NONE"
     }
 }
@@ -269,7 +336,9 @@ final class PrivateCloudComputeCoachEngine: CoachEngine {
     private let model = PrivateCloudComputeLanguageModel()
 
     var available: Bool {
-        if case .available = model.availability { return true }
+        if case .available = model.availability {
+            return true
+        }
         return false
     }
 
@@ -277,18 +346,30 @@ final class PrivateCloudComputeCoachEngine: CoachEngine {
     /// reason (Apple Intelligence off, model downloading) is the one they can act on
     var unavailableReason: String? {
         if case .unavailable(let reason) = model.availability {
-            CoachModelAvailability.log.notice("Private Cloud Compute unavailable: \(String(describing: reason), privacy: .public)")
+            CoachModelAvailability.log
+                .notice("Private Cloud Compute unavailable: \(String(describing: reason), privacy: .public)")
         }
-        return CoachModelAvailability.reason(for: SystemLanguageModel.default.availability, engine: "On-device model")
+        return CoachModelAvailability.reason(
+            for: SystemLanguageModel.default.availability,
+            engine: "On-device model"
+        )
     }
 
-    func reply(to question: String, context: CoachContext, history: [CoachMessage],
-               language: CoachLanguage) async throws -> String {
-        let session = LanguageModelSession(model: model,
-                                           instructions: FoundationModelsCoachPrompt.instructions(language: language))
+    func reply(
+        to question: String,
+        context: CoachContext,
+        history: [CoachMessage],
+        language: CoachLanguage
+    ) async throws -> String {
+        let session = LanguageModelSession(
+            model: model,
+            instructions: FoundationModelsCoachPrompt
+                .instructions(language: language)
+        )
         let response = try await session.respond(
             to: FoundationModelsCoachPrompt.prompt(question: question, context: context, history: history),
-            generating: AppleCoachSelection.self)
+            generating: AppleCoachSelection.self
+        )
         return FoundationModelsCoachPrompt.labels(for: response.content.setNumbers, context: context) ?? "NONE"
     }
 }

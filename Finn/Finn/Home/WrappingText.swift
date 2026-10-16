@@ -40,7 +40,10 @@ struct WrappingText: UIViewRepresentable {
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: UILabel, context: Context) -> CGSize? {
-        let width = max(1, proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? ceil(uiView.intrinsicContentSize.width))
+        let width = max(
+            1,
+            proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? ceil(uiView.intrinsicContentSize.width)
+        )
         let fit = uiView.sizeThatFits(CGSize(width: max(1, width), height: .greatestFiniteMagnitude))
         // leave room for fractional glyph advances when a sheet scales its contents
         return CGSize(width: min(width, ceil(fit.width)), height: ceil(fit.height))

@@ -1,16 +1,25 @@
 import SwiftUI
 
 enum HomeTab: String, CaseIterable {
-    case home = "Home", progress = "Progress", coach = "Coach", workout = "Workout"
+    case home = "Home"
+    case progress = "Progress"
+    case coach = "Coach"
+    case workout = "Workout"
 
-    var identifier: String { "tab.\(rawValue.lowercased())" }
+    var identifier: String {
+        "tab.\(rawValue.lowercased())"
+    }
 
     var symbol: String {
         switch self {
-        case .home: "house.fill"
-        case .coach: "person"
-        case .progress: "figure.run"
-        case .workout: "dumbbell"
+        case .home:
+            "house.fill"
+        case .coach:
+            "person"
+        case .progress:
+            "figure.run"
+        case .workout:
+            "dumbbell"
         }
     }
 }
@@ -29,8 +38,13 @@ enum DashboardStyle {
     static let coachFillTop = 0.55
     static let coachFillBottom = 0.3
     /// Try Finn wears the same neon glass, brighter: a denser pink, a wider edge and a stronger glow
-    static let tryFinnSurface = FinnCardSurface(fillTop: 0.8, fillBottom: 0.5, glow: 0.75, glowRadius: 20,
-                                                edgeWidth: 2)
+    static let tryFinnSurface = FinnCardSurface(
+        fillTop: 0.8,
+        fillBottom: 0.5,
+        glow: 0.75,
+        glowRadius: 20,
+        edgeWidth: 2
+    )
     /// The pink outline around the Finn and Last workout cards: frames them without shouting.
     static let outlineOpacity = 0.4
 }
@@ -66,24 +80,30 @@ struct DashboardView: View {
     // reference values are available only in explicitly labelled design previews
     private var isPreview: Bool {
         #if DEBUG
-        ProcessInfo.processInfo.arguments.contains("-finn-dashboard-preview")
+            ProcessInfo.processInfo.arguments.contains("-finn-dashboard-preview")
         #else
-        false
+            false
         #endif
     }
 
     /// the most reps Finn measured in one set of the chosen exercise. Finn measures no load, so
     /// the record is in reps, never in kilograms
     private var bestReps: String {
-        if isPreview { return "12" }
+        if isPreview {
+            return "12"
+        }
         let best = history.flatMap(\.sets).filter { $0.exercise == exercise }
             .map { $0.analysis.reps.count }.max()
         return best.map(String.init) ?? "—"
     }
 
     private var duration: String {
-        if isPreview { return "42:18" }
-        guard let last = history.first, let workout = FitnessWorkout.make(from: last) else { return "—" }
+        if isPreview {
+            return "42:18"
+        }
+        guard let last = history.first, let workout = FitnessWorkout.make(from: last) else {
+            return "—"
+        }
         let seconds = Int(workout.activeDuration)
         return String(format: "%d:%02d", seconds / 60, seconds % 60)
     }
@@ -121,9 +141,13 @@ struct DashboardView: View {
 
                 finnOutline
 
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: DashboardStyle.cardSpacing),
-                                         count: dynamicTypeSize.isAccessibilitySize ? 1 : 2),
-                          spacing: DashboardStyle.cardSpacing) {
+                LazyVGrid(
+                    columns: Array(
+                        repeating: GridItem(.flexible(), spacing: DashboardStyle.cardSpacing),
+                        count: dynamicTypeSize.isAccessibilitySize ? 1 : 2
+                    ),
+                    spacing: DashboardStyle.cardSpacing
+                ) {
                     card(.posture, id: "home.posture") {
                         VStack(alignment: .leading, spacing: 7) {
                             heading("Posture")
@@ -131,8 +155,8 @@ struct DashboardView: View {
                             Spacer(minLength: 12)
                             if !postureEvidence.measurements.isEmpty {
                                 Text(postureEvidence.flagged.isEmpty
-                                     ? String(localized: "No recurring issue")
-                                     : String(localized: "\(postureEvidence.flagged.count) checks to review"))
+                                    ? String(localized: "No recurring issue")
+                                    : String(localized: "\(postureEvidence.flagged.count) checks to review"))
                                     .font(.subheadline.weight(.semibold))
                             } else {
                                 Text("See movement guide").font(.subheadline.weight(.semibold))
@@ -144,16 +168,21 @@ struct DashboardView: View {
                         .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
                     }
                     card(.weights, id: "home.weights") {
-                        metric(title: "Best set", subtitle: exercise.chipName,
-                               label: "Most reps in one set", value: bestReps, unit: "reps")
+                        metric(
+                            title: "Best set",
+                            subtitle: exercise.chipName,
+                            label: "Most reps in one set",
+                            value: bestReps,
+                            unit: "reps"
+                        )
                     }
                     card(.history, id: "home.sessions") {
                         VStack(alignment: .leading, spacing: 0) {
                             heading("Sessions")
                             Spacer(minLength: 30)
                             Text(history.isEmpty ? String(localized: "No sessions")
-                                 : history.count == 1 ? String(localized: "1 session")
-                                 : String(localized: "\(history.count) sessions"))
+                                : history.count == 1 ? String(localized: "1 session")
+                                : String(localized: "\(history.count) sessions"))
                                 .font(.footnote)
                                 .foregroundStyle(DashboardStyle.secondary)
                             Spacer(minLength: 30)
@@ -191,8 +220,13 @@ struct DashboardView: View {
             VStack(spacing: DashboardStyle.cardSpacing) {
                 Group {
                     if hasTriedFinn {
-                        FinnCoachCard(workout: coachMessage.workout, quote: coachMessage.quote, action: openNextWorkout)
-                            .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
+                        FinnCoachCard(
+                            workout: coachMessage.workout,
+                            quote: coachMessage.quote,
+                            action: openNextWorkout
+                        )
+                        .transition(reduceMotion ? .opacity : .opacity
+                            .combined(with: .scale(scale: 0.96)))
                     } else {
                         tryFinnCard.transition(.opacity)
                     }
@@ -280,31 +314,34 @@ struct DashboardView: View {
 
     /// the Finn+ banner, kept for 1.1 behind `DashboardFlags.showsFinnPlusBanner`
     private var plusBanner: some View {
-                Button { open(.plus) } label: {
-                    ZStack(alignment: .topLeading) {
-                        GeometryReader { proxy in
-                            Image("HomeBackdrop").resizable().scaledToFill()
-                                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
-                                .clipped()
-                        }
-                        LinearGradient(colors: [.black.opacity(0.2), .clear, .black.opacity(0.65)],
-                                       startPoint: .top, endPoint: .bottom)
-                        HStack {
-                            heading("Finn+")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.headline)
-                                .foregroundStyle(.black)
-                                .frame(width: 26, height: 26)
-                                .background(.white.opacity(0.4), in: Circle())
-                        }
-                        .padding(16)
-                    }
-                    .frame(height: 165)
-                    .clipShape(RoundedRectangle(cornerRadius: 15))
+        Button { open(.plus) } label: {
+            ZStack(alignment: .topLeading) {
+                GeometryReader { proxy in
+                    Image("HomeBackdrop").resizable().scaledToFill()
+                        .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+                        .clipped()
                 }
-                .buttonStyle(PressableStyle())
-                .accessibilityIdentifier("home.plus")
+                LinearGradient(
+                    colors: [.black.opacity(0.2), .clear, .black.opacity(0.65)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                HStack {
+                    heading("Finn+")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.headline)
+                        .foregroundStyle(.black)
+                        .frame(width: 26, height: 26)
+                        .background(.white.opacity(0.4), in: Circle())
+                }
+                .padding(16)
+            }
+            .frame(height: 165)
+            .clipShape(RoundedRectangle(cornerRadius: 15))
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityIdentifier("home.plus")
     }
 
     private var durationLabel: some View {
@@ -324,31 +361,43 @@ struct DashboardView: View {
                 Text(isPreview ? "3" : history.first.map { String($0.sets.count) } ?? "—")
                     .font(.title.bold())
             } else {
-            ZStack {
-                Circle().stroke(.white.opacity(0.13), lineWidth: 10)
-                Text(isPreview ? "3" : history.first.map { String($0.sets.count) } ?? "—")
-                    .font(.system(size: scoreSize, weight: .bold))
-            }
-            .frame(width: 96, height: 96)
-            .padding(5)
+                ZStack {
+                    Circle().stroke(.white.opacity(0.13), lineWidth: 10)
+                    Text(isPreview ? "3" : history.first.map { String($0.sets.count) } ?? "—")
+                        .font(.system(size: scoreSize, weight: .bold))
+                }
+                .frame(width: 96, height: 96)
+                .padding(5)
             }
             Text("Measured sets").font(.system(size: detailSize)).foregroundStyle(DashboardStyle.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(isPreview ? String(localized: "Sample workout, 3 measured sets")
-                            : history.first.map { String(localized: "\($0.sets.count) measured sets") }
-                                ?? String(localized: "No measured sets yet"))
+            : history.first.map { String(localized: "\($0.sets.count) measured sets") }
+            ?? String(localized: "No measured sets yet"))
     }
 
-    private func metric(title: String, subtitle: String, label: String, value: String, unit: String?) -> some View {
+    private func metric(
+        title: String,
+        subtitle: String,
+        label: String,
+        value: String,
+        unit: String?
+    ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             heading(title)
             Text(subtitle).font(.footnote).foregroundStyle(DashboardStyle.secondary)
-            Text(LocalizedStringKey(label)).font(.footnote).foregroundStyle(DashboardStyle.secondary).padding(.top, 7)
+            Text(LocalizedStringKey(label)).font(.footnote).foregroundStyle(DashboardStyle.secondary).padding(
+                .top,
+                7
+            )
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(value).font(.system(size: metricSize, weight: .bold)).foregroundStyle(DashboardStyle.accent)
-                if let unit { Text(LocalizedStringKey(unit)).font(.subheadline).foregroundStyle(DashboardStyle.secondary) }
+                Text(value).font(.system(size: metricSize, weight: .bold))
+                    .foregroundStyle(DashboardStyle.accent)
+                if let unit {
+                    Text(LocalizedStringKey(unit)).font(.subheadline)
+                        .foregroundStyle(DashboardStyle.secondary) }
             }
             miniatureChart.padding(.top, 3)
         }
@@ -358,7 +407,7 @@ struct DashboardView: View {
     private var miniatureChart: some View {
         VStack(spacing: 5) {
             HStack(alignment: .bottom, spacing: 5) {
-                ForEach(0..<16) { index in
+                ForEach(0 ..< 16) { index in
                     Capsule().fill(.white.opacity(0.045))
                         .overlay(alignment: .bottom) {
                             if isPreview && [0, 1, 6, 9, 10].contains(index) {
@@ -371,14 +420,15 @@ struct DashboardView: View {
             .frame(height: 38)
             // the empty real-data charts have no time series to label. Hours belong
             // only to the explicitly marked sample preview
-            if isPreview { HStack(spacing: 0) {
-                ForEach(["12 AM", "6 AM", "12 PM", "6 PM"], id: \.self) { time in
-                    Text(time).font(.system(size: detailSize))
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+            if isPreview {
+                HStack(spacing: 0) {
+                    ForEach(["12 AM", "6 AM", "12 PM", "6 PM"], id: \.self) { time in
+                        Text(time).font(.system(size: detailSize))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
-            }
-            .foregroundStyle(DashboardStyle.secondary)
+                .foregroundStyle(DashboardStyle.secondary)
             }
         }
         .frame(minHeight: 54, alignment: .top)
@@ -389,7 +439,11 @@ struct DashboardView: View {
         DashboardHeading(LocalizedStringKey(text))
     }
 
-    private func card<Content: View>(_ route: HomeRoute, id: String, @ViewBuilder content: () -> Content) -> some View {
+    private func card<Content: View>(
+        _ route: HomeRoute,
+        id: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
         Button { open(route) } label: {
             content().modifier(DashboardCard())
         }
@@ -400,14 +454,28 @@ struct DashboardView: View {
 
 #Preview("Try Finn") {
     @Previewable @State var hasTriedFinn = false
-    DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
-                  coachMessage: .constant(FinnCoachMessage()), openNextWorkout: {}, watchDemo: {}, open: { _ in })
-        .preferredColorScheme(.dark)
+    DashboardView(
+        history: [],
+        exercise: .bodyweightSquat,
+        hasTriedFinn: $hasTriedFinn,
+        coachMessage: .constant(FinnCoachMessage()),
+        openNextWorkout: {},
+        watchDemo: {},
+        open: { _ in }
+    )
+    .preferredColorScheme(.dark)
 }
 
 #Preview("Coach") {
     @Previewable @State var hasTriedFinn = true
-    DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
-                  coachMessage: .constant(FinnCoachMessage()), openNextWorkout: {}, watchDemo: {}, open: { _ in })
-        .preferredColorScheme(.dark)
+    DashboardView(
+        history: [],
+        exercise: .bodyweightSquat,
+        hasTriedFinn: $hasTriedFinn,
+        coachMessage: .constant(FinnCoachMessage()),
+        openNextWorkout: {},
+        watchDemo: {},
+        open: { _ in }
+    )
+    .preferredColorScheme(.dark)
 }

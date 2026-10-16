@@ -16,8 +16,14 @@ protocol PoseStreaming: AnyObject {
 }
 
 extension PoseStreaming {
-    var previewFeed: PreviewFeed? { nil }
-    var endedAtLimit: Bool { false }
+    var previewFeed: PreviewFeed? {
+        nil
+    }
+
+    var endedAtLimit: Bool {
+        false
+    }
+
     func prepareForSet() async {}
     func configure(for exercise: ExerciseKind) {}
     func setCameraAngleEstimation(_ enabled: Bool) {}
@@ -41,8 +47,14 @@ protocol CameraCaptureDriving: AnyObject {
 
 extension CameraCaptureDriving {
     func setCameraAngleEstimation(_ enabled: Bool) {}
-    var previewSink: PreviewFrameSink? { nil }
-    var cameraDevice: AVCaptureDevice? { nil }
+    var previewSink: PreviewFrameSink? {
+        nil
+    }
+
+    var cameraDevice: AVCaptureDevice? {
+        nil
+    }
+
     func setCaptureRotation(_ degrees: Double) {}
     func lockAthlete() {}
 }
@@ -75,11 +87,17 @@ final class CameraPoseSource: PoseStreaming {
 
     private(set) var state: CameraSourceState = .idle
     private(set) var endedAtLimit = false
-    var previewSession: AVCaptureSession { driver.session }
+    var previewSession: AVCaptureSession {
+        driver.session
+    }
+
     let previewFeed: PreviewFeed?
 
-    init(authorise: @escaping @MainActor () async -> Bool, driver: any CameraCaptureDriving,
-         setDurationLimit: Duration = .seconds(120)) {
+    init(
+        authorise: @escaping @MainActor () async -> Bool,
+        driver: any CameraCaptureDriving,
+        setDurationLimit: Duration = .seconds(120)
+    ) {
         self.authorise = authorise
         self.driver = driver
         self.setDurationLimit = setDurationLimit
@@ -99,9 +117,12 @@ final class CameraPoseSource: PoseStreaming {
     static func live() -> CameraPoseSource {
         CameraPoseSource(authorise: {
             switch AVCaptureDevice.authorizationStatus(for: .video) {
-            case .authorized: return true
-            case .notDetermined: return await AVCaptureDevice.requestAccess(for: .video)
-            default: return false
+            case .authorized:
+                return true
+            case .notDetermined:
+                return await AVCaptureDevice.requestAccess(for: .video)
+            default:
+                return false
             }
         }, driver: AVCameraCaptureDriver())
     }
@@ -111,27 +132,37 @@ final class CameraPoseSource: PoseStreaming {
     }
 
     func prepareForSet() async {
-        guard state == .running, !isSetActive, let currentID = runID else { return }
+        guard state == .running, !isSetActive, let currentID = runID else {
+            return
+        }
         isSetActive = true
         driver.lockAthlete()
         limitTask = Task { @MainActor [weak self, setDurationLimit] in
             do { try await Task.sleep(for: setDurationLimit) } catch { return }
-            guard let self, self.runID == currentID, self.isSetActive else { return }
+            guard let self, self.runID == currentID, self.isSetActive else {
+                return
+            }
             self.endedAtLimit = true
             await self.stop()
         }
     }
 
     func start() async throws -> AsyncStream<PoseFrame> {
-        guard state != .running && state != .starting else { throw CameraSourceError.alreadyRunning }
+        guard state != .running && state != .starting else {
+            throw CameraSourceError.alreadyRunning
+        }
         let currentID = UUID()
         runID = currentID
         state = .starting
         guard await authorise() else {
-            if runID == currentID { runID = nil; state = .idle }
+            if runID == currentID {
+                runID = nil
+                state = .idle }
             throw CameraSourceError.denied
         }
-        guard runID == currentID else { throw CameraSourceError.cancelled }
+        guard runID == currentID else {
+            throw CameraSourceError.cancelled
+        }
         guard driver.isAvailable else {
             runID = nil
             state = .idle
@@ -148,7 +179,9 @@ final class CameraPoseSource: PoseStreaming {
         do {
             backendStream = try await driver.start()
         } catch {
-            if runID == currentID { runID = nil; state = .idle }
+            if runID == currentID {
+                runID = nil
+                state = .idle }
             throw error
         }
         guard runID == currentID else {
@@ -162,21 +195,33 @@ final class CameraPoseSource: PoseStreaming {
             self.continuation = continuation
         }
         forwardTask = Task { @MainActor [weak self] in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
             var previewFirstTime: TimeInterval?
             var setFirstTime: TimeInterval?
             var previousTime: TimeInterval?
             for await frame in backendStream {
-                guard self.runID == currentID else { break }
-                guard frame.time.isFinite, frame.time >= 0 else { continue }
-                if let previousTime, frame.time <= previousTime { continue }
+                guard self.runID == currentID else {
+                    break
+                }
+                guard frame.time.isFinite, frame.time >= 0 else {
+                    continue
+                }
+                if let previousTime, frame.time <= previousTime {
+                    continue
+                }
                 previousTime = frame.time
                 let elapsed: TimeInterval
                 if self.isSetActive {
-                    if setFirstTime == nil { setFirstTime = frame.time }
+                    if setFirstTime == nil {
+                        setFirstTime = frame.time
+                    }
                     elapsed = max(0, frame.time - (setFirstTime ?? frame.time))
                 } else {
-                    if previewFirstTime == nil { previewFirstTime = frame.time }
+                    if previewFirstTime == nil {
+                        previewFirstTime = frame.time
+                    }
                     elapsed = max(0, frame.time - (previewFirstTime ?? frame.time))
                 }
                 self.continuation?.yield(frame.retimed(to: elapsed))

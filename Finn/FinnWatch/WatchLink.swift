@@ -48,18 +48,26 @@ final class WatchLink: NSObject, WCSessionDelegate {
 
     func start() {
         #if DEBUG
-        // Scripted product-film state. No Health session, phone message, or measurement is created.
-        if ProcessInfo.processInfo.arguments.contains("-finn-presentation-tip") {
-            guard !isStarted else { return }
-            isStarted = true
-            state = WatchState(stage: .capturing, exercise: "Squat", demoInput: true,
-                               sentAt: Date().timeIntervalSince1970,
-                               coachMessage: "Sit lower")
-            isLiveCapture = true
+            // Scripted product-film state. No Health session, phone message, or measurement is created.
+            if ProcessInfo.processInfo.arguments.contains("-finn-presentation-tip") {
+                guard !isStarted else {
+                    return
+                }
+                isStarted = true
+                state = WatchState(
+                    stage: .capturing,
+                    exercise: "Squat",
+                    demoInput: true,
+                    sentAt: Date().timeIntervalSince1970,
+                    coachMessage: "Sit lower"
+                )
+                isLiveCapture = true
+                return
+            }
+        #endif
+        guard !isStarted, WCSession.isSupported() else {
             return
         }
-        #endif
-        guard !isStarted, WCSession.isSupported() else { return }
         isStarted = true
         let session = WCSession.default
         session.delegate = self
@@ -85,11 +93,17 @@ final class WatchLink: NSObject, WCSessionDelegate {
         rhythmEnabled = enabled
         UserDefaults.standard.set(enabled, forKey: "finn.watch.rhythm")
         notice = nil
-        if enabled { followCapture() } else { stopRhythm() }
+        if enabled {
+            followCapture()
+        } else {
+            stopRhythm()
+        }
     }
 
     func setRhythmInterval(_ interval: Int) {
-        guard [2, 3, 4, 5].contains(interval) else { return }
+        guard [2, 3, 4, 5].contains(interval) else {
+            return
+        }
         rhythmInterval = interval
         UserDefaults.standard.set(interval, forKey: "finn.watch.rhythmInterval")
         clock = WatchRhythmClock(interval: interval)
@@ -112,36 +126,53 @@ final class WatchLink: NSObject, WCSessionDelegate {
         }
         let previousSetID = state?.setID
         state = incoming
-        if fresh { lastPhoneStateAt = ProcessInfo.processInfo.systemUptime }
+        if fresh {
+            lastPhoneStateAt = ProcessInfo.processInfo.systemUptime
+        }
         isLiveCapture = fresh && incoming.stage == .capturing
         if incoming.stage == .capturing, previousSetID != incoming.setID {
             clock.stop()
             rhythmArmed = false
         }
-        if isLiveCapture { followCapture() }
-        else { stopRhythm() }
+        if isLiveCapture {
+            followCapture()
+        } else {
+            stopRhythm()
+        }
     }
 
     private func followCapture() {
-        guard let state, isLiveCapture, isPhoneReachable,
-              rhythmEnabled, state.hapticsEnabled else {
+        guard
+            let state, isLiveCapture, isPhoneReachable,
+            rhythmEnabled, state.hapticsEnabled else {
             stopRhythm()
             return
         }
-        if rhythmArmed && workout.isRunning { return }
-        guard !startingWorkout else { return }
+        if rhythmArmed && workout.isRunning {
+            return
+        }
+        guard !startingWorkout else {
+            return
+        }
         startingWorkout = true
         let startGeneration = rhythmGeneration
         Task { [weak self] in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
             defer {
                 self.startingWorkout = false
-                if startGeneration != self.rhythmGeneration { self.followCapture() }
+                if startGeneration != self.rhythmGeneration {
+                    self.followCapture()
+                }
             }
             let started = await self.workout.start()
-            guard startGeneration == self.rhythmGeneration else { return }
-            guard self.isLiveCapture, self.isPhoneReachable,
-                  self.rhythmEnabled, self.state?.hapticsEnabled == true else {
+            guard startGeneration == self.rhythmGeneration else {
+                return
+            }
+            guard
+                self.isLiveCapture, self.isPhoneReachable,
+                self.rhythmEnabled, self.state?.hapticsEnabled == true else {
                 self.workout.stop()
                 return
             }
@@ -171,10 +202,15 @@ final class WatchLink: NSObject, WCSessionDelegate {
             isLiveCapture = false
             stopRhythm()
         }
-        guard let state, WatchRhythmPolicy.canTap(enabled: rhythmEnabled,
-                                                  masterHapticsEnabled: state.hapticsEnabled,
-                                                  workoutRunning: workout.isRunning,
-                                                  capturing: isLiveCapture) else { return }
+        guard
+            let state, WatchRhythmPolicy.canTap(
+                enabled: rhythmEnabled,
+                masterHapticsEnabled: state.hapticsEnabled,
+                workoutRunning: workout.isRunning,
+                capturing: isLiveCapture
+            ) else {
+            return
+        }
         if clock.shouldTap(now: now, lastPhoneStateAt: lastPhoneStateAt, reachable: isPhoneReachable) {
             WKInterfaceDevice.current().play(.click)
         } else if !isPhoneReachable || now - lastPhoneStateAt >= 15 {
@@ -183,14 +219,19 @@ final class WatchLink: NSObject, WCSessionDelegate {
     }
 
     // WatchConnectivity delegates arrive on a background queue
-    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState,
-                             error: (any Error)?) {
+    nonisolated func session(
+        _ session: WCSession,
+        activationDidCompleteWith activationState: WCSessionActivationState,
+        error: (any Error)?
+    ) {
         let reachable = session.isReachable
         let saved = WatchState(message: session.receivedApplicationContext)
         let now = Date().timeIntervalSince1970
         Task { @MainActor [weak self] in
             self?.isPhoneReachable = reachable
-            if let saved, !saved.isStale(now: now) { self?.apply(saved, live: false) }
+            if let saved, !saved.isStale(now: now) {
+                self?.apply(saved, live: false)
+            }
         }
     }
 
@@ -206,15 +247,24 @@ final class WatchLink: NSObject, WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        guard let incoming = WatchState(message: message) else { return }
+        guard let incoming = WatchState(message: message) else {
+            return
+        }
         Task { @MainActor [weak self] in self?.apply(incoming, live: true) }
     }
 
-    nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        guard let incoming = WatchState(message: applicationContext) else { return }
+    nonisolated func session(
+        _ session: WCSession,
+        didReceiveApplicationContext applicationContext: [String: Any]
+    ) {
+        guard let incoming = WatchState(message: applicationContext) else {
+            return
+        }
         let now = Date().timeIntervalSince1970
         Task { @MainActor [weak self] in
-            if !incoming.isStale(now: now) { self?.apply(incoming, live: false) }
+            if !incoming.isStale(now: now) {
+                self?.apply(incoming, live: false)
+            }
         }
     }
 }

@@ -10,7 +10,10 @@ struct CoachView: View {
     @State private var isUserScrolling = false
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
+
     private let history: [WorkoutSessionSummary]
 
     init(history: [WorkoutSessionSummary]) {
@@ -34,14 +37,14 @@ struct CoachView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-            Button { planDraft = WorkoutPlanner.make(history: history) } label: {
-                Label("Plan a workout", systemImage: "list.bullet.clipboard")
-                    .font(.subheadline.weight(.semibold))
-                    .labelStyle(.iconOnly)
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("coach.planWorkout")
-            .accessibilityHint("Composes a workout from your saved sets")
+                Button { planDraft = WorkoutPlanner.make(history: history) } label: {
+                    Label("Plan a workout", systemImage: "list.bullet.clipboard")
+                        .font(.subheadline.weight(.semibold))
+                        .labelStyle(.iconOnly)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("coach.planWorkout")
+                .accessibilityHint("Composes a workout from your saved sets")
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showsSource = true } label: {
@@ -63,13 +66,22 @@ struct CoachView: View {
                 List {
                     Section("Source") {
                         Text(engineLine)
-                        if let note = conversation.engineNote { Text(note).foregroundStyle(AppPageStyle.secondaryText) }
+                        if
+                            let note = conversation
+                                .engineNote {
+                            Text(note).foregroundStyle(AppPageStyle.secondaryText)
+                        }
                     }
-                    Section { Text("Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique.") }
+                    Section {
+                        Text(
+                            "Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique."
+                        )
+                    }
                 }
                 .navigationTitle("About Coach")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showsSource = false } } }
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) { Button("Done") { showsSource = false } } }
             }
             .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         }
@@ -147,11 +159,15 @@ struct CoachView: View {
             }
             .onChange(of: conversation.messages.last?.id) { _, _ in
                 // The conversation is capped at 40 messages, so its count eventually stops changing.
-                guard followsLatestReply || conversation.messages.last?.role == .person else { return }
+                guard followsLatestReply || conversation.messages.last?.role == .person else {
+                    return
+                }
                 scrollToLatest(using: proxy)
             }
             .onChange(of: conversation.isAnswering) { _, _ in
-                if followsLatestReply { scrollToLatest(using: proxy) }
+                if followsLatestReply {
+                    scrollToLatest(using: proxy)
+                }
             }
         }
     }
@@ -171,10 +187,20 @@ struct CoachView: View {
 
     private var engineLine: String {
         switch conversation.engineKind {
-        case .fallback: String(localized: "No language model available. The coach repeats what Finn saved.")
-        case .onDevice: String(localized: "Apple Intelligence chose the sets; the details come from Finn's records.")
-        case .privateCloudCompute: String(localized: "Apple Private Cloud Compute chose the sets; the details come from Finn's records.")
-        case .claudeDemo: String(localized: "Debug demo: Claude chose the sets; the details come from Finn's records.")
+        case .fallback:
+            String(localized: "No language model available. The coach repeats what Finn saved.")
+        case .onDevice:
+            String(
+                localized: "Apple Intelligence chose the sets; the details come from Finn's records."
+            )
+        case .privateCloudCompute:
+            String(
+                localized: "Apple Private Cloud Compute chose the sets; the details come from Finn's records."
+            )
+        case .claudeDemo:
+            String(
+                localized: "Debug demo: Claude chose the sets; the details come from Finn's records."
+            )
         }
     }
 
@@ -257,7 +283,9 @@ struct CoachView: View {
     @ViewBuilder private func bubble(_ message: CoachMessage) -> some View {
         let isCoach = message.role == .coach
         HStack {
-            if !isCoach { Spacer(minLength: typeSize.isAccessibilitySize ? 0 : 40) }
+            if !isCoach {
+                Spacer(minLength: typeSize.isAccessibilitySize ? 0 : 40)
+            }
             VStack(alignment: .leading, spacing: 4) {
                 Text(message.text)
                     .font(.body)
@@ -271,12 +299,17 @@ struct CoachView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(isCoach ? AppPageStyle.surface : AppPageStyle.action,
-                        in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            if isCoach { Spacer(minLength: typeSize.isAccessibilitySize ? 0 : 40) }
+            .background(
+                isCoach ? AppPageStyle.surface : AppPageStyle.action,
+                in: RoundedRectangle(cornerRadius: 20, style: .continuous)
+            )
+            if isCoach {
+                Spacer(minLength: typeSize.isAccessibilitySize ? 0 : 40)
+            }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier(isCoach ? "coach.answer.\(message.engine?.rawValue ?? "opening")" : "coach.question")
+        .accessibilityIdentifier(isCoach ? "coach.answer.\(message.engine?.rawValue ?? "opening")" :
+            "coach.question")
     }
 
     private func scrollToLatest(using proxy: ScrollViewProxy, animated: Bool = true) {
@@ -287,7 +320,9 @@ struct CoachView: View {
 
     private func send(_ question: String) -> Bool {
         let text = question.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty, !conversation.isAnswering else { return false }
+        guard !text.isEmpty, !conversation.isAnswering else {
+            return false
+        }
         followsLatestReply = true
         FinnHaptics.play(.selection)
         replyTask = Task { await conversation.send(text) }

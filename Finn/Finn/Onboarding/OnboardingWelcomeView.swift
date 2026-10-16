@@ -50,13 +50,19 @@ struct OnboardingWelcomeView: View {
     }
 
     private var metrics: Metrics? {
-        guard screenWidth > 0, wordmarkWidthPerPoint > 0, taglineWidthPerPoint > 0 else { return nil }
+        guard screenWidth > 0, wordmarkWidthPerPoint > 0, taglineWidthPerPoint > 0 else {
+            return nil
+        }
         let wordmark = screenWidth * Self.wordmarkShare / wordmarkWidthPerPoint
         let tagline = (screenWidth - 2 * Self.margin) / taglineWidthPerPoint
         let taglineBaseline = wordmark * Cover.wordmarkToTagline / Cover.wordmarkSize * Self.wordmarkGapShare
             + tagline * Self.capHeight
-        return Metrics(wordmark: wordmark, tagline: tagline, taglineBaseline: taglineBaseline,
-                       barTop: taglineBaseline + tagline * Cover.taglineToBar / Cover.taglineSize)
+        return Metrics(
+            wordmark: wordmark,
+            tagline: tagline,
+            taglineBaseline: taglineBaseline,
+            barTop: taglineBaseline + tagline * Cover.taglineToBar / Cover.taglineSize
+        )
     }
 
     var body: some View {
@@ -87,8 +93,10 @@ struct OnboardingWelcomeView: View {
                     .alignmentGuide(.top) { $0[.firstTextBaseline] - metrics.taglineBaseline }
                 Rectangle()
                     .fill(DashboardStyle.accent)
-                    .frame(width: metrics.tagline * Cover.barLength / Cover.taglineSize,
-                           height: metrics.tagline * Cover.barThickness / Cover.taglineSize)
+                    .frame(
+                        width: metrics.tagline * Cover.barLength / Cover.taglineSize,
+                        height: metrics.tagline * Cover.barThickness / Cover.taglineSize
+                    )
                     .alignmentGuide(.top) { _ in -metrics.barTop }
             }
             .lineLimit(1)

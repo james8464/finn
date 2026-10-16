@@ -5,7 +5,6 @@ import argparse
 from pathlib import Path
 import re
 
-
 # Approximate class durations from the October 2026 simulator runs. These only balance
 # machines; they never choose which tests run. New classes use their test count as a guide.
 APPROXIMATE_SECONDS = {

@@ -12,17 +12,25 @@ nonisolated struct SilhouetteCheckTests {
     ]
 
     /// A coarse 144 × 256 mask (Vision's fast quality) with a body 0.06 wide from `top` to `bottom`.
-    private func mask(top: Double = 0.25, bottom: Double, centerX: Double = 0.5,
-                      halfWidth: Double = 0.03) -> PersonMask {
+    private func mask(
+        top: Double = 0.25,
+        bottom: Double,
+        centerX: Double = 0.5,
+        halfWidth: Double = 0.03
+    ) -> PersonMask {
         let width = 144
         let height = 256
         var pixels = [UInt8](repeating: 0, count: width * height)
-        for y in 0..<height {
+        for y in 0 ..< height {
             let v = (Double(y) + 0.5) / Double(height)
-            guard v >= top && v <= bottom else { continue }
-            for x in 0..<width {
+            guard v >= top && v <= bottom else {
+                continue
+            }
+            for x in 0 ..< width {
                 let u = (Double(x) + 0.5) / Double(width)
-                if abs(u - centerX) <= halfWidth { pixels[y * width + x] = 255 }
+                if abs(u - centerX) <= halfWidth {
+                    pixels[y * width + x] = 255
+                }
             }
         }
         return PersonMask(width: width, height: height, pixels: pixels)!
@@ -34,14 +42,14 @@ nonisolated struct SilhouetteCheckTests {
     }
 
     @Test func anAnkleJustPastTheMasksThinEdgeStillCounts() {
-// fast masks lose the last few pixels of a foot: the silhouette stops 1.5% of the frame
+        // fast masks lose the last few pixels of a foot: the silhouette stops 1.5% of the frame
         // above the ankle point. The first version (two mask pixels) rejected this visible ankle.
         let verdict = SilhouetteCheck.verdict(for: joints, mask: mask(bottom: 0.865))
         #expect(verdict == .checked(supported: Set(joints.keys)))
     }
 
     @Test func anAnkleUnderACoverIsRejected() {
-// like tools/replay/fixtures/squat-feet-hidden.mp4: everything below 78% of the height is
+        // like tools/replay/fixtures/squat-feet-hidden.mp4: everything below 78% of the height is
         // covered, about 6% of the frame above the ankle.
         let verdict = SilhouetteCheck.verdict(for: joints, mask: mask(bottom: 0.78))
         #expect(verdict == .checked(supported: [.leftShoulder, .leftHip, .leftKnee]))
@@ -50,7 +58,8 @@ nonisolated struct SilhouetteCheckTests {
     @Test func aJointBesideTheBodyIsRejected() {
         var guessed = joints
         guessed[.leftWrist] = JointPoint(x: 0.80, y: 0.50, confidence: 0.7)
-        guard case .checked(let supported) = SilhouetteCheck.verdict(for: guessed, mask: mask(bottom: 0.90)) else {
+        guard case .checked(let supported) = SilhouetteCheck.verdict(for: guessed, mask: mask(bottom: 0.90))
+        else {
             Issue.record("Expected a checked verdict")
             return
         }

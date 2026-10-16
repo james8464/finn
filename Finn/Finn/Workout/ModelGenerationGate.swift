@@ -8,9 +8,13 @@ final class ModelGenerationGate<Value: Sendable> {
     private var activeGeneration: UUID?
     private let log = Logger(subsystem: "ai.mwm.build.challenge.team.08", category: "model-generation")
 
-    func response(timeout: Duration,
-                  using work: @escaping @MainActor () async throws -> Value) async -> Value? {
-        guard !Task.isCancelled, activeGeneration == nil, timeout > .zero else { return nil }
+    func response(
+        timeout: Duration,
+        using work: @escaping @MainActor () async throws -> Value
+    ) async -> Value? {
+        guard !Task.isCancelled, activeGeneration == nil, timeout > .zero else {
+            return nil
+        }
         let generationID = UUID()
         activeGeneration = generationID
 
@@ -34,7 +38,9 @@ final class ModelGenerationGate<Value: Sendable> {
                 continuation.finish()
             }
             let timer = Task.detached {
-                guard (try? await Task.sleep(for: timeout)) != nil else { return }
+                guard (try? await Task.sleep(for: timeout)) != nil else {
+                    return
+                }
                 continuation.yield(nil)
                 continuation.finish()
             }

@@ -25,7 +25,7 @@ nonisolated struct JointPoint: Codable, Equatable {
     /// Invalid coordinates are missing evidence, never a point at the edge of the picture.
     var isUsable: Bool {
         x.isFinite && y.isFinite && confidence.isFinite
-            && (0...1).contains(x) && (0...1).contains(y)
+            && (0 ... 1).contains(x) && (0 ... 1).contains(y)
             && confidence > 0 && confidence <= 1
     }
 }
@@ -59,9 +59,16 @@ nonisolated struct PoseFrame: Codable, Equatable {
     /// Everyone else Vision found, for drawing them greyed out. Never analysed.
     let bystanders: [[BodyJoint: JointPoint]]?
 
-    init(time: TimeInterval, subjectCount: Int, joints: [BodyJoint: JointPoint],
-         aspectRatio: Double = 1, keypoints: [Float]? = nil, profileDeviationDegrees: Double? = nil,
-         athleteTracking: AthleteTracking? = nil, bystanders: [[BodyJoint: JointPoint]]? = nil) {
+    init(
+        time: TimeInterval,
+        subjectCount: Int,
+        joints: [BodyJoint: JointPoint],
+        aspectRatio: Double = 1,
+        keypoints: [Float]? = nil,
+        profileDeviationDegrees: Double? = nil,
+        athleteTracking: AthleteTracking? = nil,
+        bystanders: [[BodyJoint: JointPoint]]? = nil
+    ) {
         self.time = time
         self.subjectCount = subjectCount
         let validGeometry = aspectRatio.isFinite && aspectRatio > 0 && aspectRatio <= 10
@@ -70,7 +77,7 @@ nonisolated struct PoseFrame: Codable, Equatable {
         self.keypoints = validGeometry && keypoints?.count == 54 && keypoints?.allSatisfy(\.isFinite) == true
             ? keypoints : nil
         self.profileDeviationDegrees = profileDeviationDegrees.flatMap {
-            $0.isFinite && (0...90).contains($0) ? $0 : nil
+            $0.isFinite && (0 ... 90).contains($0) ? $0 : nil
         }
         self.athleteTracking = athleteTracking
         self.bystanders = validGeometry ? bystanders?.map { $0.filter { $0.value.isUsable } } : nil
@@ -85,7 +92,10 @@ nonisolated struct PoseFrame: Codable, Equatable {
             joints: try values.decode([BodyJoint: JointPoint].self, forKey: .joints),
             aspectRatio: try values.decodeIfPresent(Double.self, forKey: .aspectRatio) ?? 1,
             keypoints: try values.decodeIfPresent([Float].self, forKey: .keypoints),
-            profileDeviationDegrees: try values.decodeIfPresent(Double.self, forKey: .profileDeviationDegrees),
+            profileDeviationDegrees: try values.decodeIfPresent(
+                Double.self,
+                forKey: .profileDeviationDegrees
+            ),
             athleteTracking: try values.decodeIfPresent(AthleteTracking.self, forKey: .athleteTracking),
             bystanders: try values.decodeIfPresent([[BodyJoint: JointPoint]].self, forKey: .bystanders)
         )
@@ -96,16 +106,25 @@ nonisolated struct PoseFrame: Codable, Equatable {
     static func hasIncreasingTimestamps(_ frames: [PoseFrame]) -> Bool {
         var previous = -Double.infinity
         for frame in frames {
-            guard frame.time.isFinite, frame.time >= 0, frame.time > previous else { return false }
+            guard frame.time.isFinite, frame.time >= 0, frame.time > previous else {
+                return false
+            }
             previous = frame.time
         }
         return true
     }
 
     func retimed(to time: TimeInterval) -> PoseFrame {
-        PoseFrame(time: time, subjectCount: subjectCount, joints: joints, aspectRatio: aspectRatio,
-                  keypoints: keypoints, profileDeviationDegrees: profileDeviationDegrees,
-                  athleteTracking: athleteTracking, bystanders: bystanders)
+        PoseFrame(
+            time: time,
+            subjectCount: subjectCount,
+            joints: joints,
+            aspectRatio: aspectRatio,
+            keypoints: keypoints,
+            profileDeviationDegrees: profileDeviationDegrees,
+            athleteTracking: athleteTracking,
+            bystanders: bystanders
+        )
     }
 
     /// The athlete's joints are in this frame and can be measured, whoever else is around.
@@ -125,7 +144,9 @@ nonisolated struct RepMetric: Codable, Equatable {
     /// older saved sessions have no reading and must not produce posture advice.
     let postureValue: Double?
 
-    var duration: TimeInterval { endTime - startTime }
+    var duration: TimeInterval {
+        endTime - startTime
+    }
 
     var isValid: Bool {
         number > 0 && startTime.isFinite && endTime.isFinite
@@ -133,11 +154,19 @@ nonisolated struct RepMetric: Codable, Equatable {
             && relativeRange.isFinite && relativeRange >= 0
             && (postureValue?.isFinite ?? true)
     }
-    /// The squat's original name for `relativeRange`, kept for existing callers and saved history.
-    var normalisedHipTravel: Double { relativeRange }
 
-    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, relativeRange: Double,
-         postureValue: Double? = nil) {
+    /// The squat's original name for `relativeRange`, kept for existing callers and saved history.
+    var normalisedHipTravel: Double {
+        relativeRange
+    }
+
+    init(
+        number: Int,
+        startTime: TimeInterval,
+        endTime: TimeInterval,
+        relativeRange: Double,
+        postureValue: Double? = nil
+    ) {
         self.number = number
         self.startTime = startTime
         self.endTime = endTime
@@ -145,10 +174,20 @@ nonisolated struct RepMetric: Codable, Equatable {
         self.postureValue = postureValue
     }
 
-    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, normalisedHipTravel: Double,
-         postureValue: Double? = nil) {
-        self.init(number: number, startTime: startTime, endTime: endTime,
-                  relativeRange: normalisedHipTravel, postureValue: postureValue)
+    init(
+        number: Int,
+        startTime: TimeInterval,
+        endTime: TimeInterval,
+        normalisedHipTravel: Double,
+        postureValue: Double? = nil
+    ) {
+        self.init(
+            number: number,
+            startTime: startTime,
+            endTime: endTime,
+            relativeRange: normalisedHipTravel,
+            postureValue: postureValue
+        )
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -179,18 +218,29 @@ nonisolated struct RepExtremes: Equatable {
     let deepest: RepSnapshot
     let shallowest: RepSnapshot
 
-    static func make(_ analysis: SetAnalysis, frames: [PoseFrame],
-                     definition: ExerciseDefinition) -> RepExtremes? {
-        guard analysis.reps.count >= 2,
-              let deep = analysis.reps.max(by: { $0.relativeRange < $1.relativeRange }),
-              let shallow = analysis.reps.min(by: { $0.relativeRange < $1.relativeRange }),
-              deep.number != shallow.number,
-              let deepFrame = ExerciseAnalyzer.deepestFrame(of: deep, in: frames, as: definition),
-              let shallowFrame = ExerciseAnalyzer.deepestFrame(of: shallow, in: frames, as: definition)
-        else { return nil }
-        return RepExtremes(deepest: RepSnapshot(number: deep.number, range: deep.relativeRange, frame: deepFrame),
-                           shallowest: RepSnapshot(number: shallow.number, range: shallow.relativeRange,
-                                                   frame: shallowFrame))
+    static func make(
+        _ analysis: SetAnalysis,
+        frames: [PoseFrame],
+        definition: ExerciseDefinition
+    ) -> RepExtremes? {
+        guard
+            analysis.reps.count >= 2,
+            let deep = analysis.reps.max(by: { $0.relativeRange < $1.relativeRange }),
+            let shallow = analysis.reps.min(by: { $0.relativeRange < $1.relativeRange }),
+            deep.number != shallow.number,
+            let deepFrame = ExerciseAnalyzer.deepestFrame(of: deep, in: frames, as: definition),
+            let shallowFrame = ExerciseAnalyzer.deepestFrame(of: shallow, in: frames, as: definition)
+        else {
+            return nil
+        }
+        return RepExtremes(
+            deepest: RepSnapshot(number: deep.number, range: deep.relativeRange, frame: deepFrame),
+            shallowest: RepSnapshot(
+                number: shallow.number,
+                range: shallow.relativeRange,
+                frame: shallowFrame
+            )
+        )
     }
 }
 
@@ -216,18 +266,30 @@ nonisolated enum JointRole: String, Equatable, Sendable {
 
     func joint(on side: BodySide) -> BodyJoint {
         switch (self, side) {
-        case (.shoulder, .left): .leftShoulder
-        case (.shoulder, .right): .rightShoulder
-        case (.elbow, .left): .leftElbow
-        case (.elbow, .right): .rightElbow
-        case (.wrist, .left): .leftWrist
-        case (.wrist, .right): .rightWrist
-        case (.hip, .left): .leftHip
-        case (.hip, .right): .rightHip
-        case (.knee, .left): .leftKnee
-        case (.knee, .right): .rightKnee
-        case (.ankle, .left): .leftAnkle
-        case (.ankle, .right): .rightAnkle
+        case (.shoulder, .left):
+            .leftShoulder
+        case (.shoulder, .right):
+            .rightShoulder
+        case (.elbow, .left):
+            .leftElbow
+        case (.elbow, .right):
+            .rightElbow
+        case (.wrist, .left):
+            .leftWrist
+        case (.wrist, .right):
+            .rightWrist
+        case (.hip, .left):
+            .leftHip
+        case (.hip, .right):
+            .rightHip
+        case (.knee, .left):
+            .leftKnee
+        case (.knee, .right):
+            .rightKnee
+        case (.ankle, .left):
+            .leftAnkle
+        case (.ankle, .right):
+            .rightAnkle
         }
     }
 }
@@ -246,7 +308,9 @@ nonisolated enum EvidenceAssessment: Equatable {
     case reject(EvidenceReason)
 
     var isRejected: Bool {
-        if case .reject = self { return true }
+        if case .reject = self {
+            return true
+        }
         return false
     }
 }
@@ -265,7 +329,7 @@ nonisolated enum CueKind: String, Codable, Sendable {
     case hipDropIncreased
     case kneeBendIncreased
     case swingIncreased
-// a fault seen on at least two reps (`FormCheck`), not a change within the set.
+    // a fault seen on at least two reps (`FormCheck`), not a change within the set.
     case pushUpHipsSag
     case pushUpHipsPike
     case pushUpDepth
@@ -325,11 +389,20 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
     /// without advice or comparison. Nil for a fully visible set and in older summaries.
     let partlyVisible: Bool?
 
-    init(id: UUID, sessionID: UUID, capturedAt: Date, bodySide: BodySide,
-         analysis: SetAnalysis, cue: Cue?, cueResponse: CueResponse,
-         exercise: ExerciseKind = .bodyweightSquat, cameraView: CameraView = .side,
-         issues: [SetIssue]? = nil, formMeasurements: [FormMeasurement]? = nil,
-         partlyVisible: Bool? = nil) {
+    init(
+        id: UUID,
+        sessionID: UUID,
+        capturedAt: Date,
+        bodySide: BodySide,
+        analysis: SetAnalysis,
+        cue: Cue?,
+        cueResponse: CueResponse,
+        exercise: ExerciseKind = .bodyweightSquat,
+        cameraView: CameraView = .side,
+        issues: [SetIssue]? = nil,
+        formMeasurements: [FormMeasurement]? = nil,
+        partlyVisible: Bool? = nil
+    ) {
         self.id = id
         self.sessionID = sessionID
         self.capturedAt = capturedAt
@@ -369,6 +442,6 @@ nonisolated extension WorkoutSessionSummary {
     func continues(at date: Date) -> Bool {
         let latest = sets.map(\.capturedAt).max() ?? startedAt
         let interval = date.timeIntervalSince(latest)
-        return interval.isFinite && (0...Self.longestBreak).contains(interval)
+        return interval.isFinite && (0 ... Self.longestBreak).contains(interval)
     }
 }

@@ -30,7 +30,9 @@ nonisolated enum ViewCheck {
         case unavailable
 
         var isMismatch: Bool {
-            if case .mismatch = self { return true }
+            if case .mismatch = self {
+                return true
+            }
             return false
         }
     }
@@ -39,21 +41,32 @@ nonisolated enum ViewCheck {
     /// 0 is a true side view; 90 means the person faces the camera or turns away from it.
     /// Positions are camera-relative, in metres, as Vision 3D pose returns them. Left and right
     /// labels may be swapped without changing the result.
-    static func profileDeviation(leftHip: SIMD3<Double>, rightHip: SIMD3<Double>,
-                                 leftShoulder: SIMD3<Double>? = nil,
-                                 rightShoulder: SIMD3<Double>? = nil) -> Double? {
+    static func profileDeviation(
+        leftHip: SIMD3<Double>,
+        rightHip: SIMD3<Double>,
+        leftShoulder: SIMD3<Double>? = nil,
+        rightShoulder: SIMD3<Double>? = nil
+    ) -> Double? {
         let points = [leftHip, rightHip] + [leftShoulder, rightShoulder].compactMap { $0 }
-        guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite && $0.z.isFinite }) else { return nil }
+        guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite && $0.z.isFinite }) else {
+            return nil
+        }
         let hips = leftHip - rightHip
-        guard simd_length(hips) > 1e-4 else { return nil }
+        guard simd_length(hips) > 1e-4 else {
+            return nil
+        }
         var lateral = simd_normalize(hips)
         if let leftShoulder, let rightShoulder, simd_length(leftShoulder - rightShoulder) > 1e-4 {
             var shoulders = simd_normalize(leftShoulder - rightShoulder)
-            if simd_dot(shoulders, lateral) < 0 { shoulders = -shoulders }
+            if simd_dot(shoulders, lateral) < 0 {
+                shoulders = -shoulders
+            }
             lateral = simd_normalize(lateral + shoulders)
         }
         let sight = (leftHip + rightHip) / 2
-        guard simd_length(sight) > 1e-4 else { return nil }
+        guard simd_length(sight) > 1e-4 else {
+            return nil
+        }
         let cosine = abs(simd_dot(lateral, simd_normalize(sight)))
         return acos(min(1, cosine)) * 180 / .pi
     }
@@ -61,7 +74,9 @@ nonisolated enum ViewCheck {
     static func assess(_ frames: [PoseFrame], expected: ExpectedView) -> Verdict {
         let estimates = frames.filter { $0.profileDeviationDegrees != nil }
         let deviations = estimates.compactMap(\.profileDeviationDegrees)
-        guard deviations.count >= minimumSetEstimates else { return .unavailable }
+        guard deviations.count >= minimumSetEstimates else {
+            return .unavailable
+        }
         let median = median(deviations)
         if fits(median, expected: expected) {
             return .matches(medianDeviation: median, estimates: deviations.count)
@@ -75,15 +90,19 @@ nonisolated enum ViewCheck {
 
     /// True when the latest estimates agree the person is not in the expected view.
     static func previewAsksToTurn(_ recentDeviations: [Double], expected: ExpectedView) -> Bool {
-        let valid = recentDeviations.filter { $0.isFinite && (0...90).contains($0) }
-        guard valid.count >= minimumPreviewEstimates else { return false }
+        let valid = recentDeviations.filter { $0.isFinite && (0 ... 90).contains($0) }
+        guard valid.count >= minimumPreviewEstimates else {
+            return false
+        }
         return !fits(median(valid), expected: expected)
     }
 
     private static func fits(_ deviation: Double, expected: ExpectedView) -> Bool {
         switch expected {
-        case .side: deviation <= maximumSideDeviationDegrees
-        case .any: true
+        case .side:
+            deviation <= maximumSideDeviationDegrees
+        case .any:
+            true
         }
     }
 

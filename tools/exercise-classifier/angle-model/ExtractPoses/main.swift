@@ -22,18 +22,26 @@ struct PoseRecording: Codable {
 /// every other exercise in the dataset is "other".
 func label(forExercise exercise: String) -> String {
     switch exercise {
-    case "squat": "squat"
-    case "push_up": "push_up"
-    default: "other"
+    case "squat":
+        "squat"
+    case "push_up":
+        "push_up"
+    default:
+        "other"
     }
 }
 
 func orientation(of transform: CGAffineTransform) -> CGImagePropertyOrientation {
     switch Int((atan2(transform.b, transform.a) * 180 / .pi).rounded()) {
-    case 90: .right
-    case -90: .left
-    case 180, -180: .down
-    default: .up
+    case 90:
+        .right
+    case -90:
+        .left
+    case 180,
+         -180:
+        .down
+    default:
+        .up
     }
 }
 
@@ -48,14 +56,19 @@ let mapping: [(BodyJoint, VNHumanBodyPoseObservation.JointName)] = [
 /// for push-ups counts as much as a person standing. `aspectRatio` is image height over width.
 func extent(of observation: VNHumanBodyPoseObservation, aspectRatio: Double) -> Double {
     let points = ((try? observation.recognizedPoints(.all)) ?? [:]).values.filter { $0.confidence > 0.1 }
-    guard let minX = points.map(\.location.x).min(), let maxX = points.map(\.location.x).max(),
-          let minY = points.map(\.location.y).min(), let maxY = points.map(\.location.y).max() else { return 0 }
+    guard
+        let minX = points.map(\.location.x).min(), let maxX = points.map(\.location.x).max(),
+        let minY = points.map(\.location.y).min(), let maxY = points.map(\.location.y).max() else {
+        return 0
+    }
     return hypot(Double(maxX - minX), Double(maxY - minY) * aspectRatio)
 }
 
 func extract(_ url: URL) async throws -> [PoseFrame] {
     let asset = AVURLAsset(url: url)
-    guard let track = try await asset.loadTracks(withMediaType: .video).first else { return [] }
+    guard let track = try await asset.loadTracks(withMediaType: .video).first else {
+        return []
+    }
     let (size, transform) = try await track.load(.naturalSize, .preferredTransform)
     let imageOrientation = orientation(of: transform)
     let rotated = imageOrientation == .left || imageOrientation == .right
@@ -73,8 +86,11 @@ func extract(_ url: URL) async throws -> [PoseFrame] {
     var firstTime: Double?
     while let sample = output.copyNextSampleBuffer() {
         let time = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sample))
-        guard time.isFinite, time - lastTime >= 1.0 / 15 - 1e-3,
-              let pixelBuffer = CMSampleBufferGetImageBuffer(sample) else { continue }
+        guard
+            time.isFinite, time - lastTime >= 1.0 / 15 - 1e-3,
+            let pixelBuffer = CMSampleBufferGetImageBuffer(sample) else {
+            continue
+        }
         lastTime = time
         let start = firstTime ?? time
         firstTime = start
@@ -83,21 +99,34 @@ func extract(_ url: URL) async throws -> [PoseFrame] {
         try? handler.perform([request])
         let observations = request.results ?? []
         var joints: [BodyJoint: JointPoint] = [:]
-// gyms have bystanders: keep the person who fills most of the frame, the one exercising.
-        if let subject = observations.max(by: {
-            extent(of: $0, aspectRatio: aspectRatio) < extent(of: $1, aspectRatio: aspectRatio)
-        }) {
+        // gyms have bystanders: keep the person who fills most of the frame, the one exercising.
+        if
+            let subject = observations.max(by: {
+                extent(of: $0, aspectRatio: aspectRatio) < extent(of: $1, aspectRatio: aspectRatio)
+            }) {
             for (name, visionName) in mapping {
-                guard let point = try? subject.recognizedPoint(visionName), point.confidence > 0 else { continue }
-                joints[name] = JointPoint(x: min(1, max(0, Double(point.location.x))),
-                                          y: min(1, max(0, 1 - Double(point.location.y))),
-                                          confidence: Double(point.confidence))
+                guard
+                    let point = try? subject.recognizedPoint(visionName),
+                    point.confidence > 0 else {
+                    continue
+                }
+                joints[name] = JointPoint(
+                    x: min(1, max(0, Double(point.location.x))),
+                    y: min(1, max(0, 1 - Double(point.location.y))),
+                    confidence: Double(point.confidence)
+                )
             }
         }
-        frames.append(PoseFrame(time: time - start, subjectCount: observations.count, joints: joints,
-                                aspectRatio: aspectRatio))
+        frames.append(PoseFrame(
+            time: time - start,
+            subjectCount: observations.count,
+            joints: joints,
+            aspectRatio: aspectRatio
+        ))
     }
-    if reader.status == .failed { throw reader.error ?? CocoaError(.fileReadCorruptFile) }
+    if reader.status == .failed {
+        throw reader.error ?? CocoaError(.fileReadCorruptFile)
+    }
     return frames
 }
 
@@ -106,10 +135,12 @@ guard arguments.count == 3 else {
     print("usage: extract-poses <videos folder> <output folder>")
     exit(2)
 }
+
 let input = URL(fileURLWithPath: arguments[1]), outputFolder = URL(fileURLWithPath: arguments[2])
 try FileManager.default.createDirectory(at: outputFolder, withIntermediateDirectories: true)
 let videos = (FileManager.default.enumerator(at: input, includingPropertiesForKeys: nil)?
-    .compactMap { $0 as? URL } ?? []).filter { $0.pathExtension.lowercased() == "mp4" }.sorted { $0.path < $1.path }
+    .compactMap { $0 as? URL } ?? []).filter { $0.pathExtension.lowercased() == "mp4" }
+    .sorted { $0.path < $1.path }
 print("\(videos.count) videos")
 let encoder = JSONEncoder()
 var written = 0
@@ -119,16 +150,26 @@ for video in videos {
     let exercise = parts.first.map(String.init) ?? "unknown"
     let subject = video.lastPathComponent.split(separator: "_").prefix(2).joined(separator: "_")
     let target = outputFolder.appending(path: relative.replacingOccurrences(of: "/", with: "__") + ".json")
-    if FileManager.default.fileExists(atPath: target.path) { written += 1; continue }
+    if FileManager.default.fileExists(atPath: target.path) {
+        written += 1
+        continue }
     do {
         let frames = try await extract(video)
-        let recording = PoseRecording(source: relative, exercise: exercise, label: label(forExercise: exercise),
-                                      subject: subject, frames: frames)
+        let recording = PoseRecording(
+            source: relative,
+            exercise: exercise,
+            label: label(forExercise: exercise),
+            subject: subject,
+            frames: frames
+        )
         try encoder.encode(recording).write(to: target, options: .atomic)
         written += 1
-        if written % 20 == 0 { print("\(written) of \(videos.count)") }
+        if written % 20 == 0 {
+            print("\(written) of \(videos.count)")
+        }
     } catch {
         print("skipped \(relative): \(error)")
     }
 }
+
 print("done \(written) of \(videos.count)")

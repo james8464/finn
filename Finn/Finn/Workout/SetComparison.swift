@@ -19,10 +19,18 @@ nonisolated struct Comparison: Codable, Equatable {
     /// Both sets share this exercise; ranges use its unit.
     let exercise: ExerciseKind
 
-    init(firstSetID: UUID, secondSetID: UUID, firstMedianRange: Double, secondMedianRange: Double,
-         firstMedianDuration: TimeInterval, secondMedianDuration: TimeInterval,
-         rangeDirection: RangeDirection, cueRepNumbers: [Int], cueKind: CueKind?,
-         exercise: ExerciseKind = .bodyweightSquat) {
+    init(
+        firstSetID: UUID,
+        secondSetID: UUID,
+        firstMedianRange: Double,
+        secondMedianRange: Double,
+        firstMedianDuration: TimeInterval,
+        secondMedianDuration: TimeInterval,
+        rangeDirection: RangeDirection,
+        cueRepNumbers: [Int],
+        cueKind: CueKind?,
+        exercise: ExerciseKind = .bodyweightSquat
+    ) {
         self.firstSetID = firstSetID
         self.secondSetID = secondSetID
         self.firstMedianRange = firstMedianRange
@@ -41,27 +49,36 @@ nonisolated enum SetComparison {
     static let minimumReps = 4
 
     static func compare(_ first: SetSummary, _ second: SetSummary) -> Comparison? {
-        guard first.sessionID == second.sessionID,
-              first.id != second.id,
-              first.exercise == second.exercise,
-              first.cameraView == second.cameraView,
-// the side is a key only for an exercise measured from the side; a push-up, accepted
-              // from any view, compares across sides (filmed from the front, the side is arbitrary).
-              first.bodySide == second.bodySide || first.exercise.definition.expectedView != .side,
-              first.analysis.rubricVersion == second.analysis.rubricVersion,
-              first.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
-              second.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
-              first.analysis.reps.count >= minimumReps,
-              second.analysis.reps.count >= minimumReps else { return nil }
+        guard
+            first.sessionID == second.sessionID,
+            first.id != second.id,
+            first.exercise == second.exercise,
+            first.cameraView == second.cameraView,
+            // the side is a key only for an exercise measured from the side; a push-up, accepted
+            // from any view, compares across sides (filmed from the front, the side is arbitrary).
+            first.bodySide == second.bodySide || first.exercise.definition.expectedView != .side,
+            first.analysis.rubricVersion == second.analysis.rubricVersion,
+            first.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
+            second.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
+            first.analysis.reps.count >= minimumReps,
+            second.analysis.reps.count >= minimumReps else {
+            return nil
+        }
 
         let firstRange = median(first.analysis.reps.map(\.relativeRange))
         let secondRange = median(second.analysis.reps.map(\.relativeRange))
-        guard firstRange > 0 else { return nil }
+        guard firstRange > 0 else {
+            return nil
+        }
         let ratio = secondRange / firstRange
         let direction: RangeDirection
-        if ratio >= 1.15 { direction = .longer }
-        else if ratio <= 0.85 { direction = .shorter }
-        else { direction = .noClearChange }
+        if ratio >= 1.15 {
+            direction = .longer
+        } else if ratio <= 0.85 {
+            direction = .shorter
+        } else {
+            direction = .noClearChange
+        }
         return Comparison(
             firstSetID: first.id,
             secondSetID: second.id,

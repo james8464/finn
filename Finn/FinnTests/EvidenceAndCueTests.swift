@@ -8,8 +8,11 @@ nonisolated struct EvidenceAndCueTests {
 
     @Test func rejectsMissingRequiredJoint() {
         let frames = clearTrace().map { frame in
-            PoseFrame(time: frame.time, subjectCount: 1,
-                      joints: frame.joints.filter { $0.key != .leftKnee && $0.key != .rightKnee })
+            PoseFrame(
+                time: frame.time,
+                subjectCount: 1,
+                joints: frame.joints.filter { $0.key != .leftKnee && $0.key != .rightKnee }
+            )
         }
         #expect(EvidenceGate.assess(frames) == .reject(.missingJoints))
         guard case .insufficientView = SquatAnalyzer.analyse(frames) else {
@@ -39,7 +42,7 @@ nonisolated struct EvidenceAndCueTests {
 
     @Test func rejectsBriefSustainedBystanderInLongSet() {
         let frames = clearTrace(sampleCount: 101).enumerated().map { index, frame in
-            (40...44).contains(index)
+            (40 ... 44).contains(index)
                 ? PoseFrame(time: frame.time, subjectCount: 2, joints: frame.joints)
                 : frame
         }
@@ -69,7 +72,7 @@ nonisolated struct EvidenceAndCueTests {
 
     @Test func rejectsLongTrackingLossDespiteHighOverallCoverage() {
         let frames = clearTrace(sampleCount: 101).enumerated().map { index, frame in
-            (40...48).contains(index)
+            (40 ... 48).contains(index)
                 ? PoseFrame(time: frame.time, subjectCount: 1, joints: [:])
                 : frame
         }
@@ -121,9 +124,12 @@ nonisolated struct EvidenceAndCueTests {
         #expect(CueSelector.select(from: measuredSet([0.42, 0.30, 0.25])) == nil)
     }
 
-    private func clearTrace(confidence: Double = 0.99, subjectCount: Int = 1,
-                            sampleCount: Int = 31) -> [PoseFrame] {
-        (0..<sampleCount).map { index in
+    private func clearTrace(
+        confidence: Double = 0.99,
+        subjectCount: Int = 1,
+        sampleCount: Int = 31
+    ) -> [PoseFrame] {
+        (0 ..< sampleCount).map { index in
             PoseFrame(time: Double(index) * 0.1, subjectCount: subjectCount, joints: [
                 .leftHip: JointPoint(x: 0.47, y: 0.42, confidence: confidence),
                 .leftKnee: JointPoint(x: 0.49, y: 0.70, confidence: confidence),
@@ -138,8 +144,12 @@ nonisolated struct EvidenceAndCueTests {
     private func measuredSet(_ ranges: [Double]) -> SetAnalysis {
         SetAnalysis(
             reps: ranges.enumerated().map { index, range in
-                RepMetric(number: index + 1, startTime: Double(index) * 2,
-                          endTime: Double(index + 1) * 2, normalisedHipTravel: range)
+                RepMetric(
+                    number: index + 1,
+                    startTime: Double(index) * 2,
+                    endTime: Double(index + 1) * 2,
+                    normalisedHipTravel: range
+                )
             },
             confidence: 0.95,
             rubricVersion: SquatRubric.version

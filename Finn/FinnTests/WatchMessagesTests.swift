@@ -3,10 +3,19 @@ import Testing
 @testable import Finn
 
 nonisolated struct WatchMessagesTests {
-    private let full = WatchState(stage: .capturing, countdown: 0, exercise: "Squat", reps: 5,
-                                  caption: "Rep 5 was faster than your first reps", haptic: .observation,
-                                  summary: nil, wristControls: true, handsFree: true, demoInput: false,
-                                  sentAt: 1_791_000_000.25)
+    private let full = WatchState(
+        stage: .capturing,
+        countdown: 0,
+        exercise: "Squat",
+        reps: 5,
+        caption: "Rep 5 was faster than your first reps",
+        haptic: .observation,
+        summary: nil,
+        wristControls: true,
+        handsFree: true,
+        demoInput: false,
+        sentAt: 1_791_000_000.25
+    )
 
     @Test func everyStateRoundTrips() {
         for stage in WatchStage.allCases {
@@ -25,13 +34,28 @@ nonisolated struct WatchMessagesTests {
 
     /// WatchConnectivity carries property lists only: the message must serialise, nil values left out.
     @Test func stateIsAPropertyListAndSurvivesSerialization() throws {
-        for state in [full, WatchState(stage: .result, exercise: "Push-up", reps: 1, summary: "1 rep measured.",
-                                       wristControls: false, demoInput: true, sentAt: 12)] {
+        for state in [
+            full,
+            WatchState(
+                stage: .result,
+                exercise: "Push-up",
+                reps: 1,
+                summary: "1 rep measured.",
+                wristControls: false,
+                demoInput: true,
+                sentAt: 12
+            )
+        ] {
             let message = state.message()
             #expect(!message.values.contains { $0 is NSNull })
-            let data = try PropertyListSerialization.data(fromPropertyList: message, format: .binary, options: 0)
+            let data = try PropertyListSerialization.data(
+                fromPropertyList: message,
+                format: .binary,
+                options: 0
+            )
             let decoded = try #require(
-                try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any])
+                try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+            )
             #expect(WatchState(message: decoded) == state)
         }
         var noCaption = full
@@ -116,12 +140,24 @@ nonisolated struct WatchMessagesTests {
     @Test func permissionAndPhoneHapticsGateRhythm() {
         #expect(!WatchRhythmPolicy.canEnable(permissionGranted: false))
         #expect(WatchRhythmPolicy.canEnable(permissionGranted: true))
-        #expect(!WatchRhythmPolicy.canTap(enabled: true, masterHapticsEnabled: false,
-                                         workoutRunning: true, capturing: true))
-        #expect(!WatchRhythmPolicy.canTap(enabled: true, masterHapticsEnabled: true,
-                                         workoutRunning: false, capturing: true))
-        #expect(WatchRhythmPolicy.canTap(enabled: true, masterHapticsEnabled: true,
-                                        workoutRunning: true, capturing: true))
+        #expect(!WatchRhythmPolicy.canTap(
+            enabled: true,
+            masterHapticsEnabled: false,
+            workoutRunning: true,
+            capturing: true
+        ))
+        #expect(!WatchRhythmPolicy.canTap(
+            enabled: true,
+            masterHapticsEnabled: true,
+            workoutRunning: false,
+            capturing: true
+        ))
+        #expect(WatchRhythmPolicy.canTap(
+            enabled: true,
+            masterHapticsEnabled: true,
+            workoutRunning: true,
+            capturing: true
+        ))
     }
 
     @Test func languageUsesOneOfTheFourSupportedVariants() {

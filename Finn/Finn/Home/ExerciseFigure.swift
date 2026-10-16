@@ -7,8 +7,18 @@ import SwiftUI
 /// opens it. The pose for `phase` 0 is the top of the rep and 1 the bottom.
 nonisolated struct ExerciseFigure {
     enum Joint: CaseIterable {
-        case toe, heel, ankle, knee, hip, shoulder, head, elbow, wrist
-        case backToe, backAnkle, backKnee
+        case toe
+        case heel
+        case ankle
+        case knee
+        case hip
+        case shoulder
+        case head
+        case elbow
+        case wrist
+        case backToe
+        case backAnkle
+        case backKnee
     }
 
     /// body proportions in figure units (about one standing height)
@@ -23,7 +33,9 @@ nonisolated struct ExerciseFigure {
     /// joint positions, x forward and y up, with the floor at y = 0
     func pose(at phase: Double) -> [Joint: CGPoint] {
         let t = min(1, max(0, phase))
-        func mix(_ top: Double, _ bottom: Double) -> Double { top + (bottom - top) * t }
+        func mix(_ top: Double, _ bottom: Double) -> Double {
+            top + (bottom - top) * t
+        }
         var points: [Joint: CGPoint] = [:]
         switch kind {
         case .bodyweightSquat:
@@ -56,22 +68,39 @@ nonisolated struct ExerciseFigure {
             points[.shoulder] = Self.point(ankle, angle, body)
             points[.head] = Self.point(points[.shoulder]!, angle + 8, Self.neck)
             points[.wrist] = CGPoint(x: top.x - 0.03, y: 0.0)
-            points[.elbow] = Self.bend(from: points[.shoulder]!, to: points[.wrist]!,
-                                       Self.upperArm, Self.forearm, preferForward: false)
+            points[.elbow] = Self.bend(
+                from: points[.shoulder]!,
+                to: points[.wrist]!,
+                Self.upperArm,
+                Self.forearm,
+                preferForward: false
+            )
         case .staticLunge:
             let hip = CGPoint(x: mix(-0.02, -0.03), y: mix(0.42, 0.27))
             points[.hip] = hip
             points[.ankle] = CGPoint(x: 0.21, y: 0.05)
-            points[.knee] = Self.bend(from: hip, to: points[.ankle]!, Self.thigh, Self.shin, preferForward: true)
+            points[.knee] = Self.bend(
+                from: hip,
+                to: points[.ankle]!,
+                Self.thigh,
+                Self.shin,
+                preferForward: true
+            )
             points[.backToe] = CGPoint(x: -0.32, y: 0)
             points[.backAnkle] = CGPoint(x: -0.27, y: 0.07)
-            points[.backKnee] = Self.bend(from: hip, to: points[.backAnkle]!, Self.thigh, Self.shin,
-                                          preferForward: true)
+            points[.backKnee] = Self.bend(
+                from: hip,
+                to: points[.backAnkle]!,
+                Self.thigh,
+                Self.shin,
+                preferForward: true
+            )
             points[.shoulder] = Self.point(hip, 90, Self.torso)
             points[.head] = Self.point(points[.shoulder]!, 90, Self.neck)
             points[.elbow] = Self.point(points[.shoulder]!, -96, Self.upperArm)
             points[.wrist] = Self.point(points[.elbow]!, -84, Self.forearm)
-        case .pullUp, .muscleUp:
+        case .pullUp,
+             .muscleUp:
             // hands stay on the bar; the shoulders rise to it (pull-up) or over it (muscle-up)
             let bar = Self.barHeight
             let wrist = CGPoint(x: 0, y: bar)
@@ -83,14 +112,21 @@ nonisolated struct ExerciseFigure {
                 lean = mix(-90, -100)
             } else {
                 // the chest passes in front of the bar, then the arms press to a straight support
-                shoulder = CGPoint(x: 0.04 * t + 0.13 * sin(.pi * t),
-                                   y: mix(hang.y, bar + Self.upperArm + Self.forearm - 0.01))
+                shoulder = CGPoint(
+                    x: 0.04 * t + 0.13 * sin(.pi * t),
+                    y: mix(hang.y, bar + Self.upperArm + Self.forearm - 0.01)
+                )
                 lean = mix(-90, -104) - 18 * sin(.pi * t)
             }
             points[.wrist] = wrist
             points[.shoulder] = shoulder
-            points[.elbow] = Self.bend(from: shoulder, to: wrist, Self.upperArm, Self.forearm,
-                                       preferForward: kind == .pullUp)
+            points[.elbow] = Self.bend(
+                from: shoulder,
+                to: wrist,
+                Self.upperArm,
+                Self.forearm,
+                preferForward: kind == .pullUp
+            )
             points[.head] = Self.point(shoulder, lean + 180 + (kind == .pullUp ? 0 : 8), Self.neck)
             points[.hip] = Self.point(shoulder, lean, Self.torso)
             points[.knee] = Self.point(points[.hip]!, lean + 6, Self.thigh)
@@ -116,18 +152,22 @@ nonisolated struct ExerciseFigure {
     /// over the hips for the lunge, and the ankle-to-shoulder line for the push-up
     func guide(at phase: Double) -> (CGPoint, CGPoint) {
         switch kind {
-        case .bodyweightSquat, .stiffLegDeadlift:
+        case .bodyweightSquat,
+             .stiffLegDeadlift:
             return (CGPoint(x: 0.03, y: 0), CGPoint(x: 0.03, y: 0.96))
         case .staticLunge:
             return (CGPoint(x: -0.03, y: 0), CGPoint(x: -0.03, y: 0.96))
-        case .pullUp, .muscleUp:
+        case .pullUp,
+             .muscleUp:
             return (CGPoint(x: 0, y: 0), CGPoint(x: 0, y: Self.barHeight))
         case .pushUp:
             let pose = pose(at: 0)
             let ankle = pose[.ankle]!, shoulder = pose[.shoulder]!
             let dx = shoulder.x - ankle.x, dy = shoulder.y - ankle.y
-            return (CGPoint(x: ankle.x - dx * 0.12, y: ankle.y - dy * 0.12),
-                    CGPoint(x: shoulder.x + dx * 0.22, y: shoulder.y + dy * 0.22))
+            return (
+                CGPoint(x: ankle.x - dx * 0.12, y: ankle.y - dy * 0.12),
+                CGPoint(x: shoulder.x + dx * 0.22, y: shoulder.y + dy * 0.22)
+            )
         }
     }
 
@@ -148,8 +188,13 @@ nonisolated struct ExerciseFigure {
     }
 
     /// the middle joint of a two-bone limb reaching from `root` to `end`
-    private static func bend(from root: CGPoint, to end: CGPoint, _ first: Double, _ second: Double,
-                             preferForward: Bool) -> CGPoint {
+    private static func bend(
+        from root: CGPoint,
+        to end: CGPoint,
+        _ first: Double,
+        _ second: Double,
+        preferForward: Bool
+    ) -> CGPoint {
         let dx = end.x - root.x, dy = end.y - root.y
         let reach = min(first + second - 0.001, max(abs(first - second) + 0.001, hypot(dx, dy)))
         let cosine = (first * first + reach * reach - second * second) / (2 * first * reach)
@@ -169,7 +214,9 @@ struct ExerciseFigureView: View {
     var figureColour: Color? = nil
     var animates = true
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
 
     /// seconds for one rep, down and up
     private let period = 3.2
@@ -199,7 +246,9 @@ struct ExerciseFigureView: View {
         let offsetX = room.midX - box.midX * scale
         // the figure sits in the middle of its room
         let offsetY = room.midY + box.midY * scale
-        func place(_ p: CGPoint) -> CGPoint { CGPoint(x: offsetX + p.x * scale, y: offsetY - p.y * scale) }
+        func place(_ p: CGPoint) -> CGPoint {
+            CGPoint(x: offsetX + p.x * scale, y: offsetY - p.y * scale)
+        }
         let floorY = offsetY
 
         let width = min(5.5, max(3.5, scale * 0.02))
@@ -217,8 +266,11 @@ struct ExerciseFigureView: View {
             var guide = Path()
             guide.move(to: place(from))
             guide.addLine(to: place(to))
-            context.stroke(guide, with: .color(lineColour.opacity(0.4)),
-                           style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [2, 6]))
+            context.stroke(
+                guide,
+                with: .color(lineColour.opacity(0.4)),
+                style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [2, 6])
+            )
         } else {
             let x = place(figure.guide(at: phase).0).x
             let top = CGPoint(x: x, y: room.minY + 4)
@@ -242,14 +294,19 @@ struct ExerciseFigureView: View {
             var bar = Path()
             bar.move(to: place(CGPoint(x: -0.2, y: ExerciseFigure.barHeight)))
             bar.addLine(to: place(CGPoint(x: 0.2, y: ExerciseFigure.barHeight)))
-            context.stroke(bar, with: .color(lineColour.opacity(0.55)),
-                           style: StrokeStyle(lineWidth: width * 1.4, lineCap: .round))
+            context.stroke(
+                bar,
+                with: .color(lineColour.opacity(0.55)),
+                style: StrokeStyle(lineWidth: width * 1.4, lineCap: .round)
+            )
         }
 
         let bodyColour = figureColour ?? lineColour
         let pose = figure.pose(at: phase)
         for (a, b) in ExerciseFigure.bones + [(.shoulder, .head)] {
-            guard let p = pose[a], let q = pose[b] else { continue }
+            guard let p = pose[a], let q = pose[b] else {
+                continue
+            }
             var bone = Path()
             bone.move(to: place(p))
             bone.addLine(to: place(q))
@@ -259,18 +316,31 @@ struct ExerciseFigureView: View {
         if let head = pose[.head] {
             let radius = ExerciseFigure.headRadius * scale
             let centre = place(head)
-            context.fill(Path(ellipseIn: CGRect(x: centre.x - radius, y: centre.y - radius,
-                                                width: 2 * radius, height: 2 * radius)),
-                         with: .color(bodyColour))
+            context.fill(
+                Path(ellipseIn: CGRect(
+                    x: centre.x - radius,
+                    y: centre.y - radius,
+                    width: 2 * radius,
+                    height: 2 * radius
+                )),
+                with: .color(bodyColour)
+            )
         }
         let dot = width * 0.95
         for joint in [ExerciseFigure.Joint.ankle, .knee, .hip, .shoulder, .elbow, .wrist, .backKnee] {
-            guard let p = pose[joint] else { continue }
+            guard let p = pose[joint] else {
+                continue
+            }
             let c = place(p)
-            context.fill(Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: 2 * dot, height: 2 * dot)),
-                         with: .color(bodyColour))
-            context.stroke(Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: 2 * dot, height: 2 * dot)),
-                           with: .color(HomeStyle.cameraBottom), lineWidth: 1.5)
+            context.fill(
+                Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: 2 * dot, height: 2 * dot)),
+                with: .color(bodyColour)
+            )
+            context.stroke(
+                Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: 2 * dot, height: 2 * dot)),
+                with: .color(HomeStyle.cameraBottom),
+                lineWidth: 1.5
+            )
         }
 
     }

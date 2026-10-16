@@ -16,7 +16,10 @@ final class SkeletonOverlayUITests: XCTestCase {
         let value = skeleton.value as? String ?? ""
         XCTAssertTrue(value.contains("Knee"), "skeleton value: \(value)")
         app.buttons["Stop set"].tap()
-        let gone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: skeleton)
+        let gone = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == false"),
+            object: skeleton
+        )
         XCTAssertEqual(XCTWaiter().wait(for: [gone], timeout: 8), .completed)
     }
 
@@ -35,9 +38,11 @@ final class SkeletonOverlayUITests: XCTestCase {
         stop.tap()
         XCTAssertTrue(app.staticTexts["Deepest and shallowest rep"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(
-            format: "label BEGINSWITH %@", "Deepest rep, rep ")).firstMatch.exists)
+            format: "label BEGINSWITH %@", "Deepest rep, rep "
+        )).firstMatch.exists)
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(
-            format: "label BEGINSWITH %@", "Shallowest rep, rep ")).firstMatch.exists)
+            format: "label BEGINSWITH %@", "Shallowest rep, rep "
+        )).firstMatch.exists)
         app.swipeUp()
         attachScreenshot(named: "Deepest and shallowest rep")
     }
@@ -77,7 +82,9 @@ final class SkeletonOverlayUITests: XCTestCase {
         // The count is one VoiceOver element containing both the number and its label.
         // Its separate visual caption is only "measured reps" and carries no count.
         let outcome = app.descendants(matching: .any).matching(NSPredicate(
-            format: "label MATCHES %@ OR label == %@", "[0-9]+ measured reps", "Couldn’t assess this set")).firstMatch
+            format: "label MATCHES %@ OR label == %@", "[0-9]+ measured reps", "Couldn’t assess this set"
+        ))
+        .firstMatch
         XCTAssertTrue(outcome.waitForExistence(timeout: 15))
         attachScreenshot(named: "Result")
         if app.staticTexts["Deepest and shallowest rep"].exists {
@@ -96,8 +103,9 @@ final class SkeletonOverlayUITests: XCTestCase {
     @MainActor
     func testVideoWithHiddenFeetIsCountedFromTheHips() throws {
         let environment = ProcessInfo.processInfo.environment
-        guard let video = environment["FINN_VIDEO_OCCLUDED_FILE"],
-              let poses = environment["FINN_VIDEO_OCCLUDED_POSES"] else {
+        guard
+            let video = environment["FINN_VIDEO_OCCLUDED_FILE"],
+            let poses = environment["FINN_VIDEO_OCCLUDED_POSES"] else {
             throw XCTSkip("Set the occluded video and pose fixture paths to run this test.")
         }
         let app = XCUIApplication()
@@ -111,7 +119,8 @@ final class SkeletonOverlayUITests: XCTestCase {
         app.buttons["Start set"].tap()
         Thread.sleep(forTimeInterval: 12)
         app.buttons["Stop set"].tap()
-        let outcome = app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "measured reps")).firstMatch
+        let outcome = app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "measured reps"))
+            .firstMatch
         XCTAssertTrue(outcome.waitForExistence(timeout: 15))
         XCTAssertFalse(app.staticTexts["Couldn’t assess this set"].exists)
         attachScreenshot(named: "Covered feet counted from the hips")

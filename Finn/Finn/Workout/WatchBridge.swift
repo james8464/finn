@@ -27,7 +27,9 @@ final class WatchBridge: NSObject, WCSessionDelegate {
 
     /// Activates WatchConnectivity once. Does nothing where it is unsupported or without a watch app.
     func start() {
-        guard !isStarted, Self.isWatchAppBundled, WCSession.isSupported() else { return }
+        guard !isStarted, Self.isWatchAppBundled, WCSession.isSupported() else {
+            return
+        }
         isStarted = true
         let session = WCSession.default
         session.delegate = self
@@ -36,27 +38,39 @@ final class WatchBridge: NSObject, WCSessionDelegate {
 
     /// Mirrors `model`'s sets and coaching lines on the watch.
     func attach(to model: WorkoutSessionModel, demoInput: Bool) {
-        guard sync == nil else { return }
+        guard sync == nil else {
+            return
+        }
         sync = WatchSync(model: model, demoInput: demoInput) { [weak self] state in
             self?.deliver(state)
         }
     }
 
     private func deliver(_ state: WatchState) {
-        guard isStarted else { return }
+        guard isStarted else {
+            return
+        }
         let session = WCSession.default
-        guard session.activationState == .activated, session.isPaired else { return }
-// keep the latest screen even while the watch is reachable: a live message can be lost
+        guard session.activationState == .activated, session.isPaired else {
+            return
+        }
+        // keep the latest screen even while the watch is reachable: a live message can be lost
         // when either app moves between foreground and background. Context replaces older states.
         Self.keepForLater(state, on: session)
-        if session.isReachable { Self.sendLive(state, on: session) }
+        if session.isReachable {
+            Self.sendLive(state, on: session)
+        }
     }
 
     private func update(_ new: WatchConnection) {
-        guard new != connection else { return }
+        guard new != connection else {
+            return
+        }
         connection = new
-// a watch that just opened Finn, or a session that just activated, gets the current screen.
-        if let current = sync?.current { deliver(current) }
+        // a watch that just opened Finn, or a session that just activated, gets the current screen.
+        if let current = sync?.current {
+            deliver(current)
+        }
     }
 
     /// Sends a state the watch shows at once. Application context was already updated above, so a
@@ -74,15 +88,23 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     }
 
     nonisolated private static func readConnection(of session: WCSession) -> WatchConnection {
-        guard session.activationState == .activated else { return .none }
-        return WatchConnection(isPaired: session.isPaired, isAppInstalled: session.isWatchAppInstalled,
-                               isReachable: session.isReachable)
+        guard session.activationState == .activated else {
+            return .none
+        }
+        return WatchConnection(
+            isPaired: session.isPaired,
+            isAppInstalled: session.isWatchAppInstalled,
+            isReachable: session.isReachable
+        )
     }
 
     // MARK: WCSessionDelegate, called on a background queue
 
-    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState,
-                             error: (any Error)?) {
+    nonisolated func session(
+        _ session: WCSession,
+        activationDidCompleteWith activationState: WCSessionActivationState,
+        error: (any Error)?
+    ) {
         let connection = Self.readConnection(of: session)
         Task { @MainActor [weak self] in self?.update(connection) }
     }
@@ -90,7 +112,7 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
 
     nonisolated func sessionDidDeactivate(_ session: WCSession) {
-// the person switched to another watch: start a session with that one.
+        // the person switched to another watch: start a session with that one.
         WCSession.default.activate()
     }
 

@@ -9,13 +9,17 @@ nonisolated struct PersonMask: Equatable {
     let pixels: [UInt8]
 
     init?(width: Int, height: Int, pixels: [UInt8]) {
-        guard width > 0, height > 0, pixels.count == width * height else { return nil }
+        guard width > 0, height > 0, pixels.count == width * height else {
+            return nil
+        }
         self.width = width
         self.height = height
         self.pixels = pixels
     }
 
-    func value(x: Int, y: Int) -> UInt8 { pixels[y * width + x] }
+    func value(x: Int, y: Int) -> UInt8 {
+        pixels[y * width + x]
+    }
 }
 
 /// Checks the athlete's joints against the person mask, so a joint Vision guessed behind an
@@ -44,31 +48,43 @@ nonisolated enum SilhouetteCheck {
     static let minimumRadiusPixels = 2
 
     static func verdict(for joints: [BodyJoint: JointPoint], mask: PersonMask?) -> Verdict {
-        guard let mask, !joints.isEmpty,
-              mask.pixels.contains(where: { $0 >= personThreshold }) else { return .unavailable }
+        guard
+            let mask, !joints.isEmpty,
+            mask.pixels.contains(where: { $0 >= personThreshold }) else {
+            return .unavailable
+        }
         let clear = joints.values.filter { $0.confidence >= EvidenceRubric.minimumJointConfidence }
         let reference = clear.isEmpty ? Array(joints.values) : clear
         let xs = reference.map(\.x)
         let ys = reference.map(\.y)
         let bodyWidth = (xs.max() ?? 0) - (xs.min() ?? 0)
         let bodyHeight = (ys.max() ?? 0) - (ys.min() ?? 0)
-// in normalised units on each axis, so a non-square mask keeps the same physical radius.
-        let radiusX = max(Int((radiusShareOfBody * hypot(bodyWidth, bodyHeight) * Double(mask.width)).rounded(.up)),
-                          minimumRadiusPixels)
-        let radiusY = max(Int((radiusShareOfBody * hypot(bodyWidth, bodyHeight) * Double(mask.height)).rounded(.up)),
-                          minimumRadiusPixels)
+        // in normalised units on each axis, so a non-square mask keeps the same physical radius.
+        let radiusX = max(
+            Int((radiusShareOfBody * hypot(bodyWidth, bodyHeight) * Double(mask.width)).rounded(.up)),
+            minimumRadiusPixels
+        )
+        let radiusY = max(
+            Int((radiusShareOfBody * hypot(bodyWidth, bodyHeight) * Double(mask.height)).rounded(.up)),
+            minimumRadiusPixels
+        )
         let supported = joints.filter { _, point in
             isPerson(near: point, in: mask, radiusX: radiusX, radiusY: radiusY)
         }
         return .checked(supported: Set(supported.keys))
     }
 
-    private static func isPerson(near point: JointPoint, in mask: PersonMask, radiusX: Int, radiusY: Int) -> Bool {
+    private static func isPerson(
+        near point: JointPoint,
+        in mask: PersonMask,
+        radiusX: Int,
+        radiusY: Int
+    ) -> Bool {
         let x = min(mask.width - 1, max(0, Int(point.x * Double(mask.width))))
         let y = min(mask.height - 1, max(0, Int(point.y * Double(mask.height))))
-        for yy in max(0, y - radiusY)...min(mask.height - 1, y + radiusY) {
-            for xx in max(0, x - radiusX)...min(mask.width - 1, x + radiusX)
-            where mask.value(x: xx, y: yy) >= personThreshold {
+        for yy in max(0, y - radiusY) ... min(mask.height - 1, y + radiusY) {
+            for xx in max(0, x - radiusX) ... min(mask.width - 1, x + radiusX)
+                where mask.value(x: xx, y: yy) >= personThreshold {
                 return true
             }
         }

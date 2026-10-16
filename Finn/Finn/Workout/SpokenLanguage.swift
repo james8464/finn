@@ -13,9 +13,12 @@ nonisolated enum SpokenLanguage {
     /// installed. Nil lets AVSpeechSynthesizer fall back to its default voice.
     static var voice: AVSpeechSynthesisVoice? {
         let language = appLanguage
-        if language.contains("-") { return AVSpeechSynthesisVoice(language: language) }
-        if let region = Locale.current.region?.identifier,
-           let voice = AVSpeechSynthesisVoice(language: "\(language)-\(region)") {
+        if language.contains("-") {
+            return AVSpeechSynthesisVoice(language: language)
+        }
+        if
+            let region = Locale.current.region?.identifier,
+            let voice = AVSpeechSynthesisVoice(language: "\(language)-\(region)") {
             return voice
         }
         return AVSpeechSynthesisVoice(language: language)
@@ -26,12 +29,18 @@ nonisolated extension JointRole {
     /// The joint's name as shown and said, capitalised: "Hip", "Hanche".
     var localisedName: String {
         switch self {
-        case .shoulder: String(localized: "Shoulder")
-        case .elbow: String(localized: "Elbow")
-        case .wrist: String(localized: "Wrist")
-        case .hip: String(localized: "Hip")
-        case .knee: String(localized: "Knee")
-        case .ankle: String(localized: "Ankle")
+        case .shoulder:
+            String(localized: "Shoulder")
+        case .elbow:
+            String(localized: "Elbow")
+        case .wrist:
+            String(localized: "Wrist")
+        case .hip:
+            String(localized: "Hip")
+        case .knee:
+            String(localized: "Knee")
+        case .ankle:
+            String(localized: "Ankle")
         }
     }
 }

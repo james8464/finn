@@ -30,7 +30,11 @@ final class PreviewFeed {
     /// called with the rotation coordinator's angles whenever the phone turns
     func rotationChanged(capture: Double, preview: Double) {
         onCaptureRotation?(capture)
-        displayRotationDegrees = Self.displayRotation(capture: capture, preview: preview, mirrored: isMirrored)
+        displayRotationDegrees = Self.displayRotation(
+            capture: capture,
+            preview: preview,
+            mirrored: isMirrored
+        )
     }
 
     /// the rotation still needed on screen for a frame already rotated by `capture` degrees,
@@ -41,7 +45,11 @@ final class PreviewFeed {
     /// mirrored feed turns the other way. Both cameras then get the same turn for the same phone
     /// position, as they should for an upright frame; before, the front camera was drawn upside
     /// down whenever the phone stood on its side
-    nonisolated static func displayRotation(capture: Double, preview: Double, mirrored: Bool = false) -> Double {
+    nonisolated static func displayRotation(
+        capture: Double,
+        preview: Double,
+        mirrored: Bool = false
+    ) -> Double {
         let turn = mirrored ? capture - preview : preview - capture
         let quarterTurns = Int((turn / 90).rounded())
         return Double(((quarterTurns % 4) + 4) % 4 * 90)
@@ -64,21 +72,31 @@ nonisolated final class PreviewFrameSink: @unchecked Sendable {
     func enqueue(_ sampleBuffer: CMSampleBuffer) -> AVSampleBufferVideoRenderer.Receiver.EnqueueResult? {
         lock.lock()
         defer { lock.unlock() }
-        guard let receiver, CMSampleBufferDataIsReady(sampleBuffer),
-              let copy = try? CMSampleBuffer(copying: sampleBuffer) else { return nil }
+        guard
+            let receiver, CMSampleBufferDataIsReady(sampleBuffer),
+            let copy = try? CMSampleBuffer(copying: sampleBuffer) else {
+            return nil
+        }
         // own the presentation metadata; pose analysis still reads the original capture buffer
-        if let attachments = CMSampleBufferGetSampleAttachmentsArray(copy, createIfNecessary: true),
-           CFArrayGetCount(attachments) > 0 {
-            let dictionary = unsafeBitCast(CFArrayGetValueAtIndex(attachments, 0),
-                                           to: CFMutableDictionary.self)
-            CFDictionarySetValue(dictionary,
-                                 Unmanaged.passUnretained(kCMSampleAttachmentKey_DisplayImmediately).toOpaque(),
-                                 Unmanaged.passUnretained(kCFBooleanTrue).toOpaque())
+        if
+            let attachments = CMSampleBufferGetSampleAttachmentsArray(copy, createIfNecessary: true),
+            CFArrayGetCount(attachments) > 0 {
+            let dictionary = unsafeBitCast(
+                CFArrayGetValueAtIndex(attachments, 0),
+                to: CFMutableDictionary.self
+            )
+            CFDictionarySetValue(
+                dictionary,
+                Unmanaged.passUnretained(kCMSampleAttachmentKey_DisplayImmediately)
+                    .toOpaque(),
+                Unmanaged.passUnretained(kCFBooleanTrue).toOpaque()
+            )
         }
         let ready = CMReadySampleBuffer<CMSampleBuffer.DynamicContent>(unsafeBuffer: copy)
         let result = receiver.enqueueImmediately(ready)
         switch result {
-        case .cancelledDueToFlushRequiredToResume, .cancelledDueToError:
+        case .cancelledDueToFlushRequiredToResume,
+             .cancelledDueToError:
             receiver.flush()
             return receiver.enqueueImmediately(ready)
         default:

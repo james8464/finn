@@ -41,9 +41,9 @@ nonisolated struct SkeletonGeometry: Equatable {
     ]
 
     init(frame: PoseFrame, exercise: ExerciseDefinition, size: CGSize, mirrored: Bool) {
-        let rect = Self.imageRect(aspectRatio: frame.aspectRatio, in: size)
+        let imageBounds = Self.imageRect(aspectRatio: frame.aspectRatio, in: size)
         func place(_ point: JointPoint) -> CGPoint {
-            Self.viewPoint(x: point.x, y: point.y, in: rect, mirrored: mirrored)
+            Self.viewPoint(x: point.x, y: point.y, in: imageBounds, mirrored: mirrored)
         }
         func reliable(_ point: JointPoint) -> Bool {
             point.confidence >= EvidenceRubric.minimumJointConfidence
@@ -52,45 +52,65 @@ nonisolated struct SkeletonGeometry: Equatable {
             .sorted { $0.key.rawValue < $1.key.rawValue }
             .map { Joint(joint: $0.key, point: place($0.value), reliable: reliable($0.value)) }
         bones = Self.bones(of: frame.joints, place: place)
-        let others = frame.bystanders ?? []
-        bystanderBones = others.flatMap { Self.bones(of: $0, place: place) }
-        bystanderJoints = others.flatMap { person in
+        let bystanders = frame.bystanders ?? []
+        bystanderBones = bystanders.flatMap { Self.bones(of: $0, place: place) }
+        bystanderJoints = bystanders.flatMap { person in
             person.values.filter { $0.confidence >= EvidenceRubric.minimumJointConfidence }.map(place)
         }
 
         let roles = exercise.displayedAngle
         let side = Self.trackedSide(frame, roles: [roles.from, roles.vertex, roles.to])
-        if let from = frame.joints[roles.from.joint(on: side)],
-           let vertex = frame.joints[roles.vertex.joint(on: side)],
-           let to = frame.joints[roles.to.joint(on: side)],
-           let degrees = ExerciseAnalyzer.angle(from: from, vertex: vertex, to: to,
-                                                aspectRatio: frame.aspectRatio) {
+        if
+            let from = frame.joints[roles.from.joint(on: side)],
+            let vertex = frame.joints[roles.vertex.joint(on: side)],
+            let to = frame.joints[roles.to.joint(on: side)],
+            let degrees = ExerciseAnalyzer.angle(
+                from: from,
+                vertex: vertex,
+                to: to,
+                aspectRatio: frame.aspectRatio
+            ) {
             let rounded = Int(degrees.rounded())
-            angle = AngleLabel(vertex: place(vertex), degrees: rounded,
-                               text: "\(roles.vertex.localisedName) \(rounded)°",
-                               reliable: reliable(from) && reliable(vertex) && reliable(to))
+            angle = AngleLabel(
+                vertex: place(vertex),
+                degrees: rounded,
+                text: "\(roles.vertex.localisedName) \(rounded)°",
+                reliable: reliable(from) && reliable(vertex) && reliable(to)
+            )
         } else {
             angle = nil
         }
     }
 
-    private static func bones(of joints: [BodyJoint: JointPoint],
-                              place: (JointPoint) -> CGPoint) -> [Bone] {
+    private static func bones(
+        of joints: [BodyJoint: JointPoint],
+        place: (JointPoint) -> CGPoint
+    ) -> [Bone] {
         boneList.compactMap { pair in
-            guard let a = joints[pair.0], let b = joints[pair.1] else { return nil }
-            let reliable = a.confidence >= EvidenceRubric.minimumJointConfidence
-                && b.confidence >= EvidenceRubric.minimumJointConfidence
-            return Bone(from: place(a), to: place(b), reliable: reliable)
+            guard let startJoint = joints[pair.0], let endJoint = joints[pair.1] else {
+                return nil
+            }
+            let reliable = startJoint.confidence >= EvidenceRubric.minimumJointConfidence
+                && endJoint.confidence >= EvidenceRubric.minimumJointConfidence
+            return Bone(from: place(startJoint), to: place(endJoint), reliable: reliable)
         }
     }
 
     /// The rectangle a frame with this height-to-width ratio fills when fitted inside `size`.
     static func imageRect(aspectRatio: Double, in size: CGSize) -> CGRect {
-        guard aspectRatio > 0, size.width > 0, size.height > 0 else { return CGRect(origin: .zero, size: size) }
+        guard
+            aspectRatio > 0, size.width > 0,
+            size.height > 0 else {
+            return CGRect(origin: .zero, size: size)
+        }
         let width = min(size.width, size.height / aspectRatio)
         let height = width * aspectRatio
-        return CGRect(x: (size.width - width) / 2, y: (size.height - height) / 2,
-                      width: width, height: height)
+        return CGRect(
+            x: (size.width - width) / 2,
+            y: (size.height - height) / 2,
+            width: width,
+            height: height
+        )
     }
 
     /// A normalised point (top-left origin) placed in `rect`, flipped left to right when the
@@ -111,8 +131,11 @@ nonisolated struct SkeletonGeometry: Equatable {
     /// pose on its own. Angles are unchanged: the aspect ratio is carried along.
     static func cropped(_ frame: PoseFrame) -> PoseFrame? {
         let points = frame.joints.values
-        guard points.count >= 2, let minX = points.map(\.x).min(), let maxX = points.map(\.x).max(),
-              let minY = points.map(\.y).min(), let maxY = points.map(\.y).max() else { return nil }
+        guard
+            points.count >= 2, let minX = points.map(\.x).min(), let maxX = points.map(\.x).max(),
+            let minY = points.map(\.y).min(), let maxY = points.map(\.y).max() else {
+            return nil
+        }
         let width = max(maxX - minX, 0.01)
         let height = max(maxY - minY, 0.01)
         let left = minX - 0.15 * width
@@ -120,18 +143,30 @@ nonisolated struct SkeletonGeometry: Equatable {
         let boxWidth = width * 1.3
         let boxHeight = height * 1.3
         let joints = frame.joints.mapValues { point in
-            JointPoint(x: (point.x - left) / boxWidth, y: (point.y - top) / boxHeight, confidence: point.confidence)
+            JointPoint(
+                x: (point.x - left) / boxWidth,
+                y: (point.y - top) / boxHeight,
+                confidence: point.confidence
+            )
         }
-        return PoseFrame(time: frame.time, subjectCount: 1, joints: joints,
-                         aspectRatio: boxHeight * frame.aspectRatio / boxWidth)
+        return PoseFrame(
+            time: frame.time,
+            subjectCount: 1,
+            joints: joints,
+            aspectRatio: boxHeight * frame.aspectRatio / boxWidth
+        )
     }
 
     /// A short description for VoiceOver and UI tests.
     var summary: String {
         let reliableCount = joints.filter(\.reliable).count
         var parts = ["\(joints.count) joints", "\(reliableCount) clear"]
-        if let angle { parts.append(angle.text) }
-        if !bystanderBones.isEmpty || !bystanderJoints.isEmpty { parts.append("other people ignored") }
+        if let angle {
+            parts.append(angle.text)
+        }
+        if !bystanderBones.isEmpty || !bystanderJoints.isEmpty {
+            parts.append("other people ignored")
+        }
         return parts.joined(separator: ", ")
     }
 }
@@ -141,9 +176,13 @@ nonisolated extension ExerciseDefinition {
     /// but the knee angle is what a person checks, so the squat shows the knee.
     var displayedAngle: (from: JointRole, vertex: JointRole, to: JointRole) {
         switch signal {
-        case .jointBend(let from, let vertex, let to): (from, vertex, to)
-        case .verticalTravel, .shoulderDrop: (.hip, .knee, .ankle)
-        case .verticalRise: (.shoulder, .elbow, .wrist)
+        case .jointBend(let from, let vertex, let to):
+            (from, vertex, to)
+        case .verticalTravel,
+             .shoulderDrop:
+            (.hip, .knee, .ankle)
+        case .verticalRise:
+            (.shoulder, .elbow, .wrist)
         }
     }
 }

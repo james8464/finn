@@ -28,7 +28,8 @@ private struct FinnFirstTryTrigger: ViewModifier {
 
     func body(content: Content) -> some View {
         content.fullScreenCover(isPresented: $isPresented) {
-            withAnimation(reduceMotion ? .easeInOut(duration: 0.25) : HomeStyle.spring) { hasTriedFinn = true }
+            withAnimation(reduceMotion ? .easeInOut(duration: 0.25) : HomeStyle.spring) { hasTriedFinn = true
+            }
         } content: {
             FinnFirstTryPlaceholder(isPresented: $isPresented)
         }

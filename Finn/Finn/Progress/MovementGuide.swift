@@ -21,12 +21,17 @@ struct MovementAnimationCard: View {
                     .accessibilityIdentifier("posture.playback")
                 }
             }
-            ExerciseFigureView(kind: exercise, lineColour: DashboardStyle.accent, figureColour: .white,
-                               animates: playsIllustration)
-                .frame(height: 230)
-                .frame(maxWidth: .infinity)
-                .accessibilityIdentifier("posture.illustration")
-            Text(reduceMotion ? "Motion paused for Reduce Motion" : "Illustration for guidance; bodies and ranges vary")
+            ExerciseFigureView(
+                kind: exercise,
+                lineColour: DashboardStyle.accent,
+                figureColour: .white,
+                animates: playsIllustration
+            )
+            .frame(height: 230)
+            .frame(maxWidth: .infinity)
+            .accessibilityIdentifier("posture.illustration")
+            Text(reduceMotion ? "Motion paused for Reduce Motion" :
+                "Illustration for guidance; bodies and ranges vary")
                 .font(.caption)
                 .foregroundStyle(DashboardStyle.secondary)
         }
