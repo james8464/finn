@@ -1017,7 +1017,7 @@ struct ContentView: View {
                 .disabled(!model.offersFitness)
                 .accessibilityIdentifier("options.savesToFitness")
                 if let note = fitnessOptionNote {
-                    Text(note).font(.footnote).foregroundStyle(AppPageStyle.secondaryText)
+                    WrappingText(text: note, style: .footnote, colour: UIColor.label.withAlphaComponent(0.72))
                         .accessibilityIdentifier("options.fitnessNote")
                 }
             } header: {
@@ -1037,8 +1037,8 @@ struct ContentView: View {
                 .disabled(!model.offersHealthPersonalisation)
                 .accessibilityIdentifier("options.personalizesWithHealth")
                 if !model.offersHealthPersonalisation {
-                    Text("Demo and recorded input never read Health.")
-                        .font(.footnote).foregroundStyle(AppPageStyle.secondaryText)
+                    WrappingText(text: String(localized: "Demo and recorded input never read Health."),
+                                 style: .footnote, colour: UIColor.label.withAlphaComponent(0.72))
                 }
                 DisclosureGroup("Health data") {
                     ForEach(HealthReadType.allCases, id: \.self) { type in
@@ -1482,14 +1482,13 @@ struct ContentView: View {
                             }
                         } else {
                             if analysis.reps.count < 4 {
-                                Text("Observations require 4 measured reps.")
-                                    .font(.title3)
+                                WrappingText(text: String(localized: "Observations require 4 measured reps."),
+                                             style: .title3)
                             } else {
-                                Text("No observation").font(.title3)
+                                WrappingText(text: String(localized: "No observation"), style: .title3)
                             }
-                            Text("This is a camera measurement, not a full technique assessment.")
-                                .font(.footnote)
-                                .foregroundStyle(FinnStyle.supportingText)
+                            WrappingText(text: String(localized: "This is a camera measurement, not a full technique assessment."),
+                                         style: .footnote, colour: UIColor.label.withAlphaComponent(0.72))
                         }
                         }
                         .modifier(AppSurface())

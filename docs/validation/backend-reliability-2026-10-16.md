@@ -180,9 +180,9 @@ Graphify's local-only code graph was used to follow Coach and generation-gate de
 graph files are not part of the app or repository changes.
 
 The software keyboard's Send key exposed a separate multiline-field issue: SwiftUI inserted a
-newline without calling `onSubmit`. Coach now recognises a single Return edit in linear time,
-submits the existing question, and leaves pasted paragraphs editable. All 31 Coach unit tests and
-the keyboard/tab-switch UI regression passed. The updated privacy disclosure UI check also passed.
+newline without calling `onSubmit`. An initial draft-difference workaround passed once but failed on repetition because SwiftUI can
+coalesce multiple edits. It has been replaced by a native `UITextView` delegate that handles the
+keyboard Send action directly, preserves pasted paragraphs, and bounds the draft length. The updated privacy disclosure UI check also passed.
 The UI assertion checks the latest visible reply rather than assuming a lazy transcript retains
 every off-screen accessibility row.
 
@@ -195,5 +195,17 @@ User-rejected observations and their next-action advice are also excluded from C
 Regression tests cover overlapping sessions, comparison evidence outside the retained window,
 input-order independence, and rejected advice.
 
-The final platform-independent backend run passed **245 tests in 19 suites**, including the new
-chronology, rejected-observation and keyboard-edit regressions.
+The platform-independent backend run at `e00a152` passed **245 tests in 19 suites**, including
+chronology and rejected-observation regressions. The draft-difference test was subsequently removed
+with that workaround; the native keyboard is exercised through UI tests.
+
+Repeated keyboard tests also exposed a focus feedback loop in the first native-editor candidate
+and a transcript-following bug. UIKit now owns keyboard focus; model-to-view text updates cannot
+write back through the delegate. Auto-scroll is suspended only for actual user scrolling, so
+keyboard resizing or a newly inserted reply cannot silently disable following. The UI regression
+requires exact submitted text and the complete new reply above the composer at standard text size.
+
+At the largest text size, a delayed SwiftUI text snapshot could still overwrite a newer native
+edit. The composer now uses an explicit reset identity: UIKit owns current keystrokes, and only a
+successful submission deliberately replaces its text. Large-text tests assert that every typed
+character survives before sending, and retain a screenshot when a reply cannot be reached.

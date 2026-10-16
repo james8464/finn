@@ -21,7 +21,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertTrue(app.buttons["posture.playback"].exists)
         try save("history-empty")
         app.selectTab("Coach")
-        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.textViews["coach.field"].waitForExistence(timeout: 3))
         XCTAssertGreaterThanOrEqual(app.buttons["coach.engine"].frame.height, 44)
         try save("coach")
         app.buttons["coach.engine"].tap()
@@ -68,7 +68,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
         try save("workout-largest-text")
         app.selectTab("Coach")
-        let field = app.textFields["coach.field"]
+        let field = app.textViews["coach.field"]
         XCTAssertTrue(field.waitForExistence(timeout: 3))
         field.tap()
         field.typeText("My last set")
@@ -105,7 +105,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
         try save("workout-largest-text")
         app.selectTab("Coach")
-        let field = app.textFields["coach.field"]
+        let field = app.textViews["coach.field"]
         XCTAssertTrue(field.waitForExistence(timeout: 3))
         field.tap()
         field.typeText("My last set")

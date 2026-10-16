@@ -13,7 +13,7 @@ final class DashboardUITests: XCTestCase {
         app.selectTab("Posture")
         XCTAssertTrue(app.scrollViews["posture.guide"].waitForExistence(timeout: 5))
         app.selectTab("Coach")
-        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.textViews["coach.field"].waitForExistence(timeout: 5))
         app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["home.start"].isHittable)
@@ -77,7 +77,7 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 3))
         app.navigationBars.buttons.element(boundBy: 0).tap()
         app.selectTab("Coach")
-        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.textViews["coach.field"].waitForExistence(timeout: 3))
         app.selectTab("Posture")
         XCTAssertTrue(app.navigationBars["Posture"].waitForExistence(timeout: 3))
         app.openWorkoutTab()
@@ -223,7 +223,7 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.account"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.buttons["home.account"].isHittable)
         app.selectTab("Coach")
-        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.textViews["coach.field"].waitForExistence(timeout: 3))
         app.selectTab("Home")
         let scroll = app.scrollViews["summary.scroll"]
         for _ in 0..<6 where !app.buttons["home.awards"].isHittable { scroll.swipeUp() }

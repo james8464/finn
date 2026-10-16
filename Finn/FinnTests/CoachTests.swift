@@ -40,16 +40,6 @@ struct CoachTests {
                 WorkoutSessionSummary(id: session, startedAt: start, sets: [first, second])]
     }
 
-    @Test func keyboardSendSubmitsWithoutSubmittingPastedParagraphs() {
-        #expect(CoachDraft.submission(previous: "Mon dernier effort ?", updated: "Mon dernier effort ?\n")
-                == "Mon dernier effort ?")
-        #expect(CoachDraft.submission(previous: "Set 1?", updated: "Set\n 1?") == "Set 1?")
-        #expect(CoachDraft.submission(previous: "", updated: "Set 1\nand set 2?") == nil)
-        #expect(CoachDraft.submission(previous: "Rep", updated: "Reps") == nil)
-        #expect(CoachDraft.submission(previous: "A\nB", updated: "A\nB\n") == "A\nB")
-        #expect(CoachDraft.submission(previous: "🔎 Séance", updated: "🔎 Séance\n") == "🔎 Séance")
-    }
-
     // MARK: Context
 
     @Test func contextKeepsSetsOldestFirstWithObservationsAndComparison() {

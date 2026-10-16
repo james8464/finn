@@ -94,22 +94,3 @@ final class CoachConversation {
     }
 
 }
-
-/// Distinguishes a single Return key edit from a pasted paragraph. Work is linear in the
-/// bounded draft length, and the existing text is preserved when Return submits the question.
-nonisolated enum CoachDraft {
-    static func submission(previous: String, updated: String) -> String? {
-        var previousIndex = previous.startIndex
-        var updatedIndex = updated.startIndex
-        while previousIndex < previous.endIndex, updatedIndex < updated.endIndex,
-              previous[previousIndex] == updated[updatedIndex] {
-            previous.formIndex(after: &previousIndex)
-            updated.formIndex(after: &updatedIndex)
-        }
-        guard updatedIndex < updated.endIndex, updated[updatedIndex] == "\n",
-              previous[previousIndex...] == updated[updated.index(after: updatedIndex)...] else {
-            return nil
-        }
-        return previous
-    }
-}

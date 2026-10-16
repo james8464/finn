@@ -18,7 +18,7 @@ final class CoachReliabilityUITests: XCTestCase {
         app.launch()
         app.selectTab("Coach")
 
-        let field = app.textFields["coach.field"]
+        let field = app.textViews["coach.field"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
         dismissKeyboardIntroduction(in: app)
@@ -44,6 +44,8 @@ final class CoachReliabilityUITests: XCTestCase {
         // follows the newly submitted question instead of counting off-screen answer views.
         let latestAnswer = answer.element(boundBy: max(0, answer.count - 1))
         XCTAssertGreaterThan(latestAnswer.frame.minY, submittedQuestion.frame.minY)
+        XCTAssertLessThanOrEqual(latestAnswer.frame.maxY, field.frame.minY - 8,
+                                 "The new reply must remain above the composer and keyboard")
         XCTAssertEqual(app.state, .runningForeground)
     }
 
@@ -55,18 +57,26 @@ final class CoachReliabilityUITests: XCTestCase {
                                    "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
             app.launch()
             app.selectTab("Coach")
-            let field = app.textFields["coach.field"]
+            let field = app.textViews["coach.field"]
             XCTAssertTrue(field.waitForExistence(timeout: 5))
             field.tap()
             dismissKeyboardIntroduction(in: app)
             field.typeText("Set 1?")
+            XCTAssertEqual(field.value as? String, "Set 1?", "Typing must preserve every character: \(language)")
             let send = app.buttons["coach.send"]
             XCTAssertTrue(send.isHittable, language)
             let answers = app.descendants(matching: .any).matching(identifier: "coach.answer.fallback")
             let expectedCount = answers.count + 1
             send.tap()
             let replied = XCTNSPredicateExpectation(predicate: NSPredicate(format: "count == %d", expectedCount), object: answers)
-            XCTAssertEqual(XCTWaiter().wait(for: [replied], timeout: 8), .completed, "\(language): \(app.debugDescription)")
+            let outcome = XCTWaiter().wait(for: [replied], timeout: 8)
+            if outcome != .completed {
+                let screenshot = XCTAttachment(screenshot: app.screenshot())
+                screenshot.name = "Coach composer failure — \(language)"
+                screenshot.lifetime = .keepAlways
+                add(screenshot)
+            }
+            XCTAssertEqual(outcome, .completed, "\(language): \(app.debugDescription)")
             XCTAssertTrue(app.buttons["coach.dismissKeyboard"].isHittable, language)
             app.buttons["coach.dismissKeyboard"].tap()
             app.terminate()
@@ -102,7 +112,7 @@ final class CoachReliabilityUITests: XCTestCase {
         app.buttons["result.done"].tap()
         XCTAssertTrue(app.buttons["Start a set"].waitForExistence(timeout: 5))
         app.selectTab("Coach")
-        let field = app.textFields["coach.field"]
+        let field = app.textViews["coach.field"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
         dismissKeyboardIntroduction(in: app)

@@ -4,13 +4,14 @@ import SwiftUI
 struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var draft = ""
+    @State private var composerResetID = UUID()
     @State private var showsSource = false
     @State private var replyTask: Task<Void, Never>?
     @State private var followsLatestReply = true
+    @State private var isUserScrolling = false
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
-    @FocusState private var fieldFocused: Bool
     private let history: [WorkoutSessionSummary]
 
     init(history: [WorkoutSessionSummary]) {
@@ -44,11 +45,7 @@ struct CoachView: View {
                 .accessibilityIdentifier("coach.engine")
                 .accessibilityHint("Explains how the Coach chooses its answer")
             }
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") { fieldFocused = false }
-                    .accessibilityIdentifier("coach.dismissKeyboard")
-            }
+
         }
         .sheet(isPresented: $showsSource) {
             NavigationStack {
@@ -118,9 +115,16 @@ struct CoachView: View {
             .scrollDismissesKeyboard(.interactively)
             .clipped()
             .onScrollGeometryChange(for: Bool.self) { geometry in
-                geometry.contentSize.height - geometry.visibleRect.maxY < 100
+                geometry.contentSize.height - geometry.visibleRect.maxY < 24
             } action: { _, isNearBottom in
-                followsLatestReply = isNearBottom
+                if isUserScrolling {
+                    followsLatestReply = isNearBottom
+                } else if followsLatestReply && !isNearBottom {
+                    scrollToLatest(using: proxy)
+                }
+            }
+            .onScrollPhaseChange { _, phase in
+                isUserScrolling = phase == .tracking || phase == .interacting || phase == .decelerating
             }
             .onChange(of: conversation.messages.last?.id) { _, _ in
                 // The conversation is capped at 40 messages, so its count eventually stops changing.
@@ -130,66 +134,57 @@ struct CoachView: View {
             .onChange(of: conversation.isAnswering) { _, _ in
                 if followsLatestReply { scrollToLatest(using: proxy) }
             }
-            .onChange(of: fieldFocused) { _, focused in
-                if focused {
-                    conversation.prepare()
-                }
-            }
         }
     }
 
     private var composer: some View {
-            VStack(spacing: 6) {
-                HStack(spacing: 10) {
-                    TextField("Ask about your sets", text: $draft,
-                              prompt: Text("Ask about your sets").foregroundStyle(HomeStyle.supportingText),
-                              axis: .vertical)
-                        .lineLimit(1...4)
-                        .accessibilityLabel("Ask about your sets")
-                        .textFieldStyle(.plain)
-                        .focused($fieldFocused)
-                        .submitLabel(.send)
-                        .onSubmit(send)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .accessibilityIdentifier("coach.field")
-                        .onChange(of: draft) { previous, value in
-                            // Multiline SwiftUI fields can insert a newline instead of invoking
-                            // onSubmit for the software keyboard's Send key.
-                            if let question = CoachDraft.submission(previous: previous, updated: value) {
-                                draft = question
-                                send()
-                            } else if value.count > FoundationModelsCoachPrompt.maximumQuestionCharacters {
-                                draft = String(value.prefix(FoundationModelsCoachPrompt.maximumQuestionCharacters))
-                            }
-                        }
-                    Button {
-                        if conversation.isAnswering {
-                            replyTask?.cancel()
-                        } else {
-                            send()
-                        }
-                    } label: {
-                        Image(systemName: conversation.isAnswering ? "stop.circle.fill" : "arrow.up.circle.fill")
-                            .font(.title)
-                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                            .symbolRenderingMode(.hierarchical)
+        VStack(spacing: 6) {
+            HStack(spacing: 10) {
+                CoachComposerField(
+                    text: $draft,
+                    resetID: composerResetID,
+                    onSubmit: send,
+                    onFocus: conversation.prepare
+                )
+                .overlay(alignment: .topLeading) {
+                    if draft.isEmpty {
+                        Text("Ask about your sets")
+                            .lineLimit(1)
+                            .foregroundStyle(HomeStyle.supportingText)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
                     }
-                    .buttonStyle(.plain)
-                    .tint(AppPageStyle.tint)
-                    .disabled(!conversation.isAnswering && draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .accessibilityLabel(conversation.isAnswering ? String(localized: "Stop response") : String(localized: "Send"))
-                    .accessibilityIdentifier(conversation.isAnswering ? "coach.stop" : "coach.send")
                 }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+                Button {
+                    if conversation.isAnswering {
+                        replyTask?.cancel()
+                    } else {
+                        send()
+                    }
+                } label: {
+                    Image(systemName: conversation.isAnswering ? "stop.circle.fill" : "arrow.up.circle.fill")
+                        .font(.title)
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                        .symbolRenderingMode(.hierarchical)
+                }
+                .buttonStyle(.plain)
+                .tint(AppPageStyle.tint)
+                .disabled(!conversation.isAnswering && draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .accessibilityLabel(conversation.isAnswering ? String(localized: "Stop response") : String(localized: "Send"))
+                .accessibilityIdentifier(conversation.isAnswering ? "coach.stop" : "coach.send")
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 10)
-            .padding(.bottom, 8)
-            .background(AppPageStyle.background)
         }
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 8)
+        .background(AppPageStyle.background)
+    }
 
     private var engineLine: String {
         switch conversation.engineKind {
@@ -257,6 +252,7 @@ struct CoachView: View {
         guard !text.isEmpty, !conversation.isAnswering else { return }
         followsLatestReply = true
         draft = ""
+        composerResetID = UUID()
         replyTask = Task { await conversation.send(text) }
     }
 }

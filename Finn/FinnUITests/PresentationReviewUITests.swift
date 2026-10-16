@@ -27,7 +27,7 @@ final class PresentationReviewUITests: XCTestCase {
                                   "\(page) must remain dark with light system appearance")
                 try save("\(page)-\(appearance)")
                 if page == "workout" { XCTAssertTrue(app.buttons["home.start"].isHittable) }
-                if page == "coach" { XCTAssertTrue(app.textFields["coach.field"].isHittable) }
+                if page == "coach" { XCTAssertTrue(app.textViews["coach.field"].isHittable) }
                 app.terminate()
             }
         }
@@ -112,7 +112,7 @@ final class PresentationReviewUITests: XCTestCase {
             if page == "workout" { XCTAssertTrue(app.buttons["home.start"].isHittable) }
             if page == "options" { app.reveal(app.buttons["options.replayOnboarding"]) }
             if page == "privacy" { app.reveal(app.links["Full privacy policy"]) }
-            if page == "coach" { XCTAssertTrue(app.textFields["coach.field"].isHittable) }
+            if page == "coach" { XCTAssertTrue(app.textViews["coach.field"].isHittable) }
             try save("\(page)-largest-text-end")
             app.terminate()
         }
