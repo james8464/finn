@@ -84,3 +84,7 @@ node_modules/
 /Design/Presentation/Finn-Keynote-2026-10-16/preview/
 /Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/
 /Design/Presentation/Finn-Keynote-2026-10-16/production/notes/
+
+# Publish only the final native Keynote presentation.
+/Design/Presentation/Finn-Keynote-2026-10-16/keynote/output/*
+!/Design/Presentation/Finn-Keynote-2026-10-16/keynote/output/Finn — Stronger Starts Together.key
