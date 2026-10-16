@@ -25,7 +25,7 @@ final class CoachConversation {
         #if DEBUG
         // synthetic UI tours must not call a live model service. An unsigned iOS 27
         // simulator can advertise PCC as available, then trap inside FoundationModels
-        if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
+        if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") || ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture") {
             self.init(history: history, responder: CoachResponder(selector: CoachEngineSelector(engines: [])))
             return
         }

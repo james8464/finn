@@ -51,7 +51,7 @@ struct WatchSetView: View {
     }
 
     @ViewBuilder private func content(for state: WatchState) -> some View {
-        if state.demoInput {
+        if state.demoInput && !ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture") {
             Text("DEMO INPUT")
                 .font(.caption2.bold())
                 .foregroundStyle(.black)
