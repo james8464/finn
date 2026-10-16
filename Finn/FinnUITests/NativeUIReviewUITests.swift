@@ -76,7 +76,7 @@ final class NativeUIReviewUITests: XCTestCase {
         try save("coach-largest-text-keyboard")
         app.buttons["coach.send"].tap()
         XCTAssertTrue(app.staticTexts["My last set"].waitForExistence(timeout: 5))
-        app.buttons["coach.dismissKeyboard"].tap()
+        // Sending at accessibility sizes dismisses the keyboard to make room for the reply.
         XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 3))
         app.selectTab("Home")
     }

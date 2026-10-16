@@ -229,3 +229,13 @@ twice after removing fading rep digits and improving uncertain-angle badge text 
 (32.711 and 28.539 seconds). An intervening simulator cold launch was killed by Apple's loader
 watchdog before app startup; its report attributed 1% CPU to the app. The unchanged warm-launch
 language test passed. The record does not treat that infrastructure failure as an app-code pass.
+
+The complete dark-appearance/largest-text navigation regression passed (68.998 seconds). Its
+older expectation to tap keyboard Done after submission was updated for the intentional automatic
+dismissal at accessibility sizes; it still requires the question to appear and Home to be reachable.
+
+The latest phone and Watch builds were installed on a fresh paired simulator. The phone completed
+six synthetic reps and the Watch launched with its pink settings control. WatchConnectivity still
+reported `paired:YES, appInstalled:NO` despite that installation, including after restarting only
+this pair's connection services. Stage/coaching/result delivery is therefore not verified by this
+run. No bundle identifiers were changed to work around the simulator registration failure.
