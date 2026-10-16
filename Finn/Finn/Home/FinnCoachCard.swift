@@ -143,25 +143,40 @@ struct FinnCardSurface: ViewModifier {
     }
 }
 
-/// Finn's monogram in a 48-point badge: who speaks on the coach card and the Try Finn card
-struct FinnBadge: View {
+/// the chosen coach in a 40-point badge: who speaks on the coach card, the Try Finn card, the
+/// Workout tab and the Coach tab. Finn keeps his F; the other coaches show their portrait
+struct CoachBadge: View {
     /// the thin pink ring, for the badge away from the pink card, on a dark background
     var showsOutline = false
+    @Environment(\.coach) private var coach
+
+    private static let size: CGFloat = 40
 
     var body: some View {
-        Text(verbatim: "F")
-            .font(.title2.bold())
-            .fontDesign(.rounded)
-            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-            .frame(width: 48, height: 48)
-            .background(.black.opacity(0.08), in: Circle())
+        face
             .overlay {
                 if showsOutline {
                     Circle()
                         .strokeBorder(DashboardStyle.accent.opacity(DashboardStyle.outlineOpacity), lineWidth: 1)
-                        .accessibilityHidden(true)
                 }
             }
+            // one picture named after the coach; callers may say more
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: coach.name))
+            .accessibilityAddTraits(.isImage)
+    }
+
+    @ViewBuilder private var face: some View {
+        if coach == .finn {
+            Text(verbatim: "F")
+                .font(.title2.bold())
+                .fontDesign(.rounded)
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                .frame(width: Self.size, height: Self.size)
+                .background(.black.opacity(0.08), in: Circle())
+        } else {
+            CoachAvatar(coach: coach, size: Self.size)
+        }
     }
 }
 
@@ -215,7 +230,7 @@ struct FinnCoachCard: View {
         }
     }
 
-    private var badge: some View { FinnBadge() }
+    private var badge: some View { CoachBadge() }
 
     private var title: some View {
         Text("Your next workout")

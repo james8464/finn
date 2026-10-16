@@ -16,7 +16,8 @@ final class OnboardingTourUITests: XCTestCase {
     @MainActor
     func test1Onboarding() {
         let app = XCUIApplication()
-        app.launchArguments = ["-finn-ui-demo", "-finn-ui-onboarding"]
+        // no App Store in tests: the flag stands for a verified purchase
+        app.launchArguments = ["-finn-ui-demo", "-finn-ui-onboarding", "-finn-ui-demo-purchase"]
         app.launch()
         let welcome = app.buttons["onboarding.welcome.continue"]
         XCTAssertTrue(welcome.waitForExistence(timeout: 8))
@@ -79,7 +80,6 @@ final class OnboardingTourUITests: XCTestCase {
         app.buttons["plan.trial"].tap()
         Thread.sleep(forTimeInterval: 0.6)
         save("onboarding-9-offre-essai")
-        // no real payment: the purchase succeeds at once
         app.buttons["plan.continue"].tap()
         let access = app.buttons["aboutYou.access"]
         XCTAssertTrue(access.waitForExistence(timeout: 5))

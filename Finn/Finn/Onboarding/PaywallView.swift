@@ -19,8 +19,8 @@ nonisolated enum CoachPlan: String, CaseIterable, Sendable {
 }
 
 /// the plan offer: Finn Coach+, weekly or annual, or annual after a two-week free trial.
-/// Pay with Apple Pay stands for the purchase of the chosen plan; nothing is charged. Skip, at the
-/// top right, keeps Finn Free and goes straight to Home
+/// Pay with Apple Pay opens the App Store in-app purchase sheet for the chosen plan (`TestConfig.storekit`
+/// in the simulator); Skip, at the top right, keeps Finn Free and goes straight to Home
 struct PaywallView: View {
     let back: () -> Void
     /// called after a purchase or a restored subscription
@@ -34,6 +34,7 @@ struct PaywallView: View {
     @State private var notice: Notice?
     /// counts the purchases, for the success haptic
     @State private var purchases = 0
+    @Environment(\.purchase) private var purchase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric(relativeTo: .subheadline) private var planLabelWidth = 80.0
@@ -277,7 +278,7 @@ struct PaywallView: View {
     private var actions: some View {
         VStack {
             if plan != nil {
-                Button(action: buy) {
+                Button { Task { await buy() } } label: {
                     PrimaryActionLabel(title: "Pay with Apple Pay")
                 }
                 .buttonStyle(PressableStyle())
@@ -323,11 +324,40 @@ struct PaywallView: View {
         products = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
     }
 
-    /// no real payment: the purchase of the chosen plan always succeeds, and the flow moves on
-    private func buy() {
-        guard plan != nil else { return }
-        purchases += 1
-        next()
+    /// the App Store in-app purchase sheet for the chosen plan. A verified purchase moves on
+    private func buy() async {
+        guard let plan else { return }
+        #if DEBUG
+        // UI tests run without the App Store: `-finn-ui-demo-purchase` stands for a verified purchase
+        if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo-purchase") {
+            purchases += 1
+            next()
+            return
+        }
+        #endif
+        isBusy = true
+        defer { isBusy = false }
+        if products[plan.productID] == nil { await loadProducts() }
+        guard let product = products[plan.productID] else {
+            notice = .unavailable
+            return
+        }
+        do {
+            switch try await purchase(product) {
+            case .success(.verified(let transaction)):
+                await transaction.finish()
+                purchases += 1
+                next()
+            case .success(.unverified):
+                notice = .unavailable
+            case .userCancelled, .pending:
+                break
+            @unknown default:
+                break
+            }
+        } catch {
+            notice = .unavailable
+        }
     }
 
     /// asks the App Store for this account's purchases; an active Finn Coach+ plan moves on

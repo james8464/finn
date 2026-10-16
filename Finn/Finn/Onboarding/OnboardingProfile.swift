@@ -422,20 +422,29 @@ extension FinnPreferences {
     /// the order of the exercise chips on the first screen
     var exerciseOrder: [ExerciseKind] { onboardingProfile.exerciseOrder }
 
+    /// every answer of the onboarding, the coach included
+    static let onboardingAnswerKeys = [
+        trainingGoalKey, trainingLevelKey, favoriteExercisesKey, firstNameKey, followedProgramKey,
+        programStopReasonsKey, trainingIntensityKey, trainingDaysKey, coachKey, bodySexKey,
+        heightCentimetersKey, weightKilogramsKey, trainingLocationKey, trainingEquipmentKey,
+        pastInjuriesKey, noPastInjuriesKey,
+    ]
+
+    /// forgets every onboarding answer, so a replayed onboarding starts blank, with Finn as the coach.
+    /// Settings and saved sets stay
+    func resetOnboardingAnswers() {
+        for key in Self.onboardingAnswerKeys { defaults.removeObject(forKey: key) }
+    }
+
     /// erases Finn's saved choices when the person deletes all local app data. HealthKit grants
     /// live in iOS and must still be managed in Health settings
     func resetLocalChoices() {
-        for key in [Self.onboardingCompletedKey, Self.trainingGoalKey, Self.trainingLevelKey,
-                    Self.favoriteExercisesKey, Self.firstNameKey, Self.followedProgramKey,
-                    Self.programStopReasonsKey, Self.trainingIntensityKey, Self.trainingDaysKey, Self.coachKey,
-                    Self.bodySexKey, Self.heightCentimetersKey, Self.weightKilogramsKey,
-                    Self.trainingLocationKey, Self.trainingEquipmentKey, Self.pastInjuriesKey,
-                    Self.noPastInjuriesKey,
-                    Self.recognizesExerciseKey, Self.usesTrainedModelKey,
-                    Self.checksCameraAngleKey, Self.handsFreeKey, Self.speaksLiveKey,
-                    Self.savesToFitnessKey, Self.selectedExerciseKey,
-                    Self.personalizesWithHealthKey, Self.personalizationOfferedKey,
-                    Self.hapticFeedbackKey, Self.soundFeedbackKey] {
+        let settings = [Self.recognizesExerciseKey, Self.usesTrainedModelKey,
+                        Self.checksCameraAngleKey, Self.handsFreeKey, Self.speaksLiveKey,
+                        Self.savesToFitnessKey, Self.selectedExerciseKey,
+                        Self.personalizesWithHealthKey, Self.personalizationOfferedKey,
+                        Self.hapticFeedbackKey, Self.soundFeedbackKey]
+        for key in [Self.onboardingCompletedKey] + Self.onboardingAnswerKeys + settings {
             defaults.removeObject(forKey: key)
         }
     }

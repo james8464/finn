@@ -54,6 +54,8 @@ struct ContentView: View {
     @State private var skippedPlan = false
     @State private var offersFreeWorkout = false
     @State private var acceptedFreeWorkout = false
+    /// the coach picked in the onboarding, saved by `FinnPreferences`: whoever speaks in the app
+    @AppStorage private var coachID: String
     /// the next workout and Finn's line, the one source for the Home and Workout cards
     @State private var coachMessage = FinnCoachMessage()
     /// Home's coach card opened the Workout tab: its previous workouts stay blurred until tapped
@@ -120,6 +122,7 @@ struct ContentView: View {
                                                          health: health))
         self.connectsAccessories = connectsAccessories
         self.preferences = preferences
+        _coachID = AppStorage(wrappedValue: Coach.finn.id, FinnPreferences.coachKey, store: preferences.defaults)
         _badges = State(initialValue: BadgeLedger(store: badgeStore ?? LocalBadgeStore()))
         // demo and recorded input skip the welcome unless asked for it (`-finn-ui-onboarding`)
         _showsOnboarding = State(initialValue: showsOnboarding ?? !preferences.onboardingCompleted)
@@ -248,7 +251,7 @@ struct ContentView: View {
             acceptedFreeWorkout = false
             showsFirstTry = true
         }) {
-            FreeWorkoutOfferView(coach: preferences.coach) {
+            FreeWorkoutOfferView(coach: Coach.stored(coachID)) {
                 acceptedFreeWorkout = true
                 offersFreeWorkout = false
             }
@@ -338,6 +341,8 @@ struct ContentView: View {
                  ? "This removes saved sessions, awards and preferences from this iPhone. Workouts saved to Apple Health stay there; you can delete them in the Health app."
                  : "This removes saved sessions, awards and preferences from this iPhone.")
         }
+        // outermost, so the sheets and covers above see the chosen coach too
+        .environment(\.coach, Coach.stored(coachID))
     }
 
     /// carries out what Siri asked ("Start a squat set in Finn", "Show my history in Finn") once the
@@ -537,10 +542,11 @@ struct ContentView: View {
 
     /// Plays the first-run experience again from its very start, as on a first launch: the welcome
     /// screens, then Home with Try Finn, then the one-time Health offer after a set. Every first-run
-    /// step resets here, so a new onboarding step adds its reset here too. Saved sets, answers and
-    /// settings are kept.
+    /// step resets here, so a new onboarding step adds its reset here too. The answers are erased,
+    /// so no question comes preselected and Finn is the coach again; saved sets and settings are kept.
     private func replayOnboarding() {
         preferences.onboardingCompleted = false
+        preferences.resetOnboardingAnswers()
         preferences.personalizationOffered = false
         hasTriedFinn = false // TEMPORARY with `FinnFirstTryTrigger.swift`.
         tabRoutes = [:]

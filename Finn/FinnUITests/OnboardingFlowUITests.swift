@@ -8,9 +8,26 @@ final class OnboardingFlowUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    /// Pay with Apple Pay hands over to the App Store: the offer waits for the purchase (or says it
+    /// is unavailable when StoreKit finds no product) and nothing moves on by itself
+    @MainActor
+    func testPayGoesThroughTheAppStore() throws {
+        let app = try walkToPlanOffer(coach: nil)
+        app.buttons["plan.weekly"].tap()
+        app.buttons["plan.continue"].tap()
+        let skip = app.buttons["plan.skip"]
+        let handedOver = expectation(for: NSPredicate { _, _ in
+            app.alerts["Purchase unavailable"].exists || !skip.isEnabled
+        }, evaluatedWith: nil)
+        wait(for: [handedOver], timeout: 10)
+        Thread.sleep(forTimeInterval: 3)
+        save("flow-35-app-store")
+        XCTAssertFalse(app.buttons["aboutYou.access"].exists)
+    }
+
     @MainActor
     func testPayingOpensAboutYouThenHome() throws {
-        let app = try walkToPlanOffer(coach: nil)
+        let app = try walkToPlanOffer(coach: nil, extraArguments: ["-finn-ui-demo-purchase"])
         app.buttons["plan.annual"].tap()
         let pay = app.buttons["plan.continue"]
         XCTAssertTrue(pay.waitForExistence(timeout: 3))
@@ -36,7 +53,7 @@ final class OnboardingFlowUITests: XCTestCase {
 
     @MainActor
     func testSkipOffersFreeWorkoutThatATapOutsideCloses() throws {
-        let app = try walkToPlanOffer(coach: "Ava")
+        let app = try walkToPlanOffer(coach: "Nova")
         app.buttons["plan.skip"].tap()
         let accept = app.buttons["freeWorkout.accept"]
         XCTAssertTrue(accept.waitForExistence(timeout: 8))
@@ -52,6 +69,17 @@ final class OnboardingFlowUITests: XCTestCase {
         app.buttons["home.tryFinn"].tap()
         // the first-try flow ran: Home now shows the coach card instead of Try Finn
         XCTAssertTrue(app.buttons["home.tryFinn"].waitForNonExistence(timeout: 8))
+        // the chosen coach speaks everywhere Finn's badge was
+        Thread.sleep(forTimeInterval: 1)
+        save("flow-42-home-coach-card")
+        app.selectTab("Workout")
+        let badge = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Nova, your coach")).firstMatch
+        XCTAssertTrue(badge.waitForExistence(timeout: 5))
+        save("flow-43-workout")
+        app.selectTab("Coach")
+        XCTAssertTrue(app.descendants(matching: .any)["coach.finn"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.descendants(matching: .any)["coach.finn"].label, "Nova, your coach")
+        save("flow-44-coach")
     }
 
     @MainActor
@@ -68,11 +96,12 @@ final class OnboardingFlowUITests: XCTestCase {
     // MARK: Steps
 
     /// from the welcome to the plan offer: a name, a goal and a level, the other questions
-    /// skipped, then `coach` picked on the wheel (Finn when nil), and the summary
+    /// skipped, then `coach` picked on the wheel (Finn when nil), and the summary.
+    /// `-finn-ui-demo-purchase` makes Pay with Apple Pay stand for a verified purchase
     @MainActor
-    private func walkToPlanOffer(coach: String?) throws -> XCUIApplication {
+    private func walkToPlanOffer(coach: String?, extraArguments: [String] = []) throws -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-finn-ui-demo", "-finn-ui-onboarding"]
+        app.launchArguments = ["-finn-ui-demo", "-finn-ui-onboarding"] + extraArguments
         app.launch()
         let welcome = app.buttons["onboarding.welcome.continue"]
         XCTAssertTrue(welcome.waitForExistence(timeout: 8))

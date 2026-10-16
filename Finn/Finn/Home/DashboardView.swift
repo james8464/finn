@@ -248,7 +248,7 @@ struct DashboardView: View {
             } label: {
                 HStack(spacing: 16) {
                     if !dynamicTypeSize.isAccessibilitySize {
-                        FinnBadge()
+                        CoachBadge()
                             .accessibilityHidden(true)
                     }
                     VStack(alignment: .leading, spacing: 5) {

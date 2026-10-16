@@ -7,6 +7,7 @@ struct CoachView: View {
     @State private var showsSource = false
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.coach) private var coach
     @FocusState private var fieldFocused: Bool
     private let history: [WorkoutSessionSummary]
 
@@ -25,9 +26,9 @@ struct CoachView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     // who the person talks to, and the one-tap analysis. They scroll away with the turns
-                    FinnBadge(showsOutline: true)
+                    CoachBadge(showsOutline: true)
                         .frame(maxWidth: .infinity)
-                        .accessibilityLabel("Finn, your coach")
+                        .accessibilityLabel(Text("\(coach.name), your coach"))
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityIdentifier("coach.finn")
                     analysisCard.padding(.bottom, 4)

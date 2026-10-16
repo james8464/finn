@@ -46,7 +46,7 @@ struct FreeWorkoutOfferView: View {
         .preferredColorScheme(.dark)
 }
 
-#Preview("Placeholder coach, accessibility text") {
+#Preview("Portrait coach, accessibility text") {
     FreeWorkoutOfferView(coach: Coach.all[1], accept: {})
         .dynamicTypeSize(.accessibility3)
         .preferredColorScheme(.dark)

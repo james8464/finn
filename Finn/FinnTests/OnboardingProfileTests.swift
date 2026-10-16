@@ -55,19 +55,41 @@ struct OnboardingProfileTests {
         #expect(prefs.onboardingProfile == profile)
     }
 
-    @Test func theCoachIsFinnUntilAnotherIsPickedAndIsSavedWithTheAnswers() {
+    @Test func theCoachIsFinnUntilAnotherIsPickedAndIsSavedWithTheAnswers() throws {
         let prefs = preferences()
         #expect(prefs.coach == .finn)
         #expect(prefs.onboardingProfile.coach == .finn)
-        let ava = Coach.all.first { $0.id == "ava" }!
-        prefs.apply(OnboardingProfile(coach: ava))
-        #expect(prefs.coach == ava)
-        #expect(prefs.onboardingProfile.coach == ava)
+        let nova = try #require(Coach.all.first { $0.id == "nova" })
+        prefs.apply(OnboardingProfile(coach: nova))
+        #expect(prefs.coach == nova)
+        #expect(prefs.onboardingProfile.coach == nova)
         // a coach removed in a later build falls back to Finn
         prefs.defaults.set("gone", forKey: FinnPreferences.coachKey)
         #expect(prefs.coach == .finn)
         prefs.resetLocalChoices()
         #expect(prefs.defaults.object(forKey: FinnPreferences.coachKey) == nil)
+    }
+
+    @Test func replayingTheOnboardingForgetsEveryAnswerButKeepsTheSettings() throws {
+        let prefs = preferences()
+        let nova = try #require(Coach.all.first { $0.id == "nova" })
+        prefs.apply(OnboardingProfile(goal: .muscle, level: .regular, favoriteExercises: [.pushUp],
+                                      speaksLive: false, firstName: "Alex", followedProgram: true,
+                                      stopReasons: [.injury], intensity: .hard, days: .fivePlus, coach: nova,
+                                      sex: .female, heightCentimeters: 170, weightKilograms: 60,
+                                      location: .gym, equipment: [.dumbbells], injuries: "Knee"))
+        prefs.resetOnboardingAnswers()
+        // nothing comes preselected, and Finn is the coach again
+        #expect(prefs.onboardingProfile == OnboardingProfile(speaksLive: false))
+        #expect(prefs.coach == .finn)
+        // a setting is not an answer
+        #expect(prefs.speaksLive == false)
+    }
+
+    @Test func everyCoachHasAUniqueIdAndAPortraitOrMonogram() {
+        #expect(Coach.all.first == .finn)
+        #expect(Coach.all.count == 11)
+        #expect(Set(Coach.all.map(\.id)).count == Coach.all.count)
     }
 
     @Test func theCoachSummarySaysTheGoalTheLevelAndADateThreeMonthsOn() throws {

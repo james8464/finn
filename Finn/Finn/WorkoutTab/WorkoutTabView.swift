@@ -13,14 +13,15 @@ struct WorkoutTabView: View {
     let launch: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.coach) private var coach
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DashboardStyle.cardSpacing) {
                 // Finn speaks the card below: the badge sits over its title
-                FinnBadge(showsOutline: true)
+                CoachBadge(showsOutline: true)
                     .padding(.leading, DashboardStyle.cardSpacing + 20)
-                    .accessibilityLabel("Finn, your coach")
+                    .accessibilityLabel(Text("\(coach.name), your coach"))
                 nextWorkoutOutline
                 previousWorkouts
                     .blur(radius: blursPreviousWorkouts ? 6 : 0)
@@ -57,7 +58,8 @@ struct WorkoutTabView: View {
                 .padding(.trailing, 21)
                 .padding(.bottom, 16)
         }
-        .navigationTitle("Workout")
+        // the chosen coach's workout: "Nova Workout"
+        .navigationTitle(String(localized: "\(coach.name) Workout"))
         .navigationBarTitleDisplayMode(.large)
     }
 

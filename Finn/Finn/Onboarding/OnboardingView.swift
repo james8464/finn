@@ -87,6 +87,8 @@ struct OnboardingView: View {
         }
         .background(HomeStyle.background.ignoresSafeArea())
         .tint(HomeStyle.accent)
+        // whoever answers on these screens: Finn until another coach is picked
+        .environment(\.coach, profile.coach)
         .interactiveDismissDisabled()
     }
 

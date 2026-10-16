@@ -93,7 +93,8 @@ final class InterfaceAccessibilityUITests: XCTestCase {
     @MainActor private func welcomeAndDemo(large: Bool) throws {
         try requireCaptureDirectory()
         let prefix = large ? "large" : "regular"
-        let app = launch(large: large, extra: ["-finn-ui-onboarding"])
+        // no App Store in tests: the flag stands for a verified purchase
+        let app = launch(large: large, extra: ["-finn-ui-onboarding", "-finn-ui-demo-purchase"])
         let welcome = app.buttons["onboarding.welcome.continue"]
         XCTAssertTrue(welcome.waitForExistence(timeout: 8))
         try check(app, "\(prefix)-19-welcome")

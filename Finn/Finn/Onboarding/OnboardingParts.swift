@@ -29,10 +29,12 @@ struct FinnReaction: View {
 
     /// one pass of the LEDs, after which the line takes their place
     static let waveDuration = FinnLEDs.duration
+    @Environment(\.coach) private var coach
+    @ScaledMetric(relativeTo: .body) private var avatarSize = 30.0
 
     var body: some View {
         HStack(spacing: 12) {
-            FinnAvatar()
+            CoachAvatar(coach: coach, size: avatarSize)
             ZStack(alignment: .leading) {
                 if speaks {
                     Text(line)
@@ -48,7 +50,7 @@ struct FinnReaction: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(speaks ? Text("Finn: \(line)") : Text("Finn is replying"))
+        .accessibilityLabel(speaks ? Text("\(coach.name): \(line)") : Text("\(coach.name) is replying"))
         .accessibilityIdentifier("onboarding.finnReaction")
     }
 }
@@ -70,16 +72,7 @@ enum OnboardingMetrics {
     /// below the bottom action
     static let bottomInset: CGFloat = 8
     /// the large coach circle of the coach question and the summary
-    static let coachPortrait: CGFloat = 140
-}
-
-/// Finn's monogram on a small round card
-struct FinnAvatar: View {
-    @ScaledMetric(relativeTo: .body) private var size = 36.0
-
-    var body: some View {
-        CoachAvatar(coach: .finn, size: size)
-    }
+    static let coachPortrait: CGFloat = 112
 }
 
 /// five pink LEDs: each one brightens and dims a moment after the one before, so one wave runs
