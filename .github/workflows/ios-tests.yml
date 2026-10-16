@@ -109,6 +109,8 @@ jobs:
             ${{ runner.temp }}/Finn-Release.xcresult
             ${{ runner.temp }}/summary.json
           if-no-files-found: ignore
+          retention-days: 3
+          compression-level: 9
 
   # Preserve the original required check name while reporting all independent suites.
   simulator:

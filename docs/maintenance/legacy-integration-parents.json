@@ -1,0 +1,13 @@
+{
+  "e84ffd6eada2ff842e6468c4c4cce0be65b87cf0": "refs/heads/coach-conversational-ai",
+  "1faf7b3605b4a38c897245168ccdf9890980a502": "refs/heads/feedback-localization",
+  "3a70ffddb75e0a6811a0fa8323838537369ed34f": "refs/heads/finn-release-fixes",
+  "f3deae98c46245fb2b2c5aa196f423454d5f1bef": "refs/heads/finn/feedback-localization-mwm",
+  "cd6d0baffb754e723c2e289ca2d4f2bad30acaa1": "refs/heads/finn/form-analysis-optimization",
+  "689cb429d357f751f75aaf1b6c22dd7b1f56d16c": "refs/heads/finn/watch-companion",
+  "7f79cb547561523840092e976e021f745df26af5": "refs/heads/main-all-improvements-posture",
+  "460796f2ab0280fc5a615ca6084310fc94624bc9": "refs/heads/main-keynote-readiness",
+  "2c5287a0ba9310edf8a583b0246004928d1b5063": "refs/heads/main-pink-watch-runtime",
+  "1967def2e685414163deeea0bd6bf63d6c4d8782": "refs/heads/ui/apple-native-revamp",
+  "6342b9ef38cbe5c1e20ce0595108a21d3b88759b": "refs/heads/main-preserved-main-finn-rebrand-20261016"
+}
