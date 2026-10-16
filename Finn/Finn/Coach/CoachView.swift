@@ -27,19 +27,22 @@ struct CoachView: View {
         VStack(spacing: 0) {
             transcript
             composer
-            Button { planDraft = WorkoutPlanner.make(history: history) } label: {
-                Label("Plan a workout", systemImage: "list.bullet.clipboard")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(maxWidth: .infinity, minHeight: 44)
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("coach.planWorkout")
-            .accessibilityHint("Composes a workout from your saved sets")
+
         }
         .background(AppPageStyle.background.ignoresSafeArea())
         .navigationTitle("Coach")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+            Button { planDraft = WorkoutPlanner.make(history: history) } label: {
+                Label("Plan a workout", systemImage: "list.bullet.clipboard")
+                    .font(.subheadline.weight(.semibold))
+                    .labelStyle(.iconOnly)
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("coach.planWorkout")
+            .accessibilityHint("Composes a workout from your saved sets")
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showsSource = true } label: {
                     Image(systemName: "info.circle")
