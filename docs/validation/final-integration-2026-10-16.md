@@ -31,4 +31,5 @@ These focused checks do not establish perfect real-world form accuracy. Physical
 - French dashboard and onboarding replay simulator checks passed.
 - Follow-up fixes serialize purchase/restore actions, show actual StoreKit prices and trial eligibility, and separate a new guided workout from an unfinished camera session.
 - The onboarding tour now follows coach choice and the plan summary before the subscription offer.
-- A refined build 2026101615 includes the follow-up fixes. Its upload status is reported separately.
+- Apple confirmed upload of refined version 1.0, build 2026101615 at 14:05 Paris time. It includes the follow-up fixes and passed archive verification. Tester availability requires Apple processing.
+- The final full onboarding v2 simulator tour and all 39 workout session tests passed on the refined source.
