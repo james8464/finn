@@ -18,6 +18,11 @@ final class OnboardingTourUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-finn-ui-demo", "-finn-ui-onboarding"]
         app.launch()
+        let welcome = app.buttons["onboarding.welcome.continue"]
+        XCTAssertTrue(welcome.waitForExistence(timeout: 8))
+        Thread.sleep(forTimeInterval: 0.8)
+        save("onboarding-0-accueil")
+        welcome.tap()
         let next = app.buttons["onboarding.continue"]
         XCTAssertTrue(next.waitForExistence(timeout: 8))
         Thread.sleep(forTimeInterval: 0.8)
