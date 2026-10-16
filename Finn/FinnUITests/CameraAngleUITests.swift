@@ -16,6 +16,9 @@ final class CameraAngleUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
+        let limits = app.buttons["result.measurementLimits"]
+        app.reveal(limits)
+        limits.tap()
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(
             format: "label CONTAINS[c] %@", "counted your reps without posture advice")).firstMatch.exists)
         try app.performAccessibilityAudit(for: [
