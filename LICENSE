@@ -172,7 +172,7 @@ between you and the Project Members.
    8.3 Reinstatement requires a separate written grant signed by the Project
        Members. Past conduct may not be retroactively licensed by this document.
 
-   8.4 SURVIVAL. Sections 1, 3 to 7 and 9 to 14, together with all accrued
+   8.4 SURVIVAL. Sections 1, 3 to 7 and 9 to 17, together with all accrued
        rights, claims and remedies, survive any termination, expiry, revocation or
        invalidation of the viewing right in Section 2, and bind you, your estate,
        heirs, successors and any person acting for you.
@@ -202,6 +202,19 @@ between you and the Project Members.
 
    9.4 You may not set off, withhold or deduct any amount or obligation under this
        License against any claim you may have against the Project Members.
+
+   9.5 WILFUL OR REPEATED BREACH. If a breach is committed knowingly, after
+       notice, by an automated system configured to ignore this License, or is
+       repeated after any earlier breach, the stipulated sums in Section 9.3 are
+       doubled, without prejudice to all other remedies, and the Project Members
+       may recover both the doubled stipulated sums and proven actual damages to
+       the maximum extent permitted by applicable law.
+
+   9.6 You consent to the specific performance of Sections 3, 8 and 9, including
+       destruction, certification and surrender obligations, without proof of
+       damage, and acknowledge that time is of the essence in every deadline in
+       this License; deadlines are not extended by weekends, holidays, automated
+       outages or your lack of knowledge of them.
 
 10. DISCLAIMER OF WARRANTY
 
@@ -239,7 +252,9 @@ between you and the Project Members.
    13.2 If any provision is held invalid or unenforceable, it shall be enforced to
         the maximum extent permitted and the remaining provisions continue in full
         force; the parties shall replace the invalid provision with a valid one of
-        the nearest lawful effect.
+        the nearest lawful effect. If any Section or part of a Section is held not
+        to bind a category of person, that holding does not affect the rest of this
+        License or its binding effect on every other person.
 
    13.3 No failure to enforce is a waiver. No third party has any benefit under
         this License. You may not assign or delegate it; the Project Members may
@@ -273,7 +288,6 @@ between you and the Project Members.
         extent such a restriction is enforceable by contract in your
         jurisdiction. Obligations of confidence under this Section last for as long
         as the information would qualify as a trade secret.
-
    14.2 You will not challenge, assist a challenge to, or join any challenge
         against the validity, ownership, scope or enforceability of this License
         or of any intellectual property right of the Project Members, and you
@@ -283,6 +297,59 @@ between you and the Project Members.
         enforcement, knowledge of your breach, prior tolerance of similar conduct,
         or any prior or later dealing with you or anyone else does not grant you
         any right, permission, waiver or defence.
+
+15. MARKS, IDENTIFIERS AND PUBLICITY
+
+   15.1 You may not apply for, register, own or use any trade name, trade mark,
+        business identifier, company name, domain name, subdomain, repository
+        name, username, handle, app-store listing, package-registry name, social
+        account or other identifier anywhere in the world that consists of or
+        contains "Finn", a variation of it, the Project Members' names, or any
+        sign likely to be confused with the Software or its identifiers. You must
+        transfer to the Project Members, at your expense, any such identifier you
+        already hold, and consent in advance to its assignment.
+
+   15.2 You may not announce, preview, demonstrate, advertise, crowdfund, seek
+        funding for, solicit contributions to, or hold out as affiliated with the
+        Software or the Project Members.
+
+16. EVIDENCE, RECORDS AND COOPERATION
+
+   16.1 You must preserve all records of your access to and use of the Software,
+        including access logs, authentication records, clone and fork records,
+        model-usage records and correspondence, for as long as any dispute with
+        the Project Members is reasonably foreseeable, and must not destroy,
+        alter, conceal or misrepresent them. Spoliation raises a rebuttable
+        presumption that the records would have shown breach.
+
+   16.2 On written request you must, within seven (7) days, provide a signed
+        statement identifying every Copy, Derivative Work and use in your
+        possession, custody or control, its location, and the persons to whom you
+        disclosed it or anything you learned from the Software.
+
+   16.3 You must cooperate in good faith with the Project Members' enforcement of
+        this License, including by executing documents to confirm takedowns,
+        withdrawals, assignments and destructions required by it.
+
+17. TRANSFERS, AGENTS AND SUCCESSORS
+
+   17.1 Every obligation in this License is personal to you where it sounds in
+        confidence or restraint, and binds you as principal; you remain fully
+        liable for every act of anyone acting for you, including your employees,
+        contractors, volunteers, agents, collaborators, invitees, users and
+        automated systems, as if it were your own, even if they act without your
+        instructions or against them.
+
+   17.2 If you receive the Software from a third party, whether by clone, fork,
+        transfer, inheritance, acquisition or otherwise, this License binds you
+        immediately on receipt, and any purported grant from that third party to
+        you is void because they had nothing to grant. Your only source of rights
+        is a direct written grant from the Project Members.
+
+   17.3 You may not rely on the availability, terms or licences of any mirror,
+        archive, fork, package, snapshot, artifact or cache of the Software; only
+        the Official Channel governs, and copies elsewhere are presumed
+        unauthorised unless the Project Members state otherwise in writing.
 
 NOTE: This text is a licence template, not legal advice. Have qualified counsel in
 your jurisdiction review it before relying on it for enforcement.
