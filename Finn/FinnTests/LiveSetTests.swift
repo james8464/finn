@@ -153,7 +153,7 @@ nonisolated struct LiveSetMonitorTests {
         let capture = CaptureTraces.walkIn() + CaptureTraces.squats(reps: 6, from: 2.0)
             + CaptureTraces.walkOut(from: 14.0)
         let result = run(capture)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(capture, as: .squat) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(capture, as: .squat) else {
             Issue.record("Expected a measured set")
             return
         }
@@ -191,7 +191,7 @@ nonisolated struct LiveSetMonitorTests {
                              bystanders: [passerBy])
         }
         #expect(run(frames).stoppedAt == nil)
-        guard case .analyzed = ExerciseAnalyzer.analyze(frames, as: .squat) else {
+        guard case .analyzed = ExerciseAnalyzer.analyse(frames, as: .squat) else {
             Issue.record("The gate allows a 2.5 s occlusion by someone in front")
             return
         }
@@ -364,7 +364,7 @@ nonisolated struct LiveSetMonitorTests {
     @Test func theLiveCountIsTheWholeSetAnalysisAndNeverSaysANumberTwice() {
         let frames = fastPushUps(plank: 3, reps: 12, cycle: 0.55, topBend: 35, bottomBend: 85)
         let result = run(frames, definition: .pushUp)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .pushUp, viewCheck: .ignore) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .pushUp, viewCheck: .ignore) else {
             Issue.record("Expected a measured set")
             return
         }
@@ -390,7 +390,7 @@ nonisolated struct LiveSetMonitorTests {
     @Test func fastCompletePushUpsAreCountedLiveAndInTheResult() {
         let frames = fastPushUps(plank: 2, reps: 20, cycle: 0.5, topBend: 0, bottomBend: 80)
         let result = run(frames, definition: .pushUp)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: .pushUp, viewCheck: .ignore) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: .pushUp, viewCheck: .ignore) else {
             Issue.record("Expected a measured set")
             return
         }

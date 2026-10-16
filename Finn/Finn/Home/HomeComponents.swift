@@ -9,7 +9,7 @@ enum HomeStyle {
     static let filledAccent = Color.primary
     static let onAccent = Color(uiColor: .systemBackground)
     static let card = Color(uiColor: .secondarySystemBackground)
-    static let supportingText = Color(uiColor: .secondaryLabel)
+    static let supportingText = AppPageStyle.secondaryText
     /// the camera card is dark in both appearances, like the camera view it stands for
     static let cameraTop = Color(white: 0.11)
     static let cameraBottom = Color(white: 0.05)
@@ -21,16 +21,16 @@ enum HomeStyle {
 /// a small category marker shared by dashboard widgets and supporting pages
 struct HomeSymbol: View {
     let name: String
-    var color: Color = HomeStyle.accent
+    var colour: Color = HomeStyle.accent
     var size: CGFloat = 40
 
     var body: some View {
         Image(systemName: name)
             .font(.system(size: size * 0.48, weight: .semibold))
             .symbolRenderingMode(.hierarchical)
-            .foregroundStyle(color)
+            .foregroundStyle(colour)
             .frame(width: size, height: size)
-            .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: size * 0.28))
+            .background(colour.opacity(0.12), in: RoundedRectangle(cornerRadius: size * 0.28))
             .accessibilityHidden(true)
     }
 }
@@ -73,7 +73,8 @@ struct ExerciseChips: View {
     /// the order of the chips: the exercises picked at the first launch come first
     var order: [ExerciseKind] = ExerciseKind.allCases
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     var body: some View {
         if dynamicTypeSize.isAccessibilitySize {
@@ -143,44 +144,32 @@ struct ExerciseHeroCard: View {
     let kind: ExerciseKind
     /// shorter once there is a last session to show below it
     var compact = false
-    @ScaledMetric(relativeTo: .largeTitle) private var figureHeight: CGFloat = 340
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         let copy = kind.definition.copy
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(copy.name)
+                .font(.title2.weight(.bold))
+                .accessibilityAddTraits(.isHeader)
             Label(kind.definition.expectedView == .side ? "Side view" : "Side, front or back",
                   systemImage: "camera.viewfinder")
                 .font(.footnote.weight(.semibold))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(.white.opacity(0.12), in: Capsule())
+                .foregroundStyle(AppPageStyle.tint)
                 .accessibilityLabel(kind.definition.expectedView == .side ? "Filmed from the side"
                                     : "Filmed from the side, the front or the back")
-            ExerciseFigureView(kind: kind)
+            ExerciseFigureView(kind: kind, lineColour: Color.primary)
                 .frame(maxWidth: .infinity)
-                .frame(height: min(compact ? figureHeight * 0.62 : figureHeight, 400))
-                .padding(.vertical, 12)
+                .frame(height: typeSize.isAccessibilitySize ? 160 : (compact ? 170 : 220))
+                .padding(.vertical, 4)
                 .id(kind)
                 .transition(.opacity)
-            Text(copy.name)
-                .font(.title3.weight(.semibold))
-                .accessibilityAddTraits(.isHeader)
             Text("\(copy.placementDetail) \(copy.stanceTitle).")
                 .font(.subheadline)
-                .foregroundStyle(HomeStyle.cameraSecondaryText)
-                .padding(.top, 2)
+                .foregroundStyle(AppPageStyle.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .foregroundStyle(.white)
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom], startPoint: .top, endPoint: .bottom),
-            in: RoundedRectangle(cornerRadius: 32, style: .continuous)
-        )
-        .overlay(RoundedRectangle(cornerRadius: 32, style: .continuous)
-            .strokeBorder(.white.opacity(0.08), lineWidth: 1))
-        .environment(\.colorScheme, .dark)
+        .modifier(AppSurface())
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("home.exercise")
     }
@@ -209,21 +198,18 @@ struct PrimaryActionLabel: View {
         let shape = typeSize.isAccessibilitySize
             ? AnyShape(RoundedRectangle(cornerRadius: 24, style: .continuous)) : AnyShape(Capsule())
         HStack(spacing: 12) {
-            WrappingText(text: String(localized: title), style: .headline, color: .systemBackground)
+            WrappingText(text: String(localized: title), style: .headline, colour: .black)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 44, height: 44)
-                .background(DashboardStyle.accent, in: Circle())
+                .font(.headline)
+                .foregroundStyle(.black)
                 .accessibilityHidden(true)
         }
-        .padding(.leading, 24)
-        .padding(.trailing, 8)
-        .padding(.vertical, 8)
-        .frame(minHeight: 60)
-        .foregroundStyle(Color(uiColor: .systemBackground))
-        .background(Color.primary, in: shape)
+        .padding(.horizontal, 22)
+        .padding(.vertical, 16)
+        .frame(minHeight: 54)
+        .foregroundStyle(.black)
+        .background(AppPageStyle.action, in: shape)
         .contentShape(shape)
         .accessibilityLabel(Text(title))
     }
@@ -231,7 +217,8 @@ struct PrimaryActionLabel: View {
 
 /// presses in slightly, like a physical key
 struct PressableStyle: ButtonStyle {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1)
@@ -283,12 +270,14 @@ struct CameraPrimer: View {
                 layout {
                     Button { dismiss() } label: {
                         WrappingText(text: String(localized: "Not now"), style: .subheadline, weight: .medium,
-                                     color: .secondaryLabel, alignment: .center).frame(minHeight: 44)
+                                     colour: .label.withAlphaComponent(0.72), alignment: .center)
+                            .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .accessibilityLabel("Not now")
                     Button(action: onPrivacy) {
                         WrappingText(text: String(localized: "Privacy details"), style: .subheadline, weight: .medium,
-                                     color: .secondaryLabel, alignment: .center).frame(minHeight: 44)
+                                     colour: .label.withAlphaComponent(0.72), alignment: .center)
+                            .frame(maxWidth: .infinity, minHeight: 44)
                     }
                         .accessibilityLabel("Privacy details")
                         .accessibilityIdentifier("primer.privacy")
@@ -312,7 +301,7 @@ struct CameraPrimer: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
                 WrappingText(text: String(localized: title), style: .headline)
-                WrappingText(text: String(localized: detail), style: .subheadline, color: .label.withAlphaComponent(0.8))
+                WrappingText(text: String(localized: detail), style: .subheadline, colour: .label.withAlphaComponent(0.8))
             }
         }
         .accessibilityElement(children: .combine)

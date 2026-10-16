@@ -50,6 +50,7 @@ protocol CoachEngine: AnyObject {
     var available: Bool { get }
     /// why this engine cannot answer right now, as one sentence the person can act on; nil when it can
     var unavailableReason: String? { get }
+    func prepare(language: CoachLanguage)
     /// selects relevant saved-set labels for `question`; the returned text is never displayed
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String
@@ -64,13 +65,11 @@ final class CoachEngineSelector {
         self.engines = engines
     }
 
-    /// the order the product asks for: Private Cloud Compute, then the on-device model
-    /// in Debug, `extra` goes first (the Claude demo) when the person turned it on
+    /// This app is signed without Apple's managed Private Cloud Compute entitlement. Device
+    /// availability alone does not authorise PCC, and its framework can trap before throwing.
+    /// Use the on-device model until a separately entitled build has been verified.
     static func standard(extra: [any CoachEngine] = []) -> CoachEngineSelector {
         var engines: [any CoachEngine] = extra
-        if #available(iOS 27, *) {
-            engines.append(PrivateCloudComputeCoachEngine())
-        }
         engines.append(OnDeviceCoachEngine())
         return CoachEngineSelector(engines: engines)
     }
@@ -88,6 +87,7 @@ final class CoachEngineSelector {
 
 extension CoachEngine {
     var unavailableReason: String? { nil }
+    func prepare(language: CoachLanguage) {}
 }
 
 /// reads why Foundation Models cannot run, once per check, and says what to do about it
@@ -121,6 +121,7 @@ enum CoachModelAvailability {
 final class CoachResponder {
     private let selector: CoachEngineSelector
     private let timeout: Duration
+    private let generation = ModelGenerationGate<String>()
     let language: CoachLanguage
 
     init(selector: CoachEngineSelector, timeout: Duration = .seconds(20),
@@ -137,12 +138,17 @@ final class CoachResponder {
     /// why no model answers, when none does
     var unavailableReason: String? { selector.unavailableReason() }
 
+    func prepare() {
+        selector.current()?.prepare(language: language)
+    }
+
     func answer(_ question: String, context: CoachContext, history: [CoachMessage]) async -> CoachMessage {
         let fallback = CoachMessage(role: .coach,
                                     text: CoachFallback.reply(to: question, context: context, language: language),
                                     engine: .fallback)
-        guard let engine = selector.current() else { return fallback }
-        let generated = await withTimeout { [language] in
+        guard !Task.isCancelled, !context.isEmpty,
+              let engine = selector.current() else { return fallback }
+        let generated = await generation.response(timeout: timeout) { [language] in
             try await engine.reply(to: question, context: context, history: history, language: language)
         }
         if generated?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == "NONE" {
@@ -158,30 +164,13 @@ final class CoachResponder {
                             engine: engine.kind)
     }
 
-    private func withTimeout(_ work: @escaping @MainActor () async throws -> String) async -> String? {
-        let stream = AsyncStream<String?>(bufferingPolicy: .bufferingNewest(1)) { continuation in
-            let generation = Task { @MainActor in
-                continuation.yield(try? await work())
-                continuation.finish()
-            }
-            let timer = Task.detached { [timeout] in
-                guard (try? await Task.sleep(for: timeout)) != nil else { return }
-                continuation.yield(nil)
-                continuation.finish()
-            }
-            continuation.onTermination = { @Sendable _ in
-                generation.cancel()
-                timer.cancel()
-            }
-        }
-        var iterator = stream.makeAsyncIterator()
-        return await iterator.next() ?? nil
-    }
 }
 
 /// shared by the two Foundation Models engines: instructions, the context, then the turn
 @MainActor
 enum FoundationModelsCoachPrompt {
+    static let maximumQuestionCharacters = 2_000
+    static let maximumPromptCharacters = 8_000
     static func instructions(language: CoachLanguage) -> String {
         // instructions contain only trusted app rules. Saved observations and onboarding answers
         // are data in the prompt, never higher-priority instructions to the model
@@ -193,17 +182,17 @@ enum FoundationModelsCoachPrompt {
     static func prompt(question: String, context: CoachContext, history: [CoachMessage]) -> String {
         var sections: [String] = []
         if let note = FinnPreferences.app.onboardingProfile.coachNote {
-            sections.append("Person's stated preferences:\n" + note)
+            sections.append("Person's stated preferences:\n" + String(note.prefix(500)))
         }
-        sections.append("Saved sets, oldest first:\n" + context.promptText())
-        let recent = history.suffix(6)
+        sections.append("Saved sets, oldest first:\n" + context.boundedPromptText(maximumCharacters: 4_000))
+        let recent = history.suffix(4)
         if !recent.isEmpty {
             let lines = recent.map { message in
-                (message.role == .person ? "Person: " : "Coach: ") + message.text
+                (message.role == .person ? "Person: " : "Coach: ") + String(message.text.prefix(250))
             }
             sections.append("Earlier in this conversation:\n" + lines.joined(separator: "\n"))
         }
-        sections.append("Person now asks: " + question)
+        sections.append("Person now asks: " + String(question.prefix(maximumQuestionCharacters)))
         return sections.joined(separator: "\n\n")
     }
 
@@ -216,13 +205,29 @@ enum FoundationModelsCoachPrompt {
 
 @Generable
 private struct AppleCoachSelection {
-    @Guide(description: "Zero, one, or two numbered saved sets relevant to the person's question; use an empty list when no set supports an answer.")
+    @Guide(description: "Zero, one, or two numbered saved sets relevant to the person's question; use an empty list when no set supports an answer.", .count(0...2))
     var setNumbers: [Int]
 }
 
 @MainActor
 final class OnDeviceCoachEngine: CoachEngine {
     let kind: CoachEngineKind = .onDevice
+    private var preparedSession: LanguageModelSession?
+    private var preparedLanguage: CoachLanguage?
+
+    func prepare(language: CoachLanguage) {
+        guard available, SystemLanguageModel.default.supportsLocale(language.locale) else { return }
+        guard preparedSession == nil || preparedLanguage != language else { return }
+        let session = makeSession(language: language)
+        session.prewarm()
+        preparedSession = session
+        preparedLanguage = language
+    }
+
+    private func makeSession(language: CoachLanguage) -> LanguageModelSession {
+        LanguageModelSession(model: SystemLanguageModel.default,
+                             instructions: FoundationModelsCoachPrompt.instructions(language: language))
+    }
 
     var available: Bool {
         if case .available = SystemLanguageModel.default.availability { return true }
@@ -235,13 +240,26 @@ final class OnDeviceCoachEngine: CoachEngine {
 
     func reply(to question: String, context: CoachContext, history: [CoachMessage],
                language: CoachLanguage) async throws -> String {
-        let session = LanguageModelSession(model: SystemLanguageModel.default,
-                                           instructions: FoundationModelsCoachPrompt.instructions(language: language))
+        guard available, SystemLanguageModel.default.supportsLocale(language.locale) else {
+            throw CoachGenerationError.unavailable
+        }
+        try Task.checkCancellation()
+        let session = preparedLanguage == language
+            ? preparedSession ?? makeSession(language: language)
+            : makeSession(language: language)
+        // Each turn owns its session; prewarming must never reuse an active transcript.
+        preparedSession = nil
+        preparedLanguage = nil
         let response = try await session.respond(
             to: FoundationModelsCoachPrompt.prompt(question: question, context: context, history: history),
-            generating: AppleCoachSelection.self)
+            generating: AppleCoachSelection.self,
+            options: GenerationOptions(samplingMode: .greedy, maximumResponseTokens: 128))
         return FoundationModelsCoachPrompt.labels(for: response.content.setNumbers, context: context) ?? "NONE"
     }
+}
+
+private enum CoachGenerationError: Error {
+    case unavailable
 }
 
 @available(iOS 27, *)

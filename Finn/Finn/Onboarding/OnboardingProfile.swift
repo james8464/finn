@@ -176,7 +176,7 @@ nonisolated struct OnboardingProfile: Equatable, Sendable {
     var goal: TrainingGoal?
     var level: TrainingLevel?
     /// exercises the person picked, in the order of the picker. Empty means no preference.
-    var favoriteExercises: [ExerciseKind] = []
+    var favouriteExercises: [ExerciseKind] = []
     var speaksLive = true
     /// as typed; `preferredName` is the trimmed value the screens use
     var firstName = ""
@@ -207,7 +207,7 @@ nonisolated struct OnboardingProfile: Equatable, Sendable {
 
     /// the exercises in the order the first screen shows them: favourites first, then the rest
     var exerciseOrder: [ExerciseKind] {
-        favoriteExercises + ExerciseKind.allCases.filter { !favoriteExercises.contains($0) }
+        favouriteExercises + ExerciseKind.allCases.filter { !favouriteExercises.contains($0) }
     }
 
     /// selection hints added to the coach prompt. The model still returns set labels only.
@@ -236,7 +236,7 @@ extension FinnPreferences {
     static let onboardingCompletedKey = "finn.onboardingCompleted"
     static let trainingGoalKey = "finn.trainingGoal"
     static let trainingLevelKey = "finn.trainingLevel"
-    static let favoriteExercisesKey = "finn.favoriteExercises"
+    static let favouriteExercisesKey = "finn.favoriteExercises"
     static let firstNameKey = "finn.firstName"
     static let followedProgramKey = "finn.followedProgram"
     static let programStopReasonsKey = "finn.programStopReasons"
@@ -267,9 +267,9 @@ extension FinnPreferences {
     }
 
     /// the exercises picked at the first launch, in order. Unknown values from a later build are dropped.
-    var favoriteExercises: [ExerciseKind] {
-        get { (defaults.stringArray(forKey: Self.favoriteExercisesKey) ?? []).compactMap(ExerciseKind.init(rawValue:)) }
-        nonmutating set { defaults.set(newValue.map(\.rawValue), forKey: Self.favoriteExercisesKey) }
+    var favouriteExercises: [ExerciseKind] {
+        get { (defaults.stringArray(forKey: Self.favouriteExercisesKey) ?? []).compactMap(ExerciseKind.init(rawValue:)) }
+        nonmutating set { defaults.set(newValue.map(\.rawValue), forKey: Self.favouriteExercisesKey) }
     }
 
     var firstName: String {
@@ -336,7 +336,7 @@ extension FinnPreferences {
     /// the whole profile at once
     var onboardingProfile: OnboardingProfile {
         OnboardingProfile(goal: trainingGoal, level: trainingLevel,
-                          favoriteExercises: favoriteExercises, speaksLive: speaksLive,
+                          favouriteExercises: favouriteExercises, speaksLive: speaksLive,
                           firstName: firstName, followedProgram: followedProgram,
                           stopReasons: programStopReasons, intensity: trainingIntensity, days: trainingDays,
                           sex: bodySex, heightCentimeters: heightCentimeters, weightKilograms: weightKilograms,
@@ -348,7 +348,7 @@ extension FinnPreferences {
     func apply(_ profile: OnboardingProfile) {
         trainingGoal = profile.goal
         trainingLevel = profile.level
-        favoriteExercises = profile.favoriteExercises
+        favouriteExercises = profile.favouriteExercises
         speaksLive = profile.speaksLive
         firstName = profile.preferredName ?? ""
         followedProgram = profile.followedProgram
@@ -362,7 +362,7 @@ extension FinnPreferences {
         trainingEquipment = profile.equipment
         pastInjuries = profile.noPastInjuries ? "" : profile.injuries.trimmingCharacters(in: .whitespacesAndNewlines)
         noPastInjuries = profile.noPastInjuries
-        if let first = profile.favoriteExercises.first { selectedExercise = first }
+        if let first = profile.favouriteExercises.first { selectedExercise = first }
         onboardingCompleted = true
     }
 
@@ -373,15 +373,15 @@ extension FinnPreferences {
     /// live in iOS and must still be managed in Health settings
     func resetLocalChoices() {
         for key in [Self.onboardingCompletedKey, Self.trainingGoalKey, Self.trainingLevelKey,
-                    Self.favoriteExercisesKey, Self.firstNameKey, Self.followedProgramKey,
+                    Self.favouriteExercisesKey, Self.firstNameKey, Self.followedProgramKey,
                     Self.programStopReasonsKey, Self.trainingIntensityKey, Self.trainingDaysKey,
                     Self.bodySexKey, Self.heightCentimetersKey, Self.weightKilogramsKey,
                     Self.trainingLocationKey, Self.trainingEquipmentKey, Self.pastInjuriesKey,
                     Self.noPastInjuriesKey,
-                    Self.recognizesExerciseKey, Self.usesTrainedModelKey,
+                    Self.recognisesExerciseKey, Self.usesTrainedModelKey,
                     Self.checksCameraAngleKey, Self.handsFreeKey, Self.speaksLiveKey,
                     Self.savesToFitnessKey, Self.selectedExerciseKey,
-                    Self.personalizesWithHealthKey, Self.personalizationOfferedKey,
+                    Self.personalisesWithHealthKey, Self.personalisationOfferedKey,
                     Self.hapticFeedbackKey, Self.soundFeedbackKey] {
             defaults.removeObject(forKey: key)
         }

@@ -178,7 +178,7 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
     private var athleteRequest: Bool?
     private let previewSink: PreviewFrameSink?
     // used only on the capture queue
-    private let analyzer = PoseFrameAnalyzer()
+    private let analyser = PoseFrameAnalyzer()
 
     init(previewSink: PreviewFrameSink?) {
         self.previewSink = previewSink
@@ -234,21 +234,21 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
             return
         }
         // every frame goes on screen; the analysis keeps 15 per second
-        let analyze = time - lastSampleTime >= PoseFrameAnalyzer.minimumInterval
-        if analyze { lastSampleTime = time }
+        let analyse = time - lastSampleTime >= PoseFrameAnalyzer.minimumInterval
+        if analyse { lastSampleTime = time }
         let estimateAngle = estimatesCameraAngle && !underPressure
-        let request = analyze ? athleteRequest : nil
+        let request = analyse ? athleteRequest : nil
         if request != nil { athleteRequest = nil }
         lock.unlock()
 
         previewSink?.enqueue(sampleBuffer)
-        guard analyze, let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        guard analyse, let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         switch request {
-        case true?: analyzer.lockAthlete()
-        case false?: analyzer.releaseAthlete()
+        case true?: analyser.lockAthlete()
+        case false?: analyser.releaseAthlete()
         case nil: break
         }
-        yield(analyzer.analyze(pixelBuffer, time: time, estimateAngle: estimateAngle))
+        yield(analyser.analyse(pixelBuffer, time: time, estimateAngle: estimateAngle))
     }
 
     private func yield(_ frame: PoseFrame) {

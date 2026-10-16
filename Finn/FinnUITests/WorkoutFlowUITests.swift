@@ -114,7 +114,7 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["capture.elapsed"].waitForExistence(timeout: 6))
         XCTAssertTrue(app.buttons["Stop set"].isHittable)
         capture(app, name: "Active set dark")
-        try app.performAccessibilityAudit()
+        try audit(app, at: #function)
     }
 
     @MainActor
@@ -160,23 +160,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launch()
         app.openWorkoutTab()
         app.openFromHome("Privacy")
-        XCTAssertTrue(app.navigationBars["Privacy"].exists)
-        XCTAssertTrue(app.staticTexts["Camera"].exists)
-        XCTAssertTrue(app.staticTexts["Saved results"].exists)
-        XCTAssertTrue(app.staticTexts["Apple Health"].exists)
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
-            format: "label BEGINSWITH %@", "Finn reads Health only if you turn on Personalize with Health")).firstMatch.exists)
-        XCTAssertTrue(app.staticTexts["Optional audio"].exists)
-        // XCTest refuses identifier queries longer than 128 characters, so match the start
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(
-            format: "label BEGINSWITH %@", "Finn says the countdown, each rep, and short live observations")).firstMatch.exists)
-        XCTAssertTrue(app.staticTexts["Optional explanation"].exists)
-        XCTAssertTrue(app.staticTexts["Video is processed on this iPhone and never saved."].exists)
-        XCTAssertTrue(app.staticTexts["Saved summaries may be included in your device backup."].exists)
-        XCTAssertTrue(app.staticTexts["Delete saved sessions in History."].exists)
-        let policyLink = app.links["Full privacy policy"]
-        XCTAssertTrue(policyLink.exists)
-        XCTAssertGreaterThanOrEqual(policyLink.frame.height, 44)
+        verifyPrivacyDisclosures(app)
     }
 
     @MainActor
@@ -200,40 +184,44 @@ final class WorkoutFlowUITests: XCTestCase {
 
     @MainActor
     private func auditPrivacy(_ app: XCUIApplication) throws {
-        XCTAssertTrue(app.navigationBars["Privacy"].exists)
-        let visibleCopy = [
-            "Camera",
-            "Video is processed on this iPhone and never saved.",
-            "Finn uses the camera to measure a supported exercise from the side. Camera frames and pose points stay on this iPhone.",
-            "One camera view cannot assess your whole technique or prevent injury.",
-            "Saved results",
-            "Measured set summaries are saved on this iPhone so you can review previous sets.",
-            "Saved summaries may be included in your device backup.",
-            "Delete saved sessions in History.",
-            "Apple Health",
-            "If you turn on Save workouts to Apple Fitness, Finn writes each finished session to Health as a workout",
-            "Finn reads Health only if you turn on Personalize with Health",
-            "Health keeps these workouts under your Health settings.",
-            "Optional audio",
-            "Finn says the countdown, each rep, and short live observations",
-            "Optional explanation",
-            "On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model.",
-        ]
-        // each entry is the start of a sentence: XCTest refuses identifier queries over 128 characters
-        for copy in visibleCopy {
-            XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", copy)).firstMatch.exists,
-                          "Privacy text is missing from accessibility: \(copy)")
-        }
-        let policyLink = app.links["Full privacy policy"]
-        XCTAssertTrue(policyLink.exists)
-        for _ in 0..<4 where !policyLink.isHittable { app.swipeUp() }
-        XCTAssertTrue(policyLink.isHittable)
-        XCTAssertGreaterThanOrEqual(policyLink.frame.height, 44)
-        // iOS 27's image-based checks have flagged visible, accessible black-on-white copy here.
-        // The tree assertions above cover every sentence and the only interactive control.
+        XCTAssertTrue(app.navigationBars["Privacy"].waitForExistence(timeout: 5))
+        // Audit the stable page before expanding/collapsing disclosures: iOS 27 retains
+        // removed disclosure nodes in its audit cache. Verify every disclosure afterwards.
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .textClipped, .trait,
-        ])
+        ]) { issue in
+            print("Accessibility: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
+            return false
+        }
+        verifyPrivacyDisclosures(app)
+    }
+
+    @MainActor
+    private func verifyPrivacyDisclosures(_ app: XCUIApplication) {
+        XCTAssertTrue(app.navigationBars["Privacy"].waitForExistence(timeout: 5))
+        let sections: [(String, [String])] = [
+            ("privacy.camera", ["Video is processed on this iPhone and never saved.", "Finn uses the camera to measure", "One camera view cannot assess"]),
+            ("Saved results", ["Measured set summaries are saved", "Saved summaries may be included", "Delete saved sessions in History."]),
+            ("Apple Health", ["If you turn on Save workouts", "Finn reads Health only", "Health keeps these workouts"]),
+            ("Optional audio", ["Finn says the countdown"]),
+            ("privacy.coach", ["Coach uses your question and saved set summaries."]),
+            ("Optional explanation", ["On supported iPhones, Apple's on-device model"]),
+        ]
+        for (name, sentences) in sections {
+            let disclosure = app.buttons[name]
+            app.reveal(disclosure)
+            disclosure.tap()
+            for sentence in sentences {
+                let text = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", sentence)).firstMatch
+                app.reveal(text)
+                XCTAssertTrue(text.exists, "Missing privacy disclosure: \(sentence)")
+            }
+            for _ in 0..<8 where !disclosure.isHittable { app.swipeDown() }
+            disclosure.tap()
+        }
+        let policy = app.links["Full privacy policy"]
+        app.reveal(policy)
+        XCTAssertGreaterThanOrEqual(policy.frame.height, 44)
     }
 
     @MainActor
@@ -263,7 +251,7 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Open Settings"].exists)
         XCTAssertTrue(app.buttons["Try again"].exists)
         XCTAssertFalse(app.staticTexts["Analyzing live"].exists)
-        try app.performAccessibilityAudit()
+        try audit(app, at: #function)
 
         app.buttons["Try again"].tap()
         XCTAssertTrue(app.staticTexts["Allow camera access in Settings."].waitForExistence(timeout: 5))
@@ -287,7 +275,7 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Try again"].isHittable)
         XCTAssertFalse(app.buttons["Open Settings"].exists)
         capture(app, name: "Unavailable camera large text")
-        try app.performAccessibilityAudit()
+        try audit(app, at: #function)
     }
 
     @MainActor
@@ -298,6 +286,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.openFromHome("History")
         app.buttons["Delete all local data"].tap()
         app.buttons["Delete all data"].tap()
+        app.openFromHome("History")
         XCTAssertTrue(app.staticTexts["No saved sessions yet."].waitForExistence(timeout: 5))
         try audit(app, at: "history")
     }
@@ -322,12 +311,18 @@ final class WorkoutFlowUITests: XCTestCase {
         stop.tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
         try audit(app, at: "result")
+        app.swipeUp()
+        try audit(app, at: "result scrolled")
     }
 
     /// a full audit that fails with the screen and the element of each issue, which the result
     /// bundle's summary otherwise reduces to "Contrast failed"
     @MainActor
     private func audit(_ app: XCUIApplication, at screen: String) throws {
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = screen
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
         try app.performAccessibilityAudit { issue in
             let element = issue.element.map {
                 "\($0.elementType.rawValue) '\($0.label)' id '\($0.identifier)' at \($0.frame)"
@@ -356,15 +351,10 @@ final class WorkoutFlowUITests: XCTestCase {
             }
         }
         XCTAssertTrue(app.staticTexts["Compared with your previous set"].exists)
-        try app.performAccessibilityAudit()
+        try audit(app, at: #function)
         app.buttons["Done"].tap()
         app.openFromHome("History")
-        XCTAssertTrue(app.staticTexts["Saved sessions"].waitForExistence(timeout: 5))
-        // the Debug-only yellow demo badge triggers a false image-contrast result
-        // when the audit crops its glyphs. Empty History still receives a full audit.
-        try app.performAccessibilityAudit(for: [
-            .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
-        ])
+        try audit(app, at: "saved history")
     }
 
     @MainActor
@@ -384,14 +374,14 @@ final class WorkoutFlowUITests: XCTestCase {
         app.openFromHome("History")
 
         let savedSession = app.buttons["history.session"].firstMatch
-        XCTAssertTrue(savedSession.waitForExistence(timeout: 5))
+        app.reveal(savedSession)
         savedSession.tap()
         XCTAssertTrue(app.staticTexts["Set 1"].exists)
         XCTAssertTrue(app.staticTexts["6 measured reps"].exists)
         app.buttons["Rep details"].tap()
         XCTAssertTrue(app.staticTexts["Measured reps"].exists)
         XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "rep.1").firstMatch.exists)
-        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "rep.6").firstMatch.exists)
+        app.reveal(app.descendants(matching: .any).matching(identifier: "rep.6").firstMatch)
         Thread.sleep(forTimeInterval: 1)
         capture(app, name: "Saved session detail")
     }
@@ -485,8 +475,8 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Done"].tap()
         XCTAssertTrue(app.buttons["Start a set"].waitForExistence(timeout: 5))
         app.openFromHome("History")
-        XCTAssertTrue(app.staticTexts["Saved sessions"].waitForExistence(timeout: 5))
         let delete = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Delete session from")).firstMatch
+        app.reveal(delete)
         delete.tap()
         app.buttons["Delete session"].tap()
         XCTAssertTrue(app.staticTexts["No saved sessions yet."].waitForExistence(timeout: 5))

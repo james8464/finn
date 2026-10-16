@@ -106,11 +106,22 @@ struct ComparisonNarratorTests {
 
     @Test func timeoutDoesNotWaitForGeneratorThatIgnoresCancellation() async {
         let generator = NonCooperativeGenerator()
+        defer { generator.finish() }
         let recap = await ComparisonNarrator(generator: generator,
                                              timeout: .milliseconds(20))
             .recap(for: comparison())
         #expect(recap.source == .template)
         #expect(!generator.didFinish, "The timeout must return before the generator finishes.")
+    }
+
+    @Test func repeatedRequestDoesNotOverlapATimedOutGeneration() async {
+        let generator = NonCooperativeGenerator()
+        defer { generator.finish() }
+        let narrator = ComparisonNarrator(generator: generator, timeout: .milliseconds(20))
+        let first = await narrator.recap(for: comparison())
+        let second = await narrator.recap(for: comparison())
+        #expect(first.source == .template && second.source == .template)
+        #expect(generator.calls == 1)
     }
 
     @Test func validGeneratedRecapKeepsDeterministicFacts() async {
@@ -168,15 +179,20 @@ struct ComparisonNarratorTests {
 private final class NonCooperativeGenerator: RecapGenerating {
     let available = true
     private(set) var didFinish = false
+    private(set) var calls = 0
+    private var completion: CheckedContinuation<GeneratedRecap, Never>?
 
     func generate(for comparison: Comparison) async throws -> GeneratedRecap {
-        let recap = await Task.detached {
-            try? await Task.sleep(for: .seconds(10))
-            return GeneratedRecap(explanation: "Your range was shorter.",
-                                  evidenceRepNumbers: [5, 6])
-        }.value
+        calls += 1
+        let recap = await withCheckedContinuation { completion = $0 }
         didFinish = true
         return recap
+    }
+
+    func finish() {
+        completion?.resume(returning: GeneratedRecap(explanation: "Your range was shorter.",
+                                                    evidenceRepNumbers: [5, 6]))
+        completion = nil
     }
 }
 

@@ -5,7 +5,7 @@ import Testing
 struct SetShareSummaryTests {
     @Test func measuredSummaryIncludesRepCountAndActionWithoutMedia() {
         let analysis = SetAnalysis(
-            reps: [RepMetric(number: 1, startTime: 0, endTime: 2, normalizedHipTravel: 0.4)],
+            reps: [RepMetric(number: 1, startTime: 0, endTime: 2, normalisedHipTravel: 0.4)],
             confidence: 0.9,
             rubricVersion: SquatRubric.version
         )

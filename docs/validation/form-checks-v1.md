@@ -1,5 +1,7 @@
 # Form checks v1: squat, push-up, lunge, stiff-leg deadlift
 
+> Historical baseline: the backend reliability update changes temporal filtering and checks sustained faults throughout each rep. The figures below describe v1 only, not the new implementation. See [the updated validation record](backend-reliability-2026-10-16.md).
+
 _15 October 2026._ Code: `Finn/Finn/Workout/FormChecks.swift` (checks and thresholds) and
 `Finn/Finn/Workout/BodySegments.swift` (segments and angles every check reads).
 

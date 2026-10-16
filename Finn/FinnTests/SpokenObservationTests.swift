@@ -6,7 +6,7 @@ struct SpokenObservationTests {
     @Test func readsMeasuredEvidenceAndExistingCueOnly() {
         let reps = (1...6).map {
             RepMetric(number: $0, startTime: Double($0), endTime: Double($0) + 1,
-                      normalizedHipTravel: 0.4)
+                      normalisedHipTravel: 0.4)
         }
         let analysis = SetAnalysis(reps: reps, confidence: 0.9,
                                    rubricVersion: SquatRubric.version)

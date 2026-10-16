@@ -60,6 +60,36 @@ struct CoachTests {
         #expect(prompt.contains("Set 3: Push-up, 8 reps"))
     }
 
+    @Test func overlappingSessionsKeepTheActualLatestSetAndItsEarlierComparison() {
+        let firstSession = UUID()
+        let secondSession = UUID()
+        let start = Date(timeIntervalSince1970: 1_760_000_000)
+        let first = set(session: firstSession, at: start, range: 0.4)
+        let latest = set(session: firstSession, at: start.addingTimeInterval(300), range: 0.2)
+        let middle = set(session: secondSession, at: start.addingTimeInterval(100), range: 0.5)
+        let history = [
+            WorkoutSessionSummary(id: firstSession, startedAt: start, sets: [first, latest]),
+            WorkoutSessionSummary(id: secondSession, startedAt: middle.capturedAt, sets: [middle])
+        ]
+        let context = CoachContext.make(history: history, limit: 2)
+        #expect(context.facts.map(\.id) == [middle.id, latest.id])
+        #expect(context.latest?.comparison?.contains("shorter") == true)
+        #expect(CoachContext.make(history: history.reversed(), limit: 2) == context)
+    }
+
+    @Test func rejectedObservationIsNotRepeatedAsAdvice() {
+        let session = UUID()
+        var rejected = set(session: session, at: .now, cue: rangeCue)
+        rejected.cueResponse = .notRelevant
+        let context = CoachContext.make(history: [
+            WorkoutSessionSummary(id: session, startedAt: rejected.capturedAt, sets: [rejected])
+        ])
+        #expect(context.latest?.observation == nil)
+        #expect(context.latest?.nextAction == nil)
+        #expect(!context.promptText().contains(rangeCue.nextAction))
+        #expect(context.latest?.repCount == 6)
+    }
+
     @Test func contextKeepsOnlyTheMostRecentSets() {
         let session = UUID()
         let start = Date(timeIntervalSince1970: 1_760_000_000)
@@ -137,6 +167,7 @@ struct CoachTests {
         #expect(answer.text.contains("no saved set"))
         let conversation = CoachConversation(history: [], responder: responder)
         #expect(conversation.messages.first?.text.contains("No saved set yet") == true)
+        #expect(conversation.messages.first?.engine == nil, "The fixed greeting did not run a model")
         #expect(conversation.suggestedQuestions.isEmpty)
     }
 
@@ -266,6 +297,92 @@ struct CoachTests {
         }
     }
 
+    @Test func standardBuildNeverSelectsUnentitledCloudCompute() {
+        #expect(CoachEngineSelector.standard().current()?.kind != .privateCloudCompute)
+    }
+
+    @Test func noSavedSetsNeverStartsInference() async {
+        let engine = StubCoachEngine(output: "Set 1")
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let answer = await responder.answer("Hello", context: CoachContext(facts: []), history: [])
+        #expect(answer.engine == .fallback)
+        #expect(engine.calls == 0)
+    }
+
+    @Test func promptSizeStaysBoundedForLongQuestionsAndHistory() {
+        let huge = String(repeating: "more context ", count: 10_000)
+        let turns = (0..<20).map { _ in CoachMessage(role: .person, text: huge) }
+        let prompt = FoundationModelsCoachPrompt.prompt(
+            question: huge, context: CoachContext.make(history: history()), history: turns)
+        #expect(prompt.count <= FoundationModelsCoachPrompt.maximumPromptCharacters)
+        #expect(prompt.contains("Person now asks:"))
+    }
+
+    @Test func negativeContextLimitDoesNotTrap() {
+        #expect(CoachContext.make(history: history(), limit: -1).isEmpty)
+    }
+
+    @Test func promptBudgetKeepsTheLatestSetsWhenOldObservationsAreLong() {
+        let facts = (1...32).map { number in
+            CoachSetFact(number: number, id: UUID(), exerciseName: "Squat", repCount: number,
+                         capturedAt: .now, observation: String(repeating: "Recorded fact. ", count: 1_000),
+                         issues: [], comparison: nil, partlyVisible: false)
+        }
+        let prompt = CoachContext(facts: facts).boundedPromptText(maximumCharacters: 4_000)
+        #expect(prompt.count <= 4_000)
+        #expect(prompt.contains("Set 32: Squat, 32 reps"))
+        #expect(prompt.contains("Set 31: Squat, 31 reps"))
+        #expect(!prompt.contains("Set 1:"))
+    }
+
+    @Test func refreshingDeletedHistoryDiscardsAnInFlightAnswer() async {
+        let engine = StubCoachEngine(output: "Set 1", delay: .milliseconds(100))
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let conversation = CoachConversation(history: history(), responder: responder)
+        let request = Task { await conversation.send("How was set 1?") }
+        while !conversation.isAnswering { await Task.yield() }
+        conversation.refresh(history: [])
+        await request.value
+        #expect(conversation.messages.count == 2)
+        #expect(!conversation.isAnswering)
+    }
+
+    @Test func newSavedSetsRefreshTheGreetingWithoutPretendingToRunAModel() {
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: .english)
+        let conversation = CoachConversation(history: [], responder: responder)
+        let greetingID = conversation.messages.first?.id
+        conversation.refresh(history: history())
+        #expect(conversation.messages.first?.text == CoachFallback.opening(context: conversation.context, language: .english))
+        #expect(conversation.messages.first?.id == greetingID)
+        #expect(conversation.messages.first?.engine == nil)
+    }
+
+    @Test func leavingCoachCancelsTheTurnWithoutAppendingAnAnswer() async {
+        let engine = StubCoachEngine(output: "Set 1", delay: .seconds(5))
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let conversation = CoachConversation(history: history(), responder: responder)
+        let request = Task { await conversation.send("How was set 1?") }
+        while !conversation.isAnswering { await Task.yield() }
+        request.cancel()
+        await request.value
+        #expect(conversation.messages.count == 2)
+        #expect(!conversation.isAnswering)
+    }
+
+    @Test func aTimedOutUncooperativeModelCannotStartOverlappingInference() async {
+        let engine = SuspendedCoachEngine()
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]),
+                                       timeout: .milliseconds(30), language: .english)
+        let context = CoachContext.make(history: history())
+        let first = await responder.answer("First", context: context, history: [])
+        #expect(first.engine == .fallback)
+        let second = await responder.answer("Second", context: context, history: [])
+        #expect(second.engine == .fallback)
+        #expect(engine.calls == 1)
+        engine.finish()
+        await Task.yield()
+    }
+
     // MARK: Validator and prompt
 
     @Test func answerCheckReadsSetReferencesInBothLanguages() {
@@ -353,5 +470,25 @@ private final class StubCoachEngine: CoachEngine {
         if let delay { try await Task.sleep(for: delay) }
         guard let output else { throw Failure() }
         return output
+    }
+}
+
+/// Simulates a framework operation that ignores task cancellation until it finishes.
+@MainActor
+private final class SuspendedCoachEngine: CoachEngine {
+    let kind = CoachEngineKind.onDevice
+    let available = true
+    private(set) var calls = 0
+    private var continuation: CheckedContinuation<String, Never>?
+
+    func reply(to question: String, context: CoachContext, history: [CoachMessage],
+               language: CoachLanguage) async throws -> String {
+        calls += 1
+        return await withCheckedContinuation { continuation = $0 }
+    }
+
+    func finish() {
+        continuation?.resume(returning: "Set 1")
+        continuation = nil
     }
 }

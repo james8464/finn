@@ -74,8 +74,10 @@ final class SkeletonOverlayUITests: XCTestCase {
         Thread.sleep(forTimeInterval: seconds / 2)
         stop.tap()
         // measured or refused, the result must say something
-        let outcome = app.staticTexts.matching(NSPredicate(
-            format: "label ENDSWITH %@ OR label == %@", "measured reps", "Couldn’t assess this set")).firstMatch
+        // The count is one VoiceOver element containing both the number and its label.
+        // Its separate visual caption is only "measured reps" and carries no count.
+        let outcome = app.descendants(matching: .any).matching(NSPredicate(
+            format: "label MATCHES %@ OR label == %@", "[0-9]+ measured reps", "Couldn’t assess this set")).firstMatch
         XCTAssertTrue(outcome.waitForExistence(timeout: 15))
         attachScreenshot(named: "Result")
         if app.staticTexts["Deepest and shallowest rep"].exists {

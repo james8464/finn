@@ -1,6 +1,16 @@
 import XCTest
 
 extension XCUIApplication {
+    /// Native lists load rows on demand; scroll until the requested control can be used.
+    @MainActor
+    func reveal(_ element: XCUIElement, swipes: Int = 12) {
+        for _ in 0..<swipes {
+            if element.exists && element.isHittable { return }
+            swipeUp()
+        }
+        XCTAssertTrue(element.exists && element.isHittable, "Control could not be reached: \(element)")
+    }
+
     /// a fresh simulator shows the welcome screens first; tests that want the app itself skip them
     @MainActor
     func skipOnboardingIfShown() {
@@ -63,5 +73,6 @@ extension XCUIApplication {
         let item = buttons[page].firstMatch
         XCTAssertTrue(item.waitForExistence(timeout: 3), "\(page) is missing from the More menu")
         item.tap()
+        XCTAssertTrue(navigationBars[page].waitForExistence(timeout: 5))
     }
 }

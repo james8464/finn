@@ -123,12 +123,12 @@ MICROPHONE: not used. Finn speaks but never records; there is no microphone perm
 
 APPLE INTELLIGENCE, two uses:
 - Reword comparison (result screen): on eligible devices, the on-device Foundation Models framework rephrases an already measured comparison. On other devices the button shows a fixed sentence. No images reach the model.
-- Coach (conversation): the person asks about their sets. Finn sends the question, saved set summaries (exercise, reps, date, observation), and the selected training goal and experience level, if provided, through the Foundation Models framework. It tries Apple's server model on Private Cloud Compute first (needs Apple Intelligence and a connection; Apple does not store the requests), then the on-device model, then a fixed response. No image, video or pose point is ever sent. Finn has no server and no third-party model provider. Without Apple Intelligence on the review device, the coach answers with fixed text: expected.
+- Coach (conversation): the person asks about their sets. Finn sends the question, saved set summaries (exercise, reps, date, observation), and the selected training goal and experience level, if provided, through the Foundation Models framework. It uses the on-device Apple Intelligence model to select saved sets, then a fixed response if that model is unavailable, fails or times out. This build does not request Private Cloud Compute. No image, video or pose point is ever sent. Finn has no server and no third-party model provider. Without Apple Intelligence on the review device, the coach answers with fixed text: expected.
 ```
 
 ## Export compliance
 
-Finn opens no network connection of its own. The only network use is Apple's Foundation Models framework reaching Private Cloud Compute for the coach, inside the OS, with Apple's own encryption: that is exempt (standard encryption built into the operating system). Answer: **Does your app use encryption? No** (or, if Connect shows the longer form: only standard encryption provided by Apple's OS, exempt). To stop App Store Connect from asking on every build, the project needs `ITSAppUsesNonExemptEncryption = NO` in both Info.plists; see `app-privacy-answers.md`, "Export compliance", for the exact build setting.
+Finn opens no network connection of its own. The current Coach runs on-device and does not request Private Cloud Compute. Verify the final signed archive against the export-compliance checklist below. Answer: **Does your app use encryption? No** (or, if Connect shows the longer form: only standard encryption provided by Apple's OS, exempt). To stop App Store Connect from asking on every build, the project needs `ITSAppUsesNonExemptEncryption = NO` in both Info.plists; see `app-privacy-answers.md`, "Export compliance", for the exact build setting.
 
 ## Privacy label
 

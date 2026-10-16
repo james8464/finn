@@ -16,7 +16,8 @@ struct OnboardingView: View {
     @State private var reaction: Reaction?
     @State private var reactionTask: Task<Void, Never>?
     @FocusState private var nameFocused: Bool
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -415,17 +416,17 @@ struct OnboardingView: View {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: 10) {
                 ForEach(ExerciseKind.allCases, id: \.self) { kind in
                     ExerciseTile(kind: kind,
-                                 rank: profile.favoriteExercises.firstIndex(of: kind).map { $0 + 1 }) {
-                        if let index = profile.favoriteExercises.firstIndex(of: kind) {
-                            profile.favoriteExercises.remove(at: index)
+                                 rank: profile.favouriteExercises.firstIndex(of: kind).map { $0 + 1 }) {
+                        if let index = profile.favouriteExercises.firstIndex(of: kind) {
+                            profile.favouriteExercises.remove(at: index)
                         } else {
-                            profile.favoriteExercises.append(kind)
+                            profile.favouriteExercises.append(kind)
                         }
                     }
                     .accessibilityIdentifier("onboarding.exercise.\(kind.rawValue)")
                 }
             }
-            .sensoryFeedback(.selection, trigger: profile.favoriteExercises)
+            .sensoryFeedback(.selection, trigger: profile.favouriteExercises)
         }
     }
 
@@ -603,7 +604,8 @@ private struct ExerciseTile: View {
 /// on the right, a dotted line between them at hip height, and the camera's field of view
 struct PlacementScene: View {
     let kind: ExerciseKind
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { timeline in

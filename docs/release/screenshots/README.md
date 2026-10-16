@@ -1,6 +1,6 @@
 # Finn screenshots
 
-Captured on 15 October 2026 from the renamed app on iPhone 18 Pro Max / iOS 27, using the passing `ScreenTourUITests` suite. All release images are 1320 × 2868 pixels. The status bar was fixed to 9:41 with full Wi-Fi and battery. Images are actual simulator captures.
+Captured on 16 October 2026 from the dark-only app on iPhone 18 Pro Max / iOS 27, using the passing `ScreenTourUITests` suite. All release images are 1320 × 2868 pixels. The status bar was fixed to 9:41 with full Wi-Fi and battery. Images are actual simulator captures. Finn keeps its dark appearance even when the simulator system setting is light.
 
 ## Release candidates
 

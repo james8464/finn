@@ -21,6 +21,13 @@ nonisolated struct JointPoint: Codable, Equatable {
     let x: Double
     let y: Double
     let confidence: Double
+
+    /// Invalid coordinates are missing evidence, never a point at the edge of the picture.
+    var isUsable: Bool {
+        x.isFinite && y.isFinite && confidence.isFinite
+            && (0...1).contains(x) && (0...1).contains(y)
+            && confidence > 0 && confidence <= 1
+    }
 }
 
 /// How the person doing the set was followed in a frame.
@@ -57,12 +64,42 @@ nonisolated struct PoseFrame: Codable, Equatable {
          athleteTracking: AthleteTracking? = nil, bystanders: [[BodyJoint: JointPoint]]? = nil) {
         self.time = time
         self.subjectCount = subjectCount
-        self.joints = joints
+        let validGeometry = aspectRatio.isFinite && aspectRatio > 0 && aspectRatio <= 10
+        self.joints = validGeometry ? joints.filter { $0.value.isUsable } : [:]
         self.aspectRatio = aspectRatio
-        self.keypoints = keypoints
-        self.profileDeviationDegrees = profileDeviationDegrees
+        self.keypoints = validGeometry && keypoints?.count == 54 && keypoints?.allSatisfy(\.isFinite) == true
+            ? keypoints : nil
+        self.profileDeviationDegrees = profileDeviationDegrees.flatMap {
+            $0.isFinite && (0...90).contains($0) ? $0 : nil
+        }
         self.athleteTracking = athleteTracking
-        self.bystanders = bystanders
+        self.bystanders = validGeometry ? bystanders?.map { $0.filter { $0.value.isUsable } } : nil
+    }
+
+    // Decoded replays must pass the same checks as live camera frames.
+    init(from decoder: any Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            time: try values.decode(TimeInterval.self, forKey: .time),
+            subjectCount: try values.decode(Int.self, forKey: .subjectCount),
+            joints: try values.decode([BodyJoint: JointPoint].self, forKey: .joints),
+            aspectRatio: try values.decodeIfPresent(Double.self, forKey: .aspectRatio) ?? 1,
+            keypoints: try values.decodeIfPresent([Float].self, forKey: .keypoints),
+            profileDeviationDegrees: try values.decodeIfPresent(Double.self, forKey: .profileDeviationDegrees),
+            athleteTracking: try values.decodeIfPresent(AthleteTracking.self, forKey: .athleteTracking),
+            bystanders: try values.decodeIfPresent([[BodyJoint: JointPoint]].self, forKey: .bystanders)
+        )
+    }
+
+    /// Binary searches and duration measurements require one strictly increasing capture clock.
+    /// Sorting a broken stream would join movements that were never observed together.
+    static func hasIncreasingTimestamps(_ frames: [PoseFrame]) -> Bool {
+        var previous = -Double.infinity
+        for frame in frames {
+            guard frame.time.isFinite, frame.time >= 0, frame.time > previous else { return false }
+            previous = frame.time
+        }
+        return true
     }
 
     func retimed(to time: TimeInterval) -> PoseFrame {
@@ -73,7 +110,7 @@ nonisolated struct PoseFrame: Codable, Equatable {
 
     /// The athlete's joints are in this frame and can be measured, whoever else is around.
     var athleteVisible: Bool {
-        athleteTracking == .tracked || (athleteTracking == nil && subjectCount == 1)
+        subjectCount > 0 && (athleteTracking == .tracked || (athleteTracking == nil && subjectCount == 1))
     }
 }
 
@@ -89,8 +126,15 @@ nonisolated struct RepMetric: Codable, Equatable {
     let postureValue: Double?
 
     var duration: TimeInterval { endTime - startTime }
+
+    var isValid: Bool {
+        number > 0 && startTime.isFinite && endTime.isFinite
+            && startTime >= 0 && endTime > startTime
+            && relativeRange.isFinite && relativeRange >= 0
+            && (postureValue?.isFinite ?? true)
+    }
     /// The squat's original name for `relativeRange`, kept for existing callers and saved history.
-    var normalizedHipTravel: Double { relativeRange }
+    var normalisedHipTravel: Double { relativeRange }
 
     init(number: Int, startTime: TimeInterval, endTime: TimeInterval, relativeRange: Double,
          postureValue: Double? = nil) {
@@ -101,10 +145,10 @@ nonisolated struct RepMetric: Codable, Equatable {
         self.postureValue = postureValue
     }
 
-    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, normalizedHipTravel: Double,
+    init(number: Int, startTime: TimeInterval, endTime: TimeInterval, normalisedHipTravel: Double,
          postureValue: Double? = nil) {
         self.init(number: number, startTime: startTime, endTime: endTime,
-                  relativeRange: normalizedHipTravel, postureValue: postureValue)
+                  relativeRange: normalisedHipTravel, postureValue: postureValue)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -324,6 +368,7 @@ nonisolated extension WorkoutSessionSummary {
     /// Whether a set measured at `date` still belongs to this session.
     func continues(at date: Date) -> Bool {
         let latest = sets.map(\.capturedAt).max() ?? startedAt
-        return date.timeIntervalSince(latest) <= Self.longestBreak
+        let interval = date.timeIntervalSince(latest)
+        return interval.isFinite && (0...Self.longestBreak).contains(interval)
     }
 }

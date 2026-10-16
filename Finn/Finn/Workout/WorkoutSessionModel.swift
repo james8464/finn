@@ -136,8 +136,8 @@ final class WorkoutSessionModel {
     private(set) var recognition: ExerciseRecognition = .notAttempted
     /// Whether Finn recognises the exercise after a set (joint-angle rules unless the trained
     /// model is switched on). On by default; the chosen exercise stays the fallback.
-    var recognizesExercise: Bool {
-        didSet { preferences.recognizesExercise = recognizesExercise }
+    var recognisesExercise: Bool {
+        didSet { preferences.recognisesExercise = recognisesExercise }
     }
     /// Whether a bundled trained model replaces the rules. Off by default, and only offered when
     /// this build includes a model.
@@ -164,7 +164,7 @@ final class WorkoutSessionModel {
     }
     /// The 3D camera-angle verdict for the latest analysed set, kept for the validation readout.
     private(set) var lastViewVerdict: ViewCheck.Verdict = .unavailable
-    var usesExerciseRecognition: Bool { recognizesExercise && recognitionMethod != .unavailable }
+    var usesExerciseRecognition: Bool { recognisesExercise && recognitionMethod != .unavailable }
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
     /// While framing, the joint that keeps the set from starting cleanly, named on screen.
@@ -268,13 +268,13 @@ final class WorkoutSessionModel {
     /// input, which never read Health.
     @ObservationIgnored let health: (any HealthReading)?
     /// Whether Finn reads Health to adapt its advice. Off by default; turning it on asks Health.
-    var personalizesWithHealth: Bool {
-        didSet { preferences.personalizesWithHealth = personalizesWithHealth }
+    var personalisesWithHealth: Bool {
+        didSet { preferences.personalisesWithHealth = personalisesWithHealth }
     }
     /// What Finn last read from Health; nil until read, or while the option is off.
     var healthSnapshot: HealthSnapshot?
     /// The one-time "Make Finn more personal?" offer is on screen.
-    var showsPersonalizationOffer = false
+    var showsPersonalisationOffer = false
     /// The latest heart rate from the Apple Watch, while a set or the rest after it runs.
     var liveHeartRate: Int?
     @ObservationIgnored var liveHeartRateAt: Date?
@@ -313,11 +313,11 @@ final class WorkoutSessionModel {
         self.speaksLive = preferences.speaksLive
         self.hapticFeedback = preferences.hapticFeedback
         self.soundFeedback = preferences.soundFeedback
-        self.recognizesExercise = preferences.recognizesExercise
+        self.recognisesExercise = preferences.recognisesExercise
         self.usesTrainedModel = preferences.usesTrainedModel
         self.checksCameraAngle = preferences.checksCameraAngle
         self.savesToFitness = preferences.savesToFitness
-        self.personalizesWithHealth = preferences.personalizesWithHealth
+        self.personalisesWithHealth = preferences.personalisesWithHealth
         if let remembered = preferences.selectedExercise { selectedExercise = remembered }
         if let store {
             do { history = try store.load().sorted { $0.startedAt > $1.startedAt } }
@@ -512,14 +512,14 @@ final class WorkoutSessionModel {
         }
 // the capture includes walking to the spot and back to the phone; only the set is analysed.
         let captured = SetWindow.active(frames, requirement: captureExercise.definition.evidence)
-        let recognition = recognizeExercise(in: captured)
+        let recognition = recogniseExercise(in: captured)
         self.recognition = recognition
         let exercise: ExerciseKind
-        if case .recognized(let recognized, _) = recognition {
-            exercise = recognized
+        if case .recognized(let recognisedExercise, _) = recognition {
+            exercise = recognisedExercise
             // Finn is sure the person did another exercise than the one chosen: the next sets use
             // it, so they are framed, counted live and stopped hands-free as that exercise.
-            if recognized != captureExercise { selectedExercise = recognized }
+            if recognisedExercise != captureExercise { selectedExercise = recognisedExercise }
         } else {
             exercise = captureExercise
         }
@@ -529,7 +529,7 @@ final class WorkoutSessionModel {
         resultExercise = exercise
         lastViewVerdict = ViewCheck.assess(setFrames, expected: definition.expectedView)
 // already trimmed to the set: analyse exactly these frames, so the saved set is gated the same.
-        let (outcome, measured) = ExerciseAnalyzer.analyzeWithDiagnostics(
+        let (outcome, measured) = ExerciseAnalyzer.analyseWithDiagnostics(
             setFrames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore, trimsToSet: false)
         var diagnostics = measured
         // Finn ended the capture (its time limit, or the camera stopping), not the athlete: a
@@ -580,7 +580,7 @@ final class WorkoutSessionModel {
             record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues,
                    formMeasurements: advisable ? review.measurements : [],
                    partlyVisible: diagnostics?.partialVisibility != nil)
-            offerPersonalizationIfDue()
+            offerPersonalisationIfDue()
         case .insufficientView(let reason):
             result = .insufficientView(reason)
             retakeHint = Self.otherExerciseHint(in: frames, chosen: exercise, refusedFrames: setFrames)
@@ -620,7 +620,7 @@ final class WorkoutSessionModel {
         for kind in ExerciseKind.allCases where kind != chosen && hangs(kind.definition) == hanging {
             let definition = kind.definition
             let window = SetWindow.active(frames, requirement: definition.evidence)
-            guard case .analyzed(let analysis) = ExerciseAnalyzer.analyzeWithDiagnostics(
+            guard case .analyzed(let analysis) = ExerciseAnalyzer.analyseWithDiagnostics(
                 window, as: definition, viewCheck: .ignore, trimsToSet: false).outcome,
                 analysis.reps.count >= 2, analysis.reps.count > (best?.reps ?? 0) else { continue }
             best = (kind, analysis.reps.count)
@@ -691,7 +691,7 @@ final class WorkoutSessionModel {
         if framingStatus == .turnToExpectedView {
             phrase = String(localized: "Turn your side to the camera")
         } else if let joint = unclearJoint {
-            phrase = String(localized: "\(joint.localizedName) not clear. Step back or add light")
+            phrase = String(localized: "\(joint.localisedName) not clear. Step back or add light")
         } else {
             phrase = String(localized: "Show your whole body")
         }
@@ -814,15 +814,15 @@ final class WorkoutSessionModel {
         previewLandmarksVisible = false
     }
 
-    private func recognizeExercise(in frames: [PoseFrame]) -> ExerciseRecognition {
-        guard recognizesExercise, !frames.isEmpty else { return .notAttempted }
+    private func recogniseExercise(in frames: [PoseFrame]) -> ExerciseRecognition {
+        guard recognisesExercise, !frames.isEmpty else { return .notAttempted }
         switch recognitionMethod {
         case .keypointModel:
-            if let exerciseClassifier { return ExerciseRecognizer.recognize(frames, using: exerciseClassifier) }
+            if let exerciseClassifier { return ExerciseRecognizer.recognise(frames, using: exerciseClassifier) }
         case .angleModel:
-            if let angleClassifier { return AngleRecognizer.recognize(frames, using: angleClassifier) }
+            if let angleClassifier { return AngleRecognizer.recognise(frames, using: angleClassifier) }
         case .angleRules:
-            if let ruleClassifier { return AngleRecognizer.recognize(frames, using: ruleClassifier) }
+            if let ruleClassifier { return AngleRecognizer.recognise(frames, using: ruleClassifier) }
         case .unavailable:
             break
         }
@@ -848,14 +848,14 @@ final class WorkoutSessionModel {
     /// HealthKit is not touched while the option is off.
     func refreshFitnessAccess() {
         guard let fitness, savesToFitness else { return }
-        fitnessAccess = fitness.authorization
+        fitnessAccess = fitness.authorisation
     }
 
     /// Asks Health for permission to save workouts, in context: right after the person turns the
     /// option on. Health shows its sheet only while the person has not answered.
     func requestFitnessAccess() async {
         guard let fitness, savesToFitness else { return }
-        var access = fitness.authorization
+        var access = fitness.authorisation
         if access == .notDetermined { access = await fitness.requestAuthorization() }
         fitnessAccess = access
     }
@@ -917,7 +917,7 @@ final class WorkoutSessionModel {
             fitnessSavesOfDeletedSessions.remove(id)
         }
         fitnessSave = FitnessSaveReport(sessionID: id, status: .saving)
-        var access = fitness.authorization
+        var access = fitness.authorisation
         if access == .notDetermined { access = await fitness.requestAuthorization() }
         fitnessAccess = access
         switch access {

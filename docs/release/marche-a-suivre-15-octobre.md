@@ -76,4 +76,4 @@ Dans l'app Finn > 1.0 Prepare for Submission, colle depuis `app-store-fiche.md` 
 | « Bundle ID not available » à la création de l'app | identifiant pris par une autre équipe | vérifier dans Certificates, Identifiers & Profiles qu'il est bien sous FinLearn |
 | Le build reste « Processing » plus d'une heure | file d'Apple | attendre ; soumettre le reste de la fiche en attendant |
 | ITMS-90xxx à l'upload | clé manquante dans Info.plist | lire le message, corriger, remonter le numéro de build, réarchiver |
-| Le coach ne répond que le texte fixe sur ton iPhone | l'accès Private Cloud Compute n'est pas accordé à l'équipe | normal pour ce soir ; voir `app-privacy-answers.md`, « Coach » |
+| Le coach ne répond que le texte fixe sur ton iPhone | modèle Apple Intelligence indisponible, historique vide ou requête échouée | vérifier Apple Intelligence et enregistrer une série ; depuis la correction du 16 octobre, Private Cloud Compute n’est plus utilisé ; voir `app-privacy-answers.md`, « Coach » |

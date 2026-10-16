@@ -40,17 +40,17 @@ nonisolated struct PushUpShouldersTests {
     }
 
     private func repCount(_ frames: [PoseFrame], as definition: ExerciseDefinition = .pushUp) -> Int? {
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames, as: definition) else { return nil }
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: definition) else { return nil }
         return analysis.reps.count
     }
 
     @Test func countsRepsFromTheShouldersWhenTheArmsCannotBeRead() {
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyze(frames(reps: 8), as: .pushUp) else {
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames(reps: 8), as: .pushUp) else {
             Issue.record("Expected a count from the shoulders")
             return
         }
         #expect(analysis.reps.count == 8)
-        #expect(analysis.rubricVersion == "push-up-shoulders-v2")
+        #expect(analysis.rubricVersion == "push-up-shoulders-v3")
         #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
     }
 
@@ -94,7 +94,7 @@ nonisolated struct PushUpShouldersTests {
     }
 
     @Test func explanationSaysWhyAndThatTheElbowIsNotMeasured() throws {
-        let result = ExerciseAnalyzer.analyzeWithDiagnostics(frames(reps: 8), as: .pushUp)
+        let result = ExerciseAnalyzer.analyseWithDiagnostics(frames(reps: 8), as: .pushUp)
         let text = try #require(result.diagnostics?.explanation(for: .pushUp, counted: 8))
         #expect(text.contains("counted the reps from your shoulders"))
         #expect(text.contains("elbow bend or posture"))

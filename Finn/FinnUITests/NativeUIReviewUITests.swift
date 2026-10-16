@@ -20,7 +20,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["No saved sessions yet."].waitForExistence(timeout: 3))
         try save("history-empty")
         app.selectTab("Coach")
-        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.textViews["coach.field"].waitForExistence(timeout: 3))
         XCTAssertGreaterThanOrEqual(app.buttons["coach.engine"].frame.height, 44)
         try save("coach")
         app.buttons["coach.engine"].tap()
@@ -67,7 +67,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
         try save("workout-largest-text")
         app.selectTab("Coach")
-        let field = app.textFields["coach.field"]
+        let field = app.textViews["coach.field"]
         XCTAssertTrue(field.waitForExistence(timeout: 3))
         field.tap()
         field.typeText("My last set")
@@ -75,7 +75,7 @@ final class NativeUIReviewUITests: XCTestCase {
         try save("coach-largest-text-keyboard")
         app.buttons["coach.send"].tap()
         XCTAssertTrue(app.staticTexts["My last set"].waitForExistence(timeout: 5))
-        app.buttons["coach.dismissKeyboard"].tap()
+        // Sending at accessibility sizes dismisses the keyboard to make room for the reply.
         XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 3))
         app.selectTab("Home")
     }
@@ -104,7 +104,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
         try save("workout-largest-text")
         app.selectTab("Coach")
-        let field = app.textFields["coach.field"]
+        let field = app.textViews["coach.field"]
         XCTAssertTrue(field.waitForExistence(timeout: 3))
         field.tap()
         field.typeText("My last set")
@@ -167,9 +167,9 @@ final class NativeUIReviewUITests: XCTestCase {
                                    "-UIPreferredContentSizeCategoryName", size]
             app.launch()
             XCTAssertTrue(app.buttons["primer.continue"].waitForExistence(timeout: 8))
+            try save(name)
             XCTAssertTrue(app.buttons["primer.continue"].isHittable)
             XCTAssertTrue(app.buttons["primer.privacy"].isHittable)
-            try save(name)
             app.scrollViews.firstMatch.swipeUp()
             try save(name + "-bottom")
             app.terminate()
@@ -184,20 +184,18 @@ final class NativeUIReviewUITests: XCTestCase {
         app.launchArguments = arguments + ["privacy"]
         app.launch()
         let policy = app.links["Full privacy policy"]
-        XCTAssertTrue(policy.waitForExistence(timeout: 8))
-        for _ in 0..<24 where !policy.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        app.reveal(policy, swipes: 24)
         XCTAssertTrue(policy.isHittable)
         try save("privacy-largest-text-end")
         app.terminate()
         app.launchArguments = arguments + ["options"]
         app.launch()
         let replay = app.buttons["options.replayOnboarding"]
-        XCTAssertTrue(replay.waitForExistence(timeout: 8))
-        for _ in 0..<24 where !replay.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        app.reveal(replay, swipes: 24)
         XCTAssertTrue(replay.isHittable)
         try save("options-largest-text-end")
         let data = app.buttons["Health data"]
-        for _ in 0..<12 where !data.isHittable { app.scrollViews.firstMatch.swipeDown() }
+        for _ in 0..<12 where !data.isHittable { app.swipeDown() }
         data.tap()
         try save("health-data-largest-text")
     }

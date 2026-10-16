@@ -6,7 +6,7 @@ import Testing
 struct CameraStateTests {
     @Test func cameraDeniedDoesNotStartCapture() async {
         let driver = FakeCaptureDriver()
-        let source = CameraPoseSource(authorize: { false }, driver: driver)
+        let source = CameraPoseSource(authorise: { false }, driver: driver)
 
         do {
             _ = try await source.start()
@@ -22,8 +22,8 @@ struct CameraStateTests {
 
     @Test func cameraCanStartAfterPermissionChangesFromDeniedToGranted() async throws {
         let driver = FakeCaptureDriver()
-        let authorization = MutableAuthorization()
-        let source = CameraPoseSource(authorize: { authorization.granted }, driver: driver)
+        let authorisation = MutableAuthorization()
+        let source = CameraPoseSource(authorise: { authorisation.granted }, driver: driver)
 
         do {
             _ = try await source.start()
@@ -33,7 +33,7 @@ struct CameraStateTests {
         }
         #expect(driver.startCount == 0)
 
-        authorization.granted = true
+        authorisation.granted = true
         _ = try await source.start()
         #expect(source.state == .running)
         #expect(driver.startCount == 1)
@@ -43,7 +43,7 @@ struct CameraStateTests {
     @Test func unavailableCameraDoesNotStartCapture() async {
         let driver = FakeCaptureDriver()
         driver.isAvailable = false
-        let source = CameraPoseSource(authorize: { true }, driver: driver)
+        let source = CameraPoseSource(authorise: { true }, driver: driver)
 
         do {
             _ = try await source.start()
@@ -58,7 +58,7 @@ struct CameraStateTests {
 
     @Test func interruptionFinishesStream() async throws {
         let driver = FakeCaptureDriver()
-        let source = CameraPoseSource(authorize: { true }, driver: driver)
+        let source = CameraPoseSource(authorise: { true }, driver: driver)
         let stream = try await source.start()
         var iterator = stream.makeAsyncIterator()
         driver.finish()
@@ -69,7 +69,7 @@ struct CameraStateTests {
 
     @Test func restartUsesFreshTimeBaseAndNoOldFrames() async throws {
         let driver = FakeCaptureDriver()
-        let source = CameraPoseSource(authorize: { true }, driver: driver)
+        let source = CameraPoseSource(authorise: { true }, driver: driver)
         let first = try await source.start()
         var firstIterator = first.makeAsyncIterator()
         driver.emit(frame(time: 25))
@@ -87,7 +87,7 @@ struct CameraStateTests {
 
     @Test func captureStopsAtTwoMinutes() async throws {
         let driver = FakeCaptureDriver()
-        let source = CameraPoseSource(authorize: { true }, driver: driver)
+        let source = CameraPoseSource(authorise: { true }, driver: driver)
         let stream = try await source.start()
         var iterator = stream.makeAsyncIterator()
         driver.emit(frame(time: 25))
@@ -104,7 +104,7 @@ struct CameraStateTests {
 
     @Test func frameLimitUsesConfiguredSetDuration() async throws {
         let driver = FakeCaptureDriver()
-        let source = CameraPoseSource(authorize: { true }, driver: driver,
+        let source = CameraPoseSource(authorise: { true }, driver: driver,
                                       setDurationLimit: .seconds(3))
         let stream = try await source.start()
         var iterator = stream.makeAsyncIterator()
@@ -125,7 +125,7 @@ struct CameraStateTests {
 
     @Test func previewTimeDoesNotConsumeSetLimit() async throws {
         let driver = FakeCaptureDriver()
-        let source = CameraPoseSource(authorize: { true }, driver: driver)
+        let source = CameraPoseSource(authorise: { true }, driver: driver)
         let stream = try await source.start()
         var iterator = stream.makeAsyncIterator()
         driver.emit(frame(time: 10))
@@ -142,7 +142,7 @@ struct CameraStateTests {
 
     @Test func setLimitEndsCaptureWhenFramesStopArriving() async throws {
         let driver = FakeCaptureDriver()
-        let source = CameraPoseSource(authorize: { true }, driver: driver,
+        let source = CameraPoseSource(authorise: { true }, driver: driver,
                                       setDurationLimit: .milliseconds(25))
         let stream = try await source.start()
         await source.prepareForSet()
@@ -163,7 +163,7 @@ struct CameraStateTests {
     @Test func cancellingPermissionPromptDoesNotOpenCamera() async throws {
         let driver = FakeCaptureDriver()
         var permissionReply: CheckedContinuation<Bool, Never>?
-        let source = CameraPoseSource(authorize: {
+        let source = CameraPoseSource(authorise: {
             await withCheckedContinuation { permissionReply = $0 }
         }, driver: driver)
         let attempt = Task { try await source.start() }
@@ -173,7 +173,7 @@ struct CameraStateTests {
         permissionReply?.resume(returning: true)
         do {
             _ = try await attempt.value
-            Issue.record("Cancelled authorization must not open the camera")
+            Issue.record("Cancelled authorisation must not open the camera")
         } catch let error as CameraSourceError {
             #expect(error == .cancelled)
         }
@@ -183,7 +183,7 @@ struct CameraStateTests {
     @Test func secondStartDuringPermissionPromptIsRejected() async throws {
         let driver = FakeCaptureDriver()
         var permissionReply: CheckedContinuation<Bool, Never>?
-        let source = CameraPoseSource(authorize: {
+        let source = CameraPoseSource(authorise: {
             await withCheckedContinuation { permissionReply = $0 }
         }, driver: driver)
         let attempt = Task { try await source.start() }

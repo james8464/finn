@@ -27,7 +27,7 @@ struct OnboardingProfileTests {
     @Test func freshInstallHasNoAnswersAndShowsTheWelcome() {
         let prefs = preferences()
         #expect(!prefs.onboardingCompleted)
-        #expect(prefs.onboardingProfile == OnboardingProfile(goal: nil, level: nil, favoriteExercises: [], speaksLive: true))
+        #expect(prefs.onboardingProfile == OnboardingProfile(goal: nil, level: nil, favouriteExercises: [], speaksLive: true))
         #expect(prefs.exerciseOrder == ExerciseKind.allCases)
         #expect(prefs.onboardingProfile.coachNote == nil)
     }
@@ -35,7 +35,7 @@ struct OnboardingProfileTests {
     @Test func applyingTheAnswersWritesEveryPreference() {
         let prefs = preferences()
         let profile = OnboardingProfile(goal: .muscle, level: .experienced,
-                                        favoriteExercises: [.pullUp, .pushUp], speaksLive: false,
+                                        favouriteExercises: [.pullUp, .pushUp], speaksLive: false,
                                         firstName: "Alex", followedProgram: true,
                                         stopReasons: [.injury, .motivation], intensity: .challenge,
                                         days: .threeToFour)
@@ -48,7 +48,7 @@ struct OnboardingProfileTests {
         #expect(prefs.programStopReasons == [.injury, .motivation])
         #expect(prefs.trainingIntensity == .challenge)
         #expect(prefs.trainingDays == .threeToFour)
-        #expect(prefs.favoriteExercises == [.pullUp, .pushUp])
+        #expect(prefs.favouriteExercises == [.pullUp, .pushUp])
         #expect(prefs.speaksLive == false)
         // The first favourite is the exercise ready on the first screen.
         #expect(prefs.selectedExercise == .pullUp)
@@ -57,7 +57,7 @@ struct OnboardingProfileTests {
 
     @Test func favoritesComeFirstThenTheOthersInTheirUsualOrder() {
         let prefs = preferences()
-        prefs.apply(OnboardingProfile(goal: nil, level: nil, favoriteExercises: [.muscleUp, .staticLunge], speaksLive: true))
+        prefs.apply(OnboardingProfile(goal: nil, level: nil, favouriteExercises: [.muscleUp, .staticLunge], speaksLive: true))
         #expect(prefs.exerciseOrder == [.muscleUp, .staticLunge, .bodyweightSquat, .pushUp, .stiffLegDeadlift, .pullUp])
         #expect(prefs.exerciseOrder.count == ExerciseKind.allCases.count)
     }
@@ -68,15 +68,15 @@ struct OnboardingProfileTests {
         prefs.apply(OnboardingProfile())
         #expect(prefs.onboardingCompleted)
         #expect(prefs.trainingGoal == nil)
-        #expect(prefs.favoriteExercises.isEmpty)
+        #expect(prefs.favouriteExercises.isEmpty)
         #expect(prefs.selectedExercise == .stiffLegDeadlift)
         #expect(prefs.speaksLive)
     }
 
     @Test func unknownStoredExercisesAreDropped() {
         let prefs = preferences()
-        prefs.defaults.set(["bodyweightSquat", "handstand"], forKey: FinnPreferences.favoriteExercisesKey)
-        #expect(prefs.favoriteExercises == [.bodyweightSquat])
+        prefs.defaults.set(["bodyweightSquat", "handstand"], forKey: FinnPreferences.favouriteExercisesKey)
+        #expect(prefs.favouriteExercises == [.bodyweightSquat])
     }
 
     @Test func coachNoteFollowsLevelAndGoal() {
@@ -144,10 +144,10 @@ struct OnboardingProfileTests {
     @Test func deletingLocalDataForgetsOnboardingAndHealthChoices() {
         let prefs = preferences()
         prefs.apply(OnboardingProfile(goal: .comeback, level: .regular,
-                                      favoriteExercises: [.pushUp], speaksLive: false,
+                                      favouriteExercises: [.pushUp], speaksLive: false,
                                       firstName: "Alex", followedProgram: true, stopReasons: [.didNotWork],
                                       intensity: .hard, days: .fivePlus))
-        prefs.personalizesWithHealth = true
+        prefs.personalisesWithHealth = true
         prefs.savesToFitness = true
         prefs.hapticFeedback = .regular
         prefs.soundFeedback = .bright
@@ -155,7 +155,7 @@ struct OnboardingProfileTests {
         #expect(!prefs.onboardingCompleted)
         #expect(prefs.trainingGoal == nil)
         #expect(prefs.trainingLevel == nil)
-        #expect(prefs.favoriteExercises.isEmpty)
+        #expect(prefs.favouriteExercises.isEmpty)
         #expect(prefs.firstName.isEmpty)
         #expect(prefs.followedProgram == nil)
         #expect(prefs.programStopReasons.isEmpty)
@@ -163,7 +163,7 @@ struct OnboardingProfileTests {
         #expect(prefs.trainingDays == nil)
         #expect(prefs.selectedExercise == nil)
         #expect(prefs.speaksLive)
-        #expect(!prefs.personalizesWithHealth)
+        #expect(!prefs.personalisesWithHealth)
         #expect(!prefs.savesToFitness)
         #expect(prefs.hapticFeedback == .gentle)
         #expect(prefs.soundFeedback == .off)

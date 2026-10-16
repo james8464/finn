@@ -42,6 +42,8 @@ nonisolated enum ViewCheck {
     static func profileDeviation(leftHip: SIMD3<Double>, rightHip: SIMD3<Double>,
                                  leftShoulder: SIMD3<Double>? = nil,
                                  rightShoulder: SIMD3<Double>? = nil) -> Double? {
+        let points = [leftHip, rightHip] + [leftShoulder, rightShoulder].compactMap { $0 }
+        guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite && $0.z.isFinite }) else { return nil }
         let hips = leftHip - rightHip
         guard simd_length(hips) > 1e-4 else { return nil }
         var lateral = simd_normalize(hips)
@@ -73,8 +75,9 @@ nonisolated enum ViewCheck {
 
     /// True when the latest estimates agree the person is not in the expected view.
     static func previewAsksToTurn(_ recentDeviations: [Double], expected: ExpectedView) -> Bool {
-        guard recentDeviations.count >= minimumPreviewEstimates else { return false }
-        return !fits(median(recentDeviations), expected: expected)
+        let valid = recentDeviations.filter { $0.isFinite && (0...90).contains($0) }
+        guard valid.count >= minimumPreviewEstimates else { return false }
+        return !fits(median(valid), expected: expected)
     }
 
     private static func fits(_ deviation: Double, expected: ExpectedView) -> Bool {
