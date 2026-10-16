@@ -6,6 +6,7 @@ Only typography and Apple bezel placement are composited; chart animation is nat
 from pathlib import Path
 import html
 import json
+import re
 import shutil
 import subprocess as sp
 import zipfile
@@ -119,7 +120,8 @@ with zipfile.ZipFile(deck) as src, zipfile.ZipFile(candidate, 'w', zipfile.ZIP_D
         data = src.read(item.filename)
         if item.filename == 'ppt/media/motion-07.mp4':
             data = old.read_bytes()
-        elif item.filename == 'ppt/notesSlides/notesSlide7.xml':
+        elif re.fullmatch(r'ppt/notesSlides/notesSlide\d+\.xml', item.filename):
+            note_index = int(re.search(r'notesSlide(\d+)', item.filename)[1]) - 1
             root = ET.fromstring(data)
             for shape in root.findall(f'.//{{{P}}}sp'):
                 placeholder = shape.find(f'.//{{{P}}}ph')
@@ -129,7 +131,7 @@ with zipfile.ZipFile(deck) as src, zipfile.ZipFile(candidate, 'w', zipfile.ZIP_D
                         body.remove(para)
                     para = ET.SubElement(body, f'{{{A}}}p')
                     run_node = ET.SubElement(para, f'{{{A}}}r')
-                    ET.SubElement(run_node, f'{{{A}}}t').text = scene['notes']
+                    ET.SubElement(run_node, f'{{{A}}}t').text = scenes[note_index]['notes']
             data = ET.tostring(root, encoding='utf-8', xml_declaration=True)
         dst.writestr(item, data)
 shutil.copy2(candidate, deck)
@@ -146,6 +148,6 @@ script.write_text(script.read_text().replace(html.escape(old_notes), html.escape
 # Patch only scene 7 of the uninterrupted backup and retain the existing soundtrack.
 backup = K / 'output/Finn-WWDC-5min-Playback.mp4'
 playback = D / backup.name
-run(['-i', backup, '-i', old, '-filter_complex', '[0:v]trim=end=185,setpts=PTS-STARTPTS,fps=30[a];[1:v]setpts=PTS-STARTPTS,fps=30[b];[0:v]trim=start=215,setpts=PTS-STARTPTS,fps=30[c];[a][b][c]concat=n=3:v=1:a=0[v]', '-map', '[v]', '-map', '0:a', '-c:v', 'libx264', '-preset', 'fast', '-crf', 18, '-c:a', 'copy', '-t', 300, '-movflags', '+faststart', playback])
+run(['-i', backup, '-i', old, '-filter_complex', '[0:v]trim=end=185,setpts=PTS-STARTPTS,fps=30[a];[1:v]setpts=PTS-STARTPTS,fps=30[b];[0:v]trim=start=215,setpts=PTS-STARTPTS,fps=30[c];[a][b][c]concat=n=3:v=1:a=0[v]', '-map', '[v]', '-map', '0:a', '-c:v', 'libx264', '-preset', 'fast', '-crf', 18, '-c:a', 'aac', '-b:a', '192k', '-af', 'atrim=duration=300', '-t', 300, '-movflags', '+faststart', playback])
 shutil.copy2(playback, backup)
 print('Progress walkthrough added: 10 scenes, 300 seconds. Replace scene 7 movie in native Keynote.', flush=True)

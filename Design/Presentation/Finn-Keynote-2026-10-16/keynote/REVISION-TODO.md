@@ -16,4 +16,4 @@
 - [x] Adapt the reference’s fixed-device chart reveal using the current native Progress UI.
 - [x] Separate saved results from the projection and label the estimate.
 - [x] Fit the sequence inside the existing five-minute timing.
-- [ ] Verify the revised movie embedded in the native Keynote.
+- [x] Verify the revised movie embedded in the native Keynote.
