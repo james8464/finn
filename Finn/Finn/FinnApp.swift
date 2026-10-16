@@ -32,10 +32,10 @@ struct FinnApp: App {
                     profileDeviation: ProcessInfo.processInfo.arguments
                         .contains("-finn-ui-demo-front-view") ? 75 : nil,
                     missingWrist: ProcessInfo.processInfo.arguments
-                        .contains("-finn-ui-demo-missing-wrist")), store: LocalSessionStore(
+                        .contains("-finn-ui-demo-missing-wrist")), store: ProgressDemo.seeded(LocalSessionStore(
                     url: FileManager.default.temporaryDirectory
                         .appending(path: "FinnDemo-\(UUID().uuidString)", directoryHint: .isDirectory)
-                        .appending(path: "sessions.json")),
+                        .appending(path: "sessions.json"))),
                             narrator: ComparisonNarrator(generator: DemoRecapGenerator()),
                             exerciseClassifier: ProcessInfo.processInfo.arguments
                                 .contains("-finn-ui-demo-recognition") ? DemoExerciseClassifier() : nil,

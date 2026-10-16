@@ -1,52 +1,72 @@
 import Charts
 import SwiftUI
 
-/// measured bests as a solid pink line with points; the projection as a fainter dashed line from
-/// the last measured point
+/// one bar: a workout's best set, or an estimate for a day ahead
+struct StrengthBar: Identifiable, Equatable {
+    let id: String
+    let date: Date
+    let value: Double
+    let isProjected: Bool
+}
+
+/// best sets as solid pink bars, estimates as faint ones. The first `revealed` bars stand at full
+/// height; the rest, and every bar while `collapsed`, lie flat and clear so the section can
+/// animate them out and back in
 struct StrengthChart: View {
-    let trend: StrengthTrend
+    let bars: [StrengthBar]
+    let metric: StrengthMetric
+    let label: String
+    var revealed = Int.max
+    var collapsed = false
 
     var body: some View {
-        Chart {
-            ForEach(trend.points) { point in
-                LineMark(x: .value("Date", point.date), y: .value("Value", point.value),
-                         series: .value("Series", "Measured"))
-                    .foregroundStyle(DashboardStyle.accent)
-                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                    .interpolationMethod(.monotone)
-                PointMark(x: .value("Date", point.date), y: .value("Value", point.value))
-                    .foregroundStyle(DashboardStyle.accent)
-                    .symbolSize(30)
-            }
-            ForEach(trend.projection) { point in
-                LineMark(x: .value("Date", point.date), y: .value("Value", point.value),
-                         series: .value("Series", "Projection"))
-                    .foregroundStyle(DashboardStyle.accent.opacity(0.6))
-                    .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, dash: [5, 5]))
+        Chart(Array(bars.enumerated()), id: \.element.id) { index, bar in
+            let stands = !collapsed && index < revealed
+            BarMark(x: .value("Workout", bar.id), y: .value("Reps", stands ? bar.value : 0), width: .ratio(0.6))
+                .foregroundStyle(DashboardStyle.accent.opacity(bar.isProjected ? 0.35 : 1))
+                .cornerRadius(4)
+                .opacity(stands ? 1 : 0)
+                .accessibilityLabel(bar.date.formatted(date: .abbreviated, time: .omitted))
+                .accessibilityValue(describe(bar))
+        }
+        .chartYScale(domain: 0...top)
+        .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) }
+        .chartXAxis {
+            AxisMarks { value in
+                AxisValueLabel {
+                    // a categorical axis labels every bar, so only some get a date
+                    if let id = value.as(String.self), labelled.contains(id),
+                       let bar = bars.first(where: { $0.id == id }) {
+                        Text(bar.date, format: .dateTime.month(.abbreviated).day())
+                    }
+                }
             }
         }
-        .chartYScale(domain: .automatic(includesZero: true))
-        .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) }
-        .chartXAxis { AxisMarks(values: .automatic(desiredCount: 3)) }
         .frame(height: 180)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityLabel)
-        .accessibilityValue(accessibilityValue)
+        .accessibilityLabel(label)
+        .accessibilityValue(spoken)
         .accessibilityIdentifier("strength.chart")
     }
 
-    private var accessibilityLabel: String {
-        String(localized: "\(trend.exercise.definition.copy.name), \(StrengthUnit.title(trend.metric)) per session")
+    /// room above the tallest bar, so growing bars never rescale the axis
+    private var top: Double { max(1, ((bars.map(\.value).max() ?? 0) * 1.15).rounded(.up)) }
+
+    /// at most four dates under the bars: the first, the last and two between
+    private var labelled: Set<String> {
+        guard bars.count > 4 else { return Set(bars.map(\.id)) }
+        let last = bars.count - 1
+        return Set([0, last / 3, 2 * last / 3, last].map { bars[$0].id })
     }
 
-    private var accessibilityValue: String {
-        var parts = trend.points.map {
-            "\($0.date.formatted(date: .abbreviated, time: .omitted)): \(StrengthUnit.format($0.value, trend.metric))"
-        }
-        if let end = trend.projection.last {
-            parts.append(String(localized: "Projection, \(end.date.formatted(date: .abbreviated, time: .omitted)): \(StrengthUnit.format(end.value, trend.metric))"))
-        }
-        return parts.joined(separator: "; ")
+    private var spoken: String {
+        bars.map { "\($0.date.formatted(date: .abbreviated, time: .omitted)): \(describe($0))" }
+            .joined(separator: "; ")
+    }
+
+    private func describe(_ bar: StrengthBar) -> String {
+        let value = "\(StrengthUnit.format(bar.value, metric)) \(StrengthUnit.title(metric))"
+        return bar.isProjected ? String(localized: "\(value), estimate") : value
     }
 }
 

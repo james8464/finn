@@ -75,6 +75,39 @@ final class ProgressAndWorkoutUITests: XCTestCase {
         attach(app, "progress-largest-text")
     }
 
+    /// with past workouts, Strength draws a bar per workout; Project swaps in estimated bars and the
+    /// sentence, and Back to history brings the measured bars back
+    @MainActor
+    func testStrengthProjectionAndBackToHistory() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-finn-ui-demo", "-finn-ui-progress-demo", "-finn-open", "progress"]
+        app.launch()
+        app.skipOnboardingIfShown()
+        let section = app.segmentedControls["progress.section"]
+        XCTAssertTrue(section.waitForExistence(timeout: 8))
+        section.buttons.element(boundBy: 1).tap()
+        XCTAssertTrue(app.descendants(matching: .any)["strength.chart"].waitForExistence(timeout: 3))
+        attach(app, "strength-history")
+
+        let project = app.buttons["strength.project"]
+        XCTAssertTrue(project.waitForExistence(timeout: 3))
+        project.tap()
+        let sentence = app.staticTexts["strength.projection"]
+        XCTAssertTrue(sentence.waitForExistence(timeout: 5))
+        XCTAssertTrue(sentence.label.hasPrefix("At this pace, in 2 weeks"), sentence.label)
+        XCTAssertFalse(project.isEnabled)
+        let back = app.buttons["strength.history"]
+        wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "isEnabled == true"), object: back)],
+             timeout: 5)
+        attach(app, "strength-projection")
+
+        back.tap()
+        XCTAssertTrue(sentence.waitForNonExistence(timeout: 5))
+        // the measured bars grow back in before Project is offered again
+        wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "isEnabled == true"), object: project)],
+             timeout: 5)
+    }
+
     @MainActor
     private func attach(_ app: XCUIApplication, _ name: String) {
         let image = XCTAttachment(screenshot: app.screenshot())
