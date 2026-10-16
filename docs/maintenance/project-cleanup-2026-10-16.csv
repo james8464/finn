@@ -435,12 +435,12 @@ Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_attach_videos
 Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_delivery.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
 Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_embed_media.py,retained,"Current delivery, source asset, render dependency or provenance"
 Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_export_launch.swift,retained,"Current delivery, source asset, render dependency or provenance"
-Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film.py,replaced,Current helpers/renderer retained as finn_film_assets.py; superseded standalone cut removed
 Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_finn_notification.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
 Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_inspect.py,retained,"Current delivery, source asset, render dependency or provenance"
-Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_v3.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_v3.py,replaced,Current helpers/renderer retained as finn_device_compositing.py; superseded standalone cut removed
 Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_v6.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
-Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_v7.py,retained,"Current delivery, source asset, render dependency or provenance"
+Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_film_v7.py,replaced,Current helpers/renderer retained as finn_render_film.py; superseded standalone cut removed
 Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_finish_refined.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
 Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_five_min.py,removed,"Superseded authoring, capture or completed migration script; current renderers and source inputs retained"
 Design/Presentation/Finn-Keynote-2026-10-16/production/source/finn_github_cleanup.py,removed,Completed one-off maintenance/patch script; resulting source already checked in

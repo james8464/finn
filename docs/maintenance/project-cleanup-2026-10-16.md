@@ -32,4 +32,4 @@ Historical validation and integration records, source dependencies and compatibi
 - All surviving first-party Swift files pass the configured formatter check.
 - Local Markdown links resolve. Rehearsal playback, next-slide navigation, auto-advance control and speaker notes work without browser console errors.
 - Current presentation delivery binaries are unchanged; hashes are checked against the starting revision.
-- Startup and Progress UI smoke results are recorded before merge.
+- Progress projection/back-to-history UI test passes. Startup cold-launch/background/return test passes after replacing its stale camera-button assertion with the current Workout-tab launch control.

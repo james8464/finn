@@ -8,7 +8,7 @@ D = K / 'build/smooth-native'
 P = R / 'production/film'
 FF = '/Users/james/.local/lib/python3.14/site-packages/imageio_ffmpeg/binaries/ffmpeg-macos-aarch64-v7.1'
 # Reuse verified compositing helpers and official device artwork, never the old cut sequence.
-script = Path(__file__).with_name('finn_film_v3.py').read_text().split("\nif '--stills' in sys.argv:")[0]
+script = Path(__file__).with_name('finn_device_compositing.py').read_text()
 exec(script)
 files['smooth-live'] = sorted((D / 'live').glob('*.png'))[24:-1]
 files['smooth-setup'] = sorted((D / 'setup').glob('*.png'))[24:-1]
