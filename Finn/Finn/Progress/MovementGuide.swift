@@ -21,7 +21,8 @@ struct MovementAnimationCard: View {
                     .accessibilityIdentifier("posture.playback")
                 }
             }
-            ExerciseFigureView(kind: exercise, lineColor: DashboardStyle.accent, animates: playsIllustration)
+            ExerciseFigureView(kind: exercise, lineColor: DashboardStyle.accent, figureColor: .white,
+                               animates: playsIllustration)
                 .frame(height: 230)
                 .frame(maxWidth: .infinity)
                 .accessibilityIdentifier("posture.illustration")

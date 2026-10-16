@@ -31,7 +31,7 @@ struct ExercisePicker: View {
                 .padding(.horizontal, 14)
                 .frame(minHeight: 44)
                 .background(selected ? DashboardStyle.accent : Color.white.opacity(0.12), in: Capsule())
-                .foregroundStyle(selected ? .black : .white)
+                .foregroundStyle(.white)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(kind.definition.copy.name)
