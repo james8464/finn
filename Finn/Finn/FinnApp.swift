@@ -3,73 +3,95 @@ import SwiftUI
 @main
 struct FinnApp: App {
     #if DEBUG
-    private static func argument(after flag: String) -> String? {
-        let arguments = ProcessInfo.processInfo.arguments
-        guard let index = arguments.firstIndex(of: flag), index + 1 < arguments.count else { return nil }
-        return arguments[index + 1]
-    }
+        private static func argument(after flag: String) -> String? {
+            let arguments = ProcessInfo.processInfo.arguments
+            guard let index = arguments.firstIndex(of: flag), index + 1 < arguments.count else {
+                return nil
+            }
+            return arguments[index + 1]
+        }
 
-    /// demo and video input stay off the watch unless this flag asks for it, to try the watch app in
-    /// a paired simulator. The watch then shows DEMO INPUT.
-    private static var mirrorsDemoOnWatch: Bool {
-        ProcessInfo.processInfo.arguments.contains("-finn-watch-demo")
-    }
+        /// demo and video input stay off the watch unless this flag asks for it, to try the watch app in
+        /// a paired simulator. The watch then shows DEMO INPUT.
+        private static var mirrorsDemoOnWatch: Bool {
+            ProcessInfo.processInfo.arguments.contains("-finn-watch-demo")
+        }
 
-    private static func recordedPoses() -> [PoseFrame]? {
-        guard let path = argument(after: "-finn-video-poses"),
-              let data = FileManager.default.contents(atPath: path) else { return nil }
-        return try? JSONDecoder().decode([PoseFrame].self, from: data)
-    }
+        private static func recordedPoses() -> [PoseFrame]? {
+            guard
+                let path = argument(after: "-finn-video-poses"),
+                let data = FileManager.default.contents(atPath: path) else {
+                return nil
+            }
+            return try? JSONDecoder().decode([PoseFrame].self, from: data)
+        }
     #endif
 
     var body: some Scene {
         WindowGroup {
             #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("-finn-launch-preview") {
-                FinnLaunchPreview(reducesMotion: ProcessInfo.processInfo.arguments
-                    .contains("-finn-launch-reduce-motion"))
-                    .preferredColorScheme(.dark)
-            } else if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
-                ContentView(source: DemoPoseSource(startError:
-                    ProcessInfo.processInfo.arguments.contains("-finn-ui-camera-unavailable")
-                    ? .unavailable : nil,
-                    profileDeviation: ProcessInfo.processInfo.arguments
-                        .contains("-finn-ui-demo-front-view") ? 75 : nil,
-                    missingWrist: ProcessInfo.processInfo.arguments
-                        .contains("-finn-ui-demo-missing-wrist")), store: ProgressDemo.seeded(LocalSessionStore(
-                    url: FileManager.default.temporaryDirectory
-                        .appending(path: "FinnDemo-\(UUID().uuidString)", directoryHint: .isDirectory)
-                        .appending(path: "sessions.json"))),
-                            narrator: ComparisonNarrator(generator: DemoRecapGenerator()),
-                            exerciseClassifier: ProcessInfo.processInfo.arguments
-                                .contains("-finn-ui-demo-recognition") ? DemoExerciseClassifier() : nil,
-                            preferences: FinnPreferences(defaults: UserDefaults(
-                                suiteName: "FinnDemo-\(UUID().uuidString)") ?? .standard,
-                                handsFreeByDefault: ProcessInfo.processInfo.arguments
-                                    .contains("-finn-ui-hands-free")),
-                            announcer: ProcessInfo.processInfo.arguments
-                                .contains("-finn-ui-hands-free") ? LiveAnnouncer() : nil,
-                            connectsAccessories: Self.mirrorsDemoOnWatch,
-                            // `-finn-ui-badges-demo` seeds a few earned badges; `-finn-ui-onboarding`
-                            // shows the welcome screens. Both for headless screenshots.
-                            badgeStore: MemoryBadgeStore(ProcessInfo.processInfo.arguments
-                                .contains("-finn-ui-badges-demo") ? BadgeDemo.sample : []),
-                            showsOnboarding: ProcessInfo.processInfo.arguments.contains("-finn-ui-onboarding"))
-            } else if let path = Self.argument(after: "-finn-video-file") {
-                ContentView(source: VideoFilePoseSource(url: URL(fileURLWithPath: path),
-                                                        recordedPoses: Self.recordedPoses()),
-                            store: LocalSessionStore(url: FileManager.default.temporaryDirectory
-                                .appending(path: "FinnVideo-\(UUID().uuidString)", directoryHint: .isDirectory)
-                                .appending(path: "sessions.json")),
-                            connectsAccessories: Self.mirrorsDemoOnWatch,
-                            badgeStore: MemoryBadgeStore(), showsOnboarding: false)
-            } else {
-                FinnStartupView()
-            }
+                if ProcessInfo.processInfo.arguments.contains("-finn-launch-preview") {
+                    FinnLaunchPreview(reducesMotion: ProcessInfo.processInfo.arguments
+                        .contains("-finn-launch-reduce-motion"))
+                        .preferredColorScheme(.dark)
+                } else if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
+                    ContentView(
+                        source: DemoPoseSource(
+                            startError:
+                            ProcessInfo.processInfo.arguments.contains("-finn-ui-camera-unavailable")
+                                ? .unavailable : nil,
+                            profileDeviation: ProcessInfo.processInfo.arguments
+                                .contains("-finn-ui-demo-front-view") ? 75 : nil,
+                            missingWrist: ProcessInfo.processInfo.arguments
+                                .contains("-finn-ui-demo-missing-wrist")
+                        ),
+                        store: ProgressDemo.seeded(LocalSessionStore(
+                            url: FileManager.default.temporaryDirectory
+                                .appending(path: "FinnDemo-\(UUID().uuidString)", directoryHint: .isDirectory)
+                                .appending(path: "sessions.json")
+                        )),
+                        narrator: ComparisonNarrator(generator: DemoRecapGenerator()),
+                        exerciseClassifier: ProcessInfo.processInfo.arguments
+                            .contains("-finn-ui-demo-recognition") ? DemoExerciseClassifier() : nil,
+                        preferences: FinnPreferences(
+                            defaults: UserDefaults(
+                                suiteName: "FinnDemo-\(UUID().uuidString)"
+                            ) ?? .standard,
+                            handsFreeByDefault: ProcessInfo.processInfo.arguments
+                                .contains("-finn-ui-hands-free")
+                        ),
+                        announcer: ProcessInfo.processInfo.arguments
+                            .contains("-finn-ui-hands-free") ? LiveAnnouncer() : nil,
+                        connectsAccessories: Self.mirrorsDemoOnWatch,
+                        // `-finn-ui-badges-demo` seeds a few earned badges; `-finn-ui-onboarding`
+                        // shows the welcome screens. Both for headless screenshots.
+                        badgeStore: MemoryBadgeStore(ProcessInfo.processInfo.arguments
+                            .contains("-finn-ui-badges-demo") ? BadgeDemo.sample : []),
+                        showsOnboarding: ProcessInfo.processInfo.arguments.contains("-finn-ui-onboarding")
+                    )
+                } else if let path = Self.argument(after: "-finn-video-file") {
+                    ContentView(
+                        source: VideoFilePoseSource(
+                            url: URL(fileURLWithPath: path),
+                            recordedPoses: Self.recordedPoses()
+                        ),
+                        store: LocalSessionStore(url: FileManager.default.temporaryDirectory
+                            .appending(
+                                path: "FinnVideo-\(UUID().uuidString)",
+                                directoryHint: .isDirectory
+                            )
+                            .appending(path: "sessions.json")),
+                        connectsAccessories: Self.mirrorsDemoOnWatch,
+                        badgeStore: MemoryBadgeStore(),
+                        showsOnboarding: false
+                    )
+                } else {
+                    FinnStartupView()
+                }
             #else
-            // only live camera sessions can reach Apple Health; demo and recorded input never do
-            // the widget shows only what this store saves
-            FinnStartupView()
+                // only live camera sessions can reach Apple Health; demo and recorded input never do
+                // the widget shows only what this store saves
+                FinnStartupView()
             #endif
         }
     }

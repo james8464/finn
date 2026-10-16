@@ -80,7 +80,7 @@ struct FinnLEDs: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            ForEach(0..<Self.count, id: \.self) { index in
+            ForEach(0 ..< Self.count, id: \.self) { index in
                 Circle()
                     .fill(DashboardStyle.accent)
                     .frame(width: 6, height: 6)

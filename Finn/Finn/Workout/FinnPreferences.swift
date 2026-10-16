@@ -1,25 +1,41 @@
 import Foundation
 
 nonisolated enum HapticFeedbackStyle: String, CaseIterable, Identifiable, Sendable {
-    case off, gentle, regular
-    var id: String { rawValue }
+    case off
+    case gentle
+    case regular
+    var id: String {
+        rawValue
+    }
+
     var title: String {
         switch self {
-        case .off: String(localized: "Off")
-        case .gentle: String(localized: "Gentle")
-        case .regular: String(localized: "Regular")
+        case .off:
+            String(localized: "Off")
+        case .gentle:
+            String(localized: "Gentle")
+        case .regular:
+            String(localized: "Regular")
         }
     }
 }
 
 nonisolated enum SoundFeedbackStyle: String, CaseIterable, Identifiable, Sendable {
-    case off, soft, bright
-    var id: String { rawValue }
+    case off
+    case soft
+    case bright
+    var id: String {
+        rawValue
+    }
+
     var title: String {
         switch self {
-        case .off: String(localized: "Off")
-        case .soft: String(localized: "Soft")
-        case .bright: String(localized: "Bright")
+        case .off:
+            String(localized: "Off")
+        case .soft:
+            String(localized: "Soft")
+        case .bright:
+            String(localized: "Bright")
         }
     }
 }
@@ -47,7 +63,7 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
     let remembersExercise: Bool
 
     init(defaults: UserDefaults, handsFreeByDefault: Bool = false, remembersExercise: Bool = false) {
-// keep settings selected before the product was renamed. A new value always wins.
+        // keep settings selected before the product was renamed. A new value always wins.
         for (key, value) in defaults.dictionaryRepresentation() where key.hasPrefix("plumb.") {
             let renamedKey = "finn." + key.dropFirst("plumb.".count)
             if defaults.object(forKey: renamedKey) == nil {
@@ -68,11 +84,15 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
     /// it) does not quietly go back to the squat. Nil when nothing is remembered.
     var selectedExercise: ExerciseKind? {
         get {
-            guard remembersExercise else { return nil }
+            guard remembersExercise else {
+                return nil
+            }
             return defaults.string(forKey: Self.selectedExerciseKey).flatMap(ExerciseKind.init(rawValue:))
         }
         nonmutating set {
-            guard remembersExercise else { return }
+            guard remembersExercise else {
+                return
+            }
             defaults.set(newValue?.rawValue, forKey: Self.selectedExerciseKey)
         }
     }
@@ -110,12 +130,16 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
     }
 
     var hapticFeedback: HapticFeedbackStyle {
-        get { defaults.string(forKey: Self.hapticFeedbackKey).flatMap(HapticFeedbackStyle.init(rawValue:)) ?? .gentle }
+        get {
+            defaults.string(forKey: Self.hapticFeedbackKey)
+                .flatMap(HapticFeedbackStyle.init(rawValue:)) ?? .gentle }
         nonmutating set { defaults.set(newValue.rawValue, forKey: Self.hapticFeedbackKey) }
     }
 
     var soundFeedback: SoundFeedbackStyle {
-        get { defaults.string(forKey: Self.soundFeedbackKey).flatMap(SoundFeedbackStyle.init(rawValue:)) ?? .off }
+        get {
+            defaults.string(forKey: Self.soundFeedbackKey)
+                .flatMap(SoundFeedbackStyle.init(rawValue:)) ?? .off }
         nonmutating set { defaults.set(newValue.rawValue, forKey: Self.soundFeedbackKey) }
     }
 

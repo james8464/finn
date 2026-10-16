@@ -23,8 +23,16 @@ struct LastSetEntry: TimelineEntry {
 /// its empty line.
 struct LastSetProvider: TimelineProvider {
     func placeholder(in context: Context) -> LastSetEntry {
-        LastSetEntry(date: .now, snapshot: LastSetSnapshot(exerciseName: "Squat", exerciseKey: "bodyweightSquat",
-                                                           reps: 12, capturedAt: .now, partlyVisible: false))
+        LastSetEntry(
+            date: .now,
+            snapshot: LastSetSnapshot(
+                exerciseName: "Squat",
+                exerciseKey: "bodyweightSquat",
+                reps: 12,
+                capturedAt: .now,
+                partlyVisible: false
+            )
+        )
     }
 
     func getSnapshot(in context: Context, completion: @escaping (LastSetEntry) -> Void) {
@@ -74,7 +82,9 @@ struct SetLiveActivityWidget: Widget {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 4) {
                             Text(context.attributes.exerciseName)
-                            if context.attributes.demoInput { DemoTag() }
+                            if context.attributes.demoInput {
+                                DemoTag()
+                            }
                         }
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)

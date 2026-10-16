@@ -15,14 +15,19 @@ nonisolated struct LastSetReport: Equatable {
 
     /// Siri's answer when the history holds no measured set
     static var nothingYet: String {
-        String(localized: "You haven't measured a set in Finn yet. Say \"Start a squat set in Finn\" to begin.",
-               comment: "Siri, when the history is empty")
+        String(
+            localized: "You haven't measured a set in Finn yet. Say \"Start a squat set in Finn\" to begin.",
+            comment: "Siri, when the history is empty"
+        )
     }
+
     /// Siri's answer when the history cannot be read, for instance while the iPhone is locked
     /// (the file is protected until the first unlock)
     static var unavailable: String {
-        String(localized: "Finn can't read your history right now. Unlock your iPhone and ask again.",
-               comment: "Siri, when the history file cannot be read")
+        String(
+            localized: "Finn can't read your history right now. Unlock your iPhone and ask again.",
+            comment: "Siri, when the history file cannot be read"
+        )
     }
 
     /// the most recent set across all saved sessions, or nil when nothing was measured yet
@@ -31,17 +36,23 @@ nonisolated struct LastSetReport: Equatable {
             return nil
         }
         let kept = set.cueResponse == .notRelevant ? nil : set.cue?.observation
-        return LastSetReport(exercise: set.exercise, reps: set.analysis.reps.count,
-                             capturedAt: set.capturedAt, observation: kept,
-                             partlyVisible: set.partlyVisible == true)
+        return LastSetReport(
+            exercise: set.exercise,
+            reps: set.analysis.reps.count,
+            capturedAt: set.capturedAt,
+            observation: kept,
+            partlyVisible: set.partlyVisible == true
+        )
     }
 
-    var exerciseName: String { exercise.definition.copy.name }
+    var exerciseName: String {
+        exercise.definition.copy.name
+    }
 
     /// "8 measured reps", the same wording as the shared result
     var repsText: String {
         reps == 1 ? String(localized: "1 measured rep", comment: "Siri, rep count")
-                  : String(localized: "\(reps) measured reps", comment: "Siri, rep count")
+            : String(localized: "\(reps) measured reps", comment: "Siri, rep count")
     }
 
     /// "today at 9:40", "yesterday at 18:05", or "12 Oct at 18:05"
@@ -54,35 +65,50 @@ nonisolated struct LastSetReport: Equatable {
         if calendar.isDate(capturedAt, inSameDayAs: now) {
             return String(localized: "today at \(time)", comment: "Siri, when the set was measured")
         }
-        if let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
-           calendar.isDate(capturedAt, inSameDayAs: yesterday) {
+        if
+            let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
+            calendar.isDate(capturedAt, inSameDayAs: yesterday) {
             return String(localized: "yesterday at \(time)", comment: "Siri, when the set was measured")
         }
         var dayStyle = Date.FormatStyle.dateTime.day().month(.abbreviated).locale(locale)
         dayStyle.calendar = calendar
         dayStyle.timeZone = calendar.timeZone
         let day = capturedAt.formatted(dayStyle)
-        return String(localized: "\(day) at \(time)", comment: "Siri, when the set was measured; day then time")
+        return String(
+            localized: "\(day) at \(time)",
+            comment: "Siri, when the set was measured; day then time"
+        )
     }
 
     /// the observation line, honest when there is none
     var observationText: String {
-        if let observation { return observation }
-        if partlyVisible {
-            return String(localized: "Finn saw the joints clearly for only part of the set, so it made no observation.",
-                          comment: "Siri, partly visible set")
+        if let observation {
+            return observation
         }
-        return String(localized: "No clear observation in that set.", comment: "Siri, set without observation")
+        if partlyVisible {
+            return String(
+                localized: "Finn saw the joints clearly for only part of the set, so it made no observation.",
+                comment: "Siri, partly visible set"
+            )
+        }
+        return String(
+            localized: "No clear observation in that set.",
+            comment: "Siri, set without observation"
+        )
     }
 
     /// the sentence Siri reads
     func spoken(now: Date = Date(), calendar: Calendar = .current) -> String {
         let when = whenText(now: now, calendar: calendar)
-        let opening = String(localized: "Your last set in Finn: \(exerciseName), \(repsText), \(when).",
-                             comment: "Siri, first sentence of the last-set answer")
+        let opening = String(
+            localized: "Your last set in Finn: \(exerciseName), \(repsText), \(when).",
+            comment: "Siri, first sentence of the last-set answer"
+        )
         if let observation {
-            return String(localized: "\(opening) Finn noted: \(observation)",
-                          comment: "Siri, the observation recorded for the set, word for word")
+            return String(
+                localized: "\(opening) Finn noted: \(observation)",
+                comment: "Siri, the observation recorded for the set, word for word"
+            )
         }
         return "\(opening) \(observationText)"
     }

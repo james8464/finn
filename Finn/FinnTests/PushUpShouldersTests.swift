@@ -8,9 +8,15 @@ import Testing
 nonisolated struct PushUpShouldersTests {
     /// Shoulders, nose and planted wrists. `hiddenAtBottom` drops every joint for that long around
     /// each bottom, as Vision does when the head leaves the picture. `wristSwing` moves the wrists.
-    private func frames(reps: Int, drop: Double = 0.22, period: Double = 1.4,
-                        deviation: Double? = 85, noseOnly: ClosedRange<Double>? = nil,
-                        hiddenAtBottom: Double = 0, wristSwing: Double = 0) -> [PoseFrame] {
+    private func frames(
+        reps: Int,
+        drop: Double = 0.22,
+        period: Double = 1.4,
+        deviation: Double? = 85,
+        noseOnly: ClosedRange<Double>? = nil,
+        hiddenAtBottom: Double = 0,
+        wristSwing: Double = 0
+    ) -> [PoseFrame] {
         let duration = Double(reps) * period + 2
         return stride(from: 0.0, through: duration, by: 1.0 / 15).map { time in
             let phase = max(0, time - 1) / period
@@ -25,7 +31,7 @@ nonisolated struct PushUpShouldersTests {
                 joints[.leftShoulder] = JointPoint(x: 0.4, y: shoulderY, confidence: 0.8)
                 joints[.rightShoulder] = JointPoint(x: 0.6, y: shoulderY, confidence: 0.8)
             }
-// within `hiddenAtBottom` seconds of the deepest point of a rep, the upper body is lost.
+            // within `hiddenAtBottom` seconds of the deepest point of a rep, the upper body is lost.
             if hiddenAtBottom > 0, time >= 1, phase < Double(reps) {
                 let distanceToBottom = abs(phase - phase.rounded(.down) - 0.5) * period
                 if distanceToBottom < hiddenAtBottom / 2 {
@@ -34,13 +40,22 @@ nonisolated struct PushUpShouldersTests {
                     joints[.rightShoulder] = nil
                 }
             }
-            return PoseFrame(time: time, subjectCount: 1, joints: joints, aspectRatio: 1.78,
-                             profileDeviationDegrees: deviation, athleteTracking: .tracked)
+            return PoseFrame(
+                time: time,
+                subjectCount: 1,
+                joints: joints,
+                aspectRatio: 1.78,
+                profileDeviationDegrees: deviation,
+                athleteTracking: .tracked
+            )
         }
     }
 
     private func repCount(_ frames: [PoseFrame], as definition: ExerciseDefinition = .pushUp) -> Int? {
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: definition) else { return nil }
+        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: definition)
+        else {
+            return nil
+        }
         return analysis.reps.count
     }
 
@@ -59,7 +74,7 @@ nonisolated struct PushUpShouldersTests {
     }
 
     @Test func noseStandsInWhereBothShouldersAreLostBriefly() {
-        #expect(repCount(frames(reps: 8, noseOnly: 4...4.5)) == 8)
+        #expect(repCount(frames(reps: 8, noseOnly: 4 ... 4.5)) == 8)
     }
 
     @Test func aBottomHiddenByTheFrameStillCounts() {
@@ -79,8 +94,14 @@ nonisolated struct PushUpShouldersTests {
             var joints = frame.joints
             joints[.leftWrist] = nil
             joints[.rightWrist] = nil
-            return PoseFrame(time: frame.time, subjectCount: 1, joints: joints, aspectRatio: frame.aspectRatio,
-                             profileDeviationDegrees: frame.profileDeviationDegrees, athleteTracking: .tracked)
+            return PoseFrame(
+                time: frame.time,
+                subjectCount: 1,
+                joints: joints,
+                aspectRatio: frame.aspectRatio,
+                profileDeviationDegrees: frame.profileDeviationDegrees,
+                athleteTracking: .tracked
+            )
         }
         #expect(repCount(withoutWrists) == nil)
     }

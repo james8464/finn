@@ -14,7 +14,8 @@ final class StartupUITests: XCTestCase {
         app.selectTab("Workout")
         XCUIDevice.shared.press(.home)
         app.activate()
-        XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["tab.workout"].isSelected)
+        XCTAssertTrue(app.buttons["workout.launch"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.otherElements["launch.loading"].exists)
         let capture = XCTAttachment(screenshot: app.screenshot())
         capture.name = "Returned to Finn"

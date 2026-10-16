@@ -2,7 +2,9 @@ import XCTest
 
 /// isolates the screens reported by the whole-app clipping survey
 final class ClippingRegressionUITests: XCTestCase {
-    override func setUpWithError() throws { continueAfterFailure = true }
+    override func setUpWithError() throws {
+        continueAfterFailure = true
+    }
 
     @MainActor func testAwardSheetDoesNotClipText() throws {
         try atBothTextSizes("award", arguments: ["-finn-ui-badges-demo", "-finn-open", "awards"]) { app in
@@ -45,7 +47,9 @@ final class ClippingRegressionUITests: XCTestCase {
             Thread.sleep(forTimeInterval: 2)
             try save("\(name)-\(size)-before")
             try app.performAccessibilityAudit(for: .textClipped) { issue in
-                print("CLIPPING_REGRESSION \(name) \(size): \(issue.detailedDescription) \(issue.element?.debugDescription ?? "no element")")
+                print(
+                    "CLIPPING_REGRESSION \(name) \(size): \(issue.detailedDescription) \(issue.element?.debugDescription ?? "no element")"
+                )
                 XCTFail("\(name) \(size): \(issue.compactDescription)")
                 return true
             }
@@ -55,7 +59,9 @@ final class ClippingRegressionUITests: XCTestCase {
     }
 
     private func save(_ name: String) throws {
-        guard let path = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] else { return }
+        guard let path = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] else {
+            return
+        }
         let directory = URL(fileURLWithPath: path, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try XCUIScreen.main.screenshot().pngRepresentation.write(to: directory.appending(path: name + ".png"))

@@ -17,13 +17,17 @@ nonisolated struct LocalBadgeStore: BadgeStoring {
     }
 
     func load() throws -> [EarnedBadge] {
-        guard FileManager.default.fileExists(atPath: url.path) else { return [] }
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return []
+        }
         return try JSONDecoder().decode([EarnedBadge].self, from: Data(contentsOf: url))
     }
 
     func save(_ badges: [EarnedBadge]) throws {
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
-                                                withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
         try JSONEncoder().encode(badges).write(to: url, options: [.atomic, .completeFileProtection])
     }
 }
@@ -31,9 +35,17 @@ nonisolated struct LocalBadgeStore: BadgeStoring {
 /// keeps badges in memory only, for tests and demo input
 final class MemoryBadgeStore: BadgeStoring, @unchecked Sendable {
     private var badges: [EarnedBadge]
-    init(_ badges: [EarnedBadge] = []) { self.badges = badges }
-    func load() throws -> [EarnedBadge] { badges }
-    func save(_ badges: [EarnedBadge]) throws { self.badges = badges }
+    init(_ badges: [EarnedBadge] = []) {
+        self.badges = badges
+    }
+
+    func load() throws -> [EarnedBadge] {
+        badges
+    }
+
+    func save(_ badges: [EarnedBadge]) throws {
+        self.badges = badges
+    }
 }
 
 /// the badges the person has, and the ones just earned, to show once at the end of a set
@@ -55,9 +67,13 @@ final class BadgeLedger {
         BadgeKind.all.map { kind in (kind, earned.first { $0.kind == kind }) }
     }
 
-    var count: Int { earned.count }
+    var count: Int {
+        earned.count
+    }
 
-    func has(_ kind: BadgeKind) -> Bool { earned.contains { $0.kind == kind } }
+    func has(_ kind: BadgeKind) -> Bool {
+        earned.contains { $0.kind == kind }
+    }
 
     /// compares the history with what was already given and keeps the new ones. Returns them.
     /// only the badges that `celebrating`, the set just saved, earned itself go to `justEarned`;
@@ -65,19 +81,26 @@ final class BadgeLedger {
     /// written down quietly. A set that earned nothing shows nothing, even if the launch found
     /// badges in the history
     @discardableResult
-    func update(history: [WorkoutSessionSummary], calendar: Calendar = .current,
-                celebrating setID: UUID? = nil) -> [EarnedBadge] {
+    func update(
+        history: [WorkoutSessionSummary],
+        calendar: Calendar = .current,
+        celebrating setID: UUID? = nil
+    ) -> [EarnedBadge] {
         let supported = BadgeRules.evaluate(history: history, calendar: calendar)
         let fresh = supported.filter { badge in !earned.contains { $0.kind == badge.kind } }
         justEarned = fresh.filter { $0.setID != nil && $0.setID == setID }
-        guard !fresh.isEmpty else { return [] }
+        guard !fresh.isEmpty else {
+            return []
+        }
         earned.append(contentsOf: fresh)
         earned.sort { $0.earnedAt < $1.earnedAt }
         try? store.save(earned)
         return fresh
     }
 
-    func acknowledge() { justEarned = [] }
+    func acknowledge() {
+        justEarned = []
+    }
 
     /// forgets every badge, for "Delete all local data"
     func reset() {

@@ -3,7 +3,9 @@ import UIKit
 
 /// navigation regression checks, with optional screenshots for the design review
 final class NativeUIReviewUITests: XCTestCase {
-    override func setUpWithError() throws { continueAfterFailure = false }
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+    }
 
     @MainActor
     func testNativeDestinations() throws {
@@ -52,14 +54,19 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
         try save("workout-dark")
         app.terminate()
-        app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launchArguments += [
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
         app.launch()
         XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 8))
         try save("summary-largest-text")
         XCTAssertGreaterThan(app.buttons["tab.home"].frame.height, regularHomeFrame.height)
         XCTAssertGreaterThan(app.buttons["tab.home"].frame.width, regularHomeFrame.width)
         try app.performAccessibilityAudit(for: [.textClipped, .hitRegion]) { issue in
-            print("Largest Home: \(issue.compactDescription) \(issue.element?.debugDescription ?? "no element")")
+            print(
+                "Largest Home: \(issue.compactDescription) \(issue.element?.debugDescription ?? "no element")"
+            )
             return false
         }
         app.openWorkoutTab()
@@ -83,13 +90,18 @@ final class NativeUIReviewUITests: XCTestCase {
     @MainActor
     func testHomeLargestTextAccessibilityAudit() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launchArguments = [
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
         app.launch()
         app.skipOnboardingIfShown()
         XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 8))
         try save("home-largest-text-normal")
         try app.performAccessibilityAudit(for: [.textClipped, .hitRegion]) { issue in
-            print("Home without demo: \(issue.compactDescription) \(issue.element?.debugDescription ?? "no element")")
+            print(
+                "Home without demo: \(issue.compactDescription) \(issue.element?.debugDescription ?? "no element")"
+            )
             return false
         }
     }
@@ -97,7 +109,11 @@ final class NativeUIReviewUITests: XCTestCase {
     @MainActor
     func testRestoredLargestTextControls() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["-finn-ui-demo", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launchArguments = [
+            "-finn-ui-demo",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
         app.launch()
         app.openWorkoutTab()
         XCTAssertTrue(app.buttons["home.start"].isHittable)
@@ -114,7 +130,11 @@ final class NativeUIReviewUITests: XCTestCase {
         app.selectTab("Home")
         XCTAssertTrue(app.buttons["home.tryFinn"].exists)
         app.selectTab("Coach")
-        XCTAssertEqual(field.value as? String, "My last set", "Dismissing the keyboard must preserve the draft")
+        XCTAssertEqual(
+            field.value as? String,
+            "My last set",
+            "Dismissing the keyboard must preserve the draft"
+        )
     }
 
     @MainActor
@@ -126,7 +146,9 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.tryFinn"].exists)
         try save("summary-french")
         let best = app.buttons["home.weights"]
-        if !best.isHittable { app.swipeUp() }
+        if !best.isHittable {
+            app.swipeUp()
+        }
         best.tap()
         XCTAssertTrue(app.navigationBars["Meilleure série"].waitForExistence(timeout: 3))
         app.selectTab("Séance")
@@ -139,22 +161,22 @@ final class NativeUIReviewUITests: XCTestCase {
     func testHealthOfferAtLargestText() throws {
         for (size, name) in [("UICTContentSizeCategoryL", "health-offer"),
                              ("UICTContentSizeCategoryAccessibilityXXXL", "health-offer-largest-text")] {
-        let app = XCUIApplication()
-        app.launchArguments = ["-finn-ui-demo", "-finn-open", "health",
-                               "-UIPreferredContentSizeCategoryName", size]
-        app.launch()
-        XCTAssertTrue(app.buttons["offer.later"].waitForExistence(timeout: 8))
-        XCTAssertTrue(app.buttons["offer.later"].isHittable)
-        XCTAssertTrue(app.buttons["offer.personalize"].isHittable)
-        XCTAssertEqual(app.buttons["offer.personalize"].label, "Continue")
-        assertHealthActionTextIsVisible(app.buttons["offer.personalize"])
-        XCTAssertTrue(app.staticTexts["Personalize with Health"].exists)
-        try save(name)
-        app.scrollViews.firstMatch.swipeUp()
-        try save(name + "-bottom")
-        app.buttons["offer.later"].tap()
-        XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 3))
-        app.terminate()
+            let app = XCUIApplication()
+            app.launchArguments = ["-finn-ui-demo", "-finn-open", "health",
+                                   "-UIPreferredContentSizeCategoryName", size]
+            app.launch()
+            XCTAssertTrue(app.buttons["offer.later"].waitForExistence(timeout: 8))
+            XCTAssertTrue(app.buttons["offer.later"].isHittable)
+            XCTAssertTrue(app.buttons["offer.personalize"].isHittable)
+            XCTAssertEqual(app.buttons["offer.personalize"].label, "Continue")
+            assertHealthActionTextIsVisible(app.buttons["offer.personalize"])
+            XCTAssertTrue(app.staticTexts["Personalize with Health"].exists)
+            try save(name)
+            app.scrollViews.firstMatch.swipeUp()
+            try save(name + "-bottom")
+            app.buttons["offer.later"].tap()
+            XCTAssertTrue(app.buttons["tab.home"].waitForExistence(timeout: 3))
+            app.terminate()
         }
     }
 
@@ -195,14 +217,18 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertTrue(replay.isHittable)
         try save("options-largest-text-end")
         let data = app.buttons["Health data"]
-        for _ in 0..<12 where !data.isHittable { app.swipeDown() }
+        for _ in 0 ..< 12 where !data.isHittable {
+            app.swipeDown()
+        }
         data.tap()
         try save("health-data-largest-text")
     }
 
     @MainActor
     private func save(_ name: String) throws {
-        guard let directory = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] else { return }
+        guard let directory = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] else {
+            return
+        }
         let url = URL(fileURLWithPath: directory, isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         // let native navigation/material transitions settle before capturing
@@ -219,17 +245,27 @@ final class NativeUIReviewUITests: XCTestCase {
         let width = image.width, height = image.height
         var pixels = [UInt8](repeating: 0, count: width * height * 4)
         let rendered = pixels.withUnsafeMutableBytes { buffer in
-            guard let context = CGContext(data: buffer.baseAddress, width: width, height: height,
-                bitsPerComponent: 8, bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
-                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
+            guard
+                let context = CGContext(
+                    data: buffer.baseAddress,
+                    width: width,
+                    height: height,
+                    bitsPerComponent: 8,
+                    bytesPerRow: width * 4,
+                    space: CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+                )
+            else {
+                return false
+            }
             context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
             return true
         }
         XCTAssertTrue(rendered)
         // ignore the rounded corners; the centre must contain the dark, visible label
         var darkPixels = 0
-        for y in (height / 5)..<(height * 4 / 5) {
-            for x in (width / 5)..<(width * 4 / 5) {
+        for y in (height / 5) ..< (height * 4 / 5) {
+            for x in (width / 5) ..< (width * 4 / 5) {
                 let offset = (y * width + x) * 4
                 if pixels[offset] < 128 && pixels[offset + 1] < 128 && pixels[offset + 2] < 128 {
                     darkPixels += 1

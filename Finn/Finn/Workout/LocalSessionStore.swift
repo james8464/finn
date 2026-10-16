@@ -20,12 +20,17 @@ nonisolated enum FinnDataMigration {
     static func directory(in support: URL, fileManager: FileManager = .default) -> URL {
         let current = support.appending(path: "Finn", directoryHint: .isDirectory)
         let previous = support.appending(path: "Plumb", directoryHint: .isDirectory)
-        guard fileManager.fileExists(atPath: previous.path) else { return current }
+        guard fileManager.fileExists(atPath: previous.path) else {
+            return current
+        }
         do {
             if !fileManager.fileExists(atPath: current.path) {
                 try fileManager.moveItem(at: previous, to: current)
             } else {
-                for item in try fileManager.contentsOfDirectory(at: previous, includingPropertiesForKeys: nil) {
+                for item in try fileManager.contentsOfDirectory(
+                    at: previous,
+                    includingPropertiesForKeys: nil
+                ) {
                     let destination = current.appending(path: item.lastPathComponent)
                     if !fileManager.fileExists(atPath: destination.path) {
                         try fileManager.moveItem(at: item, to: destination)
@@ -43,8 +48,10 @@ nonisolated struct LocalSessionStore: SessionStoring {
     let url: URL
     private let removeItem: (URL) throws -> Void
 
-    init(url: URL? = nil,
-         removeItem: @escaping (URL) throws -> Void = { try FileManager.default.removeItem(at: $0) }) {
+    init(
+        url: URL? = nil,
+        removeItem: @escaping (URL) throws -> Void = { try FileManager.default.removeItem(at: $0) }
+    ) {
         self.url = url ?? FinnDataMigration.directory(in:
             FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0])
             .appending(path: "sessions.json")
@@ -53,12 +60,15 @@ nonisolated struct LocalSessionStore: SessionStoring {
 
     func load() throws -> [WorkoutSessionSummary] {
         try protectExistingHistory()
-        guard FileManager.default.fileExists(atPath: url.path) else { return [] }
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return []
+        }
         let data = try Data(contentsOf: url)
         do {
             let sessions = try JSONDecoder().decode([WorkoutSessionSummary].self, from: data)
-            guard Set(sessions.map(\.id)).count == sessions.count,
-                  sessions.allSatisfy(Self.isValid) else {
+            guard
+                Set(sessions.map(\.id)).count == sessions.count,
+                sessions.allSatisfy(Self.isValid) else {
                 throw SessionStoreError.corrupted
             }
             return sessions
@@ -68,7 +78,9 @@ nonisolated struct LocalSessionStore: SessionStoring {
     }
 
     func save(_ session: WorkoutSessionSummary) throws {
-        guard Self.isValid(session) else { throw SessionStoreError.invalidSession }
+        guard Self.isValid(session) else {
+            throw SessionStoreError.invalidSession
+        }
         var sessions = try load()
         if let index = sessions.firstIndex(where: { $0.id == session.id }) {
             sessions[index] = session
@@ -85,14 +97,20 @@ nonisolated struct LocalSessionStore: SessionStoring {
 
     func deleteAll() throws {
         let directory = url.deletingLastPathComponent()
-        guard FileManager.default.fileExists(atPath: directory.path) else { return }
-        let contents = try FileManager.default.contentsOfDirectory(at: directory,
-                                                                   includingPropertiesForKeys: nil)
+        guard FileManager.default.fileExists(atPath: directory.path) else {
+            return
+        }
+        let contents = try FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil
+        )
         let backups = contents.filter { file in
             file.lastPathComponent.hasPrefix("sessions-corrupt-") &&
                 file.lastPathComponent.hasSuffix(".json")
         }.sorted { $0.lastPathComponent < $1.lastPathComponent }
-        for backup in backups { try removeItem(backup) }
+        for backup in backups {
+            try removeItem(backup)
+        }
         if let primary = contents.first(where: { $0.lastPathComponent == url.lastPathComponent }) {
             try removeItem(primary)
         }
@@ -112,43 +130,63 @@ nonisolated struct LocalSessionStore: SessionStoring {
     }
 
     private func write(_ sessions: [WorkoutSessionSummary]) throws {
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
-                                                withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
         let data = try JSONEncoder().encode(sessions)
         try data.write(to: url, options: [.atomic, .completeFileProtection])
-        try (url as NSURL).setResourceValue(URLFileProtection.complete,
-                                            forKey: .fileProtectionKey)
+        try (url as NSURL).setResourceValue(
+            URLFileProtection.complete,
+            forKey: .fileProtectionKey
+        )
     }
 
     /// JSON can decode successfully and still contain impossible measurements or duplicate IDs.
     /// Keep damaged history intact for the existing recovery flow instead of feeding it to charts,
     /// comparisons or Apple Health. Failed writes must leave the last good save untouched.
     private static func isValid(_ session: WorkoutSessionSummary) -> Bool {
-        guard session.startedAt.timeIntervalSinceReferenceDate.isFinite,
-              Set(session.sets.map(\.id)).count == session.sets.count else { return false }
+        guard
+            session.startedAt.timeIntervalSinceReferenceDate.isFinite,
+            Set(session.sets.map(\.id)).count == session.sets.count else {
+            return false
+        }
         return session.sets.allSatisfy { set in
-            guard set.sessionID == session.id, set.capturedAt.timeIntervalSinceReferenceDate.isFinite,
-                  set.analysis.confidence.isFinite, (0...1).contains(set.analysis.confidence) else { return false }
+            guard
+                set.sessionID == session.id, set.capturedAt.timeIntervalSinceReferenceDate.isFinite,
+                set.analysis.confidence.isFinite,
+                (0 ... 1).contains(set.analysis.confidence) else {
+                return false
+            }
             var previousEnd = 0.0
             for (index, rep) in set.analysis.reps.enumerated() {
-                guard rep.isValid, rep.number == index + 1, rep.startTime >= previousEnd,
-                      rep.endTime <= 600, rep.relativeRange <= 360,
-                      abs(rep.postureValue ?? 0) <= 360 else { return false }
+                guard
+                    rep.isValid, rep.number == index + 1, rep.startTime >= previousEnd,
+                    rep.endTime <= 600, rep.relativeRange <= 360,
+                    abs(rep.postureValue ?? 0) <= 360 else {
+                    return false
+                }
                 previousEnd = rep.endTime
             }
             let measurements = set.formMeasurements ?? []
-            guard Set(measurements.map(\.check)).count == measurements.count,
-                  measurements.allSatisfy({
-                      $0.check.exercise == set.exercise && $0.judged > 0
-                          && $0.judged <= set.analysis.reps.count
-                          && $0.faulty >= 0 && $0.faulty <= $0.judged
-                          && $0.typical.isFinite && abs($0.typical) <= 1_000
-                  }) else { return false }
+            guard
+                Set(measurements.map(\.check)).count == measurements.count,
+                measurements.allSatisfy({
+                    $0.check.exercise == set.exercise && $0.judged > 0
+                        && $0.judged <= set.analysis.reps.count
+                        && $0.faulty >= 0 && $0.faulty <= $0.judged
+                        && $0.typical.isFinite && abs($0.typical) <= 1_000
+                }) else {
+                return false
+            }
             if let cue = set.cue {
                 let knownNumbers = Set(set.analysis.reps.map(\.number))
-                guard cue.repNumbers.allSatisfy(knownNumbers.contains),
-                      cue.earlierMedian.isFinite, cue.laterMedian.isFinite,
-                      abs(cue.earlierMedian) <= 1_000, abs(cue.laterMedian) <= 1_000 else { return false }
+                guard
+                    cue.repNumbers.allSatisfy(knownNumbers.contains),
+                    cue.earlierMedian.isFinite, cue.laterMedian.isFinite,
+                    abs(cue.earlierMedian) <= 1_000, abs(cue.laterMedian) <= 1_000 else {
+                    return false
+                }
             }
             return true
         }
@@ -156,16 +194,25 @@ nonisolated struct LocalSessionStore: SessionStoring {
 
     private func protectExistingHistory() throws {
         let directory = url.deletingLastPathComponent()
-        guard FileManager.default.fileExists(atPath: directory.path) else { return }
-        let files = try FileManager.default.contentsOfDirectory(at: directory,
-                                                                 includingPropertiesForKeys: [.fileProtectionKey])
+        guard FileManager.default.fileExists(atPath: directory.path) else {
+            return
+        }
+        let files = try FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.fileProtectionKey]
+        )
         for file in files {
             let name = file.lastPathComponent
-            guard name == url.lastPathComponent ||
-                    (name.hasPrefix("sessions-corrupt-") && name.hasSuffix(".json")) else { continue }
+            guard
+                name == url.lastPathComponent ||
+                (name.hasPrefix("sessions-corrupt-") && name.hasSuffix(".json")) else {
+                continue
+            }
             if try file.resourceValues(forKeys: [.fileProtectionKey]).fileProtection != .complete {
-                try (file as NSURL).setResourceValue(URLFileProtection.complete,
-                                                    forKey: .fileProtectionKey)
+                try (file as NSURL).setResourceValue(
+                    URLFileProtection.complete,
+                    forKey: .fileProtectionKey
+                )
             }
         }
     }

@@ -35,12 +35,16 @@ nonisolated struct SharedSetStore: @unchecked Sendable {
     /// the store the app and the widget share. Nil only when the App Group container is missing,
     /// which means the entitlement is not in the build; nothing is written then
     static var appGroup: SharedSetStore? {
-        guard let defaults = UserDefaults(suiteName: appGroupID) else { return nil }
+        guard let defaults = UserDefaults(suiteName: appGroupID) else {
+            return nil
+        }
         return SharedSetStore(defaults: defaults)
     }
 
     func read() -> LastSetSnapshot? {
-        guard let data = defaults.data(forKey: Self.key) else { return nil }
+        guard let data = defaults.data(forKey: Self.key) else {
+            return nil
+        }
         return try? JSONDecoder().decode(LastSetSnapshot.self, from: data)
     }
 
@@ -78,9 +82,12 @@ nonisolated enum FinnDeepLink: Equatable, Sendable {
 
     /// nil for any URL the app does not know, which is then ignored
     init?(_ url: URL) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              [Self.scheme, "plumb"].contains(components.scheme?.lowercased() ?? ""),
-              components.host?.lowercased() == Self.startHost else { return nil }
+        guard
+            let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+            [Self.scheme, "plumb"].contains(components.scheme?.lowercased() ?? ""),
+            components.host?.lowercased() == Self.startHost else {
+            return nil
+        }
         let key = components.queryItems?.first { $0.name == Self.exerciseItem }?.value
         self = .startSet(exerciseKey: key?.isEmpty == false ? key : nil)
     }

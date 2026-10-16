@@ -5,20 +5,43 @@ import Testing
 struct FormTrendTests {
     private let session = UUID()
 
-    private func set(_ measurements: [FormMeasurement]?, exercise: ExerciseKind = .bodyweightSquat,
-                     side: BodySide = .left, partlyVisible: Bool? = nil) -> SetSummary {
-        let reps = (1...6).map { RepMetric(number: $0, startTime: Double($0),
-                                         endTime: Double($0) + 0.5, relativeRange: 0.4) }
-        return SetSummary(id: UUID(), sessionID: session, capturedAt: .now, bodySide: side,
-                          analysis: SetAnalysis(reps: reps, confidence: 0.9,
-                                                rubricVersion: "squat-side-v7"),
-                          cue: nil, cueResponse: .unanswered, exercise: exercise,
-                          formMeasurements: measurements, partlyVisible: partlyVisible)
+    private func set(
+        _ measurements: [FormMeasurement]?,
+        exercise: ExerciseKind = .bodyweightSquat,
+        side: BodySide = .left,
+        partlyVisible: Bool? = nil
+    ) -> SetSummary {
+        let reps = (1 ... 6).map { RepMetric(
+            number: $0,
+            startTime: Double($0),
+            endTime: Double($0) + 0.5,
+            relativeRange: 0.4
+        ) }
+        return SetSummary(
+            id: UUID(),
+            sessionID: session,
+            capturedAt: .now,
+            bodySide: side,
+            analysis: SetAnalysis(
+                reps: reps,
+                confidence: 0.9,
+                rubricVersion: "squat-side-v7"
+            ),
+            cue: nil,
+            cueResponse: .unanswered,
+            exercise: exercise,
+            formMeasurements: measurements,
+            partlyVisible: partlyVisible
+        )
     }
 
     private func depth(_ faulty: Int, judged: Int = 6) -> FormMeasurement {
-        FormMeasurement(check: .squatDepth, judged: judged, faulty: faulty,
-                        typical: 35)
+        FormMeasurement(
+            check: .squatDepth,
+            judged: judged,
+            faulty: faulty,
+            typical: 35
+        )
     }
 
     private func chest(_ faulty: Int) -> FormMeasurement {
@@ -58,8 +81,11 @@ struct FormTrendTests {
         let compatible = set([depth(5)])
         let newerDifferentSide = set([depth(5)], side: .right)
         let latest = set([depth(1)])
-        #expect(FormTrend.compareLatest(to: latest,
-                                        among: [newerDifferentSide, compatible]).map(\.check) == [.squatDepth])
+        #expect(FormTrend.compareLatest(
+            to: latest,
+            among: [newerDifferentSide, compatible]
+        )
+        .map(\.check) == [.squatDepth])
     }
 
     @Test func comparesEachCheckWithItsOwnLatestEligibleSet() {

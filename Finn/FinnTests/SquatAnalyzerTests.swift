@@ -47,7 +47,7 @@ nonisolated struct SquatAnalyzerTests {
     }
 
     @Test func stationaryTraceHasNoReps() {
-        let frames = (0...40).map { index in
+        let frames = (0 ... 40).map { index in
             frame(time: Double(index) * 0.1, hipY: 0.42)
         }
 
@@ -65,13 +65,15 @@ nonisolated struct SquatAnalyzerTests {
     @Test func aWobbleOnTheWayDownKeepsTheRepsFullDepth() {
         var frames: [PoseFrame] = []
         var time = 0.0
-        for rep in 0..<6 {
+        for rep in 0 ..< 6 {
             // 30 samples per rep at 0.1 s: down to 0.20 below standing, back up.
-            for index in 0..<30 {
+            for index in 0 ..< 30 {
                 let phase = Double(index) / 30
                 var drop = 0.20 * (1 - cos(2 * .pi * phase)) / 2
-// reps 5 and 6 stall about halfway down and rise a little before going on.
-                if rep >= 4 && index >= 8 && index < 12 { drop = 0.13 - 0.02 * Double(index - 8) }
+                // reps 5 and 6 stall about halfway down and rise a little before going on.
+                if rep >= 4 && index >= 8 && index < 12 {
+                    drop = 0.13 - 0.02 * Double(index - 8)
+                }
                 frames.append(frame(time: time, hipY: 0.42 + drop))
                 time += 0.1
             }
@@ -109,7 +111,7 @@ nonisolated struct SquatAnalyzerTests {
     }
 
     private func squatTrace(reps: Int, startTime: Double = 0) -> [PoseFrame] {
-        (0...(reps * 20)).map { index in
+        (0 ... (reps * 20)).map { index in
             let time = startTime + Double(index) * 0.1
             let phase = Double(index % 20) / 20
             let hipY = 0.42 + 0.20 * (1 - cos(2 * .pi * phase)) / 2

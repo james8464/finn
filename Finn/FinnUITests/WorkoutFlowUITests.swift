@@ -3,8 +3,10 @@ import XCTest
 final class WorkoutFlowUITests: XCTestCase {
     @MainActor
     func testPhysicalCameraOpensAfterPermission() throws {
-        try XCTSkipUnless(ProcessInfo.processInfo.environment["FINN_PHYSICAL_CAMERA"] == "1",
-                          "Run explicitly on a connected iPhone with TEST_RUNNER_FINN_PHYSICAL_CAMERA=1")
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["FINN_PHYSICAL_CAMERA"] == "1",
+            "Run explicitly on a connected iPhone with TEST_RUNNER_FINN_PHYSICAL_CAMERA=1"
+        )
         let app = XCUIApplication()
         app.resetAuthorizationStatus(for: .camera)
         app.launch()
@@ -12,17 +14,23 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 8))
         app.buttons["home.start"].tap()
         let primer = app.buttons["primer.continue"]
-        if primer.waitForExistence(timeout: 5) { primer.tap() }
+        if primer.waitForExistence(timeout: 5) {
+            primer.tap()
+        }
 
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         let allow = springboard.buttons.matching(NSPredicate(
             format: "label ==[c] %@ OR label ==[c] %@ OR label ==[c] %@",
             "Allow", "OK", "Autoriser"
         )).firstMatch
-        if allow.waitForExistence(timeout: 8) { allow.tap() }
+        if allow.waitForExistence(timeout: 8) {
+            allow.tap()
+        }
 
-        XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 15),
-                      "Live camera framing should open after permission")
+        XCTAssertTrue(
+            app.buttons["Start set"].waitForExistence(timeout: 15),
+            "Live camera framing should open after permission"
+        )
         capture(app, name: "Physical iPhone camera framing")
     }
 
@@ -60,7 +68,10 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Start set"].tap()
         let reps = app.descendants(matching: .any)["capture.liveReps"]
         XCTAssertTrue(reps.waitForExistence(timeout: 6))
-        let counted = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value != %@", "0"), object: reps)
+        let counted = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value != %@", "0"),
+            object: reps
+        )
         XCTAssertEqual(XCTWaiter().wait(for: [counted], timeout: 8), .completed)
         capture(app, name: "Live rep count")
         app.buttons["Stop set"].tap()
@@ -99,8 +110,11 @@ final class WorkoutFlowUITests: XCTestCase {
         let displayedSeconds = Double(parts[0] * 60 + parts[1])
         let timeSinceRestart = ProcessInfo.processInfo.systemUptime - restartTappedAt
         // querying the UI can take several seconds on CI; compare against the new tap's clock
-        XCTAssertLessThanOrEqual(displayedSeconds, timeSinceRestart + 1,
-                                 "The next set's timer should start from its own Start tap")
+        XCTAssertLessThanOrEqual(
+            displayedSeconds,
+            timeSinceRestart + 1,
+            "The next set's timer should start from its own Start tap"
+        )
     }
 
     @MainActor
@@ -190,7 +204,9 @@ final class WorkoutFlowUITests: XCTestCase {
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .textClipped, .trait,
         ]) { issue in
-            print("Accessibility: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
+            print(
+                "Accessibility: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")"
+            )
             return false
         }
         verifyPrivacyDisclosures(app)
@@ -200,9 +216,26 @@ final class WorkoutFlowUITests: XCTestCase {
     private func verifyPrivacyDisclosures(_ app: XCUIApplication) {
         XCTAssertTrue(app.navigationBars["Privacy"].waitForExistence(timeout: 5))
         let sections: [(String, [String])] = [
-            ("privacy.camera", ["Video is processed on this iPhone and never saved.", "Finn uses the camera to measure", "One camera view cannot assess"]),
-            ("Saved results", ["Measured set summaries are saved", "Saved summaries may be included", "Delete saved sessions in History."]),
-            ("Apple Health", ["If you turn on Save workouts", "Finn reads Health only", "Health keeps these workouts"]),
+            (
+                "privacy.camera",
+                [
+                    "Video is processed on this iPhone and never saved.",
+                    "Finn uses the camera to measure",
+                    "One camera view cannot assess"
+                ]
+            ),
+            (
+                "Saved results",
+                [
+                    "Measured set summaries are saved",
+                    "Saved summaries may be included",
+                    "Delete saved sessions in History."
+                ]
+            ),
+            (
+                "Apple Health",
+                ["If you turn on Save workouts", "Finn reads Health only", "Health keeps these workouts"]
+            ),
             ("Optional audio", ["Finn says the countdown"]),
             ("privacy.coach", ["Coach uses your question and saved set summaries."]),
             ("Optional explanation", ["On supported iPhones, Apple's on-device model"]),
@@ -212,11 +245,14 @@ final class WorkoutFlowUITests: XCTestCase {
             app.reveal(disclosure)
             disclosure.tap()
             for sentence in sentences {
-                let text = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", sentence)).firstMatch
+                let text = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", sentence))
+                    .firstMatch
                 app.reveal(text)
                 XCTAssertTrue(text.exists, "Missing privacy disclosure: \(sentence)")
             }
-            for _ in 0..<8 where !disclosure.isHittable { app.swipeDown() }
+            for _ in 0 ..< 8 where !disclosure.isHittable {
+                app.swipeDown()
+            }
             disclosure.tap()
         }
         let policy = app.links["Full privacy policy"]
@@ -241,7 +277,8 @@ final class WorkoutFlowUITests: XCTestCase {
         // the alert follows the simulator's language
         let deny = springboard.buttons.matching(NSPredicate(
             format: "(label CONTAINS[c] %@ AND label CONTAINS[c] %@) OR label ==[c] %@",
-            "Don", "Allow", "Ne pas autoriser")
+            "Don", "Allow", "Ne pas autoriser"
+        )
         ).firstMatch
         XCTAssertTrue(deny.waitForExistence(timeout: 10))
         deny.tap()
@@ -330,12 +367,17 @@ final class WorkoutFlowUITests: XCTestCase {
                 let frame = element.frame
                 for scroll in app.scrollViews.allElementsBoundByIndex {
                     let viewport = scroll.frame.intersection(app.frame)
-                    guard !viewport.isNull,
-                          frame.maxY <= viewport.minY || frame.minY >= viewport.maxY else { continue }
+                    guard
+                        !viewport.isNull,
+                        frame.maxY <= viewport.minY || frame.minY >= viewport.maxY else {
+                        continue
+                    }
                     let sameLabel = scroll.descendants(matching: .any)
                         .matching(NSPredicate(format: "label == %@", element.label))
                     if sameLabel.allElementsBoundByIndex.contains(where: { $0.frame == frame }) {
-                        print("\(screen): ignored fully clipped contrast node at \(frame), viewport \(viewport)")
+                        print(
+                            "\(screen): ignored fully clipped contrast node at \(frame), viewport \(viewport)"
+                        )
                         return true
                     }
                 }
@@ -355,7 +397,7 @@ final class WorkoutFlowUITests: XCTestCase {
         app.launch()
         app.openWorkoutTab()
         app.buttons["Start a set"].tap()
-        for setIndex in 1...2 {
+        for setIndex in 1 ... 2 {
             app.buttons["Start set"].tap()
             let stop = app.buttons["Stop set"]
             XCTAssertTrue(stop.waitForExistence(timeout: 6))
@@ -465,12 +507,15 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Compared with your previous set"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Camera-measured range was longer in set 2."].exists)
-        let rangeMetric = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Range:")).firstMatch
+        let rangeMetric = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Range:"))
+            .firstMatch
         XCTAssertFalse(rangeMetric.exists)
         app.buttons["Set measurements"].tap()
         XCTAssertTrue(rangeMetric.exists)
-        XCTAssertGreaterThan(app.staticTexts["Set 2"].frame.minY,
-                             app.staticTexts["Set 1"].frame.maxY)
+        XCTAssertGreaterThan(
+            app.staticTexts["Set 2"].frame.minY,
+            app.staticTexts["Set 1"].frame.maxY
+        )
         XCTAssertTrue(app.buttons["How range is measured"].exists)
         let methodText = app.staticTexts.matching(
             NSPredicate(format: "label BEGINSWITH %@", "Relative range compares hip travel")
@@ -492,7 +537,8 @@ final class WorkoutFlowUITests: XCTestCase {
         app.buttons["Done"].tap()
         XCTAssertTrue(app.buttons["Start a set"].waitForExistence(timeout: 5))
         app.openFromHome("History")
-        let delete = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Delete session from")).firstMatch
+        let delete = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Delete session from"))
+            .firstMatch
         app.reveal(delete)
         delete.tap()
         app.buttons["Delete session"].tap()
@@ -552,11 +598,15 @@ final class WorkoutFlowUITests: XCTestCase {
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ]) { issue in
             // the noninteractive Debug marker is deliberately capped; it's absent in Release
-            if issue.element?.label == "DEMO INPUT" { return true }
+            if issue.element?.label == "DEMO INPUT" {
+                return true
+            }
             let element = issue.element.map {
                 "\($0.elementType.rawValue) '\($0.label)' id '\($0.identifier)' at \($0.frame)"
             } ?? "no element"
-            XCTFail("large text: \(issue.compactDescription). \(issue.detailedDescription) Element: \(element)")
+            XCTFail(
+                "large text: \(issue.compactDescription). \(issue.detailedDescription) Element: \(element)"
+            )
             return true
         }
     }

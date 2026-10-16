@@ -2,14 +2,33 @@ import XCTest
 
 /// repeatable visual coverage of the app, using isolated demo data rather than personal history
 final class InterfaceAccessibilityUITests: XCTestCase {
-    override func setUpWithError() throws { continueAfterFailure = true }
+    override func setUpWithError() throws {
+        continueAfterFailure = true
+    }
 
-    @MainActor func testSupportingScreens() throws { try supportingScreens(large: false) }
-    @MainActor func testSupportingScreensLargestText() throws { try supportingScreens(large: true) }
-    @MainActor func testWelcomeAndDemo() throws { try welcomeAndDemo(large: false) }
-    @MainActor func testWelcomeAndDemoLargestText() throws { try welcomeAndDemo(large: true) }
-    @MainActor func testWorkoutAndSavedScreens() throws { try workoutAndSavedScreens(large: false) }
-    @MainActor func testWorkoutAndSavedScreensLargestText() throws { try workoutAndSavedScreens(large: true) }
+    @MainActor func testSupportingScreens() throws {
+        try supportingScreens(large: false)
+    }
+
+    @MainActor func testSupportingScreensLargestText() throws {
+        try supportingScreens(large: true)
+    }
+
+    @MainActor func testWelcomeAndDemo() throws {
+        try welcomeAndDemo(large: false)
+    }
+
+    @MainActor func testWelcomeAndDemoLargestText() throws {
+        try welcomeAndDemo(large: true)
+    }
+
+    @MainActor func testWorkoutAndSavedScreens() throws {
+        try workoutAndSavedScreens(large: false)
+    }
+
+    @MainActor func testWorkoutAndSavedScreensLargestText() throws {
+        try workoutAndSavedScreens(large: true)
+    }
 
     @MainActor func testHomeDetailTextScales() {
         let regular = launch(large: false)
@@ -20,14 +39,21 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         let large = launch(large: true)
         let scaledCaption = large.staticTexts["No workouts yet"]
         XCTAssertTrue(scaledCaption.waitForExistence(timeout: 8))
-        XCTAssertGreaterThan(scaledCaption.frame.height, regularHeight * 1.5,
-                             "Home captions must follow the person's text-size setting")
+        XCTAssertGreaterThan(
+            scaledCaption.frame.height,
+            regularHeight * 1.5,
+            "Home captions must follow the person's text-size setting"
+        )
     }
 
     @MainActor private func launch(large: Bool, extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["-finn-ui-demo"] + extra
-        if large { app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"] }
+        if large {
+            app.launchArguments += [
+                "-UIPreferredContentSizeCategoryName",
+                "UICTContentSizeCategoryAccessibilityXXXL"
+            ] }
         app.launch()
         return app
     }
@@ -40,17 +66,25 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         try check(app, "\(prefix)-01-home")
         for id in ["home.lastSession", "home.posture", "home.weights", "home.sessions", "home.awards"] {
             let card = app.buttons[id]
-            for _ in 0..<6 where !card.isHittable { app.swipeUp() }
+            for _ in 0 ..< 6 where !card.isHittable {
+                app.swipeUp()
+            }
             card.tap()
             try check(app, "\(prefix)-02-\(id)")
             if id == "home.awards" {
                 app.buttons["badge.row"].firstMatch.tap()
                 try check(app, "\(prefix)-03-award-detail")
-                for _ in 0..<12 where !app.buttons["Done"].isHittable { app.scrollViews.firstMatch.swipeUp() }
+                for _ in 0 ..< 12
+                    where !app.buttons["Done"].isHittable {
+                    app.scrollViews.firstMatch.swipeUp()
+                }
                 app.buttons["Done"].tap()
             }
-            if id == "home.posture" { app.selectTab("Home") }
-            else { app.navigationBars.buttons.element(boundBy: 0).tap() }
+            if id == "home.posture" {
+                app.selectTab("Home")
+            } else {
+                app.navigationBars.buttons.element(boundBy: 0).tap()
+            }
         }
         try check(app, "\(prefix)-04-home-bottom")
         // iOS 27 can report an offscreen scroll child as hittable. Start the
@@ -71,7 +105,7 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         app.navigationBars.buttons.element(boundBy: 0).tap()
         app.buttons["Privacy"].tap()
         try check(app, "\(prefix)-09-privacy-top")
-        for index in 1...3 {
+        for index in 1 ... 3 {
             app.swipeUp()
             try check(app, "\(prefix)-10-privacy-\(index)")
         }
@@ -100,19 +134,28 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         try check(app, "\(prefix)-19-welcome")
         welcome.tap()
         XCTAssertTrue(app.buttons["onboarding.continue"].waitForExistence(timeout: 8))
-        for step in 1...8 {
+        for step in 1 ... 8 {
             try check(app, "\(prefix)-20-welcome-\(step)")
             let last: XCUIElement
             switch step {
-            case 3: last = app.textFields["onboarding.name"]
-            case 4: last = app.buttons["onboarding.goal.fatLoss"]
-            case 5: last = app.buttons["onboarding.level.experienced"]
-            case 6: last = app.buttons["onboarding.program.no"]
-            case 7: last = app.buttons["onboarding.intensity.finnDecides"]
-            case 8: last = app.buttons["onboarding.days.fivePlus"]
-            default: last = app.buttons["onboarding.continue"]
+            case 3:
+                last = app.textFields["onboarding.name"]
+            case 4:
+                last = app.buttons["onboarding.goal.fatLoss"]
+            case 5:
+                last = app.buttons["onboarding.level.experienced"]
+            case 6:
+                last = app.buttons["onboarding.program.no"]
+            case 7:
+                last = app.buttons["onboarding.intensity.finnDecides"]
+            case 8:
+                last = app.buttons["onboarding.days.fivePlus"]
+            default:
+                last = app.buttons["onboarding.continue"]
             }
-            for _ in 0..<16 where !last.isHittable { app.scrollViews.firstMatch.swipeUp() }
+            for _ in 0 ..< 16 where !last.isHittable {
+                app.scrollViews.firstMatch.swipeUp()
+            }
             app.scrollViews.firstMatch.swipeUp()
             try check(app, "\(prefix)-21-welcome-\(step)-bottom")
             // Continue waits for a first name
@@ -133,7 +176,9 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         app.buttons["aboutYou.equipment"].tap()
         app.buttons["None, bodyweight only"].tap()
         app.staticTexts["A little more about you."].tap()
-        for _ in 0..<16 where !access.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        for _ in 0 ..< 16 where !access.isHittable {
+            app.scrollViews.firstMatch.swipeUp()
+        }
         app.buttons["aboutYou.noInjuries"].tap()
         try check(app, "\(prefix)-25-about-you-bottom")
         access.tap()
@@ -166,14 +211,18 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         app.swipeUp()
         try check(app, "\(prefix)-34-result-bottom")
         let share = app.buttons["result.shareSummary"]
-        for _ in 0..<12 where !share.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        for _ in 0 ..< 12 where !share.isHittable {
+            app.scrollViews.firstMatch.swipeUp()
+        }
         app.scrollViews.firstMatch.swipeUp()
         try check(app, "\(prefix)-34-result-end")
         app.buttons["Done"].tap()
         app.selectTab("Progress")
         try check(app, "\(prefix)-35-history")
         let session = app.buttons["history.session"].firstMatch
-        for _ in 0..<8 where !session.isHittable { app.swipeUp() }
+        for _ in 0 ..< 8 where !session.isHittable {
+            app.swipeUp()
+        }
         session.tap()
         try check(app, "\(prefix)-36-session")
         app.swipeUp()
@@ -192,7 +241,8 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         if let path = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] {
             let directory = URL(fileURLWithPath: path, isDirectory: true)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            try XCUIScreen.main.screenshot().pngRepresentation.write(to: directory.appending(path: name + ".png"))
+            try XCUIScreen.main.screenshot().pngRepresentation
+                .write(to: directory.appending(path: name + ".png"))
         }
         // the iOS 27 image scanner also inspects hidden tabs and offscreen scroll content
         // Keep the full diagnostic scan available; verify contrast from rendered pixels
@@ -210,13 +260,17 @@ final class InterfaceAccessibilityUITests: XCTestCase {
     }
 
     private func requireCaptureDirectory() throws {
-        try XCTSkipIf(ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] == nil,
-                      "Manual screen survey: set TEST_RUNNER_FINN_CAPTURE_DIR to save and review the audit evidence.")
+        try XCTSkipIf(
+            ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] == nil,
+            "Manual screen survey: set TEST_RUNNER_FINN_CAPTURE_DIR to save and review the audit evidence."
+        )
     }
 
     @MainActor private func demoBottom(_ app: XCUIApplication, name: String) throws {
         let disclaimer = app.staticTexts["Illustrated demo · sample reps and advice"]
-        for _ in 0..<12 where !disclaimer.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        for _ in 0 ..< 12 where !disclaimer.isHittable {
+            app.scrollViews.firstMatch.swipeUp()
+        }
         app.scrollViews.firstMatch.swipeUp()
         try check(app, name)
     }

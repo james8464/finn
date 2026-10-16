@@ -12,11 +12,19 @@ struct PartialVisibilityTests {
         CaptureTraces.squats(reps: 6, from: 0).enumerated().map { index, frame in
             var joints = frame.joints
             let rep = Int(frame.time / 2.0) + 1
-            if let everyNth, index % everyNth == 0 { joints[.leftKnee] = nil }
-// two frames out of three without the knee in this rep: short gaps, but mostly unclear.
-            if rep == hiddenRep, index % 3 != 0 { joints[.leftKnee] = nil }
-            return PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: joints,
-                             athleteTracking: frame.athleteTracking)
+            if let everyNth, index % everyNth == 0 {
+                joints[.leftKnee] = nil
+            }
+            // two frames out of three without the knee in this rep: short gaps, but mostly unclear.
+            if rep == hiddenRep, index % 3 != 0 {
+                joints[.leftKnee] = nil
+            }
+            return PoseFrame(
+                time: frame.time,
+                subjectCount: frame.subjectCount,
+                joints: joints,
+                athleteTracking: frame.athleteTracking
+            )
         }
     }
 
@@ -35,14 +43,17 @@ struct PartialVisibilityTests {
         #expect(visibility.coverage == 74 || visibility.coverage == 75)
         #expect(visibility.weakest == .knee)
 
-        #expect(EvidenceGate.partialVisibility(Self.squats(missingKneeEvery: 2), requirement: evidence) == nil)
-        #expect(EvidenceGate.partialVisibility(Self.squats(missingKneeEvery: nil), requirement: evidence) == nil)
+        #expect(EvidenceGate
+            .partialVisibility(Self.squats(missingKneeEvery: 2), requirement: evidence) == nil)
+        #expect(EvidenceGate
+            .partialVisibility(Self.squats(missingKneeEvery: nil), requirement: evidence) == nil)
     }
 
     @Test func aPartlyVisibleSetCountsItsRepsAndSaysWhyThereIsNoAdvice() throws {
         let definition = ExerciseKind.bodyweightSquat.definition
         let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(
-            Self.squats(missingKneeEvery: 4), as: definition, trimsToSet: false)
+            Self.squats(missingKneeEvery: 4), as: definition, trimsToSet: false
+        )
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("Expected the reps to be counted, got \(outcome)")
             return
@@ -61,14 +72,18 @@ struct PartialVisibilityTests {
     @Test func aRepWithTheKneeHiddenIsCountedFromTheHips() throws {
         let definition = ExerciseKind.bodyweightSquat.definition
         let frames = Self.squats(missingKneeEvery: 4, hiddenRep: 6)
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(frames, as: definition, trimsToSet: false)
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(
+            frames,
+            as: definition,
+            trimsToSet: false
+        )
         guard case .analyzed(let analysis) = outcome else {
             Issue.record("Expected the reps to be counted, got \(outcome)")
             return
         }
         #expect(diagnostics?.countedFromHips == true)
         #expect(analysis.reps.count == 6)
-        #expect(analysis.reps.map(\.number) == Array(1...6))
+        #expect(analysis.reps.map(\.number) == Array(1 ... 6))
         #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
         #expect(EvidenceGate.partialVisibility(frames, requirement: definition.evidence) != nil)
     }
@@ -77,7 +92,11 @@ struct PartialVisibilityTests {
     @Test func belowSixtyFivePercentTheRepsAreCountedFromTheHips() {
         let frames = Self.squats(missingKneeEvery: 2)
         #expect(EvidenceGate.assess(frames, requirement: .squat, allowsPartial: true).isRejected)
-        guard case .analyzed(let analysis) = ExerciseAnalyzer.analyse(frames, as: ExerciseKind.bodyweightSquat.definition)
+        guard
+            case .analyzed(let analysis) = ExerciseAnalyzer.analyse(
+                frames,
+                as: ExerciseKind.bodyweightSquat.definition
+            )
         else {
             Issue.record("Expected the squats to be counted from the hips")
             return
@@ -95,23 +114,33 @@ struct PartialVisibilitySessionTests {
         let directory = FileManager.default.temporaryDirectory
             .appending(path: "FinnPartial-\(UUID().uuidString)", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let model = WorkoutSessionModel(source: source,
-                                        store: LocalSessionStore(url: directory.appending(path: "sessions.json")),
-                                        preferences: FinnPreferences(defaults: defaults))
+        let model = WorkoutSessionModel(
+            source: source,
+            store: LocalSessionStore(url: directory
+                .appending(path: "sessions.json")),
+            preferences: FinnPreferences(defaults: defaults)
+        )
         model.recognisesExercise = false
 
-// a clear set first, then a partly visible one.
+        // a clear set first, then a partly visible one.
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in CaptureTraces.squats(reps: 6, from: 0) { source.emit(frame) }
+        for frame in CaptureTraces.squats(reps: 6, from: 0) {
+            source.emit(frame)
+        }
         await model.endSet()
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in PartialVisibilityTests.squats(missingKneeEvery: 4) { source.emit(frame) }
+        for frame in PartialVisibilityTests.squats(missingKneeEvery: 4) {
+            source.emit(frame)
+        }
         await model.endSet()
 
         guard case .measured(let analysis, let cue) = model.result else {
-            Issue.record("Expected the partly visible set to be measured, got \(String(describing: model.result))")
+            Issue
+                .record(
+                    "Expected the partly visible set to be measured, got \(String(describing: model.result))"
+                )
             return
         }
         #expect(analysis.reps.count == 6)
@@ -139,5 +168,7 @@ private final class PartialTestSource: PoseStreaming {
         continuation = nil
     }
 
-    func emit(_ frame: PoseFrame) { continuation?.yield(frame) }
+    func emit(_ frame: PoseFrame) {
+        continuation?.yield(frame)
+    }
 }

@@ -14,9 +14,9 @@ struct HomeBackdrop: View {
 private enum HomeAccessibilityDiagnostics {
     static var opaqueSurface: Bool {
         #if DEBUG
-        ProcessInfo.processInfo.arguments.contains("-finn-ui-opaque-surface")
+            ProcessInfo.processInfo.arguments.contains("-finn-ui-opaque-surface")
         #else
-        false
+            false
         #endif
     }
 }
@@ -34,15 +34,22 @@ struct DashboardGlass: ViewModifier {
                 if stableBackdrop || reduceTransparency || HomeAccessibilityDiagnostics.opaqueSurface {
                     shape.fill(Color(white: 0.09)).accessibilityHidden(true)
                 } else {
-                    shape.fill(.ultraThinMaterial).opacity(0.8).environment(\.colorScheme, .dark).accessibilityHidden(true)
+                    shape.fill(.ultraThinMaterial).opacity(0.8).environment(\.colorScheme, .dark)
+                        .accessibilityHidden(true)
                     shape.fill(.black.opacity(0.16)).accessibilityHidden(true)
                 }
             }
             .overlay {
                 if showsBorder {
                     RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .strokeBorder(LinearGradient(colors: [.white.opacity(0.32), .white.opacity(0.13)],
-                                                     startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [.white.opacity(0.32), .white.opacity(0.13)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
                         .accessibilityHidden(true)
                 }
             }
@@ -52,7 +59,10 @@ struct DashboardGlass: ViewModifier {
 struct HomeTabBar: View {
     @Binding var selection: HomeTab
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
+
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.dynamicTypeSize) private var typeSize
     // caption2 plateaus at smaller sizes. Body scaling preserves 11pt at default
@@ -69,25 +79,30 @@ struct HomeTabBar: View {
                         ForEach(HomeTab.allCases, id: \.self) { tab in
                             Color.clear
                                 .overlay {
-                                    if selection == tab { selectionCapsule }
+                                    if selection == tab {
+                                        selectionCapsule
+                                    }
                                 }
-                                .frame(maxWidth: .infinity, minHeight: typeSize.isAccessibilitySize ? min(tabHeight, 88) : 64)
+                                .frame(
+                                    maxWidth: .infinity,
+                                    minHeight: typeSize.isAccessibilitySize ? min(tabHeight, 88) : 64
+                                )
                         }
                     }
                 }
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)
             }
-        .padding(4)
-        // stable charcoal surfaces retain the glass outline without variable contrast
-        // beneath small labels. The selection still moves between tabs.
-        .modifier(DashboardGlass(radius: 48, stableBackdrop: true))
-        .animation(reduceMotion ? nil : .spring(duration: 0.28, bounce: 0.12), value: selection)
-        .finnFeedback(.selection, trigger: selection)
-        .padding(.horizontal, 12)
-        .accessibilityElement(children: .contain)
-        .accessibilityAddTraits(.isTabBar)
-        .accessibilityIdentifier("home.tabBar")
+            .padding(4)
+            // stable charcoal surfaces retain the glass outline without variable contrast
+            // beneath small labels. The selection still moves between tabs.
+            .modifier(DashboardGlass(radius: 48, stableBackdrop: true))
+            .animation(reduceMotion ? nil : .spring(duration: 0.28, bounce: 0.12), value: selection)
+            .finnFeedback(.selection, trigger: selection)
+            .padding(.horizontal, 12)
+            .accessibilityElement(children: .contain)
+            .accessibilityAddTraits(.isTabBar)
+            .accessibilityIdentifier("home.tabBar")
     }
 
     private var tabColumns: [GridItem] {
@@ -121,9 +136,12 @@ struct HomeTabBar: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .foregroundStyle(selection == tab
-                                     ? DashboardStyle.accent
-                                     : DashboardStyle.secondary)
-                    .frame(maxWidth: .infinity, minHeight: typeSize.isAccessibilitySize ? min(tabHeight, 88) - 2 : 62)
+                        ? DashboardStyle.accent
+                        : DashboardStyle.secondary)
+                    .frame(
+                        maxWidth: .infinity,
+                        minHeight: typeSize.isAccessibilitySize ? min(tabHeight, 88) - 2 : 62
+                    )
                     .padding(.vertical, 1)
                     .contentShape(Capsule())
                 }
@@ -140,8 +158,11 @@ struct HomeTabBar: View {
                 .matchedGeometryEffect(id: "selection", in: glassSelection)
         } else {
             Capsule()
-                .fill(LinearGradient(colors: [Color(white: 0.12), Color(white: 0.08)],
-                                     startPoint: .top, endPoint: .bottom))
+                .fill(LinearGradient(
+                    colors: [Color(white: 0.12), Color(white: 0.08)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                ))
                 .overlay {
                     Capsule().strokeBorder(.white.opacity(0.10), lineWidth: 1)
                 }

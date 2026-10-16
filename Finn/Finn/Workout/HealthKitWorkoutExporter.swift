@@ -21,34 +21,47 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
     private lazy var store = HKHealthStore()
 
     var authorisation: FitnessAuthorization {
-        guard HKHealthStore.isHealthDataAvailable() else { return .unavailable }
+        guard HKHealthStore.isHealthDataAvailable() else {
+            return .unavailable
+        }
         switch store.authorizationStatus(for: HKObjectType.workoutType()) {
-        case .sharingAuthorized: return .authorized
-        case .sharingDenied: return .denied
-        case .notDetermined: return .notDetermined
-        @unknown default: return .notDetermined
+        case .sharingAuthorized:
+            return .authorized
+        case .sharingDenied:
+            return .denied
+        case .notDetermined:
+            return .notDetermined
+        @unknown default:
+            return .notDetermined
         }
     }
 
     func requestAuthorization() async -> FitnessAuthorization {
-        guard HKHealthStore.isHealthDataAvailable() else { return .unavailable }
+        guard HKHealthStore.isHealthDataAvailable() else {
+            return .unavailable
+        }
         do {
-// share workouts only; nothing to read.
+            // share workouts only; nothing to read.
             try await store.requestAuthorization(toShare: [HKObjectType.workoutType()], read: [])
         } catch {
-// fails without the entitlement or usage description, or when Health is restricted.
+            // fails without the entitlement or usage description, or when Health is restricted.
             // The status read below then reports what Finn may do.
         }
         return authorisation
     }
 
     func save(_ workout: FitnessWorkout) async throws -> UUID? {
-        guard HKHealthStore.isHealthDataAvailable() else { throw FitnessSaveError.unavailable }
+        guard HKHealthStore.isHealthDataAvailable() else {
+            throw FitnessSaveError.unavailable
+        }
         let configuration = HKWorkoutConfiguration()
         configuration.activityType = workout.activity.healthKitType
         configuration.locationType = workout.isIndoor ? .indoor : .outdoor
-        let builder = HKWorkoutBuilder(healthStore: store, configuration: configuration,
-                                       device: HKDevice.local())
+        let builder = HKWorkoutBuilder(
+            healthStore: store,
+            configuration: configuration,
+            device: HKDevice.local()
+        )
         do {
             try await builder.beginCollection(at: workout.start)
             if !workout.pauses.isEmpty {
@@ -68,8 +81,18 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
     /// between them out of the workout's duration.
     private static func events(for pauses: [DateInterval]) -> [HKWorkoutEvent] {
         pauses.flatMap { pause in
-            [HKWorkoutEvent(type: .pause, dateInterval: DateInterval(start: pause.start, duration: 0), metadata: nil),
-             HKWorkoutEvent(type: .resume, dateInterval: DateInterval(start: pause.end, duration: 0), metadata: nil)]
+            [
+                HKWorkoutEvent(
+                    type: .pause,
+                    dateInterval: DateInterval(start: pause.start, duration: 0),
+                    metadata: nil
+                ),
+                HKWorkoutEvent(
+                    type: .resume,
+                    dateInterval: DateInterval(start: pause.end, duration: 0),
+                    metadata: nil
+                )
+            ]
         }
     }
 
@@ -78,26 +101,35 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
     private static func metadata(for workout: FitnessWorkout) -> [String: Any] {
         var metadata: [String: Any] = [
             HKMetadataKeyIndoorWorkout: NSNumber(value: workout.isIndoor),
-// one workout per session: HealthKit replaces an object with the same sync identifier only
+            // one workout per session: HealthKit replaces an object with the same sync identifier only
             // when the new sync version is greater.
             HKMetadataKeySyncIdentifier: NSString(string: workout.syncIdentifier),
             HKMetadataKeySyncVersion: NSNumber(value: FitnessWorkout.syncVersion),
         ]
         for (key, value) in workout.finnMetadata {
             switch value {
-            case .text(let text): metadata[key] = NSString(string: text)
-            case .number(let number): metadata[key] = NSNumber(value: number)
+            case .text(let text):
+                metadata[key] = NSString(string: text)
+            case .number(let number):
+                metadata[key] = NSNumber(value: number)
             }
         }
         return metadata
     }
 
     private static func fitnessError(for error: Error) -> Error {
-        guard let healthError = error as? HKError else { return error }
+        guard let healthError = error as? HKError else {
+            return error
+        }
         switch healthError.code {
-        case .errorAuthorizationDenied, .errorAuthorizationNotDetermined: return FitnessSaveError.notAuthorized
-        case .errorHealthDataUnavailable, .errorHealthDataRestricted: return FitnessSaveError.unavailable
-        default: return error
+        case .errorAuthorizationDenied,
+             .errorAuthorizationNotDetermined:
+            return FitnessSaveError.notAuthorized
+        case .errorHealthDataUnavailable,
+             .errorHealthDataRestricted:
+            return FitnessSaveError.unavailable
+        default:
+            return error
         }
     }
 }
@@ -105,7 +137,8 @@ final class HealthKitWorkoutExporter: FitnessWorkoutSaving {
 private extension FitnessActivity {
     var healthKitType: HKWorkoutActivityType {
         switch self {
-        case .functionalStrengthTraining: .functionalStrengthTraining
+        case .functionalStrengthTraining:
+            .functionalStrengthTraining
         }
     }
 }

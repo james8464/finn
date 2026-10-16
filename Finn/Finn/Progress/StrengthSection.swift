@@ -13,10 +13,15 @@ struct StrengthSection: View {
     @State private var isAnimating = false
     @State private var animation: Task<Void, Never>?
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
+
     @Environment(\.dynamicTypeSize) private var typeSize
 
-    private var trend: StrengthTrend { StrengthTrend.make(for: exercise, history: history) }
+    private var trend: StrengthTrend {
+        StrengthTrend.make(for: exercise, history: history)
+    }
 
     var body: some View {
         let trend = trend
@@ -31,19 +36,28 @@ struct StrengthSection: View {
                 ContentUnavailableView {
                     Label("No workouts yet", systemImage: "chart.bar")
                 } description: {
-                    Text("Record a \(exercise.definition.copy.shareNoun) set to see your best set for each workout.")
+                    Text(
+                        "Record a \(exercise.definition.copy.shareNoun) set to see your best set for each workout."
+                    )
                 }
                 .accessibilityIdentifier("strength.empty")
             } else {
-                StrengthChart(bars: bars(trend), metric: trend.metric, label: chartLabel,
-                              revealed: revealed, collapsed: collapsed)
+                StrengthChart(
+                    bars: bars(trend),
+                    metric: trend.metric,
+                    label: chartLabel,
+                    revealed: revealed,
+                    collapsed: collapsed
+                )
                 if let projection, !collapsed {
                     legend
-                    Text("At this pace, in \(projection.horizon.phrase) you'll do ^[\(projection.target) reps](inflect: true) in one set.")
-                        .font(.title3.weight(.semibold))
-                        .fontDesign(.rounded)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .accessibilityIdentifier("strength.projection")
+                    Text(
+                        "At this pace, in \(projection.horizon.phrase) you'll do ^[\(projection.target) reps](inflect: true) in one set."
+                    )
+                    .font(.title3.weight(.semibold))
+                    .fontDesign(.rounded)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("strength.projection")
                 }
             }
             Divider().padding(.vertical, 4)
@@ -66,7 +80,9 @@ struct StrengthSection: View {
                 .accessibilityAddTraits(.isHeader)
             switch trend.projectionStatus {
             case .needsWorkouts(let missing):
-                note("Log at least \(StrengthTrend.minimumWorkouts) workouts of this exercise to project your progress. \(missing) to go.")
+                note(
+                    "Log at least \(StrengthTrend.minimumWorkouts) workouts of this exercise to project your progress. \(missing) to go."
+                )
             case .needsMoreDays:
                 note("Log workouts on at least two different days to project your progress.")
             case .ready:
@@ -131,17 +147,28 @@ struct StrengthSection: View {
     private func bars(_ trend: StrengthTrend) -> [StrengthBar] {
         if let projection {
             return projection.points.map {
-                StrengthBar(id: "p\($0.date.timeIntervalSinceReferenceDate)", date: $0.date, value: $0.value,
-                            isProjected: true)
+                StrengthBar(
+                    id: "p\($0.date.timeIntervalSinceReferenceDate)",
+                    date: $0.date,
+                    value: $0.value,
+                    isProjected: true
+                )
             }
         }
         return trend.points.enumerated().map {
-            StrengthBar(id: "w\($0.offset)", date: $0.element.date, value: $0.element.value, isProjected: false)
+            StrengthBar(
+                id: "w\($0.offset)",
+                date: $0.element.date,
+                value: $0.element.value,
+                isProjected: false
+            )
         }
     }
 
     private func project(_ trend: StrengthTrend) {
-        guard let next = trend.projection(to: horizon) else { return }
+        guard let next = trend.projection(to: horizon) else {
+            return
+        }
         swap(to: next, trend)
     }
 
@@ -158,7 +185,9 @@ struct StrengthSection: View {
         animation = Task {
             withAnimation(.easeIn(duration: 0.18)) { collapsed = true }
             try? await Task.sleep(for: .milliseconds(190))
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else {
+                return
+            }
             withTransaction(\.disablesAnimations, true) {
                 projection = next
                 revealed = 0
@@ -166,7 +195,9 @@ struct StrengthSection: View {
             }
             for index in bars(trend).indices {
                 try? await Task.sleep(for: .milliseconds(55))
-                guard !Task.isCancelled else { return }
+                guard !Task.isCancelled else {
+                    return
+                }
                 withAnimation(.smooth(duration: 0.26)) { revealed = index + 1 }
             }
             revealed = .max

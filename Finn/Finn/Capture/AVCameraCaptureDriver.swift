@@ -19,14 +19,20 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
     /// capture runs at 15 frames per second because of system pressure. Capture queue only.
     private var lowersFrameRate = false
     nonisolated let previewSink: PreviewFrameSink? = PreviewFrameSink()
-    nonisolated let cameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
+    nonisolated let cameraDevice = AVCaptureDevice.default(
+        .builtInWideAngleCamera,
+        for: .video,
+        position: .front
+    )
 
     override init() {
         processor = PoseFrameProcessor(previewSink: previewSink)
         super.init()
     }
 
-    var isAvailable: Bool { cameraDevice != nil }
+    var isAvailable: Bool {
+        cameraDevice != nil
+    }
 
     func start() async throws -> AsyncStream<PoseFrame> {
         let stream = processor.makeStream()
@@ -34,9 +40,13 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 queue.async {
                     do {
-                        if !self.configured { try self.configure() }
+                        if !self.configured {
+                            try self.configure()
+                        }
                         self.session.startRunning()
-                        guard self.session.isRunning else { throw CameraCaptureError.cannotStart }
+                        guard self.session.isRunning else {
+                            throw CameraCaptureError.cannotStart
+                        }
                         continuation.resume()
                     } catch {
                         self.processor.finish()
@@ -86,9 +96,12 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
     func setCaptureRotation(_ degrees: Double) {
         queue.async {
             self.captureRotation = degrees
-            guard let connection = self.session.outputs.first?.connection(with: .video),
-                  connection.isVideoRotationAngleSupported(degrees),
-                  connection.videoRotationAngle != degrees else { return }
+            guard
+                let connection = self.session.outputs.first?.connection(with: .video),
+                connection.isVideoRotationAngleSupported(degrees),
+                connection.videoRotationAngle != degrees else {
+                return
+            }
             connection.videoRotationAngle = degrees
         }
     }
@@ -107,7 +120,9 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
         pressureObservation = nil
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             queue.async {
-                if self.session.isRunning { self.session.stopRunning() }
+                if self.session.isRunning {
+                    self.session.stopRunning()
+                }
                 continuation.resume()
             }
         }
@@ -119,12 +134,16 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
         let strained = level == .serious || level == .critical
         processor.setUnderPressure(strained)
         queue.async {
-            guard strained != self.lowersFrameRate, let camera = self.cameraDevice else { return }
+            guard strained != self.lowersFrameRate, let camera = self.cameraDevice else {
+                return
+            }
             // only a rate the current format supports; anything else would raise an exception
             let supportsAnalysisRate = camera.activeFormat.videoSupportedFrameRateRanges.contains {
                 $0.minFrameRate <= 15 && $0.maxFrameRate >= 15
             }
-            guard supportsAnalysisRate, (try? camera.lockForConfiguration()) != nil else { return }
+            guard supportsAnalysisRate, (try? camera.lockForConfiguration()) != nil else {
+                return
+            }
             camera.activeVideoMinFrameDuration = strained ? CMTime(value: 1, timescale: 15) : .invalid
             camera.unlockForConfiguration()
             self.lowersFrameRate = strained
@@ -132,13 +151,17 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
     }
 
     private func configure() throws {
-        guard let camera = cameraDevice else { throw CameraCaptureError.noFrontCamera }
+        guard let camera = cameraDevice else {
+            throw CameraCaptureError.noFrontCamera
+        }
 
         session.beginConfiguration()
         defer { session.commitConfiguration() }
         session.sessionPreset = .hd1280x720
         let input = try AVCaptureDeviceInput(device: camera)
-        guard session.canAddInput(input) else { throw CameraCaptureError.cannotConfigure }
+        guard session.canAddInput(input) else {
+            throw CameraCaptureError.cannotConfigure
+        }
         session.addInput(input)
 
         let output = AVCaptureVideoDataOutput()
@@ -146,7 +169,9 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
         output.videoSettings = [
             kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
         ]
-        guard session.canAddOutput(output) else { throw CameraCaptureError.cannotConfigure }
+        guard session.canAddOutput(output) else {
+            throw CameraCaptureError.cannotConfigure
+        }
         session.addOutput(output)
         output.setSampleBufferDelegate(processor, queue: queue)
         if let connection = output.connection(with: .video) {
@@ -168,7 +193,8 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
     }
 }
 
-nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
+nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
+    @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: AsyncStream<PoseFrame>.Continuation?
     private var lastSampleTime: Double = -.infinity
@@ -223,11 +249,15 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
         active?.finish()
     }
 
-    func captureOutput(_ output: AVCaptureOutput,
-                       didOutput sampleBuffer: CMSampleBuffer,
-                       from connection: AVCaptureConnection) {
+    func captureOutput(
+        _ output: AVCaptureOutput,
+        didOutput sampleBuffer: CMSampleBuffer,
+        from connection: AVCaptureConnection
+    ) {
         let time = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer))
-        guard time.isFinite else { return }
+        guard time.isFinite else {
+            return
+        }
         lock.lock()
         guard continuation != nil else {
             lock.unlock()
@@ -235,18 +265,27 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
         }
         // every frame goes on screen; the analysis keeps 15 per second
         let analyse = time - lastSampleTime >= PoseFrameAnalyzer.minimumInterval
-        if analyse { lastSampleTime = time }
+        if analyse {
+            lastSampleTime = time
+        }
         let estimateAngle = estimatesCameraAngle && !underPressure
         let request = analyse ? athleteRequest : nil
-        if request != nil { athleteRequest = nil }
+        if request != nil {
+            athleteRequest = nil
+        }
         lock.unlock()
 
         previewSink?.enqueue(sampleBuffer)
-        guard analyse, let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        guard analyse, let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            return
+        }
         switch request {
-        case true?: analyser.lockAthlete()
-        case false?: analyser.releaseAthlete()
-        case nil: break
+        case true?:
+            analyser.lockAthlete()
+        case false?:
+            analyser.releaseAthlete()
+        case nil:
+            break
         }
         yield(analyser.analyse(pixelBuffer, time: time, estimateAngle: estimateAngle))
     }

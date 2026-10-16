@@ -18,23 +18,6 @@ enum HomeStyle {
     static let spring = Animation.spring(response: 0.45, dampingFraction: 0.86)
 }
 
-/// a small category marker shared by dashboard widgets and supporting pages
-struct HomeSymbol: View {
-    let name: String
-    var colour: Color = HomeStyle.accent
-    var size: CGFloat = 40
-
-    var body: some View {
-        Image(systemName: name)
-            .font(.system(size: size * 0.48, weight: .semibold))
-            .symbolRenderingMode(.hierarchical)
-            .foregroundStyle(colour)
-            .frame(width: size, height: size)
-            .background(colour.opacity(0.12), in: RoundedRectangle(cornerRadius: size * 0.28))
-            .accessibilityHidden(true)
-    }
-}
-
 /// quiet separation from the canvas; content remains opaque and readable
 struct HomeSurface: ViewModifier {
     var radius: CGFloat = 20
@@ -46,22 +29,37 @@ struct HomeSurface: ViewModifier {
 
 /// the secondary pages reachable from the first screen
 enum HomeRoute: Hashable {
-    case history, options, privacy, coach
-    case account, lastWorkout, posture, weights, awards, plus
+    case history
+    case options
+    case privacy
+    case coach
+    case account
+    case lastWorkout
+    case posture
+    case weights
+    case awards
+    case plus
     /// the selection step before a workout, and one saved session
-    case launchWorkout, session(UUID)
+    case launchWorkout
+    case session(UUID)
 }
 
 extension ExerciseKind {
     /// the name on the exercise chips, as short as it can be
     nonisolated var chipName: String {
         switch self {
-        case .bodyweightSquat: String(localized: "Squat")
-        case .pushUp: String(localized: "Push-up")
-        case .staticLunge: String(localized: "Lunge")
-        case .stiffLegDeadlift: String(localized: "Deadlift")
-        case .pullUp: String(localized: "Pull-up")
-        case .muscleUp: String(localized: "Muscle-up")
+        case .bodyweightSquat:
+            String(localized: "Squat")
+        case .pushUp:
+            String(localized: "Push-up")
+        case .staticLunge:
+            String(localized: "Lunge")
+        case .stiffLegDeadlift:
+            String(localized: "Deadlift")
+        case .pullUp:
+            String(localized: "Pull-up")
+        case .muscleUp:
+            String(localized: "Muscle-up")
         }
     }
 }
@@ -74,7 +72,9 @@ struct ExerciseChips: View {
     var order: [ExerciseKind] = ExerciseKind.allCases
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
 
     var body: some View {
         if dynamicTypeSize.isAccessibilitySize {
@@ -111,7 +111,10 @@ struct ExerciseChips: View {
                 // the chosen exercise is kept across launches: bring its chip into view
                 .onAppear { proxy.scrollTo(selection, anchor: .center) }
                 .onChange(of: selection) { _, kind in
-                    withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(kind, anchor: .center) }
+                    withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(
+                        kind,
+                        anchor: .center
+                    ) }
                 }
             }
             .finnFeedback(.selection, trigger: selection)
@@ -152,12 +155,14 @@ struct ExerciseHeroCard: View {
             Text(copy.name)
                 .font(.title2.weight(.bold))
                 .accessibilityAddTraits(.isHeader)
-            Label(kind.definition.expectedView == .side ? "Side view" : "Side, front or back",
-                  systemImage: "camera.viewfinder")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(AppPageStyle.tint)
-                .accessibilityLabel(kind.definition.expectedView == .side ? "Filmed from the side"
-                                    : "Filmed from the side, the front or the back")
+            Label(
+                kind.definition.expectedView == .side ? "Side view" : "Side, front or back",
+                systemImage: "camera.viewfinder"
+            )
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(AppPageStyle.tint)
+            .accessibilityLabel(kind.definition.expectedView == .side ? "Filmed from the side"
+                : "Filmed from the side, the front or the back")
             ExerciseFigureView(kind: kind, lineColour: Color.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: typeSize.isAccessibilitySize ? 160 : (compact ? 170 : 220))
@@ -218,18 +223,26 @@ struct PrimaryActionLabel: View {
 /// presses in slightly, like a physical key
 struct PressableStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1)
             .opacity(configuration.isPressed ? 0.9 : 1)
-            .animation(reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
+            .animation(
+                reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.7),
+                value: configuration.isPressed
+            )
     }
 }
 
 /// whether iOS has yet to ask for the camera, so Finn can say what the camera is for first
 enum CameraPermission {
-    static var notAskedYet: Bool { AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined }
+    static var notAskedYet: Bool {
+        AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined
+    }
 }
 
 /// shown once, before iOS asks for the camera: what Finn does with it, in three lines
@@ -243,14 +256,27 @@ struct CameraPrimer: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    WrappingText(text: String(localized: "What the camera does"), style: .title2, weight: .bold)
-                        .accessibilityAddTraits(.isHeader)
-                    primerRow("figure.strengthtraining.functional", "Counts your reps",
-                              "Finn follows one person from the side and ignores anyone else in view.")
-                    primerRow("video.slash", "Keeps no video",
-                              "Frames are analyzed on this iPhone, then dropped. Nothing is recorded.")
-                    primerRow("iphone", "Sends nothing",
-                              "No account, no upload. Your set summaries are saved on this iPhone.")
+                    WrappingText(
+                        text: String(localized: "What the camera does"),
+                        style: .title2,
+                        weight: .bold
+                    )
+                    .accessibilityAddTraits(.isHeader)
+                    primerRow(
+                        "figure.strengthtraining.functional",
+                        "Counts your reps",
+                        "Finn follows one person from the side and ignores anyone else in view."
+                    )
+                    primerRow(
+                        "video.slash",
+                        "Keeps no video",
+                        "Frames are analyzed on this iPhone, then dropped. Nothing is recorded."
+                    )
+                    primerRow(
+                        "iphone",
+                        "Sends nothing",
+                        "No account, no upload. Your set summaries are saved on this iPhone."
+                    )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 24)
@@ -269,18 +295,28 @@ struct CameraPrimer: View {
                     : AnyLayout(HStackLayout(spacing: 24))
                 layout {
                     Button { dismiss() } label: {
-                        WrappingText(text: String(localized: "Not now"), style: .subheadline, weight: .medium,
-                                     colour: .label.withAlphaComponent(0.72), alignment: .center)
-                            .frame(maxWidth: .infinity, minHeight: 44)
+                        WrappingText(
+                            text: String(localized: "Not now"),
+                            style: .subheadline,
+                            weight: .medium,
+                            colour: .label.withAlphaComponent(0.72),
+                            alignment: .center
+                        )
+                        .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .accessibilityLabel("Not now")
                     Button(action: onPrivacy) {
-                        WrappingText(text: String(localized: "Privacy details"), style: .subheadline, weight: .medium,
-                                     colour: .label.withAlphaComponent(0.72), alignment: .center)
-                            .frame(maxWidth: .infinity, minHeight: 44)
+                        WrappingText(
+                            text: String(localized: "Privacy details"),
+                            style: .subheadline,
+                            weight: .medium,
+                            colour: .label.withAlphaComponent(0.72),
+                            alignment: .center
+                        )
+                        .frame(maxWidth: .infinity, minHeight: 44)
                     }
-                        .accessibilityLabel("Privacy details")
-                        .accessibilityIdentifier("primer.privacy")
+                    .accessibilityLabel("Privacy details")
+                    .accessibilityIdentifier("primer.privacy")
                 }
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(HomeStyle.supportingText)
@@ -293,7 +329,11 @@ struct CameraPrimer: View {
         .tint(HomeStyle.accent)
     }
 
-    private func primerRow(_ symbol: String, _ title: LocalizedStringResource, _ detail: LocalizedStringResource) -> some View {
+    private func primerRow(
+        _ symbol: String,
+        _ title: LocalizedStringResource,
+        _ detail: LocalizedStringResource
+    ) -> some View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: symbol)
                 .font(.system(size: 20))
@@ -301,7 +341,11 @@ struct CameraPrimer: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
                 WrappingText(text: String(localized: title), style: .headline)
-                WrappingText(text: String(localized: detail), style: .subheadline, colour: .label.withAlphaComponent(0.8))
+                WrappingText(
+                    text: String(localized: detail),
+                    style: .subheadline,
+                    colour: .label.withAlphaComponent(0.8)
+                )
             }
         }
         .accessibilityElement(children: .combine)

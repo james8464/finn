@@ -21,19 +21,25 @@ final class ProgressAndWorkoutUITests: XCTestCase {
         let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan.exercise."))
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
         XCTAssertEqual(rows.count, 4)
-        for index in 0..<rows.count {
+        for index in 0 ..< rows.count {
             let row = rows.element(boundBy: index)
-            if !row.isHittable { app.scrollViews.firstMatch.swipeUp() }
+            if !row.isHittable {
+                app.scrollViews.firstMatch.swipeUp()
+            }
             row.tap()
         }
         let validate = app.buttons["plan.validate"]
-        if !validate.isHittable { app.scrollViews.firstMatch.swipeUp() }
+        if !validate.isHittable {
+            app.scrollViews.firstMatch.swipeUp()
+        }
         XCTAssertTrue(validate.isEnabled)
         validate.tap()
         app.selectTab("Workout")
         let saved = app.buttons["nextWorkout.row"].firstMatch
         XCTAssertTrue(saved.waitForExistence(timeout: 5))
-        if !saved.isHittable { app.scrollViews["workout.scroll"].swipeUp() }
+        if !saved.isHittable {
+            app.scrollViews["workout.scroll"].swipeUp()
+        }
         saved.tap()
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
         XCTAssertTrue(rows.allElementsBoundByIndex.allSatisfy { $0.value as? String == "Not done" })
@@ -56,7 +62,8 @@ final class ProgressAndWorkoutUITests: XCTestCase {
         XCTAssertTrue(section.buttons.element(boundBy: 0).isSelected)
         XCTAssertTrue(app.descendants(matching: .any)["posture.guide"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.descendants(matching: .any)["posture.illustration"].exists)
-        XCTAssertTrue(app.staticTexts["No photos yet"].exists || app.descendants(matching: .any)["posture.moments"].exists)
+        XCTAssertTrue(app.staticTexts["No photos yet"].exists || app
+            .descendants(matching: .any)["posture.moments"].exists)
     }
 
     /// the Workout tab shows the next workout and history; Launch workout opens setup, and camera
@@ -124,15 +131,25 @@ final class ProgressAndWorkoutUITests: XCTestCase {
         XCTAssertTrue(sentence.label.hasPrefix("At this pace, in 2 weeks"), sentence.label)
         XCTAssertFalse(project.isEnabled)
         let back = app.buttons["strength.history"]
-        wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "isEnabled == true"), object: back)],
-             timeout: 5)
+        wait(
+            for: [XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "isEnabled == true"),
+                object: back
+            )],
+            timeout: 5
+        )
         attach(app, "strength-projection")
 
         back.tap()
         XCTAssertTrue(sentence.waitForNonExistence(timeout: 5))
         // the measured bars grow back in before Project is offered again
-        wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "isEnabled == true"), object: project)],
-             timeout: 5)
+        wait(
+            for: [XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "isEnabled == true"),
+                object: project
+            )],
+            timeout: 5
+        )
     }
 
     @MainActor

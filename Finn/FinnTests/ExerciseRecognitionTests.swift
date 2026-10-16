@@ -8,12 +8,15 @@ struct ExerciseRecognizerTests {
     @Test func confidentAgreementNamesTheExercise() {
         let classifier = ScriptedClassifier { _ in ("push_up", 0.95) }
         #expect(ExerciseRecognizer.recognise(keypointFrames(seconds: 6), using: classifier)
-                == .recognized(.pushUp, agreement: 1))
+            == .recognized(.pushUp, agreement: 1))
     }
 
     @Test func lowConfidenceWindowsDoNotVote() {
-// five windows; only two are confident, below the 60% agreement needed.
-        let classifier = ScriptedClassifier { index in index.isMultiple(of: 3) ? ("squat", 0.9) : ("squat", 0.5) }
+        // five windows; only two are confident, below the 60% agreement needed.
+        let classifier = ScriptedClassifier { index in index.isMultiple(of: 3) ? ("squat", 0.9) : (
+            "squat",
+            0.5
+        ) }
         #expect(ExerciseRecognizer.recognise(keypointFrames(seconds: 6), using: classifier) == .uncertain)
         #expect(classifier.calls == 5)
     }
@@ -62,8 +65,12 @@ struct ExerciseRecognizerTests {
 
     private func keypointFrames(seconds: Double) -> [PoseFrame] {
         stride(from: 0.0, through: seconds, by: 1 / 15).map {
-            PoseFrame(time: $0, subjectCount: 1, joints: [:],
-                      keypoints: [Float](repeating: 0.5, count: 54))
+            PoseFrame(
+                time: $0,
+                subjectCount: 1,
+                joints: [:],
+                keypoints: [Float](repeating: 0.5, count: 54)
+            )
         }
     }
 }
@@ -80,8 +87,10 @@ struct CoreMLExerciseClassifierTests {
 
     @Test func runsPredictionAndReadsProbabilities() throws {
         let classifier = try fixture()
-        let prediction = try classifier.classify(window: Array(repeating: [Float](repeating: 0.2, count: 54),
-                                                               count: 30))
+        let prediction = try classifier.classify(window: Array(
+            repeating: [Float](repeating: 0.2, count: 54),
+            count: 30
+        ))
         #expect(prediction.label == "push_up")
         #expect(abs(prediction.confidence - 0.92) < 0.001)
     }
@@ -100,12 +109,17 @@ struct CoreMLExerciseClassifierTests {
         let frames = stride(from: 0.0, through: 5, by: 1.0 / 15).map {
             PoseFrame(time: $0, subjectCount: 1, joints: [:], keypoints: [Float](repeating: 0.4, count: 54))
         }
-        #expect(ExerciseRecognizer.recognise(frames, using: try fixture()) == .recognized(.pushUp, agreement: 1))
+        #expect(ExerciseRecognizer.recognise(frames, using: try fixture()) == .recognized(
+            .pushUp,
+            agreement: 1
+        ))
     }
 
     @Test func bundledModelLoadsWhenTheTeamAddsOne() {
-// no trained model ships until the team adds Finn/Finn/FinnExerciseClassifier.mlmodel.
-        guard let classifier = CoreMLExerciseClassifier.bundled() else { return }
+        // no trained model ships until the team adds Finn/Finn/FinnExerciseClassifier.mlmodel.
+        guard let classifier = CoreMLExerciseClassifier.bundled() else {
+            return
+        }
         #expect(classifier.windowLength > 0)
         #expect(classifier.frameRate > 0)
     }
@@ -120,8 +134,10 @@ struct CoreMLExerciseClassifierTests {
 @MainActor
 struct RecognitionSessionTests {
     @Test func recognizedExerciseReplacesTheChoice() async throws {
-        let (model, source) = makeModel(classifier: ScriptedClassifier { _ in ("push_up", 0.95) },
-                                        recognizes: true)
+        let (model, source) = makeModel(
+            classifier: ScriptedClassifier { _ in ("push_up", 0.95) },
+            recognizes: true
+        )
         model.selectedExercise = .bodyweightSquat
         await capture(model, source, pushUpTrace(reps: 6))
         #expect(model.recognition == .recognized(.pushUp, agreement: 1))
@@ -135,8 +151,10 @@ struct RecognitionSessionTests {
     }
 
     @Test func uncertainRecognitionFallsBackToTheChoice() async throws {
-        let (model, source) = makeModel(classifier: ScriptedClassifier { _ in ("other", 0.95) },
-                                        recognizes: true)
+        let (model, source) = makeModel(
+            classifier: ScriptedClassifier { _ in ("other", 0.95) },
+            recognizes: true
+        )
         model.selectedExercise = .pushUp
         await capture(model, source, pushUpTrace(reps: 6))
         #expect(model.recognition == .uncertain)
@@ -163,40 +181,57 @@ struct RecognitionSessionTests {
     @Test func rulesAreOnByDefaultAndTheTrainedModelIsOff() throws {
         let defaults = try #require(UserDefaults(suiteName: "FinnRecognitionPrefs-\(UUID().uuidString)"))
         let preferences = FinnPreferences(defaults: defaults)
-        let first = WorkoutSessionModel(source: RecognitionPoseSource(),
-                                        exerciseClassifier: ScriptedClassifier { _ in ("squat", 0.99) },
-                                        preferences: preferences)
+        let first = WorkoutSessionModel(
+            source: RecognitionPoseSource(),
+            exerciseClassifier: ScriptedClassifier { _ in ("squat", 0.99) },
+            preferences: preferences
+        )
         #expect(first.recognisesExercise)
         #expect(!first.usesTrainedModel)
         #expect(first.recognitionMethod == .angleRules)
         first.recognisesExercise = false
         first.usesTrainedModel = true
         #expect(first.recognitionMethod == .keypointModel)
-        let second = WorkoutSessionModel(source: RecognitionPoseSource(), exerciseClassifier: nil,
-                                         preferences: preferences)
+        let second = WorkoutSessionModel(
+            source: RecognitionPoseSource(),
+            exerciseClassifier: nil,
+            preferences: preferences
+        )
         #expect(!second.recognisesExercise)
         #expect(second.usesTrainedModel)
         // Without a model in the build, the rules still run.
         #expect(second.recognitionMethod == .angleRules)
     }
 
-    private func makeModel(classifier: ScriptedClassifier?, recognizes: Bool,
-                           rules: Bool = true) -> (WorkoutSessionModel, RecognitionPoseSource) {
+    private func makeModel(
+        classifier: ScriptedClassifier?,
+        recognizes: Bool,
+        rules: Bool = true
+    ) -> (WorkoutSessionModel, RecognitionPoseSource) {
         let defaults = UserDefaults(suiteName: "FinnRecognition-\(UUID().uuidString)")!
         let preferences = FinnPreferences(defaults: defaults)
         preferences.recognisesExercise = recognizes
         preferences.usesTrainedModel = classifier != nil
         let source = RecognitionPoseSource()
-        return (WorkoutSessionModel(source: source, exerciseClassifier: classifier, angleClassifier: nil,
-                                    ruleClassifier: rules ? AngleRuleClassifier() : nil,
-                                    preferences: preferences), source)
+        return (WorkoutSessionModel(
+            source: source,
+            exerciseClassifier: classifier,
+            angleClassifier: nil,
+            ruleClassifier: rules ? AngleRuleClassifier() : nil,
+            preferences: preferences
+        ), source)
     }
 
-    private func capture(_ model: WorkoutSessionModel, _ source: RecognitionPoseSource,
-                         _ frames: [PoseFrame]) async {
+    private func capture(
+        _ model: WorkoutSessionModel,
+        _ source: RecognitionPoseSource,
+        _ frames: [PoseFrame]
+    ) async {
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in frames { source.emit(frame) }
+        for frame in frames {
+            source.emit(frame)
+        }
         await model.endSet()
     }
 }
@@ -220,7 +255,9 @@ nonisolated private final class ScriptedClassifier: ExerciseClassifying, @unchec
     func classify(window: [[Float]]) throws -> ClassifierPrediction {
         defer { calls += 1 }
         windowSizes.append(window.count)
-        if fails { throw ExerciseClassifierError.noProbabilities }
+        if fails {
+            throw ExerciseClassifierError.noProbabilities
+        }
         let (label, confidence) = script(calls)
         return ClassifierPrediction(label: label, confidence: confidence)
     }
@@ -240,5 +277,7 @@ private final class RecognitionPoseSource: PoseStreaming {
         continuation = nil
     }
 
-    func emit(_ frame: PoseFrame) { continuation?.yield(frame) }
+    func emit(_ frame: PoseFrame) {
+        continuation?.yield(frame)
+    }
 }

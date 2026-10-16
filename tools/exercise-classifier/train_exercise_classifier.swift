@@ -34,11 +34,13 @@ func parseOptions(_ arguments: [String]) -> Options {
         let argument = arguments[index]
         if argument == "--help" || argument == "-h" {
             print("usage: train_exercise_classifier.swift <dataset> <output.mlmodel> "
-                  + "[--iterations 80] [--frame-rate 15] [--window 30]")
+                + "[--iterations 80] [--frame-rate 15] [--window 30]")
             exit(0)
         }
         if argument.hasPrefix("--") {
-            guard index + 1 < arguments.count else { fail("\(argument) needs a value") }
+            guard index + 1 < arguments.count else {
+                fail("\(argument) needs a value")
+            }
             options[argument] = arguments[index + 1]
             index += 2
         } else {
@@ -46,21 +48,31 @@ func parseOptions(_ arguments: [String]) -> Options {
             index += 1
         }
     }
-    guard positional.count == 2 else { fail("expected <dataset> and <output.mlmodel>; see --help") }
-    var result = Options(dataset: URL(fileURLWithPath: positional[0]),
-                         output: URL(fileURLWithPath: positional[1]))
+    guard positional.count == 2 else {
+        fail("expected <dataset> and <output.mlmodel>; see --help")
+    }
+    var result = Options(
+        dataset: URL(fileURLWithPath: positional[0]),
+        output: URL(fileURLWithPath: positional[1])
+    )
     for (key, value) in options {
         switch key {
-        case "--iterations": result.iterations = Int(value) ?? 0
-        case "--frame-rate": result.frameRate = Double(value) ?? 0
-        case "--window": result.window = Int(value) ?? 0
-        default: fail("unknown option \(key)")
+        case "--iterations":
+            result.iterations = Int(value) ?? 0
+        case "--frame-rate":
+            result.frameRate = Double(value) ?? 0
+        case "--window":
+            result.window = Int(value) ?? 0
+        default:
+            fail("unknown option \(key)")
         }
     }
     guard result.iterations > 0, result.frameRate > 0, result.window > 0 else {
         fail("--iterations, --frame-rate and --window must be positive numbers")
     }
-    guard result.output.pathExtension == "mlmodel" else { fail("output must end in .mlmodel") }
+    guard result.output.pathExtension == "mlmodel" else {
+        fail("output must end in .mlmodel")
+    }
     return result
 }
 
@@ -68,7 +80,9 @@ func parseOptions(_ arguments: [String]) -> Options {
 func clipCounts(in directory: URL) -> [String: Int] {
     let manager = FileManager.default
     guard let labels = try? manager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
-    else { return [:] }
+    else {
+        return [:]
+    }
     var counts: [String: Int] = [:]
     for label in labels where label.hasDirectoryPath {
         let videos = (try? manager.contentsOfDirectory(at: label, includingPropertiesForKeys: nil)) ?? []
@@ -83,8 +97,14 @@ let options = parseOptions(Array(CommandLine.arguments.dropFirst()))
 let trainURL = options.dataset.appending(path: "train", directoryHint: .isDirectory)
 let validationURL = options.dataset.appending(path: "validation", directoryHint: .isDirectory)
 let trainCounts = clipCounts(in: trainURL)
-guard !trainCounts.isEmpty else { fail("no label folders in \(trainURL.path)") }
-if let empty = trainCounts.first(where: { $0.value == 0 }) { fail("\(empty.key) has no training clips") }
+guard !trainCounts.isEmpty else {
+    fail("no label folders in \(trainURL.path)")
+}
+
+if let empty = trainCounts.first(where: { $0.value == 0 }) {
+    fail("\(empty.key) has no training clips")
+}
+
 let validationCounts = clipCounts(in: validationURL)
 let heldOut = !validationCounts.isEmpty
 
@@ -92,11 +112,11 @@ print("Training clips: " + trainCounts.sorted { $0.key < $1.key }.map { "\($0.ke
     .joined(separator: ", "))
 if heldOut {
     print("Validation clips (held-out participants): "
-          + validationCounts.sorted { $0.key < $1.key }.map { "\($0.key) \($0.value)" }
-            .joined(separator: ", "))
+        + validationCounts.sorted { $0.key < $1.key }.map { "\($0.key) \($0.value)" }
+        .joined(separator: ", "))
 } else {
     print("warning: no validation folder. Create ML will hold out random clips, and clips cut from "
-          + "the same recording can land on both sides, so the validation score will look too good.")
+        + "the same recording can land on both sides, so the validation score will look too good.")
 }
 
 let parameters = MLActionClassifier.ModelParameters(
@@ -112,8 +132,10 @@ let started = Date()
 print("Extracting poses and training. This can take several minutes per hundred clips.")
 let classifier: MLActionClassifier
 do {
-    classifier = try MLActionClassifier(trainingData: .labeledDirectories(at: trainURL),
-                                        parameters: parameters)
+    classifier = try MLActionClassifier(
+        trainingData: .labeledDirectories(at: trainURL),
+        parameters: parameters
+    )
 } catch {
     fail("training failed: \(error)")
 }
@@ -150,6 +172,7 @@ do {
 } catch {
     fail("could not write \(options.output.path): \(error)")
 }
+
 let report: [String: Any] = [
     "trainedAt": trainedAt,
     "seconds": Int(Date().timeIntervalSince(started)),
@@ -166,5 +189,6 @@ let reportURL = options.output.deletingPathExtension().appendingPathExtension("r
 if let data = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]) {
     try? data.write(to: reportURL)
 }
+
 print("Wrote \(options.output.path) and \(reportURL.lastPathComponent).")
 print("To ship it, copy the .mlmodel to Finn/Finn/FinnExerciseClassifier.mlmodel and rebuild.")

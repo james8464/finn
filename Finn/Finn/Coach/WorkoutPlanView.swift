@@ -6,16 +6,20 @@ struct WorkoutPlanView: View {
     var store: PlannedWorkoutStore = .shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Do each exercise in Finn, then tick it here. Validate when the workout is finished and it is kept in Next workouts.")
-                        .font(.subheadline)
-                        .foregroundStyle(HomeStyle.supportingText)
-                        .fixedSize(horizontal: false, vertical: true)
+                    Text(
+                        "Do each exercise in Finn, then tick it here. Validate when the workout is finished and it is kept in Next workouts."
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(HomeStyle.supportingText)
+                    .fixedSize(horizontal: false, vertical: true)
                     ForEach($plan.exercises) { $item in
                         HomeCard { row($item) }
                     }
@@ -103,9 +107,11 @@ struct NextWorkoutsSection: View {
                                         .multilineTextAlignment(.leading)
                                         .fixedSize(horizontal: false, vertical: true)
                                     if let done = workout.lastDoneAt {
-                                        Text("Last done \(done.formatted(date: .abbreviated, time: .omitted))")
-                                            .font(.subheadline)
-                                            .foregroundStyle(HomeStyle.supportingText)
+                                        Text(
+                                            "Last done \(done.formatted(date: .abbreviated, time: .omitted))"
+                                        )
+                                        .font(.subheadline)
+                                        .foregroundStyle(HomeStyle.supportingText)
                                     }
                                 }
                                 Spacer(minLength: 0)

@@ -21,14 +21,20 @@ struct FinnStartupView: View {
         ZStack {
             Color.black.ignoresSafeArea()
             if let snapshot {
-                ContentView(source: CameraPoseSource.live(),
-                            store: WidgetSharingSessionStore(base: LocalSessionStore()),
-                            preferences: .app, announcer: LiveAnnouncer(),
-                            fitness: HealthKitWorkoutExporter(), health: HealthKitReader(),
-                            connectsAccessories: true, startup: snapshot,
-                            launchURL: $pendingURL, routesURLsFromParent: true)
-                    .allowsHitTesting(!showsMark)
-                    .accessibilityHidden(showsMark)
+                ContentView(
+                    source: CameraPoseSource.live(),
+                    store: WidgetSharingSessionStore(base: LocalSessionStore()),
+                    preferences: .app,
+                    announcer: LiveAnnouncer(),
+                    fitness: HealthKitWorkoutExporter(),
+                    health: HealthKitReader(),
+                    connectsAccessories: true,
+                    startup: snapshot,
+                    launchURL: $pendingURL,
+                    routesURLsFromParent: true
+                )
+                .allowsHitTesting(!showsMark)
+                .accessibilityHidden(showsMark)
             }
             if showsMark {
                 FinnLaunchCover(readyToReveal: snapshot != nil) { showsMark = false }
@@ -36,11 +42,15 @@ struct FinnStartupView: View {
         }
         .preferredColorScheme(.dark)
         .task {
-            guard snapshot == nil else { return }
+            guard snapshot == nil else {
+                return
+            }
             let loaded = await Task.detached(priority: .userInitiated) {
                 FinnStartupSnapshot.load()
             }.value
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else {
+                return
+            }
             // mount navigation beneath the cover while its one-second sequence finishes
             snapshot = loaded
         }
@@ -63,7 +73,9 @@ private struct FinnLaunchCover: View {
         FinnLaunchMark(previewReducesMotion: previewReducesMotion)
             .opacity(isVisible ? 1 : 0)
             .task(id: readyToReveal) {
-                guard readyToReveal else { return }
+                guard readyToReveal else {
+                    return
+                }
                 do {
                     try await ContinuousClock().sleep(until: startedAt.advanced(by: .milliseconds(800)))
                     try Task.checkCancellation()
@@ -79,46 +91,49 @@ private struct FinnLaunchCover: View {
 }
 
 #if DEBUG
-/// replay the production sequence without relaunching the simulator or touching saved data
-struct FinnLaunchPreview: View {
-    var reducesMotion = false
-    @State private var showsMark = true
-    @State private var replayID = 0
+    /// replay the production sequence without relaunching the simulator or touching saved data
+    struct FinnLaunchPreview: View {
+        var reducesMotion = false
+        @State private var showsMark = true
+        @State private var replayID = 0
 
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            VStack(spacing: 16) {
-                Text("Launch animation").font(.title2.bold())
-                Text("1 second").foregroundStyle(.secondary)
-                Button("Replay", systemImage: "arrow.counterclockwise") {
-                    replayID += 1
-                    showsMark = true
+        var body: some View {
+            ZStack {
+                Color.black.ignoresSafeArea()
+                VStack(spacing: 16) {
+                    Text("Launch animation").font(.title2.bold())
+                    Text("1 second").foregroundStyle(.secondary)
+                    Button("Replay", systemImage: "arrow.counterclockwise") {
+                        replayID += 1
+                        showsMark = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.white)
+                    .foregroundStyle(.black)
+                    .accessibilityIdentifier("launch.replay")
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.white)
-                .foregroundStyle(.black)
-                .accessibilityIdentifier("launch.replay")
-            }
-            .allowsHitTesting(!showsMark)
-            .accessibilityHidden(showsMark)
-            if showsMark {
-                FinnLaunchCover(readyToReveal: true, previewReducesMotion: reducesMotion) {
-                    showsMark = false
+                .allowsHitTesting(!showsMark)
+                .accessibilityHidden(showsMark)
+                if showsMark {
+                    FinnLaunchCover(readyToReveal: true, previewReducesMotion: reducesMotion) {
+                        showsMark = false
+                    }
+                    .id(replayID)
                 }
-                .id(replayID)
             }
+            .preferredColorScheme(.dark)
         }
-        .preferredColorScheme(.dark)
     }
-}
 #endif
 
 /// Draw the F at the display's frame cadence; Reduce Motion keeps the finished mark still.
 struct FinnLaunchMark: View {
     var previewReducesMotion = false
     @Environment(\.accessibilityReduceMotion) private var systemReducesMotion
-    private var reduceMotion: Bool { systemReducesMotion || previewReducesMotion }
+    private var reduceMotion: Bool {
+        systemReducesMotion || previewReducesMotion
+    }
+
     @Environment(\.scenePhase) private var scenePhase
     @State private var startedAt = Date.now
 

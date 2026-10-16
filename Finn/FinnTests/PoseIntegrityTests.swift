@@ -16,13 +16,20 @@ struct PoseIntegrityTests {
 
     @Test(arguments: [Double.nan, .infinity, -1, 0, 11])
     func invalidImageGeometryCannotProduceAngles(aspectRatio: Double) {
-        let frame = PoseFrame(time: 0, subjectCount: 1, joints: [.leftHip: point],
-                              aspectRatio: aspectRatio)
+        let frame = PoseFrame(
+            time: 0,
+            subjectCount: 1,
+            joints: [.leftHip: point],
+            aspectRatio: aspectRatio
+        )
         #expect(frame.joints.isEmpty)
     }
 
     @Test func replayDecodingAppliesTheLiveValidation() throws {
-        let data = Data(#"{"time":0,"subjectCount":1,"joints":["leftHip",{"x":2,"y":0.5,"confidence":0.9}],"profileDeviationDegrees":200}"#.utf8)
+        let data = Data(
+            #"{"time":0,"subjectCount":1,"joints":["leftHip",{"x":2,"y":0.5,"confidence":0.9}],"profileDeviationDegrees":200}"#
+                .utf8
+        )
         let frame = try JSONDecoder().decode(PoseFrame.self, from: data)
         #expect(frame.joints.isEmpty)
         #expect(frame.profileDeviationDegrees == nil)
@@ -31,8 +38,12 @@ struct PoseIntegrityTests {
 
     @Test func malformedClassifierFeaturesAreDropped() {
         let short = PoseFrame(time: 0, subjectCount: 1, joints: [:], keypoints: [0, 1])
-        let nonFinite = PoseFrame(time: 0, subjectCount: 1, joints: [:],
-                                  keypoints: Array(repeating: .infinity, count: 54))
+        let nonFinite = PoseFrame(
+            time: 0,
+            subjectCount: 1,
+            joints: [:],
+            keypoints: Array(repeating: .infinity, count: 54)
+        )
         #expect(short.keypoints == nil)
         #expect(nonFinite.keypoints == nil)
     }
@@ -49,7 +60,7 @@ struct PoseIntegrityTests {
 
     @Test func aCameraPauseRestartsTheReadinessHold() {
         var readiness = StartReadiness()
-        for index in 0...10 {
+        for index in 0 ... 10 {
             readiness.update(with: standing(at: Double(index) / 10), definition: .squat)
         }
         #expect(readiness.progress > 0)
@@ -71,7 +82,7 @@ struct PoseIntegrityTests {
 
     @Test(arguments: [5, 15, 30, 60])
     func verticalCameraMotionCannotBecomeHipOnlySquats(framesPerSecond: Int) {
-        let frames = (0...(framesPerSecond * 8)).map { index in
+        let frames = (0 ... (framesPerSecond * 8)).map { index in
             let time = Double(index) / Double(framesPerSecond)
             let shift = 0.08 * sin(2 * .pi * time)
             return PoseFrame(time: time, subjectCount: 1, joints: [
@@ -87,7 +98,7 @@ struct PoseIntegrityTests {
 
     @Test(arguments: [5, 15, 30, 60])
     func observedHipOnlySquatsKeepTheirCountAtDifferentFrameRates(framesPerSecond: Int) throws {
-        let frames = (0...(framesPerSecond * 8)).map { index in
+        let frames = (0 ... (framesPerSecond * 8)).map { index in
             let time = Double(index) / Double(framesPerSecond)
             let shift = 0.2 * (1 - cos(.pi * time)) / 2
             return PoseFrame(time: time, subjectCount: 1, joints: [
@@ -103,7 +114,9 @@ struct PoseIntegrityTests {
         #expect(analysis.reps.count == 4)
     }
 
-    private var point: JointPoint { JointPoint(x: 0.5, y: 0.4, confidence: 0.9) }
+    private var point: JointPoint {
+        JointPoint(x: 0.5, y: 0.4, confidence: 0.9)
+    }
 
     private func standing(at time: TimeInterval) -> PoseFrame {
         PoseFrame(time: time, subjectCount: 1, joints: [

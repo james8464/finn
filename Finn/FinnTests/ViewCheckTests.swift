@@ -7,23 +7,32 @@ import Testing
 struct ViewCheckTests {
     /// Camera-relative joints of a standing person 2.5 m away, turned `yaw` degrees from a
     /// true profile around the vertical axis. The camera sits slightly above the hips.
-    private func body(yaw: Double, offset: SIMD3<Double> = [0.3, -0.1, 2.5],
-                      swapSides: Bool = false) -> (SIMD3<Double>, SIMD3<Double>, SIMD3<Double>, SIMD3<Double>) {
+    private func body(
+        yaw: Double,
+        offset: SIMD3<Double> = [0.3, -0.1, 2.5],
+        swapSides: Bool = false
+    )
+        -> (SIMD3<Double>, SIMD3<Double>, SIMD3<Double>, SIMD3<Double>) {
         let up = SIMD3<Double>(0, 1, 0)
         let sight = simd_normalize(SIMD3(offset.x, 0, offset.z))
         let angle = yaw * .pi / 180
-// rotate the line of sight around the vertical axis to get the left-right axis.
+        // rotate the line of sight around the vertical axis to get the left-right axis.
         let lateral = simd_normalize(sight * cos(angle) + simd_cross(up, sight) * sin(angle))
         let side = swapSides ? -lateral : lateral
-        return (offset + 0.15 * side, offset - 0.15 * side,
-                offset + 0.5 * up + 0.2 * side, offset + 0.5 * up - 0.2 * side)
+        return (
+            offset + 0.15 * side,
+            offset - 0.15 * side,
+            offset + 0.5 * up + 0.2 * side,
+            offset + 0.5 * up - 0.2 * side
+        )
     }
 
     @Test(arguments: [0.0, 15, 45, 60, 90])
     func deviationFollowsBodyYaw(yaw: Double) throws {
         let (leftHip, rightHip, leftShoulder, rightShoulder) = body(yaw: yaw)
         let deviation = try #require(ViewCheck.profileDeviation(
-            leftHip: leftHip, rightHip: rightHip, leftShoulder: leftShoulder, rightShoulder: rightShoulder))
+            leftHip: leftHip, rightHip: rightHip, leftShoulder: leftShoulder, rightShoulder: rightShoulder
+        ))
         #expect(abs(deviation - yaw) < 4, "yaw \(yaw) gave \(deviation)")
     }
 
@@ -31,7 +40,9 @@ struct ViewCheckTests {
         for (yaw, swap) in [(0.0, true), (180.0, false), (175.0, true)] {
             let (leftHip, rightHip, leftShoulder, rightShoulder) = body(yaw: yaw, swapSides: swap)
             let deviation = try #require(ViewCheck.profileDeviation(
-                leftHip: leftHip, rightHip: rightHip, leftShoulder: leftShoulder, rightShoulder: rightShoulder))
+                leftHip: leftHip, rightHip: rightHip, leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder
+            ))
             #expect(deviation < 8)
         }
     }
@@ -44,16 +55,16 @@ struct ViewCheckTests {
 
     @Test func setVerdictUsesTheMedianAndNeedsEnoughEstimates() {
         #expect(ViewCheck.assess(frames(deviations: [10, 80, 12, 9, 15]), expected: .side)
-                == .matches(medianDeviation: 12, estimates: 5))
-// off side-on but not clearly frontal: measured, with a tip.
+            == .matches(medianDeviation: 12, estimates: 5))
+        // off side-on but not clearly frontal: measured, with a tip.
         #expect(ViewCheck.assess(frames(deviations: [50, 60, 12, 70]), expected: .side)
-                == .angled(medianDeviation: 60, estimates: 4))
-// clearly frontal over three seconds: refused.
+            == .angled(medianDeviation: 60, estimates: 4))
+        // clearly frontal over three seconds: refused.
         #expect(ViewCheck.assess(frames(deviations: [70, 80, 75, 90]), expected: .side)
-                == .mismatch(medianDeviation: 80, estimates: 4))
-// clearly frontal, but only for a second and a half: still measured.
+            == .mismatch(medianDeviation: 80, estimates: 4))
+        // clearly frontal, but only for a second and a half: still measured.
         #expect(ViewCheck.assess(frames(deviations: [70, 80, 75, 90], spacing: 0.5), expected: .side)
-                == .angled(medianDeviation: 80, estimates: 4))
+            == .angled(medianDeviation: 80, estimates: 4))
         #expect(ViewCheck.assess(frames(deviations: [80, 80, 80]), expected: .side) == .unavailable)
         #expect(ViewCheck.assess(frames(deviations: []), expected: .side) == .unavailable)
     }
@@ -74,8 +85,13 @@ struct ViewCheckTests {
         for (definition, trace) in traces {
             let front = withDeviation(trace, 85)
             let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(front, as: definition)
-            guard case .analyzed(let analysis) = outcome,
-                  case .analyzed(let ignored) = ExerciseAnalyzer.analyse(front, as: definition, viewCheck: .ignore)
+            guard
+                case .analyzed(let analysis) = outcome,
+                case .analyzed(let ignored) = ExerciseAnalyzer.analyse(
+                    front,
+                    as: definition,
+                    viewCheck: .ignore
+                )
             else {
                 Issue.record("\(definition.kind) should count a front view")
                 continue
@@ -83,7 +99,8 @@ struct ViewCheckTests {
             #expect(analysis.reps.count == ignored.reps.count)
             #expect(!analysis.reps.isEmpty)
             #expect(analysis.reps.allSatisfy { $0.postureValue == nil })
-            #expect(CueSelector.select(from: analysis, exercise: definition)?.kind != definition.posture.cueKind)
+            #expect(CueSelector.select(from: analysis, exercise: definition)?.kind != definition.posture
+                .cueKind)
             let note = try #require(diagnostics?.explanation(for: definition, counted: analysis.reps.count))
             #expect(note.contains("from the front"))
         }
@@ -101,8 +118,13 @@ struct ViewCheckTests {
 
     @Test func anAngledViewIsMeasuredWithATip() throws {
         let trace = squatTrace()
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(withDeviation(trace, 45), as: .squat)
-        guard case .analyzed(let angled) = outcome, case .analyzed(let plain) = SquatAnalyzer.analyse(trace) else {
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(
+            withDeviation(trace, 45),
+            as: .squat
+        )
+        guard
+            case .analyzed(let angled) = outcome,
+            case .analyzed(let plain) = SquatAnalyzer.analyse(trace) else {
             Issue.record("A 45° view must be measured")
             return
         }
@@ -112,10 +134,14 @@ struct ViewCheckTests {
     }
 
     @Test func aBriefFrontViewDoesNotRefuseTheSet() {
-// facing the camera for the first two seconds only (while getting into place).
+        // facing the camera for the first two seconds only (while getting into place).
         let trace = squatTrace().enumerated().map { index, frame in
-            PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints,
-                      profileDeviationDegrees: index.isMultiple(of: 4) ? (frame.time < 2 ? 85 : 10) : nil)
+            PoseFrame(
+                time: frame.time,
+                subjectCount: 1,
+                joints: frame.joints,
+                profileDeviationDegrees: index.isMultiple(of: 4) ? (frame.time < 2 ? 85 : 10) : nil
+            )
         }
         guard case .analyzed = SquatAnalyzer.analyse(trace) else {
             Issue.record("Two seconds facing the camera must not refuse the set")
@@ -132,15 +158,21 @@ struct ViewCheckTests {
 
     private func frames(deviations: [Double], spacing: Double = 1) -> [PoseFrame] {
         deviations.enumerated().map {
-            PoseFrame(time: Double($0.offset) * spacing, subjectCount: 1, joints: [:],
-                      profileDeviationDegrees: $0.element)
+            PoseFrame(
+                time: Double($0.offset) * spacing,
+                subjectCount: 1,
+                joints: [:],
+                profileDeviationDegrees: $0.element
+            )
         }
     }
 
     private func squatTrace() -> [PoseFrame] {
-        (0...120).map { index in
-            squatFrame(time: Double(index) * 0.1,
-                       hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
+        (0 ... 120).map { index in
+            squatFrame(
+                time: Double(index) * 0.1,
+                hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
+            )
         }
     }
 }
@@ -152,12 +184,15 @@ struct ViewCheckSessionTests {
         model.selectedExercise = .bodyweightSquat
         await model.startPreview()
         #expect(source.cameraAngleSettings == [true])
-        for (index, frame) in withDeviation(squatFrames(count: 12), 80, every: 1).enumerated() where index < 4 {
+        for (index, frame) in withDeviation(squatFrames(count: 12), 80, every: 1).enumerated()
+            where index < 4 {
             source.emit(frame)
         }
         try await waitFor { model.framingStatus == .turnToExpectedView }
         #expect(model.framingStatus == .turnToExpectedView)
-        for frame in withDeviation(squatFrames(count: 5, start: 0.4), 10, every: 1) { source.emit(frame) }
+        for frame in withDeviation(squatFrames(count: 5, start: 0.4), 10, every: 1) {
+            source.emit(frame)
+        }
         try await waitFor { model.framingStatus == .landmarksVisible }
         #expect(model.framingStatus == .landmarksVisible)
         await model.cancel()
@@ -171,18 +206,28 @@ struct ViewCheckSessionTests {
     @Test func oldFrontReadingsLapseWhenEstimatesStop() async throws {
         let defaults = try #require(UserDefaults(suiteName: "FinnViewCheckStale-\(UUID().uuidString)"))
         let source = AngleRecordingSource()
-        let model = WorkoutSessionModel(source: source, exerciseClassifier: nil,
-                                        preferences: FinnPreferences(defaults: defaults, handsFreeByDefault: true))
+        let model = WorkoutSessionModel(
+            source: source,
+            exerciseClassifier: nil,
+            preferences: FinnPreferences(
+                defaults: defaults,
+                handsFreeByDefault: true
+            )
+        )
         model.handsFreeCountdown = 0
         await model.startPreview()
         let walking = withDeviation(CaptureTraces.squats(reps: 0, from: 0, standing: 0.6), 85, every: 1)
         let sideOn = CaptureTraces.squats(reps: 0, from: 0.7, standing: 8)
         for frame in walking + sideOn {
             source.emit(frame)
-            if model.stage == .capturing { break }
+            if model.stage == .capturing {
+                break
+            }
             await Task.yield()
         }
-        for _ in 0..<500 where model.stage != .capturing { try await Task.sleep(for: .milliseconds(10)) }
+        for _ in 0 ..< 500 where model.stage != .capturing {
+            try await Task.sleep(for: .milliseconds(10))
+        }
         #expect(model.stage == .capturing)
         await model.cancel()
     }
@@ -192,16 +237,26 @@ struct ViewCheckSessionTests {
     @Test func aFrontViewStartsAHandsFreeSet() async throws {
         let defaults = try #require(UserDefaults(suiteName: "FinnViewCheckFrontStart-\(UUID().uuidString)"))
         let source = AngleRecordingSource()
-        let model = WorkoutSessionModel(source: source, exerciseClassifier: nil,
-                                        preferences: FinnPreferences(defaults: defaults, handsFreeByDefault: true))
+        let model = WorkoutSessionModel(
+            source: source,
+            exerciseClassifier: nil,
+            preferences: FinnPreferences(
+                defaults: defaults,
+                handsFreeByDefault: true
+            )
+        )
         model.handsFreeCountdown = 0
         await model.startPreview()
         for frame in withDeviation(CaptureTraces.squats(reps: 0, from: 0, standing: 6), 85, every: 2) {
             source.emit(frame)
-            if model.stage == .capturing { break }
+            if model.stage == .capturing {
+                break
+            }
             await Task.yield()
         }
-        for _ in 0..<500 where model.stage != .capturing { try await Task.sleep(for: .milliseconds(10)) }
+        for _ in 0 ..< 500 where model.stage != .capturing {
+            try await Task.sleep(for: .milliseconds(10))
+        }
         #expect(model.stage == .capturing)
         await model.cancel()
     }
@@ -210,7 +265,9 @@ struct ViewCheckSessionTests {
         let (model, source) = makeModel()
         model.selectedExercise = .pushUp
         await model.startPreview()
-        for frame in withDeviation(squatFrames(count: 12), 85, every: 1) { source.emit(frame) }
+        for frame in withDeviation(squatFrames(count: 12), 85, every: 1) {
+            source.emit(frame)
+        }
         try await Task.sleep(for: .milliseconds(100))
         #expect(model.framingStatus != .turnToExpectedView)
         await model.cancel()
@@ -218,7 +275,12 @@ struct ViewCheckSessionTests {
 
     @Test func aFrontViewSetIsMeasuredWithoutAdvice() async throws {
         let (model, source) = makeModel()
-        await capture(model, source, withDeviation(CaptureTraces.squats(reps: 6, from: 0), 75), exercise: .bodyweightSquat)
+        await capture(
+            model,
+            source,
+            withDeviation(CaptureTraces.squats(reps: 6, from: 0), 75),
+            exercise: .bodyweightSquat
+        )
         guard case .measured(let front, let cue) = model.result else {
             Issue.record("A front view is counted, not refused")
             return
@@ -230,7 +292,12 @@ struct ViewCheckSessionTests {
 
         model.checksCameraAngle = false
         #expect(source.cameraAngleSettings.last == false)
-        await capture(model, source, withDeviation(CaptureTraces.squats(reps: 6, from: 0), 75), exercise: .bodyweightSquat)
+        await capture(
+            model,
+            source,
+            withDeviation(CaptureTraces.squats(reps: 6, from: 0), 75),
+            exercise: .bodyweightSquat
+        )
         guard case .measured(let analysis, _) = model.result else {
             Issue.record("With the check off, the set should be measured")
             return
@@ -241,37 +308,52 @@ struct ViewCheckSessionTests {
     @Test func settingDefaultsOnAndIsRemembered() throws {
         let defaults = try #require(UserDefaults(suiteName: "FinnViewCheck-\(UUID().uuidString)"))
         let preferences = FinnPreferences(defaults: defaults)
-        let first = WorkoutSessionModel(source: AngleRecordingSource(), exerciseClassifier: nil,
-                                        preferences: preferences)
+        let first = WorkoutSessionModel(
+            source: AngleRecordingSource(),
+            exerciseClassifier: nil,
+            preferences: preferences
+        )
         #expect(first.checksCameraAngle)
         first.checksCameraAngle = false
-        let second = WorkoutSessionModel(source: AngleRecordingSource(), exerciseClassifier: nil,
-                                         preferences: preferences)
+        let second = WorkoutSessionModel(
+            source: AngleRecordingSource(),
+            exerciseClassifier: nil,
+            preferences: preferences
+        )
         #expect(!second.checksCameraAngle)
     }
 
     private func makeModel() -> (WorkoutSessionModel, AngleRecordingSource) {
         let defaults = UserDefaults(suiteName: "FinnViewCheckSession-\(UUID().uuidString)")!
         let source = AngleRecordingSource()
-        return (WorkoutSessionModel(source: source, exerciseClassifier: nil,
-                                    preferences: FinnPreferences(defaults: defaults)), source)
+        return (WorkoutSessionModel(
+            source: source,
+            exerciseClassifier: nil,
+            preferences: FinnPreferences(defaults: defaults)
+        ), source)
     }
 
-    private func capture(_ model: WorkoutSessionModel, _ source: AngleRecordingSource,
-                         _ frames: [PoseFrame], exercise: ExerciseKind) async {
+    private func capture(
+        _ model: WorkoutSessionModel,
+        _ source: AngleRecordingSource,
+        _ frames: [PoseFrame],
+        exercise: ExerciseKind
+    ) async {
         model.selectedExercise = exercise
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for frame in frames { source.emit(frame) }
+        for frame in frames {
+            source.emit(frame)
+        }
         await model.endSet()
     }
 
     private func squatFrames(count: Int, start: Double = 0) -> [PoseFrame] {
-        (0..<count).map { squatFrame(time: start + Double($0) * 0.1, hipY: 0.42) }
+        (0 ..< count).map { squatFrame(time: start + Double($0) * 0.1, hipY: 0.42) }
     }
 
     private func waitFor(_ condition: () -> Bool) async throws {
-        for _ in 0..<50 where !condition() {
+        for _ in 0 ..< 50 where !condition() {
             try await Task.sleep(for: .milliseconds(10))
         }
     }
@@ -292,7 +374,11 @@ private final class AngleRecordingSource: PoseStreaming {
         continuation = nil
     }
 
-    func setCameraAngleEstimation(_ enabled: Bool) { cameraAngleSettings.append(enabled) }
+    func setCameraAngleEstimation(_ enabled: Bool) {
+        cameraAngleSettings.append(enabled)
+    }
 
-    func emit(_ frame: PoseFrame) { continuation?.yield(frame) }
+    func emit(_ frame: PoseFrame) {
+        continuation?.yield(frame)
+    }
 }

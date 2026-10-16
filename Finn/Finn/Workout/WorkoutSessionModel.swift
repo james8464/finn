@@ -26,23 +26,33 @@ nonisolated enum CameraIssue: Equatable {
 
     var title: String {
         switch self {
-        case .permissionDenied: String(localized: "Camera access needed")
-        case .unavailable: String(localized: "Camera unavailable")
-        case .interrupted: String(localized: "Camera interrupted")
-        case .startFailed: String(localized: "Couldn’t start camera")
+        case .permissionDenied:
+            String(localized: "Camera access needed")
+        case .unavailable:
+            String(localized: "Camera unavailable")
+        case .interrupted:
+            String(localized: "Camera interrupted")
+        case .startFailed:
+            String(localized: "Couldn’t start camera")
         }
     }
 
     var message: String {
         switch self {
-        case .permissionDenied: String(localized: "Allow camera access in Settings.")
-        case .unavailable: String(localized: "The camera is unavailable right now. Try again in a moment.")
-        case .interrupted: String(localized: "Camera capture stopped. Try again.")
-        case .startFailed: String(localized: "Try again in a moment.")
+        case .permissionDenied:
+            String(localized: "Allow camera access in Settings.")
+        case .unavailable:
+            String(localized: "The camera is unavailable right now. Try again in a moment.")
+        case .interrupted:
+            String(localized: "Camera capture stopped. Try again.")
+        case .startFailed:
+            String(localized: "Try again in a moment.")
         }
     }
 
-    var offersSettings: Bool { self == .permissionDenied }
+    var offersSettings: Bool {
+        self == .permissionDenied
+    }
 }
 
 nonisolated enum ComparisonGap: Equatable {
@@ -79,7 +89,10 @@ final class WorkoutSessionModel {
     private var frames: [PoseFrame] = []
     private var previewFrames: [PoseFrame] = []
     /// Latest Vision 3D profile deviations seen while framing, newest last.
-    var previewDeviations: [Double] { previewEstimates.map { $0.deviation } }
+    var previewDeviations: [Double] {
+        previewEstimates.map { $0.deviation }
+    }
+
     /// The same, with the frame time of each: an estimate older than `previewEstimateLifetime`
     /// no longer counts.
     private var previewEstimates: [(time: TimeInterval, deviation: Double)] = []
@@ -118,6 +131,7 @@ final class WorkoutSessionModel {
     var selectedExercise: ExerciseKind = .bodyweightSquat {
         didSet { preferences.selectedExercise = selectedExercise }
     }
+
     /// The exercise used for the framing check and analysis of the current capture.
     private(set) var captureExercise: ExerciseKind = .bodyweightSquat
     private(set) var result: WorkoutResult?
@@ -139,32 +153,50 @@ final class WorkoutSessionModel {
     var recognisesExercise: Bool {
         didSet { preferences.recognisesExercise = recognisesExercise }
     }
+
     /// Whether a bundled trained model replaces the rules. Off by default, and only offered when
     /// this build includes a model.
     var usesTrainedModel: Bool {
         didSet { preferences.usesTrainedModel = usesTrainedModel }
     }
+
     /// True when a trained model (keypoint or angle) ships with this build.
-    var hasExerciseClassifier: Bool { exerciseClassifier != nil || angleClassifier != nil }
+    var hasExerciseClassifier: Bool {
+        exerciseClassifier != nil || angleClassifier != nil
+    }
+
     var recognitionMethod: RecognitionMethod {
         if usesTrainedModel {
-            if exerciseClassifier != nil { return .keypointModel }
-            if angleClassifier != nil { return .angleModel }
+            if exerciseClassifier != nil {
+                return .keypointModel
+            }
+            if angleClassifier != nil {
+                return .angleModel
+            }
         }
-        if ruleClassifier != nil { return .angleRules }
+        if ruleClassifier != nil {
+            return .angleRules
+        }
         return .unavailable
     }
+
     /// Whether Vision 3D pose may refuse a set filmed from the wrong angle. On by default.
     var checksCameraAngle: Bool {
         didSet {
             preferences.checksCameraAngle = checksCameraAngle
             source.setCameraAngleEstimation(checksCameraAngle)
-            if !checksCameraAngle { previewEstimates = [] }
+            if !checksCameraAngle {
+                previewEstimates = []
+            }
         }
     }
+
     /// The 3D camera-angle verdict for the latest analysed set, kept for the validation readout.
     private(set) var lastViewVerdict: ViewCheck.Verdict = .unavailable
-    var usesExerciseRecognition: Bool { recognisesExercise && recognitionMethod != .unavailable }
+    var usesExerciseRecognition: Bool {
+        recognisesExercise && recognitionMethod != .unavailable
+    }
+
     private(set) var frameCount = 0
     private(set) var framingStatus: FramingStatus = .checking
     /// While framing, the joint that keeps the set from starting cleanly, named on screen.
@@ -180,11 +212,23 @@ final class WorkoutSessionModel {
     private(set) var historyIssue: HistoryIssue?
     private(set) var comparisonRecap: Recap?
     private(set) var isGeneratingRecap = false
-    var hasPendingDeletion: Bool { pendingDeleteAll || !pendingDeleteIDs.isEmpty }
-    var isRecording: Bool { stage == .capturing }
-    var previewSession: AVCaptureSession { source.previewSession }
+    var hasPendingDeletion: Bool {
+        pendingDeleteAll || !pendingDeleteIDs.isEmpty
+    }
+
+    var isRecording: Bool {
+        stage == .capturing
+    }
+
+    var previewSession: AVCaptureSession {
+        source.previewSession
+    }
+
     /// The frames shown on the camera screen; nil when the source has no picture (demo input).
-    var previewFeed: PreviewFeed? { source.previewFeed }
+    var previewFeed: PreviewFeed? {
+        source.previewFeed
+    }
+
     /// The newest pose while the camera screen is open, for the live skeleton.
     private(set) var livePose: PoseFrame?
     /// Whether the set starts by itself once the athlete holds still in position, and ends when they
@@ -198,17 +242,21 @@ final class WorkoutSessionModel {
             }
         }
     }
+
     /// Whether the countdown, each rep, and live observations are said aloud (through AirPods or
     /// other headphones when connected).
     var speaksLive: Bool {
         didSet { preferences.speaksLive = speaksLive }
     }
+
     var hapticFeedback: HapticFeedbackStyle {
         didSet { preferences.hapticFeedback = hapticFeedback }
     }
+
     var soundFeedback: SoundFeedbackStyle {
         didSet { preferences.soundFeedback = soundFeedback }
     }
+
     /// Countdown of a set started hands-free, in seconds.
     @ObservationIgnored var handsFreeCountdown = 3
     /// While framing hands-free: how far the athlete is through holding position, 0 to 1.
@@ -243,7 +291,10 @@ final class WorkoutSessionModel {
     /// Why Finn closed the camera by itself while framing, for the first screen; nil otherwise.
     private(set) var framingClosedNote: String?
     /// The person's most frequent pattern in recent sets of the chosen exercise, shown before a set.
-    var focus: MistakeProfile? { MistakeProfile.make(history: history, exercise: selectedExercise) }
+    var focus: MistakeProfile? {
+        MistakeProfile.make(history: history, exercise: selectedExercise)
+    }
+
     /// The same, for the exercise being captured.
     /// Worked out once per camera screen: the screen reads it on every redraw, and it goes over the
     /// whole history.
@@ -260,6 +311,7 @@ final class WorkoutSessionModel {
     var savesToFitness: Bool {
         didSet { preferences.savesToFitness = savesToFitness }
     }
+
     /// Health's permission for Finn to save workouts, as last checked. Only read once the option is on.
     private(set) var fitnessAccess: FitnessAuthorization = .notDetermined
     /// The latest save to Apple Health, for the session it concerns.
@@ -271,6 +323,7 @@ final class WorkoutSessionModel {
     var personalisesWithHealth: Bool {
         didSet { preferences.personalisesWithHealth = personalisesWithHealth }
     }
+
     /// What Finn last read from Health; nil until read, or while the option is off.
     var healthSnapshot: HealthSnapshot?
     /// The one-time "Make Finn more personal?" offer is on screen.
@@ -283,22 +336,30 @@ final class WorkoutSessionModel {
     /// Heart rate during the latest set, from the Apple Watch.
     var setHeartRate: SetHeartRate?
     /// False for demo and recorded input: those sessions are never saved to Apple Health.
-    var offersFitness: Bool { fitness != nil }
+    var offersFitness: Bool {
+        fitness != nil
+    }
+
     /// A session still open on the first screen: Cancel, or the app going to the background during
     /// a set, comes back there without Done. The first screen offers to finish it (`finishSession`).
-    var unfinishedSession: WorkoutSessionSummary? { stage == .ready ? currentSession : nil }
+    var unfinishedSession: WorkoutSessionSummary? {
+        stage == .ready ? currentSession : nil
+    }
 
-    init(source: any PoseStreaming, store: (any SessionStoring)? = nil,
-         narrator: ComparisonNarrator? = nil,
-         exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
-         angleClassifier: (any AngleWindowClassifying)? = CoreMLAngleClassifier.bundled(),
-         ruleClassifier: (any AngleWindowClassifying)? = AngleRuleClassifier(),
-         preferences: FinnPreferences = .standard,
-         announcer: (any LiveAnnouncing)? = nil,
-         fitness: (any FitnessWorkoutSaving)? = nil,
-         health: (any HealthReading)? = nil,
-         initialHistory: Result<[WorkoutSessionSummary], Error>? = nil,
-         currentDate: @escaping () -> Date = { Date() }) {
+    init(
+        source: any PoseStreaming,
+        store: (any SessionStoring)? = nil,
+        narrator: ComparisonNarrator? = nil,
+        exerciseClassifier: (any ExerciseClassifying)? = CoreMLExerciseClassifier.bundled(),
+        angleClassifier: (any AngleWindowClassifying)? = CoreMLAngleClassifier.bundled(),
+        ruleClassifier: (any AngleWindowClassifying)? = AngleRuleClassifier(),
+        preferences: FinnPreferences = .standard,
+        announcer: (any LiveAnnouncing)? = nil,
+        fitness: (any FitnessWorkoutSaving)? = nil,
+        health: (any HealthReading)? = nil,
+        initialHistory: Result<[WorkoutSessionSummary], Error>? = nil,
+        currentDate: @escaping () -> Date = { Date() }
+    ) {
         self.source = source
         self.store = store
         self.narrator = narrator ?? ComparisonNarrator()
@@ -319,29 +380,39 @@ final class WorkoutSessionModel {
         self.checksCameraAngle = preferences.checksCameraAngle
         self.savesToFitness = preferences.savesToFitness
         self.personalisesWithHealth = preferences.personalisesWithHealth
-        if let remembered = preferences.selectedExercise { selectedExercise = remembered }
+        if let remembered = preferences.selectedExercise {
+            selectedExercise = remembered
+        }
         if let store {
-            do { history = try (initialHistory?.get() ?? store.load()).sorted { $0.startedAt > $1.startedAt } }
-            catch { historyIssue = Self.issue(for: error) }
+            do { history = try (initialHistory?.get() ?? store.load()).sorted { $0.startedAt > $1.startedAt }
+            } catch { historyIssue = Self.issue(for: error) }
         }
         // iOS terminated Finn after a set without Done: the session is still open, so the first
         // screen offers to finish it and the next set joins it, as before the relaunch.
-        if let latest = history.first, latest.isOpen == true { currentSession = latest }
+        if let latest = history.first, latest.isOpen == true {
+            currentSession = latest
+        }
         refreshFitnessAccess()
     }
 
     func startPreview() async {
-        guard stage == .ready || stage == .result else { return }
+        guard stage == .ready || stage == .result else {
+            return
+        }
         stage = .openingCamera
         await collectionTask?.value
         collectionTask = nil
-        guard stage == .openingCamera else { return }
+        guard stage == .openingCamera else {
+            return
+        }
         captureExercise = selectedExercise
         captureFocus = MistakeProfile.make(history: history, exercise: captureExercise)
         recognition = .notAttempted
         framingClosedNote = nil
-// the setup screen's Fitness line was about the session that ended; a save still running keeps it.
-        if fitnessSave?.status != .saving { fitnessSave = nil }
+        // the setup screen's Fitness line was about the session that ended; a save still running keeps it.
+        if fitnessSave?.status != .saving {
+            fitnessSave = nil
+        }
         result = nil
         movementNote = nil
         repExtremes = nil
@@ -377,9 +448,12 @@ final class WorkoutSessionModel {
             framingWatchdog = Task { @MainActor [weak self] in
                 while !Task.isCancelled {
                     do { try await Task.sleep(for: .milliseconds(250)) } catch { return }
-                    guard let self, self.stage == .framing else { return }
-                    if let lastPreviewFrameAt = self.lastPreviewFrameAt,
-                       lastPreviewFrameAt.duration(to: .now) >= .seconds(1) {
+                    guard let self, self.stage == .framing else {
+                        return
+                    }
+                    if
+                        let lastPreviewFrameAt = self.lastPreviewFrameAt,
+                        lastPreviewFrameAt.duration(to: .now) >= .seconds(1) {
                         self.previewFrames = []
                         self.previewEstimates = []
                         self.framingStatus = .checking
@@ -387,40 +461,56 @@ final class WorkoutSessionModel {
                 }
             }
             collectionTask = Task { @MainActor [weak self] in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
                 for await frame in stream {
                     switch self.stage {
-                    case .framing, .countdown, .capturing: self.livePose = frame
-                    default: self.livePose = nil
+                    case .framing,
+                         .countdown,
+                         .capturing:
+                        self.livePose = frame
+                    default:
+                        self.livePose = nil
                     }
                     let inView = !(self.livePose?.joints.isEmpty ?? true)
-                    if self.athleteInView != inView { self.athleteInView = inView }
+                    if self.athleteInView != inView {
+                        self.athleteInView = inView
+                    }
                     if self.stage == .framing {
                         self.previewFrames.append(frame)
-                        if self.previewFrames.count > 5 { self.previewFrames.removeFirst() }
+                        if self.previewFrames.count > 5 {
+                            self.previewFrames.removeFirst()
+                        }
                         self.lastPreviewFrameAt = .now
                         self.updateFramingStatus(with: frame)
                         self.updateHandsFreeStart(with: frame)
                         self.closeFramingIfIdle(with: frame)
                     }
-                    if (self.stage == .capturing || (self.stage == .analyzing && self.isStopping)) &&
+                    if
+                        (self.stage == .capturing || (self.stage == .analyzing && self.isStopping)) &&
                         self.frames.count < 1_800 {
-// the source picks a frame's clock when it forwards it, and the set starts
+                        // the source picks a frame's clock when it forwards it, and the set starts
                         // here when the frame is read: a frame stamped with the preview clock just
                         // before the countdown ended can arrive first. Set frames count from 0, so
                         // a clock going back means the frames so far were not the set's.
                         if let previous = self.frames.last, frame.time < previous.time {
                             self.frames = []
-                            self.liveMonitor = self.liveMonitor.map { LiveSetMonitor(definition: $0.definition) }
+                            self.liveMonitor = self.liveMonitor
+                                .map { LiveSetMonitor(definition: $0.definition) }
                         }
                         self.frames.append(frame)
                         self.frameCount = self.frames.count
-                        if self.stage == .capturing { self.followLiveSet() }
+                        if self.stage == .capturing {
+                            self.followLiveSet()
+                        }
                     }
                 }
                 self.livePose = nil
                 self.athleteInView = false
-                guard !self.isStopping else { return }
+                guard !self.isStopping else {
+                    return
+                }
                 self.framingWatchdog?.cancel()
                 self.framingWatchdog = nil
                 if self.stage == .capturing && self.source.endedAtLimit {
@@ -428,10 +518,11 @@ final class WorkoutSessionModel {
                     self.stage = .analyzing
                     self.completeAnalysis()
                     self.announceResult()
-                } else if self.stage == .capturing,
-                          let first = self.frames.first, let last = self.frames.last,
-                          last.time - first.time >= EvidenceRubric.minimumSetDuration {
-// the camera stopped mid-set: review what was captured rather than lose it.
+                } else if
+                    self.stage == .capturing,
+                    let first = self.frames.first, let last = self.frames.last,
+                    last.time - first.time >= EvidenceRubric.minimumSetDuration {
+                    // the camera stopped mid-set: review what was captured rather than lose it.
                     self.endedEarly = true
                     self.stage = .analyzing
                     self.completeAnalysis()
@@ -445,16 +536,24 @@ final class WorkoutSessionModel {
                 await self.source.stop()
             }
         } catch CameraSourceError.denied {
-            if stage == .openingCamera { stage = .error(.permissionDenied) }
+            if stage == .openingCamera {
+                stage = .error(.permissionDenied)
+            }
         } catch CameraSourceError.unavailable {
-            if stage == .openingCamera { stage = .error(.unavailable) }
+            if stage == .openingCamera {
+                stage = .error(.unavailable)
+            }
         } catch {
-            if stage == .openingCamera { stage = .error(.startFailed) }
+            if stage == .openingCamera {
+                stage = .error(.startFailed)
+            }
         }
     }
 
     func beginSet(countdown: Int = 3) async {
-        guard stage == .framing else { return }
+        guard stage == .framing else {
+            return
+        }
         framingWatchdog?.cancel()
         framingWatchdog = nil
         frames = []
@@ -463,11 +562,17 @@ final class WorkoutSessionModel {
             stage = .countdown(remaining)
             say("\(remaining)")
             do { try await Task.sleep(for: .seconds(1)) } catch { return }
-            guard stage == .countdown(remaining) else { return }
+            guard stage == .countdown(remaining) else {
+                return
+            }
         }
-        guard stage == .framing || stage == .countdown(1) else { return }
+        guard stage == .framing || stage == .countdown(1) else {
+            return
+        }
         await source.prepareForSet()
-        guard stage == .framing || stage == .countdown(1) else { return }
+        guard stage == .framing || stage == .countdown(1) else {
+            return
+        }
         liveMonitor = LiveSetMonitor(definition: captureExercise.definition)
         liveRepCount = 0
         liveCaption = nil
@@ -477,25 +582,33 @@ final class WorkoutSessionModel {
         setHeartRateReadings = []
         setHeartRate = nil
         stage = .capturing
-        if countdown > 0 { say(String(localized: "Go")) }
+        if countdown > 0 {
+            say(String(localized: "Go"))
+        }
     }
 
     func endSet(tappedAt: ContinuousClock.Instant = ContinuousClock.now) async {
-        guard stage == .capturing else { return }
+        guard stage == .capturing else {
+            return
+        }
         stopTappedAt = tappedAt
         isStopping = true
         stage = .analyzing
         await source.stop()
         await collectionTask?.value
         collectionTask = nil
-        guard stage == .analyzing else { return }
+        guard stage == .analyzing else {
+            return
+        }
         completeAnalysis()
         announceResult()
     }
 
     func dismissCue() {
         cueDismissed = true
-        guard var session = currentSession, session.sets.last?.cue != nil else { return }
+        guard var session = currentSession, session.sets.last?.cue != nil else {
+            return
+        }
         session.sets[session.sets.count - 1].cueResponse = .notRelevant
         currentSession = session
         save(session)
@@ -505,13 +618,16 @@ final class WorkoutSessionModel {
         defer {
             if let stopTappedAt {
                 let parts = stopTappedAt.duration(to: ContinuousClock.now).components
-                lastStopToResultMilliseconds = max(0, Int(parts.seconds) * 1_000 +
-                                                   Int(parts.attoseconds / 1_000_000_000_000_000))
+                lastStopToResultMilliseconds = max(
+                    0,
+                    Int(parts.seconds) * 1_000 +
+                        Int(parts.attoseconds / 1_000_000_000_000_000)
+                )
             }
             stopTappedAt = nil
             stage = .result
         }
-// the capture includes walking to the spot and back to the phone; only the set is analysed.
+        // the capture includes walking to the spot and back to the phone; only the set is analysed.
         let captured = SetWindow.active(frames, requirement: captureExercise.definition.evidence)
         let recognition = recogniseExercise(in: captured)
         self.recognition = recognition
@@ -520,7 +636,9 @@ final class WorkoutSessionModel {
             exercise = recognisedExercise
             // Finn is sure the person did another exercise than the one chosen: the next sets use
             // it, so they are framed, counted live and stopped hands-free as that exercise.
-            if recognisedExercise != captureExercise { selectedExercise = recognisedExercise }
+            if recognisedExercise != captureExercise {
+                selectedExercise = recognisedExercise
+            }
         } else {
             exercise = captureExercise
         }
@@ -529,18 +647,21 @@ final class WorkoutSessionModel {
             ? captured : SetWindow.active(frames, requirement: definition.evidence)
         resultExercise = exercise
         lastViewVerdict = ViewCheck.assess(setFrames, expected: definition.expectedView)
-// already trimmed to the set: analyse exactly these frames, so the saved set is gated the same.
+        // already trimmed to the set: analyse exactly these frames, so the saved set is gated the same.
         let (outcome, measured) = ExerciseAnalyzer.analyseWithDiagnostics(
-            setFrames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore, trimsToSet: false)
+            setFrames, as: definition, viewCheck: checksCameraAngle ? .enforce : .ignore, trimsToSet: false
+        )
         var diagnostics = measured
         // Finn ended the capture (its time limit, or the camera stopping), not the athlete: a
         // movement cut off then is not one they left unfinished, to note or to count in their pattern.
-        if endedAtLimit || endedEarly { diagnostics?.unfinished = false }
+        if endedAtLimit || endedEarly {
+            diagnostics?.unfinished = false
+        }
         movementNote = nil
         repExtremes = nil
         repeatedPattern = nil
         retakeHint = nil
-// a comparison belongs to the set it was made for; the new set makes its own or none.
+        // a comparison belongs to the set it was made for; the new set makes its own or none.
         comparison = nil
         comparisonRecap = nil
         formNotes = []
@@ -553,34 +674,48 @@ final class WorkoutSessionModel {
                 return
             }
             movementNote = explanation
-// the count the set ends on is the one shown: the live count can be one rep behind
+            // the count the set ends on is the one shown: the live count can be one rep behind
             // (a rep ended after its last analysis) and must never differ in the other direction.
             liveRepCount = analysis.reps.count
             repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
-            let review = FormChecks.review(analysis, frames: setFrames, definition: definition,
-                                           viewCheck: checksCameraAngle ? .enforce : .ignore)
+            let review = FormChecks.review(
+                analysis,
+                frames: setFrames,
+                definition: definition,
+                viewCheck: checksCameraAngle ? .enforce : .ignore
+            )
             formNotes = review.notes
-// a camera angle outside the supported side view can distort relative range, and a partly
+            // a camera angle outside the supported side view can distort relative range, and a partly
             // visible set is counted but not advised on. A push-up is accepted from any view, so its
             // angle is not in `angledView`: `postureFromSide` carries it, and the form checks' note
             // "no form advice for this set" must then be the whole truth (15 October).
             let advisable = diagnostics?.angledView == nil && diagnostics?.partialVisibility == nil
                 && diagnostics?.postureFromSide != false
             let changeCue = advisable ? CueSelector.select(from: analysis, exercise: definition) : nil
-// one observation: a form fault seen on several reps comes before a change between the first
+            // one observation: a form fault seen on several reps comes before a change between the first
             // and last reps.
             let findings = advisable ? review.findings : []
             let cue = findings.first?.cue ?? changeCue
-            let issues = SetIssue.issues(diagnostics: diagnostics, cue: changeCue, findings: findings,
-                                         spedUp: liveMonitor?.sawFasterRep ?? false)
-// before saving, so "again" compares with the earlier sets only.
+            let issues = SetIssue.issues(
+                diagnostics: diagnostics,
+                cue: changeCue,
+                findings: findings,
+                spedUp: liveMonitor?.sawFasterRep ?? false
+            )
+            // before saving, so "again" compares with the earlier sets only.
             let earlier = MistakeProfile.make(history: history, exercise: exercise)
             repeatedPattern = earlier.flatMap { issues.contains($0.issue) ? $0 : nil }
             result = .measured(analysis, cue)
             setHeartRate = SetHeartRate.make(setHeartRateReadings)
-            record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues,
-                   formMeasurements: advisable ? review.measurements : [],
-                   partlyVisible: diagnostics?.partialVisibility != nil)
+            record(
+                analysis: analysis,
+                cue: cue,
+                exercise: exercise,
+                frames: setFrames,
+                issues: issues,
+                formMeasurements: advisable ? review.measurements : [],
+                partlyVisible: diagnostics?.partialVisibility != nil
+            )
             offerPersonalisationIfDue()
         case .insufficientView(let reason):
             result = .insufficientView(reason)
@@ -595,8 +730,11 @@ final class WorkoutSessionModel {
     /// already say what to change. The camera angle no longer refuses a set.
     private static func retakeHint(for frames: [PoseFrame], definition: ExerciseDefinition) -> String? {
         switch EvidenceGate.assess(frames, requirement: definition.evidence) {
-        case .reject(.missingJoints), .reject(.lowConfidence): return definition.copy.retakeHint
-        default: return nil
+        case .reject(.missingJoints),
+             .reject(.lowConfidence):
+            return definition.copy.retakeHint
+        default:
+            return nil
         }
     }
 
@@ -604,71 +742,100 @@ final class WorkoutSessionModel {
     /// capture shows clear reps of another exercise (push-ups filmed while Squat was chosen, 13 October):
     /// the person probably picked the wrong exercise, so say which one Finn saw. The camera angle is
     /// not checked here, since the angle verdict belonged to the wrong exercise.
-    static func otherExerciseHint(in frames: [PoseFrame], chosen: ExerciseKind,
-                                  refusedFrames: [PoseFrame]) -> String? {
+    static func otherExerciseHint(
+        in frames: [PoseFrame],
+        chosen: ExerciseKind,
+        refusedFrames: [PoseFrame]
+    ) -> String? {
         switch EvidenceGate.assess(refusedFrames, requirement: chosen.definition.evidence) {
-        case .reject(.missingJoints), .reject(.lowConfidence): break
-        default: return nil
+        case .reject(.missingJoints),
+             .reject(.lowConfidence):
+            break
+        default:
+            return nil
         }
         var best: (kind: ExerciseKind, reps: Int)?
-// only exercises of the same kind of setup: a bar exercise counts the shoulders' rise, which a
+        // only exercises of the same kind of setup: a bar exercise counts the shoulders' rise, which a
         // squat or push-up also shows, so floor and bar exercises never suggest each other.
         func hangs(_ definition: ExerciseDefinition) -> Bool {
-            if case .verticalRise = definition.signal { return true }
+            if case .verticalRise = definition.signal {
+                return true
+            }
             return false
         }
         let hanging = hangs(chosen.definition)
         for kind in ExerciseKind.allCases where kind != chosen && hangs(kind.definition) == hanging {
             let definition = kind.definition
             let window = SetWindow.active(frames, requirement: definition.evidence)
-            guard case .analyzed(let analysis) = ExerciseAnalyzer.analyseWithDiagnostics(
-                window, as: definition, viewCheck: .ignore, trimsToSet: false).outcome,
-                analysis.reps.count >= 2, analysis.reps.count > (best?.reps ?? 0) else { continue }
+            guard
+                case .analyzed(let analysis) = ExerciseAnalyzer.analyseWithDiagnostics(
+                    window, as: definition, viewCheck: .ignore, trimsToSet: false
+                ).outcome,
+                analysis.reps.count >= 2, analysis.reps.count > (best?.reps ?? 0) else {
+                continue
+            }
             best = (kind, analysis.reps.count)
         }
-        guard let best else { return nil }
+        guard let best else {
+            return nil
+        }
         let name = best.kind.definition.copy.name
         let lowercased = name.lowercased(), chosenName = chosen.definition.copy.name
-        return String(localized: "Finn counted \(best.reps) \(lowercased)s in this set, but \(chosenName) was chosen. ")
-            + String(localized: "If you did \(lowercased)s, choose \(name) on the first screen and retake the set.")
+        return String(
+            localized: "Finn counted \(best.reps) \(lowercased)s in this set, but \(chosenName) was chosen. "
+        )
+            +
+            String(
+                localized: "If you did \(lowercased)s, choose \(name) on the first screen and retake the set."
+            )
     }
 
     private func updateFramingStatus(with frame: PoseFrame) {
         let definition = captureExercise.definition
         if checksCameraAngle, let deviation = frame.profileDeviationDegrees {
             previewEstimates.append((frame.time, deviation))
-            if previewEstimates.count > 5 { previewEstimates.removeFirst() }
+            if previewEstimates.count > 5 {
+                previewEstimates.removeFirst()
+            }
         }
-// only when one has lapsed: every change of this list redraws what reads it.
+        // only when one has lapsed: every change of this list redraws what reads it.
         if let oldest = previewEstimates.first, frame.time - oldest.time > Self.previewEstimateLifetime {
-        previewEstimates.removeAll { frame.time - $0.time > Self.previewEstimateLifetime }
+            previewEstimates.removeAll { frame.time - $0.time > Self.previewEstimateLifetime }
         }
-        if checksCameraAngle,
-           ViewCheck.previewAsksToTurn(previewDeviations, expected: definition.expectedView) {
+        if
+            checksCameraAngle,
+            ViewCheck.previewAsksToTurn(previewDeviations, expected: definition.expectedView) {
             framingStatus = .turnToExpectedView
         } else {
             framingStatus = EvidenceGate.previewStatus(previewFrames, requirement: definition.evidence)
         }
         previewLandmarksVisible = framingStatus == .landmarksVisible
             || (framingStatus == .turnToExpectedView
-                && EvidenceGate.previewStatus(previewFrames, requirement: definition.evidence) == .landmarksVisible)
+                && EvidenceGate
+                .previewStatus(previewFrames, requirement: definition.evidence) == .landmarksVisible)
         unclearJoint = framingStatus == .adjustPosition
             ? EvidenceGate.unclearJoint(previewFrames, requirement: definition.evidence) : nil
     }
 
     /// Starts the countdown once the athlete has held still in position (`StartReadiness`).
     private func updateHandsFreeStart(with frame: PoseFrame) {
-        guard handsFree, handsFreeTask == nil else { return }
+        guard handsFree, handsFreeTask == nil else {
+            return
+        }
         let progress = startReadiness.update(with: frame, definition: captureExercise.definition)
-// any view starts the set: an angle, even a front view, only earns a tip to turn, and the
+        // any view starts the set: an angle, even a front view, only earns a tip to turn, and the
         // reps are counted without posture advice. A front view used to never start hands-free.
         let placed = previewLandmarksVisible
         handsFreeProgress = placed ? progress : 0
         sayWhyNotReady(frame, placed: placed)
-        guard placed, startReadiness.isReady else { return }
+        guard placed, startReadiness.isReady else {
+            return
+        }
         startReadiness.reset()
         handsFreeTask = Task { @MainActor [weak self] in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
             await self.beginSet(countdown: self.handsFreeCountdown)
             self.handsFreeTask = nil
             self.handsFreeProgress = 0
@@ -686,8 +853,11 @@ final class WorkoutSessionModel {
         }
         let since = notReadySince ?? frame.time
         notReadySince = since
-        guard frame.time - since >= Self.notReadyDelay,
-              frame.time - lastFramingSpeech >= Self.framingSpeechInterval else { return }
+        guard
+            frame.time - since >= Self.notReadyDelay,
+            frame.time - lastFramingSpeech >= Self.framingSpeechInterval else {
+            return
+        }
         let phrase: String
         if framingStatus == .turnToExpectedView {
             phrase = String(localized: "Turn your side to the camera")
@@ -714,7 +884,9 @@ final class WorkoutSessionModel {
     /// closes after `framingLimit` without a set, or `nobodySeenLimit` with nobody in view. Hands-free,
     /// the person a few steps away also hears when Finn sees nobody.
     private func closeFramingIfIdle(with frame: PoseFrame) {
-        guard stage == .framing, handsFreeTask == nil, framingCloseTask == nil else { return }
+        guard stage == .framing, handsFreeTask == nil, framingCloseTask == nil else {
+            return
+        }
         let since = framingSince ?? frame.time
         framingSince = since
         if frame.athleteVisible && !frame.joints.isEmpty {
@@ -733,7 +905,9 @@ final class WorkoutSessionModel {
         }
         if let note {
             framingCloseTask = Task { @MainActor [weak self] in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
                 self.say(String(localized: "Camera closed"))
                 self.framingClosedNote = note
                 await self.cancel()
@@ -741,8 +915,11 @@ final class WorkoutSessionModel {
             }
             return
         }
-        guard handsFree, nobodyFor >= Self.nobodySeenDelay,
-              frame.time - lastFramingSpeech >= Self.framingSpeechInterval else { return }
+        guard
+            handsFree, nobodyFor >= Self.nobodySeenDelay,
+            frame.time - lastFramingSpeech >= Self.framingSpeechInterval else {
+            return
+        }
         lastFramingSpeech = frame.time
         say(String(localized: "Finn can’t see you. Step into view or add light"))
     }
@@ -750,26 +927,40 @@ final class WorkoutSessionModel {
     /// Counts reps while the set runs, says them and any live observation, and ends a hands-free
     /// set once the athlete walks away or stops moving after their reps.
     private func followLiveSet() {
-        guard var monitor = liveMonitor else { return }
+        guard var monitor = liveMonitor else {
+            return
+        }
         let events = monitor.update(with: frames)
         liveMonitor = monitor
         let definition = monitor.definition
         for event in events {
             switch event {
-            case .repCounted(let count), .repCountRevised(let count):
+            case .repCounted(let count),
+                 .repCountRevised(let count):
                 liveRepCount = count
-                if case .repCountRevised = event { liveCoachMessage = nil }
+                if case .repCountRevised = event {
+                    liveCoachMessage = nil
+                }
             default:
                 liveCaption = event.caption(for: definition)
             }
-            if let line = WatchCoachRules.line(for: event, reps: monitor.reps, definition: definition,
-                                               canCompareRange: monitor.supportsRangeCoaching) {
+            if
+                let line = WatchCoachRules.line(
+                    for: event,
+                    reps: monitor.reps,
+                    definition: definition,
+                    canCompareRange: monitor.supportsRangeCoaching
+                ) {
                 liveCoachMessage = line
             }
             onLiveEvent?(event, definition.kind)
         }
-        if let phrase = LiveSetEvent.phrase(for: events, definition: definition) { say(phrase) }
-        guard handsFree, handsFreeTask == nil, monitor.isOver else { return }
+        if let phrase = LiveSetEvent.phrase(for: events, definition: definition) {
+            say(phrase)
+        }
+        guard handsFree, handsFreeTask == nil, monitor.isOver else {
+            return
+        }
         endedHandsFree = true
         handsFreeTask = Task { @MainActor [weak self] in
             await self?.endSet()
@@ -782,17 +973,21 @@ final class WorkoutSessionModel {
         switch result {
         case .measured(let analysis, _):
             let count = String(localized: "\(analysis.reps.count) reps measured")
-// one phrase: the person may still be exercising and should know why the set ended.
+            // one phrase: the person may still be exercising and should know why the set ended.
             say(endedAtLimit ? String(localized: "2-minute limit reached. \(count)") : count)
-        case .insufficientView, .failed:
+        case .insufficientView,
+             .failed:
             say(String(localized: "Finn couldn’t measure this set. The reason is on screen."))
-        case .interrupted, nil:
+        case .interrupted,
+             nil:
             break
         }
     }
 
     private func say(_ text: String) {
-        guard speaksLive else { return }
+        guard speaksLive else {
+            return
+        }
         announcer?.announce(text)
     }
 
@@ -816,14 +1011,21 @@ final class WorkoutSessionModel {
     }
 
     private func recogniseExercise(in frames: [PoseFrame]) -> ExerciseRecognition {
-        guard recognisesExercise, !frames.isEmpty else { return .notAttempted }
+        guard recognisesExercise, !frames.isEmpty else {
+            return .notAttempted
+        }
         switch recognitionMethod {
         case .keypointModel:
-            if let exerciseClassifier { return ExerciseRecognizer.recognise(frames, using: exerciseClassifier) }
+            if let exerciseClassifier {
+                return ExerciseRecognizer.recognise(frames, using: exerciseClassifier) }
         case .angleModel:
-            if let angleClassifier { return AngleRecognizer.recognise(frames, using: angleClassifier) }
+            if let angleClassifier {
+                return AngleRecognizer.recognise(frames, using: angleClassifier)
+            }
         case .angleRules:
-            if let ruleClassifier { return AngleRecognizer.recognise(frames, using: ruleClassifier) }
+            if let ruleClassifier {
+                return AngleRecognizer.recognise(frames, using: ruleClassifier)
+            }
         case .unavailable:
             break
         }
@@ -838,8 +1040,10 @@ final class WorkoutSessionModel {
         currentSession = nil
         comparison = nil
         comparisonRecap = nil
-        guard var session = finished else { return }
-// ended: a relaunch no longer offers to finish it.
+        guard var session = finished else {
+            return
+        }
+        // ended: a relaunch no longer offers to finish it.
         session.isOpen = nil
         save(session)
         await saveToFitness(session)
@@ -848,16 +1052,22 @@ final class WorkoutSessionModel {
     /// Re-reads Health's permission, which the person can change in Settings or Health at any time.
     /// HealthKit is not touched while the option is off.
     func refreshFitnessAccess() {
-        guard let fitness, savesToFitness else { return }
+        guard let fitness, savesToFitness else {
+            return
+        }
         fitnessAccess = fitness.authorisation
     }
 
     /// Asks Health for permission to save workouts, in context: right after the person turns the
     /// option on. Health shows its sheet only while the person has not answered.
     func requestFitnessAccess() async {
-        guard let fitness, savesToFitness else { return }
+        guard let fitness, savesToFitness else {
+            return
+        }
         var access = fitness.authorisation
-        if access == .notDetermined { access = await fitness.requestAuthorization() }
+        if access == .notDetermined {
+            access = await fitness.requestAuthorization()
+        }
         fitnessAccess = access
     }
 
@@ -884,11 +1094,15 @@ final class WorkoutSessionModel {
     /// no later set is left out of its workout.
     func saveToFitness(sessionID id: UUID) async {
         if currentSession?.id == id {
-            guard stage == .ready, fitness != nil, savesToFitness else { return }
+            guard stage == .ready, fitness != nil, savesToFitness else {
+                return
+            }
             await finishSession()
             return
         }
-        guard let session = pendingSessions[id] ?? history.first(where: { $0.id == id }) else { return }
+        guard let session = pendingSessions[id] ?? history.first(where: { $0.id == id }) else {
+            return
+        }
         await saveToFitness(session)
     }
 
@@ -907,11 +1121,14 @@ final class WorkoutSessionModel {
 
     private func saveToFitness(_ session: WorkoutSessionSummary) async {
         let id = session.id
-        guard let fitness, savesToFitness,
-              let workout = FitnessWorkout.make(from: session),
-              session.fitnessWorkout == nil, fitnessRecord(forSession: id) == nil,
-              !fitnessSavesInFlight.contains(id) else { return }
-// claimed before any suspension, so a second Done or retry cannot start another save.
+        guard
+            let fitness, savesToFitness,
+            let workout = FitnessWorkout.make(from: session),
+            session.fitnessWorkout == nil, fitnessRecord(forSession: id) == nil,
+            !fitnessSavesInFlight.contains(id) else {
+            return
+        }
+        // claimed before any suspension, so a second Done or retry cannot start another save.
         fitnessSavesInFlight.insert(id)
         defer {
             fitnessSavesInFlight.remove(id)
@@ -919,7 +1136,9 @@ final class WorkoutSessionModel {
         }
         fitnessSave = FitnessSaveReport(sessionID: id, status: .saving)
         var access = fitness.authorisation
-        if access == .notDetermined { access = await fitness.requestAuthorization() }
+        if access == .notDetermined {
+            access = await fitness.requestAuthorization()
+        }
         fitnessAccess = access
         switch access {
         case .authorized:
@@ -927,7 +1146,8 @@ final class WorkoutSessionModel {
         case .unavailable:
             reportFitnessSave(.unavailable, for: id)
             return
-        case .notDetermined, .denied:
+        case .notDetermined,
+             .denied:
             reportFitnessSave(.needsPermission, for: id)
             return
         }
@@ -954,7 +1174,9 @@ final class WorkoutSessionModel {
             fitnessSave = FitnessSaveReport(sessionID: id, status: status)
             return
         }
-        if fitnessSave?.sessionID == id { fitnessSave = nil }
+        if fitnessSave?.sessionID == id {
+            fitnessSave = nil
+        }
     }
 
     /// A deleted session's Fitness line goes with it: a failed or refused save has nothing left to
@@ -969,18 +1191,27 @@ final class WorkoutSessionModel {
 
     /// Writes the saved workout into the session's history entry, unless it was deleted meanwhile.
     private func remember(_ record: FitnessWorkoutRecord, forSession id: UUID) {
-        if currentSession?.id == id { currentSession?.fitnessWorkout = record }
-        guard store != nil, !pendingDeleteAll, !pendingDeleteIDs.contains(id),
-              var session = pendingSessions[id] ?? history.first(where: { $0.id == id }) else { return }
+        if currentSession?.id == id {
+            currentSession?.fitnessWorkout = record
+        }
+        guard
+            store != nil, !pendingDeleteAll, !pendingDeleteIDs.contains(id),
+            var session = pendingSessions[id] ?? history.first(where: { $0.id == id }) else {
+            return
+        }
         session.fitnessWorkout = record
         save(session)
     }
 
     func deleteHistory(id: UUID) {
-        guard store != nil else { return }
+        guard store != nil else {
+            return
+        }
         pendingSessions.removeValue(forKey: id)
         forgetFitnessSaves { $0 == id }
-        if !pendingDeleteAll { pendingDeleteIDs.insert(id) }
+        if !pendingDeleteAll {
+            pendingDeleteIDs.insert(id)
+        }
         if currentSession?.id == id {
             currentSession = nil
             comparison = nil
@@ -990,7 +1221,9 @@ final class WorkoutSessionModel {
     }
 
     func deleteAllData() {
-        guard store != nil else { return }
+        guard store != nil else {
+            return
+        }
         pendingDeleteAll = true
         pendingDeleteIDs = []
         pendingSessions = [:]
@@ -1002,7 +1235,9 @@ final class WorkoutSessionModel {
     }
 
     func recoverHistory() {
-        guard let store, historyIssue == .corrupted else { return }
+        guard let store, historyIssue == .corrupted else {
+            return
+        }
         do {
             _ = try store.recoverCorruptStore()
             retryHistory()
@@ -1010,7 +1245,9 @@ final class WorkoutSessionModel {
     }
 
     func retryHistory() {
-        guard let store else { return }
+        guard let store else {
+            return
+        }
         do {
             if pendingDeleteAll {
                 try store.deleteAll()
@@ -1030,13 +1267,23 @@ final class WorkoutSessionModel {
         } catch { historyIssue = Self.issue(for: error) }
     }
 
-    private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind, frames: [PoseFrame],
-                        issues: [SetIssue], formMeasurements: [FormMeasurement],
-                        partlyVisible: Bool = false) {
-        guard case .usable(let side) = EvidenceGate.assess(
-            frames, requirement: exercise.definition.evidence, allowsPartial: partlyVisible) else { return }
+    private func record(
+        analysis: SetAnalysis,
+        cue: Cue?,
+        exercise: ExerciseKind,
+        frames: [PoseFrame],
+        issues: [SetIssue],
+        formMeasurements: [FormMeasurement],
+        partlyVisible: Bool = false
+    ) {
+        guard
+            case .usable(let side) = EvidenceGate.assess(
+                frames, requirement: exercise.definition.evidence, allowsPartial: partlyVisible
+            ) else {
+            return
+        }
         let now = currentDate()
-// a set long after the previous one starts a new session; the earlier one ends as at Done.
+        // a set long after the previous one starts a new session; the earlier one ends as at Done.
         if var open = currentSession, !open.continues(at: now) {
             currentSession = nil
             open.isOpen = nil
@@ -1052,54 +1299,73 @@ final class WorkoutSessionModel {
             formMeasurements: formMeasurements.isEmpty ? nil : formMeasurements,
             partlyVisible: partlyVisible ? true : nil
         )
-// history is newest session first; each session's sets are oldest first. A recording from a
+        // history is newest session first; each session's sets are oldest first. A recording from a
         // different side or with too little evidence cannot hide an older comparable set.
         if newSet.formMeasurements != nil {
             formNotes += FormTrend.compareLatest(
-                to: newSet, among: history.lazy.flatMap { $0.sets.reversed() }).map(\.sentence)
+                to: newSet, among: history.lazy.flatMap { $0.sets.reversed() }
+            ).map(\.sentence)
         }
-// the latest earlier set of the exercise that can be compared (not only the very last one).
+        // the latest earlier set of the exercise that can be compared (not only the very last one).
         let earlier = session.sets.filter { $0.exercise == exercise }.reversed()
         session.sets.append(newSet)
         lastSavedSetID = newSet.id
         currentSession = session
         comparisonRecap = nil
-// a partly visible set has reps but too few clear frames to compare ranges with.
+        // a partly visible set has reps but too few clear frames to compare ranges with.
         comparison = partlyVisible ? nil
-            : earlier.lazy.filter { $0.partlyVisible != true }.compactMap { SetComparison.compare($0, newSet) }.first
+            : earlier.lazy.filter { $0.partlyVisible != true }
+            .compactMap { SetComparison.compare($0, newSet) }.first
         save(session)
     }
 
     /// Why a measured set has no comparison even though the session has earlier sets.
     var comparisonGap: ComparisonGap? {
-        guard comparison == nil, let session = currentSession, session.sets.count >= 2,
-              let latest = session.sets.last else { return nil }
+        guard
+            comparison == nil, let session = currentSession, session.sets.count >= 2,
+            let latest = session.sets.last else {
+            return nil
+        }
         let earlier = session.sets.dropLast().filter { $0.exercise == latest.exercise }
-        guard !earlier.isEmpty else { return .differentExercise }
-        if latest.partlyVisible == true { return .partlyVisible }
-        if latest.analysis.reps.count < SetComparison.minimumReps
+        guard !earlier.isEmpty else {
+            return .differentExercise
+        }
+        if latest.partlyVisible == true {
+            return .partlyVisible
+        }
+        if
+            latest.analysis.reps.count < SetComparison.minimumReps
             || earlier.allSatisfy({ $0.analysis.reps.count < SetComparison.minimumReps }) {
             return .tooFewReps
         }
-// which side the gate followed only matters for an exercise measured from the side. A
+        // which side the gate followed only matters for an exercise measured from the side. A
         // push-up is accepted from any view: filmed from the front, the side is whichever arm Vision
         // saw better, and a set was told its earlier sets "were filmed from your other side" (15 October).
-        if latest.exercise.definition.expectedView == .side,
-           earlier.allSatisfy({ $0.bodySide != latest.bodySide }) { return .differentSide }
+        if
+            latest.exercise.definition.expectedView == .side,
+            earlier.allSatisfy({ $0.bodySide != latest.bodySide }) {
+            return .differentSide
+        }
         return .incompatibleSets
     }
 
     func explainComparison() async {
-        guard let comparison, !isGeneratingRecap else { return }
+        guard let comparison, !isGeneratingRecap else {
+            return
+        }
         isGeneratingRecap = true
         let recap = await narrator.recap(for: comparison)
-        if self.comparison == comparison { comparisonRecap = recap }
+        if self.comparison == comparison {
+            comparisonRecap = recap
+        }
         isGeneratingRecap = false
     }
 
     private func save(_ session: WorkoutSessionSummary) {
-        guard let store else { return }
-// the usual case, history in good order and nothing else waiting: write this session (the
+        guard let store else {
+            return
+        }
+        // the usual case, history in good order and nothing else waiting: write this session (the
         // store merges it into the file) and update the list in memory, instead of reading the
         // whole history twice more on the main actor after every set.
         if historyIssue == nil, pendingSessions.isEmpty, pendingDeleteIDs.isEmpty, !pendingDeleteAll {
@@ -1158,15 +1424,23 @@ final class WorkoutSessionModel {
 
     func backgrounded() async {
         switch stage {
-        case .openingCamera, .framing, .countdown, .capturing, .analyzing:
+        case .openingCamera,
+             .framing,
+             .countdown,
+             .capturing,
+             .analyzing:
             await cancel()
-        case .ready, .result, .error:
+        case .ready,
+             .result,
+             .error:
             break
         }
     }
 
     private var isCountingDown: Bool {
-        if case .countdown = stage { return true }
+        if case .countdown = stage {
+            return true
+        }
         return false
     }
 }

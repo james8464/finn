@@ -46,8 +46,10 @@ struct WearablesDemo: View {
         .accessibilityAddTraits(.isImage)
     }
 
-    private func device<Picture: View>(_ name: LocalizedStringKey,
-                                       @ViewBuilder picture: () -> Picture) -> some View {
+    private func device<Picture: View>(
+        _ name: LocalizedStringKey,
+        @ViewBuilder picture: () -> Picture
+    ) -> some View {
         VStack(spacing: 12) {
             picture()
                 .frame(height: typeSize.isAccessibilitySize ? 200 : 236)

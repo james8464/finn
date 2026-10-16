@@ -53,8 +53,14 @@ struct MeasuredFormCard: View {
                     Text(exercise.definition.copy.nextAction)
                 } else {
                     Text(exercise.definition.expectedView == .side
-                         ? String(localized: "No reliable side-view form comparison for this set. Keep your whole body in view and record another set.")
-                         : String(localized: "No specific movement change measured for this set. Keep your whole body in view and record another set."))
+                        ?
+                        String(
+                            localized: "No reliable side-view form comparison for this set. Keep your whole body in view and record another set."
+                        )
+                        :
+                        String(
+                            localized: "No specific movement change measured for this set. Keep your whole body in view and record another set."
+                        ))
                         .font(.subheadline)
                         .foregroundStyle(DashboardStyle.secondary)
                 }

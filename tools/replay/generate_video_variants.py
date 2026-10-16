@@ -33,6 +33,7 @@ def ffmpeg_path() -> str:
         return binary
     try:
         import imageio_ffmpeg
+
         return imageio_ffmpeg.get_ffmpeg_exe()
     except ImportError as error:
         raise SystemExit("Install ffmpeg or imageio-ffmpeg to rebuild these fixtures") from error
@@ -43,10 +44,28 @@ def main() -> None:
     for name, video_filter in VARIANTS.items():
         output = FIXTURES / name
         subprocess.run(
-            [binary, "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
-             "-i", str(SOURCE), "-vf", video_filter, "-an", "-c:v", "libx264",
-             "-crf", "28", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-             str(output)],
+            [
+                binary,
+                "-nostdin",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-i",
+                str(SOURCE),
+                "-vf",
+                video_filter,
+                "-an",
+                "-c:v",
+                "libx264",
+                "-crf",
+                "28",
+                "-pix_fmt",
+                "yuv420p",
+                "-movflags",
+                "+faststart",
+                str(output),
+            ],
             check=True,
         )
         print(f"{name}: {output.stat().st_size:,} bytes")

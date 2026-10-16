@@ -13,72 +13,100 @@ final class CoachConversation {
     init(history: [WorkoutSessionSummary], responder: CoachResponder) {
         self.context = CoachContext.make(history: history)
         self.responder = responder
-        messages = [CoachMessage(role: .coach,
-                                 text: CoachFallback.opening(context: context, language: responder.language))]
+        messages = [CoachMessage(
+            role: .coach,
+            text: CoachFallback.opening(context: context, language: responder.language)
+        )]
     }
 
     /// the app's coach: the standard engine order, with the Claude demo first in Debug builds
     convenience init(history: [WorkoutSessionSummary]) {
         var extra: [any CoachEngine] = []
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach") {
-            self.init(history: history, responder: CoachResponder(selector: .standard()))
-            return
-        }
-        // synthetic UI tours must not call a live model service. An unsigned iOS 27
-        // simulator can advertise PCC as available, then trap inside FoundationModels
-        if ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture") ||
-            (ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") &&
-             !ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach")) {
-            self.init(history: history, responder: CoachResponder(selector: CoachEngineSelector(engines: [])))
-            return
-        }
-        extra.append(ClaudeDemoCoachEngine())
+            if ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach") {
+                self.init(history: history, responder: CoachResponder(selector: .standard()))
+                return
+            }
+            // synthetic UI tours must not call a live model service. An unsigned iOS 27
+            // simulator can advertise PCC as available, then trap inside FoundationModels
+            if
+                ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture") ||
+                (ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") &&
+                    !ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach")) {
+                self.init(
+                    history: history,
+                    responder: CoachResponder(selector: CoachEngineSelector(engines: []))
+                )
+                return
+            }
+            extra.append(ClaudeDemoCoachEngine())
         #endif
         self.init(history: history, responder: CoachResponder(selector: .standard(extra: extra)))
     }
 
     /// which engine would answer the next question
-    var engineKind: CoachEngineKind { responder.currentEngineKind }
+    var engineKind: CoachEngineKind {
+        responder.currentEngineKind
+    }
 
     /// why no model answers, when none does: a sentence the person can act on
-    var engineNote: String? { responder.unavailableReason }
+    var engineNote: String? {
+        responder.unavailableReason
+    }
 
     func prepare() {
-        guard !context.isEmpty, !isAnswering else { return }
+        guard !context.isEmpty, !isAnswering else {
+            return
+        }
         responder.prepare()
     }
 
     /// the saved sets changed (a new set, a deletion): the coach reads them again
     func refresh(history: [WorkoutSessionSummary]) {
         let updated = CoachContext.make(history: history)
-        guard updated != context else { return }
+        guard updated != context else {
+            return
+        }
         context = updated
         if messages.count == 1, let greeting = messages.first {
-            messages[0] = CoachMessage(id: greeting.id, role: .coach,
-                                       text: CoachFallback.opening(context: context, language: responder.language))
+            messages[0] = CoachMessage(
+                id: greeting.id,
+                role: .coach,
+                text: CoachFallback.opening(
+                    context: context,
+                    language: responder.language
+                )
+            )
         }
     }
 
     func send(_ text: String) async {
         let question = String(text.trimmingCharacters(in: .whitespacesAndNewlines)
             .prefix(FoundationModelsCoachPrompt.maximumQuestionCharacters))
-        guard !question.isEmpty, !isAnswering else { return }
+        guard !question.isEmpty, !isAnswering else {
+            return
+        }
         let earlier = messages
         messages.append(CoachMessage(role: .person, text: question))
         isAnswering = true
         defer { isAnswering = false }
         let askedContext = context
         let answer = await responder.answer(question, context: askedContext, history: earlier)
-        guard !Task.isCancelled, context == askedContext else { return }
+        guard !Task.isCancelled, context == askedContext else {
+            return
+        }
         messages.append(answer)
-        if messages.count > 40 { messages.removeFirst(messages.count - 40) }
+        if messages.count > 40 {
+            messages.removeFirst(messages.count - 40)
+        }
     }
 
     /// questions the person can tap, once there are saved sets to talk about. Each one meets a
     /// fallback intent: a recap, the progress, then advice
     var suggestedQuestions: [String] {
-        guard context.latest != nil else { return [] }
+        guard context.latest != nil else {
+            return []
+        }
         switch responder.language {
         case .english:
             return ["How did my last set go?",

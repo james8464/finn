@@ -9,8 +9,11 @@ struct ExerciseComparisonNarratorTests {
             (.bodyweightSquat, .longer, "Camera-measured range was longer in your second set."),
             (.pushUp, .shorter, "Camera-measured elbow bend was smaller in your second set."),
             (.staticLunge, .longer, "Camera-measured knee bend was greater in your second set."),
-            (.stiffLegDeadlift, .noClearChange,
-             "There was no clear camera-measured hip hinge change between sets."),
+            (
+                .stiffLegDeadlift,
+                .noClearChange,
+                "There was no clear camera-measured hip hinge change between sets."
+            ),
         ]
         for (exercise, direction, text) in expected {
             let recap = await ComparisonNarrator(generator: RecordingGenerator(available: false))
@@ -30,7 +33,8 @@ struct ExerciseComparisonNarratorTests {
         ]
         for (exercise, direction, sentence) in cases {
             let generator = RecordingGenerator(output: GeneratedRecap(
-                explanation: sentence, evidenceRepNumbers: [5, 6]))
+                explanation: sentence, evidenceRepNumbers: [5, 6]
+            ))
             let recap = await ComparisonNarrator(generator: generator, timeout: .seconds(30))
                 .recap(for: facts(exercise, direction))
             #expect(recap.source == .appleIntelligence, "\(sentence)")
@@ -48,7 +52,8 @@ struct ExerciseComparisonNarratorTests {
         ]
         for sentence in mismatched {
             let generator = RecordingGenerator(output: GeneratedRecap(
-                explanation: sentence, evidenceRepNumbers: [5, 6]))
+                explanation: sentence, evidenceRepNumbers: [5, 6]
+            ))
             let recap = await ComparisonNarrator(generator: generator, timeout: .seconds(30))
                 .recap(for: facts(.pushUp, .shorter))
             #expect(recap.source == .template, "\(sentence)")
@@ -62,7 +67,8 @@ struct ExerciseComparisonNarratorTests {
             for addition in [" because you got tired.", ". Try a steadier pace.", " by 12 degrees."] {
                 let sentence = base + addition
                 let generator = RecordingGenerator(output: GeneratedRecap(
-                    explanation: sentence, evidenceRepNumbers: [5, 6]))
+                    explanation: sentence, evidenceRepNumbers: [5, 6]
+                ))
                 let recap = await ComparisonNarrator(generator: generator, timeout: .seconds(30))
                     .recap(for: facts(exercise, .shorter))
                 #expect(recap.source == .template, "\(exercise): \(sentence)")
@@ -73,7 +79,8 @@ struct ExerciseComparisonNarratorTests {
     @Test func slowGenerationFallsBackForNewExercises() async {
         let generator = RecordingGenerator(delay: .seconds(1), output: GeneratedRecap(
             explanation: "Your camera-measured hip hinge was smaller in the second set.",
-            evidenceRepNumbers: [5, 6]))
+            evidenceRepNumbers: [5, 6]
+        ))
         let recap = await ComparisonNarrator(generator: generator, timeout: .milliseconds(20))
             .recap(for: facts(.stiffLegDeadlift, .shorter))
         #expect(recap.source == .template)
@@ -105,12 +112,18 @@ struct ExerciseComparisonNarratorTests {
     }
 
     private func facts(_ exercise: ExerciseKind, _ direction: RangeDirection) -> Comparison {
-        Comparison(firstSetID: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
-                   secondSetID: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
-                   firstMedianRange: 80, secondMedianRange: 60,
-                   firstMedianDuration: 1.5, secondMedianDuration: 1.6,
-                   rangeDirection: direction, cueRepNumbers: [5, 6], cueKind: .rangeDecreased,
-                   exercise: exercise)
+        Comparison(
+            firstSetID: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+            secondSetID: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
+            firstMedianRange: 80,
+            secondMedianRange: 60,
+            firstMedianDuration: 1.5,
+            secondMedianDuration: 1.6,
+            rangeDirection: direction,
+            cueRepNumbers: [5, 6],
+            cueKind: .rangeDecreased,
+            exercise: exercise
+        )
     }
 }
 

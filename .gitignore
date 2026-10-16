@@ -77,3 +77,10 @@ graphify-out/
 
 # Regenerable presentation render cache
 /Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/progress/
+
+# Local dependencies and regenerated presentation previews
+node_modules/
+/Design/Presentation/Finn-Keynote-2026-10-16/keynote/build/smooth-native/
+/Design/Presentation/Finn-Keynote-2026-10-16/preview/
+/Design/Presentation/Finn-Keynote-2026-10-16/production/quality-svg/
+/Design/Presentation/Finn-Keynote-2026-10-16/production/notes/

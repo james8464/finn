@@ -25,13 +25,16 @@ struct WorkoutFeedbackTests {
         let name = "FinnWatchFeedback-\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: name))
         defer { defaults.removePersistentDomain(forName: name) }
-        let model = WorkoutSessionModel(source: DemoPoseSource(), preferences: FinnPreferences(defaults: defaults))
+        let model = WorkoutSessionModel(
+            source: DemoPoseSource(),
+            preferences: FinnPreferences(defaults: defaults)
+        )
         model.hapticFeedback = .off
         var sent: [WatchState] = []
         let sync = WatchSync(model: model) { sent.append($0) }
         await model.startPreview()
         await model.beginSet(countdown: 0)
-        for _ in 0..<100 where sent.last?.stage != .capturing {
+        for _ in 0 ..< 100 where sent.last?.stage != .capturing {
             try await Task.sleep(for: .milliseconds(10))
         }
         #expect(sent.last?.stage == .capturing)

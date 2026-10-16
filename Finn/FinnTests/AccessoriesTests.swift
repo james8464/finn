@@ -44,9 +44,10 @@ nonisolated struct AccessoriesTests {
         let status = AccessoryStatus(headphonesConnected: true)
         #expect(status.isConnected(.headphones))
         #expect(AccessoryGuide.setupLines(for: .bodyweightSquat, status: status, speaksLive: true)
-                == [AccessoryLine(accessory: .headphones, text: "Headphones connected: you will hear each rep.")])
-        #expect(AccessoryGuide.setupLines(for: .bodyweightSquat, status: status, speaksLive: false).map(\.text)
-                == ["Headphones connected. Turn on Say reps aloud in Options to hear each rep."])
+            == [AccessoryLine(accessory: .headphones, text: "Headphones connected: you will hear each rep.")])
+        #expect(AccessoryGuide.setupLines(for: .bodyweightSquat, status: status, speaksLive: false)
+            .map(\.text)
+            == ["Headphones connected. Turn on Say reps aloud in Options to hear each rep."])
     }
 
     @Test func watchLineFollowsPairingInstallAndReachability() {
@@ -55,24 +56,34 @@ nonisolated struct AccessoriesTests {
         }
         #expect(text(WatchConnection(isPaired: false, isAppInstalled: true, isReachable: true)) == nil)
         #expect(text(WatchConnection(isPaired: true)) ==
-                "Apple Watch: install Finn for coaching messages and optional rhythm taps.")
+            "Apple Watch: install Finn for coaching messages and optional rhythm taps.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true)) ==
-                "Apple Watch: open Finn on your watch for coaching messages and rhythm.")
+            "Apple Watch: open Finn on your watch for coaching messages and rhythm.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true)) ==
-                "Apple Watch connected: coaching messages are ready; rhythm is optional.")
+            "Apple Watch connected: coaching messages are ready; rhythm is optional.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true), .pushUp) ==
-                "Apple Watch: open Finn on your watch for coaching messages and rhythm.")
+            "Apple Watch: open Finn on your watch for coaching messages and rhythm.")
         #expect(text(WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true), .pushUp) ==
-                "Apple Watch connected: coaching messages are ready; rhythm is optional.")
-        #expect(AccessoryStatus(watch: WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true))
-            .isConnected(.appleWatch))
+            "Apple Watch connected: coaching messages are ready; rhythm is optional.")
+        #expect(AccessoryStatus(watch: WatchConnection(
+            isPaired: true,
+            isAppInstalled: true,
+            isReachable: true
+        ))
+        .isConnected(.appleWatch))
         #expect(!AccessoryStatus(watch: WatchConnection(isPaired: true, isAppInstalled: true))
             .isConnected(.appleWatch))
     }
 
     @Test func bothAccessoriesGiveOneLineEachHeadphonesFirst() {
-        let status = AccessoryStatus(headphonesConnected: true,
-                                     watch: WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true))
+        let status = AccessoryStatus(
+            headphonesConnected: true,
+            watch: WatchConnection(
+                isPaired: true,
+                isAppInstalled: true,
+                isReachable: true
+            )
+        )
         let lines = AccessoryGuide.setupLines(for: .staticLunge, status: status, speaksLive: true)
         #expect(lines.map(\.accessory) == [.headphones, .appleWatch])
     }
@@ -83,8 +94,10 @@ nonisolated struct AccessoriesTests {
             AccessoryStatus(headphonesConnected: true),
             AccessoryStatus(watch: WatchConnection(isPaired: true)),
             AccessoryStatus(watch: WatchConnection(isPaired: true, isAppInstalled: true)),
-            AccessoryStatus(headphonesConnected: true,
-                            watch: WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true)),
+            AccessoryStatus(
+                headphonesConnected: true,
+                watch: WatchConnection(isPaired: true, isAppInstalled: true, isReachable: true)
+            ),
         ]
         for exercise in ExerciseKind.allCases {
             for status in statuses {

@@ -37,12 +37,14 @@ var arguments = Array(CommandLine.arguments.dropFirst())
 var syntheticPerClass = 250
 if let index = arguments.firstIndex(of: "--synthetic-per-class"), index + 1 < arguments.count {
     syntheticPerClass = Int(arguments[index + 1]) ?? syntheticPerClass
-    arguments.removeSubrange(index...(index + 1))
+    arguments.removeSubrange(index ... (index + 1))
 }
+
 guard arguments.count == 2 else {
     print("usage: train-angle-classifier <poses folder> <output folder> [--synthetic-per-class N]")
     exit(2)
 }
+
 let posesFolder = URL(fileURLWithPath: arguments[0])
 let outputFolder = URL(fileURLWithPath: arguments[1])
 try FileManager.default.createDirectory(at: outputFolder, withIntermediateDirectories: true)
@@ -66,7 +68,9 @@ func fingerprint(_ frames: [PoseFrame]) -> Int {
     for frame in frames.prefix(90) {
         hasher.combine(frame.time)
         for (joint, point) in frame.joints.sorted(by: { $0.key.rawValue < $1.key.rawValue }) {
-            hasher.combine(joint.rawValue); hasher.combine(point.x); hasher.combine(point.y)
+            hasher.combine(joint.rawValue)
+            hasher.combine(point.x)
+            hasher.combine(point.y)
         }
     }
     return hasher.finalize()
@@ -74,8 +78,9 @@ func fingerprint(_ frames: [PoseFrame]) -> Int {
 
 var recordings: [Recording] = []
 var realByFingerprint: [Int: [(PoseRecording, Bool)]] = [:]
-let files = ((try? FileManager.default.contentsOfDirectory(at: posesFolder, includingPropertiesForKeys: nil)) ?? [])
-    .filter { $0.pathExtension == "json" }.sorted { $0.path < $1.path }
+let files =
+    ((try? FileManager.default.contentsOfDirectory(at: posesFolder, includingPropertiesForKeys: nil)) ?? [])
+        .filter { $0.pathExtension == "json" }.sorted { $0.path < $1.path }
 let decoder = JSONDecoder()
 for file in files {
     guard let recording = try? decoder.decode(PoseRecording.self, from: Data(contentsOf: file)) else {
@@ -85,25 +90,38 @@ for file in files {
     realByFingerprint[fingerprint(recording.frames), default: []]
         .append((recording, isTestSubject(recording.subject)))
 }
+
 var droppedDuplicates: [String] = []
 for group in realByFingerprint.values.sorted(by: { $0[0].0.source < $1[0].0.source }) {
-// keep one copy; when a group spans both splits, keep it in training and drop the test copies.
+    // keep one copy; when a group spans both splits, keep it in training and drop the test copies.
     let kept = group.first { !$0.1 } ?? group[0]
     droppedDuplicates += group.filter { $0.0.source != kept.0.source }.map(\.0.source)
-    recordings.append(Recording(id: kept.0.source, label: kept.0.label, origin: "real", test: kept.1,
-                                windows: windowFeatures(kept.0.frames)))
+    recordings.append(Recording(
+        id: kept.0.source,
+        label: kept.0.label,
+        origin: "real",
+        test: kept.1,
+        windows: windowFeatures(kept.0.frames)
+    ))
 }
+
 let realCount = recordings.count
 print("dropped \(droppedDuplicates.count) duplicate recordings")
 
 var rng = SyntheticRandom(seed: 20261012)
 for label in allLabels {
-    for index in 0..<syntheticPerClass {
+    for index in 0 ..< syntheticPerClass {
         let frames = SyntheticExerciseMotion.sequence(label: label, using: &rng)
-        recordings.append(Recording(id: "synthetic-\(label)-\(index)", label: label, origin: "synthetic",
-                                    test: index % 5 == 0, windows: windowFeatures(frames)))
+        recordings.append(Recording(
+            id: "synthetic-\(label)-\(index)",
+            label: label,
+            origin: "synthetic",
+            test: index % 5 == 0,
+            windows: windowFeatures(frames)
+        ))
     }
 }
+
 print("\(realCount) real recordings, \(recordings.count - realCount) synthetic")
 
 func frame(for selected: [Recording]) -> DataFrame {
@@ -125,7 +143,8 @@ print("training windows: \(trainingFrame.rows.count)")
 let started = Date()
 let classifier = try MLBoostedTreeClassifier(
     trainingData: trainingFrame, targetColumn: "label", featureColumns: PoseWindowFeatures.featureNames,
-    parameters: .init(validation: .none, maxDepth: 6, maxIterations: 120, randomSeed: 7))
+    parameters: .init(validation: .none, maxDepth: 6, maxIterations: 120, randomSeed: 7)
+)
 print(String(format: "trained in %.0f s", Date().timeIntervalSince(started)))
 let model = classifier.model
 
@@ -143,27 +162,44 @@ func predict(_ features: PoseWindowFeatures) -> (String, Double) {
 /// 0.8 confidence or more; anything else is "uncertain".
 func decide(_ predictions: [(String, Double)]) -> String {
     // no measurable window: Vision lost the body, so no recogniser can decide ("uncertain" in the app).
-    if predictions.isEmpty { return "no pose" }
+    if predictions.isEmpty {
+        return "no pose"
+    }
     var votes: [String: Int] = [:]
-    for (label, confidence) in predictions where confidence >= 0.8 { votes[label, default: 0] += 1 }
+    for (label, confidence) in predictions where confidence >= 0.8 {
+        votes[label, default: 0] += 1
+    }
     let ranked = votes.sorted { $0.value > $1.value }
-    guard !predictions.isEmpty, let winner = ranked.first, ranked.dropFirst().first?.value != winner.value,
-          Double(winner.value) / Double(predictions.count) >= 0.6, exerciseLabels.contains(winner.key)
-    else { return "uncertain" }
+    guard
+        !predictions.isEmpty, let winner = ranked.first, ranked.dropFirst().first?.value != winner.value,
+        Double(winner.value) / Double(predictions.count) >= 0.6, exerciseLabels.contains(winner.key)
+    else {
+        return "uncertain"
+    }
     return winner.key
 }
 
 struct Tally {
     var confusion: [String: [String: Int]] = [:]
-    mutating func add(truth: String, predicted: String) { confusion[truth, default: [:]][predicted, default: 0] += 1 }
+    mutating func add(truth: String, predicted: String) {
+        confusion[truth, default: [:]][
+            predicted,
+            default: 0
+        ] += 1 }
+
     func lines(labels: [String]) -> [String] {
         let predictedLabels = Set(confusion.values.flatMap(\.keys))
         return labels.compactMap { label in
-            guard let row = confusion[label] else { return nil }
+            guard let row = confusion[label] else {
+                return nil
+            }
             let total = row.values.reduce(0, +)
             let correct = row[label] ?? 0
             let predictedAs = confusion.values.reduce(0) { $0 + ($1[label] ?? 0) }
-            let precision = predictedAs > 0 ? String(format: "%.0f%%", 100 * Double(correct) / Double(predictedAs)) : "n/a"
+            let precision = predictedAs > 0 ? String(
+                format: "%.0f%%",
+                100 * Double(correct) / Double(predictedAs)
+            ) : "n/a"
             let others = row.filter { $0.key != label }.sorted { $0.value > $1.value }.prefix(3)
                 .map { "\($0.key) \($0.value)" }.joined(separator: ", ")
             _ = predictedLabels
@@ -173,30 +209,42 @@ struct Tally {
 }
 
 /// Set-level truth: an exercise label, or "uncertain" for other and none.
-func setTruth(_ label: String) -> String { exerciseLabels.contains(label) ? label : "uncertain" }
+func setTruth(_ label: String) -> String {
+    exerciseLabels.contains(label) ? label : "uncertain"
+}
 
 var report: [String] = []
 var summary: [String: Any] = ["droppedDuplicates": droppedDuplicates]
 let realTest = recordings.filter { $0.origin == "real" && $0.test }
-report.append("Real data: \(realCount) side-view recordings after dropping \(droppedDuplicates.count) duplicates. "
-              + "Held out: subjects 004, 008, 012, 016, 020, 024 (\(realTest.count) recordings). "
-              + "Synthetic: \(syntheticPerClass) sequences per class, one in five held out.\n")
+report.append(
+    "Real data: \(realCount) side-view recordings after dropping \(droppedDuplicates.count) duplicates. "
+        + "Held out: subjects 004, 008, 012, 016, 020, 024 (\(realTest.count) recordings). "
+        + "Synthetic: \(syntheticPerClass) sequences per class, one in five held out.\n"
+)
 for origin in ["real", "synthetic"] {
     let tested = recordings.filter { $0.test && $0.origin == origin }
     var windowTally = Tally(), setTally = Tally(), ruleSetTally = Tally()
     for recording in tested {
         let predictions = recording.windows.map(predict)
-        for (label, _) in predictions { windowTally.add(truth: recording.label, predicted: label) }
+        for (label, _) in predictions {
+            windowTally.add(truth: recording.label, predicted: label)
+        }
         setTally.add(truth: setTruth(recording.label), predicted: decide(predictions))
         let rules = recording.windows.map { (AngleRules.label(for: $0) ?? "unknown", 1.0) }
         ruleSetTally.add(truth: setTruth(recording.label), predicted: decide(rules))
     }
     let setLabels = Array(exerciseLabels).sorted() + ["uncertain", "no pose"]
-    report.append("## Held-out \(origin) data: \(tested.count) recordings, \(tested.reduce(0) { $0 + $1.windows.count }) windows\n")
+    report
+        .append(
+            "## Held-out \(origin) data: \(tested.count) recordings, \(tested.reduce(0) { $0 + $1.windows.count }) windows\n"
+        )
     report.append("Windows (2.5 s), trained model. Recall, then precision.\n")
     report.append("| Class | Correct / total | Precision | Most confused with |\n| --- | --- | --- | --- |")
     report += windowTally.lines(labels: allLabels)
-    report.append("\nWhole sets, trained model with the app's vote (other and none should come out uncertain).\n")
+    report
+        .append(
+            "\nWhole sets, trained model with the app's vote (other and none should come out uncertain).\n"
+        )
     report.append("| Class | Correct / total | Precision | Most confused with |\n| --- | --- | --- | --- |")
     report += setTally.lines(labels: setLabels)
     report.append("\nWhole sets, rule-based recognizer (no training) on the same recordings.\n")
@@ -213,6 +261,7 @@ for recording in recordings where recording.origin == "real" {
     let rules = recording.windows.map { (AngleRules.label(for: $0) ?? "unknown", 1.0) }
     allRealRules.add(truth: setTruth(recording.label), predicted: decide(rules))
 }
+
 report.append("## Rule-based recognizer on all \(realCount) real recordings\n")
 report.append("| Class | Correct / total | Precision | Most confused with |\n| --- | --- | --- | --- |")
 report += allRealRules.lines(labels: Array(exerciseLabels).sorted() + ["uncertain", "no pose"])
@@ -229,7 +278,8 @@ let metadata = MLModelMetadata(
     version: "1",
     additional: ["finn.features": PoseWindowFeatures.featureNames.joined(separator: ","),
                  "finn.window": "\(PoseWindowFeatureExtractor.windowDuration)",
-                 "finn.trainedAt": ISO8601DateFormatter().string(from: Date())])
+                 "finn.trainedAt": ISO8601DateFormatter().string(from: Date())]
+)
 let modelURL = outputFolder.appending(path: "FinnAngleClassifier.mlmodel")
 try? FileManager.default.removeItem(at: modelURL)
 try classifier.write(to: modelURL, metadata: metadata)

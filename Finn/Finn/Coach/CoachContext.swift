@@ -37,7 +37,9 @@ nonisolated struct CoachSetFact: Equatable, Identifiable, Sendable {
     /// the one thing to do next, from the same observation, on its own for the advice answers
     var nextAction: String? = nil
 
-    var label: String { "Set \(number)" }
+    var label: String {
+        "Set \(number)"
+    }
 }
 
 /// the last sets of the local history, as text the coach engines receive and the fallback reads
@@ -46,19 +48,31 @@ nonisolated struct CoachContext: Equatable, Sendable {
 
     let facts: [CoachSetFact]
 
-    var isEmpty: Bool { facts.isEmpty }
-    var knownNumbers: Set<Int> { Set(facts.map(\.number)) }
-    var latest: CoachSetFact? { facts.last }
+    var isEmpty: Bool {
+        facts.isEmpty
+    }
+
+    var knownNumbers: Set<Int> {
+        Set(facts.map(\.number))
+    }
+
+    var latest: CoachSetFact? {
+        facts.last
+    }
 
     /// Keep complete records and favour recent sets when history exceeds the model's budget.
     /// Truncating the old, unbounded text dropped the newest sets and could cut a fact in half.
     func boundedPromptText(maximumCharacters: Int) -> String {
-        guard !facts.isEmpty else { return "No saved sets." }
+        guard !facts.isEmpty else {
+            return "No saved sets."
+        }
         var remaining = max(0, maximumCharacters)
         var lines: [String] = []
         for fact in facts.reversed() {
             var line = "\(fact.label): \(fact.exerciseName.prefix(60)), \(fact.repCount) reps, \(fact.capturedAt.formatted(.iso8601))"
-            if fact.partlyVisible { line += " | partly visible; no posture advice" }
+            if fact.partlyVisible {
+                line += " | partly visible; no posture advice"
+            }
             if let observation = fact.observation {
                 line += " | observation: " + observation.prefix(180)
             }
@@ -68,7 +82,9 @@ nonisolated struct CoachContext: Equatable, Sendable {
             if !fact.issues.isEmpty {
                 line += " | showed: " + fact.issues.joined(separator: "; ").prefix(100)
             }
-            guard line.count + 1 <= remaining else { break }
+            guard line.count + 1 <= remaining else {
+                break
+            }
             lines.append(line)
             remaining -= line.count + 1
         }
@@ -76,14 +92,19 @@ nonisolated struct CoachContext: Equatable, Sendable {
     }
 
     /// builds the context from the saved sessions, keeping the `limit` most recent sets
-    static func make(history: [WorkoutSessionSummary], limit: Int = defaultLimit,
-                     now: Date = .now) -> CoachContext {
+    static func make(
+        history: [WorkoutSessionSummary],
+        limit: Int = defaultLimit,
+        now: Date = .now
+    ) -> CoachContext {
         struct Pending {
             let set: SetSummary
             let comparison: String?
         }
         let retainedCount = max(0, min(limit, 32))
-        guard retainedCount > 0 else { return CoachContext(facts: []) }
+        guard retainedCount > 0 else {
+            return CoachContext(facts: [])
+        }
         // Sessions can overlap. A session's start does not establish when its last set happened.
         let chronologicalSets = history.flatMap(\.sets).sorted { earlier, later in
             if earlier.capturedAt != later.capturedAt {
@@ -101,15 +122,19 @@ nonisolated struct CoachContext: Equatable, Sendable {
             // Older sets supply comparison evidence, but do not need strings or pending facts.
             if index >= firstRetainedIndex {
                 var comparisons: [String] = []
-                if let previous = previousBySession[set.sessionID],
-                   let compared = SetComparison.compare(previous, set) {
+                if
+                    let previous = previousBySession[set.sessionID],
+                    let compared = SetComparison.compare(previous, set) {
                     comparisons.append(describe(compared, exercise: set.exercise))
                 }
                 let priorSets = eligible.compactMap { previousByCheck[FormHistoryKey(set, check: $0.check)] }
                     .sorted { $0.capturedAt > $1.capturedAt }
                 comparisons += FormTrend.compareLatest(to: set, among: priorSets).map(\.sentence)
-                kept.append(Pending(set: set,
-                                    comparison: comparisons.isEmpty ? nil : comparisons.joined(separator: " ")))
+                kept.append(Pending(
+                    set: set,
+                    comparison: comparisons.isEmpty ? nil : comparisons
+                        .joined(separator: " ")
+                ))
             }
             previousBySession[set.sessionID] = set
             for measurement in eligible {
@@ -128,15 +153,18 @@ nonisolated struct CoachContext: Equatable, Sendable {
                 nextAction = cue.nextAction.isEmpty ? nil : cue.nextAction
             }
             let issues = (set.issues ?? []).map { $0.title(for: definition) }
-            return CoachSetFact(number: offset + 1, id: set.id,
-                                exerciseName: definition.copy.name,
-                                repCount: set.analysis.reps.count,
-                                capturedAt: set.capturedAt,
-                                observation: observation,
-                                issues: issues,
-                                comparison: item.comparison,
-                                partlyVisible: set.partlyVisible ?? false,
-                                nextAction: nextAction)
+            return CoachSetFact(
+                number: offset + 1,
+                id: set.id,
+                exerciseName: definition.copy.name,
+                repCount: set.analysis.reps.count,
+                capturedAt: set.capturedAt,
+                observation: observation,
+                issues: issues,
+                comparison: item.comparison,
+                partlyVisible: set.partlyVisible ?? false,
+                nextAction: nextAction
+            )
         }
         return CoachContext(facts: facts)
     }
@@ -146,9 +174,13 @@ nonisolated struct CoachContext: Equatable, Sendable {
         let copy = exercise.definition.copy
         switch comparison.rangeDirection {
         case .longer:
-            return String(localized: "camera-measured \(copy.rangeNoun) \(copy.moreRange) than the previous set")
+            return String(
+                localized: "camera-measured \(copy.rangeNoun) \(copy.moreRange) than the previous set"
+            )
         case .shorter:
-            return String(localized: "camera-measured \(copy.rangeNoun) \(copy.lessRange) than the previous set")
+            return String(
+                localized: "camera-measured \(copy.rangeNoun) \(copy.lessRange) than the previous set"
+            )
         case .noClearChange:
             return String(localized: "no clear \(copy.rangeNoun) change against the previous set")
         }
@@ -156,16 +188,29 @@ nonisolated struct CoachContext: Equatable, Sendable {
 
     /// the context as the model reads it: one line per set, oldest first
     func promptText(calendar: Calendar = .current, timeZone: TimeZone = .current) -> String {
-        guard !facts.isEmpty else { return "No saved sets." }
+        guard !facts.isEmpty else {
+            return "No saved sets."
+        }
         var formatter = Date.FormatStyle(date: .abbreviated, time: .shortened)
         formatter.calendar = calendar
         formatter.timeZone = timeZone
         return facts.map { fact in
-            var parts = ["\(fact.label): \(fact.exerciseName), \(fact.repCount) reps, \(fact.capturedAt.formatted(formatter))"]
-            if fact.partlyVisible { parts.append("joints not always in view, so no posture advice") }
-            if let observation = fact.observation { parts.append("observation: \(observation)") }
-            if !fact.issues.isEmpty { parts.append("showed: \(fact.issues.joined(separator: "; "))") }
-            if let comparison = fact.comparison { parts.append("comparison: \(comparison)") }
+            var parts =
+                [
+                    "\(fact.label): \(fact.exerciseName), \(fact.repCount) reps, \(fact.capturedAt.formatted(formatter))"
+                ]
+            if fact.partlyVisible {
+                parts.append("joints not always in view, so no posture advice")
+            }
+            if let observation = fact.observation {
+                parts.append("observation: \(observation)")
+            }
+            if !fact.issues.isEmpty {
+                parts.append("showed: \(fact.issues.joined(separator: "; "))")
+            }
+            if let comparison = fact.comparison {
+                parts.append("comparison: \(comparison)")
+            }
             return parts.joined(separator: " | ")
         }.joined(separator: "\n")
     }
@@ -179,26 +224,36 @@ nonisolated enum CoachLanguage: Equatable, Sendable {
 
     var locale: Locale {
         switch self {
-        case .english: Locale(identifier: "en-GB")
-        case .french: Locale(identifier: "fr")
-        case .spanish: Locale(identifier: "es")
+        case .english:
+            Locale(identifier: "en-GB")
+        case .french:
+            Locale(identifier: "fr")
+        case .spanish:
+            Locale(identifier: "es")
         }
     }
 
-    static func current(locale: Locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? Locale.current.identifier)) -> CoachLanguage {
+    static func current(locale: Locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? Locale
+            .current.identifier)) -> CoachLanguage {
         switch locale.language.languageCode?.identifier {
-        case "fr": .french
-        case "es": .spanish
-        default: .english
+        case "fr":
+            .french
+        case "es":
+            .spanish
+        default:
+            .english
         }
     }
 
     /// how a set is named in an answer, so the person and the validator agree
     var setWord: String {
         switch self {
-        case .english: "Set"
-        case .french: "Série"
-        case .spanish: "Serie"
+        case .english:
+            "Set"
+        case .french:
+            "Série"
+        case .spanish:
+            "Serie"
         }
     }
 }
@@ -207,7 +262,8 @@ nonisolated enum CoachLanguage: Equatable, Sendable {
 nonisolated enum CoachInstructions {
     static func text(language: CoachLanguage) -> String {
         switch language {
-        case .english: return english
+        case .english:
+            return english
         case .french:
             return english + """
 
@@ -222,15 +278,15 @@ nonisolated enum CoachInstructions {
     }
 
     static let english = """
-        You select saved sets relevant to the person's question. Finn writes the answer from its \
-        recorded facts; your words are never shown to the person.
+    You select saved sets relevant to the person's question. Finn writes the answer from its \
+    recorded facts; your words are never shown to the person.
 
-        Use only the numbered sets under "Saved sets". Select at most two. In a text response, \
-        output only their labels separated by a comma, for example "Set 2" or "Set 2, Set 3"; \
-        output "NONE" if none answers the question. In a structured response, return their numbers \
-        or an empty list. Do not add an explanation, measurements, advice, or other words. \
-        No medical advice: do not select a set as proof of injury, safety or diagnosis.
-        """
+    Use only the numbered sets under "Saved sets". Select at most two. In a text response, \
+    output only their labels separated by a comma, for example "Set 2" or "Set 2, Set 3"; \
+    output "NONE" if none answers the question. In a structured response, return their numbers \
+    or an empty list. Do not add an explanation, measurements, advice, or other words. \
+    No medical advice: do not select a set as proof of injury, safety or diagnosis.
+    """
 }
 
 /// sentences built from the saved observations, used when no language model can run. It reads
@@ -239,15 +295,21 @@ nonisolated enum CoachInstructions {
 nonisolated enum CoachFallback {
     static func noRelevantAnswer(language: CoachLanguage) -> String {
         switch language {
-        case .english: "Finn didn't measure that in these saved sets. I can only comment on recorded reps and observations."
-        case .french: "Finn n'a pas mesuré cela dans ces séries. Je peux seulement commenter les répétitions et observations enregistrées."
-        case .spanish: "Finn no midió eso en estas series guardadas. Solo puedo comentar las repeticiones y observaciones registradas."
+        case .english:
+            "Finn didn't measure that in these saved sets. I can only comment on recorded reps and observations."
+        case .french:
+            "Finn n'a pas mesuré cela dans ces séries. Je peux seulement commenter les répétitions et observations enregistrées."
+        case .spanish:
+            "Finn no midió eso en estas series guardadas. Solo puedo comentar las repeticiones y observaciones registradas."
         }
     }
 
     /// what the person is asking for, guessed from a few words. Recap when nothing matches.
     enum Intent: Equatable {
-        case advice, progress, set(Int), recap
+        case advice
+        case progress
+        case set(Int)
+        case recap
     }
 
     static func intent(of question: String) -> Intent {
@@ -259,20 +321,31 @@ nonisolated enum CoachFallback {
         let advice = ["next", "should", "keep in mind", "improve", "work on", "focus", "tip", "advice",
                       "prochain", "faire quoi", "je dois", "attention", "conseil", "ameliorer", "travailler",
                       "siguiente", "mejorar", "consejo", "trabajar", "deberia", "enfocar"]
-        if advice.contains(where: text.contains) { return .advice }
+        if advice.contains(where: text.contains) {
+            return .advice
+        }
         let progress = ["change", "progress", "better", "worse", "evol", "compar", "over time", "trend",
-                        "chang", "progres", "mieux", "moins bien", "au fil", "cambio", "mejor", "peor", "evolucion"]
-        if progress.contains(where: text.contains) { return .progress }
+                        "chang", "progres", "mieux", "moins bien", "au fil", "cambio", "mejor", "peor",
+                        "evolucion"]
+        if progress.contains(where: text.contains) {
+            return .progress
+        }
         return .recap
     }
 
-    static func reply(to question: String, context: CoachContext,
-                      language: CoachLanguage = .current()) -> String {
+    static func reply(
+        to question: String,
+        context: CoachContext,
+        language: CoachLanguage = .current()
+    ) -> String {
         guard let latest = context.latest else {
             return switch language {
-            case .english: "Finn has no saved set yet, so there is nothing to comment on. Finish a set and come back."
-            case .french: "Finn n'a encore aucune série enregistrée, donc rien à commenter. Finis une série et reviens."
-            case .spanish: "Finn aún no tiene series guardadas, así que no hay nada que comentar. Termina una serie y vuelve."
+            case .english:
+                "Finn has no saved set yet, so there is nothing to comment on. Finish a set and come back."
+            case .french:
+                "Finn n'a encore aucune série enregistrée, donc rien à commenter. Finis une série et reviens."
+            case .spanish:
+                "Finn aún no tiene series guardadas, así que no hay nada que comentar. Termina una serie y vuelve."
             }
         }
         switch intent(of: question) {
@@ -285,15 +358,32 @@ nonisolated enum CoachFallback {
                 return summary(of: fact, language: language)
             }
             return switch language {
-            case .english: "Finn has no set \(number) in its last \(context.facts.count) saved sets. " + summary(of: latest, language: language)
-            case .french: "Finn n'a pas de série \(number) parmi ses \(context.facts.count) dernières séries. " + summary(of: latest, language: language)
-            case .spanish: "Finn no tiene la serie \(number) entre sus últimas \(context.facts.count) series guardadas. " + summary(of: latest, language: language)
+            case .english:
+                "Finn has no set \(number) in its last \(context.facts.count) saved sets. " +
+                    summary(
+                        of: latest,
+                        language: language
+                    )
+            case .french:
+                "Finn n'a pas de série \(number) parmi ses \(context.facts.count) dernières séries. " +
+                    summary(
+                        of: latest,
+                        language: language
+                    )
+            case .spanish:
+                "Finn no tiene la serie \(number) entre sus últimas \(context.facts.count) series guardadas. " +
+                    summary(
+                        of: latest,
+                        language: language
+                    )
             }
         case .recap:
             var lines = [summary(of: latest, language: language)]
             if context.facts.count > 1 {
                 let earlier = context.facts.dropLast().reversed().prefix(2)
-                for fact in earlier { lines.append(summary(of: fact, language: language)) }
+                for fact in earlier {
+                    lines.append(summary(of: fact, language: language))
+                }
             }
             return lines.joined(separator: " ")
         }
@@ -306,20 +396,32 @@ nonisolated enum CoachFallback {
         for fact in context.facts.reversed() where !seen.contains(fact.exerciseName) {
             seen.insert(fact.exerciseName)
             let same = context.facts.filter { $0.exerciseName == fact.exerciseName }
-            guard let action = same.last(where: { $0.nextAction != nil })?.nextAction else { continue }
+            guard let action = same.last(where: { $0.nextAction != nil })?.nextAction else {
+                continue
+            }
             let numbers = same.filter { $0.nextAction == action }.map(\.number)
             let name = fact.exerciseName.lowercased()
             switch language {
             case .english:
-                lines.append("For your \(name): \(action) That is what Finn saw on \(setList(numbers, language: language)).")
+                lines
+                    .append(
+                        "For your \(name): \(action) That is what Finn saw on \(setList(numbers, language: language))."
+                    )
             case .french:
-                lines.append("Pour tes \(name) : \(action) C'est ce que Finn a vu sur \(setList(numbers, language: language)).")
+                lines
+                    .append(
+                        "Pour tes \(name) : \(action) C'est ce que Finn a vu sur \(setList(numbers, language: language))."
+                    )
             case .spanish:
-                lines.append("Para tus \(name): \(action) Eso es lo que Finn observó en \(setList(numbers, language: language)).")
+                lines
+                    .append(
+                        "Para tus \(name): \(action) Eso es lo que Finn observó en \(setList(numbers, language: language))."
+                    )
             }
         }
         if lines.isEmpty {
-            let clean = context.facts.filter { $0.nextAction == nil && !$0.partlyVisible && $0.issues.isEmpty }
+            let clean = context.facts
+                .filter { $0.nextAction == nil && !$0.partlyVisible && $0.issues.isEmpty }
             return switch language {
             case .english:
                 clean.isEmpty
@@ -345,26 +447,37 @@ nonisolated enum CoachFallback {
         for fact in context.facts where !seen.contains(fact.exerciseName) {
             seen.insert(fact.exerciseName)
             let same = context.facts.filter { $0.exerciseName == fact.exerciseName }
-            guard let first = same.first, let last = same.last else { continue }
+            guard let first = same.first, let last = same.last else {
+                continue
+            }
             var line: String
             if same.count == 1 {
                 line = switch language {
-                case .english: "\(fact.exerciseName): one set saved, \(first.repCount) reps on \(language.setWord.lowercased()) \(first.number)."
-                case .french: "\(fact.exerciseName) : une seule série enregistrée, \(first.repCount) répétitions sur la série \(first.number)."
-                case .spanish: "\(fact.exerciseName): una serie guardada, \(first.repCount) repeticiones en la serie \(first.number)."
+                case .english:
+                    "\(fact.exerciseName): one set saved, \(first.repCount) reps on \(language.setWord.lowercased()) \(first.number)."
+                case .french:
+                    "\(fact.exerciseName) : une seule série enregistrée, \(first.repCount) répétitions sur la série \(first.number)."
+                case .spanish:
+                    "\(fact.exerciseName): una serie guardada, \(first.repCount) repeticiones en la serie \(first.number)."
                 }
             } else {
                 line = switch language {
-                case .english: "\(fact.exerciseName): \(first.repCount) reps on set \(first.number), \(last.repCount) on set \(last.number)."
-                case .french: "\(fact.exerciseName) : \(first.repCount) répétitions sur la série \(first.number), \(last.repCount) sur la série \(last.number)."
-                case .spanish: "\(fact.exerciseName): \(first.repCount) repeticiones en la serie \(first.number), \(last.repCount) en la serie \(last.number)."
+                case .english:
+                    "\(fact.exerciseName): \(first.repCount) reps on set \(first.number), \(last.repCount) on set \(last.number)."
+                case .french:
+                    "\(fact.exerciseName) : \(first.repCount) répétitions sur la série \(first.number), \(last.repCount) sur la série \(last.number)."
+                case .spanish:
+                    "\(fact.exerciseName): \(first.repCount) repeticiones en la serie \(first.number), \(last.repCount) en la serie \(last.number)."
                 }
             }
             if let comparison = same.last(where: { $0.comparison != nil })?.comparison {
                 let tail = switch language {
-                case .english: " Last camera comparison: \(comparison)."
-                case .french: " Dernière comparaison caméra : \(comparison)."
-                case .spanish: " Última comparación de cámara: \(comparison)."
+                case .english:
+                    " Last camera comparison: \(comparison)."
+                case .french:
+                    " Dernière comparaison caméra : \(comparison)."
+                case .spanish:
+                    " Última comparación de cámara: \(comparison)."
                 }
                 line += tail
             }
@@ -381,14 +494,25 @@ nonisolated enum CoachFallback {
         let and: String
         let to: String
         switch language {
-        case .english: (plural, and, to) = ("sets", "and", "to")
-        case .french: (plural, and, to) = ("séries", "et", "à")
-        case .spanish: (plural, and, to) = ("series", "y", "a")
+        case .english:
+            (plural, and, to) = ("sets", "and", "to")
+        case .french:
+            (plural, and, to) = ("séries", "et", "à")
+        case .spanish:
+            (plural, and, to) = ("series", "y", "a")
         }
-        guard let first = sorted.first, let last = sorted.last else { return "" }
-        if sorted.count == 1 { return "\(word) \(first)" }
-        if sorted.count == 2 { return "\(plural) \(first) \(and) \(last)" }
-        if sorted.count == last - first + 1 { return "\(plural) \(first) \(to) \(last)" }
+        guard let first = sorted.first, let last = sorted.last else {
+            return ""
+        }
+        if sorted.count == 1 {
+            return "\(word) \(first)"
+        }
+        if sorted.count == 2 {
+            return "\(plural) \(first) \(and) \(last)"
+        }
+        if sorted.count == last - first + 1 {
+            return "\(plural) \(first) \(to) \(last)"
+        }
         let head = sorted.dropLast().map(String.init).joined(separator: ", ")
         return "\(plural) \(head) \(and) \(last)"
     }
@@ -397,9 +521,12 @@ nonisolated enum CoachFallback {
     static func opening(context: CoachContext, language: CoachLanguage = .current()) -> String {
         guard let latest = context.latest else {
             return switch language {
-            case .english: "No saved set yet."
-            case .french: "Aucune série enregistrée."
-            case .spanish: "Aún no hay series guardadas."
+            case .english:
+                "No saved set yet."
+            case .french:
+                "Aucune série enregistrée."
+            case .spanish:
+                "Aún no hay series guardadas."
             }
         }
         return summary(of: latest, language: language)
@@ -464,21 +591,28 @@ nonisolated enum CoachAnswerCheck {
         var numbers: Set<Int> = []
         let pattern = /(?:[Ss]et|[Ss][ée]rie)\s*#?\s*(\d+)/
         for match in text.matches(of: pattern) {
-            if let number = Int(match.output.1) { numbers.insert(number) }
+            if let number = Int(match.output.1) {
+                numbers.insert(number)
+            }
         }
         return numbers
     }
 
     static func selectedFacts(in text: String, for context: CoachContext) -> [CoachSetFact]? {
         let parts = text.split(separator: ",", omittingEmptySubsequences: false)
-        guard (1...2).contains(parts.count) else { return nil }
+        guard (1 ... 2).contains(parts.count) else {
+            return nil
+        }
         var selected: [CoachSetFact] = []
         for part in parts {
             let label = part.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard let match = label.wholeMatch(of: /(?:[Ss]et|[Ss][ée]rie)\s*#?\s*(\d+)/),
-                  let number = Int(match.output.1),
-                  let fact = context.facts.first(where: { $0.number == number }),
-                  !selected.contains(where: { $0.number == number }) else { return nil }
+            guard
+                let match = label.wholeMatch(of: /(?:[Ss]et|[Ss][ée]rie)\s*#?\s*(\d+)/),
+                let number = Int(match.output.1),
+                let fact = context.facts.first(where: { $0.number == number }),
+                !selected.contains(where: { $0.number == number }) else {
+                return nil
+            }
             selected.append(fact)
         }
         return selected

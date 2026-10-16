@@ -6,7 +6,8 @@ struct StartSetIntent: AppIntent {
     static let title: LocalizedStringResource = "Start a Set"
     static let description = IntentDescription(
         "Opens Finn on the set screen with the exercise you choose. The camera starts in the app, as usual.",
-        categoryName: "Sets")
+        categoryName: "Sets"
+    )
     static let openAppWhenRun = true
 
     @Parameter(title: "Exercise")

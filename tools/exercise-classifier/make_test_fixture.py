@@ -17,8 +17,9 @@ from coremltools.models.neural_network import NeuralNetworkBuilder
 
 LABELS = ["none", "other", "push_up", "squat", "static_lunge", "stiff_leg_deadlift"]
 WINDOW = 30
-OUTPUT = (Path(__file__).resolve().parents[2]
-          / "Finn/FinnTests/Fixtures/ConstantPushUpClassifierFixture.mlmodel")
+OUTPUT = (
+    Path(__file__).resolve().parents[2] / "Finn/FinnTests/Fixtures/ConstantPushUpClassifierFixture.mlmodel"
+)
 
 
 def build() -> MLModel:
@@ -31,16 +32,21 @@ def build() -> MLModel:
     bias = np.zeros(len(LABELS))
     bias[LABELS.index("push_up")] = np.log(0.92 * (len(LABELS) - 1) / 0.08)
     builder.add_inner_product(
-        name="constant", W=np.zeros((len(LABELS), WINDOW * 54)), b=bias,
-        input_channels=WINDOW * 54, output_channels=len(LABELS), has_bias=True,
-        input_name="flat", output_name="logits",
+        name="constant",
+        W=np.zeros((len(LABELS), WINDOW * 54)),
+        b=bias,
+        input_channels=WINDOW * 54,
+        output_channels=len(LABELS),
+        has_bias=True,
+        input_name="flat",
+        output_name="logits",
     )
     builder.add_softmax(name="softmax", input_name="logits", output_name="labelProbabilities")
-    builder.set_class_labels(LABELS, predicted_feature_name="label",
-                             prediction_blob="labelProbabilities")
+    builder.set_class_labels(LABELS, predicted_feature_name="label", prediction_blob="labelProbabilities")
     spec = builder.spec
     spec.description.metadata.shortDescription = (
-        "Test fixture with constant output. Never trained; not a Finn exercise model.")
+        "Test fixture with constant output. Never trained; not a Finn exercise model."
+    )
     spec.description.metadata.userDefined["finn.targetFrameRate"] = "15.0"
     spec.description.metadata.userDefined["finn.predictionWindow"] = str(WINDOW)
     return MLModel(spec)

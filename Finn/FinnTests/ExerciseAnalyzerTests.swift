@@ -11,13 +11,17 @@ nonisolated struct ExerciseAnalyzerTests {
     @Test func currentSquatKeepsEverythingV2MeasuredOnVariedTraces() {
         var generator = SplitMix64(seed: 20261012)
         var both = 0, same = 0, fewer = 0, lostByCurrent = 0
-        for _ in 0..<600 {
+        for _ in 0 ..< 600 {
             let frames = randomSquatTrace(using: &generator)
             switch (SquatAnalyzer.analyse(frames), FrozenSquatV2.analyse(frames)) {
             case (.analyzed(let current), .analyzed(let frozen)):
                 both += 1
-                if current.reps.count == frozen.reps.count { same += 1 }
-                if current.reps.count < frozen.reps.count { fewer += 1 }
+                if current.reps.count == frozen.reps.count {
+                    same += 1
+                }
+                if current.reps.count < frozen.reps.count {
+                    fewer += 1
+                }
                 #expect(current.reps.count >= frozen.reps.count - 1)
             case (_, .analyzed):
                 lostByCurrent += 1
@@ -32,12 +36,15 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func realisticConfidenceSquatIsCounted() throws {
-// real side-view video gives the hip about 0.5 confidence; v2's 0.6 floor refused it.
+        // real side-view video gives the hip about 0.5 confidence; v2's 0.6 floor refused it.
         var generator = SplitMix64(seed: 77)
-        let frames = (0...120).map { index -> PoseFrame in
+        let frames = (0 ... 120).map { index -> PoseFrame in
             let hipY = 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
-            return squatFrame(time: Double(index) * 0.1, hipY: hipY,
-                              confidence: Double.random(in: 0.38...0.6, using: &generator))
+            return squatFrame(
+                time: Double(index) * 0.1,
+                hipY: hipY,
+                confidence: Double.random(in: 0.38 ... 0.6, using: &generator)
+            )
         }
         #expect(FrozenSquatV2.analyse(frames) != SquatAnalyzer.analyse(frames))
         let analysis = try measured(SquatAnalyzer.analyse(frames))
@@ -45,25 +52,32 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func setStartingMidDescentStillCounts() throws {
-        let frames = (6...126).map { index in
-            squatFrame(time: Double(index) * 0.1,
-                       hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
+        let frames = (6 ... 126).map { index in
+            squatFrame(
+                time: Double(index) * 0.1,
+                hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
+            )
         }
         let analysis = try measured(SquatAnalyzer.analyse(frames))
         #expect(analysis.reps.count >= 5)
     }
 
     @Test func tenDegreePhoneTiltDoesNotChangeTheCount() throws {
-        let upright = (0...120).map { index in
-            squatFrame(time: Double(index) * 0.1,
-                       hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
+        let upright = (0 ... 120).map { index in
+            squatFrame(
+                time: Double(index) * 0.1,
+                hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
+            )
         }
         let angle = 10.0 * .pi / 180
         let tilted = upright.map { frame in
             PoseFrame(time: frame.time, subjectCount: 1, joints: frame.joints.mapValues { point in
                 let dx = point.x - 0.5, dy = point.y - 0.6
-                return JointPoint(x: 0.5 + dx * cos(angle) - dy * sin(angle),
-                                  y: 0.6 + dx * sin(angle) + dy * cos(angle), confidence: point.confidence)
+                return JointPoint(
+                    x: 0.5 + dx * cos(angle) - dy * sin(angle),
+                    y: 0.6 + dx * sin(angle) + dy * cos(angle),
+                    confidence: point.confidence
+                )
             })
         }
         let straight = try measured(SquatAnalyzer.analyse(upright))
@@ -72,10 +86,12 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func oneMisplacedAnkleDoesNotLookLikeAMovingPhone() throws {
-        let frames = (0...120).map { index -> PoseFrame in
-            let frame = squatFrame(time: Double(index) * 0.1,
-                                   hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2,
-                                   ankleShift: index == 60 ? 0.4 : 0)
+        let frames = (0 ... 120).map { index -> PoseFrame in
+            let frame = squatFrame(
+                time: Double(index) * 0.1,
+                hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2,
+                ankleShift: index == 60 ? 0.4 : 0
+            )
             return frame
         }
         let analysis = try measured(SquatAnalyzer.analyse(frames))
@@ -83,9 +99,11 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func shallowMovementsAreExplainedInNumbers() {
-        let frames = (0...120).map { index in
-            squatFrame(time: Double(index) * 0.1,
-                       hipY: 0.42 + 0.05 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
+        let frames = (0 ... 120).map { index in
+            squatFrame(
+                time: Double(index) * 0.1,
+                hipY: 0.42 + 0.05 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
+            )
         }
         let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(frames, as: .squat)
         guard case .analyzed(let analysis) = outcome, let diagnostics else {
@@ -98,9 +116,13 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func refusalsSayWhatWasMissing() {
-        let hidden = (0...40).map { index in
-            PoseFrame(time: Double(index) * 0.1, subjectCount: 1, joints: index % 2 == 0
-                ? squatFrame(time: 0, hipY: 0.42).joints : [:])
+        let hidden = (0 ... 40).map { index in
+            PoseFrame(
+                time: Double(index) * 0.1,
+                subjectCount: 1,
+                joints: index % 2 == 0
+                    ? squatFrame(time: 0, hipY: 0.42).joints : [:]
+            )
         }
         guard case .insufficientView(let reason) = SquatAnalyzer.analyse(hidden) else {
             Issue.record("Half-hidden joints must be refused")
@@ -115,8 +137,14 @@ nonisolated struct ExerciseAnalyzerTests {
         #expect(squat.rubricVersion == "squat-side-v8")
         #expect(squat.signal == .verticalTravel(joint: .hip, reference: .ankle))
         #expect(squat.evidence == EvidenceRequirement(joints: [.hip, .knee, .ankle], anchor: .ankle))
-        #expect(squat.phases == RepPhases(leaveTop: 0.10, reachBottom: 0.15, returnFromBottom: 0.04,
-                                          backAtTop: 0.05, minimumDuration: 0.5, maximumDuration: 8.0))
+        #expect(squat.phases == RepPhases(
+            leaveTop: 0.10,
+            reachBottom: 0.15,
+            returnFromBottom: 0.04,
+            backAtTop: 0.05,
+            minimumDuration: 0.5,
+            maximumDuration: 8.0
+        ))
         #expect(squat.minimumBodyScale == 0.1)
         #expect(squat.copy.observation == "Your range became shorter in the last two reps.")
         #expect(squat.copy.nextAction == "Choose a range you can repeat on each rep.")
@@ -130,17 +158,21 @@ nonisolated struct ExerciseAnalyzerTests {
         #expect(Set(ExerciseDefinition.all.map(\.classifierLabel)).count == ExerciseDefinition.all.count)
         for definition in ExerciseDefinition.all {
             #expect(ExerciseDefinition.definition(for: definition.kind) == definition)
-            #expect(ExerciseDefinition.definition(forClassifierLabel: definition.classifierLabel) == definition)
+            #expect(ExerciseDefinition
+                .definition(forClassifierLabel: definition.classifierLabel) == definition)
             // Hanging exercises read the same from any view, and their hands (the reference and
             // the still joint) only need to be seen now and then; every other joint is required.
             // Push-ups are accepted from any view too: the arm rubric prefers the side, the
             // shoulder count does not care.
             let hanging = [ExerciseKind.pullUp, .muscleUp].contains(definition.kind)
             #expect(definition.expectedView == (hanging || definition.kind == .pushUp ? .any : .side))
-            let required = hanging ? [JointRole.shoulder] : definition.signal.joints + [definition.evidence.anchor]
+            let required = hanging ? [JointRole.shoulder] : definition.signal
+                .joints + [definition.evidence.anchor]
             for joint in required {
-                #expect(definition.evidence.joints.contains(joint),
-                        "\(definition.kind) must require \(joint) to measure it")
+                #expect(
+                    definition.evidence.joints.contains(joint),
+                    "\(definition.kind) must require \(joint) to measure it"
+                )
             }
             let phases = definition.phases
             #expect(phases.backAtTop < phases.leaveTop)
@@ -151,16 +183,21 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func angleUsesImageAspectRatio() throws {
-// a right angle in pixels on a 720 × 1280 portrait frame.
+        // a right angle in pixels on a 720 × 1280 portrait frame.
         let aspect = 1280.0 / 720.0
         let shoulder = JointPoint(x: 0.5, y: 0.5 - 0.1 / aspect, confidence: 1)
         let elbow = JointPoint(x: 0.5, y: 0.5, confidence: 1)
         let wrist = JointPoint(x: 0.6, y: 0.5, confidence: 1)
-        let corrected = try #require(ExerciseAnalyzer.angle(from: shoulder, vertex: elbow, to: wrist,
-                                                            aspectRatio: aspect))
+        let corrected = try #require(ExerciseAnalyzer.angle(
+            from: shoulder,
+            vertex: elbow,
+            to: wrist,
+            aspectRatio: aspect
+        ))
         #expect(abs(corrected - 90) < 0.001)
         let skewed = try #require(ExerciseAnalyzer.angle(
-            from: JointPoint(x: 0.4, y: 0.4, confidence: 1), vertex: elbow, to: wrist, aspectRatio: aspect))
+            from: JointPoint(x: 0.4, y: 0.4, confidence: 1), vertex: elbow, to: wrist, aspectRatio: aspect
+        ))
         #expect(abs(skewed - 90) > 5)
     }
 
@@ -177,7 +214,8 @@ nonisolated struct ExerciseAnalyzerTests {
 
     @Test func pushUpOnPortraitFrameUsesPixelAngles() throws {
         let analysis = try measured(ExerciseAnalyzer.analyse(
-            pushUpTrace(reps: 5, aspectRatio: 1280.0 / 720.0), as: .pushUp))
+            pushUpTrace(reps: 5, aspectRatio: 1280.0 / 720.0), as: .pushUp
+        ))
         #expect(analysis.reps.count == 5)
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 75 && $0.relativeRange < 95 })
     }
@@ -205,9 +243,11 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func squatAnalyzedAsPushUpAbstains() {
-        let squatOnlyLegs = (0...120).map { index in
-            squatFrame(time: Double(index) * 0.1,
-                       hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2)
+        let squatOnlyLegs = (0 ... 120).map { index in
+            squatFrame(
+                time: Double(index) * 0.1,
+                hipY: 0.42 + 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
+            )
         }
         guard case .insufficientView = ExerciseAnalyzer.analyse(squatOnlyLegs, as: .pushUp) else {
             Issue.record("Leg-only frames cannot support an elbow measurement")
@@ -217,7 +257,8 @@ nonisolated struct ExerciseAnalyzerTests {
 
     @Test func pushUpLateSetCueUsesPushUpWording() throws {
         let analysis = try measured(ExerciseAnalyzer.analyse(
-            pushUpTrace(reps: 6, lateBend: 55), as: .pushUp))
+            pushUpTrace(reps: 6, lateBend: 55), as: .pushUp
+        ))
         let cue = try #require(CueSelector.select(from: analysis, exercise: .pushUp))
         #expect(cue.repNumbers == [5, 6])
         #expect(cue.observation == "Your elbow bend became smaller in the last two reps.")
@@ -227,13 +268,16 @@ nonisolated struct ExerciseAnalyzerTests {
     @Test func pushUpRequiresStillHands() {
         let frames = pushUpTrace(reps: 6).enumerated().map { index, frame in
             let drift = Double(index) * 0.002
-            return PoseFrame(time: frame.time, subjectCount: 1,
-                             joints: frame.joints.mapValues {
-                                 JointPoint(x: $0.x + drift, y: $0.y, confidence: $0.confidence)
-                             })
+            return PoseFrame(
+                time: frame.time,
+                subjectCount: 1,
+                joints: frame.joints.mapValues {
+                    JointPoint(x: $0.x + drift, y: $0.y, confidence: $0.confidence)
+                }
+            )
         }
         #expect(EvidenceGate.assess(frames, requirement: ExerciseDefinition.pushUp.evidence)
-                == .reject(.unstableFraming))
+            == .reject(.unstableFraming))
     }
 
     // MARK: Static lunge and stiff-leg deadlift
@@ -246,14 +290,18 @@ nonisolated struct ExerciseAnalyzerTests {
     }
 
     @Test func staticLungeStandingStillHasNoReps() throws {
-        let analysis = try measured(ExerciseAnalyzer.analyse(lungeTrace(reps: 6, bend: 0),
-                                                             as: .staticLunge))
+        let analysis = try measured(ExerciseAnalyzer.analyse(
+            lungeTrace(reps: 6, bend: 0),
+            as: .staticLunge
+        ))
         #expect(analysis.reps.isEmpty)
     }
 
     @Test func stiffLegDeadliftCountsHipHingeReps() throws {
-        let analysis = try measured(ExerciseAnalyzer.analyse(hingeTrace(reps: 5),
-                                                             as: .stiffLegDeadlift))
+        let analysis = try measured(ExerciseAnalyzer.analyse(
+            hingeTrace(reps: 5),
+            as: .stiffLegDeadlift
+        ))
         #expect(analysis.reps.count == 5)
         #expect(analysis.rubricVersion == "stiff-leg-deadlift-side-v7")
         #expect(analysis.reps.allSatisfy { $0.relativeRange > 65 && $0.relativeRange < 85 })
@@ -277,15 +325,17 @@ nonisolated struct ExerciseAnalyzerTests {
             PoseFrame(time: $0.time, subjectCount: 2, joints: $0.joints)
         }
         #expect(ExerciseAnalyzer.analyse(crowded, as: .pushUp) == .insufficientView(
-            "Another person was in view. Keep only yourself in frame and try again."))
+            "Another person was in view. Keep only yourself in frame and try again."
+        ))
         let gap = hingeTrace(reps: 5).enumerated().map { index, frame in
-            (40...50).contains(index) ? PoseFrame(time: frame.time, subjectCount: 1, joints: [:]) : frame
+            (40 ... 50).contains(index) ? PoseFrame(time: frame.time, subjectCount: 1, joints: [:]) : frame
         }
         guard case .insufficientView(let reason) = ExerciseAnalyzer.analyse(gap, as: .stiffLegDeadlift) else {
             Issue.record("A long tracking gap must be refused")
             return
         }
-        #expect(reason.hasPrefix("Tracking was lost during the set. Keep your whole body visible and try again."))
+        #expect(reason
+            .hasPrefix("Tracking was lost during the set. Keep your whole body visible and try again."))
         // Frames 40 to 50 are empty: tracked at frame 39, then again at 51, 0.1 s apart.
         #expect(reason.contains("1.2 s"))
     }
@@ -304,12 +354,12 @@ nonisolated struct ExerciseAnalyzerTests {
 
     @Test func historySavedBySquatOnlyBuildStillDecodes() throws {
         let saved = Data("""
-            {"id":"00000000-0000-0000-0000-000000000001","sessionID":"00000000-0000-0000-0000-000000000002",
-             "capturedAt":782000000,"bodySide":"left","cueResponse":"unanswered",
-             "exercise":"bodyweightSquat","cameraView":"side",
-             "analysis":{"confidence":0.9,"rubricVersion":"squat-side-v2",
-               "reps":[{"number":1,"startTime":0,"endTime":2,"normalizedHipTravel":0.4}]}}
-            """.utf8)
+        {"id":"00000000-0000-0000-0000-000000000001","sessionID":"00000000-0000-0000-0000-000000000002",
+         "capturedAt":782000000,"bodySide":"left","cueResponse":"unanswered",
+         "exercise":"bodyweightSquat","cameraView":"side",
+         "analysis":{"confidence":0.9,"rubricVersion":"squat-side-v2",
+           "reps":[{"number":1,"startTime":0,"endTime":2,"normalizedHipTravel":0.4}]}}
+        """.utf8)
         let decoded = try JSONDecoder().decode(SetSummary.self, from: saved)
         #expect(decoded.exercise == .bodyweightSquat)
         #expect(decoded.analysis.reps.first?.relativeRange == 0.4)
@@ -330,11 +380,19 @@ nonisolated struct ExerciseAnalyzerTests {
         let cycle = 0.5
         while time < 2 + 20 * cycle {
             let phase = (time - 2).truncatingRemainder(dividingBy: cycle) / cycle
-            frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: 80 * (1 - cos(2 * .pi * phase)) / 2,
-                                                    wristX: 0.62, wristY: 0.86))
+            frames.append(CaptureTraces.pushUpFrame(
+                time: time,
+                elbowBend: 80 * (1 - cos(2 * .pi * phase)) / 2,
+                wristX: 0.62,
+                wristY: 0.86
+            ))
             time += CaptureTraces.step
         }
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(frames, as: .pushUp, viewCheck: .ignore)
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(
+            frames,
+            as: .pushUp,
+            viewCheck: .ignore
+        )
         let analysis = try measured(outcome)
         #expect(analysis.reps.count == 20)
         #expect(diagnostics?.outsideTempo == 0)
@@ -352,14 +410,22 @@ nonisolated struct ExerciseAnalyzerTests {
             frames.append(CaptureTraces.pushUpFrame(time: time, elbowBend: bend, wristX: 0.62, wristY: 0.86))
             time += CaptureTraces.step
         }
-        while time < 3 { add(0) }
+        while time < 3 {
+            add(0)
+        }
         let cycle = 0.55
         while time < 3 + 12 * cycle {
             let phase = (time - 3).truncatingRemainder(dividingBy: cycle) / cycle
             add(25 + 60 * (1 - cos(2 * .pi * phase)) / 2)
         }
-        while time < 3 + 12 * cycle + 2 { add(25) }
-        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(frames, as: .pushUp, viewCheck: .ignore)
+        while time < 3 + 12 * cycle + 2 {
+            add(25)
+        }
+        let (outcome, diagnostics) = ExerciseAnalyzer.analyseWithDiagnostics(
+            frames,
+            as: .pushUp,
+            viewCheck: .ignore
+        )
         let analysis = try measured(outcome)
         #expect(analysis.reps.count == 11)
         #expect(analysis.reps.allSatisfy { $0.duration < 1.5 })
@@ -382,14 +448,19 @@ enum TraceError: Error { case notMeasured }
 // MARK: - Synthetic side-view traces
 
 /// Side-view push-up: wrists planted, forearm vertical, the elbow angle closes by `bend` degrees.
-nonisolated func pushUpTrace(reps: Int, startTime: Double = 0, bend: Double = 90, lateBend: Double? = nil,
-                 aspectRatio: Double = 1) -> [PoseFrame] {
-    (0...(reps * 20)).map { index in
+nonisolated func pushUpTrace(
+    reps: Int,
+    startTime: Double = 0,
+    bend: Double = 90,
+    lateBend: Double? = nil,
+    aspectRatio: Double = 1
+) -> [PoseFrame] {
+    (0 ... (reps * 20)).map { index in
         let repIndex = index / 20
         let depth = repIndex >= reps - 2 ? (lateBend ?? bend) : bend
         let phase = Double(index % 20) / 20
         let elbowAngle = (170 - depth * (1 - cos(2 * .pi * phase)) / 2) * .pi / 180
-// positions in width units, then y divided by the aspect ratio for normalised coordinates.
+        // positions in width units, then y divided by the aspect ratio for normalised coordinates.
         let wrist = (x: 0.30, y: 0.80)
         let elbow = (x: wrist.x, y: wrist.y - 0.14)
         let shoulder = (x: elbow.x + 0.14 * sin(elbowAngle), y: elbow.y + 0.14 * cos(elbowAngle))
@@ -403,14 +474,18 @@ nonisolated func pushUpTrace(reps: Int, startTime: Double = 0, bend: Double = 90
             .leftHip: point(hip), .leftKnee: point((x: (hip.x + ankle.x) / 2, y: (hip.y + ankle.y) / 2)),
             .leftAnkle: point(ankle),
         ]
-        return PoseFrame(time: startTime + Double(index) * 0.1, subjectCount: 1, joints: joints,
-                         aspectRatio: aspectRatio)
+        return PoseFrame(
+            time: startTime + Double(index) * 0.1,
+            subjectCount: 1,
+            joints: joints,
+            aspectRatio: aspectRatio
+        )
     }
 }
 
 /// Side-view static lunge: ankle planted, shin vertical, the knee angle closes by `bend` degrees.
 nonisolated func lungeTrace(reps: Int, bend: Double = 75) -> [PoseFrame] {
-    (0...(reps * 20)).map { index in
+    (0 ... (reps * 20)).map { index in
         let phase = Double(index % 20) / 20
         let kneeAngle = (172 - bend * (1 - cos(2 * .pi * phase)) / 2) * .pi / 180
         let ankle = (x: 0.45, y: 0.90)
@@ -429,7 +504,7 @@ nonisolated func lungeTrace(reps: Int, bend: Double = 75) -> [PoseFrame] {
 
 /// Side-view stiff-leg deadlift: legs still, the shoulder-hip-knee angle closes by `bend` degrees.
 nonisolated func hingeTrace(reps: Int, bend: Double = 80) -> [PoseFrame] {
-    (0...(reps * 25)).map { index in
+    (0 ... (reps * 25)).map { index in
         let phase = Double(index % 25) / 25
         let hipAngle = (175 - bend * (1 - cos(2 * .pi * phase)) / 2) * .pi / 180
         let ankle = (x: 0.50, y: 0.90)
@@ -448,8 +523,13 @@ nonisolated func hingeTrace(reps: Int, bend: Double = 80) -> [PoseFrame] {
     }
 }
 
-nonisolated func squatFrame(time: Double, hipY: Double, confidence: Double = 0.99, subjectCount: Int = 1,
-                ankleShift: Double = 0) -> PoseFrame {
+nonisolated func squatFrame(
+    time: Double,
+    hipY: Double,
+    confidence: Double = 0.99,
+    subjectCount: Int = 1,
+    ankleShift: Double = 0
+) -> PoseFrame {
     PoseFrame(time: time, subjectCount: subjectCount, joints: [
         .leftHip: JointPoint(x: 0.47, y: hipY, confidence: confidence),
         .leftKnee: JointPoint(x: 0.49, y: 0.70, confidence: confidence),
@@ -463,28 +543,30 @@ nonisolated func squatFrame(time: Double, hipY: Double, confidence: Double = 0.9
 /// Squat traces with varied depth, tempo, noise, dropped frames, low confidence, bystanders,
 /// tracking gaps, drift, and partial reps, so both measured and abstaining paths are compared.
 nonisolated private func randomSquatTrace(using generator: inout SplitMix64) -> [PoseFrame] {
-    let reps = Int.random(in: 0...8, using: &generator)
-    let framesPerRep = Int.random(in: 8...40, using: &generator)
+    let reps = Int.random(in: 0 ... 8, using: &generator)
+    let framesPerRep = Int.random(in: 8 ... 40, using: &generator)
     let step = [0.0667, 0.1, 0.125].randomElement(using: &generator)!
-// each disturbance is present in only some traces, so many sets still reach the rep counter.
+    // each disturbance is present in only some traces, so many sets still reach the rep counter.
     func sometimes(_ chance: Double, _ value: () -> Double) -> Double {
-        Double.random(in: 0..<1, using: &generator) < chance ? value() : 0
+        Double.random(in: 0 ..< 1, using: &generator) < chance ? value() : 0
     }
-    let amplitude = Double.random(in: 0.02...0.32, using: &generator)
-    let fadeLastTwo = Bool.random(using: &generator) ? Double.random(in: 0.5...1, using: &generator) : 1
-    let noise = Double.random(in: 0...0.015, using: &generator)
-    let dropRate = sometimes(0.4) { Double.random(in: 0...0.3, using: &generator) }
-    let lowConfidenceRate = sometimes(0.3) { Double.random(in: 0...0.25, using: &generator) }
-    let bystanderRate = sometimes(0.25) { Double.random(in: 0...0.12, using: &generator) }
-    let gapStart = Double.random(in: 0..<1, using: &generator) < 0.3
-        ? Int.random(in: 0...200, using: &generator) : -1
-    let gapLength = Int.random(in: 1...14, using: &generator)
-    let drift = sometimes(0.3) { Double.random(in: 0...0.002, using: &generator) }
-    let partialTail = Int.random(in: 0...(framesPerRep - 1), using: &generator)
+    let amplitude = Double.random(in: 0.02 ... 0.32, using: &generator)
+    let fadeLastTwo = Bool.random(using: &generator) ? Double.random(in: 0.5 ... 1, using: &generator) : 1
+    let noise = Double.random(in: 0 ... 0.015, using: &generator)
+    let dropRate = sometimes(0.4) { Double.random(in: 0 ... 0.3, using: &generator) }
+    let lowConfidenceRate = sometimes(0.3) { Double.random(in: 0 ... 0.25, using: &generator) }
+    let bystanderRate = sometimes(0.25) { Double.random(in: 0 ... 0.12, using: &generator) }
+    let gapStart = Double.random(in: 0 ..< 1, using: &generator) < 0.3
+        ? Int.random(in: 0 ... 200, using: &generator) : -1
+    let gapLength = Int.random(in: 1 ... 14, using: &generator)
+    let drift = sometimes(0.3) { Double.random(in: 0 ... 0.002, using: &generator) }
+    let partialTail = Int.random(in: 0 ... (framesPerRep - 1), using: &generator)
     let count = max(1, reps * framesPerRep + partialTail)
     var frames: [PoseFrame] = []
-    for index in 0...count {
-        if Double.random(in: 0..<1, using: &generator) < dropRate { continue }
+    for index in 0 ... count {
+        if Double.random(in: 0 ..< 1, using: &generator) < dropRate {
+            continue
+        }
         let time = Double(index) * step
         if index >= gapStart && index < gapStart + gapLength {
             frames.append(PoseFrame(time: time, subjectCount: 1, joints: [:]))
@@ -494,19 +576,30 @@ nonisolated private func randomSquatTrace(using generator: inout SplitMix64) -> 
         let depth = repIndex >= reps - 2 ? amplitude * fadeLastTwo : amplitude
         let phase = Double(index % framesPerRep) / Double(framesPerRep)
         let hipY = 0.42 + depth * (1 - cos(2 * .pi * phase)) / 2
-            + Double.random(in: -noise...noise, using: &generator)
-        let confidence = Double.random(in: 0..<1, using: &generator) < lowConfidenceRate
-            ? Double.random(in: 0.3..<0.6, using: &generator) : Double.random(in: 0.6...1, using: &generator)
-        let subjects = Double.random(in: 0..<1, using: &generator) < bystanderRate ? 2 : 1
-        frames.append(squatFrame(time: time, hipY: hipY, confidence: confidence,
-                                 subjectCount: subjects, ankleShift: drift * Double(index)))
+            + Double.random(in: -noise ... noise, using: &generator)
+        let confidence = Double.random(in: 0 ..< 1, using: &generator) < lowConfidenceRate
+            ? Double.random(in: 0.3 ..< 0.6, using: &generator) : Double.random(
+                in: 0.6 ... 1,
+                using: &generator
+            )
+        let subjects = Double.random(in: 0 ..< 1, using: &generator) < bystanderRate ? 2 : 1
+        frames.append(squatFrame(
+            time: time,
+            hipY: hipY,
+            confidence: confidence,
+            subjectCount: subjects,
+            ankleShift: drift * Double(index)
+        ))
     }
     return frames
 }
 
 nonisolated struct SplitMix64: RandomNumberGenerator {
     private var state: UInt64
-    init(seed: UInt64) { state = seed }
+    init(seed: UInt64) {
+        state = seed
+    }
+
     mutating func next() -> UInt64 {
         state &+= 0x9E37_79B9_7F4A_7C15
         var z = state
@@ -537,11 +630,14 @@ private enum FrozenSquatV2 {
     static func analyse(_ frames: [PoseFrame]) -> AnalysisOutcome {
         let side: BodySide
         switch assess(frames) {
-        case .usable(let acceptedSide): side = acceptedSide
+        case .usable(let acceptedSide):
+            side = acceptedSide
         case .reject(.multiplePeople):
             return .insufficientView("Another person was in view. Keep only yourself in frame and try again.")
         case .reject(.trackingGap):
-            return .insufficientView("Tracking was lost during the set. Keep your whole body visible and try again.")
+            return .insufficientView(
+                "Tracking was lost during the set. Keep your whole body visible and try again."
+            )
         case .reject:
             return .insufficientView("Move the phone so your full body stays visible.")
         }
@@ -564,7 +660,7 @@ private enum FrozenSquatV2 {
         let hipPositions = samples.indices.map { index -> Double in
             let lower = max(0, index - 1)
             let upper = min(samples.count - 1, index + 1)
-            let window = samples[lower...upper]
+            let window = samples[lower ... upper]
             return window.map(\.hipY).reduce(0, +) / Double(window.count)
         }
 
@@ -575,8 +671,12 @@ private enum FrozenSquatV2 {
             let travel = max(0, (hipPositions[index] - standingHipY) / standingLegLength)
             switch phase {
             case .standing:
-                if travel <= 0.03 { lastStandingTime = sample.time }
-                if travel >= 0.10 { phase = .descending(start: lastStandingTime, peak: travel) }
+                if travel <= 0.03 {
+                    lastStandingTime = sample.time
+                }
+                if travel >= 0.10 {
+                    phase = .descending(start: lastStandingTime, peak: travel)
+                }
             case .descending(let start, let peak):
                 let updatedPeak = max(peak, travel)
                 if updatedPeak >= 0.15 && updatedPeak - travel >= 0.04 {
@@ -587,9 +687,13 @@ private enum FrozenSquatV2 {
             case .ascending(let start, let peak):
                 if travel <= 0.03 {
                     let duration = sample.time - start
-                    if (0.8...8.0).contains(duration) {
-                        reps.append(RepMetric(number: reps.count + 1, startTime: start,
-                                              endTime: sample.time, normalisedHipTravel: peak))
+                    if (0.8 ... 8.0).contains(duration) {
+                        reps.append(RepMetric(
+                            number: reps.count + 1,
+                            startTime: start,
+                            endTime: sample.time,
+                            normalisedHipTravel: peak
+                        ))
                     }
                     phase = .standing
                 }
@@ -605,12 +709,20 @@ private enum FrozenSquatV2 {
             return .reject(.tooShort)
         }
         let bystanderFrames = frames.filter { $0.subjectCount > 1 }.count
-        if Double(bystanderFrames) / Double(frames.count) > 0.2 { return .reject(.multiplePeople) }
+        if Double(bystanderFrames) / Double(frames.count) > 0.2 {
+            return .reject(.multiplePeople)
+        }
         var bystanderStart: TimeInterval?
         for frame in frames {
-            if frame.subjectCount > 1 && bystanderStart == nil { bystanderStart = frame.time }
-            if let bystanderStart, frame.time - bystanderStart >= 0.35 { return .reject(.multiplePeople) }
-            if frame.subjectCount == 1 { bystanderStart = nil }
+            if frame.subjectCount > 1 && bystanderStart == nil {
+                bystanderStart = frame.time
+            }
+            if let bystanderStart, frame.time - bystanderStart >= 0.35 {
+                return .reject(.multiplePeople)
+            }
+            if frame.subjectCount == 1 {
+                bystanderStart = nil
+            }
         }
         let sides: [(BodySide, [BodyJoint])] = [
             (.left, [.leftHip, .leftKnee, .leftAnkle]),
@@ -623,33 +735,51 @@ private enum FrozenSquatV2 {
             }
             return (side: side, joints: joints, complete: complete.count, confident: confident.count)
         }.sorted { $0.confident > $1.confident }
-        guard let best = ranked.first else { return .reject(.missingJoints) }
+        guard let best = ranked.first else {
+            return .reject(.missingJoints)
+        }
         let total = Double(frames.count)
-        guard Double(best.complete) / total >= 0.8 else { return .reject(.missingJoints) }
-        guard Double(best.confident) / total >= 0.8 else { return .reject(.lowConfidence) }
+        guard Double(best.complete) / total >= 0.8 else {
+            return .reject(.missingJoints)
+        }
+        guard Double(best.confident) / total >= 0.8 else {
+            return .reject(.lowConfidence)
+        }
         var lastTrackedTime = first.time
         for frame in frames where frame.subjectCount == 1 && best.joints.allSatisfy({ joint in
             (frame.joints[joint]?.confidence ?? 0) >= 0.6
         }) {
-            if frame.time - lastTrackedTime > 0.75 { return .reject(.trackingGap) }
+            if frame.time - lastTrackedTime > 0.75 {
+                return .reject(.trackingGap)
+            }
             lastTrackedTime = frame.time
         }
-        if last.time - lastTrackedTime > 0.75 { return .reject(.trackingGap) }
+        if last.time - lastTrackedTime > 0.75 {
+            return .reject(.trackingGap)
+        }
         let ankleJoint: BodyJoint = best.side == .left ? .leftAnkle : .rightAnkle
         let anklePoints = frames.compactMap { $0.joints[ankleJoint] }.filter { $0.confidence >= 0.6 }
-        guard let minX = anklePoints.map(\.x).min(), let maxX = anklePoints.map(\.x).max(),
-              let minY = anklePoints.map(\.y).min(), let maxY = anklePoints.map(\.y).max(),
-              maxX - minX <= 0.08, maxY - minY <= 0.08 else {
+        guard
+            let minX = anklePoints.map(\.x).min(), let maxX = anklePoints.map(\.x).max(),
+            let minY = anklePoints.map(\.y).min(), let maxY = anklePoints.map(\.y).max(),
+            maxX - minX <= 0.08, maxY - minY <= 0.08 else {
             return .reject(.unstableFraming)
         }
         return .usable(best.side)
     }
 
     private static func sample(from frame: PoseFrame, side: (BodyJoint, BodyJoint)) -> Sample? {
-        guard let hip = frame.joints[side.0], let ankle = frame.joints[side.1],
-              hip.confidence >= 0.6, ankle.confidence >= 0.6 else { return nil }
-        return Sample(time: frame.time, hipY: hip.y, ankleY: ankle.y,
-                      confidence: min(hip.confidence, ankle.confidence))
+        guard
+            let hip = frame.joints[side.0], let ankle = frame.joints[side.1],
+            hip.confidence >= 0.6, ankle.confidence >= 0.6 else {
+            return nil
+        }
+        return Sample(
+            time: frame.time,
+            hipY: hip.y,
+            ankleY: ankle.y,
+            confidence: min(hip.confidence, ankle.confidence)
+        )
     }
 
     private static func median(_ values: [Double]) -> Double {

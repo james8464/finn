@@ -8,7 +8,7 @@ The live Figma guide covers the broader identity. The current production icon an
 
 ## Idea and identity
 
-**Finn** is a workout coach. Its forward-leaning F has three separate plates: a silver stem, a light upper arm and a short pink crossbar. Use the layered [Icon Composer source](../Finn/Finn/AppIcon.icon) for the iPhone and Watch icons. The matching flat artwork is for small editorial uses. The promise is **“Find your line.”**
+**Finn** is a workout coach. Its forward-leaning F has three separate plates: a silver stem, a light upper arm and a short pink crossbar. Use the layered [Icon Composer source](../Finn/Finn/AppIcon.icon) for the iPhone and Watch icons. The matching flat artwork is for small editorial uses. The promise is **“Stronger starts together.”**
 
 ## Colour
 

@@ -24,8 +24,10 @@ final class SiriLaunchRequests {
     /// siri, and History opens from the first screen only. Pure, so tests cover it.
     nonisolated static func canApply(_ request: Request, at stage: WorkoutStage) -> Bool {
         switch request {
-        case .startSet: return stage == .ready || stage == .result
-        case .showHistory: return stage == .ready
+        case .startSet:
+            return stage == .ready || stage == .result
+        case .showHistory:
+            return stage == .ready
         }
     }
 }

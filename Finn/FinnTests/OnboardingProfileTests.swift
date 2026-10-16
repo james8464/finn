@@ -27,18 +27,29 @@ struct OnboardingProfileTests {
     @Test func freshInstallHasNoAnswersAndShowsTheWelcome() {
         let prefs = preferences()
         #expect(!prefs.onboardingCompleted)
-        #expect(prefs.onboardingProfile == OnboardingProfile(goal: nil, level: nil, favouriteExercises: [], speaksLive: true))
+        #expect(prefs.onboardingProfile == OnboardingProfile(
+            goal: nil,
+            level: nil,
+            favouriteExercises: [],
+            speaksLive: true
+        ))
         #expect(prefs.exerciseOrder == ExerciseKind.allCases)
         #expect(prefs.onboardingProfile.coachNote == nil)
     }
 
     @Test func applyingTheAnswersWritesEveryPreference() {
         let prefs = preferences()
-        let profile = OnboardingProfile(goal: .muscle, level: .experienced,
-                                        favouriteExercises: [.pullUp, .pushUp], speaksLive: false,
-                                        firstName: "Alex", followedProgram: true,
-                                        stopReasons: [.injury, .motivation], intensity: .challenge,
-                                        days: .threeToFour)
+        let profile = OnboardingProfile(
+            goal: .muscle,
+            level: .experienced,
+            favouriteExercises: [.pullUp, .pushUp],
+            speaksLive: false,
+            firstName: "Alex",
+            followedProgram: true,
+            stopReasons: [.injury, .motivation],
+            intensity: .challenge,
+            days: .threeToFour
+        )
         prefs.apply(profile)
         #expect(prefs.onboardingCompleted)
         #expect(prefs.trainingGoal == .muscle)
@@ -57,8 +68,20 @@ struct OnboardingProfileTests {
 
     @Test func favoritesComeFirstThenTheOthersInTheirUsualOrder() {
         let prefs = preferences()
-        prefs.apply(OnboardingProfile(goal: nil, level: nil, favouriteExercises: [.muscleUp, .staticLunge], speaksLive: true))
-        #expect(prefs.exerciseOrder == [.muscleUp, .staticLunge, .bodyweightSquat, .pushUp, .stiffLegDeadlift, .pullUp])
+        prefs.apply(OnboardingProfile(
+            goal: nil,
+            level: nil,
+            favouriteExercises: [.muscleUp, .staticLunge],
+            speaksLive: true
+        ))
+        #expect(prefs.exerciseOrder == [
+            .muscleUp,
+            .staticLunge,
+            .bodyweightSquat,
+            .pushUp,
+            .stiffLegDeadlift,
+            .pullUp
+        ])
         #expect(prefs.exerciseOrder.count == ExerciseKind.allCases.count)
     }
 
@@ -85,7 +108,9 @@ struct OnboardingProfileTests {
         #expect(note.contains("prefer a recent set"))
         #expect(note.contains("prefer the most recent relevant set"))
         let onlyGoal = OnboardingProfile(goal: .technique, level: nil)
-        #expect(onlyGoal.coachNote == "Their goal is clearer technique: prefer a set with a recorded form observation when relevant.")
+        #expect(onlyGoal
+            .coachNote ==
+            "Their goal is clearer technique: prefer a set with a recorded form observation when relevant.")
     }
 
     @Test func accessFinnWaitsForTheSetupAndTheInjuryHistory() {
@@ -105,8 +130,14 @@ struct OnboardingProfileTests {
 
     @Test func aboutYouAnswersAreSavedAndForgotten() {
         let prefs = preferences()
-        let profile = OnboardingProfile(sex: .male, heightCentimeters: 182, weightKilograms: 79.5,
-                                        location: .outdoors, equipment: [.none], injuries: " Lower back ")
+        let profile = OnboardingProfile(
+            sex: .male,
+            heightCentimeters: 182,
+            weightKilograms: 79.5,
+            location: .outdoors,
+            equipment: [.none],
+            injuries: " Lower back "
+        )
         prefs.apply(profile)
         #expect(prefs.bodySex == .male)
         #expect(prefs.heightCentimeters == 182)
@@ -132,7 +163,11 @@ struct OnboardingProfileTests {
 
     @Test func theNameIsTrimmedAndOnlyYesKeepsStopReasons() {
         let prefs = preferences()
-        let profile = OnboardingProfile(firstName: "  Zoé-Anne ", followedProgram: false, stopReasons: [.injury])
+        let profile = OnboardingProfile(
+            firstName: "  Zoé-Anne ",
+            followedProgram: false,
+            stopReasons: [.injury]
+        )
         #expect(profile.preferredName == "Zoé-Anne")
         #expect(OnboardingProfile(firstName: "   ").preferredName == nil)
         prefs.apply(profile)
@@ -143,10 +178,17 @@ struct OnboardingProfileTests {
 
     @Test func deletingLocalDataForgetsOnboardingAndHealthChoices() {
         let prefs = preferences()
-        prefs.apply(OnboardingProfile(goal: .comeback, level: .regular,
-                                      favouriteExercises: [.pushUp], speaksLive: false,
-                                      firstName: "Alex", followedProgram: true, stopReasons: [.didNotWork],
-                                      intensity: .hard, days: .fivePlus))
+        prefs.apply(OnboardingProfile(
+            goal: .comeback,
+            level: .regular,
+            favouriteExercises: [.pushUp],
+            speaksLive: false,
+            firstName: "Alex",
+            followedProgram: true,
+            stopReasons: [.didNotWork],
+            intensity: .hard,
+            days: .fivePlus
+        ))
         prefs.personalisesWithHealth = true
         prefs.savesToFitness = true
         prefs.hapticFeedback = .regular

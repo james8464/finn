@@ -5,15 +5,37 @@ import Testing
 @MainActor
 struct WorkoutPlannerTests {
     private func rep(_ number: Int) -> RepMetric {
-        RepMetric(number: number, startTime: Double(number) * 2, endTime: Double(number) * 2 + 1.5, relativeRange: 0.4)
+        RepMetric(
+            number: number,
+            startTime: Double(number) * 2,
+            endTime: Double(number) * 2 + 1.5,
+            relativeRange: 0.4
+        )
     }
 
-    private func session(_ exercise: ExerciseKind, reps: Int, daysAgo: Int, now: Date) -> WorkoutSessionSummary {
+    private func session(
+        _ exercise: ExerciseKind,
+        reps: Int,
+        daysAgo: Int,
+        now: Date
+    ) -> WorkoutSessionSummary {
         let date = now.addingTimeInterval(-Double(daysAgo) * 86_400)
         let id = UUID()
-        let set = SetSummary(id: UUID(), sessionID: id, capturedAt: date, bodySide: .left,
-                             analysis: SetAnalysis(reps: (1...reps).map(rep), confidence: 0.95, rubricVersion: "test"),
-                             cue: nil, cueResponse: .unanswered, exercise: exercise, cameraView: .side)
+        let set = SetSummary(
+            id: UUID(),
+            sessionID: id,
+            capturedAt: date,
+            bodySide: .left,
+            analysis: SetAnalysis(
+                reps: (1 ... reps).map(rep),
+                confidence: 0.95,
+                rubricVersion: "test"
+            ),
+            cue: nil,
+            cueResponse: .unanswered,
+            exercise: exercise,
+            cameraView: .side
+        )
         return WorkoutSessionSummary(id: id, startedAt: date, sets: [set])
     }
 
@@ -58,7 +80,9 @@ struct WorkoutPlannerTests {
         let defaults = UserDefaults(suiteName: "WorkoutPlannerTests.\(UUID().uuidString)")!
         let store = PlannedWorkoutStore(defaults: defaults)
         var plan = WorkoutPlanner.make(history: [])
-        for index in plan.exercises.indices { plan.exercises[index].isDone = true }
+        for index in plan.exercises.indices {
+            plan.exercises[index].isDone = true
+        }
         #expect(plan.isComplete)
         store.add(plan)
         store.add(plan)

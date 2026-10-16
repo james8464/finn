@@ -19,3 +19,5 @@ Superseded exports and decoded frame/build caches were removed on 16 October 202
 ## Progress walkthrough
 
 Scene 7 now ends with ten seconds of the current native Progress screen: saved history, the latest best set, then a separate two-week projection. History is the isolated ProgressDemo fixture, with a latest best set of 11 reps and an estimated 13 reps. The projection is an estimate, not a promised improvement. Apple bezel artwork and SF Pro match the existing deck. Total duration remains 5:00.
+
+The current source helpers remain in `../production/source`. Historical Figma upload scripts, old long-deck previews and generated frame caches were removed. The browser player is `../player.js`; its scene data is embedded as JSON in `../index.html`. Keep the original inputs when regenerating native frames.

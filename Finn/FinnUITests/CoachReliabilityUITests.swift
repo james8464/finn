@@ -5,11 +5,13 @@ final class CoachReliabilityUITests: XCTestCase {
     private func dismissKeyboardIntroduction(in app: XCUIApplication) {
         // iOS may explain its bilingual keyboard the first time a language is used.
         let tutorial = app.buttons.matching(NSPredicate(
-            format: "label IN %@", ["Continue", "Continuer", "Continuar"])).firstMatch
+            format: "label IN %@", ["Continue", "Continuer", "Continuar"]
+        )).firstMatch
         if tutorial.waitForExistence(timeout: 1) {
             tutorial.tap()
         }
     }
+
     /// This test deliberately disables inference; the separate native test requires Apple's model.
     @MainActor
     func testCoachAnswersWithoutAModelAndSurvivesTabChanges() {
@@ -27,7 +29,8 @@ final class CoachReliabilityUITests: XCTestCase {
         app.buttons["coach.send"].tap()
 
         let answer = app.staticTexts.matching(NSPredicate(
-            format: "label CONTAINS %@", "Finn has no saved set yet, so there is nothing to comment on."))
+            format: "label CONTAINS %@", "Finn has no saved set yet, so there is nothing to comment on."
+        ))
         XCTAssertTrue(answer.firstMatch.waitForExistence(timeout: 5), app.debugDescription)
         app.buttons["coach.dismissKeyboard"].tap()
         app.selectTab("Home")
@@ -44,8 +47,11 @@ final class CoachReliabilityUITests: XCTestCase {
         // follows the newly submitted question instead of counting off-screen answer views.
         let latestAnswer = answer.element(boundBy: max(0, answer.count - 1))
         XCTAssertGreaterThan(latestAnswer.frame.minY, submittedQuestion.frame.minY)
-        XCTAssertLessThanOrEqual(latestAnswer.frame.maxY, field.frame.minY - 8,
-                                 "The new reply must remain above the composer and keyboard")
+        XCTAssertLessThanOrEqual(
+            latestAnswer.frame.maxY,
+            field.frame.minY - 8,
+            "The new reply must remain above the composer and keyboard"
+        )
         XCTAssertEqual(app.state, .runningForeground)
     }
 
@@ -54,7 +60,8 @@ final class CoachReliabilityUITests: XCTestCase {
         for language in ["en-GB", "en-US", "fr", "es"] {
             let app = XCUIApplication()
             app.launchArguments = ["-finn-ui-demo", "-AppleLanguages", "(\(language))",
-                                   "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+                                   "-UIPreferredContentSizeCategoryName",
+                                   "UICTContentSizeCategoryAccessibilityXXXL"]
             app.launch()
             app.selectTab("Coach")
             let field = app.textViews["coach.field"]
@@ -62,13 +69,20 @@ final class CoachReliabilityUITests: XCTestCase {
             field.tap()
             dismissKeyboardIntroduction(in: app)
             field.typeText("Set 1?")
-            XCTAssertEqual(field.value as? String, "Set 1?", "Typing must preserve every character: \(language)")
+            XCTAssertEqual(
+                field.value as? String,
+                "Set 1?",
+                "Typing must preserve every character: \(language)"
+            )
             let send = app.buttons["coach.send"]
             XCTAssertTrue(send.isHittable, language)
             let answers = app.descendants(matching: .any).matching(identifier: "coach.answer.fallback")
             let expectedCount = answers.count + 1
             send.tap()
-            let replied = XCTNSPredicateExpectation(predicate: NSPredicate(format: "count == %d", expectedCount), object: answers)
+            let replied = XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "count == %d", expectedCount),
+                object: answers
+            )
             let outcome = XCTWaiter().wait(for: [replied], timeout: 8)
             if outcome != .completed {
                 let screenshot = XCTAttachment(screenshot: app.screenshot())
@@ -88,8 +102,10 @@ final class CoachReliabilityUITests: XCTestCase {
 
     @MainActor
     func testNativeAppleIntelligenceCoachAfterRecordedDemoSet() throws {
-        try XCTSkipUnless(ProcessInfo.processInfo.environment["FINN_NATIVE_COACH_TESTS"] == "1",
-                          "Set TEST_RUNNER_FINN_NATIVE_COACH_TESTS=1 for real Apple Intelligence.")
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["FINN_NATIVE_COACH_TESTS"] == "1",
+            "Set TEST_RUNNER_FINN_NATIVE_COACH_TESTS=1 for real Apple Intelligence."
+        )
         let app = XCUIApplication()
         // Only the camera feed is synthetic. The Coach uses the production on-device engine.
         app.launchArguments = ["-finn-ui-demo", "-finn-ui-native-coach", "-AppleLanguages", "(en-GB)"]
@@ -97,7 +113,9 @@ final class CoachReliabilityUITests: XCTestCase {
         app.selectTab("Coach")
         app.buttons["coach.engine"].tap()
         let modelAvailable = app.staticTexts[
-            "Apple Intelligence chose the sets; the details come from Finn's records."].waitForExistence(timeout: 5)
+            "Apple Intelligence chose the sets; the details come from Finn's records."
+        ]
+        .waitForExistence(timeout: 5)
         if !modelAvailable {
             let reason = app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: " ")
             throw XCTSkip("Native model unavailable in this simulator: \(reason)")
@@ -108,7 +126,10 @@ final class CoachReliabilityUITests: XCTestCase {
         app.buttons["Start set"].tap()
         let reps = app.descendants(matching: .any)["capture.liveReps"]
         XCTAssertTrue(reps.waitForExistence(timeout: 6))
-        let counted = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value != %@", "0"), object: reps)
+        let counted = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value != %@", "0"),
+            object: reps
+        )
         XCTAssertEqual(XCTWaiter().wait(for: [counted], timeout: 10), .completed)
         app.buttons["Stop set"].tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
@@ -123,9 +144,15 @@ final class CoachReliabilityUITests: XCTestCase {
         let answers = app.descendants(matching: .any).matching(identifier: "coach.answer.onDevice")
         let expectedCount = answers.count + 1
         app.buttons["coach.send"].tap()
-        let answered = XCTNSPredicateExpectation(predicate: NSPredicate(format: "count == %d", expectedCount), object: answers)
-        XCTAssertEqual(XCTWaiter().wait(for: [answered], timeout: 35), .completed,
-                       "Expected a real on-device answer, not a fallback. \(app.debugDescription)")
+        let answered = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "count == %d", expectedCount),
+            object: answers
+        )
+        XCTAssertEqual(
+            XCTWaiter().wait(for: [answered], timeout: 35),
+            .completed,
+            "Expected a real on-device answer, not a fallback. \(app.debugDescription)"
+        )
         XCTAssertEqual(app.state, .runningForeground)
         let screenshot = XCTAttachment(screenshot: app.screenshot())
         screenshot.name = "Native Apple Intelligence Coach"

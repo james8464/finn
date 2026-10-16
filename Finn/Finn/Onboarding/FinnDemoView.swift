@@ -6,7 +6,10 @@ struct FinnDemoView: View {
     let startWorkout: () -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var reduceMotion: Bool {
+        AppMotion.reduces(systemReduceMotion)
+    }
+
     @State private var showsAdvice = false
 
     var body: some View {
@@ -46,7 +49,7 @@ struct FinnDemoView: View {
                             .frame(maxWidth: .infinity, minHeight: 44)
                             .contentShape(Rectangle())
                     }
-                        .accessibilityIdentifier("demo.replay")
+                    .accessibilityIdentifier("demo.replay")
                 }
             }
             .padding(.horizontal, 24)
@@ -65,8 +68,10 @@ struct DemoStoryPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            IntroHeading(eyebrow: showsAdvice ? "02 / REVIEW" : "01 / REPS",
-                         title: showsAdvice ? "Set review" : "Rep counting")
+            IntroHeading(
+                eyebrow: showsAdvice ? "02 / REVIEW" : "01 / REPS",
+                title: showsAdvice ? "Set review" : "Rep counting"
+            )
             if !showsAdvice {
                 DemoCameraCard(showsAdvice: false)
             }
@@ -132,11 +137,14 @@ struct DemoCameraCard: View {
                     .clipped()
             }
             .accessibilityHidden(true)
-            LinearGradient(stops: [.init(color: .black.opacity(0.55), location: 0),
-                                   .init(color: .clear, location: 0.30),
-                                   .init(color: .clear, location: 0.63),
-                                   .init(color: .black.opacity(0.88), location: 1)],
-                           startPoint: .top, endPoint: .bottom)
+            LinearGradient(
+                stops: [.init(color: .black.opacity(0.55), location: 0),
+                        .init(color: .clear, location: 0.30),
+                        .init(color: .clear, location: 0.63),
+                        .init(color: .black.opacity(0.88), location: 1)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
             VStack {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
@@ -167,10 +175,13 @@ struct DemoCameraCard: View {
                             Text("reps").font(.subheadline.weight(.medium))
                         }
                         Spacer()
-                        Label(showsAdvice ? "Reviewed" : "00:18", systemImage: showsAdvice ? "checkmark.circle" : "timer")
-                            .font(.caption.weight(.medium)).monospacedDigit()
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(10).background(.black.opacity(0.5), in: Capsule())
+                        Label(
+                            showsAdvice ? "Reviewed" : "00:18",
+                            systemImage: showsAdvice ? "checkmark.circle" : "timer"
+                        )
+                        .font(.caption.weight(.medium)).monospacedDigit()
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(10).background(.black.opacity(0.5), in: Capsule())
                     }
                 }
             }
@@ -178,7 +189,10 @@ struct DemoCameraCard: View {
             if !welcome {
                 // frame corners echo the production capture screen. They are decorative, not pose data.
                 DemoFrameCorners()
-                    .stroke(DashboardStyle.accent.opacity(0.8), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                    .stroke(
+                        DashboardStyle.accent.opacity(0.8),
+                        style: StrokeStyle(lineWidth: 2, lineCap: .round)
+                    )
                     .padding(.horizontal, 25).padding(.top, 70).padding(.bottom, 90)
                     .accessibilityHidden(true)
             }
@@ -189,7 +203,8 @@ struct DemoCameraCard: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(welcome
             ? "Illustrated demo: a man doing a squat in a gym."
-            : "Illustrated demo of Finn’s camera screen. A man doing a squat. Six sample reps. \(showsAdvice ? "Set reviewed." : "Eighteen seconds.")")
+            :
+            "Illustrated demo of Finn’s camera screen. A man doing a squat. Six sample reps. \(showsAdvice ? "Set reviewed." : "Eighteen seconds.")")
         .accessibilityAddTraits(.isImage)
     }
 }

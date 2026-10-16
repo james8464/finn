@@ -11,7 +11,8 @@ final class ExerciseOptionsUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
         let toggle = app.switches["options.recogniseExercise"]
         app.reveal(toggle)
-        XCTAssertTrue(app.staticTexts["Estimates from joint angles; uses your selection when uncertain."].exists)
+        XCTAssertTrue(app.staticTexts["Estimates from joint angles; uses your selection when uncertain."]
+            .exists)
         XCTAssertTrue(toggle.exists)
         XCTAssertEqual(toggle.value as? String, "1")
         XCTAssertFalse(app.switches["options.useTrainedModel"].exists)
@@ -35,7 +36,8 @@ final class ExerciseOptionsUITests: XCTestCase {
         XCTAssertTrue(pushUp.isSelected)
         XCTAssertFalse(squat.isSelected)
         XCTAssertTrue(app.descendants(matching: .any).matching(
-            NSPredicate(format: "label CONTAINS %@", "On the floor or a low step")).firstMatch.exists)
+            NSPredicate(format: "label CONTAINS %@", "On the floor or a low step")
+        ).firstMatch.exists)
         app.buttons["Start a set"].tap()
         XCTAssertTrue(app.staticTexts["Checking shoulder and hand visibility"].waitForExistence(timeout: 5))
     }
@@ -57,8 +59,9 @@ final class ExerciseOptionsUITests: XCTestCase {
         // the demo's last two reps also raise the hips above the body line: a form fault seen on two
         // reps comes before the change in elbow bend (15 October)
         let observation = app.staticTexts.matching(NSPredicate(
-            format: "label BEGINSWITH %@", "Your hips rose above your body line in rep 5 and rep 6"))
-            .firstMatch
+            format: "label BEGINSWITH %@", "Your hips rose above your body line in rep 5 and rep 6"
+        ))
+        .firstMatch
         XCTAssertTrue(observation.waitForExistence(timeout: 5), app.debugDescription)
     }
 
@@ -69,7 +72,7 @@ final class ExerciseOptionsUITests: XCTestCase {
             app.launchArguments.append("-finn-ui-demo")
             app.launch()
             app.openWorkoutTab()
-                app.buttons[exercise].tap()
+            app.buttons[exercise].tap()
             app.buttons["Start a set"].tap()
             app.buttons["Start set"].tap()
             let stop = app.buttons["Stop set"]
@@ -96,7 +99,8 @@ final class ExerciseOptionsUITests: XCTestCase {
         stop.tap()
         XCTAssertTrue(app.staticTexts["Couldn’t assess this set"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(
-            format: "label CONTAINS %@", "wrist was hardest to see")).firstMatch.exists)
+            format: "label CONTAINS %@", "wrist was hardest to see"
+        )).firstMatch.exists)
         XCTAssertFalse(app.staticTexts["6 measured reps"].exists)
     }
 
@@ -129,7 +133,10 @@ final class ExerciseOptionsUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.staticTexts["result.recognition"].exists, "Matching the selected exercise needs no repeated confirmation")
+        XCTAssertFalse(
+            app.staticTexts["result.recognition"].exists,
+            "Matching the selected exercise needs no repeated confirmation"
+        )
         XCTAssertTrue(app.staticTexts["Squat"].exists)
     }
 }

@@ -14,20 +14,47 @@ nonisolated struct IntentsTests {
         return calendar
     }()
 
-    private func set(_ exercise: ExerciseKind = .bodyweightSquat, reps: Int = 8, minutesAgo: Double,
-                     observation: String? = nil, response: CueResponse = .unanswered,
-                     partlyVisible: Bool? = nil) -> SetSummary {
-        let metrics = (0..<reps).map {
-            RepMetric(number: $0 + 1, startTime: Double($0) * 3, endTime: Double($0) * 3 + 2, relativeRange: 0.4)
+    private func set(
+        _ exercise: ExerciseKind = .bodyweightSquat,
+        reps: Int = 8,
+        minutesAgo: Double,
+        observation: String? = nil,
+        response: CueResponse = .unanswered,
+        partlyVisible: Bool? = nil
+    ) -> SetSummary {
+        let metrics = (0 ..< reps).map {
+            RepMetric(
+                number: $0 + 1,
+                startTime: Double($0) * 3,
+                endTime: Double($0) * 3 + 2,
+                relativeRange: 0.4
+            )
         }
         let cue = observation.map {
-            Cue(kind: .rangeDecreased, repNumbers: [5, 6], earlierMedian: 0.4, laterMedian: 0.3,
-                observation: $0, nextAction: "Pause a breath at the bottom of the next rep.")
+            Cue(
+                kind: .rangeDecreased,
+                repNumbers: [5, 6],
+                earlierMedian: 0.4,
+                laterMedian: 0.3,
+                observation: $0,
+                nextAction: "Pause a breath at the bottom of the next rep."
+            )
         }
-        return SetSummary(id: UUID(), sessionID: UUID(),
-                          capturedAt: Self.now.addingTimeInterval(-minutesAgo * 60), bodySide: .left,
-                          analysis: SetAnalysis(reps: metrics, confidence: 0.9, rubricVersion: SquatRubric.version),
-                          cue: cue, cueResponse: response, exercise: exercise, partlyVisible: partlyVisible)
+        return SetSummary(
+            id: UUID(),
+            sessionID: UUID(),
+            capturedAt: Self.now.addingTimeInterval(-minutesAgo * 60),
+            bodySide: .left,
+            analysis: SetAnalysis(
+                reps: metrics,
+                confidence: 0.9,
+                rubricVersion: SquatRubric.version
+            ),
+            cue: cue,
+            cueResponse: response,
+            exercise: exercise,
+            partlyVisible: partlyVisible
+        )
     }
 
     private func sessions(_ groups: [SetSummary]...) -> [WorkoutSessionSummary] {
@@ -45,9 +72,14 @@ nonisolated struct IntentsTests {
 
     @Test func picksTheMostRecentSetAcrossSessions() {
         let older = set(.pushUp, reps: 12, minutesAgo: 60 * 24)
-        let latest = set(.pullUp, reps: 5, minutesAgo: 20, observation: "Chin passed the hands on 4 of 5 reps.")
+        let latest = set(
+            .pullUp,
+            reps: 5,
+            minutesAgo: 20,
+            observation: "Chin passed the hands on 4 of 5 reps."
+        )
         let middle = set(.bodyweightSquat, reps: 9, minutesAgo: 30)
-// sessions are listed newest first in the app, but the report must not rely on that.
+        // sessions are listed newest first in the app, but the report must not rely on that.
         let report = LastSetReport.latest(in: sessions([older], [middle, latest]))
         #expect(report?.exercise == .pullUp)
         #expect(report?.reps == 5)
@@ -58,7 +90,8 @@ nonisolated struct IntentsTests {
         let note = "Squat depth was shallower on reps 5 and 6 than on your first reps."
         let report = LastSetReport.latest(in: sessions([set(reps: 8, minutesAgo: 20, observation: note)]))!
         let spoken = report.spoken(now: Self.now, calendar: Self.calendar)
-        #expect(spoken == "Your last set in Finn: Squat, 8 measured reps, today at 09:40. Finn noted: \(note)")
+        #expect(spoken ==
+            "Your last set in Finn: Squat, 8 measured reps, today at 09:40. Finn noted: \(note)")
     }
 
     @Test func singleRepAndYesterdayAreWorded() {
@@ -96,12 +129,17 @@ nonisolated struct IntentsTests {
         let report = LastSetReport.latest(in: sessions([set(minutesAgo: 5)]))!
         #expect(report.observation == nil)
         #expect(report.spoken(now: Self.now, calendar: Self.calendar)
-                == "Your last set in Finn: Squat, 8 measured reps, today at 09:55. No clear observation in that set.")
+            ==
+            "Your last set in Finn: Squat, 8 measured reps, today at 09:55. No clear observation in that set.")
     }
 
     @Test func dismissedObservationIsNotRepeated() {
         let report = LastSetReport.latest(in: sessions([
-            set(minutesAgo: 5, observation: "Torso leaned further forward at the end.", response: .notRelevant)
+            set(
+                minutesAgo: 5,
+                observation: "Torso leaned further forward at the end.",
+                response: .notRelevant
+            )
         ]))!
         #expect(report.observation == nil)
         #expect(report.observationText == "No clear observation in that set.")
@@ -122,15 +160,24 @@ nonisolated struct IntentsTests {
         #expect(emptyDialog == LastSetReport.nothingYet)
         #expect(emptyContent == .nothingYet)
 
-        let recorded = set(.staticLunge, reps: 6, minutesAgo: 10,
-                           observation: "Front knee bent less on the last two reps.")
-        let session = WorkoutSessionSummary(id: recorded.sessionID, startedAt: recorded.capturedAt,
-                                            sets: [recorded])
+        let recorded = set(
+            .staticLunge,
+            reps: 6,
+            minutesAgo: 10,
+            observation: "Front knee bent less on the last two reps."
+        )
+        let session = WorkoutSessionSummary(
+            id: recorded.sessionID,
+            startedAt: recorded.capturedAt,
+            sets: [recorded]
+        )
         try store.save(session)
         let (dialog, content) = LastSetIntent.answer(from: store, now: Self.now)
         #expect(dialog.hasPrefix("Your last set in Finn: Static lunge, 6 measured reps,"))
         #expect(dialog.hasSuffix("Finn noted: Front knee bent less on the last two reps."))
-        guard case .report(let report) = content else { Issue.record("expected a report"); return }
+        guard case .report(let report) = content else {
+            Issue.record("expected a report")
+            return }
         #expect(report.exercise == .staticLunge)
     }
 
@@ -172,7 +219,11 @@ nonisolated struct IntentsTests {
     /// Draws the Siri card to a PNG next to the test results, for a look without a device.
     @Test @MainActor func snippetRenders() throws {
         let report = LastSetReport.latest(in: sessions([
-            set(reps: 8, minutesAgo: 20, observation: "Squat depth was shallower on reps 5 and 6 than on your first reps.")
+            set(
+                reps: 8,
+                minutesAgo: 20,
+                observation: "Squat depth was shallower on reps 5 and 6 than on your first reps."
+            )
         ]))!
         let view = LastSetSnippet(content: .report(report), now: Self.now)
             .frame(width: 360)
@@ -192,9 +243,23 @@ nonisolated struct IntentsTests {
 
 nonisolated private struct FailingStore: SessionStoring {
     struct Locked: Error {}
-    func load() throws -> [WorkoutSessionSummary] { throw Locked() }
-    func save(_ session: WorkoutSessionSummary) throws { throw Locked() }
-    func delete(id: UUID) throws { throw Locked() }
-    func deleteAll() throws { throw Locked() }
-    func recoverCorruptStore() throws -> URL { throw Locked() }
+    func load() throws -> [WorkoutSessionSummary] {
+        throw Locked()
+    }
+
+    func save(_ session: WorkoutSessionSummary) throws {
+        throw Locked()
+    }
+
+    func delete(id: UUID) throws {
+        throw Locked()
+    }
+
+    func deleteAll() throws {
+        throw Locked()
+    }
+
+    func recoverCorruptStore() throws -> URL {
+        throw Locked()
+    }
 }

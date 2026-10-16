@@ -62,7 +62,7 @@ nonisolated struct AthleteTracker {
     static let switchAfter: TimeInterval = 1.0
     /// During a set, a lone person this much smaller or larger than the athlete is not picked up as
     /// them after a loss.
-    static let reacquireSizeRange = 0.5...2.0
+    static let reacquireSizeRange = 0.5 ... 2.0
     /// ...and must overlap where the athlete was last seen, widened by this share of their size...
     static let reacquireMargin = 0.25
     /// ...until they have been out of view this long. Before, an athlete who stepped out of the
@@ -88,10 +88,14 @@ nonisolated struct AthleteTracker {
     /// Nobody at all was in view at some point since the athlete was last matched.
     private var emptiedSinceLoss = false
 
-    var isTracking: Bool { !memory.isEmpty }
+    var isTracking: Bool {
+        !memory.isEmpty
+    }
 
     /// Keep following the current person for the whole set.
-    mutating func lock() { isLocked = true }
+    mutating func lock() {
+        isLocked = true
+    }
 
     /// Forget the person; the next frame picks the most prominent one again.
     mutating func reset() {
@@ -100,15 +104,21 @@ nonisolated struct AthleteTracker {
     }
 
     /// The index of the athlete in `people`, or nil when they are not visible in this frame.
-    mutating func select(_ people: [[BodyJoint: JointPoint]], aspectRatio: Double,
-                         time: TimeInterval) -> Int? {
+    mutating func select(
+        _ people: [[BodyJoint: JointPoint]],
+        aspectRatio: Double,
+        time: TimeInterval
+    ) -> Int? {
         let boxes = people.map { Self.box(of: $0, aspectRatio: aspectRatio) }
         if isTracking {
             let limit = Self.allowedShift(after: time - lastMatchTime)
             let distances = people.enumerated().compactMap { index, joints -> (Int, Double)? in
-                guard boxes[index] != nil,
-                      let distance = distance(to: joints, aspectRatio: aspectRatio, time: time),
-                      distance <= limit else { return nil }
+                guard
+                    boxes[index] != nil,
+                    let distance = distance(to: joints, aspectRatio: aspectRatio, time: time),
+                    distance <= limit else {
+                    return nil
+                }
                 return (index, distance)
             }.sorted { $0.1 < $1.1 }
             if let best = distances.first {
@@ -116,13 +126,16 @@ nonisolated struct AthleteTracker {
                     return nil
                 }
                 var chosen = best.0
-                if !isLocked, let leader = Self.mostProminent(boxes, aspectRatio: aspectRatio), leader != chosen,
-                   let leaderBox = boxes[leader], let chosenBox = boxes[chosen],
-                   Self.prominence(leaderBox, aspectRatio: aspectRatio)
+                if
+                    !isLocked, let leader = Self.mostProminent(boxes, aspectRatio: aspectRatio),
+                    leader != chosen,
+                    let leaderBox = boxes[leader], let chosenBox = boxes[chosen],
+                    Self.prominence(leaderBox, aspectRatio: aspectRatio)
                     > Self.switchFactor * Self.prominence(chosenBox, aspectRatio: aspectRatio) {
                     let since = challengedSince ?? time
                     challengedSince = since
-                    if time - followedSince < Self.switchAfter
+                    if
+                        time - followedSince < Self.switchAfter
                         || (time - since >= Self.switchAfter && Self.showsWholeSide(people[leader])) {
                         forget()
                         chosen = leader
@@ -134,27 +147,37 @@ nonisolated struct AthleteTracker {
                 lastOthers = boxes.indices.filter { $0 != chosen }.compactMap { boxes[$0] }
                 return chosen
             }
-            if boxes.allSatisfy({ $0 == nil }) { emptiedSinceLoss = true }
-            if time - lastMatchTime < Self.reacquireAfter { return nil }
+            if boxes.allSatisfy({ $0 == nil }) {
+                emptiedSinceLoss = true
+            }
+            if time - lastMatchTime < Self.reacquireAfter {
+                return nil
+            }
             if isLocked {
-// during a set, pick the athlete up again only when they are clearly the one person
+                // during a set, pick the athlete up again only when they are clearly the one person
                 // in view, at about the size they were. Getting down into a push-up can hide them
                 // from Vision for a moment and bring them back far from where they were last seen;
                 // before, every remaining frame of the set then had no athlete.
                 let candidates = boxes.indices.filter { boxes[$0] != nil }
                 let relocated = emptiedSinceLoss && time - lastMatchTime >= Self.relocateAfter
-                guard candidates.count == 1, let box = boxes[candidates[0]], size > 0,
-                      Self.reacquireSizeRange.contains(box.size / size),
-                      let lastBox, relocated || box.overlaps(lastBox, margin: Self.reacquireMargin),
-                      !lastOthers.contains(where: { hypot($0.x - box.x, $0.y - box.y) <= Self.reacquireMargin * size })
-                else { return nil }
+                guard
+                    candidates.count == 1, let box = boxes[candidates[0]], size > 0,
+                    Self.reacquireSizeRange.contains(box.size / size),
+                    let lastBox, relocated || box.overlaps(lastBox, margin: Self.reacquireMargin),
+                    !lastOthers
+                        .contains(where: { hypot($0.x - box.x, $0.y - box.y) <= Self.reacquireMargin * size })
+                else {
+                    return nil
+                }
                 forget()
                 remember(people[candidates[0]], box: box, aspectRatio: aspectRatio, time: time)
                 return candidates[0]
             }
             forget()
         }
-        guard let pick = Self.mostProminent(boxes, aspectRatio: aspectRatio) else { return nil }
+        guard let pick = Self.mostProminent(boxes, aspectRatio: aspectRatio) else {
+            return nil
+        }
         remember(people[pick], box: boxes[pick], aspectRatio: aspectRatio, time: time)
         lastOthers = boxes.indices.filter { $0 != pick }.compactMap { boxes[$0] }
         return pick
@@ -172,30 +195,48 @@ nonisolated struct AthleteTracker {
 
     /// Median distance, in person sizes, between a candidate's clear joints and where the
     /// athlete's same joints were last seen; nil with too few joints in common.
-    private func distance(to joints: [BodyJoint: JointPoint], aspectRatio: Double,
-                          time: TimeInterval) -> Double? {
-        guard size > 0 else { return nil }
+    private func distance(
+        to joints: [BodyJoint: JointPoint],
+        aspectRatio: Double,
+        time: TimeInterval
+    ) -> Double? {
+        guard size > 0 else {
+            return nil
+        }
         func gaps(maximumAge: TimeInterval) -> [Double] {
             joints.compactMap { joint, point -> Double? in
-                guard point.confidence >= Self.jointConfidence, let seen = memory[joint],
-                      time - seen.time <= maximumAge else { return nil }
+                guard
+                    point.confidence >= Self.jointConfidence, let seen = memory[joint],
+                    time - seen.time <= maximumAge else {
+                    return nil
+                }
                 return hypot(point.x - seen.x, point.y * aspectRatio - seen.y) / size
             }.sorted()
         }
-// recent joints first; after a long absence, the last positions seen are all there is.
+        // recent joints first; after a long absence, the last positions seen are all there is.
         var shared = gaps(maximumAge: Self.jointMemory)
-        if shared.count < Self.minimumSharedJoints { shared = gaps(maximumAge: .infinity) }
-        guard shared.count >= Self.minimumSharedJoints else { return nil }
+        if shared.count < Self.minimumSharedJoints {
+            shared = gaps(maximumAge: .infinity)
+        }
+        guard shared.count >= Self.minimumSharedJoints else {
+            return nil
+        }
         return shared[shared.count / 2]
     }
 
-    private mutating func remember(_ joints: [BodyJoint: JointPoint], box: Box?, aspectRatio: Double,
-                                   time: TimeInterval) {
-        if memory.isEmpty { followedSince = time }
+    private mutating func remember(
+        _ joints: [BodyJoint: JointPoint],
+        box: Box?,
+        aspectRatio: Double,
+        time: TimeInterval
+    ) {
+        if memory.isEmpty {
+            followedSince = time
+        }
         for (joint, point) in joints where point.confidence >= Self.jointConfidence {
             memory[joint] = Seen(x: point.x, y: point.y * aspectRatio, time: time)
         }
-// a detection missing the legs gives a small box; it does not shrink the size.
+        // a detection missing the legs gives a small box; it does not shrink the size.
         if let box {
             lastBox = box
             if size == 0 {
@@ -215,7 +256,9 @@ nonisolated struct AthleteTracker {
 
     static func mostProminent(_ boxes: [Box?], aspectRatio: Double) -> Int? {
         boxes.enumerated().compactMap { index, box -> (Int, Double)? in
-            guard let box else { return nil }
+            guard let box else {
+                return nil
+            }
             return (index, prominence(box, aspectRatio: aspectRatio))
         }.max { $0.1 < $1.1 }?.0
     }
@@ -239,12 +282,20 @@ nonisolated struct AthleteTracker {
 
     static func box(of joints: [BodyJoint: JointPoint], aspectRatio: Double) -> Box? {
         let points = joints.values.filter { $0.confidence >= jointConfidence }
-        guard points.count >= minimumJoints,
-              let minX = points.map(\.x).min(), let maxX = points.map(\.x).max(),
-              let minY = points.map(\.y).min(), let maxY = points.map(\.y).max() else { return nil }
+        guard
+            points.count >= minimumJoints,
+            let minX = points.map(\.x).min(), let maxX = points.map(\.x).max(),
+            let minY = points.map(\.y).min(), let maxY = points.map(\.y).max() else {
+            return nil
+        }
         let width = maxX - minX
         let height = (maxY - minY) * aspectRatio
-        return Box(x: (minX + maxX) / 2, y: (minY + maxY) / 2 * aspectRatio, size: hypot(width, height),
-                   halfWidth: width / 2, halfHeight: height / 2)
+        return Box(
+            x: (minX + maxX) / 2,
+            y: (minY + maxY) / 2 * aspectRatio,
+            size: hypot(width, height),
+            halfWidth: width / 2,
+            halfHeight: height / 2
+        )
     }
 }

@@ -68,10 +68,17 @@ struct ComparisonNarratorTests {
     }
 
     @Test func noClearChangeCannotAddUnmeasuredExplanation() async {
-        let facts = Comparison(firstSetID: UUID(), secondSetID: UUID(),
-                               firstMedianRange: 0.4, secondMedianRange: 0.41,
-                               firstMedianDuration: 1.5, secondMedianDuration: 1.6,
-                               rangeDirection: .noClearChange, cueRepNumbers: [], cueKind: nil)
+        let facts = Comparison(
+            firstSetID: UUID(),
+            secondSetID: UUID(),
+            firstMedianRange: 0.4,
+            secondMedianRange: 0.41,
+            firstMedianDuration: 1.5,
+            secondMedianDuration: 1.6,
+            rangeDirection: .noClearChange,
+            cueRepNumbers: [],
+            cueKind: nil
+        )
         let generator = StubRecapGenerator(output: GeneratedRecap(
             explanation: "There was no clear range change between sets because your effort stayed consistent.",
             evidenceRepNumbers: []
@@ -81,10 +88,17 @@ struct ComparisonNarratorTests {
     }
 
     @Test func noClearChangeCannotAlsoClaimLongerRange() async {
-        let facts = Comparison(firstSetID: UUID(), secondSetID: UUID(),
-                               firstMedianRange: 0.4, secondMedianRange: 0.41,
-                               firstMedianDuration: 1.5, secondMedianDuration: 1.6,
-                               rangeDirection: .noClearChange, cueRepNumbers: [], cueKind: nil)
+        let facts = Comparison(
+            firstSetID: UUID(),
+            secondSetID: UUID(),
+            firstMedianRange: 0.4,
+            secondMedianRange: 0.41,
+            firstMedianDuration: 1.5,
+            secondMedianDuration: 1.6,
+            rangeDirection: .noClearChange,
+            cueRepNumbers: [],
+            cueKind: nil
+        )
         let generator = StubRecapGenerator(output: GeneratedRecap(
             explanation: "There was no clear range change between sets, but range was longer in the second set.",
             evidenceRepNumbers: []
@@ -107,9 +121,11 @@ struct ComparisonNarratorTests {
     @Test func timeoutDoesNotWaitForGeneratorThatIgnoresCancellation() async {
         let generator = NonCooperativeGenerator()
         defer { generator.finish() }
-        let recap = await ComparisonNarrator(generator: generator,
-                                             timeout: .milliseconds(20))
-            .recap(for: comparison())
+        let recap = await ComparisonNarrator(
+            generator: generator,
+            timeout: .milliseconds(20)
+        )
+        .recap(for: comparison())
         #expect(recap.source == .template)
         #expect(!generator.didFinish, "The timeout must return before the generator finishes.")
     }
@@ -137,10 +153,17 @@ struct ComparisonNarratorTests {
     }
 
     @Test func validLongerRecapKeepsDeterministicFacts() async {
-        let facts = Comparison(firstSetID: UUID(), secondSetID: UUID(),
-                               firstMedianRange: 0.3, secondMedianRange: 0.4,
-                               firstMedianDuration: 1.5, secondMedianDuration: 1.6,
-                               rangeDirection: .longer, cueRepNumbers: [], cueKind: nil)
+        let facts = Comparison(
+            firstSetID: UUID(),
+            secondSetID: UUID(),
+            firstMedianRange: 0.3,
+            secondMedianRange: 0.4,
+            firstMedianDuration: 1.5,
+            secondMedianDuration: 1.6,
+            rangeDirection: .longer,
+            cueRepNumbers: [],
+            cueKind: nil
+        )
         let generator = StubRecapGenerator(output: GeneratedRecap(
             explanation: "Your camera-measured range was longer in the second set.",
             evidenceRepNumbers: []
@@ -152,10 +175,17 @@ struct ComparisonNarratorTests {
     }
 
     @Test func validNoClearChangeRecapKeepsDeterministicFacts() async {
-        let facts = Comparison(firstSetID: UUID(), secondSetID: UUID(),
-                               firstMedianRange: 0.4, secondMedianRange: 0.41,
-                               firstMedianDuration: 1.5, secondMedianDuration: 1.6,
-                               rangeDirection: .noClearChange, cueRepNumbers: [], cueKind: nil)
+        let facts = Comparison(
+            firstSetID: UUID(),
+            secondSetID: UUID(),
+            firstMedianRange: 0.4,
+            secondMedianRange: 0.41,
+            firstMedianDuration: 1.5,
+            secondMedianDuration: 1.6,
+            rangeDirection: .noClearChange,
+            cueRepNumbers: [],
+            cueKind: nil
+        )
         let generator = StubRecapGenerator(output: GeneratedRecap(
             explanation: "There was no clear camera-measured range change between sets.",
             evidenceRepNumbers: []
@@ -167,11 +197,17 @@ struct ComparisonNarratorTests {
     }
 
     private func comparison() -> Comparison {
-        Comparison(firstSetID: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
-                   secondSetID: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
-                   firstMedianRange: 0.4, secondMedianRange: 0.3,
-                   firstMedianDuration: 1.5, secondMedianDuration: 1.6,
-                   rangeDirection: .shorter, cueRepNumbers: [5, 6], cueKind: .rangeDecreased)
+        Comparison(
+            firstSetID: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+            secondSetID: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
+            firstMedianRange: 0.4,
+            secondMedianRange: 0.3,
+            firstMedianDuration: 1.5,
+            secondMedianDuration: 1.6,
+            rangeDirection: .shorter,
+            cueRepNumbers: [5, 6],
+            cueKind: .rangeDecreased
+        )
     }
 }
 
@@ -190,8 +226,10 @@ private final class NonCooperativeGenerator: RecapGenerating {
     }
 
     func finish() {
-        completion?.resume(returning: GeneratedRecap(explanation: "Your range was shorter.",
-                                                    evidenceRepNumbers: [5, 6]))
+        completion?.resume(returning: GeneratedRecap(
+            explanation: "Your range was shorter.",
+            evidenceRepNumbers: [5, 6]
+        ))
         completion = nil
     }
 }

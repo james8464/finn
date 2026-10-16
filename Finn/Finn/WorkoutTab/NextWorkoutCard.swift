@@ -40,8 +40,10 @@ struct NextWorkoutCard: View {
         .font(.body.weight(.medium))
         .monospacedDigit()
         .fixedSize(horizontal: false, vertical: true)
-        .accessibilityLabel(String(localized: "\(workout.spokenDayText), \(workout.timeText) to \(workout.endTimeText)",
-                                   comment: "VoiceOver: day, start time and end time of the next workout."))
+        .accessibilityLabel(String(
+            localized: "\(workout.spokenDayText), \(workout.timeText) to \(workout.endTimeText)",
+            comment: "VoiceOver: day, start time and end time of the next workout."
+        ))
     }
 
     /// the intensity row, then one line on how to train at it, in the same whisper as Home's quote

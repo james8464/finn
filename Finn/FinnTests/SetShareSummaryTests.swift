@@ -9,9 +9,14 @@ struct SetShareSummaryTests {
             confidence: 0.9,
             rubricVersion: SquatRubric.version
         )
-        let cue = Cue(kind: .rangeDecreased, repNumbers: [1], earlierMedian: 0.5,
-                      laterMedian: 0.4, observation: "Range became shorter.",
-                      nextAction: "Keep a steady pace.")
+        let cue = Cue(
+            kind: .rangeDecreased,
+            repNumbers: [1],
+            earlierMedian: 0.5,
+            laterMedian: 0.4,
+            observation: "Range became shorter.",
+            nextAction: "Keep a steady pace."
+        )
 
         let text = SetShareSummary.text(for: analysis, cue: cue, cueDismissed: false)
 
@@ -23,11 +28,19 @@ struct SetShareSummaryTests {
     }
 
     @Test func dismissedObservationIsNotShared() {
-        let analysis = SetAnalysis(reps: [], confidence: 0.9,
-                                   rubricVersion: SquatRubric.version)
-        let cue = Cue(kind: .rangeDecreased, repNumbers: [1], earlierMedian: 0.5,
-                      laterMedian: 0.4, observation: "Range became shorter.",
-                      nextAction: "Keep a steady pace.")
+        let analysis = SetAnalysis(
+            reps: [],
+            confidence: 0.9,
+            rubricVersion: SquatRubric.version
+        )
+        let cue = Cue(
+            kind: .rangeDecreased,
+            repNumbers: [1],
+            earlierMedian: 0.5,
+            laterMedian: 0.4,
+            observation: "Range became shorter.",
+            nextAction: "Keep a steady pace."
+        )
 
         let text = SetShareSummary.text(for: analysis, cue: cue, cueDismissed: true)
 
@@ -37,8 +50,11 @@ struct SetShareSummaryTests {
     }
 
     @Test func comparableSetsShareMeasuredChangeWithoutClaimingImprovement() {
-        let analysis = SetAnalysis(reps: [], confidence: 0.9,
-                                   rubricVersion: SquatRubric.version)
+        let analysis = SetAnalysis(
+            reps: [],
+            confidence: 0.9,
+            rubricVersion: SquatRubric.version
+        )
         let comparison = Comparison(
             firstSetID: UUID(), secondSetID: UUID(),
             firstMedianRange: 0.39, secondMedianRange: 0.47,
@@ -46,8 +62,12 @@ struct SetShareSummaryTests {
             rangeDirection: .longer, cueRepNumbers: [], cueKind: nil
         )
 
-        let text = SetShareSummary.text(for: analysis, cue: nil, cueDismissed: false,
-                                        comparison: comparison)
+        let text = SetShareSummary.text(
+            for: analysis,
+            cue: nil,
+            cueDismissed: false,
+            comparison: comparison
+        )
 
         #expect(text.contains("Camera-measured range was longer in set 2."))
         #expect(text.contains("Latest set: 0 measured reps"))
@@ -57,8 +77,11 @@ struct SetShareSummaryTests {
     }
 
     @Test func noClearChangeDoesNotBecomeAPositiveClaim() {
-        let analysis = SetAnalysis(reps: [], confidence: 0.9,
-                                   rubricVersion: SquatRubric.version)
+        let analysis = SetAnalysis(
+            reps: [],
+            confidence: 0.9,
+            rubricVersion: SquatRubric.version
+        )
         let comparison = Comparison(
             firstSetID: UUID(), secondSetID: UUID(),
             firstMedianRange: 0.40, secondMedianRange: 0.41,
@@ -66,16 +89,23 @@ struct SetShareSummaryTests {
             rangeDirection: .noClearChange, cueRepNumbers: [], cueKind: nil
         )
 
-        let text = SetShareSummary.text(for: analysis, cue: nil, cueDismissed: false,
-                                        comparison: comparison)
+        let text = SetShareSummary.text(
+            for: analysis,
+            cue: nil,
+            cueDismissed: false,
+            comparison: comparison
+        )
 
         #expect(text.contains("No clear measured range change between sets."))
         #expect(!text.localizedCaseInsensitiveContains("better"))
     }
 
     @Test func shorterRangeIsSharedAsMeasurementNotSafetyJudgment() {
-        let analysis = SetAnalysis(reps: [], confidence: 0.9,
-                                   rubricVersion: SquatRubric.version)
+        let analysis = SetAnalysis(
+            reps: [],
+            confidence: 0.9,
+            rubricVersion: SquatRubric.version
+        )
         let comparison = Comparison(
             firstSetID: UUID(), secondSetID: UUID(),
             firstMedianRange: 0.50, secondMedianRange: 0.38,
@@ -83,8 +113,12 @@ struct SetShareSummaryTests {
             rangeDirection: .shorter, cueRepNumbers: [], cueKind: nil
         )
 
-        let text = SetShareSummary.text(for: analysis, cue: nil, cueDismissed: false,
-                                        comparison: comparison)
+        let text = SetShareSummary.text(
+            for: analysis,
+            cue: nil,
+            cueDismissed: false,
+            comparison: comparison
+        )
 
         #expect(text.contains("Camera-measured range was shorter in set 2."))
         #expect(!text.localizedCaseInsensitiveContains("unsafe"))

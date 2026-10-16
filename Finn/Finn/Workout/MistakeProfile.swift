@@ -21,7 +21,7 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     case angledView
     /// The joints were clear in only 65 to 80% of the set (`PartialVisibility`).
     case partlyVisible
-// a form fault seen on at least two reps (`FormCheck`), with the check's own name.
+    // a form fault seen on at least two reps (`FormCheck`), with the check's own name.
     case pushUpHipsSag
     case pushUpHipsPike
     case pushUpDepth
@@ -33,47 +33,93 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     case deadliftHinge
 
     /// The form check this issue records, if it is one.
-    var formCheck: FormCheck? { FormCheck(rawValue: rawValue) }
+    var formCheck: FormCheck? {
+        FormCheck(rawValue: rawValue)
+    }
 
     /// Issues of one measured set, from its diagnostics, its change observation (`CueSelector`), its
     /// form faults and its live events.
-    static func issues(diagnostics: MovementDiagnostics?, cue: Cue?, findings: [FormFinding] = [],
-                       spedUp: Bool) -> [SetIssue] {
+    static func issues(
+        diagnostics: MovementDiagnostics?,
+        cue: Cue?,
+        findings: [FormFinding] = [],
+        spedUp: Bool
+    ) -> [SetIssue] {
         var issues: [SetIssue] = []
         if let diagnostics {
-            if diagnostics.shallow > 0 { issues.append(.shallowMovements) }
-            if diagnostics.outsideTempo > 0 { issues.append(.outsideTempo) }
-            if diagnostics.unfinished { issues.append(.unfinishedLastRep) }
-            if diagnostics.angledView != nil { issues.append(.angledView) }
-            if diagnostics.partialVisibility != nil { issues.append(.partlyVisible) }
+            if diagnostics.shallow > 0 {
+                issues.append(.shallowMovements)
+            }
+            if diagnostics.outsideTempo > 0 {
+                issues.append(.outsideTempo)
+            }
+            if diagnostics.unfinished {
+                issues.append(.unfinishedLastRep)
+            }
+            if diagnostics.angledView != nil {
+                issues.append(.angledView)
+            }
+            if diagnostics.partialVisibility != nil {
+                issues.append(.partlyVisible)
+            }
         }
         switch cue?.kind {
-        case .rangeDecreased?: issues.append(.rangeDropped)
-        case .torsoTiltIncreased?, .hipDropIncreased?, .kneeBendIncreased?, .swingIncreased?:
+        case .rangeDecreased?:
+            issues.append(.rangeDropped)
+        case .torsoTiltIncreased?,
+             .hipDropIncreased?,
+             .kneeBendIncreased?,
+             .swingIncreased?:
             issues.append(.postureChanged)
-        case .pushUpHipsSag?, .pushUpHipsPike?, .pushUpDepth?, .squatChestDrop?, .squatDepth?, .lungeTorsoLean?,
-             .lungeFrontKnee?, .deadliftKneeBend?, .deadliftHinge?, nil:
+        case .pushUpHipsSag?,
+             .pushUpHipsPike?,
+             .pushUpDepth?,
+             .squatChestDrop?,
+             .squatDepth?,
+             .lungeTorsoLean?,
+             .lungeFrontKnee?,
+             .deadliftKneeBend?,
+             .deadliftHinge?,
+             nil:
             break
         }
         issues += findings.compactMap { SetIssue(rawValue: $0.check.rawValue) }
-        if spedUp { issues.append(.spedUp) }
+        if spedUp {
+            issues.append(.spedUp)
+        }
         return issues
     }
 
     /// The pattern, in a few words.
     func title(for definition: ExerciseDefinition) -> String {
         switch self {
-        case .shallowMovements: String(localized: "Movements too shallow to count")
-        case .outsideTempo: String(localized: "Movements too fast or too slow to count")
-        case .unfinishedLastRep: String(localized: "Last movement not finished")
+        case .shallowMovements:
+            String(localized: "Movements too shallow to count")
+        case .outsideTempo:
+            String(localized: "Movements too fast or too slow to count")
+        case .unfinishedLastRep:
+            String(localized: "Last movement not finished")
         case .rangeDropped:
-            String(localized: "\(definition.copy.rangeNoun.prefix(1).uppercased() + definition.copy.rangeNoun.dropFirst()) \(definition.copy.lessRange) at the end of the set")
-        case .postureChanged: definition.posture.title
-        case .spedUp: String(localized: "Reps faster than your first ones")
-        case .angledView: String(localized: "Filmed at an angle")
-        case .partlyVisible: String(localized: "Joints not always in view")
-        case .pushUpHipsSag, .pushUpHipsPike, .pushUpDepth, .squatChestDrop, .squatDepth, .lungeTorsoLean,
-             .lungeFrontKnee, .deadliftKneeBend, .deadliftHinge:
+            String(
+                localized: "\(definition.copy.rangeNoun.prefix(1).uppercased() + definition.copy.rangeNoun.dropFirst()) \(definition.copy.lessRange) at the end of the set"
+            )
+        case .postureChanged:
+            definition.posture.title
+        case .spedUp:
+            String(localized: "Reps faster than your first ones")
+        case .angledView:
+            String(localized: "Filmed at an angle")
+        case .partlyVisible:
+            String(localized: "Joints not always in view")
+        case .pushUpHipsSag,
+             .pushUpHipsPike,
+             .pushUpDepth,
+             .squatChestDrop,
+             .squatDepth,
+             .lungeTorsoLean,
+             .lungeFrontKnee,
+             .deadliftKneeBend,
+             .deadliftHinge:
             formCheck?.title ?? ""
         }
     }
@@ -82,17 +128,34 @@ nonisolated enum SetIssue: String, Codable, CaseIterable, Sendable {
     func focus(for definition: ExerciseDefinition) -> String {
         switch self {
         case .shallowMovements:
-            String(localized: "Reach the same depth on every rep. Finn needs \(definition.formattedDepth(definition.phases.reachBottom)) to count one.")
+            String(
+                localized: "Reach the same depth on every rep. Finn needs \(definition.formattedDepth(definition.phases.reachBottom)) to count one."
+            )
         case .outsideTempo:
-            String(localized: "Keep each rep between \(definition.phases.minimumDuration.formatted(.number.precision(.fractionLength(1)))) and \(definition.phases.maximumDuration.formatted(.number.precision(.fractionLength(0)))) seconds.")
-        case .unfinishedLastRep: String(localized: "Come back to your starting position before the set ends.")
-        case .rangeDropped: definition.copy.nextAction
-        case .postureChanged: definition.posture.nextAction
-        case .spedUp: String(localized: "Keep the pace of your first reps.")
-        case .angledView: String(localized: "Turn so your side faces the camera.")
-        case .partlyVisible: String(localized: "Keep your whole body in view, with even light.")
-        case .pushUpHipsSag, .pushUpHipsPike, .pushUpDepth, .squatChestDrop, .squatDepth, .lungeTorsoLean,
-             .lungeFrontKnee, .deadliftKneeBend, .deadliftHinge:
+            String(
+                localized: "Keep each rep between \(definition.phases.minimumDuration.formatted(.number.precision(.fractionLength(1)))) and \(definition.phases.maximumDuration.formatted(.number.precision(.fractionLength(0)))) seconds."
+            )
+        case .unfinishedLastRep:
+            String(localized: "Come back to your starting position before the set ends.")
+        case .rangeDropped:
+            definition.copy.nextAction
+        case .postureChanged:
+            definition.posture.nextAction
+        case .spedUp:
+            String(localized: "Keep the pace of your first reps.")
+        case .angledView:
+            String(localized: "Turn so your side faces the camera.")
+        case .partlyVisible:
+            String(localized: "Keep your whole body in view, with even light.")
+        case .pushUpHipsSag,
+             .pushUpHipsPike,
+             .pushUpDepth,
+             .squatChestDrop,
+             .squatDepth,
+             .lungeTorsoLean,
+             .lungeFrontKnee,
+             .deadliftKneeBend,
+             .deadliftHinge:
             formCheck?.nextAction ?? ""
         }
     }
@@ -122,28 +185,41 @@ nonisolated struct MistakeProfile: Equatable, Sendable {
             .filter { $0.exercise == exercise && $0.issues != nil }
             .sorted { $0.capturedAt > $1.capturedAt }
             .prefix(recentSets)
-        guard !recent.isEmpty else { return nil }
+        guard !recent.isEmpty else {
+            return nil
+        }
         var best: (issue: SetIssue, count: Int, latest: Int)?
         for issue in SetIssue.allCases {
             let matching = recent.enumerated().filter { $0.element.issues?.contains(issue) == true }
-            guard let latest = matching.first?.offset else { continue }
+            guard let latest = matching.first?.offset else {
+                continue
+            }
             let candidate = (issue: issue, count: matching.count, latest: latest)
-            if let current = best,
-               current.count > candidate.count || (current.count == candidate.count && current.latest <= candidate.latest) {
+            if
+                let current = best,
+                current.count > candidate
+                    .count || (current.count == candidate.count && current.latest <= candidate.latest) {
                 continue
             }
             best = candidate
         }
-        guard let best, best.count >= minimumSets,
-              Double(best.count) / Double(recent.count) >= minimumShare else { return nil }
+        guard
+            let best, best.count >= minimumSets,
+            Double(best.count) / Double(recent.count) >= minimumShare else {
+            return nil
+        }
         return MistakeProfile(exercise: exercise, issue: best.issue, sets: best.count, outOf: recent.count)
     }
 
     /// For example "Movements too shallow to count in 3 of your last 5 squat sets."
     var summary: String {
         let definition = exercise.definition
-        return String(localized: "\(issue.title(for: definition)) in \(sets) of your last \(outOf) \(definition.copy.shareNoun) sets.")
+        return String(
+            localized: "\(issue.title(for: definition)) in \(sets) of your last \(outOf) \(definition.copy.shareNoun) sets."
+        )
     }
 
-    var focus: String { issue.focus(for: exercise.definition) }
+    var focus: String {
+        issue.focus(for: exercise.definition)
+    }
 }

@@ -9,8 +9,10 @@ nonisolated enum Accessory: String, CaseIterable, Equatable, Sendable {
 
     var name: String {
         switch self {
-        case .appleWatch: "Apple Watch"
-        case .headphones: String(localized: "AirPods or headphones")
+        case .appleWatch:
+            "Apple Watch"
+        case .headphones:
+            String(localized: "AirPods or headphones")
         }
     }
 }
@@ -38,9 +40,13 @@ nonisolated struct AccessoryRole: Equatable, Sendable {
     /// Why a feature is left out for this exercise, if one is.
     let limitation: String?
 
-    var isUsed: Bool { !features.isEmpty }
+    var isUsed: Bool {
+        !features.isEmpty
+    }
 
-    func offers(_ feature: AccessoryFeature) -> Bool { features.contains(feature) }
+    func offers(_ feature: AccessoryFeature) -> Bool {
+        features.contains(feature)
+    }
 }
 
 /// Per exercise, what AirPods (or other headphones) and an Apple Watch add.
@@ -48,11 +54,21 @@ nonisolated enum AccessoryRoles {
     static func role(of accessory: Accessory, for exercise: ExerciseKind) -> AccessoryRole {
         switch accessory {
         case .headphones:
-            return AccessoryRole(accessory: .headphones, exercise: exercise, isRequired: false,
-                                 features: [.hearCountdownRepsAndObservations], limitation: nil)
+            return AccessoryRole(
+                accessory: .headphones,
+                exercise: exercise,
+                isRequired: false,
+                features: [.hearCountdownRepsAndObservations],
+                limitation: nil
+            )
         case .appleWatch:
-            return AccessoryRole(accessory: .appleWatch, exercise: exercise, isRequired: false,
-                                 features: [.seeCoachMessages, .feelRhythmTaps], limitation: nil)
+            return AccessoryRole(
+                accessory: .appleWatch,
+                exercise: exercise,
+                isRequired: false,
+                features: [.seeCoachMessages, .feelRhythmTaps],
+                limitation: nil
+            )
         }
     }
 
@@ -84,8 +100,10 @@ nonisolated struct AccessoryStatus: Equatable, Sendable {
     /// Whether the accessory can take part in the next set without anything else to do.
     func isConnected(_ accessory: Accessory) -> Bool {
         switch accessory {
-        case .headphones: headphonesConnected
-        case .appleWatch: watch.isPaired && watch.isAppInstalled && watch.isReachable
+        case .headphones:
+            headphonesConnected
+        case .appleWatch:
+            watch.isPaired && watch.isAppInstalled && watch.isReachable
         }
     }
 }
@@ -99,26 +117,43 @@ nonisolated struct AccessoryLine: Equatable, Sendable {
 nonisolated enum AccessoryGuide {
     /// One short line per accessory that matters right now, headphones first. Empty when neither is
     /// around: Finn works the same without them.
-    static func setupLines(for exercise: ExerciseKind, status: AccessoryStatus,
-                           speaksLive: Bool) -> [AccessoryLine] {
+    static func setupLines(
+        for exercise: ExerciseKind,
+        status: AccessoryStatus,
+        speaksLive: Bool
+    ) -> [AccessoryLine] {
         [headphonesLine(status: status, speaksLive: speaksLive),
          watchLine(for: exercise, status: status)].compactMap { $0 }
     }
 
     static func headphonesLine(status: AccessoryStatus, speaksLive: Bool) -> AccessoryLine? {
-        guard status.headphonesConnected else { return nil }
-// the route says Bluetooth or wired headphones, not which model, so the line does not say AirPods.
-        return AccessoryLine(accessory: .headphones, text: speaksLive
-            ? String(localized: "Headphones connected: you will hear each rep.")
-            : String(localized: "Headphones connected. Turn on Say reps aloud in Options to hear each rep."))
+        guard status.headphonesConnected else {
+            return nil
+        }
+        // the route says Bluetooth or wired headphones, not which model, so the line does not say AirPods.
+        return AccessoryLine(
+            accessory: .headphones,
+            text: speaksLive
+                ? String(localized: "Headphones connected: you will hear each rep.")
+                :
+                String(
+                    localized: "Headphones connected. Turn on Say reps aloud in Options to hear each rep."
+                )
+        )
     }
 
     static func watchLine(for exercise: ExerciseKind, status: AccessoryStatus) -> AccessoryLine? {
         let watch = status.watch
-        guard watch.isPaired else { return nil }
+        guard watch.isPaired else {
+            return nil
+        }
         guard watch.isAppInstalled else {
-            return AccessoryLine(accessory: .appleWatch,
-                                 text: String(localized: "Apple Watch: install Finn for coaching messages and optional rhythm taps."))
+            return AccessoryLine(
+                accessory: .appleWatch,
+                text: String(
+                    localized: "Apple Watch: install Finn for coaching messages and optional rhythm taps."
+                )
+            )
         }
         let text = watch.isReachable
             ? String(localized: "Apple Watch connected: coaching messages are ready; rhythm is optional.")

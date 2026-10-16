@@ -9,8 +9,16 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from prepare_clips import (  # noqa: E402
-    LABELS, PrepareError, REPO_ROOT, Take, ensure_outside_repo, main, parse_take, plan_clips,
-    plan_warnings, window_starts,
+    LABELS,
+    PrepareError,
+    REPO_ROOT,
+    Take,
+    ensure_outside_repo,
+    main,
+    parse_take,
+    plan_clips,
+    plan_warnings,
+    window_starts,
 )
 
 
@@ -21,8 +29,7 @@ def take(participant="p01", label="squat", number="01"):
 class NamingTests(unittest.TestCase):
     def test_parses_labels_containing_underscores(self):
         parsed = parse_take(Path("/raw/p02_stiff_leg_deadlift_03.MOV"))
-        self.assertEqual(("p02", "stiff_leg_deadlift", "03"),
-                         (parsed.participant, parsed.label, parsed.take))
+        self.assertEqual(("p02", "stiff_leg_deadlift", "03"), (parsed.participant, parsed.label, parsed.take))
 
     def test_rejects_unknown_label_and_loose_names(self):
         for name in ("p01_burpee_01.mov", "james_squat_01.mov", "p01_squat.mov", "p1_squat_01.mov"):
@@ -47,8 +54,7 @@ class PlanTests(unittest.TestCase):
         splits = {(c.take.participant, c.split) for c in clips}
         self.assertEqual({("p01", "train"), ("p02", "validation")}, splits)
         self.assertEqual(9, len(clips))
-        self.assertEqual("validation/push_up/p02_push_up_01_03.mov",
-                         clips[-1].relative_path().as_posix())
+        self.assertEqual("validation/push_up/p02_push_up_01_03.mov", clips[-1].relative_path().as_posix())
 
     def test_unknown_validation_participant_is_an_error(self):
         with self.assertRaisesRegex(PrepareError, "p09"):
@@ -74,18 +80,48 @@ class CuttingTests(unittest.TestCase):
             raw.mkdir()
             for name in ("p01_squat_01.mov", "p02_squat_01.mov"):
                 subprocess.run(
-                    ["ffmpeg", "-nostdin", "-loglevel", "error", "-f", "lavfi",
-                     "-i", "testsrc=size=180x320:rate=30:duration=7", "-f", "lavfi",
-                     "-i", "sine=duration=7", "-shortest", "-c:v", "libx264",
-                     "-pix_fmt", "yuv420p", str(raw / name)],
-                    check=True, stdin=subprocess.DEVNULL)
+                    [
+                        "ffmpeg",
+                        "-nostdin",
+                        "-loglevel",
+                        "error",
+                        "-f",
+                        "lavfi",
+                        "-i",
+                        "testsrc=size=180x320:rate=30:duration=7",
+                        "-f",
+                        "lavfi",
+                        "-i",
+                        "sine=duration=7",
+                        "-shortest",
+                        "-c:v",
+                        "libx264",
+                        "-pix_fmt",
+                        "yuv420p",
+                        str(raw / name),
+                    ],
+                    check=True,
+                    stdin=subprocess.DEVNULL,
+                )
             output = Path(directory) / "dataset"
             self.assertEqual(0, main([str(raw), str(output), "--validation-participants", "p02"]))
             train = sorted((output / "train/squat").iterdir())
             self.assertEqual(["p01_squat_01_01.mov", "p01_squat_01_02.mov"], [p.name for p in train])
             streams = subprocess.run(
-                ["ffprobe", "-v", "error", "-show_entries", "stream=codec_type", "-of", "csv=p=0",
-                 str(train[0])], check=True, capture_output=True, text=True).stdout.split()
+                [
+                    "ffprobe",
+                    "-v",
+                    "error",
+                    "-show_entries",
+                    "stream=codec_type",
+                    "-of",
+                    "csv=p=0",
+                    str(train[0]),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.split()
             self.assertEqual(["video"], streams)
             with (output / "manifest.csv").open() as file:
                 rows = list(csv.DictReader(file))

@@ -16,7 +16,8 @@ struct WorkoutHistoryRow: View {
                         .monospacedDigit()
                         .fixedSize(horizontal: false, vertical: true)
                     Group {
-                        if savedToFitness { Text("\(when) · \(sets) · Saved to Fitness") } else { Text("\(when) · \(sets)") }
+                        if savedToFitness { Text("\(when) · \(sets) · Saved to Fitness") }
+                        else { Text("\(when) · \(sets)") }
                     }
                     .font(.subheadline)
                     .foregroundStyle(DashboardStyle.secondary)
@@ -46,9 +47,13 @@ struct WorkoutHistoryRow: View {
         .accessibilityIdentifier("workout.session")
     }
 
-    private var reps: Int { session.sets.reduce(0) { $0 + $1.analysis.reps.count } }
+    private var reps: Int {
+        session.sets.reduce(0) { $0 + $1.analysis.reps.count }
+    }
 
-    private var sets: String { String(localized: "\(session.sets.count) sets") }
+    private var sets: String {
+        String(localized: "\(session.sets.count) sets")
+    }
 
     private var exerciseNames: String {
         var names: [String] = []
@@ -60,8 +65,14 @@ struct WorkoutHistoryRow: View {
 
     private var when: String {
         let time = session.startedAt.formatted(date: .omitted, time: .shortened)
-        if Calendar.current.isDateInToday(session.startedAt) { return String(localized: "Today, \(time)") }
-        if Calendar.current.isDateInYesterday(session.startedAt) { return String(localized: "Yesterday, \(time)") }
+        if Calendar.current.isDateInToday(session.startedAt) {
+            return String(localized: "Today, \(time)")
+        }
+        if
+            Calendar.current
+                .isDateInYesterday(session.startedAt) {
+            return String(localized: "Yesterday, \(time)")
+        }
         return session.startedAt.formatted(.dateTime.day().month(.abbreviated).hour().minute())
     }
 

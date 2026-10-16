@@ -14,8 +14,11 @@ struct IntroBrand: View {
 struct IntroBackground: View {
     var body: some View {
         HomeBackdrop()
-            .overlay(LinearGradient(colors: [.black.opacity(0.68), .black.opacity(0.78)],
-                                    startPoint: .top, endPoint: .bottom))
+            .overlay(LinearGradient(
+                colors: [.black.opacity(0.68), .black.opacity(0.78)],
+                startPoint: .top,
+                endPoint: .bottom
+            ))
             .ignoresSafeArea()
     }
 }

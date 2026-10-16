@@ -4,8 +4,10 @@ extension XCUIApplication {
     /// Native lists load rows on demand; scroll until the requested control can be used.
     @MainActor
     func reveal(_ element: XCUIElement, swipes: Int = 12) {
-        for _ in 0..<swipes {
-            if element.exists && element.isHittable { return }
+        for _ in 0 ..< swipes {
+            if element.exists && element.isHittable {
+                return
+            }
             swipeUp()
         }
         XCTAssertTrue(element.exists && element.isHittable, "Control could not be reached: \(element)")
@@ -16,7 +18,9 @@ extension XCUIApplication {
     func skipOnboardingIfShown() {
         passWelcomeIfShown()
         let skip = buttons["onboarding.finish"]
-        guard skip.waitForExistence(timeout: 2) else { return }
+        guard skip.waitForExistence(timeout: 2) else {
+            return
+        }
         skip.tap()
         XCTAssertTrue(buttons["tab.home"].waitForExistence(timeout: 8))
     }
@@ -25,7 +29,9 @@ extension XCUIApplication {
     @MainActor
     func passWelcomeIfShown() {
         let welcome = buttons["onboarding.welcome.continue"]
-        guard welcome.waitForExistence(timeout: 2) else { return }
+        guard welcome.waitForExistence(timeout: 2) else {
+            return
+        }
         welcome.tap()
     }
 
@@ -41,7 +47,11 @@ extension XCUIApplication {
     @MainActor
     func launchWorkoutIfNeeded() {
         let launch = buttons["workout.launch"]
-        guard !buttons["home.start"].waitForExistence(timeout: 1), launch.waitForExistence(timeout: 5) else { return }
+        guard
+            !buttons["home.start"].waitForExistence(timeout: 1),
+            launch.waitForExistence(timeout: 5) else {
+            return
+        }
         launch.tap()
         XCTAssertTrue(buttons["home.start"].waitForExistence(timeout: 5), "Launch workout did not open setup")
     }
@@ -49,9 +59,13 @@ extension XCUIApplication {
     /// back from workout setup to the Workout tab's root, where the More menu is
     @MainActor
     func returnToWorkoutRoot() {
-        guard !buttons["home.more"].waitForExistence(timeout: 1) else { return }
+        guard !buttons["home.more"].waitForExistence(timeout: 1) else {
+            return
+        }
         let back = navigationBars.buttons.element(boundBy: 0)
-        if back.exists { back.tap() }
+        if back.exists {
+            back.tap()
+        }
     }
 
     @MainActor

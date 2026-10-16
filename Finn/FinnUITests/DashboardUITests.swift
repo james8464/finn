@@ -190,7 +190,10 @@ final class DashboardUITests: XCTestCase {
             app.launch()
             XCTAssertTrue(app.staticTexts[tryLabel].waitForExistence(timeout: 8), language)
             app.buttons["home.posture"].tap()
-            XCTAssertTrue(app.descendants(matching: .any)["posture.guide"].waitForExistence(timeout: 3), language)
+            XCTAssertTrue(
+                app.descendants(matching: .any)["posture.guide"].waitForExistence(timeout: 3),
+                language
+            )
             app.openWorkoutTab()
             XCTAssertEqual(app.buttons["home.start"].label, startLabel, language)
             app.terminate()
@@ -224,7 +227,8 @@ final class DashboardUITests: XCTestCase {
         XCTAssertEqual(app.buttons["home.lastSession"].frame.minY, savedPosition, accuracy: 3)
         app.buttons["home.lastSession"].tap()
         XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.disclosureTriangles["About measurements"].exists || app.buttons["About measurements"].exists)
+        XCTAssertTrue(app.disclosureTriangles["About measurements"].exists || app
+            .buttons["About measurements"].exists)
         try saveWidget("session")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         app.swipeUp()
@@ -257,14 +261,20 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 5))
         app.buttons["Cancel"].tap()
         app.selectTab("Home")
-        XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 3),
-                      "Returning from the camera must preserve nested tab navigation")
+        XCTAssertTrue(
+            app.navigationBars["Options"].waitForExistence(timeout: 3),
+            "Returning from the camera must preserve nested tab navigation"
+        )
     }
 
     @MainActor
     func testLargeTextKeepsNavigationUsable() {
         let app = XCUIApplication()
-        app.launchArguments = ["-finn-ui-demo", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launchArguments = [
+            "-finn-ui-demo",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
         app.launch()
         XCTAssertTrue(app.buttons["home.account"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.buttons["home.account"].isHittable)
@@ -272,12 +282,17 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.textViews["coach.field"].waitForExistence(timeout: 3))
         app.selectTab("Home")
         let scroll = app.scrollViews["summary.scroll"]
-        for _ in 0..<6 where !app.buttons["home.awards"].isHittable { scroll.swipeUp() }
+        for _ in 0 ..< 6 where !app.buttons["home.awards"].isHittable {
+            scroll.swipeUp()
+        }
         XCTAssertTrue(app.buttons["home.awards"].isHittable)
     }
+
     @MainActor
     private func saveWidget(_ name: String) throws {
-        guard let directory = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] else { return }
+        guard let directory = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] else {
+            return
+        }
         let url = URL(fileURLWithPath: directory, isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         try XCUIScreen.main.screenshot().pngRepresentation.write(to: url.appending(path: "\(name).png"))

@@ -20,10 +20,12 @@ struct PostureMomentsCard: View {
             .accessibilityHidden(true)
             Text("No photos yet")
                 .font(.subheadline.weight(.semibold))
-            Text("When Finn has photos of this exercise, you’ll see one moment to fix and one done right, each with Finn’s comment.")
-                .font(.subheadline)
-                .foregroundStyle(DashboardStyle.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            Text(
+                "When Finn has photos of this exercise, you’ll see one moment to fix and one done right, each with Finn’s comment."
+            )
+            .font(.subheadline)
+            .foregroundStyle(DashboardStyle.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
@@ -45,7 +47,8 @@ struct PostureMomentsCard: View {
                 .overlay(alignment: .topLeading) {
                     Image(systemName: symbol)
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(symbol == "checkmark" ? DashboardStyle.accent : DashboardStyle.secondary)
+                        .foregroundStyle(symbol == "checkmark" ? DashboardStyle.accent : DashboardStyle
+                            .secondary)
                         .padding(8)
                 }
             Text(title).font(.subheadline.weight(.semibold))

@@ -10,8 +10,10 @@ struct PostureSection: View {
             MovementAnimationCard(exercise: exercise)
             MovementStepsCard(exercise: exercise)
             PostureMomentsCard()
-            MeasuredFormCard(exercise: exercise,
-                             evidence: PostureGuideEvidence.make(for: exercise, history: history))
+            MeasuredFormCard(
+                exercise: exercise,
+                evidence: PostureGuideEvidence.make(for: exercise, history: history)
+            )
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("posture.guide")

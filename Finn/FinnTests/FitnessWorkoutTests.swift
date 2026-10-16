@@ -7,16 +7,30 @@ nonisolated struct FitnessWorkoutTests {
 
     /// A set saved `secondsIn` after `origin`, with `reps` reps of 2 s each, 1 s apart, on the
     /// capture clock starting at `clockStart` (the camera's clock, not the date).
-    private func set(_ exercise: ExerciseKind = .bodyweightSquat, reps: Int, secondsIn: TimeInterval,
-                     clockStart: TimeInterval = 5_000) -> SetSummary {
-        let metrics = (0..<reps).map { index in
-            RepMetric(number: index + 1, startTime: clockStart + Double(index) * 3,
-                      endTime: clockStart + Double(index) * 3 + 2, relativeRange: 0.4)
+    private func set(
+        _ exercise: ExerciseKind = .bodyweightSquat,
+        reps: Int,
+        secondsIn: TimeInterval,
+        clockStart: TimeInterval = 5_000
+    ) -> SetSummary {
+        let metrics = (0 ..< reps).map { index in
+            RepMetric(
+                number: index + 1,
+                startTime: clockStart + Double(index) * 3,
+                endTime: clockStart + Double(index) * 3 + 2,
+                relativeRange: 0.4
+            )
         }
-        return SetSummary(id: UUID(), sessionID: UUID(), capturedAt: origin.addingTimeInterval(secondsIn),
-                          bodySide: .left,
-                          analysis: SetAnalysis(reps: metrics, confidence: 0.9, rubricVersion: "test"),
-                          cue: nil, cueResponse: .unanswered, exercise: exercise)
+        return SetSummary(
+            id: UUID(),
+            sessionID: UUID(),
+            capturedAt: origin.addingTimeInterval(secondsIn),
+            bodySide: .left,
+            analysis: SetAnalysis(reps: metrics, confidence: 0.9, rubricVersion: "test"),
+            cue: nil,
+            cueResponse: .unanswered,
+            exercise: exercise
+        )
     }
 
     private func session(_ sets: [SetSummary]) -> WorkoutSessionSummary {
@@ -30,7 +44,10 @@ nonisolated struct FitnessWorkoutTests {
 
     /// Six reps span 17 s on the capture clock (0 to 17); the set ended when it was saved.
     @Test func theWorkoutRunsFromTheFirstMeasuredRepToTheEndOfTheLastSet() throws {
-        let sessionValue = session([set(reps: 6, secondsIn: 60), set(reps: 4, secondsIn: 200, clockStart: 90_000)])
+        let sessionValue = session([
+            set(reps: 6, secondsIn: 60),
+            set(reps: 4, secondsIn: 200, clockStart: 90_000)
+        ])
         let workout = try #require(FitnessWorkout.make(from: sessionValue))
         #expect(workout.sessionID == sessionValue.id)
         #expect(workout.start == origin.addingTimeInterval(60 - 17))
@@ -70,10 +87,19 @@ nonisolated struct FitnessWorkoutTests {
     @Test func aRepSpanBeyondTheCaptureLimitIsClamped() throws {
         let broken = SetSummary(
             id: UUID(), sessionID: UUID(), capturedAt: origin, bodySide: .left,
-            analysis: SetAnalysis(reps: [RepMetric(number: 1, startTime: 0, endTime: 2, relativeRange: 0.4),
-                                         RepMetric(number: 2, startTime: 9_998, endTime: 10_000, relativeRange: 0.4)],
-                                  confidence: 0.9, rubricVersion: "test"),
-            cue: nil, cueResponse: .unanswered)
+            analysis: SetAnalysis(
+                reps: [RepMetric(number: 1, startTime: 0, endTime: 2, relativeRange: 0.4),
+                       RepMetric(
+                           number: 2,
+                           startTime: 9_998,
+                           endTime: 10_000,
+                           relativeRange: 0.4
+                       )],
+                confidence: 0.9,
+                rubricVersion: "test"
+            ),
+            cue: nil, cueResponse: .unanswered
+        )
         let workout = try #require(FitnessWorkout.make(from: session([broken])))
         #expect(workout.start == origin.addingTimeInterval(-FitnessWorkout.longestSet))
     }
@@ -81,9 +107,13 @@ nonisolated struct FitnessWorkoutTests {
     @Test func aSetWithoutAUsableSpanAloneMakesNoWorkout() {
         let still = SetSummary(
             id: UUID(), sessionID: UUID(), capturedAt: origin, bodySide: .left,
-            analysis: SetAnalysis(reps: [RepMetric(number: 1, startTime: 4, endTime: 4, relativeRange: 0.4)],
-                                  confidence: 0.9, rubricVersion: "test"),
-            cue: nil, cueResponse: .unanswered)
+            analysis: SetAnalysis(
+                reps: [RepMetric(number: 1, startTime: 4, endTime: 4, relativeRange: 0.4)],
+                confidence: 0.9,
+                rubricVersion: "test"
+            ),
+            cue: nil, cueResponse: .unanswered
+        )
         #expect(FitnessWorkout.make(from: session([still])) == nil)
     }
 
@@ -125,7 +155,8 @@ nonisolated struct FitnessWorkoutTests {
     @Test func theSyncIdentifierNamesTheSession() throws {
         let sessionValue = session([set(reps: 6, secondsIn: 60)])
         let workout = try #require(FitnessWorkout.make(from: sessionValue))
-        #expect(workout.syncIdentifier == "ai.mwm.build.challenge.team.08.session.\(sessionValue.id.uuidString)")
+        #expect(workout
+            .syncIdentifier == "ai.mwm.build.challenge.team.08.session.\(sessionValue.id.uuidString)")
         #expect(FitnessWorkout.syncVersion == 1)
     }
 
@@ -148,11 +179,22 @@ nonisolated struct FitnessWorkoutTests {
 
         var saved = WorkoutSessionSummary(id: id, startedAt: origin, sets: [])
         saved.fitnessWorkout = FitnessWorkoutRecord(savedAt: origin, workoutID: UUID())
-        let roundTrip = try JSONDecoder().decode(WorkoutSessionSummary.self, from: JSONEncoder().encode(saved))
+        let roundTrip = try JSONDecoder().decode(
+            WorkoutSessionSummary.self,
+            from: JSONEncoder().encode(saved)
+        )
         #expect(roundTrip == saved)
-        let locked = WorkoutSessionSummary(id: id, startedAt: origin, sets: [],
-                                           fitnessWorkout: FitnessWorkoutRecord(savedAt: origin, workoutID: nil))
-        #expect(try JSONDecoder().decode(WorkoutSessionSummary.self, from: JSONEncoder().encode(locked)) == locked)
+        let locked = WorkoutSessionSummary(
+            id: id,
+            startedAt: origin,
+            sets: [],
+            fitnessWorkout: FitnessWorkoutRecord(
+                savedAt: origin,
+                workoutID: nil
+            )
+        )
+        #expect(try JSONDecoder()
+            .decode(WorkoutSessionSummary.self, from: JSONEncoder().encode(locked)) == locked)
     }
 
     @Test func theOptionIsOffByDefault() throws {

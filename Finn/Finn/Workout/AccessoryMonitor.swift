@@ -33,7 +33,9 @@ final class AccessoryMonitor {
         watch.start()
         watch.attach(to: model, demoInput: demoInput)
         refreshHeadphones()
-        guard routeObserver == nil else { return }
+        guard routeObserver == nil else {
+            return
+        }
         routeObserver = NotificationCenter.default.addObserver(
             forName: AVAudioSession.routeChangeNotification, object: nil, queue: .main
         ) { [weak self] _ in
@@ -47,6 +49,8 @@ final class AccessoryMonitor {
         let connected = AVAudioSession.sharedInstance().currentRoute.outputs.contains {
             Self.headphonePorts.contains($0.portType)
         }
-        if connected != headphonesConnected { headphonesConnected = connected }
+        if connected != headphonesConnected {
+            headphonesConnected = connected
+        }
     }
 }

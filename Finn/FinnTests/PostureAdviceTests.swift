@@ -4,15 +4,18 @@ import Testing
 
 struct PostureAdviceTests {
     @Test func squatTorsoChangeGetsPostureAdvice() throws {
-        let frames = (0...120).map { index -> PoseFrame in
+        let frames = (0 ... 120).map { index -> PoseFrame in
             let depth = 0.2 * (1 - cos(2 * .pi * Double(index % 20) / 20)) / 2
             let original = squatFrame(time: Double(index) * 0.1, hipY: 0.42 + depth)
             var joints = original.joints
             for (hipJoint, shoulderJoint) in [(BodyJoint.leftHip, BodyJoint.leftShoulder),
                                               (.rightHip, .rightShoulder)] {
                 let hip = joints[hipJoint]!
-                joints[shoulderJoint] = JointPoint(x: hip.x + (index / 20 >= 4 ? 0.09 : 0),
-                                                   y: hip.y - 0.25, confidence: 0.95)
+                joints[shoulderJoint] = JointPoint(
+                    x: hip.x + (index / 20 >= 4 ? 0.09 : 0),
+                    y: hip.y - 0.25,
+                    confidence: 0.95
+                )
             }
             return PoseFrame(time: original.time, subjectCount: 1, joints: joints)
         }
@@ -23,28 +26,41 @@ struct PostureAdviceTests {
 
     @Test func pushUpHipDropGetsOneSpecificNextAction() throws {
         let frames = pushUpTrace(reps: 6).enumerated().map { index, frame in
-            guard index / 20 >= 4 else { return frame }
+            guard index / 20 >= 4 else {
+                return frame
+            }
             var joints = frame.joints
             if let hip = joints[.leftHip] {
                 joints[.leftHip] = JointPoint(x: hip.x, y: hip.y + 0.09, confidence: hip.confidence)
             }
-            return PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: joints,
-                             aspectRatio: frame.aspectRatio)
+            return PoseFrame(
+                time: frame.time,
+                subjectCount: frame.subjectCount,
+                joints: joints,
+                aspectRatio: frame.aspectRatio
+            )
         }
         let analysis = try measured(ExerciseAnalyzer.analyse(frames, as: .pushUp))
         let cue = CueSelector.select(from: analysis, exercise: .pushUp)
         #expect(cue?.repNumbers == [5, 6])
-        #expect(cue?.observation == "Your hips sat lower relative to your shoulder-to-ankle line in the last two reps.")
+        #expect(cue?
+            .observation ==
+            "Your hips sat lower relative to your shoulder-to-ankle line in the last two reps.")
         #expect(cue?.nextAction == "Try keeping your hips aligned with your shoulders and ankles.")
     }
 
     @Test func lungeTorsoChangeGetsPostureAdvice() throws {
         let frames = lungeTrace(reps: 6).enumerated().map { index, frame in
-            guard index / 20 >= 4 else { return frame }
+            guard index / 20 >= 4 else {
+                return frame
+            }
             var joints = frame.joints
             if let shoulder = joints[.rightShoulder] {
-                joints[.rightShoulder] = JointPoint(x: shoulder.x + 0.09, y: shoulder.y,
-                                                    confidence: shoulder.confidence)
+                joints[.rightShoulder] = JointPoint(
+                    x: shoulder.x + 0.09,
+                    y: shoulder.y,
+                    confidence: shoulder.confidence
+                )
             }
             return PoseFrame(time: frame.time, subjectCount: frame.subjectCount, joints: joints)
         }
@@ -60,8 +76,13 @@ struct PostureAdviceTests {
             if index / 20 >= 4, let hip = joints[.leftHip] {
                 joints[.leftHip] = JointPoint(x: hip.x, y: hip.y + 0.09, confidence: hip.confidence)
             }
-            return PoseFrame(time: frame.time, subjectCount: 1, joints: joints,
-                             aspectRatio: frame.aspectRatio, profileDeviationDegrees: 45)
+            return PoseFrame(
+                time: frame.time,
+                subjectCount: 1,
+                joints: joints,
+                aspectRatio: frame.aspectRatio,
+                profileDeviationDegrees: 45
+            )
         }
         let analysis = try measured(ExerciseAnalyzer.analyse(frames, as: .pushUp))
         #expect(analysis.reps.count == 6)
@@ -70,8 +91,11 @@ struct PostureAdviceTests {
 
     @Test func missingPostureJointPreservesRepCountWithoutGuessing() throws {
         let frames = pushUpTrace(reps: 6).map { frame in
-            PoseFrame(time: frame.time, subjectCount: 1,
-                      joints: frame.joints.filter { $0.key != .leftHip })
+            PoseFrame(
+                time: frame.time,
+                subjectCount: 1,
+                joints: frame.joints.filter { $0.key != .leftHip }
+            )
         }
         let analysis = try measured(ExerciseAnalyzer.analyse(frames, as: .pushUp))
         #expect(analysis.reps.count == 6)
@@ -83,13 +107,20 @@ struct PostureAdviceTests {
         #expect(analysis.reps.count == 6)
         #expect(analysis.reps.allSatisfy { $0.postureValue != nil })
 
-        let reps = (0..<6).map { (index: Int) -> RepMetric in
-            RepMetric(number: index + 1, startTime: Double(index) * 2,
-                      endTime: Double(index + 1) * 2, relativeRange: 75.0,
-                      postureValue: index >= 4 ? 27.0 : 9.0)
+        let reps = (0 ..< 6).map { (index: Int) -> RepMetric in
+            RepMetric(
+                number: index + 1,
+                startTime: Double(index) * 2,
+                endTime: Double(index + 1) * 2,
+                relativeRange: 75.0,
+                postureValue: index >= 4 ? 27.0 : 9.0
+            )
         }
-        let changed = SetAnalysis(reps: reps, confidence: 0.9,
-                                  rubricVersion: ExerciseDefinition.stiffLegDeadlift.rubricVersion)
+        let changed = SetAnalysis(
+            reps: reps,
+            confidence: 0.9,
+            rubricVersion: ExerciseDefinition.stiffLegDeadlift.rubricVersion
+        )
         let cue = CueSelector.select(from: changed, exercise: .stiffLegDeadlift)
         #expect(cue?.kind == .kneeBendIncreased)
         #expect(cue?.observation == "Your knees bent more during the last two hinges.")
@@ -97,14 +128,20 @@ struct PostureAdviceTests {
     }
 
     @Test func changingRangeDoesNotConfusePostureWithRange() {
-        let reps = (0..<6).map { (index: Int) -> RepMetric in
-            RepMetric(number: index + 1, startTime: Double(index) * 2,
-                      endTime: Double(index + 1) * 2,
-                      relativeRange: index >= 4 ? 60.0 : 80.0,
-                      postureValue: index >= 4 ? 35.0 : 10.0)
+        let reps = (0 ..< 6).map { (index: Int) -> RepMetric in
+            RepMetric(
+                number: index + 1,
+                startTime: Double(index) * 2,
+                endTime: Double(index + 1) * 2,
+                relativeRange: index >= 4 ? 60.0 : 80.0,
+                postureValue: index >= 4 ? 35.0 : 10.0
+            )
         }
-        let analysis = SetAnalysis(reps: reps, confidence: 0.9,
-                                   rubricVersion: ExerciseDefinition.staticLunge.rubricVersion)
+        let analysis = SetAnalysis(
+            reps: reps,
+            confidence: 0.9,
+            rubricVersion: ExerciseDefinition.staticLunge.rubricVersion
+        )
         #expect(CueSelector.select(from: analysis, exercise: .staticLunge)?.kind == .rangeDecreased)
     }
 
@@ -116,7 +153,9 @@ struct PostureAdviceTests {
     }
 
     private func measured(_ outcome: AnalysisOutcome) throws -> SetAnalysis {
-        guard case .analyzed(let analysis) = outcome else { throw TraceError.notMeasured }
+        guard case .analyzed(let analysis) = outcome else {
+            throw TraceError.notMeasured
+        }
         return analysis
     }
 }

@@ -20,11 +20,14 @@ final class CameraAngleUITests: XCTestCase {
         app.reveal(limits)
         limits.tap()
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(
-            format: "label CONTAINS[c] %@", "counted your reps without posture advice")).firstMatch.exists)
+            format: "label CONTAINS[c] %@", "counted your reps without posture advice"
+        )).firstMatch.exists)
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ]) { issue in
-            print("Front-view result audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
+            print(
+                "Front-view result audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")"
+            )
             return false
         }
 
@@ -39,7 +42,9 @@ final class CameraAngleUITests: XCTestCase {
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ]) { issue in
-            print("Camera-angle options audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
+            print(
+                "Camera-angle options audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")"
+            )
             return false
         }
         app.navigationBars.buttons.element(boundBy: 0).tap()
@@ -91,6 +96,7 @@ final class CameraAngleUITests: XCTestCase {
         stop.tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts.matching(NSPredicate(
-            format: "label CONTAINS %@", "needs a side view")).firstMatch.exists)
+            format: "label CONTAINS %@", "needs a side view"
+        )).firstMatch.exists)
     }
 }

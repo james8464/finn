@@ -40,16 +40,21 @@ final class ComparisonNarrator {
     }
 
     func recap(for comparison: Comparison) async -> Recap {
-        guard !Task.isCancelled, generator.available else { return template(for: comparison) }
+        guard !Task.isCancelled, generator.available else {
+            return template(for: comparison)
+        }
         let generated = await generation.response(timeout: timeout) { [generator] in
             try await generator.generate(for: comparison)
         }
         guard let generated, isValid(generated, for: comparison) else {
             return template(for: comparison)
         }
-        return Recap(text: generated.explanation.trimmingCharacters(in: .whitespacesAndNewlines),
-                     evidenceRepNumbers: generated.evidenceRepNumbers,
-                     source: .appleIntelligence, facts: comparison)
+        return Recap(
+            text: generated.explanation.trimmingCharacters(in: .whitespacesAndNewlines),
+            evidenceRepNumbers: generated.evidenceRepNumbers,
+            source: .appleIntelligence,
+            facts: comparison
+        )
     }
 
     /// Reviewed wording used whenever generation is unavailable, slow, or invalid.
@@ -57,12 +62,26 @@ final class ComparisonNarrator {
         let copy = comparison.exercise.definition.copy
         let text: String
         switch comparison.rangeDirection {
-        case .longer: text = String(localized: "Camera-measured \(copy.rangeNoun) was \(copy.moreRange) in your second set.")
-        case .shorter: text = String(localized: "Camera-measured \(copy.rangeNoun) was \(copy.lessRange) in your second set.")
-        case .noClearChange: text = String(localized: "There was no clear camera-measured \(copy.rangeNoun) change between sets.")
+        case .longer:
+            text =
+                String(
+                    localized: "Camera-measured \(copy.rangeNoun) was \(copy.moreRange) in your second set."
+                )
+        case .shorter:
+            text =
+                String(
+                    localized: "Camera-measured \(copy.rangeNoun) was \(copy.lessRange) in your second set."
+                )
+        case .noClearChange:
+            text =
+                String(localized: "There was no clear camera-measured \(copy.rangeNoun) change between sets.")
         }
-        return Recap(text: text, evidenceRepNumbers: comparison.cueRepNumbers,
-                     source: .template, facts: comparison)
+        return Recap(
+            text: text,
+            evidenceRepNumbers: comparison.cueRepNumbers,
+            source: .template,
+            facts: comparison
+        )
     }
 
     /// Accepts only sentences from a closed set built from the exercise's own vocabulary, so the
@@ -71,7 +90,8 @@ final class ComparisonNarrator {
         let copy = comparison.exercise.definition.copy
         let noun = copy.rangeNoun
         switch comparison.rangeDirection {
-        case .longer, .shorter:
+        case .longer,
+             .shorter:
             let direction = comparison.rangeDirection == .longer ? copy.moreRange : copy.lessRange
             let subjects = ["Your camera-measured \(noun)", "Your measured \(noun)", "Your \(noun)",
                             "The camera-measured \(noun)", "Your \(copy.shareNoun) \(noun)"]
@@ -105,9 +125,13 @@ private struct AppleGeneratedRecap {
 @MainActor
 private final class AppleRecapGenerator: RecapGenerating {
     var available: Bool {
-// the instructions and the accepted sentences are English; other languages keep the template.
-        guard SpokenLanguage.appLanguage == "en" else { return false }
-        if case .available = SystemLanguageModel.default.availability { return true }
+        // the instructions and the accepted sentences are English; other languages keep the template.
+        guard SpokenLanguage.appLanguage == "en" else {
+            return false
+        }
+        if case .available = SystemLanguageModel.default.availability {
+            return true
+        }
         return false
     }
 
@@ -115,38 +139,48 @@ private final class AppleRecapGenerator: RecapGenerating {
         let definition = comparison.exercise.definition
         let copy = definition.copy
         let instructions = """
-            Choose one plain sentence about the supplied camera-measured comparison. For \(copy.moreRange) or
-            \(copy.lessRange), use "Your camera-measured \(copy.rangeNoun) was \(copy.moreRange)/\(copy.lessRange) in the second set." with
-            the supplied direction. For no clear change, use "There was no clear camera-measured
-            \(copy.rangeNoun) change between sets." Do not add causes, measurements, body-part diagnoses,
-            safety claims, advice, or numbers. Return the evidence rep numbers exactly as supplied.
-            """
+        Choose one plain sentence about the supplied camera-measured comparison. For \(copy.moreRange) or
+        \(copy.lessRange), use "Your camera-measured \(copy.rangeNoun) was \(copy.moreRange)/\(copy.lessRange) in the second set." with
+        the supplied direction. For no clear change, use "There was no clear camera-measured
+        \(copy.rangeNoun) change between sets." Do not add causes, measurements, body-part diagnoses,
+        safety claims, advice, or numbers. Return the evidence rep numbers exactly as supplied.
+        """
         let direction: String
         switch comparison.rangeDirection {
-        case .longer: direction = copy.moreRange
-        case .shorter: direction = copy.lessRange
-        case .noClearChange: direction = comparison.rangeDirection.rawValue
+        case .longer:
+            direction = copy.moreRange
+        case .shorter:
+            direction = copy.lessRange
+        case .noClearChange:
+            direction = comparison.rangeDirection.rawValue
         }
         let measure: String
         switch definition.rangeUnit {
-        case .bodyLengthFraction: measure = "relative range"
-        case .degrees: measure = "\(copy.rangeNoun) in degrees from the starting position"
+        case .bodyLengthFraction:
+            measure = "relative range"
+        case .degrees:
+            measure = "\(copy.rangeNoun) in degrees from the starting position"
         }
         let prompt = """
-            Exercise: \(copy.name), side view.
-            Direction: \(direction).
-            First \(measure): \(comparison.firstMedianRange).
-            Second \(measure): \(comparison.secondMedianRange).
-            First median rep duration: \(comparison.firstMedianDuration) seconds.
-            Second median rep duration: \(comparison.secondMedianDuration) seconds.
-            Cue category: \(comparison.cueKind?.rawValue ?? "none").
-            Evidence rep numbers: \(comparison.cueRepNumbers).
-            """
+        Exercise: \(copy.name), side view.
+        Direction: \(direction).
+        First \(measure): \(comparison.firstMedianRange).
+        Second \(measure): \(comparison.secondMedianRange).
+        First median rep duration: \(comparison.firstMedianDuration) seconds.
+        Second median rep duration: \(comparison.secondMedianDuration) seconds.
+        Cue category: \(comparison.cueKind?.rawValue ?? "none").
+        Evidence rep numbers: \(comparison.cueRepNumbers).
+        """
         let session = LanguageModelSession(instructions: instructions)
         try Task.checkCancellation()
-        let response = try await session.respond(to: prompt, generating: AppleGeneratedRecap.self,
-                                                  options: GenerationOptions(maximumResponseTokens: 256))
-        return GeneratedRecap(explanation: response.content.explanation,
-                              evidenceRepNumbers: response.content.evidenceRepNumbers)
+        let response = try await session.respond(
+            to: prompt,
+            generating: AppleGeneratedRecap.self,
+            options: GenerationOptions(maximumResponseTokens: 256)
+        )
+        return GeneratedRecap(
+            explanation: response.content.explanation,
+            evidenceRepNumbers: response.content.evidenceRepNumbers
+        )
     }
 }

@@ -85,18 +85,29 @@ nonisolated struct WatchState: Equatable, Sendable {
             WatchMessageKey.languageCode: languageCode,
             WatchMessageKey.sentAt: sentAt,
         ]
-        if let setID { message[WatchMessageKey.setID] = setID }
-        if let coachMessage { message[WatchMessageKey.coachMessage] = coachMessage }
-        if let caption { message[WatchMessageKey.caption] = caption }
-        if let summary { message[WatchMessageKey.summary] = summary }
+        if let setID {
+            message[WatchMessageKey.setID] = setID
+        }
+        if let coachMessage {
+            message[WatchMessageKey.coachMessage] = coachMessage
+        }
+        if let caption {
+            message[WatchMessageKey.caption] = caption
+        }
+        if let summary {
+            message[WatchMessageKey.summary] = summary
+        }
         return message
     }
 
     /// Reads a state message; nil for anything else. Missing optional values take their defaults.
     init?(message: [String: Any]) {
-        guard message[WatchMessageKey.messageType] as? String == Self.messageType,
-              let rawStage = message[WatchMessageKey.stage] as? String,
-              let stage = WatchStage(rawValue: rawStage) else { return nil }
+        guard
+            message[WatchMessageKey.messageType] as? String == Self.messageType,
+            let rawStage = message[WatchMessageKey.stage] as? String,
+            let stage = WatchStage(rawValue: rawStage) else {
+            return nil
+        }
         self.stage = stage
         countdown = WatchMessageKey.integer(message[WatchMessageKey.countdown]) ?? 0
         exercise = message[WatchMessageKey.exercise] as? String ?? ""
@@ -115,11 +126,24 @@ nonisolated struct WatchState: Equatable, Sendable {
         sentAt = WatchMessageKey.number(message[WatchMessageKey.sentAt]) ?? 0
     }
 
-    init(stage: WatchStage = .ready, countdown: Int = 0, exercise: String = "", reps: Int = 0,
-         caption: String? = nil, haptic: WatchHaptic = .none, summary: String? = nil,
-         wristControls: Bool = true, handsFree: Bool = false, demoInput: Bool = false,
-         measuresHeartRate: Bool = false, sentAt: Double = 0, setID: String? = nil,
-         coachMessage: String? = nil, hapticsEnabled: Bool = true, languageCode: String = "en-GB") {
+    init(
+        stage: WatchStage = .ready,
+        countdown: Int = 0,
+        exercise: String = "",
+        reps: Int = 0,
+        caption: String? = nil,
+        haptic: WatchHaptic = .none,
+        summary: String? = nil,
+        wristControls: Bool = true,
+        handsFree: Bool = false,
+        demoInput: Bool = false,
+        measuresHeartRate: Bool = false,
+        sentAt: Double = 0,
+        setID: String? = nil,
+        coachMessage: String? = nil,
+        hapticsEnabled: Bool = true,
+        languageCode: String = "en-GB"
+    ) {
         self.stage = stage
         self.countdown = countdown
         self.exercise = exercise
@@ -141,7 +165,9 @@ nonisolated struct WatchState: Equatable, Sendable {
     /// Whether this state should replace `shown` on the watch. Only a newer one does, so a late
     /// application context never rewinds the screen and a repeated message never taps twice.
     func isNewer(than shown: WatchState?) -> Bool {
-        guard let shown else { return true }
+        guard let shown else {
+            return true
+        }
         return sentAt > shown.sentAt
     }
 
@@ -154,7 +180,9 @@ nonisolated struct WatchState: Equatable, Sendable {
 
     /// The live copy of a context already shown may refresh liveness without replaying its screen.
     func matchesShownStateForLive(_ shown: WatchState?, now: TimeInterval) -> Bool {
-        guard let shown else { return false }
+        guard let shown else {
+            return false
+        }
         return self == shown && isFreshForLive(now: now)
     }
 
@@ -169,16 +197,26 @@ nonisolated struct WatchRhythmClock: Equatable, Sendable {
     let interval: Int
     private var nextBeat: Double?
 
-    init(interval: Int = 3) { self.interval = [2, 3, 4, 5].contains(interval) ? interval : 3 }
-    mutating func resume(now: Double) { nextBeat = now + Double(interval) }
-    mutating func stop() { nextBeat = nil }
+    init(interval: Int = 3) {
+        self.interval = [2, 3, 4, 5].contains(interval) ? interval : 3
+    }
+
+    mutating func resume(now: Double) {
+        nextBeat = now + Double(interval)
+    }
+
+    mutating func stop() {
+        nextBeat = nil
+    }
 
     mutating func shouldTap(now: Double, lastPhoneStateAt: Double, reachable: Bool) -> Bool {
         guard reachable, now - lastPhoneStateAt < 15, let nextBeat else {
             stop()
             return false
         }
-        guard now >= nextBeat else { return false }
+        guard now >= nextBeat else {
+            return false
+        }
         let missed = floor((now - nextBeat) / Double(interval)) + 1
         self.nextBeat = nextBeat + missed * Double(interval)
         return true
@@ -186,10 +224,16 @@ nonisolated struct WatchRhythmClock: Equatable, Sendable {
 }
 
 nonisolated enum WatchRhythmPolicy {
-    static func canEnable(permissionGranted: Bool) -> Bool { permissionGranted }
+    static func canEnable(permissionGranted: Bool) -> Bool {
+        permissionGranted
+    }
 
-    static func canTap(enabled: Bool, masterHapticsEnabled: Bool, workoutRunning: Bool,
-                       capturing: Bool) -> Bool {
+    static func canTap(
+        enabled: Bool,
+        masterHapticsEnabled: Bool,
+        workoutRunning: Bool,
+        capturing: Bool
+    ) -> Bool {
         enabled && masterHapticsEnabled && workoutRunning && capturing
     }
 }
@@ -197,9 +241,15 @@ nonisolated enum WatchRhythmPolicy {
 nonisolated enum WatchLanguage {
     static func resolved(_ identifier: String?) -> String {
         let language = (identifier ?? "").replacingOccurrences(of: "_", with: "-").lowercased()
-        if language.hasPrefix("fr") { return "fr" }
-        if language.hasPrefix("es") { return "es" }
-        if language == "en-us" { return "en-US" }
+        if language.hasPrefix("fr") {
+            return "fr"
+        }
+        if language.hasPrefix("es") {
+            return "es"
+        }
+        if language == "en-us" {
+            return "en-US"
+        }
         return "en-GB"
     }
 }
@@ -218,9 +268,12 @@ nonisolated enum WatchCommand: String, CaseIterable, Equatable, Sendable {
     }
 
     init?(message: [String: Any]) {
-        guard message[WatchMessageKey.messageType] as? String == Self.messageType,
-              let raw = message[WatchMessageKey.command] as? String,
-              let command = WatchCommand(rawValue: raw) else { return nil }
+        guard
+            message[WatchMessageKey.messageType] as? String == Self.messageType,
+            let raw = message[WatchMessageKey.command] as? String,
+            let command = WatchCommand(rawValue: raw) else {
+            return nil
+        }
         self = command
     }
 }
@@ -246,9 +299,12 @@ nonisolated struct WatchHeartRate: Equatable, Sendable {
     }
 
     init?(message: [String: Any]) {
-        guard message[WatchMessageKey.messageType] as? String == Self.messageType,
-              let beats = WatchMessageKey.number(message[WatchMessageKey.beatsPerMinute]),
-              let measuredAt = WatchMessageKey.number(message[WatchMessageKey.measuredAt]) else { return nil }
+        guard
+            message[WatchMessageKey.messageType] as? String == Self.messageType,
+            let beats = WatchMessageKey.number(message[WatchMessageKey.beatsPerMinute]),
+            let measuredAt = WatchMessageKey.number(message[WatchMessageKey.measuredAt]) else {
+            return nil
+        }
         self.init(beatsPerMinute: beats, measuredAt: measuredAt)
     }
 }
@@ -280,14 +336,22 @@ nonisolated enum WatchMessageKey {
 
     /// Numbers come back as NSNumber on Apple platforms and as Int or Double elsewhere.
     static func integer(_ value: Any?) -> Int? {
-        if let value = value as? Int { return value }
-        if let value = value as? Double, value.isFinite, value == value.rounded() { return Int(value) }
+        if let value = value as? Int {
+            return value
+        }
+        if let value = value as? Double, value.isFinite, value == value.rounded() {
+            return Int(value)
+        }
         return nil
     }
 
     static func number(_ value: Any?) -> Double? {
-        if let value = value as? Double { return value }
-        if let value = value as? Int { return Double(value) }
+        if let value = value as? Double {
+            return value
+        }
+        if let value = value as? Int {
+            return Double(value)
+        }
         return nil
     }
 }

@@ -4,18 +4,25 @@ import SwiftUI
 /// the three offers of the plan screen and their products in `TestConfig.storekit`. The trial is
 /// its own annual product, so choosing Annual never starts a trial by itself
 nonisolated enum CoachPlan: String, CaseIterable, Sendable {
-    case weekly, annual, trial
+    case weekly
+    case annual
+    case trial
 
     var productID: String {
         switch self {
-        case .weekly: "ai.mwm.build.challenge.team.08.weekly.00.ft.05.99"
-        case .annual: "ai.mwm.build.challenge.team.08.yearly.00.ft.149.99"
-        case .trial: "ai.mwm.build.challenge.team.08.yearly.14.ft.149.99"
+        case .weekly:
+            "ai.mwm.build.challenge.team.08.weekly.00.ft.05.99"
+        case .annual:
+            "ai.mwm.build.challenge.team.08.yearly.00.ft.149.99"
+        case .trial:
+            "ai.mwm.build.challenge.team.08.yearly.14.ft.149.99"
         }
     }
 
     /// the design's prices, shown until the App Store answers (previews, launches without StoreKit)
-    var fallbackPrice: String { self == .weekly ? "€5.99" : "€149.99" }
+    var fallbackPrice: String {
+        self == .weekly ? "€5.99" : "€149.99"
+    }
 }
 
 /// the plan offer: Finn Coach+, weekly or annual, or annual after a two-week free trial.
@@ -34,23 +41,31 @@ struct PaywallView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric(relativeTo: .subheadline) private var planLabelWidth = 80.0
 
-    private static let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    private static let termsURL =
+        URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
     private static let privacyURL = URL(string: "https://james8464.github.io/finn/privacy.html")!
 
     private enum Notice {
-        case unavailable, nothingToRestore
+        case unavailable
+        case nothingToRestore
 
         var title: String {
             switch self {
-            case .unavailable: String(localized: "Purchase unavailable")
-            case .nothingToRestore: String(localized: "Nothing to restore")
+            case .unavailable:
+                String(localized: "Purchase unavailable")
+            case .nothingToRestore:
+                String(localized: "Nothing to restore")
             }
         }
 
         var message: String {
             switch self {
-            case .unavailable: String(localized: "The App Store can't be reached right now. Try again later.")
-            case .nothingToRestore: String(localized: "No Finn Coach+ subscription was found for this Apple Account.")
+            case .unavailable:
+                String(localized: "The App Store can't be reached right now. Try again later.")
+            case .nothingToRestore:
+                String(
+                    localized: "No Finn Coach+ subscription was found for this Apple Account."
+                )
             }
         }
     }
@@ -85,9 +100,18 @@ struct PaywallView: View {
         }
         .disabled(isBusy)
         .task { await loadProducts() }
-        .alert(notice?.title ?? "", isPresented: Binding(get: { notice != nil },
-                                                         set: { if !$0 { notice = nil } }),
-               presenting: notice) { _ in
+        .alert(
+            notice?.title ?? "",
+            isPresented: Binding(
+                get: { notice != nil },
+                set: {
+                    if !$0 {
+                        notice = nil
+                    }
+                }
+            ),
+            presenting: notice
+        ) { _ in
             Button("OK", role: .cancel) {}
         } message: { notice in
             Text(notice.message)
@@ -141,10 +165,16 @@ struct PaywallView: View {
             .padding(.horizontal, 4)
             .padding(.top, 10)
             VStack(spacing: 10) {
-                planRow(.weekly, title: String(localized: "Weekly"),
-                        price: String(localized: "\(price(.weekly)) / week"))
-                planRow(.annual, title: String(localized: "Annual"),
-                        price: String(localized: "\(price(.annual)) / year"))
+                planRow(
+                    .weekly,
+                    title: String(localized: "Weekly"),
+                    price: String(localized: "\(price(.weekly)) / week")
+                )
+                planRow(
+                    .annual,
+                    title: String(localized: "Annual"),
+                    price: String(localized: "\(price(.annual)) / year")
+                )
             }
             .padding(.top, 7)
         }
@@ -194,7 +224,10 @@ struct PaywallView: View {
                 layout {
                     Text(title)
                         .font(.subheadline.weight(.semibold))
-                        .frame(minWidth: typeSize.isAccessibilitySize ? nil : planLabelWidth, alignment: .leading)
+                        .frame(
+                            minWidth: typeSize.isAccessibilitySize ? nil : planLabelWidth,
+                            alignment: .leading
+                        )
                     Text(price)
                         .font(.headline)
                 }
@@ -229,13 +262,21 @@ struct PaywallView: View {
     private var termsText: String {
         switch plan {
         case nil:
-            String(localized: "Renews automatically. Cancel in Settings at least 24 hours before renewal. Trial for eligible subscribers.")
+            String(
+                localized: "Renews automatically. Cancel in Settings at least 24 hours before renewal. Trial for eligible subscribers."
+            )
         case .weekly?:
-            String(localized: "\(price(.weekly)) charged today, then weekly. Renews automatically. Cancel in Settings at least 24 hours before renewal.")
+            String(
+                localized: "\(price(.weekly)) charged today, then weekly. Renews automatically. Cancel in Settings at least 24 hours before renewal."
+            )
         case .annual?:
-            String(localized: "\(price(.annual)) charged today, then yearly. Renews automatically. Cancel in Settings at least 24 hours before renewal.")
+            String(
+                localized: "\(price(.annual)) charged today, then yearly. Renews automatically. Cancel in Settings at least 24 hours before renewal."
+            )
         case .trial?:
-            String(localized: "\(freeToday) today. After 2 weeks, \(price(.trial))/year. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only.")
+            String(
+                localized: "\(freeToday) today. After 2 weeks, \(price(.trial))/year. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only."
+            )
         }
     }
 
@@ -252,9 +293,13 @@ struct PaywallView: View {
     @ViewBuilder private func linkItems(separated: Bool) -> some View {
         Button { Task { await restore() } } label: { target("Restore purchases") }
             .accessibilityIdentifier("plan.restore")
-        if separated { Text(verbatim: "·").accessibilityHidden(true) }
+        if separated {
+            Text(verbatim: "·").accessibilityHidden(true)
+        }
         Link(destination: Self.termsURL) { target("Terms") }
-        if separated { Text(verbatim: "·").accessibilityHidden(true) }
+        if separated {
+            Text(verbatim: "·").accessibilityHidden(true)
+        }
         Link(destination: Self.privacyURL) { target("Privacy") }
     }
 
@@ -290,7 +335,9 @@ struct PaywallView: View {
     // MARK: StoreKit
 
     private func choose(_ chosen: CoachPlan) {
-        guard plan != chosen else { return }
+        guard plan != chosen else {
+            return
+        }
         withAnimation(reduceMotion ? nil : HomeStyle.spring) { plan = chosen }
         FinnHaptics.play(.selection)
     }
@@ -301,21 +348,30 @@ struct PaywallView: View {
 
     /// nothing due today, in the trial's currency
     private var freeToday: String {
-        guard let product = products[CoachPlan.trial.productID] else { return "€0" }
+        guard let product = products[CoachPlan.trial.productID] else {
+            return "€0"
+        }
         return Decimal.zero.formatted(product.priceFormatStyle.precision(.fractionLength(0)))
     }
 
     private func loadProducts() async {
-        guard let loaded = try? await Product.products(for: CoachPlan.allCases.map(\.productID)) else { return }
+        guard let loaded = try? await Product.products(for: CoachPlan.allCases.map(\.productID))
+        else {
+            return
+        }
         products = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
     }
 
     /// the App Store sheet for the chosen plan. A verified purchase moves on
     private func buy() async {
-        guard let plan else { return }
+        guard let plan else {
+            return
+        }
         isBusy = true
         defer { isBusy = false }
-        if products[plan.productID] == nil { await loadProducts() }
+        if products[plan.productID] == nil {
+            await loadProducts()
+        }
         guard let product = products[plan.productID] else {
             notice = .unavailable
             return
@@ -327,7 +383,8 @@ struct PaywallView: View {
                 next()
             case .success(.unverified):
                 notice = .unavailable
-            case .userCancelled, .pending:
+            case .userCancelled,
+                 .pending:
                 break
             @unknown default:
                 break
@@ -370,8 +427,10 @@ private extension View {
     /// a plan inside an offer: grey, or pink with black type once chosen
     func planSurface(_ selected: Bool) -> some View {
         foregroundStyle(selected ? Color.black : Color.primary)
-            .background(selected ? DashboardStyle.accent : HomeStyle.card,
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .background(
+                selected ? DashboardStyle.accent : HomeStyle.card,
+                in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+            )
             .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }

@@ -104,8 +104,11 @@ struct CameraStateTests {
 
     @Test func frameLimitUsesConfiguredSetDuration() async throws {
         let driver = FakeCaptureDriver()
-        let source = CameraPoseSource(authorise: { true }, driver: driver,
-                                      setDurationLimit: .seconds(3))
+        let source = CameraPoseSource(
+            authorise: { true },
+            driver: driver,
+            setDurationLimit: .seconds(3)
+        )
         let stream = try await source.start()
         var iterator = stream.makeAsyncIterator()
         await source.prepareForSet()
@@ -142,12 +145,15 @@ struct CameraStateTests {
 
     @Test func setLimitEndsCaptureWhenFramesStopArriving() async throws {
         let driver = FakeCaptureDriver()
-        let source = CameraPoseSource(authorise: { true }, driver: driver,
-                                      setDurationLimit: .milliseconds(25))
+        let source = CameraPoseSource(
+            authorise: { true },
+            driver: driver,
+            setDurationLimit: .milliseconds(25)
+        )
         let stream = try await source.start()
         await source.prepareForSet()
 
-        for _ in 0..<50 where source.state != .idle {
+        for _ in 0 ..< 50 where source.state != .idle {
             try await Task.sleep(for: .milliseconds(10))
         }
         guard source.state == .idle else {
@@ -167,7 +173,9 @@ struct CameraStateTests {
             await withCheckedContinuation { permissionReply = $0 }
         }, driver: driver)
         let attempt = Task { try await source.start() }
-        for _ in 0..<100 where source.state != .starting { await Task.yield() }
+        for _ in 0 ..< 100 where source.state != .starting {
+            await Task.yield()
+        }
         #expect(source.state == .starting)
         await source.stop()
         permissionReply?.resume(returning: true)
@@ -187,7 +195,9 @@ struct CameraStateTests {
             await withCheckedContinuation { permissionReply = $0 }
         }, driver: driver)
         let attempt = Task { try await source.start() }
-        for _ in 0..<100 where source.state != .starting { await Task.yield() }
+        for _ in 0 ..< 100 where source.state != .starting {
+            await Task.yield()
+        }
         do {
             _ = try await source.start()
             Issue.record("Second start must be rejected")

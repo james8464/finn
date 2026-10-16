@@ -6,7 +6,6 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-
 COLUMNS = (
     "set_id participant_id split consent_version capture_date device_model ios_build "
     "app_commit rubric_version camera orientation side view_category distance_m camera_height_cm "
@@ -67,21 +66,28 @@ def evaluate(rows):
         if row.get("rubric_version", "").strip() != RUBRIC:
             raise ValidationError(f"{set_id}: rubric_version must be {RUBRIC}")
         if row.get("app_outcome", "").strip() not in {
-            "measured", "insufficient_view", "failed", "interrupted"
+            "measured",
+            "insufficient_view",
+            "failed",
+            "interrupted",
         }:
             raise ValidationError(f"{set_id}: invalid app_outcome")
-        if row.get("view_category", "").strip() not in {
-            "side", "three_quarter", "front", "unclear"
-        }:
+        if row.get("view_category", "").strip() not in {"side", "three_quarter", "front", "unclear"}:
             raise ValidationError(f"{set_id}: invalid view_category")
         for field in ("body_visible", "bystander"):
             if row.get(field, "").strip() not in {"yes", "no"}:
                 raise ValidationError(f"{set_id}: {field} must be yes or no")
-        for field in ("expert_supported", "expert_show", "expert_unassessable",
-                      "expert_view_suitable"):
+        for field in ("expert_supported", "expert_show", "expert_unassessable", "expert_view_suitable"):
             if row.get(field, "").strip() not in {"", "yes", "no"}:
                 raise ValidationError(f"{set_id}: {field} must be yes, no, or blank")
-        for field in ("setup_attempts", "human_reps_a", "human_reps_b", "adjudicated_reps", "app_reps", "result_latency_ms"):
+        for field in (
+            "setup_attempts",
+            "human_reps_a",
+            "human_reps_b",
+            "adjudicated_reps",
+            "app_reps",
+            "result_latency_ms",
+        ):
             _number(row, field)
         if _number(row, "setup_attempts") == 0:
             raise ValidationError(f"{set_id}: setup_attempts must be at least 1")
@@ -98,8 +104,11 @@ def evaluate(rows):
         if cue_kind:
             parts = references.split(";")
             app_reps = _number(row, "app_reps")
-            if not references or any(not part.isdigit() or not 1 <= int(part) <= app_reps
-                                     for part in parts) or len(parts) != len(set(parts)):
+            if (
+                not references
+                or any(not part.isdigit() or not 1 <= int(part) <= app_reps for part in parts)
+                or len(parts) != len(set(parts))
+            ):
                 raise ValidationError(f"{set_id}: cue_rep_numbers must refer to app reps")
         elif references:
             raise ValidationError(f"{set_id}: cue_rep_numbers requires cue_kind")
@@ -115,31 +124,39 @@ def evaluate(rows):
     people = defaultdict(list)
     for row in holdout:
         people[row["participant_id"]].append(row)
-    setup_ok = sum(any(
-        row["app_outcome"] == "measured" and
-        (_number(row, "setup_attempts") or 999) <= 2
-        for row in sets
-    ) for sets in people.values())
+    setup_ok = sum(
+        any(row["app_outcome"] == "measured" and (_number(row, "setup_attempts") or 999) <= 2 for row in sets)
+        for sets in people.values()
+    )
     setup_complete = all(_number(row, "setup_attempts") is not None for row in holdout)
 
     countable = [row for row in holdout if _number(row, "adjudicated_reps") is not None]
-    rep_ok = sum(row["app_outcome"] == "measured" and
-                 _number(row, "app_reps") == _number(row, "adjudicated_reps")
-                 for row in countable)
-    label_complete = all(row.get("reference_method", "").strip() and
-                         _number(row, "human_reps_a") is not None and
-                         _number(row, "human_reps_b") is not None
-                         for row in countable)
+    rep_ok = sum(
+        row["app_outcome"] == "measured" and _number(row, "app_reps") == _number(row, "adjudicated_reps")
+        for row in countable
+    )
+    label_complete = all(
+        row.get("reference_method", "").strip()
+        and _number(row, "human_reps_a") is not None
+        and _number(row, "human_reps_b") is not None
+        for row in countable
+    )
 
     usable = [row for row in holdout if row["app_outcome"] == "measured"]
     emitted = [row for row in holdout if row.get("cue_kind", "").strip()]
-    reviewed = [row for row in emitted if row.get("expert_supported", "").strip() and
-                row.get("expert_show", "").strip()]
-    show = sum(row["expert_supported"] == "yes" and row["expert_show"] == "yes"
-               for row in reviewed)
-    cue_status = ("not measurable" if not emitted else
-                  _gate(show, len(emitted), .8, sample_ready and len(emitted) >= 5
-                        and len(reviewed) == len(emitted)))
+    reviewed = [
+        row
+        for row in emitted
+        if row.get("expert_supported", "").strip() and row.get("expert_show", "").strip()
+    ]
+    show = sum(row["expert_supported"] == "yes" and row["expert_show"] == "yes" for row in reviewed)
+    cue_status = (
+        "not measurable"
+        if not emitted
+        else _gate(
+            show, len(emitted), 0.8, sample_ready and len(emitted) >= 5 and len(reviewed) == len(emitted)
+        )
+    )
 
     timed = [row for row in usable if _number(row, "result_latency_ms") is not None]
     timely = sum(_number(row, "result_latency_ms") <= 5000 for row in timed)
@@ -148,8 +165,11 @@ def evaluate(rows):
     view_labels_complete = all(row.get("expert_view_suitable", "").strip() for row in holdout)
     unsuitable = [row for row in holdout if row.get("expert_view_suitable") == "no"]
     unsuitable_measured = sum(row["app_outcome"] == "measured" for row in unsuitable)
-    view_status = ("unverified" if not holdout or not view_labels_complete else
-                   "not measurable" if not unsuitable else "reported")
+    view_status = (
+        "unverified"
+        if not holdout or not view_labels_complete
+        else "not measurable" if not unsuitable else "reported"
+    )
 
     breakdown = {}
     for field in ("device_model", "lighting", "side", "view_category"):
@@ -157,70 +177,106 @@ def evaluate(rows):
         for row in holdout:
             groups[row[field]].append(row)
         breakdown[field] = {
-            key: {"sets": len(group),
-                  "countable": sum(_number(row, "adjudicated_reps") is not None for row in group),
-                  "exact": sum(row["app_outcome"] == "measured" and
-                               _number(row, "adjudicated_reps") is not None and
-                               _number(row, "app_reps") == _number(row, "adjudicated_reps")
-                               for row in group)}
+            key: {
+                "sets": len(group),
+                "countable": sum(_number(row, "adjudicated_reps") is not None for row in group),
+                "exact": sum(
+                    row["app_outcome"] == "measured"
+                    and _number(row, "adjudicated_reps") is not None
+                    and _number(row, "app_reps") == _number(row, "adjudicated_reps")
+                    for row in group
+                ),
+            }
             for key, group in sorted(groups.items())
         }
-    failures = Counter(row.get("failure_reason", "").strip() or row["app_outcome"]
-                       for row in holdout if row["app_outcome"] != "measured")
+    failures = Counter(
+        row.get("failure_reason", "").strip() or row["app_outcome"]
+        for row in holdout
+        if row["app_outcome"] != "measured"
+    )
     return {
-        "total_sets": len(rows), "holdout_sets": len(holdout),
-        "holdout_people": len(people), "sample_ready": sample_ready,
+        "total_sets": len(rows),
+        "holdout_sets": len(holdout),
+        "holdout_people": len(people),
+        "sample_ready": sample_ready,
         "app_commit": next(iter(commits), "unfrozen"),
-        "setup": _metric(setup_ok, len(people), _gate(setup_ok, len(people), .8,
-                                                      sample_ready and setup_complete)),
-        "rep_count": _metric(rep_ok, len(countable), _gate(rep_ok, len(countable), .9,
-                                                            sample_ready and len(countable) >= 18
-                                                            and label_complete)),
+        "setup": _metric(
+            setup_ok, len(people), _gate(setup_ok, len(people), 0.8, sample_ready and setup_complete)
+        ),
+        "rep_count": _metric(
+            rep_ok,
+            len(countable),
+            _gate(rep_ok, len(countable), 0.9, sample_ready and len(countable) >= 18 and label_complete),
+        ),
         "cue_agreement": _metric(show, len(emitted), cue_status),
-        "cue_reviews": _metric(len(reviewed), len(emitted),
-                               "reported" if emitted else "not measurable"),
+        "cue_reviews": _metric(len(reviewed), len(emitted), "reported" if emitted else "not measurable"),
         "cue_coverage": _metric(len(emitted), len(usable), "reported" if usable else "unverified"),
-        "latency": _metric(timely, len(usable), _gate(timely, len(usable), 1.0,
-                                                       sample_ready and len(timed) == len(usable))),
-        "abstention": _metric(sum(row["expert_unassessable"] == "yes" for row in abstention_reviewed),
-                              len(rejected), "reported" if len(abstention_reviewed) == len(rejected)
-                              and rejected else "unverified"),
+        "latency": _metric(
+            timely, len(usable), _gate(timely, len(usable), 1.0, sample_ready and len(timed) == len(usable))
+        ),
+        "abstention": _metric(
+            sum(row["expert_unassessable"] == "yes" for row in abstention_reviewed),
+            len(rejected),
+            "reported" if len(abstention_reviewed) == len(rejected) and rejected else "unverified",
+        ),
         "unsuitable_view_acceptance": _metric(unsuitable_measured, len(unsuitable), view_status),
-        "breakdown": breakdown, "failures": failures,
+        "breakdown": breakdown,
+        "failures": failures,
     }
 
 
 def render_report(result):
-    lines = ["# Squat v1 holdout score", "",
-             f"Data: {result['total_sets']} total sets; {result['holdout_sets']} holdout sets; "
-             f"{result['holdout_people']} holdout people. Frozen app commit: `{result['app_commit']}`.",
-             "",
-             "Sample gate: " + ("met" if result["sample_ready"] else
-                                "unverified (need at least 30 total and 18 holdout sets)"),
-             "", "| Measure | Numerator / denominator | Status |", "| --- | ---: | --- |"]
-    labels = (("setup", "Setup within two attempts"), ("rep_count", "Exact rep count"),
-              ("cue_agreement", "Cue agreement"), ("cue_reviews", "Cue reviews complete"),
-              ("cue_coverage", "Cue coverage"), ("latency", "Results within 5 seconds"),
-              ("abstention", "Reviewer agrees with view rejection"),
-              ("unsuitable_view_acceptance", "Measured on unsuitable view (lower is better)"))
+    lines = [
+        "# Squat v1 holdout score",
+        "",
+        f"Data: {result['total_sets']} total sets; {result['holdout_sets']} holdout sets; "
+        f"{result['holdout_people']} holdout people. Frozen app commit: `{result['app_commit']}`.",
+        "",
+        "Sample gate: "
+        + ("met" if result["sample_ready"] else "unverified (need at least 30 total and 18 holdout sets)"),
+        "",
+        "| Measure | Numerator / denominator | Status |",
+        "| --- | ---: | --- |",
+    ]
+    labels = (
+        ("setup", "Setup within two attempts"),
+        ("rep_count", "Exact rep count"),
+        ("cue_agreement", "Cue agreement"),
+        ("cue_reviews", "Cue reviews complete"),
+        ("cue_coverage", "Cue coverage"),
+        ("latency", "Results within 5 seconds"),
+        ("abstention", "Reviewer agrees with view rejection"),
+        ("unsuitable_view_acceptance", "Measured on unsuitable view (lower is better)"),
+    )
     for key, label in labels:
         metric = result[key]
-        lines.append(f"| {label} | {metric['numerator']} / {metric['denominator']} | "
-                     f"{metric['status']} |")
-    lines += ["", "## Holdout breakdown", "", "| Factor | Value | Sets | Exact / countable |",
-              "| --- | --- | ---: | ---: |"]
+        lines.append(
+            f"| {label} | {metric['numerator']} / {metric['denominator']} | " f"{metric['status']} |"
+        )
+    lines += [
+        "",
+        "## Holdout breakdown",
+        "",
+        "| Factor | Value | Sets | Exact / countable |",
+        "| --- | --- | ---: | ---: |",
+    ]
     for field, groups in result["breakdown"].items():
         for value, counts in groups.items():
-            lines.append(f"| {field} | {value} | {counts['sets']} | "
-                         f"{counts['exact']} / {counts['countable']} |")
+            lines.append(
+                f"| {field} | {value} | {counts['sets']} | " f"{counts['exact']} / {counts['countable']} |"
+            )
     lines += ["", "## Non-measured outcomes", ""]
     if result["failures"]:
         lines += ["| Reason | Sets |", "| --- | ---: |"]
         lines += [f"| {reason} | {count} |" for reason, count in sorted(result["failures"].items())]
     else:
         lines.append("None recorded.")
-    lines += ["", "A pass requires the full sample and complete relevant annotations. "
-              "This report does not replace physical-device and specialist review.", ""]
+    lines += [
+        "",
+        "A pass requires the full sample and complete relevant annotations. "
+        "This report does not replace physical-device and specialist review.",
+        "",
+    ]
     return "\n".join(lines)
 
 

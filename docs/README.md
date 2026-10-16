@@ -11,3 +11,5 @@ The root [README](../README.md) owns current build status. [Planning](../plannin
 | Architecture | [Decisions & plans](architecture/) |
 
 Keep implemented behavior, synthetic results, physical-device evidence, and future ideas distinct. Update the README when product status changes; public release copy must match the signed build.
+
+Contributor code conventions: [Code style](development/code-style.md).

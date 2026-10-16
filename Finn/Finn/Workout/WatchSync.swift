@@ -5,12 +5,20 @@ import Observation
 nonisolated enum WatchSyncRules {
     static func stage(for stage: WorkoutStage) -> WatchStage {
         switch stage {
-        case .ready, .openingCamera, .error: .ready
-        case .framing: .framing
-        case .countdown: .countdown
-        case .capturing: .capturing
-        case .analyzing: .analyzing
-        case .result: .result
+        case .ready,
+             .openingCamera,
+             .error:
+            .ready
+        case .framing:
+            .framing
+        case .countdown:
+            .countdown
+        case .capturing:
+            .capturing
+        case .analyzing:
+            .analyzing
+        case .result:
+            .result
         }
     }
 
@@ -20,9 +28,12 @@ nonisolated enum WatchSyncRules {
         case .measured(let analysis, let cue):
             let count = analysis.reps.count
             let reps = String(localized: "\(count) reps measured.")
-            guard let cue, !cueDismissed else { return reps }
+            guard let cue, !cueDismissed else {
+                return reps
+            }
             return "\(reps) \(cue.observation)"
-        case .insufficientView, .failed:
+        case .insufficientView,
+             .failed:
             return String(localized: "Finn couldn’t measure this set. The reason is on your iPhone.")
         case .interrupted:
             return String(localized: "The set stopped before it was complete.")
@@ -31,10 +42,18 @@ nonisolated enum WatchSyncRules {
         }
     }
 
-    static func state(stage: WorkoutStage, exercise: ExerciseKind, liveReps: Int, caption: String?,
-                      result: WorkoutResult?, cueDismissed: Bool, handsFree: Bool,
-                      demoInput: Bool, measuresHeartRate: Bool = false,
-                      coachMessage: String? = nil) -> WatchState {
+    static func state(
+        stage: WorkoutStage,
+        exercise: ExerciseKind,
+        liveReps: Int,
+        caption: String?,
+        result: WorkoutResult?,
+        cueDismissed: Bool,
+        handsFree: Bool,
+        demoInput: Bool,
+        measuresHeartRate: Bool = false,
+        coachMessage: String? = nil
+    ) -> WatchState {
         let watchStage = Self.stage(for: stage)
         var state = WatchState(
             stage: watchStage,
@@ -42,19 +61,28 @@ nonisolated enum WatchSyncRules {
             wristControls: false,
             handsFree: handsFree,
             demoInput: demoInput,
-// demo input films nobody, so there is no heart rate to pair with it.
-            measuresHeartRate: measuresHeartRate && !demoInput)
+            // demo input films nobody, so there is no heart rate to pair with it.
+            measuresHeartRate: measuresHeartRate && !demoInput
+        )
         switch watchStage {
         case .countdown:
-            if case .countdown(let seconds) = stage { state.countdown = seconds }
-        case .capturing, .analyzing:
+            if case .countdown(let seconds) = stage {
+                state.countdown = seconds
+            }
+        case .capturing,
+             .analyzing:
             state.reps = liveReps
             state.caption = caption
-            if watchStage == .capturing { state.coachMessage = coachMessage }
+            if watchStage == .capturing {
+                state.coachMessage = coachMessage
+            }
         case .result:
-            if case .measured(let analysis, _) = result { state.reps = analysis.reps.count }
+            if case .measured(let analysis, _) = result {
+                state.reps = analysis.reps.count
+            }
             state.summary = summary(for: result, cueDismissed: cueDismissed)
-        case .ready, .framing:
+        case .ready,
+             .framing:
             break
         }
         return state
@@ -86,9 +114,12 @@ final class WatchSync {
     private var activeSetID: String?
     private var heartbeatTask: Task<Void, Never>?
 
-    init(model: WorkoutSessionModel, demoInput: Bool = false,
-         clock: @escaping () -> Double = { Date().timeIntervalSince1970 },
-         deliver: @escaping (WatchState) -> Void) {
+    init(
+        model: WorkoutSessionModel,
+        demoInput: Bool = false,
+        clock: @escaping () -> Double = { Date().timeIntervalSince1970 },
+        deliver: @escaping (WatchState) -> Void
+    ) {
         self.model = model
         self.demoInput = demoInput
         self.clock = clock
@@ -98,18 +129,25 @@ final class WatchSync {
 
     /// The screen shown now, without a tap, for a watch that just opened Finn.
     var current: WatchState? {
-        guard var state = lastSent else { return nil }
+        guard var state = lastSent else {
+            return nil
+        }
         state.haptic = .none
         return state
     }
 
     func handle(_ heartRate: WatchHeartRate) {
-        model?.receiveHeartRate(heartRate.beatsPerMinute, at: Date(timeIntervalSince1970: heartRate.measuredAt))
+        model?.receiveHeartRate(
+            heartRate.beatsPerMinute,
+            at: Date(timeIntervalSince1970: heartRate.measuredAt)
+        )
     }
 
     /// Liveness update during capture. It carries no tap or new coaching line.
     func heartbeat() {
-        guard var current = lastSent, current.stage == .capturing else { return }
+        guard var current = lastSent, current.stage == .capturing else {
+            return
+        }
         current.haptic = .none
         current.sentAt = max(clock(), current.sentAt + 0.001)
         lastSent = current
@@ -117,11 +155,13 @@ final class WatchSync {
     }
 
     private func follow() {
-        guard let model else { return }
+        guard let model else {
+            return
+        }
         let state = withObservationTracking {
             Self.state(of: model, demoInput: demoInput)
         } onChange: { [weak self] in
-// called before the change lands; read the new values on the next turn.
+            // called before the change lands; read the new values on the next turn.
             Task { @MainActor [weak self] in self?.follow() }
         }
         publish(state)
@@ -132,10 +172,14 @@ final class WatchSync {
         if next.stage == .countdown || next.stage == .capturing, activeSetID == nil {
             activeSetID = UUID().uuidString
         }
-        if next.stage == .ready || next.stage == .framing { activeSetID = nil }
+        if next.stage == .ready || next.stage == .framing {
+            activeSetID = nil
+        }
         next.setID = activeSetID
         next.languageCode = WatchLanguage.resolved(Bundle.main.preferredLocalizations.first)
-        if let lastSent, WatchSyncRules.sameScreen(lastSent, next) { return }
+        if let lastSent, WatchSyncRules.sameScreen(lastSent, next) {
+            return
+        }
         next.haptic = .none
         next.sentAt = max(clock(), (lastSent?.sentAt ?? 0) + 0.001)
         lastSent = next
@@ -156,15 +200,30 @@ final class WatchSync {
     private static func state(of model: WorkoutSessionModel, demoInput: Bool) -> WatchState {
         let exercise: ExerciseKind
         switch model.stage {
-        case .ready, .openingCamera, .error: exercise = model.selectedExercise
-        case .result: exercise = model.resultExercise
-        case .framing, .countdown, .capturing, .analyzing: exercise = model.captureExercise
+        case .ready,
+             .openingCamera,
+             .error:
+            exercise = model.selectedExercise
+        case .result:
+            exercise = model.resultExercise
+        case .framing,
+             .countdown,
+             .capturing,
+             .analyzing:
+            exercise = model.captureExercise
         }
-        var state = WatchSyncRules.state(stage: model.stage, exercise: exercise, liveReps: model.liveRepCount,
-                                    caption: model.liveCaption, result: model.result,
-                                    cueDismissed: model.cueDismissed, handsFree: model.handsFree,
-                                    demoInput: demoInput, measuresHeartRate: false,
-                                    coachMessage: model.liveCoachMessage)
+        var state = WatchSyncRules.state(
+            stage: model.stage,
+            exercise: exercise,
+            liveReps: model.liveRepCount,
+            caption: model.liveCaption,
+            result: model.result,
+            cueDismissed: model.cueDismissed,
+            handsFree: model.handsFree,
+            demoInput: demoInput,
+            measuresHeartRate: false,
+            coachMessage: model.liveCoachMessage
+        )
         state.hapticsEnabled = model.hapticFeedback != .off
         return state
     }

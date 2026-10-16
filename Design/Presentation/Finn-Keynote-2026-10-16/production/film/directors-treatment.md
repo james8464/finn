@@ -22,7 +22,7 @@ Observational handheld work, motivated lateral moves, 35–50mm equivalent lense
 | 38–45 | Transition from human scene into official iPhone bezel with actual Finn live recording. | Phone perspective settles; camera moves closer to the recorded count and pose. |
 | 45–51 | Actual result UI lifts beyond the screen. Single observation becomes readable. | Real UI crop, depth separation, soft occlusion shadow, deliberately quiet sound. |
 | 51–56 | Human exhale, shoes step out of frame; result resolves back into phone. | One clean match cut and restrained musical resolution. |
-| 56–60 | Finn. Find your line. | Black hold, no oversized end-card sales copy. Match into opening live slide. |
+| 56–60 | Finn. Stronger starts together. | Black hold, no oversized end-card sales copy. Match into opening live slide. |
 
 ## Compositing
 

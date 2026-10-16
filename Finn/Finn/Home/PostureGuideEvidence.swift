@@ -19,19 +19,29 @@ nonisolated struct PostureGuideEvidence {
             $0.faulty >= FormCheck.minimumFaultyReps &&
                 Double($0.faulty) / Double($0.judged) >= FormCheck.minimumFaultyShare
         }
-        let issue: SetIssue? = if latest.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
-                                 latest.partlyVisible != true {
+        let issue: SetIssue? = if
+            latest.analysis.confidence >= EvidenceRubric.minimumJointConfidence,
+            latest.partlyVisible != true {
             (latest.issues ?? []).first { issue in
                 switch issue {
-                case .rangeDropped, .postureChanged, .shallowMovements, .outsideTempo, .spedUp:
+                case .rangeDropped,
+                     .postureChanged,
+                     .shallowMovements,
+                     .outsideTempo,
+                     .spedUp:
                     true
-                default: false
+                default:
+                    false
                 }
             }
         } else { nil }
-        return Self(latest: latest, measurements: measurements, flagged: flagged,
-                    trends: FormTrend.compareLatest(to: latest, among: sets.dropFirst()),
-                    movementIssue: issue)
+        return Self(
+            latest: latest,
+            measurements: measurements,
+            flagged: flagged,
+            trends: FormTrend.compareLatest(to: latest, among: sets.dropFirst()),
+            movementIssue: issue
+        )
     }
 }
 
@@ -64,14 +74,23 @@ nonisolated extension FormCheck {
     /// a short visible target for a measured check; these are guides, not clinical limits
     var guidePoint: String {
         switch self {
-        case .pushUpHipsSag, .pushUpHipsPike: String(localized: "Shoulders, hips and heels aligned")
-        case .pushUpDepth: String(localized: "Elbows bend toward 90°")
-        case .squatChestDrop: String(localized: "Chest stays lifted")
-        case .squatDepth: String(localized: "Thighs move toward level")
-        case .lungeTorsoLean: String(localized: "Torso stays upright")
-        case .lungeFrontKnee: String(localized: "Front knee bends toward 90°")
-        case .deadliftKneeBend: String(localized: "Knees stay softly bent")
-        case .deadliftHinge: String(localized: "Hips move back into the hinge")
+        case .pushUpHipsSag,
+             .pushUpHipsPike:
+            String(localized: "Shoulders, hips and heels aligned")
+        case .pushUpDepth:
+            String(localized: "Elbows bend toward 90°")
+        case .squatChestDrop:
+            String(localized: "Chest stays lifted")
+        case .squatDepth:
+            String(localized: "Thighs move toward level")
+        case .lungeTorsoLean:
+            String(localized: "Torso stays upright")
+        case .lungeFrontKnee:
+            String(localized: "Front knee bends toward 90°")
+        case .deadliftKneeBend:
+            String(localized: "Knees stay softly bent")
+        case .deadliftHinge:
+            String(localized: "Hips move back into the hinge")
         }
     }
 }
