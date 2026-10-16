@@ -1,27 +1,59 @@
 import SwiftUI
 
-/// follows a workout the Coach composed: tick each exercise as it is done, then validate
+/// Preview a prescription, follow its stages, or keep the familiar completion checklist.
 struct WorkoutPlanView: View {
     @State var plan: PlannedWorkout
     var store: PlannedWorkoutStore = .shared
+    var planningContext: WorkoutPlanningContext? = nil
+    var onStart: ((PlannedWorkout) -> Void)? = nil
+    @State private var planner = PersonalisedWorkoutPlanner()
+    @State private var isPlanning = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool {
-        AppMotion.reduces(systemReduceMotion)
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+    private var canFollow: Bool {
+        (1...6).contains(plan.exercises.count)
+            && Set(plan.exercises.map(\.id)).count == plan.exercises.count
+            && plan.exercises.allSatisfy { (1...3).contains($0.sets) && (1...20).contains($0.reps) }
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(
-                        "Do each exercise in Finn, then tick it here. Validate when the workout is finished and it is kept in Next workouts."
-                    )
-                    .font(.subheadline)
-                    .foregroundStyle(HomeStyle.supportingText)
-                    .fixedSize(horizontal: false, vertical: true)
+                    if isPlanning {
+                        ProgressView("Personalising your workout…")
+                            .accessibilityIdentifier("plan.generating")
+                    }
+                    if let source = plan.planningSource {
+                        Text(source == .appleIntelligence ? "On-device Apple Intelligence" : "Personalised local plan")
+                            .font(.footnote)
+                            .foregroundStyle(HomeStyle.supportingText)
+                            .accessibilityIdentifier("plan.source")
+                    }
+                    if let note = plan.planningNote {
+                        Text(note).font(.subheadline).fixedSize(horizontal: false, vertical: true)
+                    }
+                    if let onStart {
+                        Button("Follow workout") {
+                            guard canFollow else { return }
+                            onStart(plan)
+                            dismiss()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(isPlanning || !canFollow)
+                        .accessibilityIdentifier("plan.follow")
+                        Text("Follow each set at your own pace. Camera advice is optional.")
+                            .font(.subheadline)
+                            .foregroundStyle(HomeStyle.supportingText)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Text("Do each exercise in Finn, then tick it here. Validate when the workout is finished and it is kept in Next workouts.")
+                        .font(.subheadline)
+                        .foregroundStyle(HomeStyle.supportingText)
+                        .fixedSize(horizontal: false, vertical: true)
                     ForEach($plan.exercises) { $item in
-                        HomeCard { row($item) }
+                        HomeCard { row($item) }.disabled(isPlanning)
                     }
                     Button {
                         store.add(plan)
@@ -33,7 +65,7 @@ struct WorkoutPlanView: View {
                             .frame(maxWidth: .infinity, minHeight: 32)
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(!plan.isComplete)
+                    .disabled(!plan.isComplete || isPlanning)
                     .accessibilityIdentifier("plan.validate")
                     .accessibilityHint(plan.isComplete ? "" : "Tick every exercise first")
                 }
@@ -48,6 +80,14 @@ struct WorkoutPlanView: View {
                     Button("Close") { dismiss() }
                 }
             }
+        }
+        .task {
+            guard let planningContext, plan.planningSource != .appleIntelligence else { return }
+            isPlanning = true
+            let personalised = await planner.make(context: planningContext)
+            guard !Task.isCancelled else { return }
+            plan = personalised
+            isPlanning = false
         }
     }
 
@@ -71,6 +111,9 @@ struct WorkoutPlanView: View {
                     Text("\(item.wrappedValue.sets) sets of \(item.wrappedValue.reps)")
                         .font(.subheadline)
                         .foregroundStyle(HomeStyle.supportingText)
+                    if let focus = item.wrappedValue.focus {
+                        Text(focus).font(.footnote).foregroundStyle(HomeStyle.supportingText)
+                    }
                 }
                 Spacer(minLength: 0)
             }
@@ -107,11 +150,9 @@ struct NextWorkoutsSection: View {
                                         .multilineTextAlignment(.leading)
                                         .fixedSize(horizontal: false, vertical: true)
                                     if let done = workout.lastDoneAt {
-                                        Text(
-                                            "Last done \(done.formatted(date: .abbreviated, time: .omitted))"
-                                        )
-                                        .font(.subheadline)
-                                        .foregroundStyle(HomeStyle.supportingText)
+                                        Text("Last done \(done.formatted(date: .abbreviated, time: .omitted))")
+                                            .font(.subheadline)
+                                            .foregroundStyle(HomeStyle.supportingText)
                                     }
                                 }
                                 Spacer(minLength: 0)

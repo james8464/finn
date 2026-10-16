@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The next workout Finn suggests on Home. Sample data until there is a real plan: add fields here
-/// as the plan grows. `start` carries both the day and the time.
+/// The next workout Finn suggests on Home. Ready suggestions use the current time;
+/// the displayed duration is an estimate rather than a scheduled appointment.
 struct NextWorkout: Equatable {
     enum Intensity: String, CaseIterable {
         case light
@@ -43,10 +43,17 @@ struct NextWorkout: Equatable {
 
     /// one exercise of the plan, in order
     struct Exercise: Equatable, Identifiable {
-        let id = UUID()
+        let id: UUID
         var kind: ExerciseKind
         var sets: Int
         var reps: Int
+
+        init(id: UUID = UUID(), kind: ExerciseKind, sets: Int, reps: Int) {
+            self.id = id
+            self.kind = kind
+            self.sets = sets
+            self.reps = reps
+        }
     }
 
     var start: Date
@@ -54,6 +61,34 @@ struct NextWorkout: Equatable {
     /// how long the workout should take, for its end time
     var estimatedDuration: TimeInterval
     var exercises: [Exercise]
+
+    /// Keep the displayed prescription identical to the cached, validated plan. Duration assumes
+    /// three seconds per rep and ninety seconds between sets; the person controls actual pacing.
+    static func suggestion(from plan: PlannedWorkout, profile: OnboardingProfile,
+                           health: HealthSnapshot?, now: Date = .now) -> NextWorkout {
+        let recovering = health.flatMap(HealthCoach.readiness) != nil
+        let cautious = recovering || profile.level == .new || profile.level == .returning
+            || profile.goal == .comeback || profile.intensity == .easy
+            || plan.exercises.contains { $0.focus != nil }
+            || (!profile.noPastInjuries && !profile.injuries.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        let intensity: Intensity
+        if cautious {
+            intensity = .light
+        } else if profile.level == .experienced && profile.intensity == .hard {
+            intensity = .hard
+        } else {
+            intensity = .moderate
+        }
+        let totalSets = plan.exercises.reduce(0.0) { $0 + Double(max(0, $1.sets)) }
+        let movementSeconds = plan.exercises.reduce(0.0) {
+            $0 + Double(max(0, $1.sets)) * Double(max(0, $1.reps)) * 3
+        }
+        let duration = movementSeconds + max(0, totalSets - 1) * 90
+        return NextWorkout(start: now, intensity: intensity, estimatedDuration: duration,
+                           exercises: plan.exercises.map {
+                               Exercise(id: $0.id, kind: $0.exercise, sets: $0.sets, reps: $0.reps)
+                           })
+    }
 
     /// Sample: two days from now at 6:30 PM, moderate, 55 minutes. No scheduling behind it.
     static func sample(now: Date = .now, calendar: Calendar = .current) -> NextWorkout {

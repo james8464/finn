@@ -61,7 +61,7 @@ final class DashboardUITests: XCTestCase {
         XCTAssertFalse(app.buttons["home.watchDemo"].exists)
         // the card opens the Workout tab with the previous workouts blurred; a tap clears them
         coach.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["workout.next"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["workout.suggestedPlan"].waitForExistence(timeout: 3))
         let reveal = app.buttons["workout.history.reveal"]
         XCTAssertTrue(reveal.waitForExistence(timeout: 3))
         reveal.tap()

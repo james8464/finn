@@ -5,6 +5,7 @@ struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var showsSource = false
     @State private var planDraft: PlannedWorkout?
+    @State private var pendingWorkoutStart: PlannedWorkout?
     @State private var replyTask: Task<Void, Never>?
     @State private var followsLatestReply = true
     @State private var isUserScrolling = false
@@ -15,15 +16,41 @@ struct CoachView: View {
     }
 
     private let history: [WorkoutSessionSummary]
+    private let planningContext: WorkoutPlanningContext?
+    private let plannedWorkouts: PlannedWorkoutStore
+    private let onStartWorkout: ((PlannedWorkout) -> Void)?
 
-    init(history: [WorkoutSessionSummary]) {
+    init(history: [WorkoutSessionSummary], planningContext: WorkoutPlanningContext? = nil,
+         onStartWorkout: ((PlannedWorkout) -> Void)? = nil, store: PlannedWorkoutStore? = nil) {
         self.history = history
+        self.planningContext = planningContext
+        self.plannedWorkouts = store ?? .shared
+        self.onStartWorkout = onStartWorkout
         _conversation = State(initialValue: CoachConversation(history: history))
     }
 
     init(history: [WorkoutSessionSummary], conversation: CoachConversation) {
         self.history = history
+        self.planningContext = nil
+        self.plannedWorkouts = .shared
+        self.onStartWorkout = nil
         _conversation = State(initialValue: conversation)
+    }
+
+    private var workoutStartAction: ((PlannedWorkout) -> Void)? {
+        guard onStartWorkout != nil else { return nil }
+        return { plan in queueWorkoutStart(plan) }
+    }
+
+    private func queueWorkoutStart(_ plan: PlannedWorkout) {
+        pendingWorkoutStart = plan
+    }
+
+    /// Wait for the preview sheet to finish closing before presenting the workout guide.
+    private func startRequestedWorkout() {
+        guard let requested = pendingWorkoutStart else { return }
+        pendingWorkoutStart = nil
+        onStartWorkout?(requested)
     }
 
     var body: some View {
@@ -37,7 +64,7 @@ struct CoachView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button { planDraft = WorkoutPlanner.make(history: history) } label: {
+            Button { planDraft = planningContext.map { PersonalisedWorkoutRules.make(context: $0) } ?? WorkoutPlanner.make(history: history) } label: {
                     Label("Plan a workout", systemImage: "list.bullet.clipboard")
                         .font(.subheadline.weight(.semibold))
                         .labelStyle(.iconOnly)
@@ -60,7 +87,10 @@ struct CoachView: View {
             }
 
         }
-        .sheet(item: $planDraft) { WorkoutPlanView(plan: $0) }
+        .sheet(item: $planDraft, onDismiss: startRequestedWorkout) {
+            WorkoutPlanView(plan: $0, store: plannedWorkouts, planningContext: planningContext,
+                            onStart: workoutStartAction)
+        }
         .sheet(isPresented: $showsSource) {
             NavigationStack {
                 List {

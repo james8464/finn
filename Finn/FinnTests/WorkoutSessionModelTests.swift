@@ -264,6 +264,25 @@ struct WorkoutSessionModelTests {
         #expect(analysis.reps.count == 6)
     }
 
+    @Test func cameraClockRestartClearsPreviousSegmentCoachingAndCount() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        let frames = trace(reps: 6)
+        for frame in frames { source.emit(frame) }
+        try await waitUntil { model.livePose?.time == frames.last?.time }
+        #expect(model.liveRepCount >= 5)
+        #expect(model.liveCoachMessage != nil)
+
+        source.emit(frame(time: 0, hipY: 0.42))
+        try await waitUntil { model.frameCount == 1 }
+        #expect(model.liveRepCount == 0)
+        #expect(model.liveCoachMessage == nil)
+        #expect(model.liveCaption == nil)
+        await model.cancel()
+    }
+
     /// Hands-free in a dim room, or standing just outside the picture: Vision finds nobody. Finn
     /// says so to the person a few steps away, and after a minute with nobody in view it closes the
     /// camera, so the screen can lock and the camera and Vision stop.

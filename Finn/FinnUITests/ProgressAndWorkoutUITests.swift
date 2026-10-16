@@ -20,6 +20,7 @@ final class ProgressAndWorkoutUITests: XCTestCase {
         app.buttons["coach.planWorkout"].tap()
         let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan.exercise."))
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
+        waitForPlanning(app)
         XCTAssertEqual(rows.count, 4)
         for index in 0 ..< rows.count {
             let row = rows.element(boundBy: index)
@@ -44,6 +45,106 @@ final class ProgressAndWorkoutUITests: XCTestCase {
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
         XCTAssertTrue(rows.allElementsBoundByIndex.allSatisfy { $0.value as? String == "Not done" })
         XCTAssertFalse(app.buttons["plan.validate"].isEnabled)
+    }
+
+    @MainActor
+    func testSuggestedWorkoutCanBeFollowedWithoutCameraAdvice() {
+        let app = launch()
+        openSuggestedGuide(app)
+        XCTAssertTrue(app.descendants(matching: .any)["guided.animation"].exists)
+        XCTAssertTrue(app.buttons["guided.advice"].exists)
+        XCTAssertFalse(app.buttons["Stop set"].exists)
+        let initialPrescription = app.staticTexts["guided.prescription"].label
+        let next = app.buttons["guided.next"]
+        app.reveal(next)
+        next.tap()
+        XCTAssertNotEqual(app.staticTexts["guided.prescription"].label, initialPrescription)
+
+        // The guide may contain fewer stages after personalisation; never assume a fixed volume.
+        for _ in 0..<18 {
+            if app.descendants(matching: .any)["guided.complete"].exists { break }
+            app.reveal(next)
+            XCTAssertTrue(next.isHittable)
+            next.tap()
+        }
+        XCTAssertTrue(app.descendants(matching: .any)["guided.complete"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["guided.summary"].label.contains("0 sets measured"))
+        XCTAssertFalse(app.buttons["Stop set"].exists)
+        app.buttons["guided.finish"].tap()
+        XCTAssertTrue(app.buttons["workout.suggestedPlan"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testGuidedCameraAdviceMeasuresOnlyTheChosenStage() {
+        let app = launch()
+        openSuggestedGuide(app)
+        let prescription = app.staticTexts["guided.prescription"].label
+        let advice = app.buttons["guided.advice"]
+        app.reveal(advice)
+        advice.tap()
+        XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 10))
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 6))
+        Thread.sleep(forTimeInterval: 4)
+        stop.tap()
+        XCTAssertTrue(app.staticTexts["6 measured reps"].waitForExistence(timeout: 8))
+        // The measured result remains visible until the person explicitly continues the guide.
+        XCTAssertFalse(app.buttons["guided.next"].exists)
+        let resume = app.buttons["guided.resume"]
+        app.reveal(resume)
+        XCTAssertTrue(resume.waitForExistence(timeout: 5))
+        resume.tap()
+        XCTAssertTrue(app.staticTexts["guided.prescription"].waitForExistence(timeout: 5))
+        XCTAssertNotEqual(app.staticTexts["guided.prescription"].label, prescription)
+    }
+
+    @MainActor
+    func testGuidedWorkoutAtLargestTextAndReducedMotionInEveryLanguage() {
+        for language in ["en-GB", "en-US", "fr", "es"] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-finn-ui-demo", "-finn-ui-reduce-motion",
+                                   "-AppleLanguages", "(\(language))",
+                                   "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+            app.launch()
+            openSuggestedGuide(app)
+            let illustration = app.descendants(matching: .any)["guided.animation"]
+            XCTAssertTrue(illustration.exists, language)
+            let advice = app.buttons["guided.advice"]
+            app.reveal(advice)
+            XCTAssertTrue(advice.isHittable, language)
+            let before = app.staticTexts["guided.prescription"].label
+            let next = app.buttons["guided.next"]
+            app.reveal(next)
+            XCTAssertTrue(next.isHittable, language)
+            next.tap()
+            XCTAssertNotEqual(app.staticTexts["guided.prescription"].label, before, language)
+            XCTAssertFalse(app.buttons["Stop set"].exists, "Manual progression must not activate the camera: \(language)")
+            attach(app, "guided-largest-text-reduced-motion-\(language)")
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    private func openSuggestedGuide(_ app: XCUIApplication) {
+        app.selectTab("Workout")
+        let suggestion = app.buttons["workout.suggestedPlan"]
+        app.reveal(suggestion)
+        XCTAssertTrue(suggestion.waitForExistence(timeout: 5))
+        suggestion.tap()
+        let follow = app.buttons["plan.follow"]
+        XCTAssertTrue(follow.waitForExistence(timeout: 5))
+        waitForPlanning(app)
+        follow.tap()
+        XCTAssertTrue(app.staticTexts["guided.prescription"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    private func waitForPlanning(_ app: XCUIApplication) {
+        let spinner = app.descendants(matching: .any)["plan.generating"]
+        XCTAssertTrue(spinner.waitForNonExistence(timeout: 30))
+        let firstRow = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan.exercise.")).firstMatch
+        wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "isEnabled == true"), object: firstRow)], timeout: 5)
     }
 
     /// Home's Posture card lands on Posture even after the person left Progress on Strength
@@ -72,7 +173,7 @@ final class ProgressAndWorkoutUITests: XCTestCase {
     func testLaunchWorkoutOpensSetupBeforeTheCamera() {
         let app = launch()
         app.selectTab("Workout")
-        XCTAssertTrue(app.descendants(matching: .any)["workout.next"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["workout.suggestedPlan"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Previous workouts"].exists)
         XCTAssertFalse(app.buttons["home.start"].exists)
         let launch = app.buttons["workout.launch"]
@@ -99,7 +200,7 @@ final class ProgressAndWorkoutUITests: XCTestCase {
         app.launch()
         app.skipOnboardingIfShown()
         app.selectTab("Workout")
-        XCTAssertTrue(app.descendants(matching: .any)["workout.next"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["workout.suggestedPlan"].waitForExistence(timeout: 5))
         let launch = app.buttons["workout.launch"]
         XCTAssertTrue(launch.isHittable)
         XCTAssertLessThanOrEqual(launch.frame.maxY, app.buttons["tab.home"].frame.minY)

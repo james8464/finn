@@ -8,13 +8,15 @@ nonisolated struct PlannedExercise: Codable, Equatable, Identifiable, Sendable {
     let sets: Int
     let reps: Int
     var isDone: Bool
+    var focus: String?
 
-    init(id: UUID = UUID(), exercise: ExerciseKind, sets: Int, reps: Int, isDone: Bool = false) {
+    init(id: UUID = UUID(), exercise: ExerciseKind, sets: Int, reps: Int, isDone: Bool = false, focus: String? = nil) {
         self.id = id
         self.exercise = exercise
         self.sets = sets
         self.reps = reps
         self.isDone = isDone
+        self.focus = focus
     }
 }
 
@@ -25,6 +27,8 @@ nonisolated struct PlannedWorkout: Codable, Equatable, Identifiable, Sendable {
     var exercises: [PlannedExercise]
     /// set when the person validated the workout in the Coach
     var lastDoneAt: Date?
+    var planningSource: WorkoutPlanSource?
+    var planningNote: String?
 
     init(id: UUID = UUID(), createdAt: Date = Date(), exercises: [PlannedExercise], lastDoneAt: Date? = nil) {
         self.id = id
@@ -33,19 +37,13 @@ nonisolated struct PlannedWorkout: Codable, Equatable, Identifiable, Sendable {
         self.lastDoneAt = lastDoneAt
     }
 
-    var isComplete: Bool {
-        !exercises.isEmpty && exercises.allSatisfy(\.isDone)
-    }
-
-    var doneCount: Int {
-        exercises.filter(\.isDone).count
-    }
+    var isComplete: Bool { !exercises.isEmpty && exercises.allSatisfy(\.isDone) }
+    var doneCount: Int { exercises.filter(\.isDone).count }
 
     /// the same workout with every box unticked, ready to be followed again
     var reset: PlannedWorkout {
         var copy = self
-        copy.exercises = exercises
-            .map { PlannedExercise(exercise: $0.exercise, sets: $0.sets, reps: $0.reps) }
+        copy.exercises = exercises.map { PlannedExercise(exercise: $0.exercise, sets: $0.sets, reps: $0.reps, focus: $0.focus) }
         return copy
     }
 }
@@ -56,33 +54,21 @@ nonisolated enum WorkoutPlanner {
 
     private static func group(_ kind: ExerciseKind) -> Group {
         switch kind {
-        case .bodyweightSquat,
-             .staticLunge,
-             .stiffLegDeadlift:
-            .lower
-        case .pushUp:
-            .push
-        case .pullUp,
-             .muscleUp:
-            .pull
+        case .bodyweightSquat, .staticLunge, .stiffLegDeadlift: .lower
+        case .pushUp: .push
+        case .pullUp, .muscleUp: .pull
         }
     }
 
     /// reps for a first set when nothing was measured yet
     private static func startingReps(_ kind: ExerciseKind) -> Int {
         switch kind {
-        case .bodyweightSquat:
-            12
-        case .pushUp:
-            8
-        case .staticLunge:
-            8
-        case .stiffLegDeadlift:
-            10
-        case .pullUp:
-            4
-        case .muscleUp:
-            1
+        case .bodyweightSquat: 12
+        case .pushUp: 8
+        case .staticLunge: 8
+        case .stiffLegDeadlift: 10
+        case .pullUp: 4
+        case .muscleUp: 1
         }
     }
 
@@ -100,9 +86,7 @@ nonisolated enum WorkoutPlanner {
             sets.filter { $0.exercise == kind }.map(\.capturedAt).max() ?? .distantPast
         }
         func eligible(_ kind: ExerciseKind) -> Bool {
-            guard kind == .muscleUp else {
-                return true
-            }
+            guard kind == .muscleUp else { return true }
             return (bestReps(.muscleUp, in: sets) ?? 0) > 0 || (bestReps(.pullUp, in: sets) ?? 0) >= 10
         }
         func stalest(_ group: Group, skipping taken: Set<ExerciseKind> = []) -> ExerciseKind? {
@@ -113,13 +97,9 @@ nonisolated enum WorkoutPlanner {
 
         var picked: [ExerciseKind] = []
         for group in [Group.lower, .push, .pull] {
-            if let kind = stalest(group) {
-                picked.append(kind)
-            }
+            if let kind = stalest(group) { picked.append(kind) }
         }
-        if let extra = stalest(.lower, skipping: Set(picked)) {
-            picked.append(extra)
-        }
+        if let extra = stalest(.lower, skipping: Set(picked)) { picked.append(extra) }
 
         let exercises = picked.map { kind -> PlannedExercise in
             let reps: Int
@@ -145,10 +125,15 @@ final class PlannedWorkoutStore {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        if
-            let data = defaults.data(forKey: Self.key),
-            let saved = try? JSONDecoder().decode([PlannedWorkout].self, from: data) {
-            upcoming = saved
+        if let data = defaults.data(forKey: Self.key),
+           let saved = try? JSONDecoder().decode([PlannedWorkout].self, from: data) {
+            var seen: Set<UUID> = []
+            upcoming = saved.filter { workout in
+                (1...6).contains(workout.exercises.count)
+                    && Set(workout.exercises.map(\.id)).count == workout.exercises.count
+                    && workout.exercises.allSatisfy { (1...3).contains($0.sets) && (1...20).contains($0.reps) }
+                    && seen.insert(workout.id).inserted
+            }
         } else {
             upcoming = []
         }
@@ -168,10 +153,13 @@ final class PlannedWorkoutStore {
         persist()
     }
 
+    func clear() {
+        upcoming = []
+        defaults.removeObject(forKey: Self.key)
+    }
+
     private func persist() {
-        guard let data = try? JSONEncoder().encode(upcoming) else {
-            return
-        }
+        guard let data = try? JSONEncoder().encode(upcoming) else { return }
         defaults.set(data, forKey: Self.key)
     }
 }

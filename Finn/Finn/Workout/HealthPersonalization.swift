@@ -415,3 +415,32 @@ protocol HealthReading: AnyObject {
     func requestAccess() async
     func snapshot(now: Date) async -> HealthSnapshot
 }
+
+extension HealthSnapshot {
+    /// Ignore corrupt or non-finite cache values before formatting numbers or planning a session.
+    var validatedForCoaching: HealthSnapshot {
+        func valid(_ value: Double?, in range: ClosedRange<Double>) -> Double? {
+            guard let value, value.isFinite, range.contains(value) else { return nil }
+            return value
+        }
+        var copy = self
+        copy.restingHeartRate = valid(restingHeartRate, in: 20...260)
+        copy.restingHeartRateBaseline = valid(restingHeartRateBaseline, in: 20...260)
+        copy.heartRateVariability = valid(heartRateVariability, in: 0.1...1_000)
+        copy.heartRateVariabilityBaseline = valid(heartRateVariabilityBaseline, in: 0.1...1_000)
+        copy.vo2Max = valid(vo2Max, in: 1...100)
+        copy.sleepLastNight = valid(sleepLastNight, in: 0...86_400)
+        copy.activeEnergyYesterday = valid(activeEnergyYesterday, in: 0...100_000)
+        copy.activeEnergyBaseline = valid(activeEnergyBaseline, in: 0...100_000)
+        copy.stepsYesterday = valid(stepsYesterday, in: 0...200_000)
+        copy.stepsBaseline = valid(stepsBaseline, in: 0...200_000)
+        copy.weight = valid(weight, in: 1...700)
+        copy.height = valid(height, in: 0.3...3)
+        copy.age = age.flatMap { (13...100).contains($0) ? $0 : nil }
+        copy.workoutsYesterday = workoutsYesterday.filter {
+            $0.start.timeIntervalSinceReferenceDate.isFinite && $0.end.timeIntervalSinceReferenceDate.isFinite
+                && $0.minutes.isFinite && (0...1_440).contains($0.minutes)
+        }
+        return copy
+    }
+}

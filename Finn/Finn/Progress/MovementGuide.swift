@@ -3,8 +3,10 @@ import SwiftUI
 /// the chosen exercise drawn moving, with a pause. Still with Reduce Motion
 struct MovementAnimationCard: View {
     let exercise: ExerciseKind
+    var usesRecordingSkeleton = false
     @State private var playsIllustration = true
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -21,17 +23,18 @@ struct MovementAnimationCard: View {
                     .accessibilityIdentifier("posture.playback")
                 }
             }
-            ExerciseFigureView(
-                kind: exercise,
-                lineColour: DashboardStyle.accent,
-                figureColour: .white,
-                animates: playsIllustration
-            )
-            .frame(height: 230)
-            .frame(maxWidth: .infinity)
-            .accessibilityIdentifier("posture.illustration")
-            Text(reduceMotion ? "Motion paused for Reduce Motion" :
-                "Illustration for guidance; bodies and ranges vary")
+            Group {
+                if usesRecordingSkeleton {
+                    GuidedExerciseSkeletonView(exercise: exercise, animates: playsIllustration)
+                } else {
+                    ExerciseFigureView(kind: exercise, lineColour: DashboardStyle.accent, figureColour: .white,
+                                       animates: playsIllustration)
+                }
+            }
+                .frame(height: 230)
+                .frame(maxWidth: .infinity)
+                .accessibilityIdentifier("posture.illustration")
+            Text(reduceMotion ? "Motion paused for Reduce Motion" : "Illustration for guidance; bodies and ranges vary")
                 .font(.caption)
                 .foregroundStyle(DashboardStyle.secondary)
         }
