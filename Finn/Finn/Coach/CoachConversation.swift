@@ -92,10 +92,20 @@ final class CoachConversation {
         defer { isAnswering = false }
         let askedContext = context
         let answer = await responder.answer(question, context: askedContext, history: earlier)
-        guard !Task.isCancelled, context == askedContext else {
+        guard !Task.isCancelled else {
             return
         }
-        messages.append(answer)
+        if context == askedContext {
+            messages.append(answer)
+        } else {
+            // History can change while the model is working. Answer from the current records
+            // so the question is not left hanging or answered with deleted set details.
+            messages.append(CoachMessage(
+                role: .coach,
+                text: CoachFallback.reply(to: question, context: context, language: responder.language),
+                engine: .fallback
+            ))
+        }
         if messages.count > 40 {
             messages.removeFirst(messages.count - 40)
         }

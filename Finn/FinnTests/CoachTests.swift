@@ -489,7 +489,7 @@ struct CoachTests {
         #expect(!prompt.contains("Set 1:"))
     }
 
-    @Test func refreshingDeletedHistoryDiscardsAnInFlightAnswer() async {
+    @Test func refreshingDeletedHistoryAnswersWithoutUsingRemovedSets() async {
         let engine = StubCoachEngine(output: "Set 1", delay: .milliseconds(100))
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
         let conversation = CoachConversation(history: history(), responder: responder)
@@ -499,7 +499,10 @@ struct CoachTests {
         }
         conversation.refresh(history: [])
         await request.value
-        #expect(conversation.messages.count == 2)
+        #expect(conversation.messages.count == 3)
+        #expect(conversation.messages.last?.engine == .fallback)
+        #expect(conversation.messages.last?.text.contains("no saved set yet") == true)
+        #expect(conversation.messages.last?.text.contains("6 squat reps") == false)
         #expect(!conversation.isAnswering)
     }
 
