@@ -16,12 +16,9 @@ struct WorkoutTabView: View {
             VStack(alignment: .leading, spacing: DashboardStyle.cardSpacing) {
                 // Finn speaks the card below: the badge sits over its title
                 FinnBadge(showsOutline: true)
-                    .padding(.leading, 20)
+                    .padding(.leading, DashboardStyle.cardSpacing + 20)
                     .accessibilityLabel("Finn, your coach")
-                NextWorkoutCard(workout: message.workout)
-                if !message.workout.exercises.isEmpty {
-                    exercises
-                }
+                nextWorkoutOutline
                 Text("Previous workouts")
                     .font(.title3.weight(.semibold))
                     .accessibilityAddTraits(.isHeader)
@@ -61,17 +58,28 @@ struct WorkoutTabView: View {
         .navigationBarTitleDisplayMode(.large)
     }
 
-    /// the exercises of the next workout, in order, framed like Home's Last workout
-    private var exercises: some View {
-        FinnOutline {
-            VStack(alignment: .leading, spacing: 12) {
-                DashboardHeading("Exercises").accessibilityAddTraits(.isHeader)
-                ForEach(message.workout.exercises) { exercise in
-                    exerciseRow(exercise)
-                }
+    /// the next workout and its exercises in one light pink outline, like Home's Finn card and
+    /// Last workout
+    private var nextWorkoutOutline: some View {
+        let hasExercises = !message.workout.exercises.isEmpty
+        return FinnOutline(topRadius: DashboardStyle.finnCardRadius,
+                           bottomRadius: hasExercises ? DashboardStyle.cardRadius : DashboardStyle.finnCardRadius) {
+            VStack(spacing: DashboardStyle.cardSpacing) {
+                NextWorkoutCard(workout: message.workout)
+                if hasExercises { exercises }
             }
-            .modifier(DashboardCard())
         }
+    }
+
+    /// the exercises of the next workout, in order, on a glass card
+    private var exercises: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            DashboardHeading("Exercises").accessibilityAddTraits(.isHeader)
+            ForEach(message.workout.exercises) { exercise in
+                exerciseRow(exercise)
+            }
+        }
+        .modifier(DashboardCard())
         .accessibilityIdentifier("workout.exercises")
     }
 
