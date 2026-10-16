@@ -1,0 +1,1 @@
+These inputs preserve the selected portrait clip, raw Vision observations and original native cue crop used by the final film. Rendering scripts refer to their original /tmp names; restore them there when rebuilding. Decoded frames and compiled app caches are disposable and were removed.

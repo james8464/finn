@@ -1017,7 +1017,7 @@ struct ContentView: View {
                 .disabled(!model.offersFitness)
                 .accessibilityIdentifier("options.savesToFitness")
                 if let note = fitnessOptionNote {
-                    Text(note).font(.footnote).foregroundStyle(AppPageStyle.secondaryText)
+                    WrappingText(text: note, style: .footnote, color: UIColor.label.withAlphaComponent(0.72))
                         .accessibilityIdentifier("options.fitnessNote")
                 }
             } header: {
@@ -1482,14 +1482,13 @@ struct ContentView: View {
                             }
                         } else {
                             if analysis.reps.count < 4 {
-                                Text("Observations require 4 measured reps.")
-                                    .font(.title3)
+                                WrappingText(text: String(localized: "Observations require 4 measured reps."),
+                                             style: .title3)
                             } else {
-                                Text("No observation").font(.title3)
+                                WrappingText(text: String(localized: "No observation"), style: .title3)
                             }
-                            Text("This is a camera measurement, not a full technique assessment.")
-                                .font(.footnote)
-                                .foregroundStyle(FinnStyle.supportingText)
+                            WrappingText(text: String(localized: "This is a camera measurement, not a full technique assessment."),
+                                         style: .footnote, color: UIColor.label.withAlphaComponent(0.72))
                         }
                         }
                         .modifier(AppSurface())

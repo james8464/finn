@@ -1,0 +1,167 @@
+[
+  {
+    "ref": "refs/heads/coach-conversational-ai",
+    "sha": "e84ffd6eada2ff842e6468c4c4cce0be65b87cf0",
+    "commits_not_in_main": 4
+  },
+  {
+    "ref": "refs/heads/feedback-localization",
+    "sha": "1faf7b3605b4a38c897245168ccdf9890980a502",
+    "commits_not_in_main": 1
+  },
+  {
+    "ref": "refs/heads/finn-release-fixes",
+    "sha": "3a70ffddb75e0a6811a0fa8323838537369ed34f",
+    "commits_not_in_main": 9
+  },
+  {
+    "ref": "refs/heads/finn/backend-reliability",
+    "sha": "253aebe298ab78b5fdfbe9aadd9ce5754bd2ae6e",
+    "commits_not_in_main": 18
+  },
+  {
+    "ref": "refs/heads/finn/feedback-localization-mwm",
+    "sha": "f3deae98c46245fb2b2c5aa196f423454d5f1bef",
+    "commits_not_in_main": 1
+  },
+  {
+    "ref": "refs/heads/finn/form-analysis-optimization",
+    "sha": "cd6d0baffb754e723c2e289ca2d4f2bad30acaa1",
+    "commits_not_in_main": 2
+  },
+  {
+    "ref": "refs/heads/finn/full-device-audit",
+    "sha": "ba0d0be3779b51100e9e0e1789a0b3e27d4a36cc",
+    "commits_not_in_main": 9
+  },
+  {
+    "ref": "refs/heads/finn/icon-consistency",
+    "sha": "b1f3dd32612288d8603cd1476b7c84e7fec553d8",
+    "commits_not_in_main": 17
+  },
+  {
+    "ref": "refs/heads/finn/interface-review",
+    "sha": "ce50d5b10c2d72932532ee1478fba3c122046232",
+    "commits_not_in_main": 9
+  },
+  {
+    "ref": "refs/heads/finn/keynote-quality",
+    "sha": "7d5ea73394a16b65fcb0670f94eb60ec15c09fcb",
+    "commits_not_in_main": 10
+  },
+  {
+    "ref": "refs/heads/finn/layered-icon",
+    "sha": "7c746a0a1a58c6574d89cfb1c7e3ea87b2a7d387",
+    "commits_not_in_main": 5
+  },
+  {
+    "ref": "refs/heads/finn/presentation-refinement",
+    "sha": "7d5ea73394a16b65fcb0670f94eb60ec15c09fcb",
+    "commits_not_in_main": 10
+  },
+  {
+    "ref": "refs/heads/finn/watch-companion",
+    "sha": "689cb429d357f751f75aaf1b6c22dd7b1f56d16c",
+    "commits_not_in_main": 3
+  },
+  {
+    "ref": "refs/heads/main",
+    "sha": "3c8af267cf5b0d196630cd54209b286ea5cd394b",
+    "commits_not_in_main": 0
+  },
+  {
+    "ref": "refs/heads/main-all-improvements-posture",
+    "sha": "7f79cb547561523840092e976e021f745df26af5",
+    "commits_not_in_main": 77
+  },
+  {
+    "ref": "refs/heads/main-finn-rebrand",
+    "sha": "f76e01098d5f7727de16c245a939faf2bb32fe40",
+    "commits_not_in_main": 0
+  },
+  {
+    "ref": "refs/heads/main-keynote-readiness",
+    "sha": "460796f2ab0280fc5a615ca6084310fc94624bc9",
+    "commits_not_in_main": 8
+  },
+  {
+    "ref": "refs/heads/main-phone-ui-verification",
+    "sha": "69e5c4503d17b8f27dac9367f1cedcfae4a0e491",
+    "commits_not_in_main": 0
+  },
+  {
+    "ref": "refs/heads/main-pink-watch-runtime",
+    "sha": "2c5287a0ba9310edf8a583b0246004928d1b5063",
+    "commits_not_in_main": 1
+  },
+  {
+    "ref": "refs/heads/main-preserve-release-progress",
+    "sha": "b06a5a8b58713bcc3dea030e48caa8d35736e004",
+    "commits_not_in_main": 0
+  },
+  {
+    "ref": "refs/heads/ui/apple-native-revamp",
+    "sha": "1967def2e685414163deeea0bd6bf63d6c4d8782",
+    "commits_not_in_main": 15
+  },
+  {
+    "ref": "refs/remotes/origin/claude/finn-home-screen-redesign-15a51a",
+    "sha": "f25eedfb8df96da783d9b653223290bb963ee777",
+    "commits_not_in_main": 1
+  },
+  {
+    "ref": "refs/remotes/origin/claude/finn-nav-restructure-71c44c",
+    "sha": "fb290e6ddb960fdd080a891281e3d079e38a823d",
+    "commits_not_in_main": 3
+  },
+  {
+    "ref": "refs/remotes/origin/design/finn-welcome-onboarding",
+    "sha": "e73a3506ce5d85d50952ff85c903808acf4ac1b1",
+    "commits_not_in_main": 2
+  },
+  {
+    "ref": "refs/remotes/origin/finn/backend-reliability",
+    "sha": "253aebe298ab78b5fdfbe9aadd9ce5754bd2ae6e",
+    "commits_not_in_main": 18
+  },
+  {
+    "ref": "refs/remotes/origin/finn/full-device-audit",
+    "sha": "ba0d0be3779b51100e9e0e1789a0b3e27d4a36cc",
+    "commits_not_in_main": 9
+  },
+  {
+    "ref": "refs/remotes/origin/finn/icon-consistency",
+    "sha": "b1f3dd32612288d8603cd1476b7c84e7fec553d8",
+    "commits_not_in_main": 17
+  },
+  {
+    "ref": "refs/remotes/origin/finn/interface-review",
+    "sha": "ce50d5b10c2d72932532ee1478fba3c122046232",
+    "commits_not_in_main": 9
+  },
+  {
+    "ref": "refs/remotes/origin/finn/layered-icon",
+    "sha": "7c746a0a1a58c6574d89cfb1c7e3ea87b2a7d387",
+    "commits_not_in_main": 5
+  },
+  {
+    "ref": "refs/remotes/origin/finn/navig",
+    "sha": "50395fd83bb6fda8e8dabbd9362f5fce90fe83cd",
+    "commits_not_in_main": 16
+  },
+  {
+    "ref": "refs/remotes/origin/finn/onboarding",
+    "sha": "4fa8d4a33a129801449562632b7b17292e6770eb",
+    "commits_not_in_main": 19
+  },
+  {
+    "ref": "refs/remotes/origin/finn/presentation-refinement",
+    "sha": "7d5ea73394a16b65fcb0670f94eb60ec15c09fcb",
+    "commits_not_in_main": 10
+  },
+  {
+    "ref": "refs/remotes/origin/main",
+    "sha": "e05e3301df1de3eadce647d312a7bd978a7e6507",
+    "commits_not_in_main": 0
+  }
+]

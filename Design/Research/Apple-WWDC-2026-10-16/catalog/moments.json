@@ -1,0 +1,1010 @@
+[
+  {
+    "id": "wwdc2013-intention-geometry",
+    "year": 2013,
+    "event": "WWDC",
+    "title": "Intention opening film",
+    "start_seconds": 12,
+    "duration_seconds": 45,
+    "tags": [
+      "motion",
+      "typography",
+      "film"
+    ],
+    "analysis": "Minimal geometry and changing words carry a brand argument before any product appears. Study how each movement gives the next phrase a reason to arrive.",
+    "source_page": "http://itstreaming.apple.com/podcasts/apple_keynotes_hd/wwdc2013_atv.m4v",
+    "media_url": "http://itstreaming.apple.com/podcasts/apple_keynotes_hd/wwdc2013_atv.m4v",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2013-intention-geometry.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2013-intention-geometry-01.jpg",
+        "source_seconds": 17
+      },
+      {
+        "file": "stills/wwdc2013-intention-geometry-02.jpg",
+        "source_seconds": 34
+      },
+      {
+        "file": "stills/wwdc2013-intention-geometry-03.jpg",
+        "source_seconds": 52
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2013-mac-pro-film",
+    "year": 2013,
+    "event": "WWDC",
+    "title": "Mac Pro silhouette reveal",
+    "start_seconds": 3245,
+    "duration_seconds": 60,
+    "tags": [
+      "reveal",
+      "film",
+      "lighting"
+    ],
+    "analysis": "Darkness, reflected edges and macro details build recognition before the entire product becomes visible. The object receives attention before the specification list.",
+    "source_page": "http://itstreaming.apple.com/podcasts/apple_keynotes_hd/wwdc2013_atv.m4v",
+    "media_url": "http://itstreaming.apple.com/podcasts/apple_keynotes_hd/wwdc2013_atv.m4v",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2013-mac-pro-film.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2013-mac-pro-film-01.jpg",
+        "source_seconds": 3250
+      },
+      {
+        "file": "stills/wwdc2013-mac-pro-film-02.jpg",
+        "source_seconds": 3275
+      },
+      {
+        "file": "stills/wwdc2013-mac-pro-film-03.jpg",
+        "source_seconds": 3300
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2013-ios7-design-film",
+    "year": 2013,
+    "event": "WWDC",
+    "title": "iOS 7 design-film introduction",
+    "start_seconds": 4550,
+    "duration_seconds": 45,
+    "tags": [
+      "film",
+      "ui",
+      "transition"
+    ],
+    "analysis": "An isolated product detail leads into Jony Ive speaking against white. Study the design-voice framing; this short selection is not a complete tour of the redesigned interface.",
+    "source_page": "http://itstreaming.apple.com/podcasts/apple_keynotes_hd/wwdc2013_atv.m4v",
+    "media_url": "http://itstreaming.apple.com/podcasts/apple_keynotes_hd/wwdc2013_atv.m4v",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2013-ios7-design-film.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2013-ios7-design-film-01.jpg",
+        "source_seconds": 4555
+      },
+      {
+        "file": "stills/wwdc2013-ios7-design-film-02.jpg",
+        "source_seconds": 4572
+      },
+      {
+        "file": "stills/wwdc2013-ios7-design-film-03.jpg",
+        "source_seconds": 4590
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2010-retina-comparison",
+    "year": 2010,
+    "event": "WWDC",
+    "title": "Retina pixel-density explanation",
+    "start_seconds": 2200,
+    "duration_seconds": 35,
+    "tags": [
+      "demo",
+      "comparison",
+      "typography"
+    ],
+    "analysis": "A giant letterform and one numerical claim anchor the explanation. This excerpt focuses on pixel density; it is not the complete magnified comparison sequence.",
+    "source_page": "http://itstreaming.apple.com/podcasts/apple_keynotes/13_wwdc2010.m4v",
+    "media_url": "http://itstreaming.apple.com/podcasts/apple_keynotes/13_wwdc2010.m4v",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2010-retina-comparison.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2010-retina-comparison-01.jpg",
+        "source_seconds": 2205
+      },
+      {
+        "file": "stills/wwdc2010-retina-comparison-02.jpg",
+        "source_seconds": 2217
+      },
+      {
+        "file": "stills/wwdc2010-retina-comparison-03.jpg",
+        "source_seconds": 2230
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2010-facetime-demo",
+    "year": 2010,
+    "event": "WWDC",
+    "title": "FaceTime human-use film",
+    "start_seconds": 5650,
+    "duration_seconds": 40,
+    "tags": [
+      "demo",
+      "presenter",
+      "emotion"
+    ],
+    "analysis": "The excerpt moves from Jobs on stage into edited family-use footage. The film makes the emotional benefit visible; it is not an uninterrupted live call.",
+    "source_page": "http://itstreaming.apple.com/podcasts/apple_keynotes/13_wwdc2010.m4v",
+    "media_url": "http://itstreaming.apple.com/podcasts/apple_keynotes/13_wwdc2010.m4v",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2010-facetime-demo.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2010-facetime-demo-01.jpg",
+        "source_seconds": 5655
+      },
+      {
+        "file": "stills/wwdc2010-facetime-demo-02.jpg",
+        "source_seconds": 5670
+      },
+      {
+        "file": "stills/wwdc2010-facetime-demo-03.jpg",
+        "source_seconds": 5685
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2019-mac-pro-reveal",
+    "year": 2019,
+    "event": "WWDC",
+    "title": "Mac Pro product film and reveal",
+    "start_seconds": 4700,
+    "duration_seconds": 50,
+    "tags": [
+      "reveal",
+      "film",
+      "lighting"
+    ],
+    "analysis": "Materials and a controlled camera path turn an enclosure into the central subject. Detail shots prepare the whole-product reveal.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2019/101/",
+    "media_url": "https://p-events-delivery.akamaized.net/3004qzusahnbjppuwydgjzsdyzsippar/vod3/4500/4500_vod.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2019-mac-pro-reveal.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2019-mac-pro-reveal-01.jpg",
+        "source_seconds": 4705
+      },
+      {
+        "file": "stills/wwdc2019-mac-pro-reveal-02.jpg",
+        "source_seconds": 4725
+      },
+      {
+        "file": "stills/wwdc2019-mac-pro-reveal-03.jpg",
+        "source_seconds": 4745
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2019-price-sequence",
+    "year": 2019,
+    "event": "WWDC",
+    "title": "Mac Pro and display pricing",
+    "start_seconds": 6070,
+    "duration_seconds": 60,
+    "tags": [
+      "pricing",
+      "typography",
+      "caution"
+    ],
+    "analysis": "Large prices and sparse product groupings create separate commercial beats. Clear pricing treatment is not evidence that an audience accepts the value proposition.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2019/101/",
+    "media_url": "https://p-events-delivery.akamaized.net/3004qzusahnbjppuwydgjzsdyzsippar/vod3/4500/4500_vod.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2019-price-sequence.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2019-price-sequence-01.jpg",
+        "source_seconds": 6075
+      },
+      {
+        "file": "stills/wwdc2019-price-sequence-02.jpg",
+        "source_seconds": 6100
+      },
+      {
+        "file": "stills/wwdc2019-price-sequence-03.jpg",
+        "source_seconds": 6125
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2019-swiftui-reveal",
+    "year": 2019,
+    "event": "WWDC",
+    "title": "SwiftUI introduction",
+    "start_seconds": 7665,
+    "duration_seconds": 45,
+    "tags": [
+      "reveal",
+      "developer",
+      "comparison"
+    ],
+    "analysis": "The name lands before an explanation of reduced complexity. A developer announcement can create an aha moment by showing the work that disappears.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2019/101/",
+    "media_url": "https://p-events-delivery.akamaized.net/3004qzusahnbjppuwydgjzsdyzsippar/vod3/4500/4500_vod.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2019-swiftui-reveal.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2019-swiftui-reveal-01.jpg",
+        "source_seconds": 7670
+      },
+      {
+        "file": "stills/wwdc2019-swiftui-reveal-02.jpg",
+        "source_seconds": 7687
+      },
+      {
+        "file": "stills/wwdc2019-swiftui-reveal-03.jpg",
+        "source_seconds": 7705
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2020-big-sur-film",
+    "year": 2020,
+    "event": "WWDC",
+    "title": "Big Sur design-film introduction",
+    "start_seconds": 4143,
+    "duration_seconds": 55,
+    "tags": [
+      "ui",
+      "film",
+      "transition"
+    ],
+    "analysis": "A section transition leads from Craig Federighi into a monochrome designer interview. Useful for studying the handoff into an authoritative design voice.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2020/101/",
+    "media_url": "https://p-events-delivery.akamaized.net/2605bdtgclbnfypwzfkzdsupvcyzhhbx/vod5/master/3000/720p_3000.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2020-big-sur-film.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2020-big-sur-film-01.jpg",
+        "source_seconds": 4148
+      },
+      {
+        "file": "stills/wwdc2020-big-sur-film-02.jpg",
+        "source_seconds": 4170
+      },
+      {
+        "file": "stills/wwdc2020-big-sur-film-03.jpg",
+        "source_seconds": 4193
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2020-silicon-transition",
+    "year": 2020,
+    "event": "WWDC",
+    "title": "Apple silicon transition",
+    "start_seconds": 5185,
+    "duration_seconds": 60,
+    "tags": [
+      "story",
+      "reveal",
+      "presenter"
+    ],
+    "analysis": "A platform decision is framed within earlier transitions, then given a clear destination. History makes the change easier to understand.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2020/101/",
+    "media_url": "https://p-events-delivery.akamaized.net/2605bdtgclbnfypwzfkzdsupvcyzhhbx/vod5/master/3000/720p_3000.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2020-silicon-transition.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2020-silicon-transition-01.jpg",
+        "source_seconds": 5190
+      },
+      {
+        "file": "stills/wwdc2020-silicon-transition-02.jpg",
+        "source_seconds": 5215
+      },
+      {
+        "file": "stills/wwdc2020-silicon-transition-03.jpg",
+        "source_seconds": 5240
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2021-universal-control",
+    "year": 2021,
+    "event": "WWDC",
+    "title": "Universal Control demonstration",
+    "start_seconds": 4960,
+    "duration_seconds": 60,
+    "tags": [
+      "demo",
+      "continuity",
+      "ecosystem"
+    ],
+    "analysis": "The same pointer and object persist across devices. Continuity makes the relationship tangible without an architecture diagram.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2021/101/",
+    "media_url": "https://p-events-delivery.akamaized.net/1805asrvgvurxcrkewleraugwqathmvg/vod_FbRMWBEvqAdggApZaUoqQJkJWhojfMfh/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2021-universal-control.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2021-universal-control-01.jpg",
+        "source_seconds": 4965
+      },
+      {
+        "file": "stills/wwdc2021-universal-control-02.jpg",
+        "source_seconds": 4990
+      },
+      {
+        "file": "stills/wwdc2021-universal-control-03.jpg",
+        "source_seconds": 5015
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2022-macbook-air-film",
+    "year": 2022,
+    "event": "WWDC",
+    "title": "MacBook Air with M2 reveal",
+    "start_seconds": 3670,
+    "duration_seconds": 55,
+    "tags": [
+      "film",
+      "reveal",
+      "product"
+    ],
+    "analysis": "A restrained product film gives the silhouette and finish room. The reveal arrives after the presenter establishes why the update matters.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2022/101/",
+    "media_url": "https://events-delivery.apple.com/0205eyyhwbbqexozkwmgccegwnjyrktg/vod_main_KYVtRmtKMbxMmJHvKTwKJVQuxEmzBjPm/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2022-macbook-air-film.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2022-macbook-air-film-01.jpg",
+        "source_seconds": 3675
+      },
+      {
+        "file": "stills/wwdc2022-macbook-air-film-02.jpg",
+        "source_seconds": 3697
+      },
+      {
+        "file": "stills/wwdc2022-macbook-air-film-03.jpg",
+        "source_seconds": 3720
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2023-opening-camera",
+    "year": 2023,
+    "event": "WWDC",
+    "title": "WWDC23 developer opening film",
+    "start_seconds": 35,
+    "duration_seconds": 40,
+    "tags": [
+      "opening",
+      "camera",
+      "film"
+    ],
+    "analysis": "A developer-centered narrative uses people, streets and cinematic cuts to establish human stakes before the main presentation. This is an opening story, not an Apple Park establishing shot.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2023/101/",
+    "media_url": "https://events-delivery.apple.com/0105cftwpxxsfrpdwklppzjhjocakrsk/vod_main_dcxgfpCbhQsgAaxKGMVqZMCdBHZnMpJM/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2023-opening-camera.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2023-opening-camera-01.jpg",
+        "source_seconds": 40
+      },
+      {
+        "file": "stills/wwdc2023-opening-camera-02.jpg",
+        "source_seconds": 55
+      },
+      {
+        "file": "stills/wwdc2023-opening-camera-03.jpg",
+        "source_seconds": 70
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2023-vision-announcement",
+    "year": 2023,
+    "event": "WWDC",
+    "title": "One more thing stage beat",
+    "start_seconds": 4858,
+    "duration_seconds": 35,
+    "tags": [
+      "reveal",
+      "typography",
+      "presenter"
+    ],
+    "analysis": "A large phrase, a small presenter and a pause reset attention. The scene withholds the object rather than explaining it too early.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2023/101/",
+    "media_url": "https://events-delivery.apple.com/0105cftwpxxsfrpdwklppzjhjocakrsk/vod_main_dcxgfpCbhQsgAaxKGMVqZMCdBHZnMpJM/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2023-vision-announcement.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2023-vision-announcement-01.jpg",
+        "source_seconds": 4863
+      },
+      {
+        "file": "stills/wwdc2023-vision-announcement-02.jpg",
+        "source_seconds": 4875
+      },
+      {
+        "file": "stills/wwdc2023-vision-announcement-03.jpg",
+        "source_seconds": 4888
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2023-vision-product-film",
+    "year": 2023,
+    "event": "WWDC",
+    "title": "Vision Pro first product reveal",
+    "start_seconds": 4895,
+    "duration_seconds": 55,
+    "tags": [
+      "reveal",
+      "film",
+      "product"
+    ],
+    "analysis": "The first product images resolve the preceding suspense. Watch the handoff from an unnamed promise to a named object.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2023/101/",
+    "media_url": "https://events-delivery.apple.com/0105cftwpxxsfrpdwklppzjhjocakrsk/vod_main_dcxgfpCbhQsgAaxKGMVqZMCdBHZnMpJM/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2023-vision-product-film.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2023-vision-product-film-01.jpg",
+        "source_seconds": 4900
+      },
+      {
+        "file": "stills/wwdc2023-vision-product-film-02.jpg",
+        "source_seconds": 4922
+      },
+      {
+        "file": "stills/wwdc2023-vision-product-film-03.jpg",
+        "source_seconds": 4945
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2023-vision-use-case",
+    "year": 2023,
+    "event": "WWDC",
+    "title": "Vision Pro spatial use case",
+    "start_seconds": 5080,
+    "duration_seconds": 45,
+    "tags": [
+      "demo",
+      "film",
+      "ui"
+    ],
+    "analysis": "A person in a recognizable room gives an unfamiliar interface context. The product story depends on what the person can do.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2023/101/",
+    "media_url": "https://events-delivery.apple.com/0105cftwpxxsfrpdwklppzjhjocakrsk/vod_main_dcxgfpCbhQsgAaxKGMVqZMCdBHZnMpJM/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2023-vision-use-case.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2023-vision-use-case-01.jpg",
+        "source_seconds": 5085
+      },
+      {
+        "file": "stills/wwdc2023-vision-use-case-02.jpg",
+        "source_seconds": 5102
+      },
+      {
+        "file": "stills/wwdc2023-vision-use-case-03.jpg",
+        "source_seconds": 5120
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2024-opening-skydiving",
+    "year": 2024,
+    "event": "WWDC",
+    "title": "WWDC24 skydiving opening",
+    "start_seconds": 30,
+    "duration_seconds": 45,
+    "tags": [
+      "opening",
+      "film",
+      "humour"
+    ],
+    "analysis": "An energetic filmed opening supplies surprise before the presentation changes to a calmer explanatory register.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2024/101/",
+    "media_url": "https://events-delivery.apple.com/1505clvgxdwlbjrjhxtjdgcdxaiabvuf/vod_main_BveVQvhWftXzpUakjHjEUkbmUYLbRdcV/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2024-opening-skydiving.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2024-opening-skydiving-01.jpg",
+        "source_seconds": 35
+      },
+      {
+        "file": "stills/wwdc2024-opening-skydiving-02.jpg",
+        "source_seconds": 52
+      },
+      {
+        "file": "stills/wwdc2024-opening-skydiving-03.jpg",
+        "source_seconds": 70
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2024-intelligence-reveal",
+    "year": 2024,
+    "event": "WWDC",
+    "title": "Apple Intelligence identity reveal",
+    "start_seconds": 3950,
+    "duration_seconds": 55,
+    "tags": [
+      "reveal",
+      "typography",
+      "identity"
+    ],
+    "analysis": "The identity combines a short verbal idea with a visual reset. The reveal needs breathing room before the capability explanation.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2024/101/",
+    "media_url": "https://events-delivery.apple.com/1505clvgxdwlbjrjhxtjdgcdxaiabvuf/vod_main_BveVQvhWftXzpUakjHjEUkbmUYLbRdcV/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2024-intelligence-reveal.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2024-intelligence-reveal-01.jpg",
+        "source_seconds": 3955
+      },
+      {
+        "file": "stills/wwdc2024-intelligence-reveal-02.jpg",
+        "source_seconds": 3977
+      },
+      {
+        "file": "stills/wwdc2024-intelligence-reveal-03.jpg",
+        "source_seconds": 4000
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2024-privacy-compute",
+    "year": 2024,
+    "event": "WWDC",
+    "title": "Private Cloud Compute explanation",
+    "start_seconds": 4435,
+    "duration_seconds": 55,
+    "tags": [
+      "diagram",
+      "privacy",
+      "explanation"
+    ],
+    "analysis": "An abstract trust question becomes a simple relationship between device and cloud. Inspect what appears first and what the presenter explains next.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2024/101/",
+    "media_url": "https://events-delivery.apple.com/1505clvgxdwlbjrjhxtjdgcdxaiabvuf/vod_main_BveVQvhWftXzpUakjHjEUkbmUYLbRdcV/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2024-privacy-compute.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2024-privacy-compute-01.jpg",
+        "source_seconds": 4440
+      },
+      {
+        "file": "stills/wwdc2024-privacy-compute-02.jpg",
+        "source_seconds": 4462
+      },
+      {
+        "file": "stills/wwdc2024-privacy-compute-03.jpg",
+        "source_seconds": 4485
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2024-siri-demo",
+    "year": 2024,
+    "event": "WWDC",
+    "title": "Siri identity and product-knowledge explanation",
+    "start_seconds": 4660,
+    "duration_seconds": 55,
+    "tags": [
+      "demo",
+      "ui",
+      "motion"
+    ],
+    "analysis": "The presenter, Siri icon and a room-sized field of questions frame the explanation. This sample captures identity and information staging; consult the full keynote for the glowing-edge interaction demonstration.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2024/101/",
+    "media_url": "https://events-delivery.apple.com/1505clvgxdwlbjrjhxtjdgcdxaiabvuf/vod_main_BveVQvhWftXzpUakjHjEUkbmUYLbRdcV/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "downloaded",
+    "clip": "clips/wwdc2024-siri-demo.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2024-siri-demo-01.jpg",
+        "source_seconds": 4665
+      },
+      {
+        "file": "stills/wwdc2024-siri-demo-02.jpg",
+        "source_seconds": 4687
+      },
+      {
+        "file": "stills/wwdc2024-siri-demo-03.jpg",
+        "source_seconds": 4710
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2025-design-evolution",
+    "year": 2025,
+    "event": "WWDC",
+    "title": "Design film: architecture, device and interface",
+    "start_seconds": 494,
+    "duration_seconds": 55,
+    "tags": [
+      "story",
+      "comparison",
+      "ui"
+    ],
+    "analysis": "The selected film moves between architectural glass, a phone and a fluid surface. It sits within the wider design-evolution narrative; this excerpt is not a complete historical comparison.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2025/101/",
+    "media_url": "https://events-delivery.apple.com/0705ssefukzgmvtafvdghmccmofevkcb/vod_main_tbRmxUmgfZUDgixPtvpuvDHQcDAUqvUq/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2025-design-evolution.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2025-design-evolution-01.jpg",
+        "source_seconds": 499
+      },
+      {
+        "file": "stills/wwdc2025-design-evolution-02.jpg",
+        "source_seconds": 521
+      },
+      {
+        "file": "stills/wwdc2025-design-evolution-03.jpg",
+        "source_seconds": 544
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2025-liquid-glass-reveal",
+    "year": 2025,
+    "event": "WWDC",
+    "title": "Liquid Glass material in use",
+    "start_seconds": 585,
+    "duration_seconds": 55,
+    "tags": [
+      "reveal",
+      "motion",
+      "material"
+    ],
+    "analysis": "Close views of controls, phone interaction and the browser present material behavior in use. The excerpt illustrates the reveal section rather than guaranteeing a name-only title card.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2025/101/",
+    "media_url": "https://events-delivery.apple.com/0705ssefukzgmvtafvdghmccmofevkcb/vod_main_tbRmxUmgfZUDgixPtvpuvDHQcDAUqvUq/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2025-liquid-glass-reveal.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2025-liquid-glass-reveal-01.jpg",
+        "source_seconds": 590
+      },
+      {
+        "file": "stills/wwdc2025-liquid-glass-reveal-02.jpg",
+        "source_seconds": 612
+      },
+      {
+        "file": "stills/wwdc2025-liquid-glass-reveal-03.jpg",
+        "source_seconds": 635
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2025-glass-in-ui",
+    "year": 2025,
+    "event": "WWDC",
+    "title": "Liquid Glass in interface elements",
+    "start_seconds": 650,
+    "duration_seconds": 55,
+    "tags": [
+      "ui",
+      "motion",
+      "material"
+    ],
+    "analysis": "Surface motion serves a control or transition. The useful reference is the relationship between content and material, not a glass filter.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2025/101/",
+    "media_url": "https://events-delivery.apple.com/0705ssefukzgmvtafvdghmccmofevkcb/vod_main_tbRmxUmgfZUDgixPtvpuvDHQcDAUqvUq/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2025-glass-in-ui.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2025-glass-in-ui-01.jpg",
+        "source_seconds": 655
+      },
+      {
+        "file": "stills/wwdc2025-glass-in-ui-02.jpg",
+        "source_seconds": 677
+      },
+      {
+        "file": "stills/wwdc2025-glass-in-ui-03.jpg",
+        "source_seconds": 700
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2025-workout-buddy",
+    "year": 2025,
+    "event": "WWDC",
+    "title": "Workout Buddy introduction",
+    "start_seconds": 2590,
+    "duration_seconds": 55,
+    "tags": [
+      "fitness",
+      "demo",
+      "audio"
+    ],
+    "analysis": "A fitness feature is introduced through a familiar workout situation and spoken encouragement. Compare its motivation story with Finn\u2019s measured-observation story.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2025/101/",
+    "media_url": "https://events-delivery.apple.com/0705ssefukzgmvtafvdghmccmofevkcb/vod_main_tbRmxUmgfZUDgixPtvpuvDHQcDAUqvUq/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "downloaded",
+    "clip": "clips/wwdc2025-workout-buddy.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2025-workout-buddy-01.jpg",
+        "source_seconds": 2595
+      },
+      {
+        "file": "stills/wwdc2025-workout-buddy-02.jpg",
+        "source_seconds": 2617
+      },
+      {
+        "file": "stills/wwdc2025-workout-buddy-03.jpg",
+        "source_seconds": 2640
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2025-workout-audio",
+    "year": 2025,
+    "event": "WWDC",
+    "title": "Workout Buddy spoken example",
+    "start_seconds": 2660,
+    "duration_seconds": 55,
+    "tags": [
+      "fitness",
+      "audio",
+      "film"
+    ],
+    "analysis": "The voice is part of the product demonstration. Notice the space needed to hear a response and understand when it occurs.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2025/101/",
+    "media_url": "https://events-delivery.apple.com/0705ssefukzgmvtafvdghmccmofevkcb/vod_main_tbRmxUmgfZUDgixPtvpuvDHQcDAUqvUq/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "downloaded",
+    "clip": "clips/wwdc2025-workout-audio.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2025-workout-audio-01.jpg",
+        "source_seconds": 2665
+      },
+      {
+        "file": "stills/wwdc2025-workout-audio-02.jpg",
+        "source_seconds": 2687
+      },
+      {
+        "file": "stills/wwdc2025-workout-audio-03.jpg",
+        "source_seconds": 2710
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2026-intelligence-framing",
+    "year": 2026,
+    "event": "WWDC",
+    "title": "WWDC26 intelligence framing",
+    "start_seconds": 1680,
+    "duration_seconds": 50,
+    "tags": [
+      "story",
+      "explanation",
+      "recent"
+    ],
+    "analysis": "A presenter addresses the camera beside a landscaped pool. The excerpt is primarily verbal framing, providing a useful contrast with a highly visual hardware reveal.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2026/101/",
+    "media_url": "https://events-delivery.apple.com/0601eknundukyswuegvjcidvurtztakr/vod_main_vdhwwrygnmzydhppixlrqwduiqffztdw/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2026-intelligence-framing.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2026-intelligence-framing-01.jpg",
+        "source_seconds": 1685
+      },
+      {
+        "file": "stills/wwdc2026-intelligence-framing-02.jpg",
+        "source_seconds": 1705
+      },
+      {
+        "file": "stills/wwdc2026-intelligence-framing-03.jpg",
+        "source_seconds": 1725
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2026-siri-ai-reveal",
+    "year": 2026,
+    "event": "WWDC",
+    "title": "WWDC26 Siri AI introduction",
+    "start_seconds": 1995,
+    "duration_seconds": 55,
+    "tags": [
+      "reveal",
+      "ui",
+      "recent"
+    ],
+    "analysis": "The sequence moves from contextual footage through a dark identity beat into presenter explanation. This is a recent comparison, not a claim of historical iconic status.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2026/101/",
+    "media_url": "https://events-delivery.apple.com/0601eknundukyswuegvjcidvurtztakr/vod_main_vdhwwrygnmzydhppixlrqwduiqffztdw/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2026-siri-ai-reveal.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2026-siri-ai-reveal-01.jpg",
+        "source_seconds": 2000
+      },
+      {
+        "file": "stills/wwdc2026-siri-ai-reveal-02.jpg",
+        "source_seconds": 2022
+      },
+      {
+        "file": "stills/wwdc2026-siri-ai-reveal-03.jpg",
+        "source_seconds": 2045
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  },
+  {
+    "id": "wwdc2026-camera-intelligence",
+    "year": 2026,
+    "event": "WWDC",
+    "title": "WWDC26 Siri mode in Camera",
+    "start_seconds": 2830,
+    "duration_seconds": 50,
+    "tags": [
+      "camera",
+      "demo",
+      "recent"
+    ],
+    "analysis": "A presenter introduces a camera-context capability; the sequence includes a phone-labelled Camera mode and an Apple lock mark. Useful for studying contextual naming and the shift toward trust messaging.",
+    "source_page": "https://developer.apple.com/videos/play/wwdc2026/101/",
+    "media_url": "https://events-delivery.apple.com/0601eknundukyswuegvjcidvurtztakr/vod_main_vdhwwrygnmzydhppixlrqwduiqffztdw/sdr_avc_720p_3000/prog_index.m3u8",
+    "source_hosting": "Apple",
+    "status": "exists",
+    "clip": "clips/wwdc2026-camera-intelligence.mp4",
+    "stills": [
+      {
+        "file": "stills/wwdc2026-camera-intelligence-01.jpg",
+        "source_seconds": 2835
+      },
+      {
+        "file": "stills/wwdc2026-camera-intelligence-02.jpg",
+        "source_seconds": 2855
+      },
+      {
+        "file": "stills/wwdc2026-camera-intelligence-03.jpg",
+        "source_seconds": 2875
+      }
+    ],
+    "review": "Three sampled frames visually inspected. Full keynote not watched end to end.",
+    "timestamp_note": "Nominal source seek time. Caption and alternate-upload offsets may differ; verify exact edit boundaries before production.",
+    "rights": "Apple-owned study reference; no public reuse rights granted by this catalog."
+  }
+]

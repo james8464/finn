@@ -47,7 +47,8 @@ nonisolated struct LastSetReport: Equatable {
     /// "today at 9:40", "yesterday at 18:05", or "12 Oct at 18:05"
     func whenText(now: Date = Date(), calendar: Calendar = .current) -> String {
         let locale = calendar.locale ?? .current
-        let time = capturedAt.formatted(.dateTime.hour().minute().locale(locale))
+        let format = Date.FormatStyle(locale: locale, calendar: calendar, timeZone: calendar.timeZone)
+        let time = capturedAt.formatted(format.hour().minute())
         if calendar.isDate(capturedAt, inSameDayAs: now) {
             return String(localized: "today at \(time)", comment: "Siri, when the set was measured")
         }
@@ -55,7 +56,7 @@ nonisolated struct LastSetReport: Equatable {
            calendar.isDate(capturedAt, inSameDayAs: yesterday) {
             return String(localized: "yesterday at \(time)", comment: "Siri, when the set was measured")
         }
-        let day = capturedAt.formatted(.dateTime.day().month(.abbreviated).locale(locale))
+        let day = capturedAt.formatted(format.day().month(.abbreviated))
         return String(localized: "\(day) at \(time)", comment: "Siri, when the set was measured; day then time")
     }
 

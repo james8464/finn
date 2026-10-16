@@ -1,0 +1,29 @@
+[
+  {
+    "file": "supporting-slides/fluid-interfaces.pdf",
+    "pages": 281,
+    "embedded_font_resource_names": [
+      "/MTQMAQ+SFHello-Medium",
+      "/OZLWGL+SFMono-Regular",
+      "/PJQKPV+SFHello-Light",
+      "/SHHAXA+SFHello-Semibold",
+      "/SVKXYJ+SFHello-Bold",
+      "/YBCEGE+SFHello-Regular",
+      "/YKEPET+SFHello-Italic"
+    ],
+    "interpretation": "Evidence for this technical-session PDF only, not all keynote recordings."
+  },
+  {
+    "file": "supporting-slides/presenting-design.pdf",
+    "pages": 104,
+    "embedded_font_resource_names": [
+      "/FJJPTQ+SFHello-Semibold",
+      "/FKXCIP+LucidaGrande",
+      "/JCPDMX+SFHello-Regular",
+      "/MQSAJO+AppleColorEmoji",
+      "/NWXLCK+SFHello-Regular",
+      "/OBEVNS+SFHello-Medium"
+    ],
+    "interpretation": "Evidence for this technical-session PDF only, not all keynote recordings."
+  }
+]

@@ -1,0 +1,30 @@
+APPLE WWDC PRESENTATION RESEARCH
+
+Open index.html for the searchable offline gallery.
+Read analysis/research-report.html for the full analysis.
+Catalogs preserve sources, timestamps, hashes and font evidence.
+
+{
+  "keynote_cases": 28,
+  "keynote_years": [
+    2010,
+    2013,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "clips": 28,
+  "captured_stills": 84,
+  "press_assets": 22,
+  "unique_press_assets_in_gallery": 22,
+  "supporting_pdfs": 2,
+  "asset_bytes": 236989780,
+  "method": "Caption-assisted selection and three sampled visual frames per excerpt; no claim to have watched every full keynote."
+}
+
+References are Apple-owned study material. No public reuse license is granted.

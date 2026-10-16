@@ -1,0 +1,190 @@
+[
+  {
+    "id": "wwdc2012",
+    "year": 2012,
+    "url": "https://developer.apple.com/videos/play/wwdc2012/101/",
+    "media": [],
+    "thumbnail": null,
+    "sentences": 0,
+    "status": "No playable keynote media found at this attempted developer URL; not a verified keynote page."
+  },
+  {
+    "id": "wwdc2014",
+    "year": 2014,
+    "url": "https://developer.apple.com/videos/play/wwdc2014/101/",
+    "media": [],
+    "thumbnail": null,
+    "sentences": 0,
+    "status": "No playable keynote media found at this attempted developer URL; not a verified keynote page."
+  },
+  {
+    "id": "wwdc2015",
+    "year": 2015,
+    "url": "https://developer.apple.com/videos/play/wwdc2015/101/",
+    "media": [],
+    "thumbnail": null,
+    "sentences": 0,
+    "status": "No playable keynote media found at this attempted developer URL; not a verified keynote page."
+  },
+  {
+    "id": "wwdc2016",
+    "year": 2016,
+    "url": "https://developer.apple.com/videos/play/wwdc2016/101/",
+    "media": [],
+    "thumbnail": null,
+    "sentences": 0,
+    "status": "No playable keynote media found at this attempted developer URL; not a verified keynote page."
+  },
+  {
+    "id": "wwdc2017",
+    "year": 2017,
+    "url": "https://developer.apple.com/videos/play/wwdc2017/101/",
+    "media": [],
+    "thumbnail": null,
+    "sentences": 0,
+    "status": "No playable keynote media found at this attempted developer URL; not a verified keynote page."
+  },
+  {
+    "id": "wwdc2018",
+    "year": 2018,
+    "url": "https://developer.apple.com/videos/play/wwdc2018/101/",
+    "media": [],
+    "thumbnail": null,
+    "sentences": 0,
+    "status": "No playable keynote media found at this attempted developer URL; not a verified keynote page."
+  },
+  {
+    "id": "wwdc2019",
+    "year": 2019,
+    "url": "https://developer.apple.com/videos/play/wwdc2019/101/",
+    "media": [
+      "https://p-events-delivery.akamaized.net/3004qzusahnbjppuwydgjzsdyzsippar/m3u8/hls_vod_mvp.m3u8"
+    ],
+    "thumbnail": "https://devimages-cdn.apple.com/wwdc-services/images/48/2826/2826_wide_900x506_2x.jpg",
+    "sentences": 0,
+    "status": "accessible",
+    "video": "https://p-events-delivery.akamaized.net/3004qzusahnbjppuwydgjzsdyzsippar/vod3/4500/4500_vod.m3u8"
+  },
+  {
+    "id": "wwdc2020",
+    "year": 2020,
+    "url": "https://developer.apple.com/videos/play/wwdc2020/101/",
+    "media": [
+      "https://p-events-delivery.akamaized.net/2605bdtgclbnfypwzfkzdsupvcyzhhbx/m3u8/hls_vod_mvp.m3u8"
+    ],
+    "thumbnail": "https://devimages-cdn.apple.com/wwdc-services/images/49/3921/3921_wide_900x506_2x.jpg",
+    "sentences": 0,
+    "status": "accessible",
+    "video": "https://p-events-delivery.akamaized.net/2605bdtgclbnfypwzfkzdsupvcyzhhbx/vod5/master/3000/720p_3000.m3u8",
+    "audio": "https://p-events-delivery.akamaized.net/2605bdtgclbnfypwzfkzdsupvcyzhhbx/vod5/master/audio/en_128/en_128.m3u8"
+  },
+  {
+    "id": "wwdc2021",
+    "year": 2021,
+    "url": "https://developer.apple.com/videos/play/wwdc2021/101/",
+    "media": [
+      "https://p-events-delivery.akamaized.net/1805asrvgvurxcrkewleraugwqathmvg/m3u8/vod_index-YVvsDudyWzBdgmtcMPabYTdjaWWmbLaA.m3u8"
+    ],
+    "thumbnail": "https://devimages-cdn.apple.com/wwdc-services/images/119/5721/5721_wide_900x506_2x.jpg",
+    "sentences": 0,
+    "status": "accessible",
+    "video": "https://p-events-delivery.akamaized.net/1805asrvgvurxcrkewleraugwqathmvg/vod_FbRMWBEvqAdggApZaUoqQJkJWhojfMfh/sdr_avc_720p_3000/prog_index.m3u8",
+    "audio": "https://p-events-delivery.akamaized.net/1805asrvgvurxcrkewleraugwqathmvg/vod_FbRMWBEvqAdggApZaUoqQJkJWhojfMfh/audio_main_en_2ch_aac_128/prog_index.m3u8"
+  },
+  {
+    "id": "wwdc2022",
+    "year": 2022,
+    "url": "https://developer.apple.com/videos/play/wwdc2022/101/",
+    "media": [
+      "https://events-delivery.apple.com/0205eyyhwbbqexozkwmgccegwnjyrktg/m3u8/vod_index-dpyfrsVksFWjneFiptbXnAMYBtGYbXeZ.m3u8"
+    ],
+    "thumbnail": "https://devimages-cdn.apple.com/wwdc-services/images/124/6854/6854_wide_900x506_2x.jpg",
+    "sentences": 1819,
+    "status": "accessible",
+    "video": "https://events-delivery.apple.com/0205eyyhwbbqexozkwmgccegwnjyrktg/vod_main_KYVtRmtKMbxMmJHvKTwKJVQuxEmzBjPm/sdr_avc_720p_3000/prog_index.m3u8",
+    "audio": "https://events-delivery.apple.com/0205eyyhwbbqexozkwmgccegwnjyrktg/vod_main_KYVtRmtKMbxMmJHvKTwKJVQuxEmzBjPm/audio_main_en_2ch_aac_128/prog_index.m3u8"
+  },
+  {
+    "id": "wwdc2023",
+    "year": 2023,
+    "url": "https://developer.apple.com/videos/play/wwdc2023/101/",
+    "media": [
+      "https://events-delivery.apple.com/0105cftwpxxsfrpdwklppzjhjocakrsk/m3u8/vod_index-PQsoJoECcKHTYzphNkXohHsQWACugmET.m3u8"
+    ],
+    "thumbnail": "https://devimages-cdn.apple.com/wwdc-services/images/D35E0E85-CCB6-41A1-B227-7995ECD83ED5/8746/8746_wide_900x506_2x.jpg",
+    "sentences": 2269,
+    "status": "accessible",
+    "video": "https://events-delivery.apple.com/0105cftwpxxsfrpdwklppzjhjocakrsk/vod_main_dcxgfpCbhQsgAaxKGMVqZMCdBHZnMpJM/sdr_avc_720p_3000/prog_index.m3u8",
+    "audio": "https://events-delivery.apple.com/0105cftwpxxsfrpdwklppzjhjocakrsk/vod_main_dcxgfpCbhQsgAaxKGMVqZMCdBHZnMpJM/audio_main_en_2ch_aac_128/prog_index.m3u8"
+  },
+  {
+    "id": "wwdc2024",
+    "year": 2024,
+    "url": "https://developer.apple.com/videos/play/wwdc2024/101/",
+    "media": [
+      "https://events-delivery.apple.com/1505clvgxdwlbjrjhxtjdgcdxaiabvuf/m3u8/vod_index-LHDoZDhTrsKLsbrZKqYpbWraixsWQHkw.m3u8"
+    ],
+    "thumbnail": "https://devimages-cdn.apple.com/wwdc-services/images/C03E6E6D-A32A-41D0-9E50-C3C6059820AA/9737/9737_wide_900x506_2x.jpg",
+    "sentences": 1742,
+    "status": "accessible",
+    "video": "https://events-delivery.apple.com/1505clvgxdwlbjrjhxtjdgcdxaiabvuf/vod_main_BveVQvhWftXzpUakjHjEUkbmUYLbRdcV/sdr_avc_720p_3000/prog_index.m3u8",
+    "audio": "https://events-delivery.apple.com/1505clvgxdwlbjrjhxtjdgcdxaiabvuf/vod_main_BveVQvhWftXzpUakjHjEUkbmUYLbRdcV/audio_main_en_2ch_aac_128/prog_index.m3u8"
+  },
+  {
+    "id": "wwdc2025",
+    "year": 2025,
+    "url": "https://developer.apple.com/videos/play/wwdc2025/101/",
+    "media": [
+      "https://events-delivery.apple.com/0705ssefukzgmvtafvdghmccmofevkcb/m3u8/vod_index-joowRJLcCBPCthnkzxWwyZCUDqDsNaCG.m3u8"
+    ],
+    "thumbnail": "https://devimages-cdn.apple.com/wwdc-services/images/3055294D-836B-4513-B7B0-0BC5666246B0/10373/10373_wide_900x506_2x.jpg",
+    "sentences": 0,
+    "status": "accessible",
+    "video": "https://events-delivery.apple.com/0705ssefukzgmvtafvdghmccmofevkcb/vod_main_tbRmxUmgfZUDgixPtvpuvDHQcDAUqvUq/sdr_avc_720p_3000/prog_index.m3u8",
+    "audio": "https://events-delivery.apple.com/0705ssefukzgmvtafvdghmccmofevkcb/vod_main_tbRmxUmgfZUDgixPtvpuvDHQcDAUqvUq/audio_main_en_2ch_aac_128/prog_index.m3u8"
+  },
+  {
+    "id": "wwdc2026",
+    "year": 2026,
+    "url": "https://developer.apple.com/videos/play/wwdc2026/101/",
+    "media": [
+      "https://events-delivery.apple.com/0601eknundukyswuegvjcidvurtztakr/vod_main_vdhwwrygnmzydhppixlrqwduiqffztdw/vod_main_vdhwwrygnmzydhppixlrqwduiqffztdw.m3u8"
+    ],
+    "thumbnail": "https://devimages-cdn.apple.com/wwdc-services/images/9B2E82C5-4DDF-4B9A-9459-328D8E297696/10994/10994_wide_900x506_2x.jpg",
+    "sentences": 1289,
+    "status": "accessible",
+    "video": "https://events-delivery.apple.com/0601eknundukyswuegvjcidvurtztakr/vod_main_vdhwwrygnmzydhppixlrqwduiqffztdw/sdr_avc_720p_3000/prog_index.m3u8",
+    "audio": "https://events-delivery.apple.com/0601eknundukyswuegvjcidvurtztakr/vod_main_vdhwwrygnmzydhppixlrqwduiqffztdw/audio_main_en_2ch_aac_128/prog_index.m3u8"
+  },
+  {
+    "id": "wwdc2013",
+    "year": 2013,
+    "url": "http://itstreaming.apple.com/podcasts/apple_keynotes_hd/wwdc2013_atv.m4v",
+    "video": "http://itstreaming.apple.com/podcasts/apple_keynotes_hd/wwdc2013_atv.m4v",
+    "status": "verified-official-legacy-media",
+    "event": "WWDC"
+  },
+  {
+    "id": "macworld2007",
+    "year": 2007,
+    "url": "https://www.apple.com/podcasts/apple_keynotes/apple_keynotes.xml",
+    "video": "http://movies.apple.com/movies/us/podcast/apple_keynotes/MacworldSFKeynote2007.m4v",
+    "status": "verified-official-legacy-media",
+    "event": "Macworld"
+  },
+  {
+    "id": "wwdc2010",
+    "year": 2010,
+    "url": "http://itstreaming.apple.com/podcasts/apple_keynotes/13_wwdc2010.m4v",
+    "video": "http://itstreaming.apple.com/podcasts/apple_keynotes/13_wwdc2010.m4v",
+    "status": "verified-official-legacy-media"
+  },
+  {
+    "id": "wwdc2005",
+    "year": 2005,
+    "url": "https://archive.org/details/wwdc-2005",
+    "video": "https://archive.org/download/wwdc-2005/WWDC%202005.mp4",
+    "status": "archive-mirror",
+    "event": "WWDC"
+  }
+]

@@ -72,6 +72,18 @@ nonisolated struct IntentsTests {
         #expect(report.whenText(now: Self.now, calendar: Self.calendar) == "12 Oct at 10:00")
     }
 
+    @Test func formattingUsesTheRequestedTimeZoneForDayAndTime() {
+        var calendar = Self.calendar
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let recent = LastSetReport.latest(in: sessions([set(minutesAgo: 5)]))!
+        #expect(recent.whenText(now: Self.now, calendar: calendar) == "today at 07:55")
+
+        // This instant is 12 October in UTC, but 13 October in Paris.
+        let older = LastSetReport.latest(in: sessions([set(minutesAgo: 60 * 56.5)]))!
+        #expect(older.whenText(now: Self.now, calendar: calendar) == "12 Oct at 23:30")
+        #expect(older.whenText(now: Self.now, calendar: Self.calendar) == "13 Oct at 01:30")
+    }
+
     @Test func noObservationIsSaidPlainly() {
         let report = LastSetReport.latest(in: sessions([set(minutesAgo: 5)]))!
         #expect(report.observation == nil)

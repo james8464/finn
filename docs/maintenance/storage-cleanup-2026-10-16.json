@@ -1,0 +1,175 @@
+{
+  "deleted": [
+    {
+      "path": "/tmp/finn-keynote-apple-downloads",
+      "allocated_bytes": 524951552,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-backend-watch-derived",
+      "allocated_bytes": 696684544,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-backend-derived",
+      "allocated_bytes": 601239552,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-audit-dark-dd",
+      "allocated_bytes": 579641344,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-ui-full-final",
+      "allocated_bytes": 544321536,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-max-capture-build",
+      "allocated_bytes": 516894720,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-audit-dd",
+      "allocated_bytes": 512380928,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-presentation-build",
+      "allocated_bytes": 511029248,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-ui-final-regressions",
+      "allocated_bytes": 509775872,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-icon-launch-phone-build",
+      "allocated_bytes": 377139200,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-final-release",
+      "allocated_bytes": 339197952,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-ui-release",
+      "allocated_bytes": 337727488,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-ui-next",
+      "allocated_bytes": 219398144,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-backend-core-tests",
+      "allocated_bytes": 178388992,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-audit-swift-cache",
+      "allocated_bytes": 96178176,
+      "reason": "Rebuildable Finn compilation/test cache; no build process running"
+    },
+    {
+      "path": "/tmp/finn-keynote-camera-take.mov",
+      "allocated_bytes": 208879616,
+      "reason": "Superseded capture; selected source and current masters preserved"
+    },
+    {
+      "path": "/tmp/finn-camera-smooth-take.mov",
+      "allocated_bytes": 140275712,
+      "reason": "Superseded capture; selected source and current masters preserved"
+    },
+    {
+      "path": "/tmp/finn-keynote-demo.mp4",
+      "allocated_bytes": 33607680,
+      "reason": "Superseded capture; selected source and current masters preserved"
+    },
+    {
+      "path": "/tmp/finn-keynote-walkthrough-raw.mp4",
+      "allocated_bytes": 33587200,
+      "reason": "Superseded capture; selected source and current masters preserved"
+    },
+    {
+      "path": "/tmp/finn-keynote-navigation.mp4",
+      "allocated_bytes": 25784320,
+      "reason": "Superseded capture; selected source and current masters preserved"
+    },
+    {
+      "path": "/tmp/finn-clean-result-coach-take.mov",
+      "allocated_bytes": 24092672,
+      "reason": "Superseded capture; selected source and current masters preserved"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-gpedfgiqekuddpcprbtulkmpmcvd",
+      "allocated_bytes": 0,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-abssvdckkicilmfjvjtbeboxmcri",
+      "allocated_bytes": 0,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-allvlylckqoykxgfsebdkdcmkqpw",
+      "allocated_bytes": 98304,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-galyuyrxyamsswcbezvwtqiflgge",
+      "allocated_bytes": 1687552,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-ckcxfctgkcpkwuajbfuijsncgkjm",
+      "allocated_bytes": 0,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-bdcjpwvgkfbhgahewdagylhxltwj",
+      "allocated_bytes": 1687552,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-acsxitmtbczvrqdcocraxpraxgll",
+      "allocated_bytes": 225280,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-cavvfoyachjrbcdutbdywjghtakl",
+      "allocated_bytes": 0,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-ehfakfchshxnfngedlduelbnxamv",
+      "allocated_bytes": 0,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Library/Developer/Xcode/DerivedData/Finn-frkwxjbrxtgrdmfzvbrznhofsqxb",
+      "allocated_bytes": 151736320,
+      "reason": "Rebuildable Finn Xcode derived data"
+    },
+    {
+      "path": "/Users/james/Downloads/Man_rushing_through_city_morning_20261016013806.mp4",
+      "allocated_bytes": 5500928,
+      "reason": "Exact duplicate of retained film source"
+    },
+    {
+      "path": "/Users/james/Downloads/Man_dropping_bag_and_squatting_20261016013848.mp4",
+      "allocated_bytes": 3067904,
+      "reason": "Exact duplicate of retained film source"
+    },
+    {
+      "path": "/Users/james/Downloads/Man_working_in_office_20261016013834.mp4",
+      "allocated_bytes": 3166208,
+      "reason": "Exact duplicate of retained film source"
+    }
+  ],
+  "allocated_bytes_removed": 7178346496
+}
