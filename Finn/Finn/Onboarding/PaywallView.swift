@@ -71,14 +71,22 @@ struct PaywallView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: OnboardingMetrics.sectionSpacing) {
                     heading
-                    features
-                    VStack(spacing: OnboardingMetrics.rowSpacing) {
-                        ForEach(CoachPlan.allCases, id: \.self) { planRow($0) }
+                    // the touch of pink: Home's outline around Finn Coach+ and its two plans
+                    FinnOutline(topRadius: Self.rowRadius, bottomRadius: Self.rowRadius) {
+                        VStack(alignment: .leading, spacing: OnboardingMetrics.rowSpacing) {
+                            features
+                                .padding(.horizontal, OnboardingMetrics.cardPadding)
+                                .padding(.vertical, OnboardingMetrics.titleSpacing)
+                            planRow(.weekly)
+                            planRow(.annual)
+                        }
                     }
-                    .sensoryFeedback(.selection, trigger: plan)
+                    // outside the outline, as wide as the plans inside it
+                    planRow(.trial)
+                        .padding(.horizontal, DashboardStyle.cardSpacing)
                     terms
-                    links
                 }
+                .sensoryFeedback(.selection, trigger: plan)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, OnboardingMetrics.gutter)
                 .padding(.vertical, OnboardingMetrics.sectionSpacing)
@@ -87,7 +95,9 @@ struct PaywallView: View {
             .scrollBounceBehavior(.basedOnSize)
             actions
                 .padding(.horizontal, OnboardingMetrics.gutter)
-                .padding(.bottom, OnboardingMetrics.bottomInset)
+            // at the very bottom of the screen, under the main action
+            links
+                .padding(.horizontal, OnboardingMetrics.gutter)
         }
         .disabled(isBusy)
         .sensoryFeedback(.success, trigger: purchases)
@@ -182,13 +192,13 @@ struct PaywallView: View {
         switch plan {
         case .weekly: String(localized: "Weekly")
         case .annual: String(localized: "Annual")
-        case .trial: String(localized: "Free trial · 2 weeks")
+        case .trial: String(localized: "Free trial")
         }
     }
 
     /// the trial says what follows it; the price beside it is the one billed
     private func detail(_ plan: CoachPlan) -> String? {
-        plan == .trial ? String(localized: "Then billed yearly") : nil
+        plan == .trial ? String(localized: "2 weeks free, then billed yearly") : nil
     }
 
     /// what the plan bills, the same size for every plan, the trial included
@@ -247,7 +257,7 @@ struct PaywallView: View {
             .contentShape(Rectangle())
     }
 
-    /// Pay with Apple Pay appears once a plan is chosen
+    /// Pay with Apple Pay appears once a plan is chosen, above the links
     private var actions: some View {
         VStack {
             if plan != nil {
