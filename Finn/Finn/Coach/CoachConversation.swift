@@ -56,22 +56,35 @@ final class CoachConversation {
         messages.append(answer)
     }
 
-    /// questions the person can tap, so the demo does not start from a blank field
+    /// questions the person can tap, once there are saved sets to talk about. Each one meets a
+    /// fallback intent: a recap, the progress, then advice
     var suggestedQuestions: [String] {
-        guard let latest = context.latest else { return [] }
+        guard context.latest != nil else { return [] }
         switch responder.language {
         case .english:
-            return ["How did set \(latest.number) go?",
-                    "What should I keep in mind next time?",
-                    "What changed across my last sets?"]
+            return ["How did my last set go?",
+                    "What changed across my sets?",
+                    "What should I focus on next time?"]
         case .french:
-            return ["Comment s'est passée la série \(latest.number) ?",
-                    "À quoi faire attention la prochaine fois ?",
-                    "Qu'est-ce qui a changé sur mes dernières séries ?"]
+            return ["Comment s'est passée ma dernière série ?",
+                    "Qu'est-ce qui a changé sur mes séries ?",
+                    "Sur quoi me concentrer la prochaine fois ?"]
         case .spanish:
-            return ["¿Cómo fue la serie \(latest.number)?",
-                    "¿En qué debería fijarme la próxima vez?",
-                    "¿Qué cambió en mis últimas series?"]
+            return ["¿Cómo fue mi última serie?",
+                    "¿Qué cambió en mis series?",
+                    "¿En qué debería enfocarme la próxima vez?"]
+        }
+    }
+
+    /// what the analysis card asks: where the person stands, what to do next, what to avoid
+    var analysisRequest: String {
+        switch responder.language {
+        case .english:
+            "Analyze my progression and give me advice: tell me where I stand, what I need to do next and what I need to avoid."
+        case .french:
+            "Analyse ma progression et donne-moi des conseils : dis-moi où j'en suis, ce que je dois faire ensuite et ce que je dois éviter."
+        case .spanish:
+            "Analiza mi progresión y dame consejos: dime dónde estoy, qué debo hacer a continuación y qué debo evitar."
         }
     }
 

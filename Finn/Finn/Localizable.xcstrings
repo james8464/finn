@@ -331,6 +331,62 @@
         }
       }
     },
+    "Analyze my progress" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse my progress"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyze my progress"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analizar mi progreso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyser ma progression"
+          }
+        }
+      }
+    },
+    "Asks Finn to analyze your saved sets" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asks Finn to analyse your saved sets"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asks Finn to analyze your saved sets"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pide a Finn que analice tus series guardadas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demande à Finn d’analyser tes séries enregistrées"
+          }
+        }
+      }
+    },
     "Easy pace, focus on clean reps." : {
       "comment" : "How to train at light intensity, on the next workout card.",
       "localizations" : {
@@ -445,6 +501,34 @@
         }
       }
     },
+    "Sends this question to Finn" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sends this question to Finn"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sends this question to Finn"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envía esta pregunta a Finn"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoie cette question à Finn"
+          }
+        }
+      }
+    },
     "Steady pace, leave 2 reps in the tank." : {
       "comment" : "How to train at moderate intensity, on the next workout card.",
       "localizations" : {
@@ -470,6 +554,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rythme régulier, garde 2 répétitions en réserve."
+          }
+        }
+      }
+    },
+    "Where I stand, what to do next, what to avoid." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where I stand, what to do next, what to avoid."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where I stand, what to do next, what to avoid."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dónde estoy, qué hacer después, qué evitar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Où j’en suis, quoi faire ensuite, quoi éviter."
           }
         }
       }
