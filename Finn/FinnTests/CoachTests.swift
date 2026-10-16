@@ -247,7 +247,7 @@ struct CoachTests {
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
         let conversation = CoachConversation(history: history(), responder: responder)
         #expect(conversation.messages.count == 1)
-        #expect(conversation.suggestedQuestions.first == "How did set 3 go?")
+        #expect(conversation.suggestedQuestions.first == "How did my last set go?")
         await conversation.send("What about set 2?")
         #expect(conversation.messages.count == 3)
         #expect(conversation.messages[1].role == .person)
@@ -255,6 +255,15 @@ struct CoachTests {
         #expect(engine.lastHistory?.count == 1)
         await conversation.send("   ")
         #expect(conversation.messages.count == 3)
+    }
+
+    @Test func promptsAndAnalysisMeetTheirFallbackIntentsInEveryLanguage() {
+        for language in [CoachLanguage.english, .french, .spanish] {
+            let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: language)
+            let conversation = CoachConversation(history: history(), responder: responder)
+            #expect(conversation.suggestedQuestions.map(CoachFallback.intent(of:)) == [.recap, .progress, .advice])
+            #expect(CoachFallback.intent(of: conversation.analysisRequest) == .advice)
+        }
     }
 
     // MARK: Validator and prompt

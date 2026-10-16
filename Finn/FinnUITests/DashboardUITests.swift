@@ -32,8 +32,14 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(coach.waitForExistence(timeout: 5))
         XCTAssertTrue(coach.label.hasPrefix("Finn: your next workout, "), coach.label)
         XCTAssertFalse(app.buttons["home.watchDemo"].exists)
+        // the card opens the Workout tab with the previous workouts blurred; a tap clears them
         coach.tap()
-        XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["workout.next"].waitForExistence(timeout: 3))
+        let reveal = app.buttons["workout.history.reveal"]
+        XCTAssertTrue(reveal.waitForExistence(timeout: 3))
+        reveal.tap()
+        XCTAssertTrue(reveal.waitForNonExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["home.account"].exists)
     }
 
     /// Replay onboarding, in the profile, starts again from the welcome screens, then Try Finn.

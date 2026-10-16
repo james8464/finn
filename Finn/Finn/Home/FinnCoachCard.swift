@@ -13,22 +13,54 @@ struct NextWorkout: Equatable {
             case .hard: String(localized: "Hard", comment: "Intensity of the next workout.")
             }
         }
+
+        /// one line on how to train at this intensity, under it on the Workout card
+        var encouragement: String {
+            switch self {
+            case .light: String(localized: "Easy pace, focus on clean reps.",
+                                comment: "How to train at light intensity, on the next workout card.")
+            case .moderate: String(localized: "Steady pace, leave 2 reps in the tank.",
+                                   comment: "How to train at moderate intensity, on the next workout card.")
+            case .hard: String(localized: "Push hard, stop when form slips.",
+                               comment: "How to train at hard intensity, on the next workout card.")
+            }
+        }
+    }
+
+    /// one exercise of the plan, in order
+    struct Exercise: Equatable, Identifiable {
+        let id = UUID()
+        var kind: ExerciseKind
+        var sets: Int
+        var reps: Int
     }
 
     var start: Date
     var intensity: Intensity
+    /// how long the workout should take, for its end time
+    var estimatedDuration: TimeInterval
+    var exercises: [Exercise]
 
-    /// Sample: two days from now at 6:30 PM, moderate. No scheduling behind it.
+    /// Sample: two days from now at 6:30 PM, moderate, 55 minutes. No scheduling behind it.
     static func sample(now: Date = .now, calendar: Calendar = .current) -> NextWorkout {
         let day = calendar.date(byAdding: .day, value: 2, to: now) ?? now
         let start = calendar.date(bySettingHour: 18, minute: 30, second: 0, of: day) ?? day
-        return NextWorkout(start: start, intensity: .moderate)
+        return NextWorkout(start: start, intensity: .moderate, estimatedDuration: 55 * 60,
+                           exercises: [Exercise(kind: .bodyweightSquat, sets: 3, reps: 12),
+                                       Exercise(kind: .pushUp, sets: 3, reps: 10),
+                                       Exercise(kind: .staticLunge, sets: 3, reps: 10)])
     }
+
+    var end: Date { start.addingTimeInterval(estimatedDuration) }
 
     /// "Thu, Oct 17", in the person's locale.
     var dayText: String { start.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()) }
     /// "6:30 PM", or "18:30", as the person's settings say.
     var timeText: String { start.formatted(date: .omitted, time: .shortened) }
+    /// "18:30 – 19:25", or "6:30 – 7:25 PM", as the person's settings say.
+    var timeRangeText: String { (start..<end).formatted(.interval.hour().minute()) }
+    /// "7:25 PM", for VoiceOver.
+    var endTimeText: String { end.formatted(date: .omitted, time: .shortened) }
     /// "Thursday, October 17", for VoiceOver.
     var spokenDayText: String { start.formatted(.dateTime.weekday(.wide).month(.wide).day()) }
 }
@@ -62,7 +94,7 @@ enum FinnQuotes {
 }
 
 /// the next workout and Finn's current line, held once in `ContentView` so the Home and Workout
-/// cards always say the same thing
+/// cards always show the same workout. Only Home shows the line
 struct FinnCoachMessage: Equatable {
     var workout = NextWorkout.sample()
     var quoteIndex = FinnQuotes.next(after: nil)
@@ -113,6 +145,9 @@ struct FinnCardSurface: ViewModifier {
 
 /// Finn's monogram in a 48-point badge: who speaks on the coach card and the Try Finn card
 struct FinnBadge: View {
+    /// the thin pink ring, for the badge away from the pink card, on a dark background
+    var showsOutline = false
+
     var body: some View {
         Text(verbatim: "F")
             .font(.title2.bold())
@@ -120,6 +155,13 @@ struct FinnBadge: View {
             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .frame(width: 48, height: 48)
             .background(.black.opacity(0.08), in: Circle())
+            .overlay {
+                if showsOutline {
+                    Circle()
+                        .strokeBorder(DashboardStyle.accent.opacity(DashboardStyle.outlineOpacity), lineWidth: 1)
+                        .accessibilityHidden(true)
+                }
+            }
     }
 }
 
@@ -152,7 +194,7 @@ struct FinnCoachCard: View {
         .buttonStyle(PressableStyle())
         // One element: who speaks, the workout, then the line.
         .accessibilityLabel(spokenLabel)
-        .accessibilityHint("Opens workout setup.")
+        .accessibilityHint("Opens the Workout tab.")
         .accessibilityIdentifier("home.finnCoach")
     }
 

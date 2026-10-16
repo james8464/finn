@@ -24,6 +24,13 @@ struct CoachView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
+                    // who the person talks to, and the one-tap analysis. They scroll away with the turns
+                    FinnBadge(showsOutline: true)
+                        .frame(maxWidth: .infinity)
+                        .accessibilityLabel("Finn, your coach")
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("coach.finn")
+                    analysisCard.padding(.bottom, 4)
                     ForEach(conversation.messages) { message in
                         bubble(message)
                             .id(message.id)
@@ -38,8 +45,9 @@ struct CoachView: View {
                         .padding(.horizontal, 4)
                         .id("thinking")
                     }
-                    if conversation.messages.count == 1, !conversation.suggestedQuestions.isEmpty {
-                        suggestions
+                    // at accessibility sizes the row scrolls with the turns, so the conversation keeps its room
+                    if showsPrompts && typeSize.isAccessibilitySize {
+                        prompts
                     }
                 }
                 .padding(.horizontal, 20)
@@ -53,6 +61,9 @@ struct CoachView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 6) {
+                if showsPrompts && !typeSize.isAccessibilitySize {
+                    prompts.transition(.opacity)
+                }
                 HStack(spacing: 10) {
                     TextField("Ask about your sets", text: $draft,
                               prompt: Text("Ask about your sets").foregroundStyle(HomeStyle.supportingText),
@@ -93,6 +104,7 @@ struct CoachView: View {
             .padding(.top, 10)
             .padding(.bottom, 8)
             .background(HomeStyle.background)
+            .animation(reduceMotion ? nil : HomeStyle.spring, value: showsPrompts)
         }
         .background(HomeStyle.background.ignoresSafeArea())
         .navigationTitle("Coach")
@@ -131,24 +143,59 @@ struct CoachView: View {
         }
     }
 
-    private var suggestions: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(conversation.suggestedQuestions, id: \.self) { question in
-                Button {
-                    draft = question
-                    send()
-                } label: {
-                    Text(question)
-                        .font(.subheadline)
-                        .frame(minHeight: 44, alignment: .leading)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 9)
-                        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 14))
+    /// the whole picture in one tap, sent like a typed question. Framed like Home's Last workout
+    private var analysisCard: some View {
+        FinnOutline {
+            Button { send(conversation.analysisRequest) } label: {
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        DashboardHeading("Analyze my progress")
+                        Text("Where I stand, what to do next, what to avoid.")
+                            .font(.footnote)
+                            .foregroundStyle(DashboardStyle.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "arrow.up.right")
+                        .foregroundStyle(DashboardStyle.accent)
+                        .accessibilityHidden(true)
                 }
-                .buttonStyle(.plain)
+                .foregroundStyle(.primary)
+                .modifier(DashboardCard())
+            }
+            .buttonStyle(PressableStyle())
+            .disabled(conversation.isAnswering)
+            .accessibilityHint("Asks Finn to analyze your saved sets")
+            .accessibilityIdentifier("coach.analysis")
+        }
+    }
+
+    /// the prompts stay until the person asks their first question
+    private var showsPrompts: Bool {
+        !conversation.suggestedQuestions.isEmpty && !conversation.messages.contains { $0.role == .person }
+    }
+
+    /// questions to tap, on glass, sent like typed ones. The row scrolls when they don't fit
+    private var prompts: some View {
+        ScrollView(.horizontal) {
+            GlassEffectContainer(spacing: 8) {
+                HStack(spacing: 8) {
+                    ForEach(conversation.suggestedQuestions, id: \.self) { question in
+                        Button { send(question) } label: {
+                            Text(question)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.primary)
+                        }
+                        .buttonStyle(.glass)
+                        .controlSize(.large)
+                        .accessibilityHint("Sends this question to Finn")
+                    }
+                }
             }
         }
-        .padding(.top, 4)
+        .scrollIndicators(.hidden)
+        .scrollClipDisabled()
+        .disabled(conversation.isAnswering)
         .accessibilityIdentifier("coach.suggestions")
     }
 
@@ -176,10 +223,16 @@ struct CoachView: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// the typed question: sent, then the field clears
     private func send() {
-        let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty, !conversation.isAnswering else { return }
-        draft = ""
-        Task { await conversation.send(text) }
+        if send(draft) { draft = "" }
+    }
+
+    /// the one way a question reaches the coach: typed, a prompt or the analysis card
+    @discardableResult private func send(_ text: String) -> Bool {
+        let question = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !question.isEmpty, !conversation.isAnswering else { return false }
+        Task { await conversation.send(question) }
+        return true
     }
 }
