@@ -184,28 +184,20 @@ struct DashboardView: View {
         .finnFirstTryTrigger(isPresented: $showsFirstTry, hasTriedFinn: $hasTriedFinn)
     }
 
-    /// The Finn card and Last workout in one light pink outline. Its corners are concentric with
-    /// both cards: each outline radius is the card radius plus the padding.
+    /// The Finn card and Last workout in one light pink outline, concentric with both cards.
     private var finnOutline: some View {
-        let padding = DashboardStyle.cardSpacing
-        let top = DashboardStyle.finnCardRadius + padding, bottom = DashboardStyle.cardRadius + padding
-        return VStack(spacing: DashboardStyle.cardSpacing) {
-            Group {
-                if hasTriedFinn {
-                    FinnCoachCard(workout: coachMessage.workout, quote: coachMessage.quote, action: startWorkout)
-                        .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
-                } else {
-                    tryFinnCard.transition(.opacity)
+        FinnOutline(topRadius: DashboardStyle.finnCardRadius) {
+            VStack(spacing: DashboardStyle.cardSpacing) {
+                Group {
+                    if hasTriedFinn {
+                        FinnCoachCard(workout: coachMessage.workout, quote: coachMessage.quote, action: startWorkout)
+                            .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
+                    } else {
+                        tryFinnCard.transition(.opacity)
+                    }
                 }
+                lastWorkoutCard
             }
-            lastWorkoutCard
-        }
-        .padding(padding)
-        .overlay {
-            UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
-                                   bottomTrailingRadius: bottom, topTrailingRadius: top, style: .continuous)
-                .strokeBorder(DashboardStyle.accent.opacity(DashboardStyle.outlineOpacity), lineWidth: 1)
-                .accessibilityHidden(true)
         }
     }
 
@@ -393,14 +385,12 @@ struct DashboardView: View {
     }
 
     private func heading(_ text: String) -> some View {
-        Text(LocalizedStringKey(text)).font(.title3.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+        DashboardHeading(LocalizedStringKey(text))
     }
 
     private func card<Content: View>(_ route: HomeRoute, id: String, @ViewBuilder content: () -> Content) -> some View {
         Button { open(route) } label: {
-            content().padding(14).frame(maxWidth: .infinity, alignment: .leading)
-                .modifier(DashboardGlass(showsBorder: false))
-                .contentShape(RoundedRectangle(cornerRadius: DashboardStyle.cardRadius))
+            content().modifier(DashboardCard())
         }
         .buttonStyle(PressableStyle())
         .accessibilityIdentifier(id)

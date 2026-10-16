@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// the floating pink button that opens the selection step before a workout
+/// the floating Liquid Glass button that opens the selection step before a workout. Only its
+/// label is pink: the glass stays dark on the dark tab
 struct LaunchWorkoutButton: View {
     let action: () -> Void
 
@@ -8,14 +9,13 @@ struct LaunchWorkoutButton: View {
         Button(action: action) {
             Label("Launch workout", systemImage: "plus")
                 .font(.headline)
-                .padding(.horizontal, 20)
-                .frame(minHeight: 52)
-                .foregroundStyle(.black)
-                .background(DashboardStyle.accent, in: Capsule())
-                .shadow(color: .black.opacity(0.35), radius: 10, y: 4)
-                .contentShape(Capsule())
+                .foregroundStyle(DashboardStyle.accent)
+                .padding(.horizontal, 6)
+                .frame(minHeight: 40)
         }
-        .buttonStyle(PressableStyle())
+        // the glass's own black tint keeps it dark on the dark tab
+        .buttonStyle(.glass(.regular.tint(.black)))
+        .controlSize(.large)
         .accessibilityHint("Choose an exercise before the camera opens")
         .accessibilityIdentifier("workout.launch")
     }

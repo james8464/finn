@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// the Workout tab: Finn's next workout, the sessions before it, and the button that sets up a new one
+/// the Workout tab: Finn's next workout and its exercises, the sessions before it, and the button
+/// that sets up a new one
 struct WorkoutTabView: View {
     let message: FinnCoachMessage
     let history: [WorkoutSessionSummary]
@@ -8,11 +9,19 @@ struct WorkoutTabView: View {
     let savedToFitness: (WorkoutSessionSummary) -> Bool
     let openSession: (WorkoutSessionSummary) -> Void
     let launch: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DashboardStyle.cardSpacing) {
-                NextWorkoutCard(workout: message.workout, quote: message.quote)
+                // Finn speaks the card below: the badge sits over its title
+                FinnBadge(showsOutline: true)
+                    .padding(.leading, 20)
+                    .accessibilityLabel("Finn, your coach")
+                NextWorkoutCard(workout: message.workout)
+                if !message.workout.exercises.isEmpty {
+                    exercises
+                }
                 Text("Previous workouts")
                     .font(.title3.weight(.semibold))
                     .accessibilityAddTraits(.isHeader)
@@ -50,5 +59,38 @@ struct WorkoutTabView: View {
         }
         .navigationTitle("Workout")
         .navigationBarTitleDisplayMode(.large)
+    }
+
+    /// the exercises of the next workout, in order, framed like Home's Last workout
+    private var exercises: some View {
+        FinnOutline {
+            VStack(alignment: .leading, spacing: 12) {
+                DashboardHeading("Exercises").accessibilityAddTraits(.isHeader)
+                ForEach(message.workout.exercises) { exercise in
+                    exerciseRow(exercise)
+                }
+            }
+            .modifier(DashboardCard())
+        }
+        .accessibilityIdentifier("workout.exercises")
+    }
+
+    /// name, then sets × reps; stacked at accessibility sizes
+    private func exerciseRow(_ exercise: NextWorkout.Exercise) -> some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
+        return layout {
+            Text(exercise.kind.chipName).font(.body.weight(.medium))
+            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
+            Text(verbatim: "\(exercise.sets) × \(exercise.reps)")
+                .font(.body)
+                .monospacedDigit()
+                .foregroundStyle(DashboardStyle.secondary)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "\(exercise.kind.chipName), \(exercise.sets) sets of \(exercise.reps) reps",
+                                   comment: "VoiceOver: one exercise of the next workout, with its sets and reps."))
     }
 }
