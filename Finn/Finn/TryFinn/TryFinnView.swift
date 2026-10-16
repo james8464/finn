@@ -119,6 +119,7 @@ struct TryFinnView: View {
     }
 }
 
+#if DEBUG
 #Preview("Beginner") {
     TryFinnView(model: TryFinnViewModel(level: .new, camera: .fixed(.notDetermined)),
                 start: { _ in }, close: {})
@@ -157,3 +158,5 @@ struct TryFinnView: View {
         .dynamicTypeSize(.accessibility3)
         .preferredColorScheme(.dark)
 }
+
+#endif
