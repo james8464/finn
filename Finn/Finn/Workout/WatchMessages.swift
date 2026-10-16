@@ -31,8 +31,6 @@ nonisolated enum WatchHaptic: String, CaseIterable, Equatable, Sendable {
     case end
 }
 
-/// iPhone to watch: everything the watch screen shows. The iPhone sends the whole state each time,
-/// so a lost or late message never leaves the watch stuck.
 /// The wrist taps of a set with a rep target (Try Finn): one per counted rep, then a success
 /// once the target is reached. Ordinary sets keep the rhythm taps only.
 nonisolated enum WatchTargetTaps {
@@ -44,6 +42,8 @@ nonisolated enum WatchTargetTaps {
     }
 }
 
+/// iPhone to watch: everything the watch screen shows. The iPhone sends the whole state each time,
+/// so a lost or late message never leaves the watch stuck.
 nonisolated struct WatchState: Equatable, Sendable {
     var stage: WatchStage = .ready
     /// Seconds left in the countdown; 0 outside it.
