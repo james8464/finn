@@ -75,9 +75,12 @@ final class OnboardingTourUITests: XCTestCase {
         app.buttons["plan.annual"].tap()
         Thread.sleep(forTimeInterval: 0.6)
         save("onboarding-9-offre-annuel")
-        app.buttons["plan.trial"].tap()
-        Thread.sleep(forTimeInterval: 0.6)
-        save("onboarding-9-offre-essai")
+        // StoreKit offers a trial only when the current account is eligible.
+        let trial = app.buttons["plan.trial"]
+        if trial.exists {
+            trial.tap()
+            save("onboarding-11-offre-essai")
+        }
         app.buttons["plan.skip"].tap()
         // Skipping a paid plan now offers a free workout, without starting a purchase.
         let freeWorkout = app.buttons["freeWorkout.accept"]
