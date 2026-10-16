@@ -47,9 +47,9 @@ The screen tours use explicitly labelled synthetic input. Widget and Live Activi
 
 ## Reproduce
 
-Use the `Plumb` scheme with Xcode 27 and an iOS 27 iPhone simulator. Run `PlumbTests`, `DashboardUITests`, `NativeUIReviewUITests`, the onboarding tour, the demo set tour, and the setup/privacy/large-text accessibility audits in `WorkoutFlowUITests`.
+Use the `Finn` scheme with Xcode 27 and an iOS 27 iPhone simulator. Run `FinnTests`, `DashboardUITests`, `NativeUIReviewUITests`, the onboarding tour, the demo set tour, and the setup/privacy/large-text accessibility audits in `WorkoutFlowUITests`.
 
-Set `TEST_RUNNER_PLUMB_CAPTURE_DIR` for screen-tour PNGs and `TEST_RUNNER_PLUMB_WIDGET_RENDERS` for extension previews. Use `-collect-test-diagnostics never` if simulator failure diagnostics stall after a test run. Full test logs are local review artifacts, not committed build products.
+Set `TEST_RUNNER_FINN_CAPTURE_DIR` for screen-tour PNGs and `TEST_RUNNER_FINN_WIDGET_RENDERS` for extension previews. Use `-collect-test-diagnostics never` if simulator failure diagnostics stall after a test run. Full test logs are local review artifacts, not committed build products.
 
 ## Monochrome widget refinement
 
@@ -120,7 +120,7 @@ The final three-test run passed: tab Dynamic Type audit, full setup audit with t
 
 Captures: [Home](screenshots/2026-10-15-theophile-original/home.png), [largest-text Workout](screenshots/2026-10-15-theophile-original/workout-largest-text-demo.png), [Coach keyboard](screenshots/2026-10-15-theophile-original/coach-largest-text-keyboard-demo.png), [largest-text Home audit capture](screenshots/2026-10-15-theophile-original/home-largest-text-audit-demo.png). Demo-labelled captures use synthetic input.
 
-Installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; unlock it and open Plumb. Repository signing settings remain unchanged.
+Installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; unlock it and open Finn. Repository signing settings remain unchanged.
 
 ## Minimal background and accessibility fixes
 
@@ -135,7 +135,7 @@ No data, storage, camera or service behavior changed. Review found no functional
 
 Captures: [Home](screenshots/2026-10-15-minimal-background/home-demo.png) and [largest-text Home](screenshots/2026-10-15-minimal-background/home-largest-text-demo.png). Both show explicitly labelled synthetic input; the installed Release app does not.
 
-The update installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; opening Plumb after unlocking uses this update.
+The update installed successfully over the existing app on James’s iPhone. Automatic launch was denied because the phone was locked; opening Finn after unlocking uses this update.
 
 The largest-text Home checks passed with both normal and synthetic input, including Workout/Coach controls and return to Home. The destinations tour also passed. The combined audit/keyboard test encountered long simulator animation-idle waits and the pre-existing keyboard `Invalid frame dimension` runtime warning; all its assertions passed. These are separate from the resolved contrast/clipping audit findings.
 
@@ -167,7 +167,7 @@ The phone build exposed deprecated preview renderer calls and two isolation warn
 
 The signed Release build succeeded. Twenty-four targeted tests passed on the physical iPhone, covering real receiver enqueue/detach/reattach and metadata isolation, skeleton alignment/rotation and Siri report behavior. The project warnings identified in this pass are cleared. Xcode’s metadata-extraction notice for a target without AppIntents remains a tool notice.
 
-Installed the Release app over the existing `com.jamesdurup.plumbtestoct` app and launched it successfully. Existing application data and repository signing settings were preserved. An obsolete `com.james8464.Plumb.uitests.xctrunner` test helper was removed to free a personal-signing slot; the older Plumb application was kept.
+Installed the Release app over the existing `com.jamesdurup.finntestoct` app and launched it successfully. Existing application data and repository signing settings were preserved. An obsolete `com.james8464.Finn.uitests.xctrunner` test helper was removed to free a personal-signing slot; the older Finn application was kept.
 
 ## Whole-app legibility review
 
@@ -179,9 +179,9 @@ The survey captured 84 screen states across Home details, awards, settings, priv
 
 **Earlier audit limitation, resolved in the clipping follow-up below:** the broader structural scan reported predictive clipping on some fully visible native rows and sheet labels. Findings remain unsuppressed in `InterfaceAccessibilityUITests`. The palette test checks the actual brand/secondary-label combinations against stable dark surfaces, not every material or system control.
 
-To repeat the manual survey, set `TEST_RUNNER_PLUMB_CAPTURE_DIR` when running `InterfaceAccessibilityUITests`. Add `TEST_RUNNER_PLUMB_FULL_ACCESSIBILITY_AUDIT=1` for contrast and Dynamic Type diagnostics. Capture tours skip without an output directory; the Home text-scaling regression and palette test run normally.
+To repeat the manual survey, set `TEST_RUNNER_FINN_CAPTURE_DIR` when running `InterfaceAccessibilityUITests`. Add `TEST_RUNNER_FINN_FULL_ACCESSIBILITY_AUDIT=1` for contrast and Dynamic Type diagnostics. Capture tours skip without an output directory; the Home text-scaling regression and palette test run normally.
 
-Final verification: 7 unit tests and 9 UI tests passed. After the last Health/Coach colour adjustments, the palette, Health actions at both text sizes and native destination tour passed again. Simulator and signed iPhone Release builds succeeded. Installed and launched over the existing iPhone app without erasing its container. The laptop preview runs in Device Hub on the dedicated **Plumb Accessibility Review** simulator using `-plumb-ui-demo`.
+Final verification: 7 unit tests and 9 UI tests passed. After the last Health/Coach colour adjustments, the palette, Health actions at both text sizes and native destination tour passed again. Simulator and signed iPhone Release builds succeeded. Installed and launched over the existing iPhone app without erasing its container. The laptop preview runs in Device Hub on the dedicated **Finn Accessibility Review** simulator using `-finn-ui-demo`.
 
 ## Clipping follow-up
 

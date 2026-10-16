@@ -1,6 +1,6 @@
 # App Store screenshots
 
-Taken 15 October 2026 on the iPhone 18 Pro Max simulator, iOS 27.0, from `main` at d8f1503, by the `ScreenTourUITests` screen tour (`TEST_RUNNER_PLUMB_CAPTURE_DIR`), without the Simulator app on screen. Status bar forced to 9:41, full signal and battery. All files are 1320 × 2868 px PNG, no alpha: the 6.9-inch size App Store Connect requires for the iPhone set, from which it derives the smaller sizes.
+Taken 15 October 2026 on the iPhone 18 Pro Max simulator, iOS 27.0, from `main` at d8f1503, by the `ScreenTourUITests` screen tour (`TEST_RUNNER_FINN_CAPTURE_DIR`), without the Simulator app on screen. Status bar forced to 9:41, full signal and battery. All files are 1320 × 2868 px PNG, no alpha: the 6.9-inch size App Store Connect requires for the iPhone set, from which it derives the smaller sizes.
 
 ## Ready to upload
 

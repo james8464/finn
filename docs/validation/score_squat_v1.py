@@ -1,4 +1,4 @@
-"""Score the frozen Plumb squat validation sheet. Standard library only."""
+"""Score the frozen Finn squat validation sheet. Standard library only."""
 
 import argparse
 import csv

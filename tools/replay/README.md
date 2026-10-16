@@ -1,30 +1,30 @@
 # Repeatable workout replay
 
-The iOS simulator runs **Debug-only generated pose fixtures** for all four supported exercises. They pass through the normal setup, set, scoring, and result screens without anyone doing reps. Each fixture has six complete reps; a push-up fixture with a missing wrist checks that Plumb asks for a retake rather than making up measurements. Xcode launches them with `-plumb-ui-demo` or `-plumb-ui-demo-missing-wrist`. The yellow **DEMO INPUT** badge makes this mode unmistakable, and release archive verification excludes it.
+The iOS simulator runs **Debug-only generated pose fixtures** for all four supported exercises. They pass through the normal setup, set, scoring, and result screens without anyone doing reps. Each fixture has six complete reps; a push-up fixture with a missing wrist checks that Finn asks for a retake rather than making up measurements. Xcode launches them with `-finn-ui-demo` or `-finn-ui-demo-missing-wrist`. The yellow **DEMO INPUT** badge makes this mode unmistakable, and release archive verification excludes it.
 
-Run the entire local iPhone suite with the `Plumb` scheme in Xcode, or run focused simulator UI tests:
+Run the entire local iPhone suite with the `Finn` scheme in Xcode, or run focused simulator UI tests:
 
 ```sh
-xcodebuild test -project Plumb/Plumb.xcodeproj -scheme Plumb \
+xcodebuild test -project Finn/Finn.xcodeproj -scheme Finn \
   -destination 'platform=iOS Simulator,name=iPhone 18 Pro Max' \
   -parallel-testing-enabled NO \
-  -only-testing:PlumbUITests/ExerciseOptionsUITests \
-  -only-testing:PlumbUITests/WorkoutFlowUITests
+  -only-testing:FinnUITests/ExerciseOptionsUITests \
+  -only-testing:FinnUITests/WorkoutFlowUITests
 ```
 
 For a saved video that you have permission to use, the Mac command reads its frames upright, samples at the app's 15 fps rate, runs the app's Vision pose extractor, and scores them with the **same exercise analyzer** as the iPhone. Pass an absolute path and keep recordings of real people and their pose JSON outside this repository:
 
 ```sh
 tools/replay/replay.sh --exercise pushUp --video /absolute/path/to/clip.mov \
-  --poses-output /tmp/plumb-pushup-poses.json
-tools/replay/replay.sh --exercise pushUp --poses /tmp/plumb-pushup-poses.json
+  --poses-output /tmp/finn-pushup-poses.json
+tools/replay/replay.sh --exercise pushUp --poses /tmp/finn-pushup-poses.json
 ```
 
-The Mac extractor can pad the picture with a black border before Vision sees it (`PLUMB_REPLAY_MARGIN=0.25 tools/replay/replay.sh ...`, a share of the picture size). Vision then finds the shoulders and head of a person the frame cuts off; the app's camera path does not do this. The JSON also gives `recognized`, the exercise the angle rules read from the poses whatever was chosen.
+The Mac extractor can pad the picture with a black border before Vision sees it (`FINN_REPLAY_MARGIN=0.25 tools/replay/replay.sh ...`, a share of the picture size). Vision then finds the shoulders and head of a person the frame cuts off; the app's camera path does not do this. The JSON also gives `recognized`, the exercise the angle rules read from the poses whatever was chosen.
 
 A push-up the arm rubric cannot read (filmed from the front, or so close that the arm is cut off) is counted from the shoulders going down and up (`push-up-shoulders-v2`, no elbow bend or posture). The hands must stay planted. On three real sets (local, not in this repository) it gave 10, 6 or 7, and 10 reps for 10, 7 and 10 performed.
 
-The command prints JSON with `status` (`measured`, `retake`, or `failed`), `frameCount`, `measuredReps`, `repTimes` (start and end of each measured rep, in seconds, to check a count against the video), and a `reason` or `rubricVersion` when available. `--poses-output` is optional. Supported exercise values are `bodyweightSquat`, `pushUp`, `staticLunge`, and `stiffLegDeadlift`. The pose JSON can also be supplied to the app's Debug video-file path on the simulator with `-plumb-video-file <video> -plumb-video-poses <json>`; Xcode must make those files readable to the simulator process.
+The command prints JSON with `status` (`measured`, `retake`, or `failed`), `frameCount`, `measuredReps`, `repTimes` (start and end of each measured rep, in seconds, to check a count against the video), and a `reason` or `rubricVersion` when available. `--poses-output` is optional. Supported exercise values are `bodyweightSquat`, `pushUp`, `staticLunge`, and `stiffLegDeadlift`. The pose JSON can also be supplied to the app's Debug video-file path on the simulator with `-finn-video-file <video> -finn-video-poses <json>`; Xcode must make those files readable to the simulator process.
 
 ## One count, live and in the result
 

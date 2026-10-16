@@ -5,7 +5,7 @@ This records the Workout tab's setup, capture, and result screens. The newer [Ho
 ## Flow
 
 1. **Setup:** Exercise chips change the illustrated movement and placement guide. One **Start a set** action leads to a short camera explanation, then the iOS permission prompt. A nearby privacy line explains local processing and no saved video.
-2. **Capture:** Camera pixels remain visible behind the tracked skeleton, framing status, live count, and Start/Stop controls. Text accompanies symbols; audio is optional. Stop is neutral because Plumb analyzes frames without saving video.
+2. **Capture:** Camera pixels remain visible behind the tracked skeleton, framing status, live count, and Start/Stop controls. Text accompanies symbols; audio is optional. Stop is neutral because Finn analyzes frames without saving video.
 3. **Result:** Show the measured outcome first: one supported observation with evidence and a next-set action, no clear pattern, or a retake reason. Rep details, comparison, speech, and text sharing are secondary. Keep navigation and the next action reachable at accessibility text sizes.
 4. **Recovery:** Permission denial and camera interruption explain the problem before offering Settings or retry. History, Options, and Privacy use native navigation and controls.
 

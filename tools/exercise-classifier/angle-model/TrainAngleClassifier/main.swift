@@ -1,4 +1,4 @@
-// Trains Plumb's joint-angle exercise classifier with Create ML and reports held-out accuracy.
+// Trains Finn's joint-angle exercise classifier with Create ML and reports held-out accuracy.
 //
 //   train-angle-classifier <poses folder> <output folder> [--synthetic-per-class 250]
 //
@@ -221,19 +221,19 @@ summary["rulesAllReal"] = allRealRules.confusion
 // MARK: Write
 
 let metadata = MLModelMetadata(
-    author: "Plumb team",
+    author: "Finn team",
     shortDescription: "Exercise classifier on joint-angle windows (PoseWindowFeatures). Trained on "
         + "Mendeley 10.17632/kgbb3yn47p.2 side-view videos (CC BY 4.0) and synthetic sequences. "
         + "Lunge and stiff-leg deadlift are synthetic only. Not a technique judge.",
     license: "Model trained on CC BY 4.0 data: Mendeley Data 10.17632/kgbb3yn47p.2",
     version: "1",
-    additional: ["plumb.features": PoseWindowFeatures.featureNames.joined(separator: ","),
-                 "plumb.window": "\(PoseWindowFeatureExtractor.windowDuration)",
-                 "plumb.trainedAt": ISO8601DateFormatter().string(from: Date())])
-let modelURL = outputFolder.appending(path: "PlumbAngleClassifier.mlmodel")
+    additional: ["finn.features": PoseWindowFeatures.featureNames.joined(separator: ","),
+                 "finn.window": "\(PoseWindowFeatureExtractor.windowDuration)",
+                 "finn.trainedAt": ISO8601DateFormatter().string(from: Date())])
+let modelURL = outputFolder.appending(path: "FinnAngleClassifier.mlmodel")
 try? FileManager.default.removeItem(at: modelURL)
 try classifier.write(to: modelURL, metadata: metadata)
-let reportText = "# Plumb angle classifier report\n\n" + report.joined(separator: "\n") + "\n"
+let reportText = "# Finn angle classifier report\n\n" + report.joined(separator: "\n") + "\n"
 try reportText.write(to: outputFolder.appending(path: "report.md"), atomically: true, encoding: .utf8)
 let json = try JSONSerialization.data(withJSONObject: summary, options: [.prettyPrinted, .sortedKeys])
 try json.write(to: outputFolder.appending(path: "report.json"))

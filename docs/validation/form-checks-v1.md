@@ -1,7 +1,7 @@
 # Form checks v1: squat, push-up, lunge, stiff-leg deadlift
 
-_15 October 2026._ Code: `Plumb/Plumb/Workout/FormChecks.swift` (checks and thresholds) and
-`Plumb/Plumb/Workout/BodySegments.swift` (segments and angles every check reads).
+_15 October 2026._ Code: `Finn/Finn/Workout/FormChecks.swift` (checks and thresholds) and
+`Finn/Finn/Workout/BodySegments.swift` (segments and angles every check reads).
 
 ## What each check reads
 
@@ -84,7 +84,7 @@ for a rounding back on a hinge. The labeled set has no stiff-leg deadlift; its c
 - Only the lowest tenth of readings hints at a difference: 4 bad sets fall below 144°, no good set,
   with a margin under 1°.
 
-That is not reliable enough to tell someone their back rounds, so Plumb gives no back advice. The
+That is not reliable enough to tell someone their back rounds, so Finn gives no back advice. The
 measurement is easy to add to `PoseFrameAnalyzer` if real deadlift sets labeled by a coach show a
 clearer gap.
 

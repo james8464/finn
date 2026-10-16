@@ -1,4 +1,4 @@
-name: Publish Plumb support pages
+name: Publish Finn support pages
 on:
   workflow_dispatch:
 

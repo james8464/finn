@@ -1,4 +1,4 @@
-# Plumb native UI design
+# Finn native UI design
 
 ## Outcome
 
@@ -10,7 +10,7 @@ On 15 October 2026, retrieved all 173 pages in the repository’s HIG index succ
 
 The visual study used published interfaces, not hands-on tests of third-party apps:
 
-| Reference | Observed pattern | Decision for Plumb |
+| Reference | Observed pattern | Decision for Finn |
 |---|---|---|
 | [Apple Fitness](https://support.apple.com/en-mide/guide/iphone/ipha5dddb411/ios) | Dominant measured values, quiet containers, consistent navigation, drill-down summaries | Show actual sets and reps; remove unimplemented scores and ornamental charts |
 | [Apple Camera](https://support.apple.com/en-ie/guide/iphone/iph263472f78/27/ios/27) | Preview dominates; a small number of stable, high-contrast controls | Keep the live count and one cue legible; distinguish Start from Stop |
@@ -44,7 +44,7 @@ The captured Summary screen has a full-screen decorative gym image, translucent 
 
 ### Content hierarchy
 
-Fitness gives measured activity a clear visual centre. Tide Guide uses the same principle for a different subject: the primary reading comes first, with labels and supporting detail close to it. Plumb therefore gives measured reps the strongest emphasis on Results. Summary totals come only from saved sessions; the most-reps row names its exercise. Detailed rep evidence is progressively disclosed. No posture score is inferred from an incomplete camera view.
+Fitness gives measured activity a clear visual centre. Tide Guide uses the same principle for a different subject: the primary reading comes first, with labels and supporting detail close to it. Finn therefore gives measured reps the strongest emphasis on Results. Summary totals come only from saved sessions; the most-reps row names its exercise. Detailed rep evidence is progressively disclosed. No posture score is inferred from an incomplete camera view.
 
 ### Navigation and actions
 
@@ -52,11 +52,11 @@ Camera’s visible task and stable controls informed the capture screen. The pre
 
 ### Surfaces, colour and type
 
-Reminders demonstrates how system grouping can provide structure without a decorative backdrop. Plumb uses semantic backgrounds, opaque content surfaces and a consistent spacing scale. Monochrome controls identify actions; red identifies Stop and deletion; green remains the native toggle/success colour. Text and symbols also explain every state. System text styles establish hierarchy and adapt to Dynamic Type. The camera count is intentionally larger for viewing from a distance; the instructional illustration has a bounded height so enlarged text can still scroll into view.
+Reminders demonstrates how system grouping can provide structure without a decorative backdrop. Finn uses semantic backgrounds, opaque content surfaces and a consistent spacing scale. Monochrome controls identify actions; red identifies Stop and deletion; green remains the native toggle/success colour. Text and symbols also explain every state. System text styles establish hierarchy and adapt to Dynamic Type. The camera count is intentionally larger for viewing from a distance; the instructional illustration has a bounded height so enlarged text can still scroll into view.
 
 ### Tone and evidence
 
-Gentler Streak’s published interface shows approachable fitness guidance without crowding the screen with statistics. Plumb keeps its language specific to recorded sets, preserves uncertainty, and avoids readiness claims unsupported by the camera. Coach’s messages remain grounded in saved facts. A short source link opens a fuller explanation, keeping both readability and disclosure. Awards recognise recorded milestones and appear after the measured result.
+Gentler Streak’s published interface shows approachable fitness guidance without crowding the screen with statistics. Finn keeps its language specific to recorded sets, preserves uncertainty, and avoids readiness claims unsupported by the camera. Coach’s messages remain grounded in saved facts. A short source link opens a fuller explanation, keeping both readability and disclosure. Awards recognise recorded milestones and appear after the measured result.
 
 ### Motion and ongoing feedback
 
@@ -84,12 +84,12 @@ James found the first native pass too flat and asked to restore the earlier dash
 
 Inspected rendered screenshots in the browser, not just app descriptions:
 
-| Reference | Observed screen detail | Application to Plumb |
+| Reference | Observed screen detail | Application to Finn |
 | --- | --- | --- |
 | [Apple Fitness Summary](https://support.apple.com/en-ie/guide/iphone/iph4c34a8a95/ios) | A wide activity card, paired compact metrics and a photographic workout card. Different content has different composition. | An exercise-led workout card, weekly activity, compact Best set/Awards and a recent session. |
 | [Apple Health Highlights](https://support.apple.com/en-us/104997#progress) | Category symbol and colour, a short observation, then its supporting chart or measurements. | Clear category headings; measured reps and dates remain more prominent than decoration. |
 | [Apple Journal](https://apps.apple.com/us/app/journal/id6447391597) | Photos and maps make entries recognizable; compact insight cards sit above ordinary lists. | Use the selected exercise drawing as recognizable content. Settings and History retain native lists. |
-| [Gentler Streak, 2024 winner](https://developer.apple.com/news/?id=3m0ht22s) | Workout symbols, a distinctive illustration and a readable activity chart. Illustration supports the app's friendly purpose. | Plumb's own camera-pose illustration supplies identity. No borrowed mascot or unsupported readiness judgement. |
+| [Gentler Streak, 2024 winner](https://developer.apple.com/news/?id=3m0ht22s) | Workout symbols, a distinctive illustration and a readable activity chart. Illustration supports the app's friendly purpose. | Finn's own camera-pose illustration supplies identity. No borrowed mascot or unsupported readiness judgement. |
 | [Lumy, 2025 finalist](https://apps.apple.com/us/app/lumy/id908905093) | A large sun-path visual, small event rows and widgets whose visual forms reflect their data. | Give exercise imagery room; make activity charts functional and keep secondary information compact. Lumy is a finalist, not an ADA winner. |
 
 These are visual observations of published screens, not claims that we tested those apps' live interactions. Earlier research also covers Camera, Reminders and Tide Guide. Apple's [2025 award page](https://developer.apple.com/design/awards/2025/) confirms Lumy's finalist status.
@@ -118,7 +118,7 @@ James rejected “A week at a glance” as unnecessary. The revised hierarchy pu
 
 ### Final visual choice: monochrome
 
-After reviewing the coloured widgets, James preferred the earlier black-and-white Plumb screen. This supersedes the blue-accent exploration. Keep the larger white exercise drawing on black, strong system typography, grey secondary widgets and inverse capsule actions. Fitness informs the compact information layout; Plumb's camera-pose drawing provides its own visual identity. No stock photos, decorative shadows or multicolour dashboard tiles.
+After reviewing the coloured widgets, James preferred the earlier black-and-white Finn screen. This supersedes the blue-accent exploration. Keep the larger white exercise drawing on black, strong system typography, grey secondary widgets and inverse capsule actions. Fitness informs the compact information layout; Finn's camera-pose drawing provides its own visual identity. No stock photos, decorative shadows or multicolour dashboard tiles.
 
 Summary contains a static exercise illustration, seven-day rep chart, paired Best set/Awards widgets and a Recent workout card only when history exists. Workout retains the animated placement demonstration, disabled with Reduce Motion. Chart bars are centred on local calendar days; VoiceOver receives all seven values. Accessibility sizes stack widgets and chart content.
 

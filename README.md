@@ -1,6 +1,6 @@
-# Plumb
+# Finn
 
-Plumb reviews strength sets through your iPhone camera. It counts reps and, when the evidence supports it, gives one specific observation to try on the next set. Video is processed on the phone and is not saved. The longer-term product pairs iPhone with Apple Watch for timely feedback.
+Finn reviews strength sets through your iPhone camera. It counts reps and, when the evidence supports it, gives one specific observation to try on the next set. Video is processed on the phone and is not saved. The longer-term product pairs iPhone with Apple Watch for timely feedback.
 
 | Status | Details |
 |--------|---------|
@@ -48,9 +48,9 @@ History stores local summaries, compares compatible sets, identifies a recurring
 
 The Home, Posture, Coach and Workout tabs keep their navigation state. Home shows recent sessions, measured progress and awards. Posture shows looping illustrated exercise movements, short cues and comparisons with eligible saved measurements. The illustrations are guidance, not validated video of a person. System text and adaptive layouts support larger text. See the [design research](docs/architecture/specs/2026-10-15-native-ui-design.md) and [HIG review](docs/design/hig-ui-coverage.md).
 
-First launch asks for a goal, experience level, favourite exercises, and spoken feedback preference; these choices stay on the iPhone. Awards mark measured milestones, including a set with no pattern flagged by Plumb's current checks; they do not certify perfect form.
+First launch asks for a goal, experience level, favourite exercises, and spoken feedback preference; these choices stay on the iPhone. Awards mark measured milestones, including a set with no pattern flagged by Finn's current checks; they do not certify perfect form.
 
-Coach uses Apple Intelligence, when available, to select up to two relevant saved sets. The selected goal and level can guide that selection; Plumb writes the displayed response from recorded counts and observations. Invalid model output and unavailable models use fixed text. A Claude demo is Debug-only. Source information is available beside the composer. Plumb+ stays hidden until its subscription exists.
+Coach uses Apple Intelligence, when available, to select up to two relevant saved sets. The selected goal and level can guide that selection; Finn writes the displayed response from recorded counts and observations. Invalid model output and unavailable models use fixed text. A Claude demo is Debug-only. Source information is available beside the composer. Finn+ stays hidden until its subscription exists.
 
 ### Apple Watch
 
@@ -72,7 +72,7 @@ The embedded extension shows the last measured set and can open the camera on it
 
 | Item | Detail |
 |------|--------|
-| Bundle ID | `com.finlearn.plumb` |
+| Bundle ID | `ai.mwm.build.challenge.team.08` |
 | Apple Developer team in the project | `2FN6Y5NHS5` |
 | Analytics SDK | None in the checked-in project |
 | StoreKit catalog and paywall | Not implemented |
@@ -99,7 +99,7 @@ The app checks visibility, viewpoint, and which person it follows before giving 
 > **Important**
 >
 > - **Do not** present synthetic or recorded input as a live camera result.
-> - **Do not** claim that Plumb diagnoses injury risk, proves safe form, or replaces a trainer.
+> - **Do not** claim that Finn diagnoses injury risk, proves safe form, or replaces a trainer.
 
 ---
 
@@ -125,10 +125,10 @@ The next gate is a dependable iPhone set-to-set loop on physical devices, with e
 
 ```bash
 # 1. Open the project
-open Plumb/Plumb.xcodeproj
+open Finn/Finn.xcodeproj
 
 # 2. Select the scheme and destination
-# Scheme: Plumb
+# Scheme: Finn
 # Destination: Simulator or connected iPhone
 
 # 3. Build and run (⌘R)
@@ -140,7 +140,7 @@ The checked-in project signs with team `2FN6Y5NHS5`; device builds require that 
 |----------|------|
 | Document map | [docs/README.md](docs/README.md) |
 | Detailed plan | [planning.md](planning.md) |
-| Git workflow | [Plumb/GIT guide.md](Plumb/GIT%20guide.md) |
+| Git workflow | [Finn/GIT guide.md](Finn/GIT%20guide.md) |
 
 ---
 

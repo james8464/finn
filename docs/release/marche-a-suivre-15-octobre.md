@@ -1,4 +1,4 @@
-# Soumettre Plumb ce soir, pas à pas
+# Soumettre Finn ce soir, pas à pas
 
 Pour Guilhem, jeudi 15 octobre 2026. La build doit être soumise sur App Store Connect avant vendredi 14 h ; tu es en cours de 9 h à 12 h, donc tout se fait ce soir. Compte deux heures sans accroc, trois avec. Les textes à coller sont dans `app-store-fiche.md`, les réponses de confidentialité dans `app-privacy-answers.md`, les captures dans `screenshots/`.
 
@@ -9,7 +9,7 @@ Ce qui est déjà vérifié à 15 h : l'archive Release iOS de `main` (d8f1503) 
 1. Dans le dépôt : `git checkout main && git pull`. Si la PR `claude/app-store` est fusionnée, les documents sont là ; sinon ouvre-les depuis la branche.
 2. Décide si `claude/coach` entre dans la build. Si oui, fusionne-la d'abord et garde le paragraphe « A COACH YOU CAN ASK » de la fiche ; sinon, supprime ce paragraphe et la phrase du « What's new ».
 3. Même question pour `claude/fr` (interface en français). À 16 h, cette branche n'avait encore aucun fichier de localisation. Si elle est fusionnée avant l'archive : ajoute la langue French (France) à l'app dans Connect (App Information > Localizations), colle les textes français de la fiche, et refais les captures en français avec `xcrun simctl launch 79E9F1F2-D51F-4882-8A4F-DB4BBFE85F80 ai.mwm.build.challenge.team.08 -AppleLanguages "(fr)" -AppleLocale fr_FR` puis `xcrun simctl io 79E9F1F2-D51F-4882-8A4F-DB4BBFE85F80 screenshot <fichier>.png` (simulateur iPhone 18 Pro Max, iOS 27, déjà créé ; ou la même tournée `ScreenTourUITests` avec `-AppleLanguages` dans les arguments de lancement). Sinon, la fiche reste en anglais seul ce soir et le français s'ajoute à la version 1.0.1.
-4. Un réglage manque dans le projet, à faire par celui qui touche `project.pbxproj` (l'agent widgets, ou toi) : ajouter `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;` dans les quatre blocs de réglages (Plumb Debug et Release, PlumbWatch Debug et Release), juste sous `INFOPLIST_KEY_NSCameraUsageDescription` pour l'iPhone et sous `INFOPLIST_KEY_WKCompanionAppBundleIdentifier` pour la montre. Sans lui, App Store Connect pose la question de conformité à l'export à chaque build ; ce n'est pas bloquant ce soir, tu peux répondre « Non » à la main.
+4. Un réglage manque dans le projet, à faire par celui qui touche `project.pbxproj` (l'agent widgets, ou toi) : ajouter `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;` dans les quatre blocs de réglages (Finn Debug et Release, FinnWatch Debug et Release), juste sous `INFOPLIST_KEY_NSCameraUsageDescription` pour l'iPhone et sous `INFOPLIST_KEY_WKCompanionAppBundleIdentifier` pour la montre. Sans lui, App Store Connect pose la question de conformité à l'export à chaque build ; ce n'est pas bloquant ce soir, tu peux répondre « Non » à la main.
 5. Xcode > Settings > Accounts : vérifie que le compte Apple connecté est membre de l'équipe FinLearn (2FN6Y5NHS5) avec le rôle Admin ou App Manager. Le Mac n'a qu'un certificat « Apple Development: Paul Aubry » ; Xcode créera le certificat Apple Distribution tout seul à l'étape 3 si le compte a le droit, sinon il te le dira et il faudra que Paul le crée ou te donne le rôle.
 
 ## 1. Créer l'app dans App Store Connect (10 min)
@@ -17,19 +17,19 @@ Ce qui est déjà vérifié à 15 h : l'archive Release iOS de `main` (d8f1503) 
 Sur https://appstoreconnect.apple.com, Apps > « + » > Nouvelle app.
 
 - Plateformes : iOS.
-- Nom : Plumb (s'il est pris, Apple le dit tout de suite ; prends « Plumb: rep counter » et dis-le à l'équipe).
+- Nom : Finn (s'il est pris, Apple le dit tout de suite ; prends « Finn: rep counter » et dis-le à l'équipe).
 - Langue principale : English (U.S.).
 - Identifiant de bundle : `ai.mwm.build.challenge.team.08`. Il existe déjà dans le portail (Xcode l'a créé pour signer, avec HealthKit). S'il n'apparaît pas dans la liste, c'est que le compte n'est pas sur la bonne équipe.
-- SKU : `plumb-ios`.
+- SKU : `finn-ios`.
 - Accès utilisateur : accès complet.
 
 Ce qui peut bloquer : un accord non signé. Dans Business (Agreements), le titulaire du compte doit avoir accepté le Paid Apps Agreement ou au moins le Free Apps ; si une bannière jaune demande d'accepter de nouvelles conditions, seul le titulaire (Account Holder) peut le faire. Si c'est Paul, appelle-le avant 22 h.
 
 ## 2. Archiver dans Xcode (10 min)
 
-1. Ouvre `Plumb/Plumb.xcodeproj`, schéma `Plumb`, destination « Any iOS Device (arm64) ».
+1. Ouvre `Finn/Finn.xcodeproj`, schéma `Finn`, destination « Any iOS Device (arm64) ».
 2. Product > Archive. Ça prend trois à cinq minutes. L'Organizer s'ouvre sur l'archive.
-3. Si tu as déjà uploadé un build 1 et que tu dois recommencer, monte `CURRENT_PROJECT_VERSION` à 2 dans le projet (cible Plumb et PlumbWatch, même numéro) avant de réarchiver : App Store Connect refuse deux uploads au même numéro.
+3. Si tu as déjà uploadé un build 1 et que tu dois recommencer, monte `CURRENT_PROJECT_VERSION` à 2 dans le projet (cible Finn et FinnWatch, même numéro) avant de réarchiver : App Store Connect refuse deux uploads au même numéro.
 
 ## 3. Uploader (15 min, puis 15 à 30 min d'attente)
 
@@ -43,7 +43,7 @@ Ce qui peut bloquer : un mail « Missing Compliance » ou « ITMS-90683 » n'arr
 
 ## 4. Remplir la fiche pendant le traitement (30 min)
 
-Dans l'app Plumb > 1.0 Prepare for Submission, colle depuis `app-store-fiche.md` :
+Dans l'app Finn > 1.0 Prepare for Submission, colle depuis `app-store-fiche.md` :
 
 - Nom, sous-titre, texte promotionnel, description, mots-clés, URL de support et de confidentialité, en anglais ; puis la même chose dans la localisation French (France) si `claude/fr` est dans la build (étape 0.3).
 - Captures iPhone 6,9 pouces : les six de `screenshots/`, plus les trois que tu auras prises sur ton iPhone pendant que le build se traite (voir `screenshots/README.md`). Pas de capture iPad : l'app est iPhone seulement. Pas de capture Apple Watch obligatoire tant que l'app montre n'est pas une app indépendante.
@@ -65,7 +65,7 @@ Dans l'app Plumb > 1.0 Prepare for Submission, colle depuis `app-store-fiche.md`
 
 - Note dans `app-store-submission.md`, tableau « Submission log » : date, heure, build, état affiché.
 - Si l'équipe de review répond (souvent sous 24 à 48 h), la réponse arrive par mail et dans Connect ; les notes de review expliquent déjà comment tester sans matériel.
-- Les pages publiques : si tu as changé `site/` (la PR met à jour support et confidentialité), lance le workflow GitHub « Publish Plumb support pages » depuis `main`, sinon les URL de la fiche montrent l'ancienne version. Si le coach n'est pas dans la build, retire d'abord la section « Coach » de `site/privacy.html`.
+- Les pages publiques : si tu as changé `site/` (la PR met à jour support et confidentialité), lance le workflow GitHub « Publish Finn support pages » depuis `main`, sinon les URL de la fiche montrent l'ancienne version. Si le coach n'est pas dans la build, retire d'abord la section « Coach » de `site/privacy.html`.
 
 ## Si ça coince
 

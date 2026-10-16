@@ -1,22 +1,22 @@
-# Plumb — three-minute pitch
+# Finn — three-minute pitch
 
 **Working pitch, updated 13 October 2026.** The repository contains a simulator-tested iPhone workout flow, generated-video replay checks, and brand work. Real-camera pose quality and coaching claims remain unvalidated on a physical iPhone. Demonstrations must identify which steps are live and which are recorded or simulated.
 
 ## One line
 
-Plumb turns an iPhone camera into a private technique mirror: after a supported set, it shows one evidence-linked cue when the view can support it.
+Finn turns an iPhone camera into a private technique mirror: after a supported set, it shows one evidence-linked cue when the view can support it.
 
 ## The story
 
 **The problem (0:00–0:35).** Most people train without anyone watching their form. A video tutorial can show an ideal movement, but it cannot tell you what changed in *your* last six reps. Recording yourself helps, yet reviewing every clip and knowing what to look for takes time and expertise.
 
-**The product (0:35–1:25).** Put your iPhone where it can see your full body from the side and do a bodyweight squat set. Plumb tracks visible joint motion on device. It identifies the reps, shows the evidence, and offers one short range or posture-change cue when the view supports it. The next set becomes a small experiment: did that observable pattern change? It uses plain language and tells you when the camera view is too weak to judge.
+**The product (0:35–1:25).** Put your iPhone where it can see your full body from the side and do a bodyweight squat set. Finn tracks visible joint motion on device. It identifies the reps, shows the evidence, and offers one short range or posture-change cue when the view supports it. The next set becomes a small experiment: did that observable pattern change? It uses plain language and tells you when the camera view is too weak to judge.
 
 **The Apple ecosystem (1:25–1:55).** The iPhone camera is the core sensor. Vision estimates pose and corroborates sampled joints against a person mask on device. On eligible iPhones, Foundation Models can reword a measured set-to-set comparison, with a deterministic fallback; the model does not invent the measurement. The current app can speak a post-set observation through the system audio route, including paired AirPods. The intended product pairs iPhone with Apple Watch for rep timing, effort, and discreet, timely cues; that Watch technology is not in this build. iPhone Duo placement and Apple TV display are proposed extensions, not demo features.
 
-**Why Plumb (1:55–2:25).** Existing products offer classes, hardware-based form feedback, running analysis, or coach video review. Plumb's proposed wedge is a focused iPhone loop for self-directed strength training: evidence, one cue, another set, and visible progress. Privacy and uncertainty are part of that loop. Test return visits and willingness to pay after a person sees the current result; no paid model has been chosen. Treadmill running is a possible next use case, requiring separate camera setup, measurement, and expert validation; it is not in this demo.
+**Why Finn (1:55–2:25).** Existing products offer classes, hardware-based form feedback, running analysis, or coach video review. Finn's proposed wedge is a focused iPhone loop for self-directed strength training: evidence, one cue, another set, and visible progress. Privacy and uncertainty are part of that loop. Test return visits and willingness to pay after a person sees the current result; no paid model has been chosen. Treadmill running is a possible next use case, requiring separate camera setup, measurement, and expert validation; it is not in this demo.
 
-**The close (2:25–3:00).** Better form is not a single score. It is noticing one thing, changing it, and seeing the result. Plumb helps you find your line, one set at a time.
+**The close (2:25–3:00).** Better form is not a single score. It is noticing one thing, changing it, and seeing the result. Finn helps you find your line, one set at a time.
 
 ## Demo path
 
@@ -28,15 +28,15 @@ Plumb turns an iPhone camera into a private technique mirror: after a supported 
 
 ## Judge questions
 
-**Is this a medical or injury-prevention app?** No. Plumb observes limited camera-visible movement patterns and offers general training cues. It does not diagnose pain, certify safety, prescribe weight, or replace a qualified professional.
+**Is this a medical or injury-prevention app?** No. Finn observes limited camera-visible movement patterns and offers general training cues. It does not diagnose pain, certify safety, prescribe weight, or replace a qualified professional.
 
 **Does the AI watch raw video and decide what good form is?** No. Vision extracts pose points and a deterministic squat rule produces the measurement. Foundation Models may reword a measured comparison; if unavailable, reviewed templates work offline.
 
 **Can it coach live?** The full product aims to correct a validated issue as early as possible. The current build gives post-set feedback. In-set prompts and Watch haptics are future features gated by tracking confidence, latency, and user testing so cues do not distract or mislead.
 
-**Do I need a Watch or AirPods?** No for the current iPhone build. Apple Watch is central to the intended paired experience; AirPods are an optional audio route today. Neither currently contributes a form measurement to Plumb.
+**Do I need a Watch or AirPods?** No for the current iPhone build. Apple Watch is central to the intended paired experience; AirPods are an optional audio route today. Neither currently contributes a form measurement to Finn.
 
-**Why is a single-camera result trustworthy?** Its accuracy has not yet been established on a physical iPhone. Plumb links each provisional cue to named reps and withholds feedback when important joints are obscured. The team must measure agreement with annotated sets and expert review before broader claims.
+**Why is a single-camera result trustworthy?** Its accuracy has not yet been established on a physical iPhone. Finn links each provisional cue to named reps and withholds feedback when important joints are obscured. The team must measure agreement with annotated sets and expert review before broader claims.
 
 **What is the business?** Monetization and acquisition are part of the product work, but the README has not selected a paid feature, price, or subscription. The first test is whether people value the iPhone set-to-set loop enough to return.
 

@@ -4,5 +4,5 @@
     @media(prefers-color-scheme:dark){.ground{fill:#141414}.mark{stroke:#fff}}
   </style>
   <rect class="ground" width="1024" height="1024" rx="200"/>
-  <path class="mark" d="M390 713V325H507C588 325 634 371 634 439C634 507 588 553 507 553H390" fill="none" stroke-width="61" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="mark" d="M390 713V325H623M390 505H565" fill="none" stroke-width="61" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

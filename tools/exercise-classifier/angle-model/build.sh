@@ -5,7 +5,7 @@ set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../../.." && pwd)
 OUT=${1:-"$ROOT/.build/angle-model"}
-WORKOUT="$ROOT/Plumb/Plumb/Workout"
+WORKOUT="$ROOT/Finn/Finn/Workout"
 mkdir -p "$OUT"
 xcrun swiftc -O -o "$OUT/extract-poses" "$HERE/ExtractPoses/main.swift" "$WORKOUT/WorkoutModels.swift"
 xcrun swiftc -O -D DEBUG -o "$OUT/train-angle-classifier" "$HERE/TrainAngleClassifier/main.swift" \

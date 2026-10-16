@@ -32,19 +32,19 @@ jobs:
           echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
       - name: Test analysis and iPhone flows
         env:
-          TEST_RUNNER_PLUMB_VIDEO_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps.mp4
-          TEST_RUNNER_PLUMB_VIDEO_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps-poses.json
-          TEST_RUNNER_PLUMB_VIDEO_SECONDS: '12'
-          TEST_RUNNER_PLUMB_VIDEO_EXPECTED_REPS: '6'
-          TEST_RUNNER_PLUMB_VIDEO_OCCLUDED_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden.mp4
-          TEST_RUNNER_PLUMB_VIDEO_OCCLUDED_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden-poses.json
+          TEST_RUNNER_FINN_VIDEO_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps.mp4
+          TEST_RUNNER_FINN_VIDEO_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-six-reps-poses.json
+          TEST_RUNNER_FINN_VIDEO_SECONDS: '12'
+          TEST_RUNNER_FINN_VIDEO_EXPECTED_REPS: '6'
+          TEST_RUNNER_FINN_VIDEO_OCCLUDED_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden.mp4
+          TEST_RUNNER_FINN_VIDEO_OCCLUDED_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden-poses.json
         run: |
           xcodebuild test \
-            -project Plumb/Plumb.xcodeproj \
-            -scheme Plumb \
+            -project Finn/Finn.xcodeproj \
+            -scheme Finn \
             -destination "platform=iOS Simulator,id=$DEVICE_ID" \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
-            -resultBundlePath "$RUNNER_TEMP/Plumb.xcresult" \
+            -resultBundlePath "$RUNNER_TEMP/Finn.xcresult" \
             -parallel-testing-enabled YES \
             -maximum-parallel-testing-workers 1 \
             -collect-test-diagnostics never \
@@ -53,7 +53,7 @@ jobs:
         if: failure()
         run: |
           # The xcodebuild summary names failing tests without saying why; the result bundle does.
-          xcrun xcresulttool get test-results summary --path "$RUNNER_TEMP/Plumb.xcresult" > "$RUNNER_TEMP/summary.json" || exit 0
+          xcrun xcresulttool get test-results summary --path "$RUNNER_TEMP/Finn.xcresult" > "$RUNNER_TEMP/summary.json" || exit 0
           python3 - "$RUNNER_TEMP/summary.json" <<'PY'
           import json, sys
           summary = json.load(open(sys.argv[1]))
@@ -72,6 +72,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: plumb-test-report
-          path: ${{ runner.temp }}/Plumb.xcresult
+          name: finn-test-report
+          path: ${{ runner.temp }}/Finn.xcresult
           if-no-files-found: ignore
