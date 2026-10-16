@@ -1,24 +1,23 @@
 import StoreKit
 import SwiftUI
 
-/// the three offers of the plan screen and their products in `TestConfig.storekit`. The trial is
-/// its own annual product, so choosing Annual never starts a trial by itself
+/// The two offers configured in App Store Connect. The monthly product has an introductory
+/// week for eligible accounts; StoreKit decides whether that offer applies at purchase time.
 nonisolated enum CoachPlan: String, CaseIterable, Sendable {
-    case weekly, annual, trial
+    case monthly, annual
 
     var productID: String {
         switch self {
-        case .weekly: "ai.mwm.build.challenge.team.08.weekly.00.ft.05.99"
-        case .annual: "ai.mwm.build.challenge.team.08.yearly.00.ft.149.99"
-        case .trial: "ai.mwm.build.challenge.team.08.yearly.14.ft.149.99"
+        case .monthly: "ai.mwm.build.challenge.team.08.monthly.07.ft.04.99"
+        case .annual: "ai.mwm.build.challenge.team.08.yearly.00.ft.34.99"
         }
     }
 
     /// the design's prices, shown until the App Store answers (previews, launches without StoreKit)
-    var fallbackPrice: String { self == .weekly ? "€5.99" : "€149.99" }
+    var fallbackPrice: String { self == .monthly ? "€4.99" : "€34.99" }
 }
 
-/// the plan offer: Finn Coach+, weekly or annual, or annual after a two-week free trial.
+/// The plan offer: Finn Coach+, monthly with an eligible trial, or annual.
 /// Subscribe opens the App Store in-app purchase sheet for the chosen plan (`TestConfig.storekit`
 /// in the simulator); Skip, at the top right, keeps Finn Free and goes straight to Home
 struct PaywallView: View {
@@ -79,13 +78,9 @@ struct PaywallView: View {
                             features
                                 .padding(.horizontal, OnboardingMetrics.cardPadding)
                                 .padding(.vertical, OnboardingMetrics.titleSpacing)
-                            planRow(.weekly)
+                            planRow(.monthly)
                             planRow(.annual)
                         }
-                    }
-                    if eligibleForFreeTrial || usesDemoPurchase {
-                        planRow(.trial)
-                            .padding(.horizontal, DashboardStyle.cardSpacing)
                     }
                     if hasLoadedProducts && !hasPurchasableOffers && !usesDemoPurchase {
                         freePlan
@@ -217,23 +212,21 @@ struct PaywallView: View {
 
     private func title(_ plan: CoachPlan) -> String {
         switch plan {
-        case .weekly: String(localized: "Weekly")
+        case .monthly: String(localized: "Monthly")
         case .annual: String(localized: "Annual")
-        case .trial: String(localized: "Free trial")
         }
     }
 
-    /// the trial says what follows it; the price beside it is the one billed
     private func detail(_ plan: CoachPlan) -> String? {
-        plan == .trial ? String(localized: "2 weeks free, then billed yearly") : nil
+        plan == .monthly && eligibleForFreeTrial
+            ? String(localized: "1 week free, then billed monthly") : nil
     }
 
     /// what the plan bills, the same size for every plan, the trial included
     private func billedPrice(_ plan: CoachPlan) -> String {
         switch plan {
-        case .weekly: String(localized: "\(price(.weekly)) / week")
+        case .monthly: String(localized: "\(price(.monthly)) / month")
         case .annual: String(localized: "\(price(.annual)) / year")
-        case .trial: String(localized: "\(price(.trial)) / year")
         }
     }
 
@@ -258,12 +251,12 @@ struct PaywallView: View {
         return switch plan {
         case nil:
             String(localized: "Renews automatically. Cancel in Settings at least 24 hours before renewal. Trial for eligible subscribers.")
-        case .weekly?:
-            String(localized: "\(price(.weekly)) charged today, then weekly. Renews automatically. Cancel in Settings at least 24 hours before renewal.")
+        case .monthly? where eligibleForFreeTrial:
+            String(localized: "\(freeToday) today. After 1 week, \(price(.monthly))/month. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only.")
+        case .monthly?:
+            String(localized: "\(price(.monthly)) charged today, then monthly. Renews automatically. Cancel in Settings at least 24 hours before renewal.")
         case .annual?:
             String(localized: "\(price(.annual)) charged today, then yearly. Renews automatically. Cancel in Settings at least 24 hours before renewal.")
-        case .trial?:
-            String(localized: "\(freeToday) today. After 2 weeks, \(price(.trial))/year. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only.")
         }
     }
 
@@ -343,7 +336,7 @@ struct PaywallView: View {
     }
 
     private var hasPurchasableOffers: Bool {
-        products[CoachPlan.weekly.productID] != nil || products[CoachPlan.annual.productID] != nil
+        products[CoachPlan.monthly.productID] != nil || products[CoachPlan.annual.productID] != nil
     }
 
     private func offerIsAvailable(_ offer: CoachPlan) -> Bool {
@@ -360,7 +353,7 @@ struct PaywallView: View {
 
     /// nothing due today, in the trial's currency
     private var freeToday: String {
-        guard let product = products[CoachPlan.trial.productID] else { return "€0" }
+        guard let product = products[CoachPlan.monthly.productID] else { return "€0" }
         return Decimal.zero.formatted(product.priceFormatStyle.precision(.fractionLength(0)))
     }
 
@@ -371,15 +364,14 @@ struct PaywallView: View {
         #endif
         guard let loaded = try? await Product.products(for: CoachPlan.allCases.map(\.productID)) else { return }
         products = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
-        if let subscription = products[CoachPlan.trial.productID]?.subscription,
+        if let subscription = products[CoachPlan.monthly.productID]?.subscription,
            let offer = subscription.introductoryOffer,
            offer.paymentMode == .freeTrial,
-           offer.period.unit == .week, offer.period.value == 2, offer.periodCount == 1 {
+           offer.period.unit == .week, offer.period.value == 1, offer.periodCount == 1 {
             eligibleForFreeTrial = await subscription.isEligibleForIntroOffer
         } else {
             eligibleForFreeTrial = false
         }
-        if plan == .trial && !eligibleForFreeTrial && !usesDemoPurchase { plan = nil }
     }
 
     /// the App Store in-app purchase sheet for the chosen plan. A verified purchase moves on
@@ -400,13 +392,11 @@ struct PaywallView: View {
             notice = .unavailable
             return
         }
-        if plan == .trial {
-            guard let subscription = product.subscription,
-                  eligibleForFreeTrial, await subscription.isEligibleForIntroOffer else {
-                eligibleForFreeTrial = false
-                self.plan = nil
-                return
-            }
+        if plan == .monthly, eligibleForFreeTrial,
+           let subscription = product.subscription,
+           !(await subscription.isEligibleForIntroOffer) {
+            eligibleForFreeTrial = false
+            return
         }
         do {
             switch try await purchase(product) {

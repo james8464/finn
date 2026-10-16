@@ -4,6 +4,46 @@
     "": {
       "localizations": {}
     },
+    "Monthly": {
+      "localizations": {
+        "en-GB": { "stringUnit": { "state": "translated", "value": "Monthly" } },
+        "en-US": { "stringUnit": { "state": "translated", "value": "Monthly" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "Mensuel" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Mensual" } }
+      }
+    },
+    "1 week free, then billed monthly": {
+      "localizations": {
+        "en-GB": { "stringUnit": { "state": "translated", "value": "1 week free, then billed monthly" } },
+        "en-US": { "stringUnit": { "state": "translated", "value": "1 week free, then billed monthly" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "1 semaine offerte, puis facturation mensuelle" } },
+        "es": { "stringUnit": { "state": "translated", "value": "1 semana gratis, después facturación mensual" } }
+      }
+    },
+    "%@ / month": {
+      "localizations": {
+        "en-GB": { "stringUnit": { "state": "translated", "value": "%@ / month" } },
+        "en-US": { "stringUnit": { "state": "translated", "value": "%@ / month" } },
+        "fr": { "stringUnit": { "state": "translated", "value": "%@ / mois" } },
+        "es": { "stringUnit": { "state": "translated", "value": "%@ / mes" } }
+      }
+    },
+    "%@ charged today, then monthly. Renews automatically. Cancel in Settings at least 24 hours before renewal.": {
+      "localizations": {
+        "en-GB": { "stringUnit": { "state": "translated", "value": "%@ charged today, then monthly. Renews automatically. Cancel in Settings at least 24 hours before renewal." } },
+        "en-US": { "stringUnit": { "state": "translated", "value": "%@ charged today, then monthly. Renews automatically. Cancel in Settings at least 24 hours before renewal." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "%@ facturés aujourd'hui, puis chaque mois. Renouvellement automatique. Résilie dans Réglages au moins 24 heures avant le renouvellement." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Se cobran %@ hoy y después cada mes. Se renueva automáticamente. Cancela en Ajustes al menos 24 horas antes de la renovación." } }
+      }
+    },
+    "%@ today. After 1 week, %@/month. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only.": {
+      "localizations": {
+        "en-GB": { "stringUnit": { "state": "translated", "value": "%1$@ today. After 1 week, %2$@/month. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only." } },
+        "en-US": { "stringUnit": { "state": "translated", "value": "%1$@ today. After 1 week, %2$@/month. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only." } },
+        "fr": { "stringUnit": { "state": "translated", "value": "%1$@ aujourd'hui. Après 1 semaine, %2$@/mois. Renouvellement automatique. Résilie dans Réglages au moins 24 heures avant le renouvellement. Réservé aux abonnés éligibles." } },
+        "es": { "stringUnit": { "state": "translated", "value": "%1$@ hoy. Después de 1 semana, %2$@/mes. Se renueva automáticamente. Cancela en Ajustes al menos 24 horas antes de la renovación. Solo para suscriptores aptos." } }
+      }
+    },
     " (now %lld).": {
       "localizations": {
         "en-GB": {

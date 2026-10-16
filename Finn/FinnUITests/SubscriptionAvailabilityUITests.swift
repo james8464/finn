@@ -11,9 +11,9 @@ final class SubscriptionAvailabilityUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Finn Free"].exists)
         XCTAssertFalse(app.staticTexts["Price unavailable"].exists)
         XCTAssertFalse(app.buttons["plan.continue"].exists)
-        XCTAssertTrue(app.buttons["plan.weekly"].exists)
+        XCTAssertTrue(app.buttons["plan.monthly"].exists)
         XCTAssertTrue(app.buttons["plan.annual"].exists)
-        XCTAssertFalse(app.buttons["plan.weekly"].isEnabled)
+        XCTAssertFalse(app.buttons["plan.monthly"].isEnabled)
         XCTAssertFalse(app.buttons["plan.annual"].isEnabled)
     }
 }
