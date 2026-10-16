@@ -32505,6 +32505,118 @@
           }
         }
       }
+    },
+    "Checking available plans": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking available plans"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking available plans"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification des offres disponibles"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobando los planes disponibles"
+          }
+        }
+      }
+    },
+    "Finn Free": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finn Free"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finn Free"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finn gratuit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finn gratis"
+          }
+        }
+      }
+    },
+    "Plan a workout": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan a workout"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan a workout"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planifier un entraînement"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planificar un entrenamiento"
+          }
+        }
+      }
+    },
+    "Subscriptions are not available yet. Continue with Finn Free to start your workout plan and use the coach.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subscriptions are not available yet. Continue with Finn Free to start your workout plan and use the coach."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subscriptions are not available yet. Continue with Finn Free to start your workout plan and use the coach."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les abonnements ne sont pas encore disponibles. Continuez avec Finn gratuit pour commencer votre programme et utiliser le coach."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las suscripciones aún no están disponibles. Continúa con Finn gratis para empezar tu plan de entrenamiento y usar el coach."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

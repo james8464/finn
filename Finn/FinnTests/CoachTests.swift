@@ -280,11 +280,16 @@ struct CoachTests {
         let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: .english)
         let answer = await responder.answer("How am I doing?", context: context, history: [])
         #expect(answer.engine == .fallback)
-        #expect(answer.text.contains("no saved set"))
+        #expect(answer.text.contains("Plan a workout"))
+        #expect(answer.text.contains("first set"))
         let conversation = CoachConversation(history: [], responder: responder)
-        #expect(conversation.messages.first?.text.contains("No saved set yet") == true)
+        #expect(conversation.messages.first?.text.contains("Plan a workout") == true)
         #expect(conversation.messages.first?.engine == nil, "The fixed greeting did not run a model")
         #expect(conversation.suggestedQuestions.isEmpty)
+        #expect(CoachFallback.reply(to: "Des conseils ?", context: context, language: .french)
+            .contains("Planifier un entraînement"))
+        #expect(CoachFallback.reply(to: "¿Qué hago?", context: context, language: .spanish)
+            .contains("Planificar un entrenamiento"))
     }
 
     // MARK: Engines unavailable
@@ -501,7 +506,7 @@ struct CoachTests {
         await request.value
         #expect(conversation.messages.count == 3)
         #expect(conversation.messages.last?.engine == .fallback)
-        #expect(conversation.messages.last?.text.contains("no saved set yet") == true)
+        #expect(conversation.messages.last?.text.contains("Plan a workout") == true)
         #expect(conversation.messages.last?.text.contains("6 squat reps") == false)
         #expect(!conversation.isAnswering)
     }

@@ -341,11 +341,11 @@ nonisolated enum CoachFallback {
         guard let latest = context.latest else {
             return switch language {
             case .english:
-                "Finn has no saved set yet, so there is nothing to comment on. Finish a set and come back."
+                "Let's get started with a workout. Tap Plan a workout to choose one, then I can help you review your reps and technique after your first set."
             case .french:
-                "Finn n'a encore aucune série enregistrée, donc rien à commenter. Finis une série et reviens."
+                "Commençons par un entraînement. Touchez Planifier un entraînement pour en choisir un ; après votre première série, je pourrai vous aider à revoir vos répétitions et votre technique."
             case .spanish:
-                "Finn aún no tiene series guardadas, así que no hay nada que comentar. Termina una serie y vuelve."
+                "Empecemos con un entrenamiento. Toca Planificar un entrenamiento para elegir uno; después de la primera serie, podré ayudarte a revisar tus repeticiones y tu técnica."
             }
         }
         switch intent(of: question) {
@@ -522,11 +522,11 @@ nonisolated enum CoachFallback {
         guard let latest = context.latest else {
             return switch language {
             case .english:
-                "No saved set yet."
+                "Ready when you are. Plan a workout to get started, and I'll help you review your first set."
             case .french:
-                "Aucune série enregistrée."
+                "À vous de jouer. Planifiez un entraînement pour commencer, puis je vous aiderai à revoir votre première série."
             case .spanish:
-                "Aún no hay series guardadas."
+                "Cuando quieras. Planifica un entrenamiento para empezar y te ayudaré a revisar tu primera serie."
             }
         }
         return summary(of: latest, language: language)

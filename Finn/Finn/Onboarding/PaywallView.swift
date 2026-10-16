@@ -23,13 +23,14 @@ nonisolated enum CoachPlan: String, CaseIterable, Sendable {
 /// in the simulator); Skip, at the top right, keeps Finn Free and goes straight to Home
 struct PaywallView: View {
     let back: () -> Void
-    /// called after a purchase or a restored subscription
+    /// continues to the final onboarding questions after a purchase, restore, or free choice
     let next: () -> Void
     /// called by Skip
     let skip: () -> Void
 
     @State private var plan: CoachPlan?
     @State private var products: [String: Product] = [:]
+    @State private var hasLoadedProducts = false
     @State private var isBusy = false
     @State private var notice: Notice?
     @State private var eligibleForFreeTrial = false
@@ -73,22 +74,27 @@ struct PaywallView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: OnboardingMetrics.sectionSpacing) {
                     heading
-                    // the touch of pink: Home's outline around Finn Coach+ and its two plans
-                    FinnOutline(topRadius: Self.rowRadius, bottomRadius: Self.rowRadius) {
-                        VStack(alignment: .leading, spacing: OnboardingMetrics.rowSpacing) {
-                            features
-                                .padding(.horizontal, OnboardingMetrics.cardPadding)
-                                .padding(.vertical, OnboardingMetrics.titleSpacing)
-                            planRow(.weekly)
-                            planRow(.annual)
+                    if hasLoadedProducts && !hasPurchasableOffers && !usesDemoPurchase {
+                        freePlan
+                    } else if !hasLoadedProducts && !usesDemoPurchase {
+                        ProgressView("Checking available plans")
+                            .frame(maxWidth: .infinity, minHeight: 120)
+                    } else {
+                        FinnOutline(topRadius: Self.rowRadius, bottomRadius: Self.rowRadius) {
+                            VStack(alignment: .leading, spacing: OnboardingMetrics.rowSpacing) {
+                                features
+                                    .padding(.horizontal, OnboardingMetrics.cardPadding)
+                                    .padding(.vertical, OnboardingMetrics.titleSpacing)
+                                planRow(.weekly)
+                                planRow(.annual)
+                            }
                         }
+                        if eligibleForFreeTrial || usesDemoPurchase {
+                            planRow(.trial)
+                                .padding(.horizontal, DashboardStyle.cardSpacing)
+                        }
+                        terms
                     }
-                    // outside the outline, as wide as the plans inside it
-                    if eligibleForFreeTrial || usesDemoPurchase {
-                        planRow(.trial)
-                            .padding(.horizontal, DashboardStyle.cardSpacing)
-                    }
-                    terms
                 }
                 .finnFeedback(.selection, trigger: plan)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -143,6 +149,19 @@ struct PaywallView: View {
         }
         .font(.body)
         .foregroundStyle(Color.primary)
+    }
+
+    private var freePlan: some View {
+        VStack(alignment: .leading, spacing: OnboardingMetrics.titleSpacing) {
+            Text("Finn Free")
+                .font(.title2.bold())
+            Text("Subscriptions are not available yet. Continue with Finn Free to start your workout plan and use the coach.")
+                .font(.body)
+                .foregroundStyle(HomeStyle.supportingText)
+        }
+        .padding(OnboardingMetrics.cardPadding)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: Self.rowRadius))
     }
 
     /// one plan: a neutral row, every price in the same type; only the chosen one turns pink
@@ -249,9 +268,11 @@ struct PaywallView: View {
     }
 
     @ViewBuilder private func linkItems(separated: Bool) -> some View {
-        Button { Task { await restore() } } label: { target("Restore purchases") }
-            .accessibilityIdentifier("plan.restore")
-        if separated { Text(verbatim: "·").accessibilityHidden(true) }
+        if hasPurchasableOffers || usesDemoPurchase {
+            Button { Task { await restore() } } label: { target("Restore purchases") }
+                .accessibilityIdentifier("plan.restore")
+            if separated { Text(verbatim: "·").accessibilityHidden(true) }
+        }
         Link(destination: Self.termsURL) { target("Terms") }
         if separated { Text(verbatim: "·").accessibilityHidden(true) }
         Link(destination: Self.privacyURL) { target("Privacy") }
@@ -267,7 +288,13 @@ struct PaywallView: View {
     /// Subscribe appears once a plan is chosen, above the links
     private var actions: some View {
         VStack {
-            if plan != nil {
+            if hasLoadedProducts && !hasPurchasableOffers && !usesDemoPurchase {
+                Button(action: next) {
+                    PrimaryActionLabel(title: "Continue with Finn Free")
+                }
+                .buttonStyle(PressableStyle())
+                .accessibilityIdentifier("plan.continueFree")
+            } else if plan != nil && (hasPurchasableOffers || usesDemoPurchase) {
                 Button { Task { await buy() } } label: {
                     PrimaryActionLabel(title: "Subscribe")
                 }
@@ -304,6 +331,10 @@ struct PaywallView: View {
         return usesDemoPurchase ? plan.fallbackPrice : String(localized: "Price unavailable")
     }
 
+    private var hasPurchasableOffers: Bool {
+        products[CoachPlan.weekly.productID] != nil && products[CoachPlan.annual.productID] != nil
+    }
+
     private var usesDemoPurchase: Bool {
         #if DEBUG
         ProcessInfo.processInfo.arguments.contains("-finn-ui-demo-purchase")
@@ -319,6 +350,10 @@ struct PaywallView: View {
     }
 
     private func loadProducts() async {
+        defer { hasLoadedProducts = true }
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-finn-ui-no-storekit-products") { return }
+        #endif
         guard let loaded = try? await Product.products(for: CoachPlan.allCases.map(\.productID)) else { return }
         products = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
         if let subscription = products[CoachPlan.trial.productID]?.subscription,

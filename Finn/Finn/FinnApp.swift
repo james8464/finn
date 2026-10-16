@@ -34,6 +34,9 @@ struct FinnApp: App {
                     FinnLaunchPreview(reducesMotion: ProcessInfo.processInfo.arguments
                         .contains("-finn-launch-reduce-motion"))
                         .preferredColorScheme(.dark)
+                } else if ProcessInfo.processInfo.arguments.contains("-finn-ui-paywall") {
+                    PaywallView(back: {}, next: {}, skip: {})
+                        .preferredColorScheme(.dark)
                 } else if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
                     ContentView(
                         source: DemoPoseSource(
