@@ -58,6 +58,33 @@ struct TryFinnTests {
     }
 }
 
+/// Try Finn on the Watch: the target travels with the set, and the wrist taps once per rep, then
+/// a success at the target. Ordinary sets and saved states never tap
+nonisolated struct TryFinnWatchTests {
+    @Test func targetRoundTripsAndOlderMessagesHaveNone() {
+        let state = WatchState(stage: .capturing, exercise: "Squat", reps: 3, target: 8, setID: "set")
+        #expect(WatchState(message: state.message())?.target == 8)
+        var older = state.message()
+        older.removeValue(forKey: WatchMessageKey.target)
+        #expect(WatchState(message: older)?.target == nil)
+    }
+
+    @Test func wristTapsEachRepThenSucceedsAtTheTarget() {
+        func state(_ reps: Int, target: Int? = 8, stage: WatchStage = .capturing, set: String = "set",
+                   haptics: Bool = true) -> WatchState {
+            WatchState(stage: stage, reps: reps, target: target, setID: set, hapticsEnabled: haptics)
+        }
+        #expect(WatchTargetTaps.haptic(after: state(2), for: state(3)) == .rep)
+        #expect(WatchTargetTaps.haptic(after: state(7), for: state(8)) == .end)
+        #expect(WatchTargetTaps.haptic(after: state(7), for: state(8, stage: .analyzing)) == .end)
+        #expect(WatchTargetTaps.haptic(after: state(3), for: state(3)) == .none)
+        #expect(WatchTargetTaps.haptic(after: nil, for: state(3)) == .none)
+        #expect(WatchTargetTaps.haptic(after: state(3, set: "old"), for: state(4)) == .none)
+        #expect(WatchTargetTaps.haptic(after: state(2, target: nil), for: state(3, target: nil)) == .none)
+        #expect(WatchTargetTaps.haptic(after: state(2, haptics: false), for: state(3, haptics: false)) == .none)
+    }
+}
+
 /// a camera that has not been asked yet, and how many times iOS showed its prompt
 @MainActor
 private final class PromptRecorder {

@@ -125,6 +125,8 @@ final class WatchLink: NSObject, WCSessionDelegate {
             return
         }
         let previousSetID = state?.setID
+        // a saved state read later never taps the wrist
+        let tap = fresh ? WatchTargetTaps.haptic(after: state, for: incoming) : .none
         state = incoming
         if fresh {
             lastPhoneStateAt = ProcessInfo.processInfo.systemUptime
@@ -138,6 +140,14 @@ final class WatchLink: NSObject, WCSessionDelegate {
             followCapture()
         } else {
             stopRhythm()
+        }
+        switch tap {
+        case .rep:
+            WKInterfaceDevice.current().play(.click)
+        case .end:
+            WKInterfaceDevice.current().play(.success)
+        case .none, .observation, .start:
+            break
         }
     }
 

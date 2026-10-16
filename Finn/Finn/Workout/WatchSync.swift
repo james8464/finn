@@ -225,6 +225,7 @@ final class WatchSync {
             coachMessage: model.liveCoachMessage
         )
         state.hapticsEnabled = model.hapticFeedback != .off
+        state.target = model.repTarget
         return state
     }
 }
