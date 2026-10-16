@@ -83,7 +83,7 @@ struct HomeTabBar: View {
         // beneath small labels. The selection still moves between tabs.
         .modifier(DashboardGlass(radius: 48, stableBackdrop: true))
         .animation(reduceMotion ? nil : .spring(duration: 0.28, bounce: 0.12), value: selection)
-        .sensoryFeedback(.selection, trigger: selection)
+        .finnFeedback(.selection, trigger: selection)
         .padding(.horizontal, 12)
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(.isTabBar)

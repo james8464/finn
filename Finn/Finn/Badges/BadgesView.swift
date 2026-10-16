@@ -154,7 +154,7 @@ struct BadgeUnlockCard: View {
             }
         }
         .buttonStyle(PressableStyle())
-        .sensoryFeedback(.success, trigger: shown)
+        .finnFeedback(.success, trigger: shown)
         .onAppear { shown = true }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("result.badges")
