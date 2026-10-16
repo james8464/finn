@@ -65,6 +65,29 @@ struct WorkoutSessionModelTests {
         #expect(analysis.reps.count == 6)
     }
 
+    /// Try Finn's first exercise: the set ends by itself once the target is counted, with no tap
+    /// and not hands-free. Another set keeps the target; closing the camera screen clears it.
+    @Test func setEndsByItselfAtTheRepTarget() async throws {
+        let source = TestPoseSource()
+        let model = WorkoutSessionModel(source: source)
+        model.repTarget = 4
+        await model.startPreview()
+        await model.beginSet(countdown: 0)
+        for frame in trace(reps: 8) { source.emit(frame) }
+        try await waitUntil { model.stage == .result }
+        #expect(!model.endedHandsFree)
+        guard case .measured(let analysis, _) = model.result else {
+            Issue.record("Expected a measured result, got \(String(describing: model.result))")
+            return
+        }
+        #expect(analysis.reps.count >= 4)
+
+        await model.startPreview()
+        #expect(model.repTarget == 4)
+        await model.cancel()
+        #expect(model.repTarget == nil)
+    }
+
     /// Start at the phone, walk to the spot, squat, walk back to stop: measured and saved.
     @Test func walkingToTheSpotAndBackIsMeasuredAndSaved() async throws {
         let directory = FileManager.default.temporaryDirectory
