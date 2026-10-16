@@ -146,15 +146,15 @@ nonisolated struct StartReadinessTests {
 
 nonisolated struct LiveSetMonitorTests {
     @Test func aBriefLowerReadingDoesNotMakeTheLiveCountBounce() {
-        var stabilizer = LiveRepCountStabilizer()
+        var stabiliser = LiveRepCountStabiliser()
         var shown = 4
-        shown = stabilizer.accept(measured: 3, shown: shown, at: 1.0)
+        shown = stabiliser.accept(measured: 3, shown: shown, at: 1.0)
         #expect(shown == 4)
-        shown = stabilizer.accept(measured: 4, shown: shown, at: 1.4)
+        shown = stabiliser.accept(measured: 4, shown: shown, at: 1.4)
         #expect(shown == 4)
-        shown = stabilizer.accept(measured: 3, shown: shown, at: 1.8)
+        shown = stabiliser.accept(measured: 3, shown: shown, at: 1.8)
         #expect(shown == 4)
-        shown = stabilizer.accept(measured: 3, shown: shown, at: 2.7)
+        shown = stabiliser.accept(measured: 3, shown: shown, at: 2.7)
         #expect(shown == 3)
     }
 

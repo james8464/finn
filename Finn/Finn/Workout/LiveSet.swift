@@ -186,7 +186,7 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
 
 /// Holds a lower reading until it persists. A brief change in Vision's chosen joints or counting
 /// method can revise the whole set for one review, then recover at the next review.
-nonisolated struct LiveRepCountStabilizer {
+nonisolated struct LiveRepCountStabiliser {
     static let revisionHold: TimeInterval = 0.8
     private var lowerReading: Int?
     private var lowerSince: TimeInterval?
@@ -239,7 +239,7 @@ nonisolated struct LiveSetMonitor {
     /// set ended now. It can go down (see `update`).
     private(set) var countedReps = 0
     /// A single noisy review must not make the live number jump down and back up.
-    private var countStabilizer = LiveRepCountStabilizer()
+    private var countStabiliser = LiveRepCountStabiliser()
     /// The highest count said aloud so far, so a number is never announced twice.
     private var highestSaid = 0
     /// The set looks over (see `shouldStop`), as of the latest analysis.
@@ -315,7 +315,7 @@ nonisolated struct LiveSetMonitor {
             // to keep every rep ever said: it reached 29 and froze there while the result gave 18.
             // Now it follows the analysis, down as well as up, and a number already said is shown
             // again without being spoken.
-            let stableCount = countStabilizer.accept(
+            let stableCount = countStabiliser.accept(
                 measured: reps.count,
                 shown: countedReps,
                 at: last.time
