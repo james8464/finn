@@ -624,7 +624,7 @@ struct ContentView: View {
                     }
                     .accessibilityLabel("Privacy")
                 }
-                Button { showsOnboarding = true } label: {
+                Button(action: replayOnboarding) {
                     Label {
                         WrappingText(text: String(localized: "Replay the welcome"))
                     } icon: {
