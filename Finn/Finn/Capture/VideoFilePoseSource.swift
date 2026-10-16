@@ -83,13 +83,18 @@ nonisolated enum VideoFileReader {
             let provider = reader.outputProvider(for: output)
             guard (try? reader.start()) != nil else { return }
             let clock = ContinuousClock()
-            let start = clock.now
+            // Start the replay clock after the decoder delivers its first frame.
+            // Simulator decoder startup can otherwise compress the whole movement into a burst.
+            var start: ContinuousClock.Instant?
             var lastAnalysed = -Double.infinity
             while !Task.isCancelled, let ready = try? await provider.next() {
                 let sample = ready.withUnsafeSampleBuffer { $0 }
                 let time = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sample))
                 guard time.isFinite else { continue }
-                try? await clock.sleep(until: start + .milliseconds(Int(time * 1000)))
+                if start == nil { start = clock.now }
+                if let start {
+                    try? await clock.sleep(until: start + .milliseconds(Int(time * 1000)))
+                }
                 guard !Task.isCancelled else { break }
                 sink.enqueue(sample)
                 if time - lastAnalysed >= PoseFrameAnalyzer.minimumInterval,

@@ -78,7 +78,7 @@ struct ContentView: View {
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") }
     // presentation exports hide debug chrome; input and storage remain synthetic and isolated
     private var isPresentationCapture: Bool {
-        isDemo && ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture")
+        ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture")
     }
     private var showsDemoIndicator: Bool { isDemo && !isPresentationCapture }
     private var isVideoFileInput: Bool { ProcessInfo.processInfo.arguments.contains("-finn-video-file") }
@@ -1227,7 +1227,7 @@ struct ContentView: View {
                 .accessibilityHidden(true)
             VStack(spacing: 16) {
                 #if DEBUG
-                if showsDemoIndicator || isVideoFileInput {
+                if showsDemoIndicator || (isVideoFileInput && !isPresentationCapture) {
                     Text(isDemo ? "DEMO INPUT" : "VIDEO FILE INPUT")
                         .font(.caption.bold())
                         .foregroundStyle(.black)
