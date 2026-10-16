@@ -211,7 +211,7 @@ struct AboutYouView: View {
             .contentShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         }
         .accessibilityAddTraits(profile.noPastInjuries ? .isSelected : [])
-        .sensoryFeedback(.selection, trigger: profile.noPastInjuries)
+        .finnFeedback(.selection, trigger: profile.noPastInjuries)
         .accessibilityIdentifier("aboutYou.noInjuries")
     }
 

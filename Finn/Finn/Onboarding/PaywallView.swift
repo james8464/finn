@@ -182,7 +182,7 @@ struct PaywallView: View {
         }
         .padding(16)
         .offerCard()
-        .sensoryFeedback(.selection, trigger: selected)
+        .finnFeedback(.selection, trigger: selected)
     }
 
     private func planRow(_ rowPlan: CoachPlan, title: String, price: String) -> some View {
@@ -210,7 +210,7 @@ struct PaywallView: View {
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("plan.\(rowPlan.rawValue)")
-        .sensoryFeedback(.selection, trigger: selected)
+        .finnFeedback(.selection, trigger: selected)
     }
 
     private func checkBox(_ selected: Bool) -> some View {

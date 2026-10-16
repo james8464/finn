@@ -114,7 +114,7 @@ struct ExerciseChips: View {
                     withAnimation(reduceMotion ? nil : HomeStyle.spring) { proxy.scrollTo(kind, anchor: .center) }
                 }
             }
-            .sensoryFeedback(.selection, trigger: selection)
+            .finnFeedback(.selection, trigger: selection)
         }
     }
 

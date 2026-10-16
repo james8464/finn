@@ -426,7 +426,7 @@ struct OnboardingView: View {
                     .accessibilityIdentifier("onboarding.exercise.\(kind.rawValue)")
                 }
             }
-            .sensoryFeedback(.selection, trigger: profile.favouriteExercises)
+            .finnFeedback(.selection, trigger: profile.favouriteExercises)
         }
     }
 
@@ -552,7 +552,7 @@ private struct ChoiceCard: View {
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
-        .sensoryFeedback(.selection, trigger: selected)
+        .finnFeedback(.selection, trigger: selected)
     }
 }
 

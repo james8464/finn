@@ -12,7 +12,8 @@ struct StrengthSection: View {
     @State private var collapsed = false
     @State private var isAnimating = false
     @State private var animation: Task<Void, Never>?
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     @Environment(\.dynamicTypeSize) private var typeSize
 
     private var trend: StrengthTrend { StrengthTrend.make(for: exercise, history: history) }
@@ -144,8 +145,7 @@ struct StrengthSection: View {
         swap(to: next, trend)
     }
 
-    /// the bars on screen shrink and fade, then the next ones grow in from the left, one by one.
-    /// Reduce Motion swaps them at once
+    /// Brief chart update; Reduce Motion swaps the values without movement.
     private func swap(to next: StrengthProjection?, _ trend: StrengthTrend) {
         animation?.cancel()
         guard !reduceMotion else {
@@ -156,8 +156,8 @@ struct StrengthSection: View {
         }
         isAnimating = true
         animation = Task {
-            withAnimation(.easeIn(duration: 0.3)) { collapsed = true }
-            try? await Task.sleep(for: .milliseconds(320))
+            withAnimation(.easeIn(duration: 0.18)) { collapsed = true }
+            try? await Task.sleep(for: .milliseconds(190))
             guard !Task.isCancelled else { return }
             withTransaction(\.disablesAnimations, true) {
                 projection = next
@@ -165,9 +165,9 @@ struct StrengthSection: View {
                 collapsed = false
             }
             for index in bars(trend).indices {
-                try? await Task.sleep(for: .milliseconds(90))
+                try? await Task.sleep(for: .milliseconds(55))
                 guard !Task.isCancelled else { return }
-                withAnimation(HomeStyle.spring) { revealed = index + 1 }
+                withAnimation(.smooth(duration: 0.26)) { revealed = index + 1 }
             }
             revealed = .max
             isAnimating = false

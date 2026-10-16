@@ -1,5 +1,42 @@
 import AVFoundation
+import SwiftUI
 import UIKit
+
+/// Tactile cues for custom controls. Native controls provide their own feedback.
+@MainActor
+enum FinnHaptics {
+    enum Cue { case selection, success }
+
+    static func play(_ cue: Cue, preferences: FinnPreferences = .app) {
+        switch preferences.hapticFeedback {
+        case .off: return
+        case .gentle:
+            UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: cue == .success ? 0.8 : 0.5)
+        case .regular:
+            switch cue {
+            case .selection: UISelectionFeedbackGenerator().selectionChanged()
+            case .success: UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
+        }
+    }
+}
+
+private struct FinnFeedbackModifier<Value: Equatable>: ViewModifier {
+    let cue: FinnHaptics.Cue
+    let trigger: Value
+
+    func body(content: Content) -> some View {
+        content.onChange(of: trigger) { old, new in
+            if old != new { FinnHaptics.play(cue) }
+        }
+    }
+}
+
+extension View {
+    func finnFeedback<Value: Equatable>(_ cue: FinnHaptics.Cue, trigger: Value) -> some View {
+        modifier(FinnFeedbackModifier(cue: cue, trigger: trigger))
+    }
+}
 
 /// Short, optional cues for workout milestones. Speech remains independent of these settings.
 @MainActor

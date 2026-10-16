@@ -5,6 +5,8 @@ struct WorkoutPlanView: View {
     @State var plan: PlannedWorkout
     var store: PlannedWorkoutStore = .shared
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     var body: some View {
         NavigationStack {
@@ -19,6 +21,7 @@ struct WorkoutPlanView: View {
                     }
                     Button {
                         store.add(plan)
+                        FinnHaptics.play(.success)
                         dismiss()
                     } label: {
                         Text("Validate workout")
@@ -47,12 +50,16 @@ struct WorkoutPlanView: View {
     private func row(_ item: Binding<PlannedExercise>) -> some View {
         let name = ExerciseDefinition.definition(for: item.wrappedValue.exercise).copy.name
         return Button {
-            item.wrappedValue.isDone.toggle()
+            withAnimation(reduceMotion ? nil : .smooth(duration: 0.22)) {
+                item.wrappedValue.isDone.toggle()
+            }
+            FinnHaptics.play(.selection)
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: item.wrappedValue.isDone ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
                     .foregroundStyle(item.wrappedValue.isDone ? Color.accentColor : HomeStyle.supportingText)
+                    .contentTransition(.symbolEffect(.replace))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name)

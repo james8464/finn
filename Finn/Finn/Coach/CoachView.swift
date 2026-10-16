@@ -289,6 +289,7 @@ struct CoachView: View {
         let text = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !conversation.isAnswering else { return false }
         followsLatestReply = true
+        FinnHaptics.play(.selection)
         replyTask = Task { await conversation.send(text) }
         return true
     }
