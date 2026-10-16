@@ -3,8 +3,6 @@ import SwiftUI
 /// a conversation grounded in the saved sets, with source details one tap away
 struct CoachView: View {
     @State private var conversation: CoachConversation
-    @State private var draft = ""
-    @State private var composerResetID = UUID()
     @State private var showsSource = false
     @State private var replyTask: Task<Void, Never>?
     @State private var followsLatestReply = true
@@ -140,48 +138,12 @@ struct CoachView: View {
     }
 
     private var composer: some View {
-        VStack(spacing: 6) {
-            HStack(spacing: 10) {
-                CoachComposerField(
-                    text: $draft,
-                    resetID: composerResetID,
-                    onSubmit: send,
-                    onFocus: conversation.prepare
-                )
-                .overlay(alignment: .topLeading) {
-                    if draft.isEmpty {
-                        Text("Ask about your sets")
-                            .lineLimit(1)
-                            .foregroundStyle(HomeStyle.supportingText)
-                            .allowsHitTesting(false)
-                            .accessibilityHidden(true)
-                    }
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-
-                Button {
-                    if conversation.isAnswering {
-                        replyTask?.cancel()
-                    } else {
-                        send()
-                    }
-                } label: {
-                    Image(systemName: conversation.isAnswering ? "stop.circle.fill" : "arrow.up.circle.fill")
-                        .font(.title)
-                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                        .symbolRenderingMode(.hierarchical)
-                }
-                .buttonStyle(.plain)
-                .tint(AppPageStyle.tint)
-                .disabled(!conversation.isAnswering && draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                .accessibilityLabel(conversation.isAnswering ? String(localized: "Stop response") : String(localized: "Send"))
-                .accessibilityIdentifier(conversation.isAnswering ? "coach.stop" : "coach.send")
-            }
-        }
+        CoachComposerField(
+            isAnswering: conversation.isAnswering,
+            onSubmit: send,
+            onStop: { replyTask?.cancel() },
+            onFocus: conversation.prepare
+        )
         .padding(.horizontal, 20)
         .padding(.top, 10)
         .padding(.bottom, 8)
@@ -201,8 +163,7 @@ struct CoachView: View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(conversation.suggestedQuestions, id: \.self) { question in
                 Button {
-                    draft = question
-                    send()
+                    _ = send(question)
                 } label: {
                     Text(question)
                         .font(.subheadline)
@@ -249,12 +210,11 @@ struct CoachView: View {
         }
     }
 
-    private func send() {
-        let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty, !conversation.isAnswering else { return }
+    private func send(_ question: String) -> Bool {
+        let text = question.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty, !conversation.isAnswering else { return false }
         followsLatestReply = true
-        draft = ""
-        composerResetID = UUID()
         replyTask = Task { await conversation.send(text) }
+        return true
     }
 }

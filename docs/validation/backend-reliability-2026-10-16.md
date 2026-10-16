@@ -179,12 +179,15 @@ The in-app privacy disclosure now matches the on-device production selector and 
 Graphify's local-only code graph was used to follow Coach and generation-gate dependencies; generated
 graph files are not part of the app or repository changes.
 
-The software keyboard's Send key exposed a separate multiline-field issue: SwiftUI inserted a
-newline without calling `onSubmit`. An initial draft-difference workaround passed once but failed on repetition because SwiftUI can
-coalesce multiple edits. It has been replaced by a native `UITextView` delegate that handles the
-keyboard Send action directly, preserves pasted paragraphs, and bounds the draft length. The updated privacy disclosure UI check also passed.
-The UI assertion checks the latest visible reply rather than assuming a lazy transcript retains
-every off-screen accessibility row.
+The Coach composer now keeps its native editor and Send/Stop control in one UIKit component.
+The control reads the editor's current text directly; delayed SwiftUI draft snapshots cannot
+replace keystrokes or leave Send disabled after typing. The keyboard's Send action submits
+explicitly, pasted paragraphs remain editable, and marked text can finish composing. Questions
+remain bounded to 2,000 characters. The editor clears only after the conversation accepts a
+submission. The existing information, keyboard dismissal and reply-cancellation actions remain.
+
+The updated privacy disclosure UI check passed. The transcript test checks the latest visible
+reply rather than assuming a lazy transcript retains every off-screen accessibility row.
 
 A final context audit found that sorting sessions by their start time could choose an older set
 as “latest” when sessions overlapped. Context now orders individual sets by capture time, with a
@@ -199,18 +202,30 @@ The platform-independent backend run at `e00a152` passed **245 tests in 19 suite
 chronology and rejected-observation regressions. The draft-difference test was subsequently removed
 with that workaround; the native keyboard is exercised through UI tests.
 
-Repeated keyboard tests also exposed a focus feedback loop in the first native-editor candidate
-and a transcript-following bug. UIKit now owns keyboard focus; model-to-view text updates cannot
-write back through the delegate. Auto-scroll is suspended only for actual user scrolling, so
-keyboard resizing or a newly inserted reply cannot silently disable following. The UI regression
-requires exact submitted text and the complete new reply above the composer at standard text size.
+UIKit owns keyboard focus and draft text. Transcript following is suspended only for actual
+user scrolling. Keyboard-driven geometry corrections scroll without animation, avoiding a new
+animated correction from an intermediate layout position. New-message transitions still respect
+Reduce Motion. Tests require exact submitted text, a complete reply above the composer, and
+reachable input/Send controls at the largest text size in all four languages.
 
-At the largest text size, a delayed SwiftUI text snapshot could still overwrite a newer native
-edit. The composer now uses an explicit reset identity: UIKit owns current keystrokes, and only a
-successful submission deliberately replaces its text. Large-text tests assert that every typed
-character survives before sending, and retain a screenshot when a reply cannot be reached.
+Small-screen accessibility fixes use the existing native text wrapper for unavailable-Health
+explanations, result guidance and the Health settings heading. The targeted camera-angle/settings
+audit passed after the heading change. The current standalone backend suite passed **244 tests
+in 19 suites**. Live counts change without fading their digits, and uncertain angle badges use
+dark text on orange to preserve contrast.
 
-Keyboard-driven geometry corrections now scroll without animation. New-message transitions still
-respect Reduce Motion; intermediate layout positions cannot start another animated correction.
-The current standalone backend suite passed **244 tests in 19 suites**. Small-screen accessibility
-fixes also use the existing native text wrapper for result and unavailable-Health explanations.
+### Final composer and accessibility checks
+
+The combined native composer passed exact keyboard submission and tab switching (34.020 seconds).
+Its real Apple Intelligence UI flow passed (58.345 seconds), requiring an on-device answer after
+recording a synthetic set. The largest-text flow then passed all four languages, including exact
+typed text, Send, a recorded-data reply and reopening/dismissing the keyboard (453.549 seconds on
+this heavily loaded Mac). At accessibility sizes, submission dismisses the keyboard to leave more
+space for the reply. These are test durations, not inference latency measurements.
+
+The camera-angle/settings accessibility audit passed (78.412 seconds). Capture/result and
+comparison/history audits passed (56.410 and 80.937 seconds). The dark live-capture audit passed
+twice after removing fading rep digits and improving uncertain-angle badge text contrast
+(32.711 and 28.539 seconds). An intervening simulator cold launch was killed by Apple's loader
+watchdog before app startup; its report attributed 1% CPU to the app. The unchanged warm-launch
+language test passed. The record does not treat that infrastructure failure as an app-code pass.

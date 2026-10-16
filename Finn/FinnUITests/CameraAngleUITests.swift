@@ -20,7 +20,10 @@ final class CameraAngleUITests: XCTestCase {
             format: "label CONTAINS[c] %@", "counted your reps without posture advice")).firstMatch.exists)
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
-        ])
+        ]) { issue in
+            print("Camera-angle audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
+            return false
+        }
 
         app.buttons["Done"].tap()
         app.openFromHome("Options")
@@ -32,7 +35,10 @@ final class CameraAngleUITests: XCTestCase {
         XCTAssertEqual(toggle.value as? String, "0")
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
-        ])
+        ]) { issue in
+            print("Camera-angle audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
+            return false
+        }
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
         app.buttons["Start a set"].tap()

@@ -92,7 +92,7 @@ enum SkeletonPainter {
         if let angle = geometry.angle {
             let text = Text(angle.text)
                 .font(.callout.weight(.semibold).monospacedDigit())
-                .foregroundStyle(angle.reliable ? labelText : Color.white)
+                .foregroundStyle(angle.reliable ? labelText : Color.black)
             let resolved = context.resolve(text)
             let size = resolved.measure(in: CGSize(width: 200, height: 40))
             // right of the joint, or left of it near the right edge, and always inside the canvas

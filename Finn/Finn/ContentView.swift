@@ -1050,7 +1050,9 @@ struct ContentView: View {
                     }
                 }
             } header: {
-                Text("Personalize with Health")
+                WrappingText(text: String(localized: "Personalize with Health"),
+                             style: .footnote, weight: .semibold, colour: .secondaryLabel)
+                    .accessibilityAddTraits(.isHeader)
             } footer: {
                 Text("Tailors rest and recovery advice. Data stays on this iPhone.")
             }
@@ -1296,8 +1298,7 @@ struct ContentView: View {
                 .monospacedDigit()
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
-                .contentTransition(.numericText())
-                .animation(reduceMotion ? nil : .snappy, value: model.liveRepCount)
+                // Counts must stay legible while changing; a fading digit loses contrast.
             // the exercise being measured, such as "push-ups", so a wrong choice shows before the reps
             // are done (13 October: push-ups filmed while Squat was chosen counted nothing)
             Text(captureCopy.name.lowercased() + (model.liveRepCount == 1 ? "" : "s"))

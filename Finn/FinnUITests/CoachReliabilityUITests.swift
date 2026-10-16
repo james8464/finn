@@ -77,6 +77,9 @@ final class CoachReliabilityUITests: XCTestCase {
                 add(screenshot)
             }
             XCTAssertEqual(outcome, .completed, "\(language): \(app.debugDescription)")
+            // At accessibility sizes Send dismisses the keyboard to leave room for the reply.
+            // The composer must reopen it so the next question remains reachable.
+            field.tap()
             XCTAssertTrue(app.buttons["coach.dismissKeyboard"].isHittable, language)
             app.buttons["coach.dismissKeyboard"].tap()
             app.terminate()
