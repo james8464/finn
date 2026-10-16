@@ -29,7 +29,7 @@ final class CoachReliabilityUITests: XCTestCase {
         app.buttons["coach.send"].tap()
 
         let answer = app.staticTexts.matching(NSPredicate(
-            format: "label CONTAINS %@", "Finn has no saved set yet, so there is nothing to comment on."
+            format: "label CONTAINS %@", "Tap Plan a workout to choose one"
         ))
         XCTAssertTrue(answer.firstMatch.waitForExistence(timeout: 5), app.debugDescription)
         app.buttons["coach.dismissKeyboard"].tap()
