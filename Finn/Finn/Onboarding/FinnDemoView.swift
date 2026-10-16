@@ -5,7 +5,8 @@ import SwiftUI
 struct FinnDemoView: View {
     let startWorkout: () -> Void
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     @State private var showsAdvice = false
 
     var body: some View {

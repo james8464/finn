@@ -49,7 +49,8 @@ final class InterfaceAccessibilityUITests: XCTestCase {
                 for _ in 0..<12 where !app.buttons["Done"].isHittable { app.scrollViews.firstMatch.swipeUp() }
                 app.buttons["Done"].tap()
             }
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            if id == "home.posture" { app.selectTab("Home") }
+            else { app.navigationBars.buttons.element(boundBy: 0).tap() }
         }
         try check(app, "\(prefix)-04-home-bottom")
         // iOS 27 can report an offscreen scroll child as hittable. Start the
@@ -144,7 +145,8 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         app.scrollViews.firstMatch.swipeUp()
         try check(app, "\(prefix)-34-result-end")
         app.buttons["Done"].tap()
-        app.selectTab("Posture")
+        app.openWorkoutTab()
+        app.openFromHome("History")
         try check(app, "\(prefix)-35-history")
         let session = app.buttons["history.session"].firstMatch
         for _ in 0..<8 where !session.isHittable { app.swipeUp() }

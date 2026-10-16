@@ -116,8 +116,8 @@ struct MeasuredFigure<Content: View>: View {
     let sources: [WorkoutSessionSummary]
     @ViewBuilder var content: Content
     @State private var showsSources = false
-    @ScaledMetric(relativeTo: .largeTitle) private var valueSize = 44.0
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -126,10 +126,10 @@ struct MeasuredFigure<Content: View>: View {
             } label: {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(value)
-                        .font(.system(size: valueSize, weight: .bold))
+                        .font(.largeTitle.bold())
                         .tracking(-1.2)
                         .monospacedDigit()
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.primary)
                     Text(label)
                         .font(.subheadline)
                         .foregroundStyle(HomeStyle.supportingText)
@@ -160,19 +160,22 @@ struct RegularityCalendar: View {
 
     var body: some View {
         let most = max(1, days.map(\.reps).max() ?? 1)
-        let rows = Array(repeating: GridItem(.fixed(18), spacing: 3), count: 7)
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 12)
         let spoken = days.filter { $0.reps > 0 }
             .map { "\($0.day.formatted(date: .abbreviated, time: .omitted)): \($0.reps)" }.joined(separator: "; ")
         VStack(alignment: .leading, spacing: 6) {
-            LazyHGrid(rows: rows, spacing: 3) {
-                ForEach(days, id: \.day) { entry in
+            LazyVGrid(columns: columns, spacing: 4) {
+                ForEach(0..<84, id: \.self) { index in
+                    let source = (index % 12) * 7 + index / 12
+                    let entry = source < days.count ? days[source] : (day: Date.now, reps: 0)
                     RoundedRectangle(cornerRadius: 3, style: .continuous)
-                        .fill(entry.reps == 0 ? Color.white.opacity(0.08)
-                              : Color.white.opacity(0.3 + 0.7 * Double(entry.reps) / Double(most)))
-                        .frame(width: 18, height: 18)
+                        .fill(entry.reps == 0 ? Color.primary.opacity(0.08)
+                              : AppPageStyle.tint.opacity(0.4 + 0.6 * Double(entry.reps) / Double(most)))
+                        .frame(height: 12)
+                        .opacity(source < days.count ? 1 : 0)
                 }
             }
-            .frame(height: 144)
+            .frame(height: 108)
             Text("12 weeks")
                 .font(.footnote)
                 .foregroundStyle(HomeStyle.supportingText)
@@ -190,10 +193,10 @@ struct QualityChart: View {
     var body: some View {
         Chart(Array(points.enumerated()), id: \.offset) { _, point in
             LineMark(x: .value("Date", point.date), y: .value("Reps without observations", point.share * 100))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.primary)
                 .interpolationMethod(.monotone)
             PointMark(x: .value("Date", point.date), y: .value("Reps without observations", point.share * 100))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.primary)
         }
         .chartYScale(domain: 0...100)
         .chartYAxis { AxisMarks(position: .leading, values: [0, 50, 100]) }
@@ -214,8 +217,7 @@ struct ExerciseStatsCard: View {
     var body: some View {
         let definition = facts.kind.definition
         VStack(alignment: .leading, spacing: 10) {
-            Text(definition.copy.name)
-                .font(.title3.weight(.semibold))
+            WrappingText(text: definition.copy.name, style: .title3, weight: .semibold)
                 .accessibilityAddTraits(.isHeader)
             let layout = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
@@ -228,10 +230,10 @@ struct ExerciseStatsCard: View {
             if facts.repsPerSession.count >= 2 {
                 Chart(Array(facts.repsPerSession.enumerated()), id: \.offset) { _, point in
                     LineMark(x: .value("Date", point.date), y: .value("Reps", point.reps))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.primary)
                         .interpolationMethod(.monotone)
                     AreaMark(x: .value("Date", point.date), y: .value("Reps", point.reps))
-                        .foregroundStyle(.linearGradient(colors: [.white.opacity(0.25), .clear],
+                        .foregroundStyle(.linearGradient(colors: [Color.primary.opacity(0.25), .clear],
                                                          startPoint: .top, endPoint: .bottom))
                         .interpolationMethod(.monotone)
                 }
@@ -244,23 +246,18 @@ struct ExerciseStatsCard: View {
                     "\($0.date.formatted(date: .abbreviated, time: .omitted)): \($0.reps)"
                 }.joined(separator: "; "))
             }
-            Text("Tempo \(facts.tempo.formatted(.number.precision(.fractionLength(1)))) s per rep · median \(definition.copy.rangeNoun) \(definition.formattedRange(facts.medianRange))")
-                .font(.footnote)
-                .monospacedDigit()
-                .foregroundStyle(HomeStyle.supportingText)
+            WrappingText(text: String(localized: "Tempo \(facts.tempo.formatted(.number.precision(.fractionLength(1)))) s per rep · median \(definition.copy.rangeNoun) \(definition.formattedRange(facts.medianRange))"),
+                         style: .footnote, color: .label.withAlphaComponent(0.72))
         }
         .padding(.vertical, 4)
         .accessibilityIdentifier("stats.exercise.\(facts.kind.rawValue)")
     }
 
-    private func figure(_ value: String, _ label: LocalizedStringKey) -> some View {
+    private func figure(_ value: String, _ label: String.LocalizationValue) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(value)
-                .font(.title2.weight(.bold))
-                .monospacedDigit()
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(HomeStyle.supportingText)
+            WrappingText(text: value, style: .title2, weight: .bold)
+            WrappingText(text: String(localized: label), style: .caption1,
+                         color: .label.withAlphaComponent(0.72))
         }
         .accessibilityElement(children: .combine)
     }
@@ -273,7 +270,7 @@ struct Sparkline: View {
     var body: some View {
         Chart(Array(values.enumerated()), id: \.offset) { index, value in
             LineMark(x: .value("Session", index), y: .value("Reps", value))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.primary)
                 .interpolationMethod(.monotone)
         }
         .chartXAxis(.hidden)

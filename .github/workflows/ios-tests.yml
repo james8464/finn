@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   simulator:
     runs-on: xcode-27
@@ -62,16 +66,33 @@ jobs:
               print("::error title={}::{}".format(name, failure.get("failureText", "").replace("\n", " ")))
               print(json.dumps(failure, indent=2))
           PY
+      - name: Check Release startup and navigation
+        if: ${{ !cancelled() }}
+        run: |
+          xcodebuild test \
+            -project Finn/Finn.xcodeproj \
+            -scheme Finn-ReleaseSmoke \
+            -configuration Release \
+            -destination "platform=iOS Simulator,id=$DEVICE_ID" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            -resultBundlePath "$RUNNER_TEMP/Finn-Release.xcresult" \
+            -parallel-testing-enabled NO \
+            -jobs 2 \
+            -collect-test-diagnostics never \
+            -only-testing:FinnUITests/DashboardUITests/testProductionLaunchRendersAllTabsAndDestinations \
+            ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO
       - name: Replay generated workout videos through Vision
-        if: always()
+        if: ${{ !cancelled() }}
         run: tools/replay/test_generated_videos.sh
       - name: Test validation scorer
-        if: always()
+        if: ${{ !cancelled() }}
         run: python3 -m unittest discover -s docs/validation -p 'test_*.py'
       - name: Upload failed test report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: finn-test-report
-          path: ${{ runner.temp }}/Finn.xcresult
+          path: |
+            ${{ runner.temp }}/Finn.xcresult
+            ${{ runner.temp }}/Finn-Release.xcresult
           if-no-files-found: ignore

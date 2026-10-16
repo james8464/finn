@@ -46,7 +46,7 @@ else
 fi
 
 contents=$(strings -a "$binary")
-if matches=$(printf '%s\n' "$contents" | rg 'DemoPoseSource|DemoRecapGenerator|DemoExerciseClassifier|SyntheticExerciseMotion|DEMO INPUT|-finn-ui-demo|-finn-validation|validation\.stopToResult|VideoFilePoseSource|VIDEO FILE INPUT|-finn-video-file|-finn-video-poses|-finn-ui-hands-free'); then
+if matches=$(printf '%s\n' "$contents" | rg 'DemoPoseSource|DemoRecapGenerator|DemoExerciseClassifier|SyntheticExerciseMotion|DEMO INPUT|-finn-ui-demo|-finn-validation|validation\.stopToResult|VideoFilePoseSource|VIDEO FILE INPUT|-finn-video-file|-finn-video-poses|-finn-ui-hands-free|-finn-ui-reduce-motion|-finn-ui-light|-finn-ui-dark'); then
     echo "Release archive contains test-only demo or validation code:" >&2
     echo "$matches" >&2
     exit 1
