@@ -1,13 +1,22 @@
 import SwiftUI
 
-/// the welcome, two demos, six questions, the plan offer, then a few details about the person.
+/// how the person left the onboarding
+enum OnboardingExit {
+    /// through every screen, or Not now on a question
+    case completed
+    /// Skip on the plan offer: straight to Home, where the coach offers one free workout
+    case skippedPlan
+}
+
+/// the welcome, two demos, the first name, six questions (the last one picks the coach), the
+/// plan summary, the plan offer, then a few details about the person.
 /// Questions can be skipped; Continue waits for a first name, Access Finn for the training setup.
 /// The answers go to `FinnPreferences` when the person leaves, and the camera is asked for later,
 /// when a set starts
 struct OnboardingView: View {
     let preferences: FinnPreferences
     /// called once the answers are saved (or the whole thing was skipped)
-    let finished: (OnboardingProfile) -> Void
+    let finished: (OnboardingProfile, OnboardingExit) -> Void
 
     @State private var stage = Stage.welcome
     @State private var step = Step.liveDemo
@@ -15,16 +24,26 @@ struct OnboardingView: View {
     /// Finn's answer to the current choice; nil while Finn is quiet
     @State private var reaction: Reaction?
     @State private var reactionTask: Task<Void, Never>?
+    /// true once the summary's bar has filled, so Back from the plan offer skips the wait
+    @State private var planReady = false
     @FocusState private var nameFocused: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
     @Environment(\.dynamicTypeSize) private var typeSize
 
-    private enum Stage { case welcome, questions, plan, aboutYou }
+    private enum Stage { case welcome, questions, summary, plan, aboutYou }
 
-    /// the screens that carry the progress bar, in order
+    /// the paged screens, in order
     private enum Step: Int, CaseIterable {
-        case liveDemo, wearablesDemo, name, goal, level, pastProgram, intensity, days
+        case liveDemo, wearablesDemo, name, goal, level, pastProgram, intensity, days, coach
+
+        /// the questions carry the pink bar, from the goal to the coach
+        static let questions = Step.goal.rawValue...Step.coach.rawValue
+
+        /// this screen's place among the questions, from 1; nil before the first one
+        var questionNumber: Int? {
+            Self.questions.contains(rawValue) ? rawValue - Self.questions.lowerBound + 1 : nil
+        }
     }
 
     private struct Reaction: Equatable {
@@ -38,7 +57,7 @@ struct OnboardingView: View {
     /// how long the line stays before the next screen
     private static let lineHold = 1.5
 
-    init(preferences: FinnPreferences, finished: @escaping (OnboardingProfile) -> Void) {
+    init(preferences: FinnPreferences, finished: @escaping (OnboardingProfile, OnboardingExit) -> Void) {
         self.preferences = preferences
         self.finished = finished
         _profile = State(initialValue: preferences.onboardingProfile)
@@ -53,11 +72,16 @@ struct OnboardingView: View {
             case .questions:
                 questions
                     .transition(.opacity)
+            case .summary:
+                PlanSummaryView(profile: profile, isReady: $planReady,
+                                back: { show(.questions) }, next: { show(.plan) })
+                    .transition(.opacity)
             case .plan:
-                PaywallView(back: { show(.questions) }, next: { show(.aboutYou) })
+                PaywallView(back: { show(.summary) }, next: { show(.aboutYou) },
+                            skip: { finish(.skippedPlan) })
                     .transition(.opacity)
             case .aboutYou:
-                AboutYouView(profile: $profile, back: { show(.plan) }, finish: finish)
+                AboutYouView(profile: $profile, back: { show(.plan) }, finish: { finish() })
                     .transition(.opacity)
             }
         }
@@ -94,6 +118,7 @@ struct OnboardingView: View {
                 pastProgramPage.tag(Step.pastProgram)
                 intensityPage.tag(Step.intensity)
                 daysPage.tag(Step.days)
+                coachPage.tag(Step.coach)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(reduceMotion ? nil : HomeStyle.spring, value: step)
@@ -139,18 +164,22 @@ struct OnboardingView: View {
                 }
             }
             .accessibilityElement(children: .contain)
-            // the counter above already says how far along this is
-            ProgressView(value: Double(step.rawValue + 1), total: Double(Step.allCases.count))
+            // the counter above already says how far along this is. Before the first question
+            // both keep their place, unseen, so the screen doesn't move when they appear
+            ProgressView(value: Double(step.questionNumber ?? 0), total: Double(Step.questions.count))
                 .tint(DashboardStyle.accent)
+                .opacity(step.questionNumber == nil ? 0 : 1)
                 .accessibilityHidden(true)
                 .animation(reduceMotion ? nil : HomeStyle.spring, value: step)
         }
     }
 
     private var counter: some View {
-        Text("\(step.rawValue + 1) of \(Step.allCases.count)")
+        Text("\(step.questionNumber ?? 1) of \(Step.questions.count)")
             .monospacedDigit()
             .foregroundStyle(.secondary)
+            .opacity(step.questionNumber == nil ? 0 : 1)
+            .accessibilityHidden(step.questionNumber == nil)
     }
 
     private var backButton: some View {
@@ -163,7 +192,7 @@ struct OnboardingView: View {
     }
 
     private var skipAllButton: some View {
-        Button(action: finish) { Text("Not now").frame(minHeight: 44) }
+        Button { finish() } label: { Text("Not now").frame(minHeight: 44) }
             .accessibilityIdentifier("onboarding.finish")
     }
 
@@ -196,7 +225,7 @@ struct OnboardingView: View {
     /// what Finn says about the current answer; nil on the demos, the name, or with no answer
     private var finnLine: String? {
         switch step {
-        case .liveDemo, .wearablesDemo, .name: nil
+        case .liveDemo, .wearablesDemo, .name, .coach: nil
         case .goal: profile.goal?.finnLine
         case .level: profile.level?.finnLine
         case .pastProgram:
@@ -249,14 +278,16 @@ struct OnboardingView: View {
         if let next = Step(rawValue: step.rawValue + 1) {
             withAnimation(reduceMotion ? nil : HomeStyle.spring) { step = next }
         } else {
-            show(.plan)
+            // new answers, a new plan: the summary customises it again
+            planReady = false
+            show(.summary)
         }
     }
 
-    private func finish() {
+    private func finish(_ exit: OnboardingExit = .completed) {
         endReaction()
         preferences.apply(profile)
-        finished(profile)
+        finished(profile, exit)
     }
 
     // MARK: Pages
@@ -405,6 +436,12 @@ struct OnboardingView: View {
         }
     }
 
+    private var coachPage: some View {
+        page(String(localized: "Choose your coach")) {
+            CoachChoiceView(selection: $profile.coach)
+        }
+    }
+
     // MARK: Out of the flow
     // Exercises, Spoken feedback and Camera setup left the onboarding; they stay here, with the
     // answers they save, until favourite exercises move to Options
@@ -539,7 +576,7 @@ private struct ChoiceCard: View {
                 Spacer(minLength: 0)
                 Image(systemName: multiple ? (selected ? "checkmark.square.fill" : "square")
                                            : (selected ? "checkmark.circle.fill" : "circle"))
-                    .foregroundStyle(selected ? HomeStyle.accent : Color(uiColor: .secondaryLabel))
+                    .foregroundStyle(selected ? DashboardStyle.accent : Color(uiColor: .secondaryLabel))
                     .font(.system(size: 20))
                     .accessibilityHidden(true)
             }

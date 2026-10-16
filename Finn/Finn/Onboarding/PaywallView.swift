@@ -19,17 +19,21 @@ nonisolated enum CoachPlan: String, CaseIterable, Sendable {
 }
 
 /// the plan offer: Finn Coach+, weekly or annual, or annual after a two-week free trial.
-/// Continue opens the App Store sheet for the chosen plan; Skip keeps Finn Free
+/// Pay with Apple Pay stands for the purchase of the chosen plan; nothing is charged. Skip, at the
+/// top right, keeps Finn Free and goes straight to Home
 struct PaywallView: View {
     let back: () -> Void
-    /// called after a purchase, a restored subscription or Skip
+    /// called after a purchase or a restored subscription
     let next: () -> Void
+    /// called by Skip
+    let skip: () -> Void
 
     @State private var plan: CoachPlan?
     @State private var products: [String: Product] = [:]
     @State private var isBusy = false
     @State private var notice: Notice?
-    @Environment(\.purchase) private var purchase
+    /// counts the purchases, for the success haptic
+    @State private var purchases = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric(relativeTo: .subheadline) private var planLabelWidth = 80.0
@@ -60,9 +64,10 @@ struct PaywallView: View {
             HStack {
                 OnboardingBackButton(action: back)
                 Spacer()
+                skipButton
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
+            .padding(.horizontal, OnboardingMetrics.gutter)
+            .padding(.top, OnboardingMetrics.headerTop)
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     heading
@@ -84,6 +89,7 @@ struct PaywallView: View {
                 .padding(.bottom, 8)
         }
         .disabled(isBusy)
+        .sensoryFeedback(.success, trigger: purchases)
         .task { await loadProducts() }
         .alert(notice?.title ?? "", isPresented: Binding(get: { notice != nil },
                                                          set: { if !$0 { notice = nil } }),
@@ -267,26 +273,33 @@ struct PaywallView: View {
             .contentShape(Rectangle())
     }
 
-    /// Continue appears once a plan is chosen; Skip sits under it on the right
+    /// Pay with Apple Pay appears once a plan is chosen
     private var actions: some View {
-        VStack(spacing: 2) {
+        VStack {
             if plan != nil {
-                Button { Task { await buy() } } label: {
-                    PrimaryActionLabel(title: "Continue")
+                Button(action: buy) {
+                    PrimaryActionLabel(title: "Pay with Apple Pay")
                 }
                 .buttonStyle(PressableStyle())
                 .accessibilityIdentifier("plan.continue")
                 .transition(.opacity)
             }
-            HStack {
-                Spacer()
-                Button(action: next) { target("Skip") }
-                    .font(.footnote.weight(.light))
-                    .foregroundStyle(HomeStyle.supportingText)
-                    .accessibilityHint("Continue with Finn Free")
-                    .accessibilityIdentifier("plan.skip")
-            }
         }
+    }
+
+    /// in the top row like Not now on the questions: the full text size and colour, so it is easy to
+    /// find, with no fill, so Pay with Apple Pay stays the main action
+    private var skipButton: some View {
+        Button(action: skip) {
+            Text("Skip")
+                .font(.body.weight(.medium))
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .foregroundStyle(Color.primary)
+        .accessibilityLabel("Skip")
+        .accessibilityHint("Continue with Finn Free")
+        .accessibilityIdentifier("plan.skip")
     }
 
     // MARK: StoreKit
@@ -310,31 +323,11 @@ struct PaywallView: View {
         products = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
     }
 
-    /// the App Store sheet for the chosen plan. A verified purchase moves on
-    private func buy() async {
-        guard let plan else { return }
-        isBusy = true
-        defer { isBusy = false }
-        if products[plan.productID] == nil { await loadProducts() }
-        guard let product = products[plan.productID] else {
-            notice = .unavailable
-            return
-        }
-        do {
-            switch try await purchase(product) {
-            case .success(.verified(let transaction)):
-                await transaction.finish()
-                next()
-            case .success(.unverified):
-                notice = .unavailable
-            case .userCancelled, .pending:
-                break
-            @unknown default:
-                break
-            }
-        } catch {
-            notice = .unavailable
-        }
+    /// no real payment: the purchase of the chosen plan always succeeds, and the flow moves on
+    private func buy() {
+        guard plan != nil else { return }
+        purchases += 1
+        next()
     }
 
     /// asks the App Store for this account's purchases; an active Finn Coach+ plan moves on
@@ -377,11 +370,11 @@ private extension View {
 }
 
 #Preview("Dark") {
-    PaywallView(back: {}, next: {})
+    PaywallView(back: {}, next: {}, skip: {})
         .preferredColorScheme(.dark)
 }
 
 #Preview("Light") {
-    PaywallView(back: {}, next: {})
+    PaywallView(back: {}, next: {}, skip: {})
         .preferredColorScheme(.light)
 }

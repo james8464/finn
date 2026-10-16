@@ -55,6 +55,40 @@ struct OnboardingProfileTests {
         #expect(prefs.onboardingProfile == profile)
     }
 
+    @Test func theCoachIsFinnUntilAnotherIsPickedAndIsSavedWithTheAnswers() {
+        let prefs = preferences()
+        #expect(prefs.coach == .finn)
+        #expect(prefs.onboardingProfile.coach == .finn)
+        let ava = Coach.all.first { $0.id == "ava" }!
+        prefs.apply(OnboardingProfile(coach: ava))
+        #expect(prefs.coach == ava)
+        #expect(prefs.onboardingProfile.coach == ava)
+        // a coach removed in a later build falls back to Finn
+        prefs.defaults.set("gone", forKey: FinnPreferences.coachKey)
+        #expect(prefs.coach == .finn)
+        prefs.resetLocalChoices()
+        #expect(prefs.defaults.object(forKey: FinnPreferences.coachKey) == nil)
+    }
+
+    @Test func theCoachSummarySaysTheGoalTheLevelAndADateThreeMonthsOn() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "UTC"))
+        let today = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 16)))
+        let english = Locale(identifier: "en_US")
+        var profile = OnboardingProfile(goal: .muscle, level: .regular)
+        #expect(profile.coachSummary(from: today, calendar: calendar, locale: english)
+                == "You want to build muscle. Right now, you're training regularly. Let's get you there by January 16, 2027.")
+        profile.level = nil
+        #expect(profile.coachSummary(from: today, calendar: calendar, locale: english)
+                == "You want to build muscle. Let's get you there by January 16, 2027.")
+        profile.goal = nil
+        #expect(profile.coachSummary(from: today, calendar: calendar, locale: english)
+                == "Let's see how far you can go by January 16, 2027.")
+        // the date follows the locale
+        #expect(profile.coachSummary(from: today, calendar: calendar, locale: Locale(identifier: "fr_FR"))
+                .contains("16 janvier 2027"))
+    }
+
     @Test func favoritesComeFirstThenTheOthersInTheirUsualOrder() {
         let prefs = preferences()
         prefs.apply(OnboardingProfile(goal: nil, level: nil, favoriteExercises: [.muscleUp, .staticLunge], speaksLive: true))

@@ -99,7 +99,7 @@ final class InterfaceAccessibilityUITests: XCTestCase {
         try check(app, "\(prefix)-19-welcome")
         welcome.tap()
         XCTAssertTrue(app.buttons["onboarding.continue"].waitForExistence(timeout: 8))
-        for step in 1...8 {
+        for step in 1...9 {
             try check(app, "\(prefix)-20-welcome-\(step)")
             let last: XCUIElement
             switch step {
@@ -109,6 +109,7 @@ final class InterfaceAccessibilityUITests: XCTestCase {
             case 6: last = app.buttons["onboarding.program.no"]
             case 7: last = app.buttons["onboarding.intensity.finnDecides"]
             case 8: last = app.buttons["onboarding.days.fivePlus"]
+            case 9: last = app.pickerWheels.firstMatch
             default: last = app.buttons["onboarding.continue"]
             }
             for _ in 0..<16 where !last.isHittable { app.scrollViews.firstMatch.swipeUp() }
@@ -121,9 +122,14 @@ final class InterfaceAccessibilityUITests: XCTestCase {
             }
             app.buttons["onboarding.continue"].tap()
         }
+        XCTAssertTrue(app.buttons["summary.continue"].waitForExistence(timeout: 8))
+        try check(app, "\(prefix)-23-summary")
+        app.buttons["summary.continue"].tap()
         XCTAssertTrue(app.buttons["plan.skip"].waitForExistence(timeout: 8))
         try check(app, "\(prefix)-24-plan")
-        app.buttons["plan.skip"].tap()
+        // Skip goes straight to Home; a plan, paid, goes on to About You
+        app.buttons["plan.weekly"].tap()
+        app.buttons["plan.continue"].tap()
         let access = app.buttons["aboutYou.access"]
         XCTAssertTrue(access.waitForExistence(timeout: 8))
         try check(app, "\(prefix)-25-about-you")

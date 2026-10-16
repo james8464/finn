@@ -50,11 +50,13 @@ struct DashboardView: View {
     @Binding var hasTriedFinn: Bool
     /// the next workout and Finn's line, shared with the Workout tab
     @Binding var coachMessage: FinnCoachMessage
+    /// TEMPORARY with `FinnFirstTryTrigger.swift`: the first-try flow, also opened by the free
+    /// workout offered after Skip on the plan offer
+    @Binding var showsFirstTry: Bool
     /// opens the Workout tab on the next workout, from the coach card
     let openNextWorkout: () -> Void
     let watchDemo: () -> Void
     let open: (HomeRoute) -> Void
-    @State private var showsFirstTry = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric(relativeTo: .largeTitle) private var titleSize = 40.0
@@ -400,13 +402,15 @@ struct DashboardView: View {
 #Preview("Try Finn") {
     @Previewable @State var hasTriedFinn = false
     DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
-                  coachMessage: .constant(FinnCoachMessage()), openNextWorkout: {}, watchDemo: {}, open: { _ in })
+                  coachMessage: .constant(FinnCoachMessage()), showsFirstTry: .constant(false),
+                  openNextWorkout: {}, watchDemo: {}, open: { _ in })
         .preferredColorScheme(.dark)
 }
 
 #Preview("Coach") {
     @Previewable @State var hasTriedFinn = true
     DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
-                  coachMessage: .constant(FinnCoachMessage()), openNextWorkout: {}, watchDemo: {}, open: { _ in })
+                  coachMessage: .constant(FinnCoachMessage()), showsFirstTry: .constant(false),
+                  openNextWorkout: {}, watchDemo: {}, open: { _ in })
         .preferredColorScheme(.dark)
 }

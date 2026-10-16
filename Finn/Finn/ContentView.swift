@@ -47,6 +47,13 @@ struct ContentView: View {
     @State private var showsFinnDemo = false
     /// TEMPORARY with `FinnFirstTryTrigger.swift`: whether Home shows the coach card.
     @AppStorage(FinnFirstTry.key, store: FinnFirstTry.defaults) private var hasTriedFinn = false
+    /// TEMPORARY with `FinnFirstTryTrigger.swift`: the first-try flow, opened by Try Finn on Home or
+    /// by the free workout offered after Skip on the plan offer
+    @State private var showsFirstTry = false
+    /// Skip on the plan offer: once the onboarding is gone, Home offers one free workout
+    @State private var skippedPlan = false
+    @State private var offersFreeWorkout = false
+    @State private var acceptedFreeWorkout = false
     /// the next workout and Finn's line, the one source for the Home and Workout cards
     @State private var coachMessage = FinnCoachMessage()
     /// Home's coach card opened the Workout tab: its previous workouts stay blurred until tapped
@@ -219,13 +226,36 @@ struct ContentView: View {
             }
             .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         }
-        .fullScreenCover(isPresented: $showsOnboarding) {
-            OnboardingView(preferences: preferences) { profile in
+        .fullScreenCover(isPresented: $showsOnboarding, onDismiss: {
+            guard skippedPlan else { return }
+            skippedPlan = false
+            offersFreeWorkout = true
+        }) {
+            OnboardingView(preferences: preferences) { profile, exit in
                 // the answers take effect now, not at the next launch
                 model.speaksLive = profile.speaksLive
                 if let first = profile.favoriteExercises.first { model.selectedExercise = first }
+                if exit == .skippedPlan {
+                    selectedTab = .home
+                    skippedPlan = true
+                }
                 showsOnboarding = false
             }
+        }
+        // a sheet over Home: a tap outside or a swipe down closes it and leaves Try Finn on Home
+        .sheet(isPresented: $offersFreeWorkout, onDismiss: {
+            guard acceptedFreeWorkout else { return }
+            acceptedFreeWorkout = false
+            showsFirstTry = true
+        }) {
+            FreeWorkoutOfferView(coach: preferences.coach) {
+                acceptedFreeWorkout = true
+                offersFreeWorkout = false
+            }
+            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium])
+            .presentationDragIndicator(.visible)
+            // opaque like the other sheets with the primary action, which glass would wash out
+            .presentationBackground(HomeStyle.background)
         }
         .fullScreenCover(isPresented: $showsFinnDemo) {
             FinnDemoView {
@@ -422,6 +452,7 @@ struct ContentView: View {
         case .home:
             DashboardView(history: model.history, exercise: model.selectedExercise,
                           badges: badges.earned, hasTriedFinn: $hasTriedFinn, coachMessage: $coachMessage,
+                          showsFirstTry: $showsFirstTry,
                           openNextWorkout: openNextWorkout,
                           watchDemo: { showsFinnDemo = true }) { destination in
                 if destination == .posture { openPostureProgress() }

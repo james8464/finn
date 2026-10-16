@@ -41,6 +41,19 @@ nonisolated enum TrainingGoal: String, Codable, CaseIterable, Sendable {
     }
 }
 
+extension TrainingGoal {
+    /// the goal in the coach's summary: "You want …"
+    var summaryPhrase: String {
+        switch self {
+        case .technique: String(localized: "clearer technique")
+        case .consistency: String(localized: "to train more regularly")
+        case .muscle: String(localized: "to build muscle")
+        case .comeback: String(localized: "to get back into training")
+        case .fatLoss: String(localized: "to lose fat")
+        }
+    }
+}
+
 /// how used to training the person is. Helps the coach select relevant saved sets;
 /// it never changes what Finn measures
 nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
@@ -64,6 +77,18 @@ nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
         case .returning: String(localized: "Good to have you back. We'll find your rhythm again.")
         case .regular: String(localized: "Then let's sharpen your form and push further.")
         case .experienced: String(localized: "Then I'll focus on the details that make a difference.")
+        }
+    }
+}
+
+extension TrainingLevel {
+    /// the level in the coach's summary: "Right now, you're …"
+    var summaryPhrase: String {
+        switch self {
+        case .new: String(localized: "just starting out")
+        case .returning: String(localized: "coming back after a break")
+        case .regular: String(localized: "training regularly")
+        case .experienced: String(localized: "already advanced")
         }
     }
 }
@@ -185,6 +210,8 @@ nonisolated struct OnboardingProfile: Equatable, Sendable {
     var stopReasons: [ProgramStopReason] = []
     var intensity: TrainingIntensity?
     var days: TrainingDays?
+    /// the last question; Finn until another coach is picked
+    var coach: Coach = .finn
     var sex: BodySex?
     var heightCentimeters: Int?
     var weightKilograms: Double?
@@ -208,6 +235,24 @@ nonisolated struct OnboardingProfile: Equatable, Sendable {
     /// the exercises in the order the first screen shows them: favourites first, then the rest
     var exerciseOrder: [ExerciseKind] {
         favoriteExercises + ExerciseKind.allCases.filter { !favoriteExercises.contains($0) }
+    }
+
+    /// what the coach says once the plan is customised: the goal, the level, and a date three
+    /// months from `today` in the person's locale. A skipped question leaves its part out
+    func coachSummary(from today: Date = .now, calendar: Calendar = .autoupdatingCurrent,
+                      locale: Locale = .autoupdatingCurrent) -> String {
+        let target = calendar.date(byAdding: .month, value: 3, to: today) ?? today
+        let date = target.formatted(Date.FormatStyle(date: .long, time: .omitted, locale: locale, calendar: calendar))
+        return switch (goal, level) {
+        case let (goal?, level?):
+            String(localized: "You want \(goal.summaryPhrase). Right now, you're \(level.summaryPhrase). Let's get you there by \(date).")
+        case let (goal?, nil):
+            String(localized: "You want \(goal.summaryPhrase). Let's get you there by \(date).")
+        case let (nil, level?):
+            String(localized: "Right now, you're \(level.summaryPhrase). Let's see how far you can go by \(date).")
+        case (nil, nil):
+            String(localized: "Let's see how far you can go by \(date).")
+        }
     }
 
     /// selection hints added to the coach prompt. The model still returns set labels only.
@@ -242,6 +287,7 @@ extension FinnPreferences {
     static let programStopReasonsKey = "finn.programStopReasons"
     static let trainingIntensityKey = "finn.trainingIntensity"
     static let trainingDaysKey = "finn.trainingDays"
+    static let coachKey = "finn.coach"
     static let bodySexKey = "finn.bodySex"
     static let heightCentimetersKey = "finn.heightCentimeters"
     static let weightKilogramsKey = "finn.weightKilograms"
@@ -298,6 +344,12 @@ extension FinnPreferences {
         nonmutating set { defaults.set(newValue?.rawValue, forKey: Self.trainingDaysKey) }
     }
 
+    /// Finn when nothing is saved, or when the saved coach left a later build
+    var coach: Coach {
+        get { Coach.stored(defaults.string(forKey: Self.coachKey)) }
+        nonmutating set { defaults.set(newValue.id, forKey: Self.coachKey) }
+    }
+
     var bodySex: BodySex? {
         get { defaults.string(forKey: Self.bodySexKey).flatMap(BodySex.init(rawValue:)) }
         nonmutating set { defaults.set(newValue?.rawValue, forKey: Self.bodySexKey) }
@@ -339,7 +391,7 @@ extension FinnPreferences {
                           favoriteExercises: favoriteExercises, speaksLive: speaksLive,
                           firstName: firstName, followedProgram: followedProgram,
                           stopReasons: programStopReasons, intensity: trainingIntensity, days: trainingDays,
-                          sex: bodySex, heightCentimeters: heightCentimeters, weightKilograms: weightKilograms,
+                          coach: coach, sex: bodySex, heightCentimeters: heightCentimeters, weightKilograms: weightKilograms,
                           location: trainingLocation, equipment: trainingEquipment,
                           injuries: pastInjuries, noPastInjuries: noPastInjuries)
     }
@@ -355,6 +407,7 @@ extension FinnPreferences {
         programStopReasons = profile.followedProgram == true ? profile.stopReasons : []
         trainingIntensity = profile.intensity
         trainingDays = profile.days
+        coach = profile.coach
         bodySex = profile.sex
         heightCentimeters = profile.heightCentimeters
         weightKilograms = profile.weightKilograms
@@ -374,7 +427,7 @@ extension FinnPreferences {
     func resetLocalChoices() {
         for key in [Self.onboardingCompletedKey, Self.trainingGoalKey, Self.trainingLevelKey,
                     Self.favoriteExercisesKey, Self.firstNameKey, Self.followedProgramKey,
-                    Self.programStopReasonsKey, Self.trainingIntensityKey, Self.trainingDaysKey,
+                    Self.programStopReasonsKey, Self.trainingIntensityKey, Self.trainingDaysKey, Self.coachKey,
                     Self.bodySexKey, Self.heightCentimetersKey, Self.weightKilogramsKey,
                     Self.trainingLocationKey, Self.trainingEquipmentKey, Self.pastInjuriesKey,
                     Self.noPastInjuriesKey,

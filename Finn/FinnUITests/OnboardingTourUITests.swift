@@ -61,7 +61,16 @@ final class OnboardingTourUITests: XCTestCase {
         app.buttons["onboarding.intensity.challenge"].tap()
         answer(next, then: "onboarding-7-intensite", waitFor: "onboarding.days.threeToFour")
         app.buttons["onboarding.days.threeToFour"].tap()
-        answer(next, then: "onboarding-8-jours", waitFor: "plan.skip")
+        answer(next, then: "onboarding-8-jours", waitFor: "onboarding.coach")
+        save("onboarding-9-coach")
+        next.tap()
+        Thread.sleep(forTimeInterval: 0.8)
+        save("onboarding-9-resume-chargement")
+        XCTAssertTrue(app.buttons["summary.continue"].waitForExistence(timeout: 8))
+        Thread.sleep(forTimeInterval: 0.8)
+        save("onboarding-9-resume")
+        app.buttons["summary.continue"].tap()
+        XCTAssertTrue(app.buttons["plan.skip"].waitForExistence(timeout: 5))
         Thread.sleep(forTimeInterval: 0.8)
         save("onboarding-9-offre")
         app.buttons["plan.annual"].tap()
@@ -70,7 +79,8 @@ final class OnboardingTourUITests: XCTestCase {
         app.buttons["plan.trial"].tap()
         Thread.sleep(forTimeInterval: 0.6)
         save("onboarding-9-offre-essai")
-        app.buttons["plan.skip"].tap()
+        // no real payment: the purchase succeeds at once
+        app.buttons["plan.continue"].tap()
         let access = app.buttons["aboutYou.access"]
         XCTAssertTrue(access.waitForExistence(timeout: 5))
         Thread.sleep(forTimeInterval: 0.8)
@@ -106,7 +116,7 @@ final class OnboardingTourUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 0.9)
         save("\(name)-finn")
         // the next page is laid out beside this one, so wait until it is the one on screen
-        let target = XCUIApplication().buttons[identifier]
+        let target = XCUIApplication().descendants(matching: .any)[identifier]
         let onScreen = expectation(for: NSPredicate(format: "isHittable == true"), evaluatedWith: target)
         wait(for: [onScreen], timeout: 6)
         Thread.sleep(forTimeInterval: 0.8)

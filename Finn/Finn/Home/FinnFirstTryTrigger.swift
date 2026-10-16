@@ -1,7 +1,9 @@
 // TEMPORARY: stands in for the real first-try flow, which replaces this whole file.
 // Tapping Try Finn shows a placeholder that closes itself, then marks Finn as tried so Home shows
 // the coach card. To remove: delete this file, `.finnFirstTryTrigger` in `DashboardView` and the
-// `hasTriedFinn` lines in `ContentView`. Replay onboarding (profile) resets it.
+// `hasTriedFinn` and `showsFirstTry` lines in `ContentView` and `DashboardView`; the free workout
+// offered after Skip on the plan offer (`FreeWorkoutOfferView`) then opens the real flow.
+// Replay onboarding (profile) resets it.
 import SwiftUI
 
 /// Whether this person has tried Finn. Kept across launches; Replay onboarding resets it.

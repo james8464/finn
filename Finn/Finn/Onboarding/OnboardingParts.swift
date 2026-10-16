@@ -53,18 +53,32 @@ struct FinnReaction: View {
     }
 }
 
+/// the onboarding's shared spacing and sizes, the values its screens already use
+enum OnboardingMetrics {
+    /// the side margins of every screen
+    static let gutter: CGFloat = 20
+    /// above the top row (Back, Skip)
+    static let headerTop: CGFloat = 18
+    /// above a page's title
+    static let pageTop: CGFloat = 28
+    /// between the blocks of a page: the title, the answers, a section
+    static let sectionSpacing: CGFloat = 20
+    /// between answer rows
+    static let rowSpacing: CGFloat = 10
+    /// between a title and its subtitle
+    static let titleSpacing: CGFloat = 6
+    /// below the bottom action
+    static let bottomInset: CGFloat = 8
+    /// the large coach circle of the coach question and the summary
+    static let coachPortrait: CGFloat = 140
+}
+
 /// Finn's monogram on a small round card
 struct FinnAvatar: View {
     @ScaledMetric(relativeTo: .body) private var size = 36.0
 
     var body: some View {
-        Image("FinnMark")
-            .resizable()
-            .scaledToFit()
-            .padding(size * 0.22)
-            .frame(width: size, height: size)
-            .background(HomeStyle.card, in: Circle())
-            .accessibilityHidden(true)
+        CoachAvatar(coach: .finn, size: size)
     }
 }
 
