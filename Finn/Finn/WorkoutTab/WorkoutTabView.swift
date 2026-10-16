@@ -13,7 +13,8 @@ struct WorkoutTabView: View {
     let openSession: (WorkoutSessionSummary) -> Void
     let launch: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     var body: some View {
         ScrollView {
@@ -34,6 +35,7 @@ struct WorkoutTabView: View {
                                 withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
                                     blursPreviousWorkouts = false
                                 }
+                                FinnHaptics.play(.selection)
                             } label: {
                                 Color.clear.contentShape(Rectangle())
                             }
