@@ -16766,6 +16766,7 @@
       }
     },
     "Opens workout setup." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en-GB" : {
           "stringUnit" : {
