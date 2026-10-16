@@ -14,9 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  simulator:
+  checks:
+    name: ${{ matrix.suite }}
     runs-on: xcode-27
-    # The full simulator suite plus Release compilation can exceed one hour.
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [analysis, interface-1, interface-2, interface-3]
+    # Separate machines isolate UI state; tests stay sequential within each simulator.
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
@@ -44,9 +49,15 @@ jobs:
           TEST_RUNNER_FINN_VIDEO_OCCLUDED_FILE: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden.mp4
           TEST_RUNNER_FINN_VIDEO_OCCLUDED_POSES: ${{ github.workspace }}/tools/replay/fixtures/squat-feet-hidden-poses.json
         run: |
+          TEST_TARGETS=$(python3 tools/ci_test_groups.py "${{ matrix.suite }}")
+          test_arguments=()
+          while IFS= read -r target; do
+            test_arguments+=("-only-testing:$target")
+          done <<< "$TEST_TARGETS"
           xcodebuild test \
             -project Finn/Finn.xcodeproj \
             -scheme Finn \
+            "${test_arguments[@]}" \
             -destination "platform=iOS Simulator,id=$DEVICE_ID" \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             -resultBundlePath "$RUNNER_TEMP/Finn.xcresult" \
@@ -68,7 +79,7 @@ jobs:
               print(json.dumps(failure, indent=2))
           PY
       - name: Check Release startup and navigation
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.suite == 'analysis' }}
         run: |
           xcodebuild test \
             -project Finn/Finn.xcodeproj \
@@ -83,17 +94,29 @@ jobs:
             -only-testing:FinnUITests/DashboardUITests/testProductionLaunchRendersAllTabsAndDestinations \
             ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO
       - name: Replay generated workout videos through Vision
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.suite == 'analysis' }}
         run: tools/replay/test_generated_videos.sh
       - name: Test validation scorer
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.suite == 'analysis' }}
         run: python3 -m unittest discover -s docs/validation -p 'test_*.py'
       - name: Upload failed test report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: finn-test-report
+          name: finn-test-report-${{ matrix.suite }}
           path: |
             ${{ runner.temp }}/Finn.xcresult
             ${{ runner.temp }}/Finn-Release.xcresult
+            ${{ runner.temp }}/summary.json
           if-no-files-found: ignore
+
+  # Preserve the original required check name while reporting all independent suites.
+  simulator:
+    needs: checks
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every simulator suite to pass
+        env:
+          SUITES_RESULT: ${{ needs.checks.result }}
+        run: test "$SUITES_RESULT" = success
