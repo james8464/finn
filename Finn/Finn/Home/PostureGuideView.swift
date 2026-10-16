@@ -19,9 +19,6 @@ struct PostureGuideView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Choose an exercise")
-                    .font(.headline)
-                    .accessibilityAddTraits(.isHeader)
                 ScrollView(.horizontal) {
                     HStack(spacing: 8) {
                         ForEach(ExerciseKind.allCases, id: \.rawValue) { kind in
@@ -47,7 +44,7 @@ struct PostureGuideView: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("Illustrated movement")
+                        Text(exercise.definition.copy.name)
                             .font(.headline)
                             .accessibilityAddTraits(.isHeader)
                         Spacer()
@@ -65,7 +62,7 @@ struct PostureGuideView: View {
                         .frame(height: 230)
                         .frame(maxWidth: .infinity)
                         .accessibilityIdentifier("posture.illustration")
-                    Text(reduceMotion ? "Motion paused for Reduce Motion" : "Illustration for guidance; bodies and ranges vary")
+                    Text(reduceMotion ? "Motion paused for Reduce Motion" : "Illustrated guide · ranges vary")
                         .font(.caption)
                         .foregroundStyle(AppPageStyle.secondaryText)
                 }

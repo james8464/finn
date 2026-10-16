@@ -126,6 +126,7 @@ final class ExerciseOptionsUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
         XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Recognized as Squat on this iPhone."].exists)
+        XCTAssertFalse(app.staticTexts["result.recognition"].exists, "Matching the selected exercise needs no repeated confirmation")
+        XCTAssertTrue(app.staticTexts["Squat"].exists)
     }
 }

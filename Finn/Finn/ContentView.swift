@@ -56,6 +56,11 @@ struct ContentView: View {
     #if DEBUG
     @ScaledMetric(relativeTo: .body) private var demoLabelSize = 12.0
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") }
+    // presentation exports hide debug chrome; input and storage remain synthetic and isolated
+    private var isPresentationCapture: Bool {
+        isDemo && ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture")
+    }
+    private var showsDemoIndicator: Bool { isDemo && !isPresentationCapture }
     private var isVideoFileInput: Bool { ProcessInfo.processInfo.arguments.contains("-finn-video-file") }
     private var isValidationMode: Bool { ProcessInfo.processInfo.arguments.contains("-finn-validation") }
     private var isCaptureStage: Bool {
@@ -249,7 +254,7 @@ struct ContentView: View {
                 NavigationStack {
                     VStack(spacing: 0) {
                         #if DEBUG
-                        if isDemo && !isCaptureStage && !isErrorStage { demoIndicator }
+                        if showsDemoIndicator && !isCaptureStage && !isErrorStage { demoIndicator }
                         #endif
                         sessionContent
                     }
@@ -350,7 +355,7 @@ struct ContentView: View {
                             .accessibilityHidden(model.stage != .ready)
                             #if DEBUG
                             .safeAreaInset(edge: .top, spacing: 0) {
-                                if isDemo { demoIndicator }
+                                if showsDemoIndicator { demoIndicator }
                             }
                             #endif
                             .navigationDestination(item: Binding(
@@ -405,7 +410,7 @@ struct ContentView: View {
         destinationContent(destination)
             #if DEBUG
             .safeAreaInset(edge: .top, spacing: 0) {
-                if isDemo { demoIndicator }
+                if showsDemoIndicator { demoIndicator }
             }
             #endif
     }
@@ -1094,11 +1099,11 @@ struct ContentView: View {
             EmptyView()
         case .recognized(let kind, _):
             let name = kind.definition.copy.name
-            Text(kind == model.captureExercise
-                 ? "Recognized as \(name) on this iPhone."
-                 : "Recognized as \(name) on this iPhone, so Finn used it instead of \(chosen). Your next sets use \(name).")
-                .font(.subheadline)
-                .accessibilityIdentifier("result.recognition")
+            if kind != model.captureExercise {
+                Text("Using \(name) instead of \(chosen). Your next sets use \(name).")
+                    .font(.subheadline)
+                    .accessibilityIdentifier("result.recognition")
+            }
         case .uncertain:
             // not sure: the person's own choice was used, as they expect. Nothing to add.
             EmptyView()
@@ -1117,7 +1122,7 @@ struct ContentView: View {
                 .accessibilityHidden(true)
             VStack(spacing: 16) {
                 #if DEBUG
-                if isDemo || isVideoFileInput {
+                if showsDemoIndicator || isVideoFileInput {
                     Text(isDemo ? "DEMO INPUT" : "VIDEO FILE INPUT")
                         .font(.caption.bold())
                         .foregroundStyle(.black)
@@ -1358,9 +1363,13 @@ struct ContentView: View {
         VStack(spacing: 0) {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text(resultTitle)
-                    .font(.title2.weight(.bold))
-                    .accessibilityAddTraits(.isHeader)
+                if case .measured = model.result {
+                    // the navigation title already confirms the completed review
+                } else {
+                    Text(resultTitle)
+                        .font(.title2.weight(.bold))
+                        .accessibilityAddTraits(.isHeader)
+                }
                 if model.endedEarly {
                     Text("The camera stopped during the set. Finn reviewed the part it captured.")
                         .font(.footnote)
@@ -1389,7 +1398,7 @@ struct ContentView: View {
                             HStack(alignment: .firstTextBaseline, spacing: 10) {
                                 Text("\(analysis.reps.count)")
                                     .font(.largeTitle.bold()).monospacedDigit()
-                                Text("measured reps").font(.headline).foregroundStyle(.primary)
+                                Text("reps").font(.headline).foregroundStyle(FinnStyle.supportingText)
                             }
                             .accessibilityElement(children: .ignore)
                             .accessibilityAddTraits(.isStaticText)
@@ -1399,26 +1408,6 @@ struct ContentView: View {
                         .modifier(AppSurface())
                         if analysis.reps.count >= 2 {
                             depthChart(analysis.reps, exercise: model.resultExercise, highlighted: cue?.repNumbers ?? [])
-                        }
-                        NavigationLink { CoachView(history: model.history) } label: {
-                            Label("Ask the coach", systemImage: "bubble.left.and.text.bubble.right")
-                                .frame(minHeight: 44, alignment: .leading)
-                        }
-                        .accessibilityIdentifier("result.askCoach")
-                        recognitionNote
-                        if let note = model.movementNote {
-                            Text(note)
-                                .font(.subheadline)
-                                .accessibilityIdentifier("result.movementNote")
-                        }
-                        ForEach(model.formNotes, id: \.self) { note in
-                            Text(note)
-                                .font(.subheadline)
-                                .accessibilityIdentifier("result.formNote")
-                        }
-                        ForEach(model.resultHealthNotes, id: \.text) { note in
-                            healthNote(note)
-                                .accessibilityIdentifier("result.healthNote")
                         }
                         if let pattern = model.repeatedPattern {
                             VStack(alignment: .leading, spacing: 4) {
@@ -1452,7 +1441,7 @@ struct ContentView: View {
                                     .foregroundStyle(FinnStyle.supportingText)
                             } else {
                                 WrappingText(text: cue.observation, style: .title3, weight: .semibold)
-                                WrappingText(text: String(localized: "Observed in \(FormChecks.list(cue.repNumbers))."),
+                                WrappingText(text: String(localized: "Reps \(cue.repNumbers.map { String($0) }.joined(separator: ", "))"),
                                              style: .subheadline, color: .label.withAlphaComponent(0.72))
                                 nextAction(cue.nextAction)
                                     .padding(.top, 4)
@@ -1470,15 +1459,6 @@ struct ContentView: View {
                                     }
                                     .buttonStyle(.plain)
                                 }
-                                Button("Not relevant") {
-                                    observationSpeaker.stop()
-                                    model.dismissCue()
-                                }
-                                    .buttonStyle(.plain)
-                                    .font(.subheadline)
-                                    .foregroundStyle(FinnStyle.supportingText)
-                                    .frame(minHeight: 44)
-                                    .contentShape(Rectangle())
                             }
                         } else {
                             if analysis.reps.count < 4 {
@@ -1493,6 +1473,31 @@ struct ContentView: View {
                         }
                         }
                         .modifier(AppSurface())
+                        NavigationLink { CoachView(history: model.history) } label: {
+                            Label("Ask the coach", systemImage: "bubble.left.and.text.bubble.right")
+                                .frame(minHeight: 44, alignment: .leading)
+                        }
+                        .accessibilityIdentifier("result.askCoach")
+                        recognitionNote
+                        if model.movementNote != nil || !model.formNotes.isEmpty {
+                            DisclosureGroup {
+                                if let note = model.movementNote {
+                                    Text(note).accessibilityIdentifier("result.movementNote")
+                                }
+                                ForEach(model.formNotes, id: \.self) { note in
+                                    Text(note).accessibilityIdentifier("result.formNote")
+                                }
+                            } label: {
+                                Label("Measurement limits", systemImage: "info.circle")
+                            }
+                            .font(.subheadline)
+                            .tint(AppPageStyle.secondaryText)
+                            .accessibilityIdentifier("result.measurementLimits")
+                            .modifier(AppSurface())
+                        }
+                        ForEach(model.resultHealthNotes, id: \.text) { note in
+                            healthNote(note).accessibilityIdentifier("result.healthNote")
+                        }
                         if let comparison = model.comparison {
                             comparisonView(comparison)
                                 .modifier(AppSurface())
@@ -1517,6 +1522,23 @@ struct ContentView: View {
                         // button on a short result and the contrast audit measured them through it
                         if let extremes = model.repExtremes {
                             Divider().padding(.vertical, 12)
+                            NavigationLink {
+                                ScrollView {
+                                    VStack(alignment: .leading, spacing: 24) {
+                                        depthChart(analysis.reps, exercise: model.resultExercise,
+                                                   highlighted: cue?.repNumbers ?? [])
+                                        repExtremesView(extremes)
+                                    }
+                                    .padding(20)
+                                }
+                                .background(AppPageStyle.background)
+                                .navigationTitle("Movement")
+                                .navigationBarTitleDisplayMode(.inline)
+                            } label: {
+                                Label("Compare reps", systemImage: "figure.strengthtraining.traditional")
+                                    .frame(minHeight: 44)
+                            }
+                            .accessibilityIdentifier("result.compareReps")
                             repExtremesView(extremes)
                         }
                     case .insufficientView(let reason):
@@ -1591,7 +1613,7 @@ struct ContentView: View {
 
         }
         .background(AppPageStyle.background)
-        .navigationTitle("Set summary")
+        .navigationTitle(resultNavigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -1601,6 +1623,21 @@ struct ContentView: View {
                 }
                 .accessibilityHint("Change exercise or options while keeping this session open.")
                 .accessibilityIdentifier("result.back")
+            }
+            if case .measured(_, let cue) = model.result, cue != nil, !model.cueDismissed {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button("Not relevant") {
+                            observationSpeaker.stop()
+                            model.dismissCue()
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .frame(minWidth: 44, minHeight: 44)
+                    }
+                    .accessibilityLabel("Observation options")
+                    .accessibilityIdentifier("result.observationOptions")
+                }
             }
             if !dynamicTypeSize.isAccessibilitySize {
                 ToolbarItem(placement: .confirmationAction) {
@@ -1650,7 +1687,7 @@ struct ContentView: View {
                 repSnapshotView(extremes.deepest, title: String(localized: "Deepest"))
                 repSnapshotView(extremes.shallowest, title: String(localized: "Shallowest"))
             }
-            Text("Drawn from the pose points of each rep’s lowest moment. No image is kept.")
+            Text("Pose at the bottom of each rep. No video saved.")
                 .font(.footnote)
                 .foregroundStyle(FinnStyle.supportingText)
         }
@@ -1704,6 +1741,11 @@ struct ContentView: View {
         case .partlyVisible:
             "Finn saw this set only partly, so it doesn’t compare it with your earlier sets."
         }
+    }
+
+    private var resultNavigationTitle: LocalizedStringKey {
+        if case .measured = model.result { return "Set reviewed" }
+        return "Set summary"
     }
 
     private var resultTitle: LocalizedStringKey {
@@ -1783,6 +1825,7 @@ struct ContentView: View {
                     .padding(.top, 4)
             }
         }
+        if trend.change != nil {
         Section {
             let change = trend.change.map { Int(($0 * 100).rounded()) }
             MeasuredFigure(value: change.map { ($0 >= 0 ? "+" : "") + "\($0) %" } ?? "\(trend.thisWeek)",
@@ -1793,6 +1836,7 @@ struct ContentView: View {
                     .font(.footnote)
                     .foregroundStyle(FinnStyle.supportingText)
             }
+        }
         }
         let quality = summary.qualityPerSession
         if quality.count >= 2 {
@@ -1860,17 +1904,16 @@ struct ContentView: View {
                 }
             } else {
                 if exercise == nil { statsSections(sessions) }
-                Section("Saved sessions") {
+                Section {
                     ForEach(sessions) { session in
                         HStack(spacing: 12) {
                             NavigationLink { historyDetail(session) } label: {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(session.startedAt.formatted(date: .abbreviated, time: .shortened))
-                                    Text(model.fitnessRecord(forSession: session.id) == nil
-                                         ? "\(session.sets.count) measured sets"
-                                         : "\(session.sets.count) measured sets · Saved to Fitness")
-                                        .font(.subheadline)
-                                        .foregroundStyle(FinnStyle.supportingText)
+                                    WrappingText(text: session.startedAt.formatted(date: .abbreviated, time: .shortened))
+                                    WrappingText(text: model.fitnessRecord(forSession: session.id) == nil
+                                                 ? String(localized: "\(session.sets.count) measured sets")
+                                                 : String(localized: "\(session.sets.count) measured sets · Saved to Fitness"),
+                                                 style: .subheadline, color: .label.withAlphaComponent(0.72))
                                 }
                                 .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
                             }
@@ -1888,6 +1931,10 @@ struct ContentView: View {
                             .accessibilityLabel("Delete session from \(session.startedAt.formatted(date: .abbreviated, time: .omitted))")
                         }
                     }
+                } header: {
+                    WrappingText(text: String(localized: "Saved sessions"), style: .headline,
+                                 weight: .semibold, color: .label.withAlphaComponent(0.72))
+                        .accessibilityAddTraits(.isHeader)
                 }
             }
             Section {
@@ -1957,9 +2004,9 @@ struct ContentView: View {
     private func comparisonView(_ comparison: Comparison) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Compared with your previous set").font(.headline)
-            Text(model.comparisonRecap?.text
-                 ?? SetShareSummary.statement(for: comparison.rangeDirection, exercise: comparison.exercise))
-                .font(.title3.weight(.semibold))
+            WrappingText(text: model.comparisonRecap?.text
+                         ?? SetShareSummary.statement(for: comparison.rangeDirection, exercise: comparison.exercise),
+                         style: .title3, weight: .semibold)
             if model.comparisonRecap?.source == .appleIntelligence {
                 Text("Worded with Apple Intelligence")
                     .font(.caption).foregroundStyle(FinnStyle.supportingText)

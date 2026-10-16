@@ -27,17 +27,27 @@ struct CoachView: View {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     ForEach(conversation.messages) { message in
                         if conversation.messages.count == 1 {
-                            VStack(alignment: .leading, spacing: 16) {
-                                Image(systemName: "bubble.left.and.text.bubble.right")
-                                    .font(.largeTitle)
-                                    .foregroundStyle(AppPageStyle.tint)
-                                    .accessibilityHidden(true)
-                                Text("Ask about your sets")
-                                    .font(.title2.weight(.bold))
-                                Text(message.text)
-                                    .font(.body)
-                                    .foregroundStyle(AppPageStyle.secondaryText)
-                                    .fixedSize(horizontal: false, vertical: true)
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "bubble.left.and.text.bubble.right")
+                                        .foregroundStyle(AppPageStyle.tint)
+                                        .accessibilityHidden(true)
+                                    Text(history.isEmpty ? "Coach" : "Last set")
+                                        .font(.headline)
+                                }
+                                if let set = conversation.context.latest {
+                                    Text("\(set.exerciseName) · \(set.repCount) reps")
+                                        .font(.title2.weight(.bold))
+                                    if let observation = set.observation {
+                                        Text(observation)
+                                            .foregroundStyle(AppPageStyle.secondaryText)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                } else {
+                                    Text(message.text)
+                                        .foregroundStyle(AppPageStyle.secondaryText)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
                             }
                             .modifier(AppSurface())
                             .id(message.id)
@@ -153,23 +163,32 @@ struct CoachView: View {
     }
 
     private var suggestions: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(conversation.suggestedQuestions, id: \.self) { question in
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(conversation.suggestedQuestions.enumerated()), id: \.element) { index, question in
+                if index > 0 { Divider() }
                 Button {
                     draft = question
                     send()
                 } label: {
-                    Text(question)
-                        .font(.subheadline)
-                        .frame(minHeight: 44, alignment: .leading)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 9)
-                        .background(HomeStyle.card, in: RoundedRectangle(cornerRadius: 14))
+                    HStack(spacing: 12) {
+                        Text(question)
+                            .font(.subheadline)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 8)
+                        Image(systemName: "arrow.up.left")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(AppPageStyle.secondaryText)
+                            .accessibilityHidden(true)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .padding(.vertical, 6)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.top, 4)
+        .modifier(AppSurface())
         .accessibilityIdentifier("coach.suggestions")
     }
 

@@ -164,6 +164,7 @@ struct DashboardView: View {
                             heading("Sessions")
                             Spacer(minLength: 30)
                             Text(history.isEmpty ? String(localized: "No sessions")
+                                 : history.count == 1 ? String(localized: "1 session")
                                  : String(localized: "\(history.count) sessions"))
                                 .font(.footnote)
                                 .foregroundStyle(DashboardStyle.secondary)

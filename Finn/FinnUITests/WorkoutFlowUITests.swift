@@ -324,6 +324,22 @@ final class WorkoutFlowUITests: XCTestCase {
         screenshot.lifetime = .keepAlways
         add(screenshot)
         try app.performAccessibilityAudit { issue in
+            // iOS 27 audits retained SwiftUI labels even after they scroll behind opaque chrome.
+            // exclude only fully clipped descendants, never visible or partially visible text.
+            if issue.auditType == .contrast, let element = issue.element {
+                let frame = element.frame
+                for scroll in app.scrollViews.allElementsBoundByIndex {
+                    let viewport = scroll.frame.intersection(app.frame)
+                    guard !viewport.isNull,
+                          frame.maxY <= viewport.minY || frame.minY >= viewport.maxY else { continue }
+                    let sameLabel = scroll.descendants(matching: .any)
+                        .matching(NSPredicate(format: "label == %@", element.label))
+                    if sameLabel.allElementsBoundByIndex.contains(where: { $0.frame == frame }) {
+                        print("\(screen): ignored fully clipped contrast node at \(frame), viewport \(viewport)")
+                        return true
+                    }
+                }
+            }
             let element = issue.element.map {
                 "\($0.elementType.rawValue) '\($0.label)' id '\($0.identifier)' at \($0.frame)"
             } ?? "no element"
@@ -407,6 +423,7 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(stopSpeaking.waitForExistence(timeout: 3))
         stopSpeaking.tap()
         XCTAssertTrue(listen.waitForExistence(timeout: 3))
+        app.buttons["result.observationOptions"].tap()
         app.buttons["Not relevant"].tap()
         XCTAssertFalse(listen.exists)
         XCTAssertFalse(stopSpeaking.exists)
@@ -556,6 +573,7 @@ final class WorkoutFlowUITests: XCTestCase {
         XCTAssertTrue(stop.waitForExistence(timeout: 6))
         Thread.sleep(forTimeInterval: 4)
         stop.tap()
+        app.buttons["result.observationOptions"].tap()
         let notRelevant = app.buttons["Not relevant"]
         XCTAssertTrue(notRelevant.waitForExistence(timeout: 5))
         notRelevant.tap()

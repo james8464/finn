@@ -118,6 +118,55 @@ final class PresentationReviewUITests: XCTestCase {
         }
     }
 
+    /// exports real app renders with fixture provenance kept in the presentation notes
+    @MainActor func testKeynoteCaptures() throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] == nil)
+        let app = XCUIApplication()
+        app.launchArguments = ["-finn-ui-demo", "-finn-presentation-capture"]
+        app.launch()
+        app.skipOnboardingIfShown()
+        func capture(_ name: String) throws {
+            XCTAssertFalse(app.staticTexts["DEMO INPUT"].exists)
+            Thread.sleep(forTimeInterval: 0.4)
+            try save(name)
+        }
+        app.selectTab("Home")
+        try capture("home")
+        app.selectTab("Posture")
+        app.buttons["posture.playback"].tap()
+        try capture("posture")
+        app.openWorkoutTab()
+        app.buttons["home.start"].tap()
+        XCTAssertTrue(app.buttons["Start set"].waitForExistence(timeout: 8))
+        try capture("setup")
+        app.buttons["Start set"].tap()
+        let stop = app.buttons["Stop set"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 8))
+        Thread.sleep(forTimeInterval: 1.5)
+        try capture("live")
+        Thread.sleep(forTimeInterval: 2)
+        stop.tap()
+        XCTAssertTrue(app.staticTexts["Set reviewed"].waitForExistence(timeout: 8))
+        try capture("result")
+        app.reveal(app.buttons["result.compareReps"])
+        app.buttons["result.compareReps"].tap()
+        XCTAssertTrue(app.navigationBars["Movement"].waitForExistence(timeout: 5))
+        try capture("detail")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.buttons["home.start"].waitForExistence(timeout: 5))
+        try capture("workout")
+        app.selectTab("Home")
+        try capture("home")
+        app.selectTab("Workout")
+        app.openFromHome("History")
+        try capture("history")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.selectTab("Coach")
+        XCTAssertTrue(app.textFields["coach.field"].waitForExistence(timeout: 5))
+        try capture("coach")
+    }
+
     @MainActor private func save(_ name: String) throws {
         guard let path = ProcessInfo.processInfo.environment["FINN_CAPTURE_DIR"] else { return }
         let directory = URL(fileURLWithPath: path, isDirectory: true)
