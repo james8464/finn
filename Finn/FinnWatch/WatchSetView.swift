@@ -80,6 +80,14 @@ struct WatchSetView: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         case .capturing:
+            // a set with a rep target (Try Finn) counts towards it on the wrist too
+            if let target = state.target {
+                Text("\(state.reps)/\(target)")
+                    .font(.system(.title, design: .rounded).weight(.semibold))
+                    .monospacedDigit()
+                    .accessibilityLabel("Reps counted")
+                    .accessibilityValue(Text("\(state.reps) of \(target)"))
+            }
             if !link.isLiveCapture {
                 Text("Coaching will resume when your iPhone reconnects.")
                     .font(.footnote)

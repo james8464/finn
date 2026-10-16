@@ -33,6 +33,17 @@ nonisolated enum WatchHaptic: String, CaseIterable, Equatable, Sendable {
 
 /// iPhone to watch: everything the watch screen shows. The iPhone sends the whole state each time,
 /// so a lost or late message never leaves the watch stuck.
+/// The wrist taps of a set with a rep target (Try Finn): one per counted rep, then a success
+/// once the target is reached. Ordinary sets keep the rhythm taps only.
+nonisolated enum WatchTargetTaps {
+    static func haptic(after shown: WatchState?, for incoming: WatchState) -> WatchHaptic {
+        guard let target = incoming.target, incoming.hapticsEnabled,
+              incoming.stage == .capturing || incoming.stage == .analyzing,
+              let shown, shown.setID == incoming.setID, incoming.reps > shown.reps else { return .none }
+        return shown.reps < target && incoming.reps >= target ? .end : .rep
+    }
+}
+
 nonisolated struct WatchState: Equatable, Sendable {
     var stage: WatchStage = .ready
     /// Seconds left in the countdown; 0 outside it.
@@ -41,6 +52,8 @@ nonisolated struct WatchState: Equatable, Sendable {
     var exercise = ""
     /// Reps counted so far while the set runs; reps measured once it is reviewed.
     var reps = 0
+    /// Reps that end the set by themselves (Try Finn's first exercise); nil for an ordinary set.
+    var target: Int?
     /// The latest live observation of the running set, measured on the iPhone.
     var caption: String?
     var haptic: WatchHaptic = .none
@@ -88,6 +101,9 @@ nonisolated struct WatchState: Equatable, Sendable {
         if let setID {
             message[WatchMessageKey.setID] = setID
         }
+        if let target {
+            message[WatchMessageKey.target] = target
+        }
         if let coachMessage {
             message[WatchMessageKey.coachMessage] = coachMessage
         }
@@ -112,6 +128,7 @@ nonisolated struct WatchState: Equatable, Sendable {
         countdown = WatchMessageKey.integer(message[WatchMessageKey.countdown]) ?? 0
         exercise = message[WatchMessageKey.exercise] as? String ?? ""
         reps = WatchMessageKey.integer(message[WatchMessageKey.reps]) ?? 0
+        target = WatchMessageKey.integer(message[WatchMessageKey.target])
         caption = message[WatchMessageKey.caption] as? String
         haptic = (message[WatchMessageKey.haptic] as? String).flatMap(WatchHaptic.init(rawValue:)) ?? .none
         summary = message[WatchMessageKey.summary] as? String
@@ -131,6 +148,7 @@ nonisolated struct WatchState: Equatable, Sendable {
         countdown: Int = 0,
         exercise: String = "",
         reps: Int = 0,
+        target: Int? = nil,
         caption: String? = nil,
         haptic: WatchHaptic = .none,
         summary: String? = nil,
@@ -148,6 +166,7 @@ nonisolated struct WatchState: Equatable, Sendable {
         self.countdown = countdown
         self.exercise = exercise
         self.reps = reps
+        self.target = target
         self.caption = caption
         self.haptic = haptic
         self.summary = summary
@@ -318,6 +337,7 @@ nonisolated enum WatchMessageKey {
     static let countdown = "countdown"
     static let exercise = "exercise"
     static let reps = "reps"
+    static let target = "target"
     static let caption = "caption"
     static let haptic = "haptic"
     static let summary = "summary"
