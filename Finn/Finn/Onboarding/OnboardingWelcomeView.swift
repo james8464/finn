@@ -21,6 +21,8 @@ struct OnboardingWelcomeView: View {
     /// reference sizes near the final ones, so SF Pro's size-specific tracking matches
     private static let wordmarkReference: CGFloat = 112
     private static let taglineReference: CGFloat = 32
+    /// the gap under "Finn" is a quarter tighter than the cover's, so the tagline reads with the wordmark
+    private static let wordmarkGapShare: CGFloat = 0.75
     /// SF Pro's cap height, in ems
     private static let capHeight: CGFloat = 0.7046
 
@@ -51,7 +53,8 @@ struct OnboardingWelcomeView: View {
         guard screenWidth > 0, wordmarkWidthPerPoint > 0, taglineWidthPerPoint > 0 else { return nil }
         let wordmark = screenWidth * Self.wordmarkShare / wordmarkWidthPerPoint
         let tagline = (screenWidth - 2 * Self.margin) / taglineWidthPerPoint
-        let taglineBaseline = wordmark * Cover.wordmarkToTagline / Cover.wordmarkSize + tagline * Self.capHeight
+        let taglineBaseline = wordmark * Cover.wordmarkToTagline / Cover.wordmarkSize * Self.wordmarkGapShare
+            + tagline * Self.capHeight
         return Metrics(wordmark: wordmark, tagline: tagline, taglineBaseline: taglineBaseline,
                        barTop: taglineBaseline + tagline * Cover.taglineToBar / Cover.taglineSize)
     }
