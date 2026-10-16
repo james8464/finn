@@ -161,7 +161,7 @@ nonisolated struct ExerciseFigure {
     }
 }
 
-/// the animated drawing: one slow rep after another, inside the open corners of Finn's icon
+/// The animated drawing shows one slow rep after another.
 struct ExerciseFigureView: View {
     let kind: ExerciseKind
     var lineColor: Color = .white
@@ -269,17 +269,5 @@ struct ExerciseFigureView: View {
                            with: .color(HomeStyle.cameraBottom), lineWidth: 1.5)
         }
 
-        // the open corners of the app icon: the camera's view of the set
-        let corner: CGFloat = 26
-        let frame = CGRect(x: 2, y: 2, width: size.width - 4, height: size.height - 4)
-        var brackets = Path()
-        brackets.move(to: CGPoint(x: frame.minX, y: frame.minY + corner))
-        brackets.addLine(to: CGPoint(x: frame.minX, y: frame.minY))
-        brackets.addLine(to: CGPoint(x: frame.minX + corner, y: frame.minY))
-        brackets.move(to: CGPoint(x: frame.maxX - corner, y: frame.maxY))
-        brackets.addLine(to: CGPoint(x: frame.maxX, y: frame.maxY))
-        brackets.addLine(to: CGPoint(x: frame.maxX, y: frame.maxY - corner))
-        context.stroke(brackets, with: .color(lineColor.opacity(0.6)),
-                       style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
     }
 }

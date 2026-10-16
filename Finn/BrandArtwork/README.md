@@ -9,13 +9,13 @@ Each plate has its own Liquid Glass group. Inside highlights, 8% refraction stre
 - `AppIconPreview.png`: full-size native Composer export.
 - `AppIconAppearances.png`: default, dark, clear light/dark, tinted light/dark and Watch exports. Tint colours are examples; the system honours the user’s chosen tint.
 - `AppIconPreview.svg`: flat geometry reference, without system effects or a baked corner mask.
-- `FinnMark.svg` and `FinnMark-Reversed.svg`: existing flat marks used separately from the app icon.
+- `FinnMark.svg` and `FinnMark-Reversed.svg`: flat, transparent versions of the same three plates for app branding on light and dark surfaces.
 
 Reviewed the native previews at full size, iPhone Home Screen/Settings sizes and 40-point Watch size, including design generations 26 and 27. The final Xcode 27 simulator build passed for iPhone, the embedded Watch app and widgets; both app bundles reference the compiled `AppIcon`. No icon compilation warnings were reported. The initial full build emitted only the widget target’s existing App Intents metadata-extraction notice.
 
 The direction follows [Apple’s app-icon HIG](https://developer.apple.com/design/human-interface-guidelines/app-icons) and [Icon Composer guidance](https://developer.apple.com/documentation/xcode/creating-your-app-icon-using-icon-composer). [Logo-shape research](https://ira.lib.polyu.edu.hk/handle/10397/64985) informed the move away from capsules; associations depend on context and are not a usability guarantee.
 
-`Studies/TrainingPartner.icon` preserves the unused character exploration. It has no target membership; the app uses the selected F signature.
+The unused character study was removed from the active artwork folder. Git history preserves that exploration.
 
 ## Opening motion
 

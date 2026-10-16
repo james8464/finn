@@ -2,6 +2,8 @@
 
 Finn reviews strength sets through your iPhone camera. It counts reps and, when the evidence supports it, gives one specific observation to try on the next set. Video is processed on the phone and is not saved. The longer-term product pairs iPhone with Apple Watch for timely feedback.
 
+The editable iPhone and Watch app icon is [Finn/Finn/AppIcon.icon](Finn/Finn/AppIcon.icon). Open the package with Xcode 27’s Icon Composer. Its three vector layers are the source for the launch mark, onboarding mark and website favicon.
+
 | Status | Details |
 |--------|---------|
 | **Date** | 15 October 2026 |
