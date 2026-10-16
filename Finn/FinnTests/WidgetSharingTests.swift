@@ -165,22 +165,20 @@ struct WidgetSharingTests {
             ("widget-medium-empty", AnyView(LastSetWidgetView(snapshot: nil, family: .systemMedium, now: now)), CGSize(width: 364, height: 170)),
             ("live-activity-lock-screen", AnyView(SetActivityLockScreenView(attributes: attributes, state: state)), CGSize(width: 372, height: 110)),
         ]
-        for scheme in [ColorScheme.light, .dark] {
-            for (name, view, size) in renders {
-                let framed = view
-                    .padding(16)
-                    .frame(width: size.width, height: size.height)
-                    .background(Color(uiColor: .systemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    .environment(\.colorScheme, scheme)
-                let renderer = ImageRenderer(content: framed)
-                renderer.scale = 3
-                let image = try #require(renderer.uiImage)
-                let data = try #require(image.pngData())
-                try data.write(to: out.appending(path: "\(name)-\(scheme == .dark ? "dark" : "light").png"))
-            }
+        for (name, view, size) in renders {
+            let framed = view
+                .padding(16)
+                .frame(width: size.width, height: size.height)
+                .background(Color.black)
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .environment(\.colorScheme, .dark)
+            let renderer = ImageRenderer(content: framed)
+            renderer.scale = 3
+            let image = try #require(renderer.uiImage)
+            let data = try #require(image.pngData())
+            try data.write(to: out.appending(path: "\(name).png"))
         }
-        #expect(try FileManager.default.contentsOfDirectory(atPath: out.path).count >= renders.count * 2)
+        #expect(try FileManager.default.contentsOfDirectory(atPath: out.path).count >= renders.count)
     }
 }
 

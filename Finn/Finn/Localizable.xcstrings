@@ -2,7 +2,7 @@
   "sourceLanguage" : "en",
   "strings" : {
     "" : {
-
+      "shouldTranslate" : false
     },
     " · partly visible" : {
       "localizations" : {
@@ -342,7 +342,7 @@
       }
     },
     "·" : {
-
+      "shouldTranslate" : false
     },
     "“%@”" : {
       "comment" : "Finn's encouragement, in quotation marks.",
@@ -700,10 +700,36 @@
       }
     },
     "%@ / week" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / semaine"
+          }
+        }
+      }
     },
     "%@ / year" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / año"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / an"
+          }
+        }
+      }
     },
     "%@ %@ at the end of the set" : {
       "localizations" : {
@@ -843,10 +869,36 @@
       }
     },
     "%@ charged today, then weekly. Renews automatically. Cancel in Settings at least 24 hours before renewal." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se cobran %@ hoy y después cada semana. Se renueva automáticamente. Cancela en Ajustes al menos 24 horas antes de la renovación."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ facturés aujourd'hui, puis chaque semaine. Renouvellement automatique. Résilie dans Réglages au moins 24 heures avant le renouvellement."
+          }
+        }
+      }
     },
     "%@ charged today, then yearly. Renews automatically. Cancel in Settings at least 24 hours before renewal." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se cobran %@ hoy y después cada año. Se renueva automáticamente. Cancela en Ajustes al menos 24 horas antes de la renovación."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ facturés aujourd'hui, puis chaque année. Renouvellement automatique. Résilie dans Réglages au moins 24 heures avant le renouvellement."
+          }
+        }
+      }
     },
     "%@ Finn noted: %@" : {
       "comment" : "Siri, the observation recorded for the set, word for word",
@@ -1071,6 +1123,18 @@
             "state" : "new",
             "value" : "%1$@ today. After 2 weeks, %2$@/year. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only."
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ hoy. Después de 2 semanas, %2$@/año. Se renueva automáticamente. Cancela en Ajustes al menos 24 horas antes de la renovación. Solo para suscriptores aptos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ aujourd'hui. Après 2 semaines, %2$@/an. Renouvellement automatique. Résilie dans Réglages au moins 24 heures avant le renouvellement. Réservé aux abonnés éligibles."
+          }
         }
       }
     },
@@ -1134,16 +1198,68 @@
       }
     },
     "%@, best set per workout" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, mejor serie por entrenamiento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, meilleure série par séance"
+          }
+        }
+      }
     },
     "%@, estimate" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, estimación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, estimation"
+          }
+        }
+      }
     },
     "%@, projected best set" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, mejor serie prevista"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, meilleure série projetée"
+          }
+        }
+      }
     },
     "%@, reps per session" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, repeticiones por sesión"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, répétitions par séance"
+          }
+        }
+      }
     },
     "%@: %@" : {
       "localizations" : {
@@ -1307,6 +1423,24 @@
               }
             }
           }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld recompensa obtenida"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld recompensas obtenidas"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -1444,6 +1578,12 @@
     },
     "%lld days in a row" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días seguidos"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1841,6 +1981,12 @@
     },
     "%lld of %lld" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld de %lld"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2144,6 +2290,12 @@
     },
     "%lld reps this week, %lld last week." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld repeticiones esta semana, %lld la semana pasada."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2154,6 +2306,12 @@
     },
     "%lld sessions" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sesiones"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2417,10 +2575,11 @@
             "value" : "%1$lld/%2$lld"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "00:18" : {
-
+      "shouldTranslate" : false
     },
     "00:18 · Example session" : {
       "localizations" : {
@@ -2452,6 +2611,12 @@
     },
     "01 / REPS" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "01 / REPETICIONES"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2547,6 +2712,12 @@
     },
     "1 day in a row" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 día seguido"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2585,7 +2756,20 @@
       }
     },
     "1 month" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 mes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 mois"
+          }
+        }
+      }
     },
     "1 rep" : {
       "localizations" : {
@@ -2617,6 +2801,12 @@
     },
     "1 session" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 sesión"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2626,13 +2816,45 @@
       }
     },
     "1 week" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 semaine"
+          }
+        }
+      }
     },
     "1–2 days" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1–2 días"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 à 2 jours"
+          }
+        }
+      }
     },
     "02 / REVIEW" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "02 / REVISIÓN"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2642,7 +2864,20 @@
       }
     },
     "2 months" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 meses"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 mois"
+          }
+        }
+      }
     },
     "2 to 3 m" : {
       "localizations" : {
@@ -2673,7 +2908,36 @@
       }
     },
     "2 weeks" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 semanas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 semaines"
+          }
+        }
+      }
+    },
+    "2 weeks free, then billed yearly" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 semanas gratis, luego facturación anual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 semaines offertes, puis facturation annuelle"
+          }
+        }
+      }
     },
     "2-minute limit reached. %@" : {
       "localizations" : {
@@ -2704,7 +2968,20 @@
       }
     },
     "3–4 days" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3–4 días"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 à 4 jours"
+          }
+        }
+      }
     },
     "3D view: %lld° from profile" : {
       "extractionState" : "stale",
@@ -2765,10 +3042,23 @@
       }
     },
     "5+ days" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 días o más"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 jours ou plus"
+          }
+        }
+      }
     },
     "6" : {
-
+      "shouldTranslate" : false
     },
     "6 squat reps" : {
       "localizations" : {
@@ -2804,6 +3094,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "12 weeks"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 semanas"
           }
         },
         "fr" : {
@@ -2901,7 +3197,20 @@
       }
     },
     "A few details help me build training that fits you." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unos pocos datos me ayudan a crear un entrenamiento a tu medida."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelques infos m'aident à construire un entraînement qui te correspond."
+          }
+        }
+      }
     },
     "A few steps away" : {
       "localizations" : {
@@ -2932,7 +3241,20 @@
       }
     },
     "A little more about you." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un poco más sobre ti."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encore un peu sur toi."
+          }
+        }
+      }
     },
     "A measured set of %lld reps or more with no pattern flagged by Finn's current checks." : {
       "localizations" : {
@@ -3022,6 +3344,12 @@
     },
     "About Coach" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acerca de Coach"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3036,6 +3364,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About measurements"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acerca de las mediciones"
           }
         },
         "fr" : {
@@ -3075,7 +3409,20 @@
       }
     },
     "Access Finn" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acceder a Finn"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accéder à Finn"
+          }
+        }
+      }
     },
     "Account" : {
       "localizations" : {
@@ -3173,10 +3520,36 @@
       }
     },
     "Add height" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir altura"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter la taille"
+          }
+        }
+      }
     },
     "Add weight" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir peso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter le poids"
+          }
+        }
+      }
     },
     "Adjusts the detail in set feedback." : {
       "localizations" : {
@@ -3189,7 +3562,20 @@
       }
     },
     "Adjusts training plan" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajusta el plan de entrenamiento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajuste le programme"
+          }
+        }
+      }
     },
     "After each set, an on-device model trained by the Finn team guesses the exercise from your pose points. If it isn’t confident, Finn uses the exercise you chose. Its accuracy is still being tested." : {
       "extractionState" : "stale",
@@ -3306,7 +3692,7 @@
       }
     },
     "AirPods" : {
-
+      "shouldTranslate" : false
     },
     "AirPods or any headphones" : {
       "extractionState" : "stale",
@@ -3546,7 +3932,20 @@
       }
     },
     "Annual" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuel"
+          }
+        }
+      }
     },
     "Answers come from Apple Intelligence on this iPhone, from your saved sets only." : {
       "extractionState" : "stale",
@@ -3663,7 +4062,20 @@
       }
     },
     "Apple Health connected" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Salud conectada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Santé connectée"
+          }
+        }
+      }
     },
     "Apple Health isn’t available on this iPhone" : {
       "localizations" : {
@@ -3723,6 +4135,12 @@
     },
     "Apple Intelligence is still downloading its model. Until then the coach answers from Finn's records only." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence aún está descargando su modelo. Mientras tanto, el coach responde solo con los registros de Finn."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3816,7 +4234,20 @@
       }
     },
     "Apple Watch and AirPods" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch y AirPods"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch et AirPods"
+          }
+        }
+      }
     },
     "Apple Watch connected" : {
       "localizations" : {
@@ -4335,11 +4766,29 @@
             "state" : "new",
             "value" : "At this pace, in %1$@ you'll do ^[%2$lld reps](inflect: true) in one set."
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A este ritmo, en %1$@ harás ^[%2$lld repeticiones](inflect: true) en una serie."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À ce rythme, dans %1$@, tu feras ^[%2$lld répétitions](inflect: true) en une série."
+          }
         }
       }
     },
     "Audio plays through connected headphones or the iPhone speaker." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El audio suena por los auriculares conectados o por el altavoz del iPhone."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4349,7 +4798,20 @@
       }
     },
     "Available equipment" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Material disponible"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matériel disponible"
+          }
+        }
+      }
     },
     "Avg. posture score" : {
       "extractionState" : "stale",
@@ -4382,6 +4844,12 @@
     },
     "Award earned" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recompensa obtenida"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4491,7 +4959,20 @@
       }
     },
     "Back to history" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volver al historial"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour à l'historique"
+          }
+        }
+      }
     },
     "Badges come from what Finn measures: a set, a record, a longer range. Here is what each one takes." : {
       "extractionState" : "stale",
@@ -4518,6 +4999,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les badges viennent de ce que Finn mesure : une série, un record, une amplitude plus grande. Voici ce qu’il faut pour chacun."
+          }
+        }
+      }
+    },
+    "Bald with a black beard" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calvo con barba negra"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crâne rasé et barbe noire"
           }
         }
       }
@@ -4551,7 +5048,20 @@
       }
     },
     "Barbell" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barra"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barre"
+          }
+        }
+      }
     },
     "Based on your saved sets" : {
       "extractionState" : "stale",
@@ -4649,7 +5159,36 @@
       }
     },
     "Big weeks. I'll make sure you recover too." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semanas intensas. También me ocuparé de tu recuperación."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grosses semaines. Je veille aussi à ta récupération."
+          }
+        }
+      }
+    },
+    "Bob and pink headband" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melena corta y cinta rosa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carré et bandeau rose"
+          }
+        }
+      }
     },
     "body line" : {
       "localizations" : {
@@ -4775,7 +5314,20 @@
       }
     },
     "Build muscle" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ganar músculo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prendre du muscle"
+          }
+        }
+      }
     },
     "Camera" : {
       "localizations" : {
@@ -4986,6 +5538,12 @@
     },
     "Camera privacy" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacidad de la cámara"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4996,6 +5554,12 @@
     },
     "Camera setup" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colocación de la cámara"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5038,6 +5602,18 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "camera-measured %1$@ %2$@ than the previous set"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ medida por la cámara %2$@ que en la serie anterior"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ mesurée par la caméra : %2$@ qu'à la série précédente"
           }
         }
       }
@@ -5346,10 +5922,29 @@
       }
     },
     "Challenge me" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponme a prueba"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pousse-moi un peu"
+          }
+        }
+      }
     },
     "Change exercise or options while keeping this session open." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia de ejercicio u opciones sin cerrar esta sesión."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5781,7 +6376,20 @@
       }
     },
     "Choose a focus for better coaching" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige un objetivo para un mejor coaching"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis un objectif pour un meilleur coaching"
+          }
+        }
+      }
     },
     "Choose a focus for set feedback." : {
       "localizations" : {
@@ -5967,13 +6575,68 @@
       }
     },
     "Choose where you train" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige dónde entrenas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis où tu t'entraînes"
+          }
+        }
+      }
+    },
+    "Choose your coach" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige a tu coach"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis ton coach"
+          }
+        }
+      }
     },
     "Choose your equipment" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige tu material"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis ton matériel"
+          }
+        }
+      }
     },
     "Choose your training setup and injury history to continue." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indica tu lugar, tu material y tus lesiones anteriores para continuar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indique ton lieu, ton matériel et tes blessures passées pour continuer."
+          }
+        }
+      }
     },
     "Claude Sonnet (debug demo)" : {
       "localizations" : {
@@ -6043,7 +6706,20 @@
       }
     },
     "Clearer technique" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Técnica más limpia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technique plus propre"
+          }
+        }
+      }
     },
     "Close demo" : {
       "localizations" : {
@@ -6103,6 +6779,12 @@
     },
     "Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coach puede describir las mediciones guardadas. No puede diagnosticar una lesión ni evaluar toda tu técnica."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6197,7 +6879,20 @@
       }
     },
     "Coming back after a break" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuelvo tras una pausa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je reprends après une pause"
+          }
+        }
+      }
     },
     "Compared with the previous set: %@" : {
       "localizations" : {
@@ -6312,7 +7007,20 @@
       }
     },
     "Connect Apple Health" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectar la app Salud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecter l'app Santé"
+          }
+        }
+      }
     },
     "Consistency beats perfect." : {
       "localizations" : {
@@ -6371,7 +7079,20 @@
       }
     },
     "Continue with Finn Free" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar con Finn Free"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer avec Finn Free"
+          }
+        }
+      }
     },
     "Couldn’t assess this set" : {
       "localizations" : {
@@ -6569,6 +7290,22 @@
         }
       }
     },
+    "Curly ponytail and pink headband" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleta rizada y cinta rosa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Queue-de-cheval bouclée et bandeau rose"
+          }
+        }
+      }
+    },
     "Current: %@" : {
       "localizations" : {
         "en-GB" : {
@@ -6597,8 +7334,52 @@
         }
       }
     },
+    "Customising your training plan" : {
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Customizing your training plan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personalizando tu plan de entrenamiento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personnalisation de ton programme"
+          }
+        }
+      }
+    },
+    "Dark curls" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rizos oscuros"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boucles brunes"
+          }
+        }
+      }
+    },
     "Data stays on this iPhone. Change access anytime in Options." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos se quedan en este iPhone. Cambia el acceso cuando quieras en Opciones."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6608,7 +7389,20 @@
       }
     },
     "Date" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        }
+      }
     },
     "deadlift" : {
       "localizations" : {
@@ -7438,7 +8232,20 @@
       }
     },
     "Dumbbells" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mancuernas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haltères"
+          }
+        }
+      }
     },
     "Duration" : {
       "localizations" : {
@@ -7790,6 +8597,12 @@
             "value" : "Estimates from joint angles; uses your selection when uncertain."
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estima a partir de los ángulos articulares; usa tu selección cuando hay dudas."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7923,7 +8736,20 @@
       }
     },
     "Everyone starts somewhere. I'll guide each move." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo el mundo empieza por algo. Te guío en cada movimiento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout le monde commence un jour. Je te guide à chaque mouvement."
+          }
+        }
+      }
     },
     "Exercise" : {
       "localizations" : {
@@ -7987,6 +8813,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exercise recognition unavailable. Uses your selection."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconocimiento de ejercicios no disponible. Se usa tu selección."
           }
         },
         "fr" : {
@@ -8061,6 +8893,12 @@
             "value" : "Experimental on-device estimate. Uses your selection when uncertain."
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimación experimental en el dispositivo. Usa tu selección cuando hay dudas."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8081,7 +8919,36 @@
       }
     },
     "Explains how the Coach chooses its answer" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explica cómo Coach elige su respuesta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explique comment Coach choisit sa réponse"
+          }
+        }
+      }
+    },
+    "F monogram" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monograma F"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monogramme F"
+          }
+        }
+      }
     },
     "Face the phone or turn sideways" : {
       "localizations" : {
@@ -8198,6 +9065,12 @@
     },
     "Favorites appear first in Workout." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los favoritos aparecen primero en Entrenamiento."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8207,7 +9080,20 @@
       }
     },
     "Feel the tempo on your wrist. Hear my cues through your AirPods or iPhone." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siente el ritmo en tu muñeca. Escucha mis indicaciones en tus AirPods o tu iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sens le tempo à ton poignet. Entends mes conseils dans tes AirPods ou sur ton iPhone."
+          }
+        }
+      }
     },
     "Feet about shoulder-width" : {
       "localizations" : {
@@ -8238,7 +9124,20 @@
       }
     },
     "Female" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mujer"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Femme"
+          }
+        }
+      }
     },
     "Filmed at an angle" : {
       "localizations" : {
@@ -8646,6 +9545,22 @@
         }
       }
     },
+    "Finn Workout" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrenamiento Finn"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance Finn"
+          }
+        }
+      }
+    },
     "Finn adapts its advice to you: rest between sets, a lighter day after a short night or a heavy day, and your heart rate from Apple Watch. Each tip says which data it uses. Nothing leaves this iPhone, and Finn works fully without it." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8791,7 +9706,20 @@
       }
     },
     "Finn can't wait to coach you." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn está deseando entrenarte."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn a hâte de te coacher."
+          }
+        }
+      }
     },
     "Finn checks %@ form from the side only. It saw you about %lld° from side-on, so it gives no form advice for this set." : {
       "localizations" : {
@@ -9401,7 +10329,20 @@
       }
     },
     "Finn is replying" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn está respondiendo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn répond"
+          }
+        }
+      }
     },
     "Finn needs at least four measured reps before it can show an observation." : {
       "extractionState" : "stale",
@@ -9660,10 +10601,52 @@
       }
     },
     "Finn watches every rep" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn sigue cada repetición"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn suit chaque répétition"
+          }
+        }
+      }
+    },
+    "Finn's picture" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La imagen de Finn"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'image de Finn"
+          }
+        }
+      }
     },
     "Finn: %@" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finn : %@"
+          }
+        }
+      }
     },
     "Finn: your next workout, %@, %@, %@. %@" : {
       "comment" : "VoiceOver label of the coach card: day, time, intensity, then Finn's encouragement.",
@@ -9779,7 +10762,20 @@
       }
     },
     "Form first. I'll catch what you can't see." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primero, la técnica. Yo veo lo que tú no ves."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La technique d'abord. Je vois ce que tu ne vois pas."
+          }
+        }
+      }
     },
     "Frames are analyzed on this iPhone, then dropped." : {
       "localizations" : {
@@ -9837,11 +10833,33 @@
         }
       }
     },
+    "Free trial" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba gratuita"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essai gratuit"
+          }
+        }
+      }
+    },
     "Free trial · 2 weeks" : {
 
     },
     "From %lld sessions: " : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según %lld sesiones: "
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10327,7 +11345,20 @@
       }
     },
     "Full experience" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La experiencia completa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'expérience complète"
+          }
+        }
+      }
     },
     "Full privacy policy" : {
       "localizations" : {
@@ -10470,7 +11501,20 @@
       }
     },
     "Go easy on me" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ve suave conmigo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vas-y doucement"
+          }
+        }
+      }
     },
     "Go lower" : {
       "localizations" : {
@@ -10529,10 +11573,36 @@
       }
     },
     "Good to have you back. We'll find your rhythm again." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué bien tenerte de vuelta. Recuperaremos tu ritmo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Content de te revoir. On va retrouver ton rythme."
+          }
+        }
+      }
     },
     "Good. We'll build on what worked." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bien. Partiremos de lo que funcionó."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bien. On s'appuie sur ce qui a marché."
+          }
+        }
+      }
     },
     "greater" : {
       "localizations" : {
@@ -10591,7 +11661,36 @@
       }
     },
     "Gym" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gimnasio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salle de sport"
+          }
+        }
+      }
+    },
+    "Hair in a bun" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelo recogido en un moño"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheveux attachés en chignon"
+          }
+        }
+      }
     },
     "Hands below shoulders" : {
       "localizations" : {
@@ -10707,10 +11806,36 @@
       }
     },
     "Hard but doable. That's where you grow." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duro pero posible. Ahí es donde se progresa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dur mais faisable. C'est là qu'on progresse."
+          }
+        }
+      }
     },
     "Have you ever followed a training program?" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Has seguido alguna vez un programa de entrenamiento?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As-tu déjà suivi un programme d'entraînement ?"
+          }
+        }
+      }
     },
     "Head and feet both visible, with a bit of room above and below." : {
       "localizations" : {
@@ -10770,6 +11895,12 @@
     },
     "Headphones" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auriculares"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10842,6 +11973,12 @@
             "value" : "Health data"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datos de Salud"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10908,6 +12045,12 @@
     },
     "Hear the countdown, rep count and live observations." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escucha la cuenta atrás, el recuento de repeticiones y las observaciones en directo."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11574,6 +12717,12 @@
             "value" : "Hold position to start. Walk back or stop moving to finish."
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén la posición para empezar. Vuelve al iPhone o deja de moverte para terminar."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11667,13 +12816,52 @@
       }
     },
     "How hard do you want me to push you, %@?" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuánto quieres que te exija, %@?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À quel point veux-tu que je te pousse, %@ ?"
+          }
+        }
+      }
     },
     "How hard do you want me to push you?" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuánto quieres que te exija?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À quel point veux-tu que je te pousse ?"
+          }
+        }
+      }
     },
     "How many days a week are you ready to train?" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuántos días a la semana puedes entrenar?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combien de jours par semaine peux-tu t'entraîner ?"
+          }
+        }
+      }
     },
     "How often do you train?" : {
       "extractionState" : "stale",
@@ -11772,10 +12960,36 @@
       }
     },
     "I got injured" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me lesioné"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai eu une blessure"
+          }
+        }
+      }
     },
     "I lost motivation" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perdí la motivación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai perdu la motivation"
+          }
+        }
+      }
     },
     "I train now and then" : {
       "localizations" : {
@@ -11834,13 +13048,52 @@
       }
     },
     "I train regularly" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entreno con regularidad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je m'entraîne régulièrement"
+          }
+        }
+      }
     },
     "I'm advanced" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tengo un buen nivel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai un bon niveau"
+          }
+        }
+      }
     },
     "I've never really trained" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nunca he entrenado de verdad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je n'ai jamais vraiment fait de sport"
+          }
+        }
+      }
     },
     "If it feels comfortable, sit a little lower, toward knee height." : {
       "localizations" : {
@@ -11990,10 +13243,36 @@
       }
     },
     "Illustrated demo of Finn’s camera screen. A man doing a squat. Six sample reps. %@" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demostración ilustrada de la pantalla de cámara de Finn. Un hombre hace una sentadilla. Seis repeticiones de ejemplo. %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démo illustrée de l'écran caméra de Finn. Un homme fait un squat. Six répétitions d'exemple. %@"
+          }
+        }
+      }
     },
     "Illustrated demo: a man doing a squat in a gym." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demostración ilustrada: un hombre hace una sentadilla en el gimnasio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démo illustrée : un homme fait un squat en salle de sport."
+          }
+        }
+      }
     },
     "Illustrated movement" : {
       "localizations" : {
@@ -12052,16 +13331,68 @@
       }
     },
     "Illustration: a man training while Finn coaches him live on his iPhone." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ilustración: un hombre entrena mientras Finn lo guía en directo en su iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Illustration : un homme s'entraîne pendant que Finn le coache en direct sur son iPhone."
+          }
+        }
+      }
     },
     "Illustration: AirPods, and an Apple Watch showing a workout in progress." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ilustración: unos AirPods y un Apple Watch que muestra un entrenamiento en curso."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Illustration : des AirPods et une Apple Watch qui affiche une séance en cours."
+          }
+        }
+      }
     },
     "Import sex, height and weight, or enter them below." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importa tu sexo, altura y peso, o introdúcelos abajo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importe ton sexe, ta taille et ton poids, ou saisis-les ci-dessous."
+          }
+        }
+      }
     },
     "Imports sex, height and weight again" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuelve a importar sexo, altura y peso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importe à nouveau le sexe, la taille et le poids"
+          }
+        }
+      }
     },
     "in %@" : {
       "localizations" : {
@@ -12092,7 +13423,20 @@
       }
     },
     "In your ears, on your wrist" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En tus oídos, en tu muñeca"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans tes oreilles, à ton poignet"
+          }
+        }
+      }
     },
     "Intensity" : {
       "localizations" : {
@@ -12411,6 +13755,12 @@
     },
     "Keep the phone upright on a stable support." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coloca el iPhone en vertical sobre un soporte estable."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13406,13 +14756,52 @@
       }
     },
     "Leave it to me. I'll adjust as you go." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjamelo a mí. Iré ajustando sobre la marcha."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laisse-moi faire. J'ajuste au fil des séances."
+          }
+        }
+      }
     },
     "Let's build it right. I'll make every rep count." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hagámoslo bien. Cada repetición contará."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Construisons-le bien. Chaque répétition comptera."
+          }
+        }
+      }
     },
     "Let's keep you moving. Every set counts." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sigamos en movimiento. Cada serie cuenta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On continue de bouger. Chaque série compte."
+          }
+        }
+      }
     },
     "Let's make it count." : {
       "localizations" : {
@@ -13438,6 +14827,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Allez, on donne tout."
+          }
+        }
+      }
+    },
+    "Let's see how far you can go by %@." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veamos hasta dónde llegas para el %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voyons jusqu'où tu peux aller d'ici le %@."
           }
         }
       }
@@ -13556,7 +14961,20 @@
       }
     },
     "Little and often. I'll keep you on track." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poco y a menudo. Te ayudo a mantener el ritmo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peu, mais souvent. Je t'aide à tenir le rythme."
+          }
+        }
+      }
     },
     "Log at least %lld workouts of this exercise to project your progress. %lld to go." : {
       "localizations" : {
@@ -13565,11 +14983,36 @@
             "state" : "new",
             "value" : "Log at least %1$lld workouts of this exercise to project your progress. %2$lld to go."
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra al menos %1$lld entrenamientos de este ejercicio para proyectar tu progreso. Faltan %2$lld."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre au moins %1$lld séances de cet exercice pour projeter ta progression. Encore %2$lld."
+          }
         }
       }
     },
     "Log workouts on at least two different days to project your progress." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra entrenamientos en al menos dos días distintos para proyectar tu progreso."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre des séances sur au moins deux jours différents pour projeter ta progression."
+          }
+        }
+      }
     },
     "Long back; stand tall" : {
       "localizations" : {
@@ -13662,7 +15105,20 @@
       }
     },
     "Lose fat" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perder grasa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perdre du gras"
+          }
+        }
+      }
     },
     "lower" : {
       "localizations" : {
@@ -13985,7 +15441,20 @@
       }
     },
     "Male" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hombre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homme"
+          }
+        }
+      }
     },
     "Measure at least one set of each of the six exercises." : {
       "localizations" : {
@@ -14100,8 +15569,62 @@
         }
       }
     },
+    "Opens your free workout" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre tu entrenamiento gratis"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre ta séance gratuite"
+          }
+        }
+      }
+    },
+    "Round glasses" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gafas redondas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lunettes rondes"
+          }
+        }
+      }
+    },
+    "Short spiky hair" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelo corto de punta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheveux courts en pointes"
+          }
+        }
+      }
+    },
     "measured reps" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repeticiones medidas"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14259,6 +15782,12 @@
     },
     "Milestones" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hitos"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14802,7 +16331,20 @@
       }
     },
     "No" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non"
+          }
+        }
+      }
     },
     "No %@ sets saved yet." : {
       "localizations" : {
@@ -14849,6 +16391,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No account required"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se necesita cuenta"
           }
         },
         "fr" : {
@@ -14923,6 +16471,12 @@
             "value" : "No awards yet"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay recompensas"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14933,6 +16487,12 @@
     },
     "no clear %@ change against the previous set" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ningún cambio claro de %@ respecto a la serie anterior"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15253,7 +16813,20 @@
       }
     },
     "No Finn Coach+ subscription was found for this Apple Account." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha encontrado ninguna suscripción a Finn Coach+ para esta cuenta de Apple."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun abonnement Finn Coach+ trouvé pour ce compte Apple."
+          }
+        }
+      }
     },
     "No flagged pattern" : {
       "localizations" : {
@@ -15324,6 +16897,12 @@
     },
     "No language model is available right now, so the coach answers from Finn's records only." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora mismo no hay ningún modelo de lenguaje disponible, así que el coach responde solo con los registros de Finn."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15368,6 +16947,12 @@
             "value" : "No observation"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin observaciones"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15405,7 +16990,20 @@
       }
     },
     "No past injuries" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin lesiones anteriores"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune blessure passée"
+          }
+        }
+      }
     },
     "No photos yet" : {
       "localizations" : {
@@ -15443,6 +17041,12 @@
             "value" : "No previous week"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin semana anterior"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15452,7 +17056,20 @@
       }
     },
     "No problem. We'll build one together." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin problema. Crearemos uno juntos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de souci. On en construit un ensemble."
+          }
+        }
+      }
     },
     "No recurring issue" : {
       "localizations" : {
@@ -15579,6 +17196,12 @@
     },
     "No session yet." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay sesiones."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15791,7 +17414,20 @@
       }
     },
     "None, bodyweight only" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguno, solo peso corporal"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun, poids du corps"
+          }
+        }
+      }
     },
     "Not earned yet" : {
       "localizations" : {
@@ -15935,7 +17571,20 @@
       }
     },
     "Nothing to restore" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada que restaurar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à restaurer"
+          }
+        }
+      }
     },
     "Numbers first: range, tempo, comparison with your last set." : {
       "extractionState" : "stale",
@@ -15968,6 +17617,12 @@
     },
     "Observation" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observación"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16038,6 +17693,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Observations require 4 measured reps."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las observaciones requieren 4 repeticiones medidas."
           }
         },
         "fr" : {
@@ -16162,7 +17823,20 @@
       }
     },
     "OK" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aceptar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
     },
     "On supported iPhones, Apple's on-device model can explain a measured comparison. The camera video is never given to the model." : {
       "localizations" : {
@@ -16751,10 +18425,29 @@
       }
     },
     "Outdoors" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al aire libre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En extérieur"
+          }
+        }
+      }
     },
     "Partly visible · %@" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parcialmente visible · %@"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16764,10 +18457,36 @@
       }
     },
     "Past injuries" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lesiones anteriores"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blessures passées"
+          }
+        }
+      }
     },
     "Past injuries or areas to be careful with" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lesiones anteriores o zonas que cuidar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blessures passées ou zones à ménager"
+          }
+        }
+      }
     },
     "Paste the demo API key" : {
       "extractionState" : "stale",
@@ -16822,6 +18541,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pause"
+          }
+        }
+      }
+    },
+    "Pay with Apple Pay" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagar con Apple Pay"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Payer avec Apple Pay"
           }
         }
       }
@@ -16895,6 +18630,12 @@
     },
     "Place the camera near hip height." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coloca la cámara a la altura de la cadera."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17028,6 +18769,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Posture feedback requires a side view. Turn this off if the angle estimate is wrong."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las indicaciones de postura requieren una vista lateral. Desactívalo si el ángulo estimado es incorrecto."
           }
         },
         "fr" : {
@@ -17236,13 +18983,52 @@
       }
     },
     "Project" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proyectar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projeter"
+          }
+        }
+      }
     },
     "Project my progress" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proyectar mi progreso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projeter ma progression"
+          }
+        }
+      }
     },
     "Projected from your trend: an estimate, not a target" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proyectado según tu tendencia: una estimación, no un objetivo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projeté à partir de ta tendance : une estimation, pas un objectif"
+          }
+        }
+      }
     },
     "Projection" : {
       "extractionState" : "stale",
@@ -17274,7 +19060,20 @@
       }
     },
     "Projection horizon" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horizonte de proyección"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horizon de projection"
+          }
+        }
+      }
     },
     "Projection, %@: %@" : {
       "comment" : "VoiceOver value of the projected point: date, then value.",
@@ -17420,7 +19219,20 @@
       }
     },
     "Pull higher" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tira más alto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tire plus haut"
+          }
+        }
+      }
     },
     "pull-up" : {
       "localizations" : {
@@ -17479,7 +19291,20 @@
       }
     },
     "Pull-up bar" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barra de dominadas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barre de traction"
+          }
+        }
+      }
     },
     "Pull-up check" : {
       "localizations" : {
@@ -17594,7 +19419,20 @@
       }
     },
     "Purchase unavailable" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra no disponible"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Achat indisponible"
+          }
+        }
+      }
     },
     "Push hips back" : {
       "localizations" : {
@@ -17625,7 +19463,20 @@
       }
     },
     "Push me hard" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exígeme al máximo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pousse-moi à fond"
+          }
+        }
+      }
     },
     "Push your hips farther back and let your torso lower more, as far as feels comfortable." : {
       "localizations" : {
@@ -17651,6 +19502,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pousse les hanches plus loin vers l’arrière et laisse ton buste descendre davantage, tant que c’est confortable."
+          }
+        }
+      }
+    },
+    "Right now, you're %@. Let's see how far you can go by %@." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora mismo, %1$@. Veamos hasta dónde llegas para el %2$@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour l'instant, tu %1$@. Voyons jusqu'où tu peux aller d'ici le %2$@."
           }
         }
       }
@@ -17880,7 +19747,20 @@
       }
     },
     "Range" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amplitud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amplitude"
+          }
+        }
+      }
     },
     "Range, tempo and set comparisons." : {
       "extractionState" : "stale",
@@ -18225,7 +20105,20 @@
       }
     },
     "Record a %@ set to see your best set for each workout." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra una serie de %@ para ver tu mejor serie en cada entrenamiento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre une série de %@ pour voir ta meilleure série à chaque séance."
+          }
+        }
+      }
     },
     "Record a set of this exercise to see your measured movement here." : {
       "localizations" : {
@@ -18453,13 +20346,45 @@
       }
     },
     "Renews automatically. Cancel in Settings at least 24 hours before renewal. Trial for eligible subscribers." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se renueva automáticamente. Cancela en Ajustes al menos 24 horas antes de la renovación. Prueba para suscriptores aptos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renouvellement automatique. Résilie dans Réglages au moins 24 heures avant le renouvellement. Essai réservé aux abonnés éligibles."
+          }
+        }
+      }
     },
     "Rep" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rep."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rép."
+          }
+        }
+      }
     },
     "rep · %@" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repetición · %@"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18728,6 +20653,12 @@
     },
     "Rep counting" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recuento de repeticiones"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18798,6 +20729,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repeated observation"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observación repetida"
           }
         },
         "fr" : {
@@ -18922,6 +20859,12 @@
     },
     "Reps" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeticiones"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18932,6 +20875,12 @@
     },
     "reps · %@" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "repeticiones · %@"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19066,6 +21015,12 @@
             "value" : "Reps this week"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeticiones esta semana"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19082,6 +21037,12 @@
             "value" : "Reps without observations"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeticiones sin observaciones"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19096,6 +21057,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reps without observations per session"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeticiones sin observaciones por sesión"
           }
         },
         "fr" : {
@@ -19118,7 +21085,20 @@
       }
     },
     "Resistance bands" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bandas elásticas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Élastiques"
+          }
+        }
+      }
     },
     "Rest about %@ before your next set" : {
       "localizations" : {
@@ -19205,7 +21185,20 @@
       }
     },
     "Restore purchases" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar compras"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurer les achats"
+          }
+        }
+      }
     },
     "Retake set" : {
       "localizations" : {
@@ -19377,7 +21370,20 @@
       }
     },
     "Reviewed" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifié"
+          }
+        }
+      }
     },
     "Reviewing set" : {
       "localizations" : {
@@ -19893,6 +21899,12 @@
             "value" : "Saves finished sessions with duration and reps, without calorie or heart-rate estimates."
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guarda las sesiones terminadas con duración y repeticiones, sin estimar calorías ni frecuencia cardiaca."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20127,10 +22139,36 @@
       }
     },
     "Select" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir"
+          }
+        }
+      }
     },
     "Select all that apply" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona todo lo que corresponda"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionne tout ce qui s'applique"
+          }
+        }
+      }
     },
     "Send" : {
       "localizations" : {
@@ -20565,6 +22603,12 @@
     },
     "Set review" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisión de la serie"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20603,6 +22647,12 @@
     },
     "Set summary" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen de la serie"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20612,7 +22662,20 @@
       }
     },
     "Set your iPhone down. Move with Finn." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deja tu iPhone. Muévete con Finn."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pose ton iPhone. Bouge avec Finn."
+          }
+        }
+      }
     },
     "Sets" : {
       "localizations" : {
@@ -20678,6 +22741,12 @@
     },
     "Settings" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20687,10 +22756,36 @@
       }
     },
     "Sex" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sexo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sexe"
+          }
+        }
+      }
     },
     "Sex, height and weight imported. You can edit them." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sexo, altura y peso importados. Puedes editarlos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sexe, taille et poids importés. Tu peux les modifier."
+          }
+        }
+      }
     },
     "Shallowest" : {
       "localizations" : {
@@ -20805,6 +22900,22 @@
         }
       }
     },
+    "Short natural curls" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rizos naturales cortos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boucles naturelles courtes"
+          }
+        }
+      }
+    },
     "Short sets, often. Finn keeps the history." : {
       "localizations" : {
         "en-GB" : {
@@ -20834,7 +22945,36 @@
       }
     },
     "Short weeks still count. We'll make each session matter." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las semanas cortas también cuentan. Cada sesión contará."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les petites semaines comptent aussi. Chaque séance servira."
+          }
+        }
+      }
+    },
+    "Short white hair" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelo blanco corto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheveux blancs courts"
+          }
+        }
+      }
     },
     "shorter" : {
       "localizations" : {
@@ -21342,6 +23482,12 @@
     },
     "Shows the sessions behind this number" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra las sesiones detrás de esta cifra"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21603,6 +23749,22 @@
         }
       }
     },
+    "Skipped" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin responder"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non renseigné"
+          }
+        }
+      }
+    },
     "sleep" : {
       "localizations" : {
         "en-GB" : {
@@ -21660,7 +23822,20 @@
       }
     },
     "Slow down" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más despacio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ralentis"
+          }
+        }
+      }
     },
     "Small steps, big gains." : {
       "localizations" : {
@@ -21804,6 +23979,12 @@
     },
     "Source" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fuente"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21870,6 +24051,12 @@
     },
     "Spoken feedback" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indicaciones habladas"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22523,6 +24710,22 @@
         }
       }
     },
+    "Start my free workout" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar mi entrenamiento gratis"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencer ma séance gratuite"
+          }
+        }
+      }
+    },
     "Start set" : {
       "localizations" : {
         "en-GB" : {
@@ -22833,7 +25036,20 @@
       }
     },
     "Steady it is. We'll build up at your pace." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con calma, entonces. Avanzamos a tu ritmo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tranquille, alors. On progresse à ton rythme."
+          }
+        }
+      }
     },
     "Step %lld of %lld" : {
       "extractionState" : "stale",
@@ -23179,7 +25395,20 @@
       }
     },
     "Stronger starts together" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juntos, más fuertes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensemble, plus forts"
+          }
+        }
+      }
     },
     "Summary" : {
       "extractionState" : "stale",
@@ -23200,6 +25429,12 @@
             "value" : "Tailors rest and recovery advice. Data stays on this iPhone."
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adapta los consejos de descanso y recuperación. Los datos se quedan en este iPhone."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23209,7 +25444,20 @@
       }
     },
     "Talk to your coach" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habla con tu coach"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parle à ton coach"
+          }
+        }
+      }
     },
     "Tap Try again to finish removing the local data." : {
       "localizations" : {
@@ -23274,11 +25522,36 @@
             "state" : "new",
             "value" : "Tempo %1$@ s per rep · median %2$@ %3$@"
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritmo %1$@ s por repetición · mediana %2$@ %3$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tempo %1$@ s par répétition · médiane %2$@ %3$@"
+          }
         }
       }
     },
     "Terms" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Términos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conditions"
+          }
+        }
+      }
     },
     "That’s %lld reps. Keep your next one deliberate." : {
       "localizations" : {
@@ -23309,7 +25582,20 @@
       }
     },
     "The App Store can't be reached right now. Try again later." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se puede conectar con el App Store ahora mismo. Inténtalo más tarde."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de joindre l'App Store pour le moment. Réessaie plus tard."
+          }
+        }
+      }
     },
     "The camera is asked for when you start your first set, not now." : {
       "localizations" : {
@@ -23482,7 +25768,20 @@
       }
     },
     "The program didn't work for me" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El programa no me funcionó"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le programme ne me convenait pas"
+          }
+        }
+      }
     },
     "The saved file could not be accessed. Unlock this iPhone, then try again." : {
       "localizations" : {
@@ -23555,13 +25854,52 @@
 
     },
     "Then I won't let you coast." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entonces no te dejaré relajarte."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alors je ne te laisserai rien lâcher."
+          }
+        }
+      }
     },
     "Then I'll focus on the details that make a difference." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entonces me centraré en los detalles que marcan la diferencia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alors je me concentre sur les détails qui font la différence."
+          }
+        }
+      }
     },
     "Then let's sharpen your form and push further." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entonces pulamos tu técnica y vayamos más lejos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alors affinons ta technique et allons plus loin."
+          }
+        }
+      }
     },
     "There was no clear camera-measured %@ change between sets." : {
       "localizations" : {
@@ -23848,6 +26186,12 @@
     },
     "This iPhone cannot run Apple Intelligence, so the coach answers from Finn's records only." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este iPhone no puede usar Apple Intelligence, así que el coach responde solo con los registros de Finn."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24345,6 +26689,12 @@
             "value" : "Total reps"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeticiones totales"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24394,6 +26744,12 @@
     },
     "Training experience" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experiencia de entrenamiento"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24404,6 +26760,12 @@
     },
     "Training goal" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objetivo de entrenamiento"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24413,13 +26775,52 @@
       }
     },
     "Training is a marathon, not a sprint. Tell me what I should keep in mind." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrenar es una maratón, no un sprint. Dime qué debo tener en cuenta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'entraînement, c'est un marathon, pas un sprint. Dis-moi ce que je dois garder en tête."
+          }
+        }
+      }
     },
     "Training location" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lugar de entrenamiento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lieu d'entraînement"
+          }
+        }
+      }
     },
     "Training setup" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu entorno de entrenamiento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conditions d'entraînement"
+          }
+        }
+      }
     },
     "Trust the work." : {
       "localizations" : {
@@ -24843,6 +27244,12 @@
     },
     "Turn on Apple Intelligence in Settings > Apple Intelligence & Siri, and the coach will pick the sets for you." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa Apple Intelligence en Ajustes > Apple Intelligence y Siri, y el coach elegirá las series por ti."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25020,7 +27427,20 @@
       }
     },
     "Unlimited workouts" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrenamientos ilimitados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séances illimitées"
+          }
+        }
+      }
     },
     "Unlock your iPhone and ask again." : {
       "localizations" : {
@@ -25074,6 +27494,12 @@
     },
     "Use heart rate, recovery, sleep, workouts, age, weight and height from Health to tailor rest times and suggest lighter days." : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa la frecuencia cardiaca, la recuperación, el sueño, los entrenamientos, la edad, el peso y la altura de Salud para adaptar los descansos y sugerir días más suaves."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25255,6 +27681,12 @@
     },
     "View awards" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver recompensas"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25276,6 +27708,12 @@
     },
     "View set review" : {
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver la revisión"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25290,6 +27728,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "vs. last week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "respecto a la semana pasada"
           }
         },
         "fr" : {
@@ -25357,10 +27801,36 @@
       }
     },
     "We'll build a routine that works for you." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crearemos una rutina que te funcione."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On va construire une routine qui te convient."
+          }
+        }
+      }
     },
     "Weekly" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semanal"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hebdomadaire"
+          }
+        }
+      }
     },
     "Weight" : {
       "localizations" : {
@@ -25419,7 +27889,20 @@
       }
     },
     "Welcome back. We'll ease in and build from there." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué bien verte de nuevo. Empezamos suave y vamos subiendo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bon retour. On reprend en douceur, puis on monte en puissance."
+          }
+        }
+      }
     },
     "What brings you here?" : {
       "extractionState" : "stale",
@@ -25479,7 +27962,20 @@
       }
     },
     "What should I call you?" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cómo te llamo?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment je t'appelle ?"
+          }
+        }
+      }
     },
     "What the camera does" : {
       "localizations" : {
@@ -25681,6 +28177,28 @@
         }
       }
     },
+    "White moustache" : {
+      "localizations" : {
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "White mustache"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bigote blanco"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moustache blanche"
+          }
+        }
+      }
+    },
     "Whole body in the frame" : {
       "localizations" : {
         "en-GB" : {
@@ -25710,7 +28228,20 @@
       }
     },
     "Why did you stop?" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Por qué lo dejaste?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourquoi as-tu arrêté ?"
+          }
+        }
+      }
     },
     "Worded with Apple Intelligence" : {
       "localizations" : {
@@ -25888,7 +28419,20 @@
       }
     },
     "Yes" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sí"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oui"
+          }
+        }
+      }
     },
     "Yes, personalize" : {
       "extractionState" : "stale",
@@ -26095,7 +28639,20 @@
       }
     },
     "You decide" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Decide tú"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À toi de voir"
+          }
+        }
+      }
     },
     "You haven't measured a set in Finn yet. Say \"Start a squat set in Finn\" to begin." : {
       "comment" : "Siri, when the history is empty",
@@ -26122,6 +28679,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu n’as encore mesuré aucune série dans Finn. Dis « Lance une série de squats dans Finn » pour commencer."
+          }
+        }
+      }
+    },
+    "You seem not ready to start training now. I can offer you one training for free." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Aún no es el momento de entrenar? Puedo ofrecerte un entrenamiento gratis."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore le moment de t'entraîner ? Je peux t'offrir une séance gratuite."
+          }
+        }
+      }
+    },
+    "You want %@. Let's get you there by %@." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quieres %1$@. Lo conseguimos juntos para el %2$@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu veux %1$@. On y arrive ensemble d'ici le %2$@."
           }
         }
       }
@@ -26252,6 +28841,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu as bien plus marché que d’habitude hier : %1$lld pas, contre %2$lld un jour normal. Vas-y plus doucement si tes jambes le sentent."
+          }
+        }
+      }
+    },
+    "You want %@. Right now, you're %@. Let's get you there by %@." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quieres %1$@. Ahora mismo, %2$@. Lo conseguimos juntos para el %3$@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu veux %1$@. Pour l'instant, tu %2$@. On y arrive ensemble d'ici le %3$@."
           }
         }
       }
@@ -26396,6 +29001,22 @@
         }
       }
     },
+    "Your answers" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus respuestas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes réponses"
+          }
+        }
+      }
+    },
     "Your best set is still ahead." : {
       "localizations" : {
         "en-GB" : {
@@ -26498,7 +29119,20 @@
       }
     },
     "Your details" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus datos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes infos"
+          }
+        }
+      }
     },
     "Your earlier sets were filmed from your other side, so Finn can’t compare them." : {
       "localizations" : {
@@ -27288,7 +29922,20 @@
       }
     },
     "Your name" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu nombre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton prénom"
+          }
+        }
+      }
     },
     "Your next set starts here." : {
       "extractionState" : "stale",
@@ -27325,6 +29972,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ta prochaine séance"
+          }
+        }
+      }
+    },
+    "already advanced" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ya tienes un buen nivel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "as déjà un bon niveau"
+          }
+        }
+      }
+    },
+    "coming back after a break" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vuelves tras una pausa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reprends après une pause"
+          }
+        }
+      }
+    },
+    "just starting out" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "estás empezando"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "débutes"
+          }
+        }
+      }
+    },
+    "to lose fat" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "perder grasa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "perdre du gras"
+          }
+        }
+      }
+    },
+    "training regularly" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entrenas con regularidad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "t'entraînes régulièrement"
           }
         }
       }
@@ -27398,7 +30125,20 @@
       }
     },
     "Your plan is ready." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu plan está listo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton programme est prêt."
+          }
+        }
+      }
     },
     "Your profile faces the camera. Finn refuses a set filmed from the front." : {
       "extractionState" : "stale",
@@ -27716,10 +30456,36 @@
       }
     },
     "Your training details still need your input." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún faltan algunos datos de tu entrenamiento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il manque encore quelques infos sur ton entraînement."
+          }
+        }
+      }
     },
     "Your training goal, %@" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu objetivo, %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton objectif, %@"
+          }
+        }
+      }
     },
     "Your workouts are stored on this iPhone." : {
       "extractionState" : "stale",
@@ -28331,6 +31097,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Où j’en suis, quoi faire ensuite, quoi éviter."
+          }
+        }
+      }
+    },
+    "clearer technique" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "una técnica más limpia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "une technique plus propre"
+          }
+        }
+      }
+    },
+    "to build muscle" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ganar músculo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "prendre du muscle"
+          }
+        }
+      }
+    },
+    "to get back into training" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "volver a entrenar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reprendre l'entraînement"
+          }
+        }
+      }
+    },
+    "to train more regularly" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entrenar con más regularidad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "t'entraîner plus régulièrement"
           }
         }
       }

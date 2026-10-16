@@ -3,7 +3,7 @@ import WidgetKit
 
 /// the views of the home screen widget and the Live Activity. They live with the app's sources so
 /// unit tests can render them to images; the extension declares the widgets around them
-/// semantic surfaces and one accent match the app while adapting to widget rendering modes
+/// always dark, like the app; semantic colours still adapt to widget rendering modes
 
 // MARK: - Last set widget
 
@@ -26,7 +26,8 @@ struct LastSetWidgetView: View {
             default: small
             }
         }
-        .containerBackground(for: .widget) { Color(uiColor: .systemBackground) }
+        .environment(\.colorScheme, .dark)
+        .containerBackground(for: .widget) { Color.black }
         .widgetURL(startURL)
     }
 
@@ -165,8 +166,9 @@ struct SetActivityLockScreenView: View {
             }
         }
         .padding(16)
-        .activityBackgroundTint(Color(uiColor: .systemBackground))
-        .activitySystemActionForegroundColor(.primary)
+        .environment(\.colorScheme, .dark)
+        .activityBackgroundTint(.black)
+        .activitySystemActionForegroundColor(.white)
     }
 }
 

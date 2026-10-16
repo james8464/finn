@@ -145,7 +145,20 @@
       }
     },
     "Coaching will resume when your iPhone reconnects." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El coaching se reanudará cuando tu iPhone se vuelva a conectar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le coaching reprendra quand ton iPhone se reconnectera."
+          }
+        }
+      }
     },
     "DEMO INPUT" : {
       "localizations" : {

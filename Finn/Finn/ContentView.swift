@@ -79,13 +79,7 @@ struct ContentView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var liveCountSize: CGFloat = 64
     /// live advice during a set: a short order that fits on one line and reads from three metres
     @ScaledMetric(relativeTo: .largeTitle) private var liveCueSize: CGFloat = 44
-    private var destructiveLabelColor: Color {
-        Color(uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 1, green: 69 / 255, blue: 58 / 255, alpha: 1)
-                : UIColor(red: 198 / 255, green: 40 / 255, blue: 40 / 255, alpha: 1)
-        })
-    }
+    private let destructiveLabelColor = Color(red: 1, green: 69 / 255, blue: 58 / 255)
     #if DEBUG
     @ScaledMetric(relativeTo: .body) private var demoLabelSize = 12.0
     private var isDemo: Bool { ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") }
@@ -179,8 +173,8 @@ struct ContentView: View {
         }
         #endif
         .tint(HomeStyle.accent)
-        // apply the approved dark appearance at the presentation root too, so sheets,
-        // onboarding and set results use the same palette as the tabs
+        // Finn is dark only (UIUserInterfaceStyle in Info.plist); repeat it at the presentation
+        // root so sheets, onboarding and set results use the same palette as the tabs
         .preferredColorScheme(.dark)
         // the phone stands a few steps away and nobody touches it: keep the screen on while the
         // camera is open, or Auto-Lock interrupts framing and throws the set away

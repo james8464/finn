@@ -203,11 +203,11 @@ private extension OnboardingProfile {
         .preferredColorScheme(.dark)
 }
 
-#Preview("Summary, light, skipped answers") {
+#Preview("Summary, skipped answers") {
     @Previewable @State var ready = true
     PlanSummaryView(profile: OnboardingProfile(), isReady: $ready, back: {}, next: {})
         .background(HomeStyle.background)
-        .preferredColorScheme(.light)
+        .preferredColorScheme(.dark)
 }
 
 #Preview("Summary, accessibility text") {

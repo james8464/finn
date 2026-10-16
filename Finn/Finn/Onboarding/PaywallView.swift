@@ -364,12 +364,7 @@ struct PaywallView: View {
     }
 }
 
-#Preview("Dark") {
+#Preview {
     PaywallView(back: {}, next: {}, skip: {})
         .preferredColorScheme(.dark)
-}
-
-#Preview("Light") {
-    PaywallView(back: {}, next: {}, skip: {})
-        .preferredColorScheme(.light)
 }

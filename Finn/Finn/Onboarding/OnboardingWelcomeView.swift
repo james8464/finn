@@ -150,14 +150,9 @@ struct OnboardingWelcomeView: View {
     }
 }
 
-#Preview("Dark") {
+#Preview {
     OnboardingWelcomeView {}
         .preferredColorScheme(.dark)
-}
-
-#Preview("Light") {
-    OnboardingWelcomeView {}
-        .preferredColorScheme(.light)
 }
 
 #Preview("Accessibility text") {
