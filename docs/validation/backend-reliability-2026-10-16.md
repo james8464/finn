@@ -209,3 +209,8 @@ At the largest text size, a delayed SwiftUI text snapshot could still overwrite 
 edit. The composer now uses an explicit reset identity: UIKit owns current keystrokes, and only a
 successful submission deliberately replaces its text. Large-text tests assert that every typed
 character survives before sending, and retain a screenshot when a reply cannot be reached.
+
+Keyboard-driven geometry corrections now scroll without animation. New-message transitions still
+respect Reduce Motion; intermediate layout positions cannot start another animated correction.
+The current standalone backend suite passed **244 tests in 19 suites**. Small-screen accessibility
+fixes also use the existing native text wrapper for result and unavailable-Health explanations.

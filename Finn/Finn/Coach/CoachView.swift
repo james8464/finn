@@ -120,7 +120,9 @@ struct CoachView: View {
                 if isUserScrolling {
                     followsLatestReply = isNearBottom
                 } else if followsLatestReply && !isNearBottom {
-                    scrollToLatest(using: proxy)
+                    // Resizing for the keyboard is layout work. Animating this correction can
+                    // feed intermediate scroll positions back into another animation.
+                    scrollToLatest(using: proxy, animated: false)
                 }
             }
             .onScrollPhaseChange { _, phase in
@@ -241,8 +243,8 @@ struct CoachView: View {
         .accessibilityIdentifier(isCoach ? "coach.answer.\(message.engine?.rawValue ?? "opening")" : "coach.question")
     }
 
-    private func scrollToLatest(using proxy: ScrollViewProxy) {
-        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
+    private func scrollToLatest(using proxy: ScrollViewProxy, animated: Bool = true) {
+        withAnimation(!animated || reduceMotion ? nil : .easeOut(duration: 0.2)) {
             proxy.scrollTo("conversation.bottom", anchor: .bottom)
         }
     }
