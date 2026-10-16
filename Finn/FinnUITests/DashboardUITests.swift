@@ -46,15 +46,38 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.tryFinn"].isHittable)
     }
 
-    /// TEMPORARY with `FinnFirstTryTrigger.swift`: Try Finn shows the placeholder, then the coach card.
+    /// Try Finn names the first exercise; Not now leaves the card on Home. Try exercise opens the
+    /// camera with the rep target, and a set stopped early still counts: Done shows the coach card.
+    /// Demo input sends six reps only, so the stop at the target is covered by the unit tests.
     @MainActor
-    func testTryFinnSwitchesToCoachCard() {
+    func testTryFinnRunsTheFirstExerciseThenShowsTheCoachCard() {
         let app = XCUIApplication()
         app.launchArguments = ["-finn-ui-demo"]
         app.launch()
         XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 8))
         app.buttons["home.tryFinn"].tap()
-        // The placeholder shows for under a second: too brief to assert on reliably.
+        XCTAssertTrue(app.buttons["tryFinn.tryExercise"].waitForExistence(timeout: 5))
+        // demo launches have no level saved: the beginner's squats
+        let coachLine = app.descendants(matching: .any)["tryFinn.coach"]
+        XCTAssertTrue(coachLine.label.hasSuffix("Squat"), coachLine.label)
+        XCTAssertTrue(app.descendants(matching: .any)["tryFinn.target"].exists)
+        app.buttons["tryFinn.close"].tap()
+        XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 5))
+
+        app.buttons["home.tryFinn"].tap()
+        XCTAssertTrue(app.buttons["tryFinn.tryExercise"].waitForExistence(timeout: 5))
+        app.buttons["tryFinn.tryExercise"].tap()
+        let start = app.buttons["Start set"]
+        XCTAssertTrue(start.waitForExistence(timeout: 10))
+        start.tap()
+        let reps = app.descendants(matching: .any)["capture.liveReps"]
+        XCTAssertTrue(reps.waitForExistence(timeout: 10))
+        XCTAssertTrue((reps.value as? String)?.hasSuffix("of 8") == true, String(describing: reps.value))
+        Thread.sleep(forTimeInterval: 4)
+        app.buttons["Stop set"].tap()
+        let done = app.buttons["Done"].firstMatch
+        XCTAssertTrue(done.waitForExistence(timeout: 10))
+        done.tap()
         let coach = app.buttons["home.finnCoach"]
         XCTAssertTrue(coach.waitForExistence(timeout: 5))
         XCTAssertTrue(coach.label.hasPrefix("Finn: your next workout, "), coach.label)
@@ -77,7 +100,10 @@ final class DashboardUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 8))
         app.buttons["home.tryFinn"].tap()
-        XCTAssertTrue(app.buttons["home.finnCoach"].waitForExistence(timeout: 5))
+        // Try Finn opens its first exercise; Not now returns to Home
+        XCTAssertTrue(app.buttons["tryFinn.close"].waitForExistence(timeout: 10))
+        app.buttons["tryFinn.close"].tap()
+        XCTAssertTrue(app.buttons["home.account"].waitForExistence(timeout: 5))
         app.buttons["home.account"].tap()
         let replay = app.buttons["account.replayOnboarding"]
         XCTAssertTrue(replay.waitForExistence(timeout: 3))
