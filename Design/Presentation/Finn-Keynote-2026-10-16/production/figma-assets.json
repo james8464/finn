@@ -1,0 +1,134 @@
+[
+  {
+    "key": "iphone",
+    "target": "181:3",
+    "result": {
+      "success": true,
+      "imageHash": "cb0b5f8436cb73453edc30148d278c16a28ea4d1",
+      "sizeBytes": 389693,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:3"
+    }
+  },
+  {
+    "key": "watch",
+    "target": "181:4",
+    "result": {
+      "success": true,
+      "imageHash": "50bd50fb81eb7c71d31122b7bd9f3ae62104f732",
+      "sizeBytes": 206515,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:4"
+    }
+  },
+  {
+    "key": "home",
+    "target": "181:5",
+    "result": {
+      "success": true,
+      "imageHash": "d41fb77c2791aa370eefd5a551f6daf57387c52f",
+      "sizeBytes": 590541,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:5"
+    }
+  },
+  {
+    "key": "setup",
+    "target": "181:6",
+    "result": {
+      "success": true,
+      "imageHash": "df2600f7d0691fa3827d11ee01470b613b1efff6",
+      "sizeBytes": 141793,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:6"
+    }
+  },
+  {
+    "key": "live",
+    "target": "181:7",
+    "result": {
+      "success": true,
+      "imageHash": "9a8ea58ed640187aeaaab4139f664bd6de5c2c7c",
+      "sizeBytes": 181168,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:7"
+    }
+  },
+  {
+    "key": "result",
+    "target": "181:8",
+    "result": {
+      "success": true,
+      "imageHash": "6bc79658c125d6eaf1bdc717e4b3c4264ad72660",
+      "sizeBytes": 217309,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:8"
+    }
+  },
+  {
+    "key": "detail",
+    "target": "181:9",
+    "result": {
+      "success": true,
+      "imageHash": "e0985955f7cce470ea017efd13c268b6eba6e44c",
+      "sizeBytes": 231189,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:9"
+    }
+  },
+  {
+    "key": "history",
+    "target": "181:10",
+    "result": {
+      "success": true,
+      "imageHash": "95baf5c87a06b6f0a4d878f0e9a18a4afa158843",
+      "sizeBytes": 215012,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:10"
+    }
+  },
+  {
+    "key": "coach",
+    "target": "181:11",
+    "result": {
+      "success": true,
+      "imageHash": "6bbdfe41bf622720cc0ebfe01cd0a049eacc7722",
+      "sizeBytes": 234755,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:11"
+    }
+  },
+  {
+    "key": "workout",
+    "target": "181:12",
+    "result": {
+      "success": true,
+      "imageHash": "773bdd3a193741a840e2777c805c28fe182f49f4",
+      "sizeBytes": 242934,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:12"
+    }
+  },
+  {
+    "key": "posture",
+    "target": "181:13",
+    "result": {
+      "success": true,
+      "imageHash": "89b0d2d17e7fe93b689ccab8f83f3662772aeba2",
+      "sizeBytes": 246676,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:13"
+    }
+  },
+  {
+    "key": "watch-idle",
+    "target": "181:14",
+    "result": {
+      "success": true,
+      "imageHash": "d3dcb4a1e6fdf7111b7fb70ab6f2f0a996bd8474",
+      "sizeBytes": 22472,
+      "contentType": "image/png",
+      "placedOnNodeId": "181:14"
+    }
+  }
+]

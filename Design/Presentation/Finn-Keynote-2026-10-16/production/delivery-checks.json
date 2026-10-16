@@ -1,0 +1,44 @@
+{
+  "native_figma_file": "Y9asB4rM1J0tJcbr7Wim2q",
+  "page": "99:2",
+  "film_frame": "219:2",
+  "slides": 18,
+  "duration_with_film_seconds": 705,
+  "duration_without_film_seconds": 660,
+  "preserved_archives": [
+    "180:411",
+    "199:2"
+  ],
+  "native_app_videos": [
+    "setup",
+    "live",
+    "result",
+    "history-coach"
+  ],
+  "film_generation_credits": 45,
+  "additional_spend": 0,
+  "master_resolution": [
+    1920,
+    1080
+  ],
+  "generated_footage_resolution": [
+    1280,
+    720
+  ],
+  "decode_frames": 1440,
+  "audio_integrated_lufs": -16.4,
+  "audio_true_peak_dbfs": -1.0,
+  "limitations": [
+    "Generated actors; actual app demonstration uses synthetic input.",
+    "Watch companion shown as preview; paired physical validation remains outstanding."
+  ],
+  "native_motion_scenes": 18,
+  "native_video_layers_in_slides": 6,
+  "notes": 18,
+  "browser_slide_navigation": "18/18 passed, zero broken images",
+  "film_handover": "60 seconds, automatically enters slide 2",
+  "native_film_playback": "Autoplay on, Loop off, Sound on",
+  "native_still_verification": "Nine fresh PNG uploads; four exact UI crops; live Figma browser verified",
+  "reduced_motion": "Verified static scene with demo video paused at 0; manual play remains available",
+  "browser_errors": "None in final player console"
+}

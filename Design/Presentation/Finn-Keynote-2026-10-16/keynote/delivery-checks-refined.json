@@ -1,0 +1,12 @@
+{
+  "slides": 10,
+  "duration_seconds": 300,
+  "native_keynote_movies": 10,
+  "native_keynote_movies_match_revised_masters": true,
+  "finalizer": "pass",
+  "full_backup_decode": "pass",
+  "notes": "10 notes imported, verified in Keynote",
+  "notification": "Finn app icon and Finn name",
+  "motion": "source-aligned cue extraction, shared phone geometry, Watch handoff, timed implementation stages",
+  "keynote_build_editability": "embedded rendered movies; presenter notes editable"
+}

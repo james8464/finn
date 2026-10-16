@@ -21,7 +21,7 @@ final class CameraAngleUITests: XCTestCase {
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ]) { issue in
-            print("Camera-angle audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
+            print("Front-view result audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
             return false
         }
 
@@ -36,7 +36,7 @@ final class CameraAngleUITests: XCTestCase {
         try app.performAccessibilityAudit(for: [
             .sufficientElementDescription, .dynamicType, .hitRegion, .textClipped, .trait,
         ]) { issue in
-            print("Camera-angle audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
+            print("Camera-angle options audit: \(issue.compactDescription) · \(issue.element?.debugDescription ?? "no element")")
             return false
         }
         app.navigationBars.buttons.element(boundBy: 0).tap()
