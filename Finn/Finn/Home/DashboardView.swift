@@ -50,8 +50,8 @@ struct DashboardView: View {
     @Binding var hasTriedFinn: Bool
     /// the next workout and Finn's line, shared with the Workout tab
     @Binding var coachMessage: FinnCoachMessage
-    /// opens workout setup, from the coach card
-    let startWorkout: () -> Void
+    /// opens the Workout tab on the next workout, from the coach card
+    let openNextWorkout: () -> Void
     let watchDemo: () -> Void
     let open: (HomeRoute) -> Void
     @State private var showsFirstTry = false
@@ -190,7 +190,7 @@ struct DashboardView: View {
             VStack(spacing: DashboardStyle.cardSpacing) {
                 Group {
                     if hasTriedFinn {
-                        FinnCoachCard(workout: coachMessage.workout, quote: coachMessage.quote, action: startWorkout)
+                        FinnCoachCard(workout: coachMessage.workout, quote: coachMessage.quote, action: openNextWorkout)
                             .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
                     } else {
                         tryFinnCard.transition(.opacity)
@@ -400,13 +400,13 @@ struct DashboardView: View {
 #Preview("Try Finn") {
     @Previewable @State var hasTriedFinn = false
     DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
-                  coachMessage: .constant(FinnCoachMessage()), startWorkout: {}, watchDemo: {}, open: { _ in })
+                  coachMessage: .constant(FinnCoachMessage()), openNextWorkout: {}, watchDemo: {}, open: { _ in })
         .preferredColorScheme(.dark)
 }
 
 #Preview("Coach") {
     @Previewable @State var hasTriedFinn = true
     DashboardView(history: [], exercise: .bodyweightSquat, hasTriedFinn: $hasTriedFinn,
-                  coachMessage: .constant(FinnCoachMessage()), startWorkout: {}, watchDemo: {}, open: { _ in })
+                  coachMessage: .constant(FinnCoachMessage()), openNextWorkout: {}, watchDemo: {}, open: { _ in })
         .preferredColorScheme(.dark)
 }

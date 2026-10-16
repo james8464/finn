@@ -16737,6 +16737,34 @@
         }
       }
     },
+    "Opens the Workout tab." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the Workout tab."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the Workout tab."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre la pestaña Entrenamiento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l’onglet Séance."
+          }
+        }
+      }
+    },
     "Opens workout setup." : {
       "localizations" : {
         "en-GB" : {
@@ -21308,6 +21336,34 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afficher mon historique"
+          }
+        }
+      }
+    },
+    "Show previous workouts" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show previous workouts"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show previous workouts"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar entrenamientos anteriores"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher les séances précédentes"
           }
         }
       }

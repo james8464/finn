@@ -49,6 +49,8 @@ struct ContentView: View {
     @AppStorage(FinnFirstTry.key, store: FinnFirstTry.defaults) private var hasTriedFinn = false
     /// the next workout and Finn's line, the one source for the Home and Workout cards
     @State private var coachMessage = FinnCoachMessage()
+    /// Home's coach card opened the Workout tab: its previous workouts stay blurred until tapped
+    @State private var blursPreviousWorkouts = false
     /// the Progress tab's section and exercise, so Home's Posture card can open them
     @State private var progressSection: ProgressSection = .posture
     @State private var progressExercise: ExerciseKind?
@@ -375,13 +377,10 @@ struct ContentView: View {
                                 set: { tabRoutes[tab] = $0 }
                             )) { destinationPage($0) }
                             .toolbar {
-                                if tab != .workout && tab != .home {
-                                    ToolbarItem(placement: .topBarTrailing) {
-                                        Button { route = .account } label: {
-                                            Label("Settings", systemImage: "gearshape")
-                                        }
-                                        .accessibilityIdentifier("home.account")
-                                    }
+                                // Home draws its own, having no navigation bar; Workout places it
+                                // after its More menu
+                                if tab != .home && tab != .workout {
+                                    ToolbarItem(placement: .topBarTrailing) { accountButton }
                                 }
                             }
                     }
@@ -423,7 +422,7 @@ struct ContentView: View {
         case .home:
             DashboardView(history: model.history, exercise: model.selectedExercise,
                           badges: badges.earned, hasTriedFinn: $hasTriedFinn, coachMessage: $coachMessage,
-                          startWorkout: openWorkoutSetup,
+                          openNextWorkout: openNextWorkout,
                           watchDemo: { showsFinnDemo = true }) { destination in
                 if destination == .posture { openPostureProgress() }
                 else { route = destination }
@@ -441,10 +440,18 @@ struct ContentView: View {
         ))
     }
 
-    /// the Workout tab with its selection step open, where Home's coach card and the demo lead
+    /// the Workout tab with its selection step open, where the demo leads
     private func openWorkoutSetup() {
         selectedTab = .workout
         tabRoutes[.workout] = .launchWorkout
+    }
+
+    /// Home's coach card: the Workout tab at its root, the next workout in focus and the previous
+    /// workouts blurred until tapped
+    private func openNextWorkout() {
+        tabRoutes[.workout] = nil
+        blursPreviousWorkouts = true
+        selectedTab = .workout
     }
 
     /// Home's Posture card: always the Progress tab's Posture section, on the exercise the card shows
@@ -658,9 +665,14 @@ struct ContentView: View {
     /// the Workout tab: the next workout, previous sessions, and Launch workout for the setup above
     private var workoutHome: some View {
         WorkoutTabView(message: coachMessage, history: model.history,
+                       blursPreviousWorkouts: $blursPreviousWorkouts,
                        savedToFitness: { model.fitnessRecord(forSession: $0.id) != nil },
                        openSession: { route = .session($0.id) },
                        launch: { route = .launchWorkout })
+            // the blur belongs to the visit Home's card started: gone once the person leaves the tab
+            .onChange(of: selectedTab) { _, tab in
+                if tab != .workout { blursPreviousWorkouts = false }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -684,7 +696,18 @@ struct ContentView: View {
                     }
                     .accessibilityIdentifier("home.more")
                 }
+                // its own glass, at the far right like on the other tabs
+                ToolbarSpacer(.fixed, placement: .topBarTrailing)
+                ToolbarItem(placement: .topBarTrailing) { accountButton }
             }
+    }
+
+    /// Home's profile button, the same on every tab: it opens Settings
+    private var accountButton: some View {
+        Button { route = .account } label: {
+            Label("Account settings", systemImage: "person.fill")
+        }
+        .accessibilityIdentifier("home.account")
     }
 
     /// one short line about the latest save to Apple Health, with Try again when it can help

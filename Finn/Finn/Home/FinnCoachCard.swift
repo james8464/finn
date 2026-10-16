@@ -194,7 +194,7 @@ struct FinnCoachCard: View {
         .buttonStyle(PressableStyle())
         // One element: who speaks, the workout, then the line.
         .accessibilityLabel(spokenLabel)
-        .accessibilityHint("Opens workout setup.")
+        .accessibilityHint("Opens the Workout tab.")
         .accessibilityIdentifier("home.finnCoach")
     }
 
