@@ -363,6 +363,8 @@ struct ContentView: View {
     private var appearancePresentation: some View {
         // A native modal isolates the workout accessibility tree while preserving tab state.
         setup
+            // Try Finn (`TryFinn/`) opens the camera on this model
+            .environment(model)
             .fullScreenCover(isPresented: Binding(
                 get: { model.stage != .ready },
                 set: { _ in }
