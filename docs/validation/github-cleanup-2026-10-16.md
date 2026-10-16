@@ -36,9 +36,11 @@ shorten chart transitions, and respect the app's Reduce Motion setting.
 
 ## Verification and cleanup
 
-The consolidated tree is checked with Swift unit tests and focused simulator navigation/Coach
-flows. Pull request CI checks analysis, Release startup, all interface test groups, Vision replay
-and the validation scorer before the squash merge to main. Remote branches are deleted only
+The consolidated tree passed 562 Swift unit tests in 66 suites, Coach submission/tab switching,
+all dashboard destinations, and dark appearance/largest-text navigation in an iOS 27 simulator.
+Full CI checks analysis, Release startup, all interface groups, Vision replay and the validation
+scorer on the final main tree; superseded runs are cancelled to avoid duplicate work. Remote
+branches are deleted only
 after their captured tips are preserved in the archive and their reconciled changes are in main.
 A changed remote tip must be reconciled rather than deleted.
 
