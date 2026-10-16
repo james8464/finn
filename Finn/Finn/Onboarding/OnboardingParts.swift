@@ -29,10 +29,12 @@ struct FinnReaction: View {
 
     /// one pass of the LEDs, after which the line takes their place
     static let waveDuration = FinnLEDs.duration
+    @Environment(\.coach) private var coach
+    @ScaledMetric(relativeTo: .body) private var avatarSize = 30.0
 
     var body: some View {
         HStack(spacing: 12) {
-            FinnAvatar()
+            CoachAvatar(coach: coach, size: avatarSize)
             ZStack(alignment: .leading) {
                 if speaks {
                     Text(line)
@@ -150,4 +152,25 @@ struct OnboardingImageSlot: View {
                 }
         }
     }
+}
+
+enum OnboardingMetrics {
+    /// the side margins of every screen
+    static let gutter: CGFloat = 20
+    /// above the top row (Back, Skip)
+    static let headerTop: CGFloat = 18
+    /// above a page's title
+    static let pageTop: CGFloat = 28
+    /// between the blocks of a page: the title, the answers, a section
+    static let sectionSpacing: CGFloat = 20
+    /// between answer rows
+    static let rowSpacing: CGFloat = 10
+    /// between a title and its subtitle
+    static let titleSpacing: CGFloat = 6
+    /// inside a card or a row
+    static let cardPadding: CGFloat = 16
+    /// below the bottom action
+    static let bottomInset: CGFloat = 8
+    /// the large coach circle of the coach question and the summary
+    static let coachPortrait: CGFloat = 112
 }

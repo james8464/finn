@@ -11,47 +11,45 @@ nonisolated enum TrainingGoal: String, Codable, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .technique:
-            String(localized: "Clearer technique")
-        case .consistency:
-            String(localized: "Train more regularly")
-        case .muscle:
-            String(localized: "Build muscle")
-        case .comeback:
-            String(localized: "Come back after a break")
-        case .fatLoss:
-            String(localized: "Lose fat")
+        case .technique: String(localized: "Clearer technique")
+        case .consistency: String(localized: "Train more regularly")
+        case .muscle: String(localized: "Build muscle")
+        case .comeback: String(localized: "Come back after a break")
+        case .fatLoss: String(localized: "Lose fat")
         }
     }
 
     var symbol: String {
         switch self {
-        case .technique:
-            "scope"
-        case .consistency:
-            "calendar"
-        case .muscle:
-            "figure.strengthtraining.traditional"
-        case .comeback:
-            "arrow.uturn.forward"
-        case .fatLoss:
-            "flame"
+        case .technique: "scope"
+        case .consistency: "calendar"
+        case .muscle: "figure.strengthtraining.traditional"
+        case .comeback: "arrow.uturn.forward"
+        case .fatLoss: "flame"
         }
     }
 
     /// what Finn says once Continue is tapped
     var finnLine: String {
         switch self {
-        case .technique:
-            String(localized: "Form first. I'll catch what you can't see.")
-        case .consistency:
-            String(localized: "Little and often. I'll keep you on track.")
-        case .muscle:
-            String(localized: "Let's build it right. I'll make every rep count.")
-        case .comeback:
-            String(localized: "Welcome back. We'll ease in and build from there.")
-        case .fatLoss:
-            String(localized: "Let's keep you moving. Every set counts.")
+        case .technique: String(localized: "Form first. I'll catch what you can't see.")
+        case .consistency: String(localized: "Little and often. I'll keep you on track.")
+        case .muscle: String(localized: "Let's build it right. I'll make every rep count.")
+        case .comeback: String(localized: "Welcome back. We'll ease in and build from there.")
+        case .fatLoss: String(localized: "Let's keep you moving. Every set counts.")
+        }
+    }
+}
+
+extension TrainingGoal {
+    /// the goal in the coach's summary: "You want …"
+    var summaryPhrase: String {
+        switch self {
+        case .technique: String(localized: "clearer technique")
+        case .consistency: String(localized: "to train more regularly")
+        case .muscle: String(localized: "to build muscle")
+        case .comeback: String(localized: "to get back into training")
+        case .fatLoss: String(localized: "to lose fat")
         }
     }
 }
@@ -66,27 +64,31 @@ nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .new:
-            String(localized: "I've never really trained")
-        case .returning:
-            String(localized: "Coming back after a break")
-        case .regular:
-            String(localized: "I train regularly")
-        case .experienced:
-            String(localized: "I'm advanced")
+        case .new: String(localized: "I've never really trained")
+        case .returning: String(localized: "Coming back after a break")
+        case .regular: String(localized: "I train regularly")
+        case .experienced: String(localized: "I'm advanced")
         }
     }
 
     var finnLine: String {
         switch self {
-        case .new:
-            String(localized: "Everyone starts somewhere. I'll guide each move.")
-        case .returning:
-            String(localized: "Good to have you back. We'll find your rhythm again.")
-        case .regular:
-            String(localized: "Then let's sharpen your form and push further.")
-        case .experienced:
-            String(localized: "Then I'll focus on the details that make a difference.")
+        case .new: String(localized: "Everyone starts somewhere. I'll guide each move.")
+        case .returning: String(localized: "Good to have you back. We'll find your rhythm again.")
+        case .regular: String(localized: "Then let's sharpen your form and push further.")
+        case .experienced: String(localized: "Then I'll focus on the details that make a difference.")
+        }
+    }
+}
+
+extension TrainingLevel {
+    /// the level in the coach's summary: "Right now, you're …"
+    var summaryPhrase: String {
+        switch self {
+        case .new: String(localized: "just starting out")
+        case .returning: String(localized: "coming back after a break")
+        case .regular: String(localized: "training regularly")
+        case .experienced: String(localized: "already advanced")
         }
     }
 }
@@ -99,12 +101,9 @@ nonisolated enum ProgramStopReason: String, Codable, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .motivation:
-            String(localized: "I lost motivation")
-        case .injury:
-            String(localized: "I got injured")
-        case .didNotWork:
-            String(localized: "The program didn't work for me")
+        case .motivation: String(localized: "I lost motivation")
+        case .injury: String(localized: "I got injured")
+        case .didNotWork: String(localized: "The program didn't work for me")
         }
     }
 }
@@ -118,27 +117,19 @@ nonisolated enum TrainingIntensity: String, Codable, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .easy:
-            String(localized: "Go easy on me")
-        case .challenge:
-            String(localized: "Challenge me")
-        case .hard:
-            String(localized: "Push me hard")
-        case .finnDecides:
-            String(localized: "You decide")
+        case .easy: String(localized: "Go easy on me")
+        case .challenge: String(localized: "Challenge me")
+        case .hard: String(localized: "Push me hard")
+        case .finnDecides: String(localized: "You decide")
         }
     }
 
     var finnLine: String {
         switch self {
-        case .easy:
-            String(localized: "Steady it is. We'll build up at your pace.")
-        case .challenge:
-            String(localized: "Hard but doable. That's where you grow.")
-        case .hard:
-            String(localized: "Then I won't let you coast.")
-        case .finnDecides:
-            String(localized: "Leave it to me. I'll adjust as you go.")
+        case .easy: String(localized: "Steady it is. We'll build up at your pace.")
+        case .challenge: String(localized: "Hard but doable. That's where you grow.")
+        case .hard: String(localized: "Then I won't let you coast.")
+        case .finnDecides: String(localized: "Leave it to me. I'll adjust as you go.")
         }
     }
 }
@@ -151,79 +142,56 @@ nonisolated enum TrainingDays: String, Codable, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .oneToTwo:
-            String(localized: "1–2 days")
-        case .threeToFour:
-            String(localized: "3–4 days")
-        case .fivePlus:
-            String(localized: "5+ days")
+        case .oneToTwo: String(localized: "1–2 days")
+        case .threeToFour: String(localized: "3–4 days")
+        case .fivePlus: String(localized: "5+ days")
         }
     }
 
     var finnLine: String {
         switch self {
-        case .oneToTwo:
-            String(localized: "Short weeks still count. We'll make each session matter.")
-        case .threeToFour:
-            String(localized: "We'll build a routine that works for you.")
-        case .fivePlus:
-            String(localized: "Big weeks. I'll make sure you recover too.")
+        case .oneToTwo: String(localized: "Short weeks still count. We'll make each session matter.")
+        case .threeToFour: String(localized: "We'll build a routine that works for you.")
+        case .fivePlus: String(localized: "Big weeks. I'll make sure you recover too.")
         }
     }
 }
 
 /// asked after the plan offer, or imported from Apple Health
 nonisolated enum BodySex: String, Codable, CaseIterable, Sendable {
-    case female
-    case male
+    case female, male
 
     var title: String {
         switch self {
-        case .female:
-            String(localized: "Female")
-        case .male:
-            String(localized: "Male")
+        case .female: String(localized: "Female")
+        case .male: String(localized: "Male")
         }
     }
 }
 
 nonisolated enum TrainingLocation: String, Codable, CaseIterable, Sendable {
-    case gym
-    case home
-    case outdoors
+    case gym, home, outdoors
 
     var title: String {
         switch self {
-        case .gym:
-            String(localized: "Gym")
-        case .home:
-            String(localized: "Home")
-        case .outdoors:
-            String(localized: "Outdoors")
+        case .gym: String(localized: "Gym")
+        case .home: String(localized: "Home")
+        case .outdoors: String(localized: "Outdoors")
         }
     }
 }
 
 /// what the person can train with. "None" excludes the others
 nonisolated enum TrainingEquipment: String, Codable, CaseIterable, Sendable {
-    case none
-    case pullUpBar
-    case dumbbells
-    case barbell
-    case resistanceBands
+    case none, pullUpBar, dumbbells, barbell, resistanceBands
 
     var title: String {
         switch self {
-        case .none:
-            String(localized: "None, bodyweight only")
-        case .pullUpBar:
-            String(localized: "Pull-up bar")
-        case .dumbbells:
-            String(localized: "Dumbbells")
-        case .barbell:
-            String(localized: "Barbell")
-        case .resistanceBands:
-            String(localized: "Resistance bands")
+        case .none: String(localized: "None, bodyweight only")
+        case .pullUpBar: String(localized: "Pull-up bar")
+        case .dumbbells: String(localized: "Dumbbells")
+        case .barbell: String(localized: "Barbell")
+        case .resistanceBands: String(localized: "Resistance bands")
         }
     }
 }
@@ -242,6 +210,8 @@ nonisolated struct OnboardingProfile: Equatable, Sendable {
     var stopReasons: [ProgramStopReason] = []
     var intensity: TrainingIntensity?
     var days: TrainingDays?
+    /// the last question; Finn until another coach is picked
+    var coach: Coach = .finn
     var sex: BodySex?
     var heightCentimeters: Int?
     var weightKilograms: Double?
@@ -267,50 +237,41 @@ nonisolated struct OnboardingProfile: Equatable, Sendable {
         favouriteExercises + ExerciseKind.allCases.filter { !favouriteExercises.contains($0) }
     }
 
+    /// what the coach says once the plan is customised: the goal, the level, and a date three
+    /// months from `today` in the person's locale. A skipped question leaves its part out
+    func coachSummary(from today: Date = .now, calendar: Calendar = .autoupdatingCurrent,
+                      locale: Locale = .autoupdatingCurrent) -> String {
+        let target = calendar.date(byAdding: .month, value: 3, to: today) ?? today
+        let date = target.formatted(Date.FormatStyle(date: .long, time: .omitted, locale: locale, calendar: calendar))
+        return switch (goal, level) {
+        case let (goal?, level?):
+            String(localized: "You want \(goal.summaryPhrase). Right now, you're \(level.summaryPhrase). Let's get you there by \(date).")
+        case let (goal?, nil):
+            String(localized: "You want \(goal.summaryPhrase). Let's get you there by \(date).")
+        case let (nil, level?):
+            String(localized: "Right now, you're \(level.summaryPhrase). Let's see how far you can go by \(date).")
+        case (nil, nil):
+            String(localized: "Let's see how far you can go by \(date).")
+        }
+    }
+
     /// selection hints added to the coach prompt. The model still returns set labels only.
     var coachNote: String? {
         var parts: [String] = []
         switch level {
-        case .new?:
-            parts
-                .append(
-                    "The person is new to training: prefer a recent set with one clear recorded observation."
-                )
-        case .returning?:
-            parts
-                .append("The person is coming back after a break: prefer the most recent relevant set.")
-        case .regular?:
-            parts
-                .append("The person trains regularly: prefer a set with a recorded comparison when relevant.")
-        case .experienced?:
-            parts
-                .append(
-                    "The person is advanced: prefer sets with measured counts or comparisons when relevant."
-                )
-        case nil:
-            break
+        case .new?: parts.append("The person is new to training: prefer a recent set with one clear recorded observation.")
+        case .returning?: parts.append("The person is coming back after a break: prefer the most recent relevant set.")
+        case .regular?: parts.append("The person trains regularly: prefer a set with a recorded comparison when relevant.")
+        case .experienced?: parts.append("The person is advanced: prefer sets with measured counts or comparisons when relevant.")
+        case nil: break
         }
         switch goal {
-        case .technique?:
-            parts
-                .append(
-                    "Their goal is clearer technique: prefer a set with a recorded form observation when relevant."
-                )
-        case .consistency?:
-            parts
-                .append("Their goal is to train more regularly: prefer recent dated sets when relevant.")
-        case .muscle?:
-            parts
-                .append(
-                    "Their goal is to build muscle: prefer sets with recorded rep counts or comparisons when relevant."
-                )
-        case .comeback?:
-            parts
-                .append("They are coming back after a break: prefer the most recent relevant set.")
-        case .fatLoss?:
-            parts.append("Their goal is to lose fat: prefer recent dated sets when relevant.")
-        case nil:
-            break
+        case .technique?: parts.append("Their goal is clearer technique: prefer a set with a recorded form observation when relevant.")
+        case .consistency?: parts.append("Their goal is to train more regularly: prefer recent dated sets when relevant.")
+        case .muscle?: parts.append("Their goal is to build muscle: prefer sets with recorded rep counts or comparisons when relevant.")
+        case .comeback?: parts.append("They are coming back after a break: prefer the most recent relevant set.")
+        case .fatLoss?: parts.append("Their goal is to lose fat: prefer recent dated sets when relevant.")
+        case nil: break
         }
         return parts.isEmpty ? nil : parts.joined(separator: " ")
     }
@@ -326,6 +287,7 @@ extension FinnPreferences {
     static let programStopReasonsKey = "finn.programStopReasons"
     static let trainingIntensityKey = "finn.trainingIntensity"
     static let trainingDaysKey = "finn.trainingDays"
+    static let coachKey = "finn.coach"
     static let bodySexKey = "finn.bodySex"
     static let heightCentimetersKey = "finn.heightCentimeters"
     static let weightKilogramsKey = "finn.weightKilograms"
@@ -352,9 +314,7 @@ extension FinnPreferences {
 
     /// the exercises picked at the first launch, in order. Unknown values from a later build are dropped.
     var favouriteExercises: [ExerciseKind] {
-        get {
-            (defaults.stringArray(forKey: Self.favouriteExercisesKey) ?? [])
-                .compactMap(ExerciseKind.init(rawValue:)) }
+        get { (defaults.stringArray(forKey: Self.favouriteExercisesKey) ?? []).compactMap(ExerciseKind.init(rawValue:)) }
         nonmutating set { defaults.set(newValue.map(\.rawValue), forKey: Self.favouriteExercisesKey) }
     }
 
@@ -370,13 +330,8 @@ extension FinnPreferences {
     }
 
     var programStopReasons: [ProgramStopReason] {
-        get {
-            (defaults.stringArray(forKey: Self.programStopReasonsKey) ?? [])
-                .compactMap(ProgramStopReason.init(rawValue:)) }
-        nonmutating set { defaults.set(
-            newValue.isEmpty ? nil : newValue.map(\.rawValue),
-            forKey: Self.programStopReasonsKey
-        ) }
+        get { (defaults.stringArray(forKey: Self.programStopReasonsKey) ?? []).compactMap(ProgramStopReason.init(rawValue:)) }
+        nonmutating set { defaults.set(newValue.isEmpty ? nil : newValue.map(\.rawValue), forKey: Self.programStopReasonsKey) }
     }
 
     var trainingIntensity: TrainingIntensity? {
@@ -387,6 +342,12 @@ extension FinnPreferences {
     var trainingDays: TrainingDays? {
         get { defaults.string(forKey: Self.trainingDaysKey).flatMap(TrainingDays.init(rawValue:)) }
         nonmutating set { defaults.set(newValue?.rawValue, forKey: Self.trainingDaysKey) }
+    }
+
+    /// Finn when nothing is saved, or when the saved coach left a later build
+    var coach: Coach {
+        get { Coach.stored(defaults.string(forKey: Self.coachKey)) }
+        nonmutating set { defaults.set(newValue.id, forKey: Self.coachKey) }
     }
 
     var bodySex: BodySex? {
@@ -410,13 +371,8 @@ extension FinnPreferences {
     }
 
     var trainingEquipment: [TrainingEquipment] {
-        get {
-            (defaults.stringArray(forKey: Self.trainingEquipmentKey) ?? [])
-                .compactMap(TrainingEquipment.init(rawValue:)) }
-        nonmutating set { defaults.set(
-            newValue.isEmpty ? nil : newValue.map(\.rawValue),
-            forKey: Self.trainingEquipmentKey
-        ) }
+        get { (defaults.stringArray(forKey: Self.trainingEquipmentKey) ?? []).compactMap(TrainingEquipment.init(rawValue:)) }
+        nonmutating set { defaults.set(newValue.isEmpty ? nil : newValue.map(\.rawValue), forKey: Self.trainingEquipmentKey) }
     }
 
     var pastInjuries: String {
@@ -431,24 +387,13 @@ extension FinnPreferences {
 
     /// the whole profile at once
     var onboardingProfile: OnboardingProfile {
-        OnboardingProfile(
-            goal: trainingGoal,
-            level: trainingLevel,
-            favouriteExercises: favouriteExercises,
-            speaksLive: speaksLive,
-            firstName: firstName,
-            followedProgram: followedProgram,
-            stopReasons: programStopReasons,
-            intensity: trainingIntensity,
-            days: trainingDays,
-            sex: bodySex,
-            heightCentimeters: heightCentimeters,
-            weightKilograms: weightKilograms,
-            location: trainingLocation,
-            equipment: trainingEquipment,
-            injuries: pastInjuries,
-            noPastInjuries: noPastInjuries
-        )
+        OnboardingProfile(goal: trainingGoal, level: trainingLevel,
+                          favouriteExercises: favouriteExercises, speaksLive: speaksLive,
+                          firstName: firstName, followedProgram: followedProgram,
+                          stopReasons: programStopReasons, intensity: trainingIntensity, days: trainingDays,
+                          coach: coach, sex: bodySex, heightCentimeters: heightCentimeters, weightKilograms: weightKilograms,
+                          location: trainingLocation, equipment: trainingEquipment,
+                          injuries: pastInjuries, noPastInjuries: noPastInjuries)
     }
 
     /// writes every answer, marks the onboarding done, and makes the first favourite the chosen exercise
@@ -462,39 +407,44 @@ extension FinnPreferences {
         programStopReasons = profile.followedProgram == true ? profile.stopReasons : []
         trainingIntensity = profile.intensity
         trainingDays = profile.days
+        coach = profile.coach
         bodySex = profile.sex
         heightCentimeters = profile.heightCentimeters
         weightKilograms = profile.weightKilograms
         trainingLocation = profile.location
         trainingEquipment = profile.equipment
-        pastInjuries = profile.noPastInjuries ? "" : profile.injuries
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        pastInjuries = profile.noPastInjuries ? "" : profile.injuries.trimmingCharacters(in: .whitespacesAndNewlines)
         noPastInjuries = profile.noPastInjuries
-        if let first = profile.favouriteExercises.first {
-            selectedExercise = first
-        }
+        if let first = profile.favouriteExercises.first { selectedExercise = first }
         onboardingCompleted = true
     }
 
     /// the order of the exercise chips on the first screen
-    var exerciseOrder: [ExerciseKind] {
-        onboardingProfile.exerciseOrder
+    var exerciseOrder: [ExerciseKind] { onboardingProfile.exerciseOrder }
+
+    /// every answer of the onboarding, the coach included
+    static let onboardingAnswerKeys = [
+        trainingGoalKey, trainingLevelKey, favouriteExercisesKey, firstNameKey, followedProgramKey,
+        programStopReasonsKey, trainingIntensityKey, trainingDaysKey, coachKey, bodySexKey,
+        heightCentimetersKey, weightKilogramsKey, trainingLocationKey, trainingEquipmentKey,
+        pastInjuriesKey, noPastInjuriesKey,
+    ]
+
+    /// forgets every onboarding answer, so a replayed onboarding starts blank, with Finn as the coach.
+    /// Settings and saved sets stay
+    func resetOnboardingAnswers() {
+        for key in Self.onboardingAnswerKeys { defaults.removeObject(forKey: key) }
     }
 
     /// erases Finn's saved choices when the person deletes all local app data. HealthKit grants
     /// live in iOS and must still be managed in Health settings
     func resetLocalChoices() {
-        for key in [Self.onboardingCompletedKey, Self.trainingGoalKey, Self.trainingLevelKey,
-                    Self.favouriteExercisesKey, Self.firstNameKey, Self.followedProgramKey,
-                    Self.programStopReasonsKey, Self.trainingIntensityKey, Self.trainingDaysKey,
-                    Self.bodySexKey, Self.heightCentimetersKey, Self.weightKilogramsKey,
-                    Self.trainingLocationKey, Self.trainingEquipmentKey, Self.pastInjuriesKey,
-                    Self.noPastInjuriesKey,
-                    Self.recognisesExerciseKey, Self.usesTrainedModelKey,
-                    Self.checksCameraAngleKey, Self.handsFreeKey, Self.speaksLiveKey,
-                    Self.savesToFitnessKey, Self.selectedExerciseKey,
-                    Self.personalisesWithHealthKey, Self.personalisationOfferedKey,
-                    Self.hapticFeedbackKey, Self.soundFeedbackKey] {
+        let settings = [Self.recognisesExerciseKey, Self.usesTrainedModelKey,
+                        Self.checksCameraAngleKey, Self.handsFreeKey, Self.speaksLiveKey,
+                        Self.savesToFitnessKey, Self.selectedExerciseKey,
+                        Self.personalisesWithHealthKey, Self.personalisationOfferedKey,
+                        Self.hapticFeedbackKey, Self.soundFeedbackKey]
+        for key in [Self.onboardingCompletedKey] + Self.onboardingAnswerKeys + settings {
             defaults.removeObject(forKey: key)
         }
     }

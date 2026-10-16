@@ -63,6 +63,10 @@ struct ContentView: View {
     @State private var selectedTab: HomeTab = .home
     @State private var keyboardVisible = false
     @State private var showsFinnDemo = false
+    @State private var showsFreeWorkoutOffer = false
+    @State private var offersFreeWorkoutAfterOnboarding = false
+    @State private var startsFreeWorkoutAfterOffer = false
+    @State private var showsFreeTryFinn = false
     /// TEMPORARY with `FinnFirstTryTrigger.swift`: whether Home shows the coach card.
     @AppStorage(FinnFirstTry.key, store: FinnFirstTry.defaults) private var hasTriedFinn = false
     /// the next workout and Finn's line, the one source for the Home and Workout cards
@@ -297,13 +301,31 @@ struct ContentView: View {
             }
             .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         }
-        .fullScreenCover(isPresented: $showsOnboarding) {
-            OnboardingView(preferences: preferences) { profile in
+        .fullScreenCover(isPresented: $showsOnboarding, onDismiss: {
+            guard offersFreeWorkoutAfterOnboarding else { return }
+            offersFreeWorkoutAfterOnboarding = false
+            showsFreeWorkoutOffer = true
+        }) {
+            OnboardingView(preferences: preferences) { profile, exit in
                 // the answers take effect now, not at the next launch
                 model.speaksLive = profile.speaksLive
                 if let first = profile.favouriteExercises.first { model.selectedExercise = first }
+                offersFreeWorkoutAfterOnboarding = exit == .skippedPlan
                 showsOnboarding = false
             }
+        }
+        .sheet(isPresented: $showsFreeWorkoutOffer, onDismiss: {
+            guard startsFreeWorkoutAfterOffer else { return }
+            startsFreeWorkoutAfterOffer = false
+            showsFreeTryFinn = true
+        }) {
+            FreeWorkoutOfferView(coach: preferences.coach) {
+                startsFreeWorkoutAfterOffer = true
+                showsFreeWorkoutOffer = false
+            }
+            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(HomeStyle.background)
         }
         .fullScreenCover(isPresented: $showsFinnDemo) {
             FinnDemoView {
@@ -353,7 +375,9 @@ struct ContentView: View {
         // A native modal isolates the workout accessibility tree while preserving tab state.
         setup
             // Try Finn (`TryFinn/`) opens the camera on this model
+            .tryFinn(isPresented: $showsFreeTryFinn, hasTriedFinn: $hasTriedFinn)
             .environment(model)
+            .environment(\.coach, preferences.coach)
             .fullScreenCover(isPresented: Binding(
                 get: { model.stage != .ready },
                 set: { _ in }

@@ -223,14 +223,10 @@ struct FinnCardSurface: ViewModifier {
 struct FinnBadge: View {
     /// the thin pink ring, for the badge away from the pink card, on a dark background
     var showsOutline = false
+    @Environment(\.coach) private var coach
 
     var body: some View {
-        Text(verbatim: "F")
-            .font(.title2.bold())
-            .fontDesign(.rounded)
-            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-            .frame(width: 48, height: 48)
-            .background(.black.opacity(0.08), in: Circle())
+        CoachAvatar(coach: coach, size: 48)
             .overlay {
                 if showsOutline {
                     Circle()

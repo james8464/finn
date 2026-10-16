@@ -1,13 +1,22 @@
 import SwiftUI
 
-/// the welcome, two demos, six questions, the plan offer, then a few details about the person.
+/// how the person left the onboarding
+enum OnboardingExit {
+    /// through every screen, or Not now on a question
+    case completed
+    /// Skip on the plan offer: straight to Home, where the coach offers one free workout
+    case skippedPlan
+}
+
+/// the welcome, two demos, the first name, six questions (the last one picks the coach), the
+/// plan summary, the plan offer, then a few details about the person.
 /// Questions can be skipped; Continue waits for a first name, Access Finn for the training setup.
 /// The answers go to `FinnPreferences` when the person leaves, and the camera is asked for later,
 /// when a set starts
 struct OnboardingView: View {
     let preferences: FinnPreferences
     /// called once the answers are saved (or the whole thing was skipped)
-    let finished: (OnboardingProfile) -> Void
+    let finished: (OnboardingProfile, OnboardingExit) -> Void
 
     @State private var stage = Stage.welcome
     @State private var step = Step.liveDemo
@@ -15,27 +24,27 @@ struct OnboardingView: View {
     /// Finn's answer to the current choice; nil while Finn is quiet
     @State private var reaction: Reaction?
     @State private var reactionTask: Task<Void, Never>?
+    /// true once the summary's bar has filled, so Back from the plan offer skips the wait
+    @State private var planReady = false
     @FocusState private var nameFocused: Bool
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool {
-        AppMotion.reduces(systemReduceMotion)
-    }
-
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
     @Environment(\.dynamicTypeSize) private var typeSize
 
-    private enum Stage { case welcome, questions, plan, aboutYou }
+    private enum Stage { case welcome, questions, summary, plan, aboutYou }
 
-    /// the screens that carry the progress bar, in order
+    /// the paged screens, in order
     private enum Step: Int, CaseIterable {
-        case liveDemo
-        case wearablesDemo
-        case name
-        case goal
-        case level
-        case pastProgram
-        case intensity
-        case days
+        case liveDemo, wearablesDemo, name, goal, level, pastProgram, intensity, days, coach
+
+        /// the questions carry the pink bar, from the goal to the coach
+        static let questions = Step.goal.rawValue...Step.coach.rawValue
+
+        /// this screen's place among the questions, from 1; nil before the first one
+        var questionNumber: Int? {
+            Self.questions.contains(rawValue) ? rawValue - Self.questions.lowerBound + 1 : nil
+        }
     }
 
     private struct Reaction: Equatable {
@@ -49,7 +58,7 @@ struct OnboardingView: View {
     /// how long the line stays before the next screen
     private static let lineHold = 1.5
 
-    init(preferences: FinnPreferences, finished: @escaping (OnboardingProfile) -> Void) {
+    init(preferences: FinnPreferences, finished: @escaping (OnboardingProfile, OnboardingExit) -> Void) {
         self.preferences = preferences
         self.finished = finished
         _profile = State(initialValue: preferences.onboardingProfile)
@@ -64,16 +73,23 @@ struct OnboardingView: View {
             case .questions:
                 questions
                     .transition(.opacity)
+            case .summary:
+                PlanSummaryView(profile: profile, isReady: $planReady,
+                                back: { show(.questions) }, next: { show(.plan) })
+                    .transition(.opacity)
             case .plan:
-                PaywallView(back: { show(.questions) }, next: { show(.aboutYou) })
+                PaywallView(back: { show(.summary) }, next: { show(.aboutYou) },
+                            skip: { finish(.skippedPlan) })
                     .transition(.opacity)
             case .aboutYou:
-                AboutYouView(profile: $profile, back: { show(.plan) }, finish: finish)
+                AboutYouView(profile: $profile, back: { show(.plan) }, finish: { finish() })
                     .transition(.opacity)
             }
         }
         .background(HomeStyle.background.ignoresSafeArea())
         .tint(HomeStyle.accent)
+        // whoever answers on these screens: Finn until another coach is picked
+        .environment(\.coach, profile.coach)
         .interactiveDismissDisabled()
     }
 
@@ -89,19 +105,13 @@ struct OnboardingView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 18)
             TabView(selection: $step) {
-                page(
-                    String(localized: "Finn watches every rep"),
-                    String(localized: "Set your iPhone down. Move with Finn.")
-                ) {
+                page(String(localized: "Finn watches every rep"),
+                     String(localized: "Set your iPhone down. Move with Finn.")) {
                     LiveCoachingDemo()
                 }
                 .tag(Step.liveDemo)
-                page(
-                    String(localized: "In your ears, on your wrist"),
-                    String(
-                        localized: "Feel the tempo on your wrist. Hear my cues through your AirPods or iPhone."
-                    )
-                ) {
+                page(String(localized: "In your ears, on your wrist"),
+                     String(localized: "Feel the tempo on your wrist. Hear my cues through your AirPods or iPhone.")) {
                     WearablesDemo()
                 }
                 .tag(Step.wearablesDemo)
@@ -111,6 +121,7 @@ struct OnboardingView: View {
                 pastProgramPage.tag(Step.pastProgram)
                 intensityPage.tag(Step.intensity)
                 daysPage.tag(Step.days)
+                coachPage.tag(Step.coach)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(reduceMotion ? nil : HomeStyle.spring, value: step)
@@ -156,25 +167,27 @@ struct OnboardingView: View {
                 }
             }
             .accessibilityElement(children: .contain)
-            // the counter above already says how far along this is
-            ProgressView(value: Double(step.rawValue + 1), total: Double(Step.allCases.count))
+            // the counter above already says how far along this is. Before the first question
+            // both keep their place, unseen, so the screen doesn't move when they appear
+            ProgressView(value: Double(step.questionNumber ?? 0), total: Double(Step.questions.count))
                 .tint(DashboardStyle.accent)
+                .opacity(step.questionNumber == nil ? 0 : 1)
                 .accessibilityHidden(true)
                 .animation(reduceMotion ? nil : HomeStyle.spring, value: step)
         }
     }
 
     private var counter: some View {
-        Text("\(step.rawValue + 1) of \(Step.allCases.count)")
+        Text("\(step.questionNumber ?? 1) of \(Step.questions.count)")
             .monospacedDigit()
             .foregroundStyle(.secondary)
+            .opacity(step.questionNumber == nil ? 0 : 1)
+            .accessibilityHidden(step.questionNumber == nil)
     }
 
     private var backButton: some View {
         OnboardingBackButton {
-            guard let previous = Step(rawValue: step.rawValue - 1) else {
-                return
-            }
+            guard let previous = Step(rawValue: step.rawValue - 1) else { return }
             withAnimation(reduceMotion ? nil : HomeStyle.spring) { step = previous }
         }
         .disabled(step == .liveDemo)
@@ -182,14 +195,12 @@ struct OnboardingView: View {
     }
 
     private var skipAllButton: some View {
-        Button(action: finish) { Text("Not now").frame(minHeight: 44) }
+        Button { finish() } label: { Text("Not now").frame(minHeight: 44) }
             .accessibilityIdentifier("onboarding.finish")
     }
 
     /// the first name is the one answer Continue waits for: two titles use it
-    private var continueDisabled: Bool {
-        step == .name && profile.preferredName == nil
-    }
+    private var continueDisabled: Bool { step == .name && profile.preferredName == nil }
 
     private var actions: some View {
         VStack(spacing: 2) {
@@ -217,23 +228,16 @@ struct OnboardingView: View {
     /// what Finn says about the current answer; nil on the demos, the name, or with no answer
     private var finnLine: String? {
         switch step {
-        case .liveDemo,
-             .wearablesDemo,
-             .name:
-            nil
-        case .goal:
-            profile.goal?.finnLine
-        case .level:
-            profile.level?.finnLine
+        case .liveDemo, .wearablesDemo, .name, .coach: nil
+        case .goal: profile.goal?.finnLine
+        case .level: profile.level?.finnLine
         case .pastProgram:
             profile.followedProgram.map {
                 $0 ? String(localized: "Good. We'll build on what worked.")
-                    : String(localized: "No problem. We'll build one together.")
+                   : String(localized: "No problem. We'll build one together.")
             }
-        case .intensity:
-            profile.intensity?.finnLine
-        case .days:
-            profile.days?.finnLine
+        case .intensity: profile.intensity?.finnLine
+        case .days: profile.days?.finnLine
         }
     }
 
@@ -268,9 +272,7 @@ struct OnboardingView: View {
     private func endReaction() {
         reactionTask?.cancel()
         reactionTask = nil
-        guard reaction != nil else {
-            return
-        }
+        guard reaction != nil else { return }
         withAnimation(.easeInOut(duration: Self.lineFade)) { reaction = nil }
     }
 
@@ -279,23 +281,22 @@ struct OnboardingView: View {
         if let next = Step(rawValue: step.rawValue + 1) {
             withAnimation(reduceMotion ? nil : HomeStyle.spring) { step = next }
         } else {
-            show(.plan)
+            // new answers, a new plan: the summary customises it again
+            planReady = false
+            show(.summary)
         }
     }
 
-    private func finish() {
+    private func finish(_ exit: OnboardingExit = .completed) {
         endReaction()
         preferences.apply(profile)
-        finished(profile)
+        finished(profile, exit)
     }
 
     // MARK: Pages
 
-    private func page<Content: View>(
-        _ title: String,
-        _ subtitle: String? = nil,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
+    private func page<Content: View>(_ title: String, _ subtitle: String? = nil,
+                                     @ViewBuilder content: () -> Content) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -324,27 +325,19 @@ struct OnboardingView: View {
     private var namePage: some View {
         page(String(localized: "What should I call you?")) {
             OnboardingNameField(name: $profile.firstName, focus: $nameFocused) {
-                if !continueDisabled {
-                    advance()
-                }
+                if !continueDisabled { advance() }
             }
         }
     }
 
     private var goalPage: some View {
-        page(
-            profile.preferredName.map { String(localized: "Your training goal, \($0)") }
+        page(profile.preferredName.map { String(localized: "Your training goal, \($0)") }
                 ?? String(localized: "Training goal"),
-            String(localized: "Choose a focus for better coaching")
-        ) {
+             String(localized: "Choose a focus for better coaching")) {
             VStack(spacing: 10) {
                 ForEach(TrainingGoal.allCases, id: \.self) { goal in
-                    ChoiceCard(
-                        title: goal.title,
-                        detail: nil,
-                        symbol: goal.symbol,
-                        selected: profile.goal == goal
-                    ) {
+                    ChoiceCard(title: goal.title, detail: nil, symbol: goal.symbol,
+                               selected: profile.goal == goal) {
                         profile.goal = profile.goal == goal ? nil : goal
                     }
                     .accessibilityIdentifier("onboarding.goal.\(goal.rawValue)")
@@ -354,18 +347,12 @@ struct OnboardingView: View {
     }
 
     private var levelPage: some View {
-        page(
-            String(localized: "Training experience"),
-            String(localized: "Adjusts training plan")
-        ) {
+        page(String(localized: "Training experience"),
+             String(localized: "Adjusts training plan")) {
             VStack(spacing: 10) {
                 ForEach(TrainingLevel.allCases, id: \.self) { level in
-                    ChoiceCard(
-                        title: level.title,
-                        detail: nil,
-                        symbol: nil,
-                        selected: profile.level == level
-                    ) {
+                    ChoiceCard(title: level.title, detail: nil, symbol: nil,
+                               selected: profile.level == level) {
                         profile.level = profile.level == level ? nil : level
                     }
                     .accessibilityIdentifier("onboarding.level.\(level.rawValue)")
@@ -379,17 +366,11 @@ struct OnboardingView: View {
         page(String(localized: "Have you ever followed a training program?")) {
             VStack(alignment: .leading, spacing: 10) {
                 ForEach([true, false], id: \.self) { answer in
-                    ChoiceCard(
-                        title: answer ? String(localized: "Yes") : String(localized: "No"),
-                        detail: nil,
-                        symbol: nil,
-                        selected: profile.followedProgram == answer
-                    ) {
+                    ChoiceCard(title: answer ? String(localized: "Yes") : String(localized: "No"),
+                               detail: nil, symbol: nil, selected: profile.followedProgram == answer) {
                         withAnimation(reduceMotion ? nil : HomeStyle.spring) {
                             profile.followedProgram = profile.followedProgram == answer ? nil : answer
-                            if profile.followedProgram != true {
-                                profile.stopReasons = []
-                            }
+                            if profile.followedProgram != true { profile.stopReasons = [] }
                         }
                     }
                     .accessibilityIdentifier("onboarding.program.\(answer ? "yes" : "no")")
@@ -416,13 +397,8 @@ struct OnboardingView: View {
             .padding(.top, 22)
             .padding(.bottom, 4)
             ForEach(ProgramStopReason.allCases, id: \.self) { reason in
-                ChoiceCard(
-                    title: reason.title,
-                    detail: nil,
-                    symbol: nil,
-                    selected: profile.stopReasons.contains(reason),
-                    multiple: true
-                ) {
+                ChoiceCard(title: reason.title, detail: nil, symbol: nil,
+                           selected: profile.stopReasons.contains(reason), multiple: true) {
                     if let index = profile.stopReasons.firstIndex(of: reason) {
                         profile.stopReasons.remove(at: index)
                     } else {
@@ -436,33 +412,25 @@ struct OnboardingView: View {
 
     private var intensityPage: some View {
         page(profile.preferredName.map { String(localized: "How hard do you want me to push you, \($0)?") }
-            ?? String(localized: "How hard do you want me to push you?")) {
-                VStack(spacing: 10) {
-                    ForEach(TrainingIntensity.allCases, id: \.self) { intensity in
-                        ChoiceCard(
-                            title: intensity.title,
-                            detail: nil,
-                            symbol: nil,
-                            selected: profile.intensity == intensity
-                        ) {
-                            profile.intensity = profile.intensity == intensity ? nil : intensity
-                        }
-                        .accessibilityIdentifier("onboarding.intensity.\(intensity.rawValue)")
+                ?? String(localized: "How hard do you want me to push you?")) {
+            VStack(spacing: 10) {
+                ForEach(TrainingIntensity.allCases, id: \.self) { intensity in
+                    ChoiceCard(title: intensity.title, detail: nil, symbol: nil,
+                               selected: profile.intensity == intensity) {
+                        profile.intensity = profile.intensity == intensity ? nil : intensity
                     }
+                    .accessibilityIdentifier("onboarding.intensity.\(intensity.rawValue)")
                 }
             }
+        }
     }
 
     private var daysPage: some View {
         page(String(localized: "How many days a week are you ready to train?")) {
             VStack(spacing: 10) {
                 ForEach(TrainingDays.allCases, id: \.self) { days in
-                    ChoiceCard(
-                        title: days.title,
-                        detail: nil,
-                        symbol: nil,
-                        selected: profile.days == days
-                    ) {
+                    ChoiceCard(title: days.title, detail: nil, symbol: nil,
+                               selected: profile.days == days) {
                         profile.days = profile.days == days ? nil : days
                     }
                     .accessibilityIdentifier("onboarding.days.\(days.rawValue)")
@@ -471,27 +439,23 @@ struct OnboardingView: View {
         }
     }
 
+    private var coachPage: some View {
+        page(String(localized: "Choose your coach")) {
+            CoachChoiceView(selection: $profile.coach)
+        }
+    }
+
     // MARK: Out of the flow
     // Exercises, Spoken feedback and Camera setup left the onboarding; they stay here, with the
     // answers they save, until favourite exercises move to Options
 
     private var exercisesPage: some View {
-        page(
-            String(localized: "Exercises"),
-            String(localized: "Favorites appear first in Workout.")
-        ) {
-            LazyVGrid(
-                columns: Array(
-                    repeating: GridItem(.flexible(), spacing: 10),
-                    count: typeSize.isAccessibilitySize ? 1 : 2
-                ),
-                spacing: 10
-            ) {
+        page(String(localized: "Exercises"),
+             String(localized: "Favorites appear first in Workout.")) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: 10) {
                 ForEach(ExerciseKind.allCases, id: \.self) { kind in
-                    ExerciseTile(
-                        kind: kind,
-                        rank: profile.favouriteExercises.firstIndex(of: kind).map { $0 + 1 }
-                    ) {
+                    ExerciseTile(kind: kind,
+                                 rank: profile.favouriteExercises.firstIndex(of: kind).map { $0 + 1 }) {
                         if let index = profile.favouriteExercises.firstIndex(of: kind) {
                             profile.favouriteExercises.remove(at: index)
                         } else {
@@ -506,10 +470,8 @@ struct OnboardingView: View {
     }
 
     private var voicePage: some View {
-        page(
-            String(localized: "Spoken feedback"),
-            String(localized: "Hear the countdown, rep count and live observations.")
-        ) {
+        page(String(localized: "Spoken feedback"),
+             String(localized: "Hear the countdown, rep count and live observations.")) {
             VStack(alignment: .leading, spacing: 14) {
                 Toggle(isOn: $profile.speaksLive) {
                     VStack(alignment: .leading, spacing: 3) {
@@ -541,55 +503,30 @@ struct OnboardingView: View {
     }
 
     private var placementPage: some View {
-        page(
-            String(localized: "Camera setup"),
-            String(localized: "Keep the phone upright on a stable support.")
-        ) {
+        page(String(localized: "Camera setup"),
+             String(localized: "Keep the phone upright on a stable support.")) {
             VStack(alignment: .leading, spacing: 14) {
                 // always a standing figure: the point is the whole body in the frame
                 PlacementScene(kind: .bodyweightSquat)
                     .frame(height: 210)
                     .accessibilityIdentifier("onboarding.placementScene")
                 VStack(alignment: .leading, spacing: 12) {
-                    placementRow(
-                        "rectangle.portrait.and.arrow.right",
-                        String(localized: "From the side"),
-                        String(
-                            localized: "Your profile faces the camera. From the front, Finn still counts your reps, but posture advice needs your side."
-                        )
-                    )
-                    placementRow(
-                        "arrow.up.and.down",
-                        String(localized: "At hip height"),
-                        String(localized: "Place the camera near hip height.")
-                    )
-                    placementRow(
-                        "figure.walk",
-                        String(localized: "A few steps away"),
-                        Locale.current.measurementSystem == .us
-                            ?
-                            String(
-                                localized: "About seven to ten feet. Walk back to your iPhone to end the set."
-                            )
-                            :
-                            String(
-                                localized: "Two to three meters. Walk back to your iPhone to end the set."
-                            )
-                    )
-                    placementRow(
-                        "person.crop.rectangle",
-                        String(localized: "Whole body in the frame"),
-                        String(localized: "Head and feet both visible, with a bit of room above and below.")
-                    )
+                    placementRow("rectangle.portrait.and.arrow.right", String(localized: "From the side"),
+                                 String(localized: "Your profile faces the camera. From the front, Finn still counts your reps, but posture advice needs your side."))
+                    placementRow("arrow.up.and.down", String(localized: "At hip height"),
+                                 String(localized: "Place the camera near hip height."))
+                    placementRow("figure.walk", String(localized: "A few steps away"),
+                                 Locale.current.measurementSystem == .us
+                                     ? String(localized: "About seven to ten feet. Walk back to your iPhone to end the set.")
+                                     : String(localized: "Two to three meters. Walk back to your iPhone to end the set."))
+                    placementRow("person.crop.rectangle", String(localized: "Whole body in the frame"),
+                                 String(localized: "Head and feet both visible, with a bit of room above and below."))
                 }
                 .optionCard()
-                Label(
-                    "The camera is asked for when you start your first set, not now.",
-                    systemImage: "camera"
-                )
-                .font(.footnote)
-                .foregroundStyle(HomeStyle.supportingText)
-                .fixedSize(horizontal: false, vertical: true)
+                Label("The camera is asked for when you start your first set, not now.", systemImage: "camera")
+                    .font(.footnote)
+                    .foregroundStyle(HomeStyle.supportingText)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -633,27 +570,24 @@ private struct ChoiceCard: View {
                 }
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title).font(.headline)
-                    if let detail {
-                        Text(detail)
-                            .font(.subheadline)
-                            .opacity(0.78)
-                            .fixedSize(horizontal: false, vertical: true)
+                    if let detail { Text(detail)
+                        .font(.subheadline)
+                        .opacity(0.78)
+                        .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 Spacer(minLength: 0)
                 Image(systemName: multiple ? (selected ? "checkmark.square.fill" : "square")
-                    : (selected ? "checkmark.circle.fill" : "circle"))
-                    .foregroundStyle(selected ? HomeStyle.accent : Color(uiColor: .secondaryLabel))
+                                           : (selected ? "checkmark.circle.fill" : "circle"))
+                    .foregroundStyle(selected ? DashboardStyle.accent : Color(uiColor: .secondaryLabel))
                     .font(.system(size: 20))
                     .accessibilityHidden(true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .foregroundStyle(Color.primary)
-            .background(
-                selected ? HomeStyle.accent.opacity(0.12) : HomeStyle.card,
-                in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-            )
+            .background(selected ? HomeStyle.accent.opacity(0.12) : HomeStyle.card,
+                        in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -691,13 +625,9 @@ private struct ExerciseTile: View {
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                LinearGradient(
-                    colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom],
-                    startPoint: .top,
-                    endPoint: .bottom
-                ),
-                in: RoundedRectangle(cornerRadius: 22, style: .continuous)
-            )
+                LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom],
+                               startPoint: .top, endPoint: .bottom),
+                in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .strokeBorder(rank == nil ? .white.opacity(0.08) : .white, lineWidth: rank == nil ? 1 : 2))
             .environment(\.colorScheme, .dark)
@@ -714,9 +644,7 @@ private struct ExerciseTile: View {
 struct PlacementScene: View {
     let kind: ExerciseKind
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    private var reduceMotion: Bool {
-        AppMotion.reduces(systemReduceMotion)
-    }
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { timeline in
@@ -737,21 +665,15 @@ struct PlacementScene: View {
             }
             .padding(14)
             .background(
-                LinearGradient(
-                    colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom],
-                    startPoint: .top,
-                    endPoint: .bottom
-                ),
-                in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-            )
+                LinearGradient(colors: [HomeStyle.cameraTop, HomeStyle.cameraBottom],
+                               startPoint: .top, endPoint: .bottom),
+                in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .strokeBorder(.white.opacity(0.08), lineWidth: 1))
             .environment(\.colorScheme, .dark)
         }
         .accessibilityElement()
-        .accessibilityLabel(
-            "Drawing: the iPhone stands at hip height a few steps from the person, filming from the side."
-        )
+        .accessibilityLabel("Drawing: the iPhone stands at hip height a few steps from the person, filming from the side.")
         .accessibilityAddTraits(.isImage)
     }
 
@@ -782,31 +704,21 @@ struct PlacementScene: View {
         cone.addLine(to: CGPoint(x: size.width - 18, y: 22))
         cone.move(to: lens)
         cone.addLine(to: CGPoint(x: size.width - 18, y: floorY - 4))
-        context.stroke(
-            cone,
-            with: .color(white.opacity(0.22)),
-            style: StrokeStyle(lineWidth: 1, dash: [3, 5])
-        )
+        context.stroke(cone, with: .color(white.opacity(0.22)),
+                       style: StrokeStyle(lineWidth: 1, dash: [3, 5]))
 
         // the hip line, from the lens across the floor: "at hip height"
         var hipLine = Path()
         hipLine.move(to: CGPoint(x: phone.maxX + 8, y: lens.y))
         hipLine.addLine(to: CGPoint(x: size.width - 150, y: lens.y))
-        context.stroke(
-            hipLine,
-            with: .color(white.opacity(0.5)),
-            style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [2, 6])
-        )
+        context.stroke(hipLine, with: .color(white.opacity(0.5)),
+                       style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [2, 6]))
 
         // the distance, written under the floor
         // illustration labels share fixed geometry; the accessible description and
         // placement instructions below provide the scalable text
-        let text = Text("2 to 3 m").font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(white.opacity(0.8))
-        context.draw(
-            context.resolve(text),
-            at: CGPoint(x: (phone.maxX + size.width - 150) / 2, y: floorY + 16)
-        )
+        let text = Text("2 to 3 m").font(.system(size: 12, weight: .semibold)).foregroundStyle(white.opacity(0.8))
+        context.draw(context.resolve(text), at: CGPoint(x: (phone.maxX + size.width - 150) / 2, y: floorY + 16))
         var arrow = Path()
         arrow.move(to: CGPoint(x: phone.maxX + 6, y: floorY + 16))
         arrow.addLine(to: CGPoint(x: (phone.maxX + size.width - 150) / 2 - 34, y: floorY + 16))
@@ -815,8 +727,7 @@ struct PlacementScene: View {
         context.stroke(arrow, with: .color(white.opacity(0.4)), lineWidth: 1)
 
         // "Side view" label at the top left
-        let label = Text("Side view · hip height").font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(white)
+        let label = Text("Side view · hip height").font(.system(size: 13, weight: .semibold)).foregroundStyle(white)
         context.draw(context.resolve(label), at: CGPoint(x: 14, y: 12), anchor: .topLeading)
     }
 }

@@ -143,7 +143,9 @@ final class WatchLink: NSObject, WCSessionDelegate {
         }
         switch tap {
         case .rep:
-            WKInterfaceDevice.current().play(.click)
+            if !rhythmEnabled {
+                WKInterfaceDevice.current().play(.click)
+            }
         case .end:
             WKInterfaceDevice.current().play(.success)
         case .none, .observation, .start:
