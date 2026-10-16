@@ -17,7 +17,7 @@ final class NativeUIReviewUITests: XCTestCase {
         XCTAssertLessThanOrEqual(app.buttons["home.start"].frame.maxY, app.buttons["tab.home"].frame.minY)
         try save("workout")
         app.selectTab("Progress")
-        XCTAssertTrue(app.staticTexts["No saved sessions yet."].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.segmentedControls["progress.section"].waitForExistence(timeout: 3))
         try save("history-empty")
         app.selectTab("Coach")
         XCTAssertTrue(app.textViews["coach.field"].waitForExistence(timeout: 3))

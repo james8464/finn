@@ -809,7 +809,8 @@ struct ContentView: View {
                         .font(.subheadline.weight(.semibold))
                         .padding(.horizontal, 16)
                         .frame(minHeight: 48)
-                        .background(.thinMaterial, in: Capsule())
+                        .foregroundStyle(.primary)
+                        .background(AppPageStyle.surface, in: Capsule())
                 }
                 .buttonStyle(.plain)
                 .padding(.trailing, 20)

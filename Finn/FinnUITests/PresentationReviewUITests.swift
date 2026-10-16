@@ -47,7 +47,8 @@ final class PresentationReviewUITests: XCTestCase {
                 )
                 try save("\(page)-\(appearance)")
                 if page == "workout" {
-                    XCTAssertTrue(app.buttons["home.start"].isHittable)
+                    XCTAssertTrue(app.buttons["workout.launch"].waitForExistence(timeout: 5))
+                    XCTAssertTrue(app.buttons["workout.launch"].isHittable)
                 }
                 if page == "coach" {
                     XCTAssertTrue(app.textViews["coach.field"].isHittable)
@@ -144,7 +145,8 @@ final class PresentationReviewUITests: XCTestCase {
             }
             try save("\(page)-largest-text-reduced-motion")
             if page == "workout" {
-                XCTAssertTrue(app.buttons["home.start"].isHittable)
+                XCTAssertTrue(app.buttons["workout.launch"].waitForExistence(timeout: 5))
+                XCTAssertTrue(app.buttons["workout.launch"].isHittable)
             }
             if page == "options" {
                 app.reveal(app.buttons["options.replayOnboarding"])
