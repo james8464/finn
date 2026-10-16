@@ -32449,6 +32449,62 @@
           }
         }
       }
+    },
+    "Price unavailable": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Price unavailable"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Price unavailable"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prix indisponible"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precio no disponible"
+          }
+        }
+      }
+    },
+    "Pricing will appear when the App Store is available. You can continue with Finn Free.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pricing will appear when the App Store is available. You can continue with Finn Free."
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pricing will appear when the App Store is available. You can continue with Finn Free."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les prix s’afficheront lorsque l’App Store sera disponible. Vous pouvez continuer avec Finn Free."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los precios aparecerán cuando el App Store esté disponible. Puedes continuar con Finn Free."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

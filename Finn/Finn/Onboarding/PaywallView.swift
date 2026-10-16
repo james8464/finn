@@ -32,6 +32,7 @@ struct PaywallView: View {
     @State private var products: [String: Product] = [:]
     @State private var isBusy = false
     @State private var notice: Notice?
+    @State private var eligibleForFreeTrial = false
     /// counts the purchases, for the success haptic
     @State private var purchases = 0
     @Environment(\.purchase) private var purchase
@@ -83,8 +84,10 @@ struct PaywallView: View {
                         }
                     }
                     // outside the outline, as wide as the plans inside it
-                    planRow(.trial)
-                        .padding(.horizontal, DashboardStyle.cardSpacing)
+                    if eligibleForFreeTrial || usesDemoPurchase {
+                        planRow(.trial)
+                            .padding(.horizontal, DashboardStyle.cardSpacing)
+                    }
                     terms
                 }
                 .finnFeedback(.selection, trigger: plan)
@@ -220,7 +223,10 @@ struct PaywallView: View {
     }
 
     private var termsText: String {
-        switch plan {
+        if let plan, products[plan.productID] == nil && !usesDemoPurchase {
+            return String(localized: "Pricing will appear when the App Store is available. You can continue with Finn Free.")
+        }
+        return switch plan {
         case nil:
             String(localized: "Renews automatically. Cancel in Settings at least 24 hours before renewal. Trial for eligible subscribers.")
         case .weekly?:
@@ -294,7 +300,16 @@ struct PaywallView: View {
     }
 
     private func price(_ plan: CoachPlan) -> String {
-        products[plan.productID]?.displayPrice ?? plan.fallbackPrice
+        if let product = products[plan.productID] { return product.displayPrice }
+        return usesDemoPurchase ? plan.fallbackPrice : String(localized: "Price unavailable")
+    }
+
+    private var usesDemoPurchase: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-finn-ui-demo-purchase")
+        #else
+        false
+        #endif
     }
 
     /// nothing due today, in the trial's currency
@@ -306,11 +321,22 @@ struct PaywallView: View {
     private func loadProducts() async {
         guard let loaded = try? await Product.products(for: CoachPlan.allCases.map(\.productID)) else { return }
         products = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
+        if let subscription = products[CoachPlan.trial.productID]?.subscription,
+           let offer = subscription.introductoryOffer,
+           offer.paymentMode == .freeTrial,
+           offer.period.unit == .week, offer.period.value == 2, offer.periodCount == 1 {
+            eligibleForFreeTrial = await subscription.isEligibleForIntroOffer
+        } else {
+            eligibleForFreeTrial = false
+        }
+        if plan == .trial && !eligibleForFreeTrial && !usesDemoPurchase { plan = nil }
     }
 
     /// the App Store in-app purchase sheet for the chosen plan. A verified purchase moves on
     private func buy() async {
-        guard let plan else { return }
+        guard !isBusy, let plan else { return }
+        isBusy = true
+        defer { isBusy = false }
         #if DEBUG
         // UI tests run without the App Store: `-finn-ui-demo-purchase` stands for a verified purchase
         if ProcessInfo.processInfo.arguments.contains("-finn-ui-demo-purchase") {
@@ -319,12 +345,18 @@ struct PaywallView: View {
             return
         }
         #endif
-        isBusy = true
-        defer { isBusy = false }
         if products[plan.productID] == nil { await loadProducts() }
         guard let product = products[plan.productID] else {
             notice = .unavailable
             return
+        }
+        if plan == .trial {
+            guard let subscription = product.subscription,
+                  eligibleForFreeTrial, await subscription.isEligibleForIntroOffer else {
+                eligibleForFreeTrial = false
+                self.plan = nil
+                return
+            }
         }
         do {
             switch try await purchase(product) {
@@ -346,6 +378,7 @@ struct PaywallView: View {
 
     /// asks the App Store for this account's purchases; an active Finn Coach+ plan moves on
     private func restore() async {
+        guard !isBusy else { return }
         isBusy = true
         defer { isBusy = false }
         do {

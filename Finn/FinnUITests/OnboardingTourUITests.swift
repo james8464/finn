@@ -61,9 +61,17 @@ final class OnboardingTourUITests: XCTestCase {
         app.buttons["onboarding.intensity.challenge"].tap()
         answer(next, then: "onboarding-7-intensite", waitFor: "onboarding.days.threeToFour")
         app.buttons["onboarding.days.threeToFour"].tap()
-        answer(next, then: "onboarding-8-jours", waitFor: "plan.skip")
-        Thread.sleep(forTimeInterval: 0.8)
-        save("onboarding-9-offre")
+        answer(next, then: "onboarding-8-jours", waitFor: "onboarding.coach.finn")
+        app.buttons["onboarding.coach.finn"].tap()
+        save("onboarding-9-coach")
+        next.tap()
+        let summaryContinue = app.buttons["summary.continue"]
+        XCTAssertTrue(summaryContinue.waitForExistence(timeout: 12))
+        XCTAssertTrue(app.staticTexts["summary.sentence"].exists)
+        save("onboarding-10-summary")
+        summaryContinue.tap()
+        XCTAssertTrue(app.buttons["plan.skip"].waitForExistence(timeout: 5))
+        save("onboarding-11-offre")
         app.buttons["plan.annual"].tap()
         Thread.sleep(forTimeInterval: 0.6)
         save("onboarding-9-offre-annuel")
@@ -71,32 +79,17 @@ final class OnboardingTourUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 0.6)
         save("onboarding-9-offre-essai")
         app.buttons["plan.skip"].tap()
-        let access = app.buttons["aboutYou.access"]
-        XCTAssertTrue(access.waitForExistence(timeout: 5))
-        Thread.sleep(forTimeInterval: 0.8)
-        save("onboarding-10-a-propos")
-        app.buttons["aboutYou.location"].tap()
-        app.buttons["Gym"].tap()
-        app.buttons["aboutYou.equipment"].tap()
-        app.buttons["Pull-up bar"].tap()
-        app.buttons["Dumbbells"].tap()
-        Thread.sleep(forTimeInterval: 0.5)
-        save("onboarding-10-a-propos-materiel")
-        // the equipment menu stays open while ticking; a tap outside closes it
-        app.staticTexts["A little more about you."].tap()
-        for _ in 0 ..< 6 where !access.isHittable {
-            app.swipeUp()
-        }
-        XCTAssertFalse(access.isEnabled)
-        app.buttons["aboutYou.noInjuries"].tap()
-        XCTAssertTrue(access.isEnabled)
-        Thread.sleep(forTimeInterval: 0.5)
-        save("onboarding-10-a-propos-bas")
-        access.tap()
-        // the app opens on Home, with Try Finn
+        // Skipping a paid plan now offers a free workout, without starting a purchase.
+        let freeWorkout = app.buttons["freeWorkout.accept"]
+        XCTAssertTrue(freeWorkout.waitForExistence(timeout: 5))
+        save("onboarding-12-free-workout-offer")
+        freeWorkout.tap()
+        let closeWorkout = app.buttons["tryFinn.close"]
+        XCTAssertTrue(closeWorkout.waitForExistence(timeout: 8))
+        save("onboarding-13-free-workout")
+        closeWorkout.tap()
         XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 8))
-        Thread.sleep(forTimeInterval: 1)
-        save("onboarding-11-accueil-try-finn")
+        save("onboarding-14-home-try-finn")
     }
 
     /// Continue with an answer chosen: Finn's LEDs, then the line, then the next screen by itself

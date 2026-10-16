@@ -574,7 +574,10 @@ struct ContentView: View {
     private func startGuidedWorkout(_ plan: PlannedWorkout) {
         guard model.stage == .ready || model.stage == .result, !plan.exercises.isEmpty else { return }
         Task { @MainActor in
-            if model.stage == .result { await model.finishSession() }
+            // A new plan starts a separate session, even after returning home from camera advice.
+            if model.stage == .result || model.unfinishedSession != nil {
+                await model.finishSession()
+            }
             guidedWorkout = GuidedWorkout(plan: plan)
             showsGuidedWorkout = true
         }

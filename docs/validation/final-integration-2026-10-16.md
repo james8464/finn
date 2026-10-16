@@ -23,3 +23,12 @@ Combined the current main cleanup and presentation work with personalised guided
 ## Limits
 
 These focused checks do not establish perfect real-world form accuracy. Physical wrist-down Watch rhythm and real exercise accuracy still require device validation. Full matrix CI continues separately from this time-bounded release check.
+
+## TestFlight and follow-up checks
+
+- Apple confirmed upload of version 1.0, build 2026101614 at 14:00 Paris time. Processing for testers is separate.
+- Signed Release archive passed the repository archive checks.
+- French dashboard and onboarding replay simulator checks passed.
+- Follow-up fixes serialize purchase/restore actions, show actual StoreKit prices and trial eligibility, and separate a new guided workout from an unfinished camera session.
+- The onboarding tour now follows coach choice and the plan summary before the subscription offer.
+- A refined build 2026101615 includes the follow-up fixes. Its upload status is reported separately.
