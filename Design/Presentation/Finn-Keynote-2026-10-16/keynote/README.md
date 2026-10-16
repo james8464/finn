@@ -1,23 +1,9 @@
-# Finn · Five minutes
+# Finn — Stronger Starts Together
 
-Open `output/Finn-WWDC-5min-Polished.key` in Keynote. Select slide 1 and press Play. Movies begin automatically. Advance slides on click as you speak; the slide timings in the presenter notes total exactly 5:00, including the opening film.
+The single final presentation is [Finn — Stronger Starts Together.key](output/Finn%20%E2%80%94%20Stronger%20Starts%20Together.key).
 
-For automatic uninterrupted playback, use `output/Finn-WWDC-5min-Playback.mp4`. It lasts exactly five minutes. The first minute includes sound. The remaining four minutes leave space for your voice.
+Open it in Keynote, select slide 1 and press Play. Movies start automatically. Advance slides as you speak; presenter notes total five minutes, including the one-minute opening film. All media is embedded for offline playback. Motion and outlined SF Pro typography remain full-slide movies; presenter notes are editable.
 
-The native Keynote contains all media, so it works offline without linked files. Motion, app footage and outlined SF Pro typography are embedded as full-slide movies. The choreography cannot be edited as separate native Keynote builds. Presenter notes are editable.
+The [speaker script](../speaker-notes.html) and `motion-direction.md` support this presentation. Source assets, scene movies and rendering tools remain for future edits. Alternate PowerPoint, full-length video and browser presentations have been removed.
 
-The browser rehearsal and printable script are one folder above. `motion-direction.md` preserves the design rationale and timings.
-
-The film uses previously generated human footage. Native UI crops supply the scripted posture cue. The Finn notification is a proposed experience. These sequences illustrate the product concept and do not establish detection accuracy. Technical claims describe the current implementation: Vision body pose, joint-angle rules, evidence gates, WatchConnectivity, and Foundation Models for grounded conversation.
-
-Revision 7 uses the actual Apple Figma notification component with Finn identity. The cue now has one visual owner from phone to stage to Watch. Its background dissolves as the lettering enters the Watch.
-
-## Storage cleanup
-
-Superseded exports and decoded frame/build caches were removed on 16 October 2026. The three current delivery files remain in output. Source footage, original score, final mix, device assets, native UI source, selected video input, pose data, and rendering scripts remain under assets and production. Regenerate decoded frames before rendering again; source-inputs contains the selected portrait recording and cue image formerly stored in /tmp.
-
-## Progress walkthrough
-
-Scene 7 now ends with ten seconds of the current native Progress screen: saved history, the latest best set, then a separate two-week projection. History is the isolated ProgressDemo fixture, with a latest best set of 11 reps and an estimated 13 reps. The projection is an estimate, not a promised improvement. Apple bezel artwork and SF Pro match the existing deck. Total duration remains 5:00.
-
-The current source helpers remain in `../production/source`. Historical Figma upload scripts, old long-deck previews and generated frame caches were removed. The browser player is `../player.js`; its scene data is embedded as JSON in `../index.html`. Keep the original inputs when regenerating native frames.
+The film is a scripted product demonstration. Technical claims describe Vision body pose, joint-angle rules, evidence gates, WatchConnectivity and Foundation Models for grounded conversation. Progress shows illustrative saved workout history and a clearly labelled projection.

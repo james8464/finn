@@ -123,6 +123,10 @@ The next gate is a dependable iPhone set-to-set loop on physical devices, with e
 
 ---
 
+## Presentation
+
+[**Finn — Stronger Starts Together**](Design/Presentation/Finn-Keynote-2026-10-16/keynote/output/Finn%20%E2%80%94%20Stronger%20Starts%20Together.key) is the single final five-minute Keynote presentation.
+
 ## Open the Project
 
 ```bash

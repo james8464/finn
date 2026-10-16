@@ -1,6 +1,6 @@
 # Current presentation sources
 
-The checked-in delivery files and `keynote/five-minute-scenes.json` are the current five-minute presentation. Keep the source footage and `production/source-inputs` when clearing render caches.
+The single checked-in Keynote delivery and `keynote/five-minute-scenes.json` are the current five-minute presentation. Keep the source footage and `production/source-inputs` when clearing render caches.
 
 ## Film
 
@@ -14,6 +14,8 @@ The checked-in delivery files and `keynote/five-minute-scenes.json` are the curr
 
 `finn_scene_layers.cjs` rasterizes outlined text from the scene JSON. `finn_render_keynote_v5.py` renders the scene layers and device movies. Its version suffix identifies the renderer implementation, not an older delivery.
 
-`finn_progress_walkthrough.py` composes the current native Progress capture into scene 7 and updates the portable deck and five-minute backup. It retains the opening film and the first part of the Watch scene. Replace the scene 7 movie in native Keynote after regenerating it.
+`finn_progress_walkthrough.py` composes the current native Progress capture into scene 7 and updates the scene master. It retains the opening film and the first part of the Watch scene. Replace the scene 7 movie in native Keynote after regenerating it.
 
 The helpers require the Apple fonts and original rendering tools recorded in their source. They are production utilities, not a portable one-command build system. Python source is expanded with Black; Swift and browser utilities use the repository format settings.
+
+Only `keynote/output/Finn — Stronger Starts Together.key` is a presentation deliverable. Alternate deck exports and the browser rehearsal have been removed. Scene movies and source assets support editing this presentation.
