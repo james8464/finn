@@ -2016,7 +2016,7 @@ struct ContentView: View {
                                     WrappingText(text: model.fitnessRecord(forSession: session.id) == nil
                                                  ? String(localized: "\(session.sets.count) measured sets")
                                                  : String(localized: "\(session.sets.count) measured sets · Saved to Fitness"),
-                                                 style: .subheadline, color: .label.withAlphaComponent(0.72))
+                                                 style: .subheadline, colour: .label.withAlphaComponent(0.72))
                                 }
                                 .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
                             }
@@ -2036,7 +2036,7 @@ struct ContentView: View {
                     }
                 } header: {
                     WrappingText(text: String(localized: "Saved sessions"), style: .headline,
-                                 weight: .semibold, color: .label.withAlphaComponent(0.72))
+                                 weight: .semibold, colour: .label.withAlphaComponent(0.72))
                         .accessibilityAddTraits(.isHeader)
                 }
             }
