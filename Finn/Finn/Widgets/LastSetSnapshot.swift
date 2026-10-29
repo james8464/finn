@@ -48,10 +48,15 @@ nonisolated struct SharedSetStore: @unchecked Sendable {
         return try? JSONDecoder().decode(LastSetSnapshot.self, from: data)
     }
 
-    /// replaces the snapshot, or removes it when `snapshot` is nil (history emptied)
+    /// Replaces the snapshot, or removes it when `snapshot` is nil (history emptied). A snapshot
+    /// that cannot be encoded leaves the stored one alone, so a valid widget is never blanked by an
+    /// encoding error.
     func write(_ snapshot: LastSetSnapshot?) {
-        guard let snapshot, let data = try? JSONEncoder().encode(snapshot) else {
+        guard let snapshot else {
             defaults.removeObject(forKey: Self.key)
+            return
+        }
+        guard let data = try? JSONEncoder().encode(snapshot) else {
             return
         }
         defaults.set(data, forKey: Self.key)

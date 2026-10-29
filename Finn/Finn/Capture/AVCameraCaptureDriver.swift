@@ -10,6 +10,7 @@ nonisolated final class AVCameraCaptureDriver: NSObject, CameraCaptureDriving, @
     nonisolated(unsafe) let session = AVCaptureSession()
     private let queue = DispatchQueue(label: "ai.mwm.build.challenge.team.08.camera.capture")
     private let processor: PoseFrameProcessor
+    /// Capture queue only: set inside `configure()`, read when a start decides whether to configure.
     private var configured = false
     private var interruptionObserver: NSObjectProtocol?
     private var runtimeErrorObserver: NSObjectProtocol?
@@ -232,13 +233,21 @@ nonisolated private final class PoseFrameProcessor: NSObject, AVCaptureVideoData
     }
 
     func makeStream() -> AsyncStream<PoseFrame> {
+        // the builder runs synchronously; keeping the continuation out of it means the lock is
+        // never held while a stream is built
+        var start: AsyncStream<PoseFrame>.Continuation?
+        let stream = AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(3)) {
+            start = $0
+        }
         lock.lock()
-        defer { lock.unlock() }
         lastSampleTime = -.infinity
         athleteRequest = false
-        return AsyncStream(PoseFrame.self, bufferingPolicy: .bufferingNewest(3)) { continuation in
-            self.continuation = continuation
-        }
+        let previous = continuation
+        continuation = start
+        lock.unlock()
+        // a replaced stream would otherwise wait for frames that go to the new one
+        previous?.finish()
+        return stream
     }
 
     func finish() {

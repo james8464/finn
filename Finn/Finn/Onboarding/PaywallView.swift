@@ -44,12 +44,13 @@ struct PaywallView: View {
     private static let privacyURL = URL(string: "https://james8464.github.io/finn/privacy.html")!
 
     private enum Notice {
-        case unavailable, nothingToRestore
+        case unavailable, nothingToRestore, trialUsed
 
         var title: String {
             switch self {
             case .unavailable: String(localized: "Purchase unavailable")
             case .nothingToRestore: String(localized: "Nothing to restore")
+            case .trialUsed: String(localized: "Free trial already used")
             }
         }
 
@@ -57,6 +58,8 @@ struct PaywallView: View {
             switch self {
             case .unavailable: String(localized: "The App Store can't be reached right now. Try again later.")
             case .nothingToRestore: String(localized: "No Finn Coach+ subscription was found for this Apple Account.")
+            case .trialUsed:
+                String(localized: "This Apple Account has used the free week. Subscribe again to pay monthly.")
             }
         }
     }
@@ -395,7 +398,9 @@ struct PaywallView: View {
         if plan == .monthly, eligibleForFreeTrial,
            let subscription = product.subscription,
            !(await subscription.isEligibleForIntroOffer) {
+            // the offer was shown from an earlier answer: correct it, and say why nothing happened
             eligibleForFreeTrial = false
+            notice = .trialUsed
             return
         }
         do {

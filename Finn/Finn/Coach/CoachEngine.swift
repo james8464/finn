@@ -226,7 +226,7 @@ enum FoundationModelsCoachPrompt {
     /// the on-device model has a small window
     static func prompt(question: String, context: CoachContext, history: [CoachMessage]) -> String {
         var sections: [String] = []
-        if let note = FinnPreferences.app.onboardingProfile.coachNote {
+        if let note = context.preferencesNote, !note.isEmpty {
             sections.append("Person's stated preferences:\n" + String(note.prefix(500)))
         }
         sections.append("Saved sets, oldest first:\n" + context.boundedPromptText(maximumCharacters: 4_000))

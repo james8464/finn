@@ -46,6 +46,22 @@ struct SessionStoreAndComparisonTests {
         #expect(session.continues(at: now.addingTimeInterval(60)))
     }
 
+    /// A set saved before exercise, camera view and cue response existed still loads as the
+    /// side-view squat it was, instead of failing the whole history as corrupt.
+    @Test func aSetSavedWithoutExerciseViewOrCueResponseStillLoads() throws {
+        let id = UUID()
+        let encoded = try JSONEncoder().encode(set(sessionID: id, range: 0.4))
+        var object = try #require(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        object.removeValue(forKey: "exercise")
+        object.removeValue(forKey: "cameraView")
+        object.removeValue(forKey: "cueResponse")
+        let legacy = try JSONSerialization.data(withJSONObject: object)
+        let decoded = try JSONDecoder().decode(SetSummary.self, from: legacy)
+        #expect(decoded.exercise == .bodyweightSquat)
+        #expect(decoded.cameraView == .side)
+        #expect(decoded.cueResponse == .unanswered)
+    }
+
     @Test func existingHistoryAndBadgesMoveIntoFinnSupportFolder() throws {
         let support = FileManager.default.temporaryDirectory
             .appending(path: "FinnMigration-\(UUID().uuidString)", directoryHint: .isDirectory)

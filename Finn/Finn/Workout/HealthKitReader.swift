@@ -34,24 +34,33 @@ final class HealthKitReader: HealthReading {
         try? await store.requestAuthorization(toShare: [], read: Self.readTypes)
     }
 
-    func snapshot(now: Date) async -> HealthSnapshot {
+    func snapshot(now: Date) async -> HealthSnapshot? {
         guard isAvailable else {
             return HealthSnapshot()
         }
+        do {
+            return try await readSnapshot(now: now)
+        } catch {
+            // a failed read is not an empty one: callers keep the last good snapshot instead
+            return nil
+        }
+    }
+
+    private func readSnapshot(now: Date) async throws -> HealthSnapshot {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: now)
         let yesterday = calendar.date(byAdding: .day, value: -1, to: today) ?? today
         let weekBefore = calendar.date(byAdding: .day, value: -8, to: today) ?? today
         var health = HealthSnapshot()
 
-        let resting = await samples(
+        let resting = try await samples(
             .restingHeartRate,
             unit: .count().unitDivided(by: .minute()),
             from: weekBefore,
             to: now
         )
         (health.restingHeartRate, health.restingHeartRateBaseline) = Self.latestAndBaseline(resting, now: now)
-        let variability = await samples(
+        let variability = try await samples(
             .heartRateVariabilitySDNN,
             unit: .secondUnit(with: .milli),
             from: weekBefore,
@@ -62,31 +71,49 @@ final class HealthKitReader: HealthReading {
             now: now
         )
         let ninetyDaysAgo = calendar.date(byAdding: .day, value: -90, to: today) ?? today
-        health.vo2Max = await samples(.vo2Max, unit: HKUnit(from: "ml/kg*min"), from: ninetyDaysAgo, to: now)
-            .last?.value
+        health.vo2Max = try await samples(
+            .vo2Max,
+            unit: HKUnit(from: "ml/kg*min"),
+            from: ninetyDaysAgo,
+            to: now
+        ).last?.value
 
-        health.workoutsYesterday = await workouts(endingFrom: yesterday, to: today)
-        let energy = await dailySums(.activeEnergyBurned, unit: .kilocalorie(), from: weekBefore, to: today)
+        health.workoutsYesterday = try await workouts(endingFrom: yesterday, to: today)
+        let energy = try await dailySums(
+            .activeEnergyBurned,
+            unit: .kilocalorie(),
+            from: weekBefore,
+            to: today
+        )
         (health.activeEnergyYesterday, health.activeEnergyBaseline) = Self.yesterdayAndBaseline(
             energy,
             yesterday: yesterday
         )
-        let steps = await dailySums(.stepCount, unit: .count(), from: weekBefore, to: today)
+        let steps = try await dailySums(.stepCount, unit: .count(), from: weekBefore, to: today)
         (health.stepsYesterday, health.stepsBaseline) = Self.yesterdayAndBaseline(steps, yesterday: yesterday)
 
         // the night that ended this morning: from 6 p.m. yesterday to noon today, or now if earlier.
         let nightStart = calendar.date(byAdding: .hour, value: 18, to: yesterday) ?? yesterday
         let nightEnd = min(now, calendar.date(byAdding: .hour, value: 12, to: today) ?? now)
-        let asleep = await sleepIntervals(from: nightStart, to: nightEnd)
+        let asleep = try await sleepIntervals(from: nightStart, to: nightEnd)
         health.sleepLastNight = asleep.isEmpty ? nil : HealthCoach.asleep(asleep)
 
         if let birth = try? store.dateOfBirthComponents(), let birthDate = calendar.date(from: birth) {
             health.age = calendar.dateComponents([.year], from: birthDate, to: now).year
         }
         let tenYearsAgo = calendar.date(byAdding: .year, value: -10, to: today) ?? today
-        health.weight = await samples(.bodyMass, unit: .gramUnit(with: .kilo), from: tenYearsAgo, to: now)
-            .last?.value
-        health.height = await samples(.height, unit: .meter(), from: tenYearsAgo, to: now).last?.value
+        health.weight = try await samples(
+            .bodyMass,
+            unit: .gramUnit(with: .kilo),
+            from: tenYearsAgo,
+            to: now
+        ).last?.value
+        health.height = try await samples(
+            .height,
+            unit: .meter(),
+            from: tenYearsAgo,
+            to: now
+        ).last?.value
         return health
     }
 
@@ -115,16 +142,14 @@ final class HealthKitReader: HealthReading {
         unit: HKUnit,
         from start: Date,
         to end: Date
-    ) async -> [(date: Date, value: Double)] {
+    ) async throws -> [(date: Date, value: Double)] {
         let type = HKQuantityType(identifier)
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end)
         let descriptor = HKSampleQueryDescriptor(
             predicates: [.quantitySample(type: type, predicate: predicate)],
             sortDescriptors: [SortDescriptor(\.endDate, order: .forward)]
         )
-        guard let results = try? await descriptor.result(for: store) else {
-            return []
-        }
+        let results = try await descriptor.result(for: store)
         return results.map { ($0.endDate, $0.quantity.doubleValue(for: unit)) }
     }
 
@@ -133,16 +158,14 @@ final class HealthKitReader: HealthReading {
         unit: HKUnit,
         from start: Date,
         to end: Date
-    ) async -> [(day: Date, sum: Double)] {
+    ) async throws -> [(day: Date, sum: Double)] {
         let type = HKQuantityType(identifier)
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end)
         let descriptor = HKStatisticsCollectionQueryDescriptor(
             predicate: .quantitySample(type: type, predicate: predicate), options: .cumulativeSum,
             anchorDate: start, intervalComponents: DateComponents(day: 1)
         )
-        guard let collection = try? await descriptor.result(for: store) else {
-            return []
-        }
+        let collection = try await descriptor.result(for: store)
         var days: [(day: Date, sum: Double)] = []
         collection.enumerateStatistics(from: start, to: end) { statistics, _ in
             days.append((statistics.startDate, statistics.sumQuantity()?.doubleValue(for: unit) ?? 0))
@@ -150,7 +173,7 @@ final class HealthKitReader: HealthReading {
         return days
     }
 
-    private func workouts(endingFrom start: Date, to end: Date) async -> [RecentWorkout] {
+    private func workouts(endingFrom start: Date, to end: Date) async throws -> [RecentWorkout] {
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictEndDate)
         let descriptor = HKSampleQueryDescriptor(
             predicates: [.workout(predicate)],
@@ -159,13 +182,11 @@ final class HealthKitReader: HealthReading {
                 order: .forward
             )]
         )
-        guard let results = try? await descriptor.result(for: store) else {
-            return []
-        }
+        let results = try await descriptor.result(for: store)
         return results.map { RecentWorkout(start: $0.startDate, end: $0.endDate) }
     }
 
-    private func sleepIntervals(from start: Date, to end: Date) async -> [DateInterval] {
+    private func sleepIntervals(from start: Date, to end: Date) async throws -> [DateInterval] {
         let asleep: Set<Int> = [HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
                                 HKCategoryValueSleepAnalysis.asleepCore.rawValue,
                                 HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
@@ -175,9 +196,7 @@ final class HealthKitReader: HealthReading {
             predicates: [.categorySample(type: HKCategoryType(.sleepAnalysis), predicate: predicate)],
             sortDescriptors: [SortDescriptor(\.startDate, order: .forward)]
         )
-        guard let results = try? await descriptor.result(for: store) else {
-            return []
-        }
+        let results = try await descriptor.result(for: store)
         return results.compactMap { sample in
             let from = max(sample.startDate, start), to = min(sample.endDate, end)
             // DateInterval traps when its end is before its start.

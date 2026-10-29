@@ -9,9 +9,12 @@ final class CoachConversation {
     private(set) var isAnswering = false
     private(set) var context: CoachContext
     private let responder: CoachResponder
+    /// onboarding answers, kept so a refreshed context still carries them
+    private let preferencesNote: String?
 
-    init(history: [WorkoutSessionSummary], responder: CoachResponder) {
-        self.context = CoachContext.make(history: history)
+    init(history: [WorkoutSessionSummary], responder: CoachResponder, preferencesNote: String? = nil) {
+        self.preferencesNote = preferencesNote
+        self.context = CoachContext.make(history: history, preferencesNote: preferencesNote)
         self.responder = responder
         messages = [CoachMessage(
             role: .coach,
@@ -20,11 +23,15 @@ final class CoachConversation {
     }
 
     /// the app's coach: the standard engine order, with the Claude demo first in Debug builds
-    convenience init(history: [WorkoutSessionSummary]) {
+    convenience init(history: [WorkoutSessionSummary], preferencesNote: String? = nil) {
         var extra: [any CoachEngine] = []
         #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach") {
-                self.init(history: history, responder: CoachResponder(selector: .standard()))
+                self.init(
+                    history: history,
+                    responder: CoachResponder(selector: .standard()),
+                    preferencesNote: preferencesNote
+                )
                 return
             }
             // synthetic UI tours must not call a live model service. An unsigned iOS 27
@@ -35,13 +42,18 @@ final class CoachConversation {
                     !ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach")) {
                 self.init(
                     history: history,
-                    responder: CoachResponder(selector: CoachEngineSelector(engines: []))
+                    responder: CoachResponder(selector: CoachEngineSelector(engines: [])),
+                    preferencesNote: preferencesNote
                 )
                 return
             }
             extra.append(ClaudeDemoCoachEngine())
         #endif
-        self.init(history: history, responder: CoachResponder(selector: .standard(extra: extra)))
+        self.init(
+            history: history,
+            responder: CoachResponder(selector: .standard(extra: extra)),
+            preferencesNote: preferencesNote
+        )
     }
 
     /// which engine would answer the next question
@@ -63,7 +75,7 @@ final class CoachConversation {
 
     /// the saved sets changed (a new set, a deletion): the coach reads them again
     func refresh(history: [WorkoutSessionSummary]) {
-        let updated = CoachContext.make(history: history)
+        let updated = CoachContext.make(history: history, preferencesNote: preferencesNote)
         guard updated != context else {
             return
         }

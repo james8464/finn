@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 nonisolated enum SessionStoreError: Error, Equatable {
     case corrupted
@@ -17,7 +18,23 @@ nonisolated protocol SessionStoring {
 /// Move existing on-device history and badges into the renamed support folder.
 /// If a move fails, callers continue using the legacy folder so no data disappears.
 nonisolated enum FinnDataMigration {
+    /// Resolved once per support folder. The history and the badges are created independently, and
+    /// they must agree on the folder: a second migration attempt would either fail or split the two
+    /// files across the old and new paths.
+    private static let resolved = OSAllocatedUnfairLock<[URL: URL]>(initialState: [:])
+
     static func directory(in support: URL, fileManager: FileManager = .default) -> URL {
+        resolved.withLock { known in
+            if let directory = known[support] {
+                return directory
+            }
+            let directory = migrate(in: support, fileManager: fileManager)
+            known[support] = directory
+            return directory
+        }
+    }
+
+    private static func migrate(in support: URL, fileManager: FileManager) -> URL {
         let current = support.appending(path: "Finn", directoryHint: .isDirectory)
         let previous = support.appending(path: "Plumb", directoryHint: .isDirectory)
         guard fileManager.fileExists(atPath: previous.path) else {

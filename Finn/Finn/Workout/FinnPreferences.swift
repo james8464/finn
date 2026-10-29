@@ -63,7 +63,20 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
     let remembersExercise: Bool
 
     init(defaults: UserDefaults, handsFreeByDefault: Bool = false, remembersExercise: Bool = false) {
-        // keep settings selected before the product was renamed. A new value always wins.
+        Self.migrateLegacyKeys(in: defaults)
+        self.defaults = defaults
+        self.handsFreeByDefault = handsFreeByDefault
+        self.remembersExercise = remembersExercise
+    }
+
+    private static let migratedLegacyKeys = "finn.migratedFromPlumb"
+
+    /// Keeps settings selected before the product was renamed. Runs once per suite: after that the
+    /// keys are gone and there is nothing left to move, so the common path is a single flag read.
+    private static func migrateLegacyKeys(in defaults: UserDefaults) {
+        guard !defaults.bool(forKey: migratedLegacyKeys) else {
+            return
+        }
         for (key, value) in defaults.dictionaryRepresentation() where key.hasPrefix("plumb.") {
             let renamedKey = "finn." + key.dropFirst("plumb.".count)
             if defaults.object(forKey: renamedKey) == nil {
@@ -71,9 +84,7 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
             }
             defaults.removeObject(forKey: key)
         }
-        self.defaults = defaults
-        self.handsFreeByDefault = handsFreeByDefault
-        self.remembersExercise = remembersExercise
+        defaults.set(true, forKey: migratedLegacyKeys)
     }
 
     static let standard = FinnPreferences(defaults: .standard)

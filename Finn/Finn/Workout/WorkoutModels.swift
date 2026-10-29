@@ -416,6 +416,39 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
         self.formMeasurements = formMeasurements
         self.partlyVisible = partlyVisible
     }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, sessionID, capturedAt, bodySide, analysis, cue, cueResponse
+        case exercise, cameraView, issues, formMeasurements, partlyVisible
+    }
+
+    /// `exercise`, `cameraView` and `cueResponse` arrived after the first saved sets, and a
+    /// property's initialiser default does not apply when decoding. Read them leniently, so a set
+    /// saved by an older build still loads as the side-view squat it was.
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        sessionID = try container.decode(UUID.self, forKey: .sessionID)
+        capturedAt = try container.decode(Date.self, forKey: .capturedAt)
+        bodySide = try container.decode(BodySide.self, forKey: .bodySide)
+        analysis = try container.decode(SetAnalysis.self, forKey: .analysis)
+        cue = try container.decodeIfPresent(Cue.self, forKey: .cue)
+        cueResponse = try container.decodeIfPresent(
+            CueResponse.self,
+            forKey: .cueResponse
+        ) ?? .unanswered
+        exercise = try container.decodeIfPresent(
+            ExerciseKind.self,
+            forKey: .exercise
+        ) ?? .bodyweightSquat
+        cameraView = try container.decodeIfPresent(CameraView.self, forKey: .cameraView) ?? .side
+        issues = try container.decodeIfPresent([SetIssue].self, forKey: .issues)
+        formMeasurements = try container.decodeIfPresent(
+            [FormMeasurement].self,
+            forKey: .formMeasurements
+        )
+        partlyVisible = try container.decodeIfPresent(Bool.self, forKey: .partlyVisible)
+    }
 }
 
 nonisolated struct WorkoutSessionSummary: Codable, Equatable, Identifiable {

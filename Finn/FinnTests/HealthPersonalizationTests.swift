@@ -221,6 +221,27 @@ struct HealthSessionTests {
         #expect(!setup.model.offersHealthPersonalisation)
         #expect(!setup.model.showsPersonalisationOffer)
     }
+
+    /// A failed HealthKit read is not an empty one: the last good snapshot stays, so a transient
+    /// error cannot read as "you slept nothing".
+    @Test func aFailedHealthReadKeepsTheLastGoodSnapshot() async throws {
+        let setup = try HealthSetup()
+        setup.health.snapshotToReturn.sleepLastNight = 5 * 3600
+        await setup.model.answerPersonalisationOffer(personalise: true)
+        #expect(setup.model.readinessNote?.basis == "From your sleep in Health.")
+
+        setup.health.failsRead = true
+        await setup.model.refreshHealth()
+        #expect(setup.health.reads == 2)
+        #expect(setup.model.readinessNote?.basis == "From your sleep in Health.")
+    }
+
+    /// A short night reads in minutes, never as "0 h 45".
+    @Test func sleepLengthUnderAnHourReadsInMinutes() {
+        #expect(HealthCoach.duration(TimeInterval(45 * 60)) == "45 min")
+        #expect(HealthCoach.duration(TimeInterval(5 * 3600 + 40 * 60)) == "5 h 40")
+        #expect(HealthCoach.duration(7.5 * 3600) == "7 h 30")
+    }
 }
 
 @MainActor
@@ -268,6 +289,8 @@ private final class HealthTestClock {
 private final class FakeHealthReader: HealthReading {
     var isAvailable = true
     var snapshotToReturn = HealthSnapshot()
+    /// stands for a HealthKit query that threw, rather than returned no samples
+    var failsRead = false
     private(set) var requests = 0
     private(set) var reads = 0
 
@@ -275,9 +298,9 @@ private final class FakeHealthReader: HealthReading {
         requests += 1
     }
 
-    func snapshot(now: Date) async -> HealthSnapshot {
+    func snapshot(now: Date) async -> HealthSnapshot? {
         reads += 1
-        return snapshotToReturn
+        return failsRead ? nil : snapshotToReturn
     }
 }
 

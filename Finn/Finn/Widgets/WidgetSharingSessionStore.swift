@@ -61,13 +61,14 @@ nonisolated struct WidgetSharingSessionStore: SessionStoring {
         return backup
     }
 
-    /// rereads the history after a write, so the widget shows what is saved rather than what was
-    /// about to be. A history that cannot be read leaves the widget empty rather than stale.
+    /// Rereads the history after a write, so the widget shows what is saved rather than what was
+    /// about to be. A history that cannot be read is left alone: a failed read must not blank a
+    /// widget that is showing a real set.
     private func publish() {
-        guard let shared else {
+        guard let shared, let sessions = try? base.load() else {
             return
         }
-        let snapshot = (try? base.load()).flatMap { LastSetSnapshot.latest(in: $0) }
+        let snapshot = LastSetSnapshot.latest(in: sessions)
         guard snapshot != shared.read() else {
             return
         }

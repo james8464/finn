@@ -459,6 +459,21 @@ struct CoachTests {
         #expect(engine.calls == 0)
     }
 
+    /// The onboarding note reaches the model through the context, so tests and demo input use their
+    /// own preferences rather than the device's.
+    @Test func thePromptCarriesTheOnboardingNoteFromItsContext() {
+        let context = CoachContext(facts: [], preferencesNote: "Bad left knee.")
+        let prompt = FoundationModelsCoachPrompt.prompt(
+            question: "How am I doing?", context: context, history: []
+        )
+        #expect(prompt.contains("Person's stated preferences:\nBad left knee."))
+
+        let plain = FoundationModelsCoachPrompt.prompt(
+            question: "How am I doing?", context: CoachContext(facts: []), history: []
+        )
+        #expect(!plain.contains("Person's stated preferences"))
+    }
+
     @Test func promptSizeStaysBoundedForLongQuestionsAndHistory() {
         let huge = String(repeating: "more context ", count: 10_000)
         let turns = (0 ..< 20).map { _ in CoachMessage(role: .person, text: huge) }

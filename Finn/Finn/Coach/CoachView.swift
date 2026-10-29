@@ -26,7 +26,10 @@ struct CoachView: View {
         self.planningContext = planningContext
         self.plannedWorkouts = store ?? .shared
         self.onStartWorkout = onStartWorkout
-        _conversation = State(initialValue: CoachConversation(history: history))
+        _conversation = State(initialValue: CoachConversation(
+            history: history,
+            preferencesNote: planningContext?.profile.coachNote
+        ))
     }
 
     init(history: [WorkoutSessionSummary], conversation: CoachConversation) {

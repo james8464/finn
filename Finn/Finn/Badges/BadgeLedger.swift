@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import os
 
 /// where earned badges are kept. The app writes a JSON file next to the history; tests use memory.
 nonisolated protocol BadgeStoring: Sendable {
@@ -29,6 +30,7 @@ nonisolated struct LocalBadgeStore: BadgeStoring {
             withIntermediateDirectories: true
         )
         try JSONEncoder().encode(badges).write(to: url, options: [.atomic, .completeFileProtection])
+        try (url as NSURL).setResourceValue(URLFileProtection.complete, forKey: .fileProtectionKey)
     }
 }
 
@@ -56,6 +58,10 @@ final class BadgeLedger {
     /// badges earned by the latest `update`, shown on the result until `acknowledge`
     private(set) var justEarned: [EarnedBadge] = []
     @ObservationIgnored private let store: any BadgeStoring
+    @ObservationIgnored private let log = Logger(
+        subsystem: "ai.mwm.build.challenge.team.08",
+        category: "badges"
+    )
 
     init(store: any BadgeStoring = LocalBadgeStore(), initialEarned: [EarnedBadge]? = nil) {
         self.store = store
@@ -94,7 +100,7 @@ final class BadgeLedger {
         }
         earned.append(contentsOf: fresh)
         earned.sort { $0.earnedAt < $1.earnedAt }
-        try? store.save(earned)
+        persist()
         return fresh
     }
 
@@ -106,6 +112,16 @@ final class BadgeLedger {
     func reset() {
         earned = []
         justEarned = []
-        try? store.save([])
+        persist()
+    }
+
+    /// A failed write is logged rather than swallowed. The badges stay in memory, so the rest of the
+    /// session is right; the next successful write catches the file up.
+    private func persist() {
+        do {
+            try store.save(earned)
+        } catch {
+            log.error("Badges could not be saved; they stay in memory until the next write.")
+        }
     }
 }

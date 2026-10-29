@@ -47,6 +47,9 @@ nonisolated struct CoachContext: Equatable, Sendable {
     static let defaultLimit = 8
 
     let facts: [CoachSetFact]
+    /// what the person said about themselves in onboarding, when they said anything. Held here so
+    /// the prompt uses the same preferences as the rest of the app, never the global defaults.
+    var preferencesNote: String? = nil
 
     var isEmpty: Bool {
         facts.isEmpty
@@ -95,7 +98,8 @@ nonisolated struct CoachContext: Equatable, Sendable {
     static func make(
         history: [WorkoutSessionSummary],
         limit: Int = defaultLimit,
-        now: Date = .now
+        now: Date = .now,
+        preferencesNote: String? = nil
     ) -> CoachContext {
         struct Pending {
             let set: SetSummary
@@ -103,7 +107,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
         }
         let retainedCount = max(0, min(limit, 32))
         guard retainedCount > 0 else {
-            return CoachContext(facts: [])
+            return CoachContext(facts: [], preferencesNote: preferencesNote)
         }
         // Sessions can overlap. A session's start does not establish when its last set happened.
         let chronologicalSets = history.flatMap(\.sets).sorted { earlier, later in
@@ -166,7 +170,7 @@ nonisolated struct CoachContext: Equatable, Sendable {
                 nextAction: nextAction
             )
         }
-        return CoachContext(facts: facts)
+        return CoachContext(facts: facts, preferencesNote: preferencesNote)
     }
 
     /// one whole sentence fragment per language, so French never mixes with English words

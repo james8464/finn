@@ -5,7 +5,9 @@ import SwiftUI
 /// is estimated. Each section answers one question and says which sessions it rests on.
 nonisolated struct StatsSummary {
     let sessions: [WorkoutSessionSummary]
-    let calendar = Calendar.current
+    var calendar: Calendar = .current
+    /// Injected so a test can pin the day it is looking at. `.now` keeps the app's behaviour.
+    var now: Date = .now
 
     var totalReps: Int {
         sessions.flatMap(\.sets).reduce(0) { $0 + $1.analysis.reps.count }
@@ -17,7 +19,7 @@ nonisolated struct StatsSummary {
         guard !days.isEmpty else {
             return 0
         }
-        var day = calendar.startOfDay(for: .now)
+        var day = calendar.startOfDay(for: now)
         if !days.contains(day) {
             guard
                 let yesterday = calendar.date(byAdding: .day, value: -1, to: day),
@@ -39,15 +41,19 @@ nonisolated struct StatsSummary {
 
     /// reps per day over the last 12 weeks, oldest first, for the regularity calendar
     var dailyReps: [(day: Date, reps: Int)] {
-        let today = calendar.startOfDay(for: .now)
+        let today = calendar.startOfDay(for: now)
         let weekStart = calendar.dateInterval(of: .weekOfYear, for: today)?.start ?? today
         guard let first = calendar.date(byAdding: .weekOfYear, value: -11, to: weekStart) else {
             return []
         }
         var byDay: [Date: Int] = [:]
+        // each set counts on the day it was measured, so a session that runs past midnight is not
+        // credited to its start day alone
         for session in sessions {
-            let day = calendar.startOfDay(for: session.startedAt)
-            byDay[day, default: 0] += session.sets.reduce(0) { $0 + $1.analysis.reps.count }
+            for set in session.sets {
+                let day = calendar.startOfDay(for: set.capturedAt)
+                byDay[day, default: 0] += set.analysis.reps.count
+            }
         }
         var days: [(Date, Int)] = []
         var day = first
@@ -63,7 +69,7 @@ nonisolated struct StatsSummary {
 
     /// this week's reps against last week's, as a share; nil without a previous week
     var weekTrend: (thisWeek: Int, lastWeek: Int, change: Double?) {
-        let today = Date.now
+        let today = now
         let thisWeek = sessions.filter { calendar.isDate(
             $0.startedAt,
             equalTo: today,

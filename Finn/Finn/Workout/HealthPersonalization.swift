@@ -383,8 +383,13 @@ nonisolated enum HealthCoach {
         "\(Int(value.rounded())) bpm"
     }
 
+    /// A sleep length in hours and minutes, or minutes alone below an hour, so a short night never
+    /// reads as "0 h 45".
     static func duration(_ seconds: TimeInterval) -> String {
-        let minutes = Int((seconds / 60).rounded())
+        let minutes = max(0, Int((seconds / 60).rounded()))
+        guard minutes >= 60 else {
+            return String(localized: "\(minutes) min")
+        }
         return "\(minutes / 60) h \(String(format: "%02d", minutes % 60))"
     }
 
@@ -413,7 +418,8 @@ protocol HealthReading: AnyObject {
     /// Shows Health's sheet for the types the person has not answered yet. HealthKit never says
     /// which read types were refused: a refused type simply reads as no data.
     func requestAccess() async
-    func snapshot(now: Date) async -> HealthSnapshot
+    /// Nil when Health could not be read at all, so a failed read never looks like "no data".
+    func snapshot(now: Date) async -> HealthSnapshot?
 }
 
 extension HealthSnapshot {

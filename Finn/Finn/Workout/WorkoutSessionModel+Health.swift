@@ -19,10 +19,11 @@ extension WorkoutSessionModel {
         await refreshHealth()
     }
 
-    /// Reads Health again, when the option is on. Called when the setup screen shows.
+    /// Reads Health again, when the option is on. Called when the setup screen shows. A read that
+    /// fails keeps the last good snapshot, so a transient HealthKit error is not shown as no data.
     func refreshHealth() async {
         guard personalisesWithHealth, let health, health.isAvailable else { return }
-        let snapshot = await health.snapshot(now: currentDate())
+        guard let snapshot = await health.snapshot(now: currentDate()) else { return }
 // the person may have turned the option off while Health was read.
         guard personalisesWithHealth else { return }
         healthSnapshot = snapshot.validatedForCoaching
