@@ -155,8 +155,7 @@ final class ScreenTourUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Options"].waitForExistence(timeout: 5))
         Thread.sleep(forTimeInterval: 0.6)
         save("12-options")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["home.privacy"].tap()
+        open(app, "Privacy")
         XCTAssertTrue(app.navigationBars["Privacy"].waitForExistence(timeout: 5))
         Thread.sleep(forTimeInterval: 0.6)
         save("13-confidentialite")
@@ -187,7 +186,8 @@ final class ScreenTourUITests: XCTestCase {
             app.buttons["Start set"].tap()
             let caption = app.staticTexts.matching(identifier: "capture.liveCaption").firstMatch
             XCTAssertTrue(caption.waitForExistence(timeout: 10))
-            let shown = NSPredicate(format: "label == %@", cue)
+            // the slot shows the whole coach line, not just the cue: "Rep 6: Chest up on the next one."
+            let shown = NSPredicate(format: "label CONTAINS[cd] %@", cue)
             expectation(for: shown, evaluatedWith: caption)
             waitForExpectations(timeout: 10)
             Thread.sleep(forTimeInterval: 1)
