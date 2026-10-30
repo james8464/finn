@@ -73,7 +73,7 @@ nonisolated enum LiveCoachChoices {
 }
 
 private extension LiveSetEvent {
-    var key: String {
+    nonisolated var key: String {
         switch self {
         case .repCounted: "count"
         case .repCountRevised: "revision"

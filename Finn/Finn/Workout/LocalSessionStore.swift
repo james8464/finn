@@ -24,14 +24,21 @@ nonisolated enum FinnDataMigration {
     private static let resolved = OSAllocatedUnfairLock<[URL: URL]>(initialState: [:])
 
     static func directory(in support: URL, fileManager: FileManager = .default) -> URL {
-        resolved.withLock { known in
+        // the lock takes a Sendable capture; the box is the thread-safe FileManager it holds
+        let files = FileManagerBox(manager: fileManager)
+        return resolved.withLock { known in
             if let directory = known[support] {
                 return directory
             }
-            let directory = migrate(in: support, fileManager: fileManager)
+            let directory = migrate(in: support, fileManager: files.manager)
             known[support] = directory
             return directory
         }
+    }
+
+    /// FileManager answers the same way from any thread for the calls `migrate` makes.
+    private struct FileManagerBox: @unchecked Sendable {
+        let manager: FileManager
     }
 
     private static func migrate(in support: URL, fileManager: FileManager) -> URL {

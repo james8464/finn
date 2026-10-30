@@ -351,6 +351,7 @@ struct CoachView: View {
         }
     }
 
+    @discardableResult
     private func send(_ question: String) -> Bool {
         let text = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !conversation.isAnswering else {

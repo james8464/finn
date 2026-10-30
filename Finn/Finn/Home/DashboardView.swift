@@ -26,7 +26,7 @@ enum HomeTab: String, CaseIterable {
 
 enum DashboardStyle {
     /// Figma brand/pink/selection, node 68:12: #FF2D92 (sRGB)
-    static let accent = Color(.sRGB, red: 1, green: 45.0 / 255, blue: 146.0 / 255, opacity: 1)
+    nonisolated static let accent = Color(.sRGB, red: 1, green: 45.0 / 255, blue: 146.0 / 255, opacity: 1)
     static let secondary = Color.white.opacity(0.7)
     /// The solid pink Finn card.
     static let finnCardRadius: CGFloat = 24

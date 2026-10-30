@@ -43,7 +43,7 @@ nonisolated enum TrainingGoal: String, Codable, CaseIterable, Sendable {
 
 extension TrainingGoal {
     /// the goal in the coach's summary: "You want …"
-    var summaryPhrase: String {
+    nonisolated var summaryPhrase: String {
         switch self {
         case .technique: String(localized: "clearer technique")
         case .consistency: String(localized: "to train more regularly")
@@ -83,7 +83,7 @@ nonisolated enum TrainingLevel: String, Codable, CaseIterable, Sendable {
 
 extension TrainingLevel {
     /// the level in the coach's summary: "Right now, you're …"
-    var summaryPhrase: String {
+    nonisolated var summaryPhrase: String {
         switch self {
         case .new: String(localized: "just starting out")
         case .returning: String(localized: "coming back after a break")

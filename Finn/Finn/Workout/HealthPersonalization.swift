@@ -424,7 +424,7 @@ protocol HealthReading: AnyObject {
 
 extension HealthSnapshot {
     /// Ignore corrupt or non-finite cache values before formatting numbers or planning a session.
-    var validatedForCoaching: HealthSnapshot {
+    nonisolated var validatedForCoaching: HealthSnapshot {
         func valid(_ value: Double?, in range: ClosedRange<Double>) -> Double? {
             guard let value, value.isFinite, range.contains(value) else { return nil }
             return value
