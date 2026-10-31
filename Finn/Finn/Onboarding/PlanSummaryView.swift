@@ -49,7 +49,7 @@ struct PlanSummaryView: View {
             .scrollBounceBehavior(.basedOnSize)
             if isReady {
                 Button(action: next) {
-                    PrimaryActionLabel(title: "Continue")
+                    PrimaryActionLabel(title: "Continue", tone: .dark)
                 }
                 .buttonStyle(PressableStyle())
                 .accessibilityIdentifier("summary.continue")

@@ -205,7 +205,7 @@ struct OnboardingView: View {
     private var actions: some View {
         VStack(spacing: 2) {
             Button(action: advance) {
-                PrimaryActionLabel(title: "Continue")
+                PrimaryActionLabel(title: "Continue", tone: .dark)
             }
             .buttonStyle(PressableStyle())
             .disabled(continueDisabled)
@@ -567,7 +567,9 @@ private struct ChoiceCard: View {
     private static let circle: CGFloat = 20
     private static let ringWidth: CGFloat = 1.8
     private static let tick: CGFloat = 12
-    private static let outlineWidth: CGFloat = 2
+    /// the chosen card's outline: a softer pink, thinner than the tick's circle
+    private static let outline = Color(red: 0xF1 / 255, green: 0x5F / 255, blue: 0xA1 / 255)
+    private static let outlineWidth: CGFloat = 1.25
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: Self.radius, style: .continuous)
@@ -596,7 +598,7 @@ private struct ChoiceCard: View {
             // always there and only faded: the paged TabView drops the animation of views that
             // appear or disappear, so the old choice would linger and the new one pop
             .overlay {
-                shape.strokeBorder(DashboardStyle.accent, lineWidth: Self.outlineWidth)
+                shape.strokeBorder(Self.outline, lineWidth: Self.outlineWidth)
                     .opacity(selected ? 1 : 0)
             }
             .contentShape(shape)
