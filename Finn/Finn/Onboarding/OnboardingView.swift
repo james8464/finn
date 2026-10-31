@@ -336,7 +336,7 @@ struct OnboardingView: View {
              String(localized: "Choose a focus for better coaching")) {
             VStack(spacing: 10) {
                 ForEach(TrainingGoal.allCases, id: \.self) { goal in
-                    ChoiceCard(title: goal.title, detail: nil, symbol: goal.symbol,
+                    ChoiceCard(title: goal.title, detail: nil,
                                selected: profile.goal == goal) {
                         profile.goal = profile.goal == goal ? nil : goal
                     }
@@ -351,7 +351,7 @@ struct OnboardingView: View {
              String(localized: "Adjusts training plan")) {
             VStack(spacing: 10) {
                 ForEach(TrainingLevel.allCases, id: \.self) { level in
-                    ChoiceCard(title: level.title, detail: nil, symbol: nil,
+                    ChoiceCard(title: level.title, detail: nil,
                                selected: profile.level == level) {
                         profile.level = profile.level == level ? nil : level
                     }
@@ -367,7 +367,7 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 10) {
                 ForEach([true, false], id: \.self) { answer in
                     ChoiceCard(title: answer ? String(localized: "Yes") : String(localized: "No"),
-                               detail: nil, symbol: nil, selected: profile.followedProgram == answer) {
+                               detail: nil, selected: profile.followedProgram == answer) {
                         withAnimation(reduceMotion ? nil : HomeStyle.spring) {
                             profile.followedProgram = profile.followedProgram == answer ? nil : answer
                             if profile.followedProgram != true { profile.stopReasons = [] }
@@ -397,8 +397,8 @@ struct OnboardingView: View {
             .padding(.top, 22)
             .padding(.bottom, 4)
             ForEach(ProgramStopReason.allCases, id: \.self) { reason in
-                ChoiceCard(title: reason.title, detail: nil, symbol: nil,
-                           selected: profile.stopReasons.contains(reason), multiple: true) {
+                ChoiceCard(title: reason.title, detail: nil,
+                           selected: profile.stopReasons.contains(reason)) {
                     if let index = profile.stopReasons.firstIndex(of: reason) {
                         profile.stopReasons.remove(at: index)
                     } else {
@@ -415,7 +415,7 @@ struct OnboardingView: View {
                 ?? String(localized: "How hard do you want me to push you?")) {
             VStack(spacing: 10) {
                 ForEach(TrainingIntensity.allCases, id: \.self) { intensity in
-                    ChoiceCard(title: intensity.title, detail: nil, symbol: nil,
+                    ChoiceCard(title: intensity.title, detail: nil,
                                selected: profile.intensity == intensity) {
                         profile.intensity = profile.intensity == intensity ? nil : intensity
                     }
@@ -429,7 +429,7 @@ struct OnboardingView: View {
         page(String(localized: "How many days a week are you ready to train?")) {
             VStack(spacing: 10) {
                 ForEach(TrainingDays.allCases, id: \.self) { days in
-                    ChoiceCard(title: days.title, detail: nil, symbol: nil,
+                    ChoiceCard(title: days.title, detail: nil,
                                selected: profile.days == days) {
                         profile.days = profile.days == days ? nil : days
                     }
@@ -549,49 +549,81 @@ struct OnboardingView: View {
     }
 }
 
-/// one answer: a card that fills when chosen. Square check boxes when several answers can apply
+/// one answer: an anthracite card with an empty circle on the left. Chosen, the circle fills pink
+/// with a black tick and a pink outline is drawn inside the card's edge, so nothing moves.
+/// Animated like the paywall's plans
 private struct ChoiceCard: View {
     let title: String
     let detail: String?
-    let symbol: String?
     let selected: Bool
-    var multiple = false
     let tap: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+
+    private static let fill = Color(red: 0x1E / 255, green: 0x1E / 255, blue: 0x1E / 255)
+    private static let ring = Color(red: 0xB7 / 255, green: 0xB7 / 255, blue: 0xB7 / 255)
+    private static let radius: CGFloat = 22
+    private static let inset: CGFloat = 16
+    private static let circle: CGFloat = 20
+    private static let ringWidth: CGFloat = 1.8
+    private static let tick: CGFloat = 12
+    private static let outlineWidth: CGFloat = 2
 
     var body: some View {
-        Button(action: tap) {
-            HStack(alignment: .top, spacing: 14) {
-                if let symbol {
-                    Image(systemName: symbol)
-                        .font(.system(size: 20))
-                        .frame(width: 28)
-                        .padding(.top, 1)
-                        .accessibilityHidden(true)
-                }
+        let shape = RoundedRectangle(cornerRadius: Self.radius, style: .continuous)
+        Button {
+            withAnimation(reduceMotion ? nil : HomeStyle.spring) { tap() }
+        } label: {
+            HStack(alignment: .center, spacing: Self.inset) {
+                indicator
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(title).font(.headline)
-                    if let detail { Text(detail)
-                        .font(.subheadline)
-                        .opacity(0.78)
-                        .fixedSize(horizontal: false, vertical: true)
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    if let detail {
+                        Text(detail)
+                            .font(.subheadline)
+                            .foregroundStyle(HomeStyle.supportingText)
                     }
                 }
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
-                Image(systemName: multiple ? (selected ? "checkmark.square.fill" : "square")
-                                           : (selected ? "checkmark.circle.fill" : "circle"))
-                    .foregroundStyle(selected ? DashboardStyle.accent : Color(uiColor: .secondaryLabel))
-                    .font(.system(size: 20))
-                    .accessibilityHidden(true)
             }
-            .padding(16)
+            .padding(Self.inset)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .foregroundStyle(Color.primary)
-            .background(selected ? HomeStyle.accent.opacity(0.12) : HomeStyle.card,
-                        in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(Self.fill, in: shape)
+            // always there and only faded: the paged TabView drops the animation of views that
+            // appear or disappear, so the old choice would linger and the new one pop
+            .overlay {
+                shape.strokeBorder(DashboardStyle.accent, lineWidth: Self.outlineWidth)
+                    .opacity(selected ? 1 : 0)
+            }
+            .contentShape(shape)
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
         .finnFeedback(.selection, trigger: selected)
+    }
+
+    /// the same 20 pt circle in both states: an empty grey ring, or pink with a 12 pt black tick.
+    /// Like the paywall's icon, it fades and shifts grey to pink at once
+    private var indicator: some View {
+        let tint = selected ? DashboardStyle.accent : Self.ring
+        return ZStack {
+            Circle().strokeBorder(tint, lineWidth: Self.ringWidth)
+            Circle().fill(tint)
+                .opacity(selected ? 1 : 0)
+            Image(systemName: "checkmark")
+                .resizable()
+                .scaledToFit()
+                .fontWeight(.bold)
+                .foregroundStyle(.black)
+                .frame(width: Self.tick, height: Self.tick)
+                .opacity(selected ? 1 : 0)
+        }
+        .frame(width: Self.circle, height: Self.circle)
+        .accessibilityHidden(true)
     }
 }
 
