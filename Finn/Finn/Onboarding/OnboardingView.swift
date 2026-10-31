@@ -2,7 +2,7 @@ import SwiftUI
 
 /// how the person left the onboarding
 enum OnboardingExit {
-    /// through every screen, or Not now on a question
+    /// through every screen: the onboarding can't be left early, only its questions skipped
     case completed
     /// Skip on the plan offer: straight to Home, where the coach offers one free workout
     case skippedPlan
@@ -143,7 +143,7 @@ struct OnboardingView: View {
         }
     }
 
-    /// the row (Back, the counter, Not now), then the pink bar
+    /// the row (Back, the counter, Skip), then the pink bar
     private var header: some View {
         VStack(spacing: 15) {
             Group {
@@ -152,17 +152,19 @@ struct OnboardingView: View {
                         HStack {
                             backButton
                             Spacer()
-                            skipAllButton
+                            skipButton
                         }
                         counter.font(.footnote.weight(.semibold))
                     }
                 } else {
+                    // the counter sits in the middle of the screen, whatever the widths of Back and Skip
                     HStack {
-                        backButton
+                        backButton.accessibilitySortPriority(3)
                         Spacer()
-                        counter.font(.subheadline.weight(.semibold))
-                        Spacer()
-                        skipAllButton
+                        skipButton.accessibilitySortPriority(1)
+                    }
+                    .overlay {
+                        counter.font(.subheadline.weight(.semibold)).accessibilitySortPriority(2)
                     }
                 }
             }
@@ -194,33 +196,30 @@ struct OnboardingView: View {
         .opacity(step == .liveDemo ? 0 : 1)
     }
 
-    private var skipAllButton: some View {
-        Button { finish() } label: { Text("Not now").frame(minHeight: 44) }
-            .accessibilityIdentifier("onboarding.finish")
+    /// skips this screen only: the onboarding itself can't be left early. Smaller and quieter than
+    /// Back, with the full 44 pt target
+    private var skipButton: some View {
+        Button(action: goToNextStep) {
+            Text("Skip")
+                .font(.subheadline.weight(.medium))
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .foregroundStyle(HomeStyle.supportingText)
+        .accessibilityIdentifier("onboarding.skip")
     }
 
     /// the first name is the one answer Continue waits for: two titles use it
     private var continueDisabled: Bool { step == .name && profile.preferredName == nil }
 
     private var actions: some View {
-        VStack(spacing: 2) {
-            Button(action: advance) {
-                PrimaryActionLabel(title: "Continue", tone: .dark)
-            }
-            .buttonStyle(PressableStyle())
-            .disabled(continueDisabled)
-            .opacity(continueDisabled ? 0.4 : 1)
-            .accessibilityIdentifier("onboarding.continue")
-            Button(action: goToNextStep) {
-                Text("Skip")
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .contentShape(Rectangle())
-            }
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(HomeStyle.supportingText)
-            .frame(minHeight: 44)
-            .accessibilityIdentifier("onboarding.skip")
+        Button(action: advance) {
+            PrimaryActionLabel(title: "Continue", tone: .dark)
         }
+        .buttonStyle(PressableStyle())
+        .disabled(continueDisabled)
+        .opacity(continueDisabled ? 0.4 : 1)
+        .accessibilityIdentifier("onboarding.continue")
     }
 
     // MARK: Finn's reaction

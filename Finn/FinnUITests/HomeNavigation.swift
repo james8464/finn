@@ -17,11 +17,34 @@ extension XCUIApplication {
     @MainActor
     func skipOnboardingIfShown() {
         passWelcomeIfShown()
-        let skip = buttons["onboarding.finish"]
-        guard skip.waitForExistence(timeout: 2) else {
+        guard buttons["onboarding.skip"].waitForExistence(timeout: 2) else {
             return
         }
-        skip.tap()
+        skipRemainingOnboarding()
+    }
+
+    /// the onboarding can't be left early: from any step, Skip each screen, Continue on the summary,
+    /// Skip on the plan offer, then a tap above the free workout it offers closes that sheet
+    @MainActor
+    func skipRemainingOnboarding() {
+        let skip = buttons["onboarding.skip"]
+        let summary = buttons["summary.continue"]
+        for _ in 0 ..< 12 where !summary.exists {
+            if skip.exists && skip.isHittable {
+                skip.tap()
+            }
+            _ = summary.waitForExistence(timeout: 0.5)
+        }
+        XCTAssertTrue(summary.waitForExistence(timeout: 12), "The plan summary did not appear")
+        summary.tap()
+        let skipPlan = buttons["plan.skip"]
+        XCTAssertTrue(skipPlan.waitForExistence(timeout: 5))
+        skipPlan.tap()
+        let offer = buttons["freeWorkout.accept"]
+        if offer.waitForExistence(timeout: 5) {
+            coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)).tap()
+            XCTAssertTrue(offer.waitForNonExistence(timeout: 5), "The free workout offer did not close")
+        }
         XCTAssertTrue(buttons["tab.home"].waitForExistence(timeout: 8))
     }
 

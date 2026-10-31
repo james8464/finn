@@ -311,8 +311,8 @@ struct PaywallView: View {
         }
     }
 
-    /// in the top row like Not now on the questions: the full text size and colour, so it is easy to
-    /// find, with no fill, so Subscribe stays the main action
+    /// in the top row like Skip on the questions, but at the full text size and colour, so it is easy
+    /// to find, with no fill, so Subscribe stays the main action
     private var skipButton: some View {
         Button(action: skip) {
             Text("Skip")
