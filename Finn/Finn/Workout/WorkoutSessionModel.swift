@@ -113,6 +113,11 @@ final class WorkoutSessionModel {
     @ObservationIgnored let currentDate: () -> Date
 
     private(set) var stage: WorkoutStage = .ready
+    /// Says whether a new workout may begin (`WorkoutAccess`). Nil lets every workout begin.
+    @ObservationIgnored weak var startGate: (any WorkoutStartGate)?
+    /// True when a new workout was refused: the free workout of these two weeks is used. The app
+    /// shows the plan offer, then sets it back to false
+    var freeWorkoutUsed = false
     /// The exercise chosen on the setup screen. A capture keeps the exercise it started with. The app
     /// remembers it across launches (`FinnPreferences.selectedExercise`).
     var selectedExercise: ExerciseKind = .bodyweightSquat {
@@ -342,6 +347,14 @@ final class WorkoutSessionModel {
 
     func startPreview() async {
         guard stage == .ready || stage == .result else { return }
+        // the next set of an open workout, or Try again, is part of a workout already allowed
+        if let startGate, currentSession?.continues(at: currentDate()) != true {
+            guard await startGate.allowsNewWorkout(at: currentDate()) else {
+                freeWorkoutUsed = true
+                return
+            }
+            guard stage == .ready || stage == .result else { return }
+        }
         stage = .openingCamera
         await collectionTask?.value
         collectionTask = nil
@@ -1083,6 +1096,8 @@ final class WorkoutSessionModel {
             save(open)
             Task { await self.saveToFitness(open) }
         }
+        // a new workout: without Finn Coach+, it is the free one of these two weeks
+        if currentSession == nil { startGate?.workoutBegan(at: now) }
         var session = currentSession ?? WorkoutSessionSummary(id: UUID(), startedAt: now, sets: [])
         session.isOpen = true
         let newSet = SetSummary(

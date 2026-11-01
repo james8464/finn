@@ -30,6 +30,10 @@ struct ContentView: View {
     private let routesURLsFromParent: Bool
     @Binding private var launchURL: URL?
     @State private var model: WorkoutSessionModel
+    /// Finn Coach+, and the one free workout every two weeks without it (`WorkoutAccess`)
+    @State private var access: WorkoutAccess
+    /// a purchase on the plan offer starts the workout that was refused, once the offer has closed
+    @State private var startsWorkoutAfterPlan = false
     @State private var workoutPlanDraft: PlannedWorkout?
     @State private var pendingWorkoutStart: PlannedWorkout?
     @State private var workoutPlanNeedsGeneration = false
@@ -140,6 +144,14 @@ struct ContentView: View {
                                                          initialHistory: startup?.history))
         self.connectsAccessories = connectsAccessories
         self.preferences = preferences
+        #if DEBUG
+        // `-finn-ui-free-used`: the free workout of these two weeks was taken five days ago
+        if ProcessInfo.processInfo.arguments.contains("-finn-ui-free-used") {
+            preferences.lastFreeWorkout = Calendar.current.date(byAdding: .day, value: -5, to: .now)
+        }
+        #endif
+        _access = State(initialValue: WorkoutAccess(preferences: preferences,
+                                                    limitsFreeWorkouts: Self.limitsFreeWorkouts))
         _guidedWorkout = State(initialValue: GuidedWorkoutStore(defaults: preferences.defaults).load())
         _plannedWorkouts = State(initialValue: PlannedWorkoutStore(defaults: preferences.defaults))
         let initialHistory = (try? startup?.history.get()) ?? []
@@ -152,6 +164,18 @@ struct ContentView: View {
                                                        initialEarned: startup?.badges))
         // demo and recorded input skip the welcome unless asked for it (`-finn-ui-onboarding`)
         _showsOnboarding = State(initialValue: showsOnboarding ?? !preferences.onboardingCompleted)
+    }
+
+    /// demo and recorded input start as many workouts as the tests need, unless
+    /// `-finn-ui-free-limit` asks for the free workout rule
+    private static var limitsFreeWorkouts: Bool {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("-finn-ui-free-limit") { return true }
+        return !arguments.contains("-finn-ui-demo") && !arguments.contains("-finn-video-file")
+        #else
+        return true
+        #endif
     }
 
     /// demo or recorded input, marked as such on the watch too
@@ -327,6 +351,25 @@ struct ContentView: View {
             .presentationDragIndicator(.visible)
             .presentationBackground(HomeStyle.background)
         }
+        // a new workout without Finn Coach+ once the free one of these two weeks is used
+        .sheet(isPresented: $model.freeWorkoutUsed, onDismiss: {
+            guard startsWorkoutAfterPlan else { return }
+            startsWorkoutAfterPlan = false
+            Task {
+                await access.purchased()
+                await model.startPreview()
+            }
+        }) {
+            PaywallView(back: {}, next: {
+                startsWorkoutAfterPlan = true
+                model.freeWorkoutUsed = false
+            }, skip: {
+                model.freeWorkoutUsed = false
+            }, context: .freeWorkoutUsed(next: access.nextFreeWorkout))
+            .tint(HomeStyle.accent)
+            .presentationDragIndicator(.visible)
+            .presentationBackground(HomeStyle.background)
+        }
         .fullScreenCover(isPresented: $showsFinnDemo) {
             FinnDemoView {
                 showsFinnDemo = false
@@ -339,6 +382,8 @@ struct ContentView: View {
             badges.update(history: history, celebrating: model.lastSavedSetID)
         }
         .task {
+            model.startGate = access
+            access.start()
             liveActivity.attach(to: model, demoInput: usesSyntheticInput)
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-finn-ui-live-activity-sample") {
