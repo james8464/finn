@@ -194,6 +194,11 @@ struct ContentView: View {
             Button("Delete all data", role: .destructive) {
                 model.deleteAllData()
                 badges.reset()
+                // the reload reads the defaults back through properties that persist every
+                // change, so the keys it writes are forgotten once more below; the model keeps
+                // the defaults in memory and the screens show them at once
+                preferences.resetLocalChoices()
+                model.reloadPreferences()
                 preferences.resetLocalChoices()
                 guidedWorkout = nil
                 plannedWorkouts.clear()

@@ -89,6 +89,10 @@ final class WorkoutSessionModel {
     static let previewEstimateLifetime: TimeInterval = 2
     private var lastPreviewFrameAt: ContinuousClock.Instant?
     private var framingWatchdog: Task<Void, Never>?
+    /// A camera start must finish or fail within this long. The camera screen cannot be
+    /// dismissed, so a start that hangs would leave the person with no way out of it.
+    static let openingLimit: TimeInterval = 30
+    private var openingWatchdog: Task<Void, Never>?
     private var isStopping = false
     @ObservationIgnored private var pendingSessions: [UUID: WorkoutSessionSummary] = [:]
     @ObservationIgnored private var pendingDeleteIDs: Set<UUID> = []
@@ -340,6 +344,24 @@ final class WorkoutSessionModel {
         refreshFitnessAccess()
     }
 
+    /// The saved choices were erased ("Delete all local data"). The screens and the watch read
+    /// these properties rather than `preferences`, so they must show the defaults again instead of
+    /// the choices just removed.
+    func reloadPreferences() {
+        recognisesExercise = preferences.recognisesExercise
+        usesTrainedModel = preferences.usesTrainedModel
+        checksCameraAngle = preferences.checksCameraAngle
+        handsFree = preferences.handsFree
+        speaksLive = preferences.speaksLive
+        hapticFeedback = preferences.hapticFeedback
+        soundFeedback = preferences.soundFeedback
+        savesToFitness = preferences.savesToFitness
+        personalisesWithHealth = preferences.personalisesWithHealth
+        // turning the option off leaves no consented Health values behind (as `setPersonalisesWithHealth` does)
+        if !personalisesWithHealth { healthSnapshot = nil }
+        selectedExercise = preferences.selectedExercise ?? .bodyweightSquat
+    }
+
     func startPreview() async {
         guard stage == .ready || stage == .result else { return }
         stage = .openingCamera
@@ -381,6 +403,7 @@ final class WorkoutSessionModel {
         personalisedLiveCoach.prepare()
         source.setCameraAngleEstimation(checksCameraAngle)
         source.configure(for: captureExercise)
+        armOpeningWatchdog()
         do {
             let stream = try await source.start()
             guard stage == .openingCamera else {
@@ -469,6 +492,32 @@ final class WorkoutSessionModel {
             if stage == .openingCamera { stage = .error(.unavailable) }
         } catch {
             if stage == .openingCamera { stage = .error(.startFailed) }
+        }
+    }
+
+    /// The camera screen cannot be dismissed, so a start that never finishes still has to reach
+    /// a screen with Try again. A denial that iOS never reports is read from the authorization
+    /// state itself; anything else still waiting after `openingLimit` is a failed start.
+    private func armOpeningWatchdog() {
+        openingWatchdog?.cancel()
+        openingWatchdog = Task { @MainActor [weak self] in
+            var waited: TimeInterval = 0
+            while !Task.isCancelled, waited < Self.openingLimit {
+                do { try await Task.sleep(for: .seconds(1)) } catch { return }
+                guard let self, self.stage == .openingCamera else { return }
+                let status = AVCaptureDevice.authorizationStatus(for: .video)
+                // the person answered Don't Allow: the alert's own reply may never arrive, so
+                // the decision is read here rather than waited for
+                if status == .denied || status == .restricted {
+                    self.stage = .error(.permissionDenied)
+                    await self.source.stop()
+                    return
+                }
+                waited += 1
+            }
+            guard let self, self.stage == .openingCamera else { return }
+            self.stage = .error(.startFailed)
+            await self.source.stop()
         }
     }
 
@@ -1174,6 +1223,8 @@ final class WorkoutSessionModel {
         stage = .ready
         framingWatchdog?.cancel()
         framingWatchdog = nil
+        openingWatchdog?.cancel()
+        openingWatchdog = nil
         resetLiveSet()
         repTarget = nil
         await source.stop()
