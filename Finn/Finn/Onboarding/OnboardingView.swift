@@ -45,6 +45,9 @@ struct OnboardingView: View {
         var questionNumber: Int? {
             Self.questions.contains(rawValue) ? rawValue - Self.questions.lowerBound + 1 : nil
         }
+
+        /// the two demos only show what Finn does: there is nothing to skip, Continue is enough
+        var isDemo: Bool { self == .liveDemo || self == .wearablesDemo }
     }
 
     private struct Reaction: Equatable {
@@ -110,8 +113,8 @@ struct OnboardingView: View {
                     LiveCoachingDemo()
                 }
                 .tag(Step.liveDemo)
-                page(String(localized: "In your ears, on your wrist"),
-                     String(localized: "Feel the tempo on your wrist. Hear my cues through your AirPods or iPhone.")) {
+                page(String(localized: "On your wrist"),
+                     String(localized: "Feel the tempo on your wrist. Hear my cues through your iPhone.")) {
                     WearablesDemo()
                 }
                 .tag(Step.wearablesDemo)
@@ -197,16 +200,19 @@ struct OnboardingView: View {
     }
 
     /// skips this screen only: the onboarding itself can't be left early. Smaller and quieter than
-    /// Back, with the full 44 pt target
-    private var skipButton: some View {
-        Button(action: goToNextStep) {
-            Text("Skip")
-                .font(.subheadline.weight(.medium))
-                .frame(minWidth: 44, minHeight: 44)
-                .contentShape(Rectangle())
+    /// Back, with the full 44 pt target. Not there on the demos: Back holds the row's height and the
+    /// counter is centred on its own, so nothing moves when it appears
+    @ViewBuilder private var skipButton: some View {
+        if !step.isDemo {
+            Button(action: goToNextStep) {
+                Text("Skip")
+                    .font(.subheadline.weight(.medium))
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .foregroundStyle(HomeStyle.supportingText)
+            .accessibilityIdentifier("onboarding.skip")
         }
-        .foregroundStyle(HomeStyle.supportingText)
-        .accessibilityIdentifier("onboarding.skip")
     }
 
     /// the first name is the one answer Continue waits for: two titles use it

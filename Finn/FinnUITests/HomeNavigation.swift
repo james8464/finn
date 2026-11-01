@@ -17,21 +17,25 @@ extension XCUIApplication {
     @MainActor
     func skipOnboardingIfShown() {
         passWelcomeIfShown()
-        guard buttons["onboarding.skip"].waitForExistence(timeout: 2) else {
+        guard buttons["onboarding.continue"].waitForExistence(timeout: 2) else {
             return
         }
         skipRemainingOnboarding()
     }
 
-    /// the onboarding can't be left early: from any step, Skip each screen, Continue on the summary,
-    /// Skip on the plan offer, then a tap above the free workout it offers closes that sheet
+    /// the onboarding can't be left early: from any step, Continue on the two demos (they have no
+    /// Skip), Skip each question, Continue on the summary, Skip on the plan offer, then a tap above
+    /// the free workout it offers closes that sheet
     @MainActor
     func skipRemainingOnboarding() {
         let skip = buttons["onboarding.skip"]
+        let next = buttons["onboarding.continue"]
         let summary = buttons["summary.continue"]
-        for _ in 0 ..< 12 where !summary.exists {
+        for _ in 0 ..< 14 where !summary.exists {
             if skip.exists && skip.isHittable {
                 skip.tap()
+            } else if next.exists && next.isHittable && next.isEnabled {
+                next.tap()
             }
             _ = summary.waitForExistence(timeout: 0.5)
         }

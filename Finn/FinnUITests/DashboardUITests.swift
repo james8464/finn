@@ -112,7 +112,9 @@ final class DashboardUITests: XCTestCase {
         let welcome = app.buttons["onboarding.welcome.continue"]
         XCTAssertTrue(welcome.waitForExistence(timeout: 3))
         welcome.tap()
-        XCTAssertTrue(app.buttons["onboarding.skip"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["onboarding.continue"].waitForExistence(timeout: 3))
+        // the first demo shows no Skip: there is nothing to skip on it
+        XCTAssertFalse(app.buttons["onboarding.skip"].exists)
         app.skipRemainingOnboarding()
         XCTAssertTrue(app.buttons["home.tryFinn"].waitForExistence(timeout: 5))
     }
