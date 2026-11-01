@@ -10,14 +10,11 @@ struct OnboardingWelcomeView: View {
     /// how wide each line sets per point of type, measured in the person's language and settings
     @State private var wordmarkWidthPerPoint: CGFloat = 0
     @State private var taglineWidthPerPoint: CGFloat = 0
-    @Environment(\.dynamicTypeSize) private var typeSize
 
     /// the onboarding's side margins
     private static let margin: CGFloat = 20
     /// "Finn" takes a little more than half the screen width
     private static let wordmarkShare: CGFloat = 0.55
-    /// the Liquid Glass ring around Continue
-    private static let rim: CGFloat = 6
     /// reference sizes near the final ones, so SF Pro's size-specific tracking matches
     private static let wordmarkReference: CGFloat = 112
     private static let taglineReference: CGFloat = 32
@@ -127,34 +124,13 @@ struct OnboardingWelcomeView: View {
         .accessibilityHidden(true)
     }
 
+    /// the same Continue as on the next screens, at the same height
     private var actions: some View {
-        VStack(spacing: 2) {
-            Button(action: onContinue) {
-                // the glass is a layer behind the opaque pill, a rim wider on each side, so only a
-                // ring of it shows. Wrapping the pill itself would make it glass content and dim it
-                PrimaryActionLabel(title: "Continue")
-                    .background {
-                        Color.clear
-                            .glassEffect(.regular.interactive(), in: rimShape)
-                            .padding(-Self.rim)
-                    }
-            }
-            .buttonStyle(PressableStyle())
-            .accessibilityIdentifier("onboarding.welcome.continue")
-            // the steps have a Skip row under Continue; holding its place keeps Continue at the same height
-            Text("Skip")
-                .font(.subheadline.weight(.medium))
-                .frame(minHeight: 44)
-                .hidden()
-                .accessibilityHidden(true)
+        Button(action: onContinue) {
+            PrimaryActionLabel(title: "Continue", tone: .dark)
         }
-    }
-
-    /// concentric with the pill, which turns into a rounded rectangle at accessibility sizes
-    private var rimShape: AnyShape {
-        typeSize.isAccessibilitySize
-            ? AnyShape(RoundedRectangle(cornerRadius: 24 + Self.rim, style: .continuous))
-            : AnyShape(Capsule())
+        .buttonStyle(PressableStyle())
+        .accessibilityIdentifier("onboarding.welcome.continue")
     }
 }
 

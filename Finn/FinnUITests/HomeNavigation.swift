@@ -17,11 +17,47 @@ extension XCUIApplication {
     @MainActor
     func skipOnboardingIfShown() {
         passWelcomeIfShown()
-        let skip = buttons["onboarding.finish"]
-        guard skip.waitForExistence(timeout: 2) else {
+        guard buttons["onboarding.continue"].waitForExistence(timeout: 2) else {
             return
         }
-        skip.tap()
+        skipRemainingOnboarding()
+    }
+
+    /// the onboarding can't be left early: from any step, Continue on the two demos (they have no
+    /// Skip), Skip each question, Continue on the summary, Skip on the plan offer, then a tap above
+    /// the free workout it offers closes that sheet
+    @MainActor
+    func skipRemainingOnboarding() {
+        let skip = buttons["onboarding.skip"]
+        let next = buttons["onboarding.continue"]
+        let summary = buttons["summary.continue"]
+        for _ in 0 ..< 14 where !summary.exists {
+            if skip.exists && skip.isHittable {
+                skip.tap()
+            } else if next.exists && next.isHittable && next.isEnabled {
+                next.tap()
+            }
+            _ = summary.waitForExistence(timeout: 0.5)
+        }
+        XCTAssertTrue(summary.waitForExistence(timeout: 12), "The plan summary did not appear")
+        summary.tap()
+        let skipPlan = buttons["plan.skip"]
+        XCTAssertTrue(skipPlan.waitForExistence(timeout: 5))
+        skipPlan.tap()
+        let offer = buttons["freeWorkout.accept"]
+        if offer.waitForExistence(timeout: 5) {
+            coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)).tap()
+            // with the largest text the sheet opens full height, so the tap lands on it: pull it
+            // down by its top edge, as a person would
+            if !offer.waitForNonExistence(timeout: 2) {
+                let sheet = scrollViews.containing(.staticText, identifier: "freeWorkout.line").firstMatch
+                let grabber = sheet.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0))
+                    .withOffset(CGVector(dx: 0, dy: 6))
+                grabber.press(forDuration: 0.1,
+                              thenDragTo: coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98)))
+            }
+            XCTAssertTrue(offer.waitForNonExistence(timeout: 5), "The free workout offer did not close")
+        }
         XCTAssertTrue(buttons["tab.home"].waitForExistence(timeout: 8))
     }
 

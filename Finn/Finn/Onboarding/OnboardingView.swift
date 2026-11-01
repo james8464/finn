@@ -2,7 +2,7 @@ import SwiftUI
 
 /// how the person left the onboarding
 enum OnboardingExit {
-    /// through every screen, or Not now on a question
+    /// through every screen: the onboarding can't be left early, only its questions skipped
     case completed
     /// Skip on the plan offer: straight to Home, where the coach offers one free workout
     case skippedPlan
@@ -45,6 +45,9 @@ struct OnboardingView: View {
         var questionNumber: Int? {
             Self.questions.contains(rawValue) ? rawValue - Self.questions.lowerBound + 1 : nil
         }
+
+        /// the two demos only show what Finn does: there is nothing to skip, Continue is enough
+        var isDemo: Bool { self == .liveDemo || self == .wearablesDemo }
     }
 
     private struct Reaction: Equatable {
@@ -110,8 +113,8 @@ struct OnboardingView: View {
                     LiveCoachingDemo()
                 }
                 .tag(Step.liveDemo)
-                page(String(localized: "In your ears, on your wrist"),
-                     String(localized: "Feel the tempo on your wrist. Hear my cues through your AirPods or iPhone.")) {
+                page(String(localized: "On your wrist"),
+                     String(localized: "Feel the tempo on your wrist. Hear my cues through your iPhone.")) {
                     WearablesDemo()
                 }
                 .tag(Step.wearablesDemo)
@@ -143,7 +146,7 @@ struct OnboardingView: View {
         }
     }
 
-    /// the row (Back, the counter, Not now), then the pink bar
+    /// the row (Back, the counter, Skip), then the pink bar
     private var header: some View {
         VStack(spacing: 15) {
             Group {
@@ -152,17 +155,19 @@ struct OnboardingView: View {
                         HStack {
                             backButton
                             Spacer()
-                            skipAllButton
+                            skipButton
                         }
                         counter.font(.footnote.weight(.semibold))
                     }
                 } else {
+                    // the counter sits in the middle of the screen, whatever the widths of Back and Skip
                     HStack {
-                        backButton
+                        backButton.accessibilitySortPriority(3)
                         Spacer()
-                        counter.font(.subheadline.weight(.semibold))
-                        Spacer()
-                        skipAllButton
+                        skipButton.accessibilitySortPriority(1)
+                    }
+                    .overlay {
+                        counter.font(.subheadline.weight(.semibold)).accessibilitySortPriority(2)
                     }
                 }
             }
@@ -194,33 +199,33 @@ struct OnboardingView: View {
         .opacity(step == .liveDemo ? 0 : 1)
     }
 
-    private var skipAllButton: some View {
-        Button { finish() } label: { Text("Not now").frame(minHeight: 44) }
-            .accessibilityIdentifier("onboarding.finish")
+    /// skips this screen only: the onboarding itself can't be left early. Smaller and quieter than
+    /// Back, with the full 44 pt target. Not there on the demos: Back holds the row's height and the
+    /// counter is centred on its own, so nothing moves when it appears
+    @ViewBuilder private var skipButton: some View {
+        if !step.isDemo {
+            Button(action: goToNextStep) {
+                Text("Skip")
+                    .font(.subheadline.weight(.medium))
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .foregroundStyle(HomeStyle.supportingText)
+            .accessibilityIdentifier("onboarding.skip")
+        }
     }
 
     /// the first name is the one answer Continue waits for: two titles use it
     private var continueDisabled: Bool { step == .name && profile.preferredName == nil }
 
     private var actions: some View {
-        VStack(spacing: 2) {
-            Button(action: advance) {
-                PrimaryActionLabel(title: "Continue")
-            }
-            .buttonStyle(PressableStyle())
-            .disabled(continueDisabled)
-            .opacity(continueDisabled ? 0.4 : 1)
-            .accessibilityIdentifier("onboarding.continue")
-            Button(action: goToNextStep) {
-                Text("Skip")
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .contentShape(Rectangle())
-            }
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(HomeStyle.supportingText)
-            .frame(minHeight: 44)
-            .accessibilityIdentifier("onboarding.skip")
+        Button(action: advance) {
+            PrimaryActionLabel(title: "Continue", tone: .dark)
         }
+        .buttonStyle(PressableStyle())
+        .disabled(continueDisabled)
+        .opacity(continueDisabled ? 0.4 : 1)
+        .accessibilityIdentifier("onboarding.continue")
     }
 
     // MARK: Finn's reaction
@@ -336,7 +341,7 @@ struct OnboardingView: View {
              String(localized: "Choose a focus for better coaching")) {
             VStack(spacing: 10) {
                 ForEach(TrainingGoal.allCases, id: \.self) { goal in
-                    ChoiceCard(title: goal.title, detail: nil, symbol: goal.symbol,
+                    ChoiceCard(title: goal.title, detail: nil,
                                selected: profile.goal == goal) {
                         profile.goal = profile.goal == goal ? nil : goal
                     }
@@ -351,7 +356,7 @@ struct OnboardingView: View {
              String(localized: "Adjusts training plan")) {
             VStack(spacing: 10) {
                 ForEach(TrainingLevel.allCases, id: \.self) { level in
-                    ChoiceCard(title: level.title, detail: nil, symbol: nil,
+                    ChoiceCard(title: level.title, detail: nil,
                                selected: profile.level == level) {
                         profile.level = profile.level == level ? nil : level
                     }
@@ -367,7 +372,7 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 10) {
                 ForEach([true, false], id: \.self) { answer in
                     ChoiceCard(title: answer ? String(localized: "Yes") : String(localized: "No"),
-                               detail: nil, symbol: nil, selected: profile.followedProgram == answer) {
+                               detail: nil, selected: profile.followedProgram == answer) {
                         withAnimation(reduceMotion ? nil : HomeStyle.spring) {
                             profile.followedProgram = profile.followedProgram == answer ? nil : answer
                             if profile.followedProgram != true { profile.stopReasons = [] }
@@ -397,8 +402,8 @@ struct OnboardingView: View {
             .padding(.top, 22)
             .padding(.bottom, 4)
             ForEach(ProgramStopReason.allCases, id: \.self) { reason in
-                ChoiceCard(title: reason.title, detail: nil, symbol: nil,
-                           selected: profile.stopReasons.contains(reason), multiple: true) {
+                ChoiceCard(title: reason.title, detail: nil,
+                           selected: profile.stopReasons.contains(reason)) {
                     if let index = profile.stopReasons.firstIndex(of: reason) {
                         profile.stopReasons.remove(at: index)
                     } else {
@@ -415,7 +420,7 @@ struct OnboardingView: View {
                 ?? String(localized: "How hard do you want me to push you?")) {
             VStack(spacing: 10) {
                 ForEach(TrainingIntensity.allCases, id: \.self) { intensity in
-                    ChoiceCard(title: intensity.title, detail: nil, symbol: nil,
+                    ChoiceCard(title: intensity.title, detail: nil,
                                selected: profile.intensity == intensity) {
                         profile.intensity = profile.intensity == intensity ? nil : intensity
                     }
@@ -429,7 +434,7 @@ struct OnboardingView: View {
         page(String(localized: "How many days a week are you ready to train?")) {
             VStack(spacing: 10) {
                 ForEach(TrainingDays.allCases, id: \.self) { days in
-                    ChoiceCard(title: days.title, detail: nil, symbol: nil,
+                    ChoiceCard(title: days.title, detail: nil,
                                selected: profile.days == days) {
                         profile.days = profile.days == days ? nil : days
                     }
@@ -549,49 +554,83 @@ struct OnboardingView: View {
     }
 }
 
-/// one answer: a card that fills when chosen. Square check boxes when several answers can apply
+/// one answer: an anthracite card with an empty circle on the left. Chosen, the circle fills pink
+/// with a black tick and a pink outline is drawn inside the card's edge, so nothing moves.
+/// Animated like the paywall's plans
 private struct ChoiceCard: View {
     let title: String
     let detail: String?
-    let symbol: String?
     let selected: Bool
-    var multiple = false
     let tap: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
+
+    private static let fill = Color(red: 0x1E / 255, green: 0x1E / 255, blue: 0x1E / 255)
+    private static let ring = Color(red: 0xB7 / 255, green: 0xB7 / 255, blue: 0xB7 / 255)
+    private static let radius: CGFloat = 22
+    private static let inset: CGFloat = 16
+    private static let circle: CGFloat = 20
+    private static let ringWidth: CGFloat = 1.8
+    private static let tick: CGFloat = 12
+    /// the chosen card's outline: a softer pink, thinner than the tick's circle
+    private static let outline = Color(red: 0xF1 / 255, green: 0x5F / 255, blue: 0xA1 / 255)
+    private static let outlineWidth: CGFloat = 1.25
 
     var body: some View {
-        Button(action: tap) {
-            HStack(alignment: .top, spacing: 14) {
-                if let symbol {
-                    Image(systemName: symbol)
-                        .font(.system(size: 20))
-                        .frame(width: 28)
-                        .padding(.top, 1)
-                        .accessibilityHidden(true)
-                }
+        let shape = RoundedRectangle(cornerRadius: Self.radius, style: .continuous)
+        Button {
+            withAnimation(reduceMotion ? nil : HomeStyle.spring) { tap() }
+        } label: {
+            HStack(alignment: .center, spacing: Self.inset) {
+                indicator
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(title).font(.headline)
-                    if let detail { Text(detail)
-                        .font(.subheadline)
-                        .opacity(0.78)
-                        .fixedSize(horizontal: false, vertical: true)
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    if let detail {
+                        Text(detail)
+                            .font(.subheadline)
+                            .foregroundStyle(HomeStyle.supportingText)
                     }
                 }
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
-                Image(systemName: multiple ? (selected ? "checkmark.square.fill" : "square")
-                                           : (selected ? "checkmark.circle.fill" : "circle"))
-                    .foregroundStyle(selected ? DashboardStyle.accent : Color(uiColor: .secondaryLabel))
-                    .font(.system(size: 20))
-                    .accessibilityHidden(true)
             }
-            .padding(16)
+            .padding(Self.inset)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .foregroundStyle(Color.primary)
-            .background(selected ? HomeStyle.accent.opacity(0.12) : HomeStyle.card,
-                        in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(Self.fill, in: shape)
+            // always there and only faded: the paged TabView drops the animation of views that
+            // appear or disappear, so the old choice would linger and the new one pop
+            .overlay {
+                shape.strokeBorder(Self.outline, lineWidth: Self.outlineWidth)
+                    .opacity(selected ? 1 : 0)
+            }
+            .contentShape(shape)
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
         .finnFeedback(.selection, trigger: selected)
+    }
+
+    /// the same 20 pt circle in both states: an empty grey ring, or pink with a 12 pt black tick.
+    /// Like the paywall's icon, it fades and shifts grey to pink at once
+    private var indicator: some View {
+        let tint = selected ? DashboardStyle.accent : Self.ring
+        return ZStack {
+            Circle().strokeBorder(tint, lineWidth: Self.ringWidth)
+            Circle().fill(tint)
+                .opacity(selected ? 1 : 0)
+            Image(systemName: "checkmark")
+                .resizable()
+                .scaledToFit()
+                .fontWeight(.bold)
+                .foregroundStyle(.black)
+                .frame(width: Self.tick, height: Self.tick)
+                .opacity(selected ? 1 : 0)
+        }
+        .frame(width: Self.circle, height: Self.circle)
+        .accessibilityHidden(true)
     }
 }
 

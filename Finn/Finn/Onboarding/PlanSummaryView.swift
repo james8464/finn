@@ -14,11 +14,20 @@ struct PlanSummaryView: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     private var reduceMotion: Bool { AppMotion.reduces(systemReduceMotion) }
 
-    /// how long the bar takes to fill
-    private static let fillDuration = 2.4
+    /// how long the bar takes to fill: a touch longer than a steady fill, for the slower middle
+    private static let fillDuration = 2.8
     /// the bar's updates: small, animated steps, or a few plain jumps with Reduce Motion
-    private static let smoothSteps = 48
+    private static let smoothSteps = 56
     private static let reducedSteps = 4
+    /// how much the bar slows around the middle: 0 fills it steadily, 1 stops it there for a moment
+    private static let midSlowdown = 0.6
+
+    /// how full the bar is at `time` (0...1): quick at first, slower around the middle, then quick
+    /// again to the end. Its speed is 1 + k·cos(2πt), always above zero, so it never goes back
+    private static func fill(at time: Double) -> Double {
+        guard time < 1 else { return 1 }
+        return max(0, time + midSlowdown * sin(2 * .pi * time) / (2 * .pi))
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -49,7 +58,7 @@ struct PlanSummaryView: View {
             .scrollBounceBehavior(.basedOnSize)
             if isReady {
                 Button(action: next) {
-                    PrimaryActionLabel(title: "Continue")
+                    PrimaryActionLabel(title: "Continue", tone: .dark)
                 }
                 .buttonStyle(PressableStyle())
                 .accessibilityIdentifier("summary.continue")
@@ -96,7 +105,7 @@ struct PlanSummaryView: View {
         for step in 1...steps {
             do { try await Task.sleep(for: .seconds(pause)) } catch { return }
             withAnimation(reduceMotion ? nil : .linear(duration: pause)) {
-                progress = Double(step) / Double(steps)
+                progress = Self.fill(at: Double(step) / Double(steps))
             }
         }
         // a beat at 100 %, then the summary

@@ -195,28 +195,47 @@ struct HomeCard<Content: View>: View {
 /// the one filled action of a screen: a full-width pill with its arrow in a pink circle of its own,
 /// the same on every screen
 struct PrimaryActionLabel: View {
+    /// filled: pink with black text. dark: anthracite with a thin grey edge and text in the
+    /// progress bar's pink, for Continue through the onboarding
+    enum Tone { case filled, dark }
+
     let title: LocalizedStringResource
     var symbol = "arrow.right"
+    var tone: Tone = .filled
     @Environment(\.dynamicTypeSize) private var typeSize
+
+    private static let darkFill = Color(red: 0x21 / 255, green: 0x21 / 255, blue: 0x23 / 255)
+    private static let darkEdge = Color(red: 0x4C / 255, green: 0x4D / 255, blue: 0x51 / 255)
 
     var body: some View {
         let shape = typeSize.isAccessibilitySize
             ? AnyShape(RoundedRectangle(cornerRadius: 24, style: .continuous)) : AnyShape(Capsule())
+        let ink = tone == .filled ? Color.black : DashboardStyle.accent
         HStack(spacing: 12) {
-            WrappingText(text: String(localized: title), style: .headline, colour: .black)
+            WrappingText(text: String(localized: title), style: .headline, colour: UIColor(ink))
                 .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: symbol)
                 .font(.headline)
-                .foregroundStyle(.black)
+                .foregroundStyle(ink)
                 .accessibilityHidden(true)
         }
         .padding(.horizontal, 22)
         .padding(.vertical, 16)
         .frame(minHeight: 54)
-        .foregroundStyle(.black)
-        .background(AppPageStyle.action, in: shape)
+        .foregroundStyle(ink)
+        .background(tone == .filled ? AppPageStyle.action : Self.darkFill, in: shape)
+        .overlay { if tone == .dark { edge } }
         .contentShape(shape)
         .accessibilityLabel(Text(title))
+    }
+
+    /// 1 pt inside the pill's edge, so the dark button keeps the filled one's size
+    @ViewBuilder private var edge: some View {
+        if typeSize.isAccessibilitySize {
+            RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Self.darkEdge, lineWidth: 1)
+        } else {
+            Capsule().strokeBorder(Self.darkEdge, lineWidth: 1)
+        }
     }
 }
 

@@ -25,41 +25,28 @@ struct LiveCoachingDemo: View {
     }
 }
 
-/// demo 2: AirPods for the spoken cues and an Apple Watch whose screen shows the workout, for the
-/// taps on the wrist. The Watch is an asset still to come (`OnboardingDemoWatch`)
+/// demo 2: an Apple Watch whose screen shows the workout, for the taps on the wrist. The Watch is
+/// an asset still to come (`OnboardingDemoWatch`)
 struct WearablesDemo: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
-    var body: some View {
-        HStack(alignment: .top, spacing: 16) {
-            device("AirPods") {
-                Image(systemName: "airpodspro")
-                    .font(.system(size: 88, weight: .light))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            device("Apple Watch") {
-                OnboardingImageSlot(name: "OnboardingDemoWatch")
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Illustration: AirPods, and an Apple Watch showing a workout in progress.")
-        .accessibilityAddTraits(.isImage)
-    }
+    /// the Watch keeps the size it had beside the AirPods, centred on its own
+    private static let watchWidth = 173.0
 
-    private func device<Picture: View>(
-        _ name: LocalizedStringKey,
-        @ViewBuilder picture: () -> Picture
-    ) -> some View {
+    var body: some View {
         VStack(spacing: 12) {
-            picture()
-                .frame(height: typeSize.isAccessibilitySize ? 200 : 236)
-            Text(name)
+            OnboardingImageSlot(name: "OnboardingDemoWatch")
+                .frame(width: Self.watchWidth, height: typeSize.isAccessibilitySize ? 200 : 236)
+            Text("Apple Watch")
                 .font(.subheadline)
                 .foregroundStyle(HomeStyle.supportingText)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Illustration: an Apple Watch showing a workout in progress.")
+        .accessibilityAddTraits(.isImage)
     }
 }
 

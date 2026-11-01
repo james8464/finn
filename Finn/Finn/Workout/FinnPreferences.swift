@@ -53,6 +53,7 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
     static let personalisationOfferedKey = "finn.personalizationOffered"
     static let hapticFeedbackKey = "finn.hapticFeedback"
     static let soundFeedbackKey = "finn.soundFeedback"
+    static let lastFreeWorkoutKey = "finn.lastFreeWorkout"
 
     let defaults: UserDefaults
     /// Hands-free capture until the person changes it. On in the app, where the phone stands a
@@ -172,5 +173,11 @@ nonisolated struct FinnPreferences: @unchecked Sendable {
     var personalisationOffered: Bool {
         get { defaults.bool(forKey: Self.personalisationOfferedKey) }
         nonmutating set { defaults.set(newValue, forKey: Self.personalisationOfferedKey) }
+    }
+
+    /// When the last workout without Finn Coach+ began (`FreeWorkoutRule`). Nil before the first.
+    var lastFreeWorkout: Date? {
+        get { defaults.object(forKey: Self.lastFreeWorkoutKey) as? Date }
+        nonmutating set { defaults.set(newValue, forKey: Self.lastFreeWorkoutKey) }
     }
 }
