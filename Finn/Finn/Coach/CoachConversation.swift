@@ -7,30 +7,49 @@ import Observation
 final class CoachConversation {
     private(set) var messages: [CoachMessage] = []
     private(set) var isAnswering = false
+    /// the coach's reply as the model writes it; nil until its first words arrive
+    private(set) var draftReply: String?
+    /// the turn allowed to update `draftReply`, so a late word from an earlier turn is ignored
+    private var currentTurn: UUID?
     private(set) var context: CoachContext
     private let responder: CoachResponder
-    /// onboarding answers, kept so a refreshed context still carries them
-    private let preferencesNote: String?
+    /// where the turns are kept between launches; nil keeps them for this screen only
+    private let transcript: CoachTranscriptStore?
+    /// a thread that is never cleared, like a messaging app: the most messages kept, months of
+    /// chat, so the saved thread stays small. The opening greeting always stays, as it heads the
+    /// screen. The model rereads only the latest that fit its window
+    static let maximumMessages = 1_000
 
-    init(history: [WorkoutSessionSummary], responder: CoachResponder, preferencesNote: String? = nil) {
-        self.preferencesNote = preferencesNote
-        self.context = CoachContext.make(history: history, preferencesNote: preferencesNote)
+    init(
+        history: [WorkoutSessionSummary],
+        responder: CoachResponder,
+        profile: String? = nil,
+        transcript: CoachTranscriptStore? = nil
+    ) {
+        self.context = CoachContext.make(history: history, profile: profile)
         self.responder = responder
+        self.transcript = transcript
+        // a fresh greeting from the latest sets, then the conversation where it was left
         messages = [CoachMessage(
             role: .coach,
             text: CoachFallback.opening(context: context, language: responder.language)
-        )]
+        )] + (transcript?.turns ?? [])
     }
 
     /// the app's coach: the standard engine order, with the Claude demo first in Debug builds
-    convenience init(history: [WorkoutSessionSummary], preferencesNote: String? = nil) {
+    convenience init(
+        history: [WorkoutSessionSummary],
+        profile: String? = nil,
+        transcript: CoachTranscriptStore? = nil
+    ) {
         var extra: [any CoachEngine] = []
         #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach") {
                 self.init(
                     history: history,
                     responder: CoachResponder(selector: .standard()),
-                    preferencesNote: preferencesNote
+                    profile: profile,
+                    transcript: transcript
                 )
                 return
             }
@@ -43,7 +62,8 @@ final class CoachConversation {
                 self.init(
                     history: history,
                     responder: CoachResponder(selector: CoachEngineSelector(engines: [])),
-                    preferencesNote: preferencesNote
+                    profile: profile,
+                    transcript: transcript
                 )
                 return
             }
@@ -52,7 +72,8 @@ final class CoachConversation {
         self.init(
             history: history,
             responder: CoachResponder(selector: .standard(extra: extra)),
-            preferencesNote: preferencesNote
+            profile: profile,
+            transcript: transcript
         )
     }
 
@@ -73,9 +94,9 @@ final class CoachConversation {
         responder.prepare()
     }
 
-    /// the saved sets changed (a new set, a deletion): the coach reads them again
-    func refresh(history: [WorkoutSessionSummary]) {
-        let updated = CoachContext.make(history: history, preferencesNote: preferencesNote)
+    /// the saved sets or the onboarding answers changed: the coach reads them again
+    func refresh(history: [WorkoutSessionSummary], profile: String?) {
+        let updated = CoachContext.make(history: history, profile: profile)
         guard updated != context else {
             return
         }
@@ -100,11 +121,32 @@ final class CoachConversation {
         }
         let earlier = messages
         messages.append(CoachMessage(role: .person, text: question))
+        let turn = UUID()
+        currentTurn = turn
+        draftReply = nil
         isAnswering = true
-        defer { isAnswering = false }
+        defer {
+            isAnswering = false
+            draftReply = nil
+            currentTurn = nil
+        }
         let askedContext = context
-        let answer = await responder.answer(question, context: askedContext, history: earlier)
+        let answer = await responder.answer(question, context: askedContext, history: earlier) { [weak self] partial in
+            guard let self, self.currentTurn == turn else {
+                return
+            }
+            self.draftReply = partial
+        }
+        // the conversation was forgotten while the model worked: drop the reply
+        guard currentTurn == turn else {
+            return
+        }
         guard !Task.isCancelled else {
+            // stopped mid-reply: keep what the model had written, like any chat. Nothing else
+            if answer.engine != .fallback, context == askedContext {
+                messages.append(answer)
+            }
+            remember()
             return
         }
         if context == askedContext {
@@ -118,9 +160,25 @@ final class CoachConversation {
                 engine: .fallback
             ))
         }
-        if messages.count > 40 {
-            messages.removeFirst(messages.count - 40)
+        if messages.count > Self.maximumMessages {
+            messages.removeSubrange(1 ... messages.count - Self.maximumMessages)
         }
+        remember()
+    }
+
+    /// keeps the turns for the next launch
+    private func remember() {
+        transcript?.save(Array(messages.dropFirst()))
+    }
+
+    /// back to the greeting alone, as after Delete all data. A reply on its way is dropped
+    func forget() {
+        currentTurn = nil
+        draftReply = nil
+        messages = [CoachMessage(
+            role: .coach,
+            text: CoachFallback.opening(context: context, language: responder.language)
+        )]
     }
 
     /// questions the person can tap, once there are saved sets to talk about. Each one meets a

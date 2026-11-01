@@ -12,6 +12,19 @@ final class CoachReliabilityUITests: XCTestCase {
         }
     }
 
+    /// no Done button: touching a message in the conversation puts the keyboard away
+    @MainActor
+    private func putKeyboardAway(in app: XCUIApplication) -> Bool {
+        let messages = app.scrollViews["coach.transcript"].descendants(matching: .any).matching(NSPredicate(
+            format: "identifier IN %@ OR identifier BEGINSWITH %@", ["coach.question", "coach.opening"], "coach.answer."
+        ))
+        guard let message = messages.allElementsBoundByIndex.last(where: \.isHittable) else {
+            return false
+        }
+        message.tap()
+        return app.keyboards.firstMatch.waitForNonExistence(timeout: 3)
+    }
+
     /// This test deliberately disables inference; the separate native test requires Apple's model.
     @MainActor
     func testCoachAnswersWithoutAModelAndSurvivesTabChanges() {
@@ -29,10 +42,10 @@ final class CoachReliabilityUITests: XCTestCase {
         app.buttons["coach.send"].tap()
 
         let answer = app.staticTexts.matching(NSPredicate(
-            format: "label CONTAINS %@", "Tap Plan a workout to choose one"
+            format: "label CONTAINS %@", "Choose one in the Workout tab"
         ))
         XCTAssertTrue(answer.firstMatch.waitForExistence(timeout: 5), app.debugDescription)
-        app.buttons["coach.dismissKeyboard"].tap()
+        XCTAssertTrue(putKeyboardAway(in: app))
         app.selectTab("Home")
         app.selectTab("Coach")
 
@@ -53,6 +66,78 @@ final class CoachReliabilityUITests: XCTestCase {
             "The new reply must remain above the composer and keyboard"
         )
         XCTAssertEqual(app.state, .runningForeground)
+    }
+
+    /// the conversation with Finn is still there after the app is closed and reopened
+    @MainActor
+    func testConversationSurvivesARelaunch() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-finn-ui-demo", "-AppleLanguages", "(en-GB)", "-finn-ui-demo-suite", "FinnCoachRelaunch-\(UUID().uuidString)",
+        ]
+        app.launch()
+        app.selectTab("Coach")
+        let field = app.textViews["coach.field"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        dismissKeyboardIntroduction(in: app)
+        field.typeText("Remember this, Finn\n")
+        let question = app.staticTexts["Remember this, Finn"]
+        XCTAssertTrue(question.waitForExistence(timeout: 5))
+        let reply = app.descendants(matching: .any).matching(identifier: "coach.answer.fallback").firstMatch
+        XCTAssertTrue(reply.waitForExistence(timeout: 5))
+
+        app.terminate()
+        app.launch()
+        app.selectTab("Coach")
+        XCTAssertTrue(question.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(reply.waitForExistence(timeout: 5), app.debugDescription)
+    }
+
+    /// the thread reads like a messaging app: the day above each day's first message, a thin
+    /// line after a pause, the time on every message. Seeds three days of messages through the
+    /// defaults' argument domain
+    @MainActor
+    func testThreadShowsDaysTimesAndPauses() throws {
+        let calendar = Calendar.current
+        let now = Date.now
+        func at(daysAgo: Int, _ hour: Int, _ minute: Int) -> Date {
+            calendar.date(bySettingHour: hour, minute: minute, second: 0,
+                          of: calendar.date(byAdding: .day, value: -daysAgo, to: now)!)!
+        }
+        let thread: [(String, String, Date)] = [
+            ("person", "Je reprends le sport cette semaine, tu m'aides ?", at(daysAgo: 2, 18, 5)),
+            ("coach", "Avec plaisir. On commence doucement : trois séances courtes cette semaine.", at(daysAgo: 2, 18, 5)),
+            ("person", "Je fais quoi ce matin ?", at(daysAgo: 1, 8, 10)),
+            ("coach", "Deux séries de 10 squats, puis deux séries de 8 pompes, une minute de repos entre chaque.", at(daysAgo: 1, 8, 10)),
+            ("person", "C'est fait !", at(daysAgo: 1, 8, 31)),
+            ("coach", "Bravo. Étire tes cuisses deux minutes et bois un grand verre d'eau.", at(daysAgo: 1, 8, 31)),
+            ("person", "J'ai un peu de courbatures ce soir", at(daysAgo: 1, 19, 40)),
+            ("coach", "C'est normal après une reprise. Marche vingt minutes demain et garde les squats pour après-demain.", at(daysAgo: 1, 19, 41)),
+            ("person", "Salut coach, je suis prêt pour aujourd'hui", now.addingTimeInterval(-60)),
+            ("coach", "Parfait. Trois séries de 12 squats, puis 3 séries de 10 pompes. Garde le dos droit.", now.addingTimeInterval(-55)),
+        ]
+        let messages: [[String: Any]] = thread.map { role, text, date in
+            var message: [String: Any] = ["id": UUID().uuidString, "role": role, "text": text,
+                                          "sentAt": date.timeIntervalSinceReferenceDate]
+            if role == "coach" { message["engine"] = "onDevice" }
+            return message
+        }
+        let data = try JSONSerialization.data(withJSONObject: messages)
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-finn-ui-demo", "-AppleLanguages", "(fr)", "-AppleLocale", "fr_FR",
+            "-coachConversation.v1", "<" + data.map { String(format: "%02x", $0) }.joined() + ">",
+        ]
+        app.launch()
+        app.selectTab("Coach")
+        let days = app.staticTexts.matching(identifier: "coach.day")
+        XCTAssertTrue(days.firstMatch.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(app.staticTexts["Hier"].exists, app.debugDescription)
+        XCTAssertTrue(days.matching(NSPredicate(format: "label BEGINSWITH %@", "Aujourd")).firstMatch.exists)
+        attachScreenshot(of: app, named: "Coach thread")
+        app.scrollViews["coach.transcript"].swipeDown()
+        attachScreenshot(of: app, named: "Coach thread, earlier")
     }
 
     @MainActor
@@ -94,8 +179,8 @@ final class CoachReliabilityUITests: XCTestCase {
             // At accessibility sizes Send dismisses the keyboard to leave room for the reply.
             // The composer must reopen it so the next question remains reachable.
             field.tap()
-            XCTAssertTrue(app.buttons["coach.dismissKeyboard"].isHittable, language)
-            app.buttons["coach.dismissKeyboard"].tap()
+            XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3), language)
+            XCTAssertTrue(putKeyboardAway(in: app), language)
             app.terminate()
         }
     }
@@ -113,7 +198,7 @@ final class CoachReliabilityUITests: XCTestCase {
         app.selectTab("Coach")
         app.buttons["coach.engine"].tap()
         let modelAvailable = app.staticTexts[
-            "Apple Intelligence chose the sets; the details come from Finn's records."
+            "Apple Intelligence writes the answers on this iPhone, using your saved sets."
         ]
         .waitForExistence(timeout: 5)
         if !modelAvailable {
@@ -156,6 +241,56 @@ final class CoachReliabilityUITests: XCTestCase {
         XCTAssertEqual(app.state, .runningForeground)
         let screenshot = XCTAttachment(screenshot: app.screenshot())
         screenshot.name = "Native Apple Intelligence Coach"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
+    /// The coach chats like any assistant: a greeting gets a written reply from Apple Intelligence,
+    /// with no saved set needed
+    @MainActor
+    func testNativeAppleIntelligenceCoachAnswersAGreeting() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["FINN_NATIVE_COACH_TESTS"] == "1",
+            "Set TEST_RUNNER_FINN_NATIVE_COACH_TESTS=1 for real Apple Intelligence."
+        )
+        let app = XCUIApplication()
+        // onboarding answers through the defaults' argument domain: a portrait and a first name
+        app.launchArguments = [
+            "-finn-ui-demo", "-finn-ui-native-coach", "-AppleLanguages", "(fr)",
+            "-finn.coach", "nova", "-finn.firstName", "Théo", "-finn.trainingGoal", "strength",
+        ]
+        app.launch()
+        app.selectTab("Coach")
+        let field = app.textViews["coach.field"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        dismissKeyboardIntroduction(in: app)
+        field.typeText("Hey, salut coach, on peut parler ?")
+        app.buttons["coach.send"].tap()
+        if app.descendants(matching: .any)["coach.thinking"].waitForExistence(timeout: 3) {
+            attachScreenshot(of: app, named: "Coach thinking")
+        }
+        let answers = app.descendants(matching: .any).matching(identifier: "coach.answer.onDevice")
+        XCTAssertTrue(
+            answers.firstMatch.waitForExistence(timeout: 45),
+            "Expected a reply written by Apple Intelligence. \(app.debugDescription)"
+        )
+        XCTAssertFalse(answers.firstMatch.label.isEmpty)
+        attachScreenshot(of: app, named: "Coach greeting")
+
+        // the onboarding answers reach every turn: Finn knows the first name without being told
+        field.tap()
+        field.typeText("Tu te souviens de mon prénom ?")
+        app.buttons["coach.send"].tap()
+        let remembered = answers.matching(NSPredicate(format: "label CONTAINS %@", "Théo")).firstMatch
+        XCTAssertTrue(remembered.waitForExistence(timeout: 45), app.debugDescription)
+        attachScreenshot(of: app, named: "Coach remembers")
+    }
+
+    @MainActor
+    private func attachScreenshot(of app: XCUIApplication, named name: String) {
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = name
         screenshot.lifetime = .keepAlways
         add(screenshot)
     }

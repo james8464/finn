@@ -21,18 +21,6 @@ struct CoachComposerField: UIViewRepresentable {
             action: #selector(Coordinator.performAction),
             for: .touchUpInside
         )
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
-        toolbar.tintColor = UIColor(AppPageStyle.tint)
-        let done = UIBarButtonItem(
-            title: String(localized: "Done"),
-            style: .prominent,
-            target: context.coordinator,
-            action: #selector(Coordinator.dismissKeyboard)
-        )
-        done.accessibilityIdentifier = "coach.dismissKeyboard"
-        toolbar.items = [.flexibleSpace(), done]
-        view.editor.inputAccessoryView = toolbar
         context.coordinator.view = view
         view.refresh(isAnswering: isAnswering)
         return view
@@ -75,9 +63,9 @@ struct CoachComposerField: UIViewRepresentable {
             editor.returnKeyType = .send
             editor.enablesReturnKeyAutomatically = true
             editor.accessibilityIdentifier = "coach.field"
-            editor.accessibilityLabel = String(localized: "Ask about your sets")
+            editor.accessibilityLabel = String(localized: "Message Finn")
             editor.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-            placeholder.text = String(localized: "Ask about your sets")
+            placeholder.text = String(localized: "Message Finn")
             placeholder.font = editor.font
             placeholder.adjustsFontForContentSizeCategory = true
             placeholder.textColor = UIColor(HomeStyle.supportingText)
@@ -203,10 +191,6 @@ struct CoachComposerField: UIViewRepresentable {
             } else {
                 submit()
             }
-        }
-
-        @objc func dismissKeyboard() {
-            view?.editor.resignFirstResponder()
         }
     }
 }

@@ -110,7 +110,9 @@ final class NativeUIReviewUITests: XCTestCase {
         field.typeText("My last set")
         XCTAssertTrue(app.buttons["coach.send"].isHittable)
         try save("coach-largest-text-keyboard")
-        app.buttons["coach.dismissKeyboard"].tap()
+        // no Done button: touching the conversation puts the keyboard away
+        app.scrollViews["coach.transcript"].descendants(matching: .any)["coach.opening"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
         app.selectTab("Home")
         XCTAssertTrue(app.buttons["home.tryFinn"].exists)
         app.selectTab("Coach")
