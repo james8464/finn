@@ -47,6 +47,15 @@ extension XCUIApplication {
         let offer = buttons["freeWorkout.accept"]
         if offer.waitForExistence(timeout: 5) {
             coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)).tap()
+            // with the largest text the sheet opens full height, so the tap lands on it: pull it
+            // down by its top edge, as a person would
+            if !offer.waitForNonExistence(timeout: 2) {
+                let sheet = scrollViews.containing(.staticText, identifier: "freeWorkout.line").firstMatch
+                let grabber = sheet.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0))
+                    .withOffset(CGVector(dx: 0, dy: 6))
+                grabber.press(forDuration: 0.1,
+                              thenDragTo: coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98)))
+            }
             XCTAssertTrue(offer.waitForNonExistence(timeout: 5), "The free workout offer did not close")
         }
         XCTAssertTrue(buttons["tab.home"].waitForExistence(timeout: 8))
