@@ -14,10 +14,10 @@ final class ProgressAndWorkoutUITests: XCTestCase {
     }
 
     @MainActor
-    func testCoachPlanCanBeCompletedAndReopenedFromWorkout() {
+    func testNewPlanCanBeCompletedAndReopenedFromWorkout() {
         let app = launch()
-        app.selectTab("Coach")
-        app.buttons["coach.planWorkout"].tap()
+        app.selectTab("Workout")
+        app.buttons["workout.new"].tap()
         let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan.exercise."))
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
         waitForPlanning(app)

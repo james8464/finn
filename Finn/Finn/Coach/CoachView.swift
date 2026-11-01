@@ -1,59 +1,47 @@
 import SwiftUI
 
-/// a conversation grounded in the saved sets, with source details one tap away
+/// a conversation with Finn, who remembers the onboarding answers and reads the saved sets. Finn's
+/// chosen face heads the screen, signs each reply and moves while a reply is on its way
 struct CoachView: View {
     @State private var conversation: CoachConversation
     @State private var showsSource = false
-    @State private var planDraft: PlannedWorkout?
-    @State private var pendingWorkoutStart: PlannedWorkout?
     @State private var replyTask: Task<Void, Never>?
     @State private var followsLatestReply = true
     @State private var isUserScrolling = false
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.coach) private var coach
+    /// Finn's face beside the heading, on each reply, and while Finn thinks
+    @ScaledMetric(relativeTo: .title2) private var headingFace: CGFloat = 30
+    @ScaledMetric(relativeTo: .subheadline) private var replyFace: CGFloat = 22
+    @ScaledMetric(relativeTo: .body) private var thinkingFace: CGFloat = 34
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     private var reduceMotion: Bool {
         AppMotion.reduces(systemReduceMotion)
     }
 
     private let history: [WorkoutSessionSummary]
-    private let planningContext: WorkoutPlanningContext?
-    private let plannedWorkouts: PlannedWorkoutStore
-    private let onStartWorkout: ((PlannedWorkout) -> Void)?
+    /// the onboarding answers Finn remembers, as the document the model rereads every turn
+    private let profile: String?
+    /// the conversation kept between launches
+    private let savedConversation: CoachTranscriptStore?
 
     init(history: [WorkoutSessionSummary], planningContext: WorkoutPlanningContext? = nil,
-         onStartWorkout: ((PlannedWorkout) -> Void)? = nil, store: PlannedWorkoutStore? = nil) {
+         transcript: CoachTranscriptStore? = nil) {
         self.history = history
-        self.planningContext = planningContext
-        self.plannedWorkouts = store ?? .shared
-        self.onStartWorkout = onStartWorkout
+        self.profile = planningContext?.profile.coachMemory
+        self.savedConversation = transcript
         _conversation = State(initialValue: CoachConversation(
             history: history,
-            preferencesNote: planningContext?.profile.coachNote
+            profile: profile,
+            transcript: transcript
         ))
     }
 
     init(history: [WorkoutSessionSummary], conversation: CoachConversation) {
         self.history = history
-        self.planningContext = nil
-        self.plannedWorkouts = .shared
-        self.onStartWorkout = nil
+        self.profile = conversation.context.profile
+        self.savedConversation = nil
         _conversation = State(initialValue: conversation)
-    }
-
-    private var workoutStartAction: ((PlannedWorkout) -> Void)? {
-        guard onStartWorkout != nil else { return nil }
-        return { plan in queueWorkoutStart(plan) }
-    }
-
-    private func queueWorkoutStart(_ plan: PlannedWorkout) {
-        pendingWorkoutStart = plan
-    }
-
-    /// Wait for the preview sheet to finish closing before presenting the workout guide.
-    private func startRequestedWorkout() {
-        guard let requested = pendingWorkoutStart else { return }
-        pendingWorkoutStart = nil
-        onStartWorkout?(requested)
     }
 
     var body: some View {
@@ -66,16 +54,6 @@ struct CoachView: View {
         .navigationTitle("Coach")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-            Button { planDraft = planningContext.map { PersonalisedWorkoutRules.make(context: $0) } ?? WorkoutPlanner.make(history: history) } label: {
-                    Label("Plan a workout", systemImage: "list.bullet.clipboard")
-                        .font(.subheadline.weight(.semibold))
-                        .labelStyle(.iconOnly)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("coach.planWorkout")
-                .accessibilityHint("Composes a workout from your saved sets")
-            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showsSource = true } label: {
                     Image(systemName: "info.circle")
@@ -86,13 +64,9 @@ struct CoachView: View {
                 .frame(minWidth: 44, minHeight: 44)
                 .accessibilityLabel("About Coach")
                 .accessibilityIdentifier("coach.engine")
-                .accessibilityHint("Explains how the Coach chooses its answer")
+                .accessibilityHint("Explains how the Coach writes its answers")
             }
 
-        }
-        .sheet(item: $planDraft, onDismiss: startRequestedWorkout) {
-            WorkoutPlanView(plan: $0, store: plannedWorkouts, planningContext: planningContext,
-                            onStart: workoutStartAction)
         }
         .sheet(isPresented: $showsSource) {
             NavigationStack {
@@ -107,7 +81,7 @@ struct CoachView: View {
                     }
                     Section {
                         Text(
-                            "Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique."
+                            "Coach answers with a language model and can make mistakes. It cannot diagnose an injury or assess your whole technique."
                         )
                     }
                 }
@@ -118,8 +92,16 @@ struct CoachView: View {
             }
             .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])
         }
-        .onAppear { conversation.refresh(history: history) }
-        .onChange(of: history) { _, updated in conversation.refresh(history: updated) }
+        .onAppear { conversation.refresh(history: history, profile: profile) }
+        .onChange(of: history) { _, updated in conversation.refresh(history: updated, profile: profile) }
+        .onChange(of: profile) { _, updated in conversation.refresh(history: history, profile: updated) }
+        // Delete all data emptied the saved conversation: the screen starts over too
+        .onChange(of: savedConversation?.turns.isEmpty) { _, isEmpty in
+            if isEmpty == true, conversation.messages.count > 1 {
+                replyTask?.cancel()
+                conversation.forget()
+            }
+        }
         .onDisappear {
             replyTask?.cancel()
             replyTask = nil
@@ -135,36 +117,24 @@ struct CoachView: View {
                         .accessibilityLabel("Finn, your coach")
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityIdentifier("coach.finn")
-                    analysisCard.padding(.bottom, 4)
-                    ForEach(conversation.messages) { message in
-                        if conversation.messages.count == 1 {
-                            VStack(alignment: .leading, spacing: 16) {
-                                Image(systemName: "bubble.left.and.text.bubble.right")
-                                    .font(.largeTitle)
-                                    .foregroundStyle(AppPageStyle.tint)
-                                    .accessibilityHidden(true)
-                                Text("Ask about your sets")
-                                    .font(.title2.weight(.bold))
-                                Text(message.text)
-                                    .font(.body)
-                                    .foregroundStyle(AppPageStyle.secondaryText)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            .modifier(AppSurface())
-                            .id(message.id)
-                        } else {
-                            bubble(message).id(message.id)
-                        }
+                    // Finn's greeting heads the conversation, then the analysis card, then the turns
+                    if let opening = conversation.messages.first {
+                        openingCard(opening).id(opening.id)
                     }
-                    if conversation.isAnswering {
-                        HStack(spacing: 8) {
-                            ProgressView()
-                            Text("Thinking")
-                                .font(.subheadline)
-                                .foregroundStyle(HomeStyle.supportingText)
+                    analysisCard.padding(.bottom, 4)
+                    // like a messaging app: the day above its first message, a thin line after
+                    // a pause, the time on each message
+                    let turns = Array(conversation.messages.dropFirst())
+                    ForEach(Array(turns.enumerated()), id: \.element.id) { index, message in
+                        if let marker = CoachTimeline.marker(for: message, after: index > 0 ? turns[index - 1] : nil) {
+                            timelineMarker(marker)
                         }
-                        .padding(.horizontal, 4)
-                        .accessibilityIdentifier("coach.thinking")
+                        bubble(message).id(message.id)
+                    }
+                    if conversation.isAnswering, let draft = conversation.draftReply, !draft.isEmpty {
+                        bubble(CoachMessage(role: .coach, text: draft), identifier: "coach.draft", showsTime: false)
+                    } else if conversation.isAnswering {
+                        thinking
                     }
                     if showsPrompts {
                         prompts
@@ -174,7 +144,15 @@ struct CoachView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
+            // the thread opens at its latest messages, as in Messages
+            .defaultScrollAnchor(.bottom, for: .initialOffset)
+            // no Done button: dragging the conversation down into the keyboard, or touching the
+            // conversation, puts the keyboard away, as in Messages and WhatsApp
             .scrollDismissesKeyboard(.interactively)
+            .simultaneousGesture(TapGesture().onEnded {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            })
+            .accessibilityIdentifier("coach.transcript")
             .clipped()
             .onScrollGeometryChange(for: Bool.self) { geometry in
                 geometry.contentSize.height - geometry.visibleRect.maxY < 24
@@ -202,6 +180,12 @@ struct CoachView: View {
                     scrollToLatest(using: proxy)
                 }
             }
+            .onChange(of: conversation.draftReply) { _, _ in
+                // follows the reply while the model writes it, without animating every word
+                if followsLatestReply {
+                    scrollToLatest(using: proxy, animated: false)
+                }
+            }
         }
     }
 
@@ -224,17 +208,77 @@ struct CoachView: View {
             String(localized: "No language model available. The coach repeats what Finn saved.")
         case .onDevice:
             String(
-                localized: "Apple Intelligence chose the sets; the details come from Finn's records."
+                localized: "Apple Intelligence writes the answers on this iPhone, using your saved sets."
             )
         case .privateCloudCompute:
             String(
-                localized: "Apple Private Cloud Compute chose the sets; the details come from Finn's records."
+                localized: "Apple Private Cloud Compute writes the answers, using your saved sets."
             )
         case .claudeDemo:
             String(
-                localized: "Debug demo: Claude chose the sets; the details come from Finn's records."
+                localized: "Debug demo: Claude writes the answers, using your saved sets."
             )
         }
+    }
+
+    /// Finn's greeting: who is talking, with the chosen face beside the name
+    private func openingCard(_ message: CoachMessage) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Image(systemName: "bubble.left.and.text.bubble.right")
+                .font(.largeTitle)
+                .foregroundStyle(AppPageStyle.tint)
+                .accessibilityHidden(true)
+            HStack(spacing: 10) {
+                Text("Talk to Finn")
+                    .font(.title2.weight(.bold))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+                CoachAvatar(coach: coach, size: headingFace)
+            }
+            Text(message.text)
+                .font(.body)
+                .foregroundStyle(AppPageStyle.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("coach.opening")
+        }
+        .modifier(AppSurface())
+    }
+
+    /// the day, in a small capsule centred above its first message, or the thin line of a pause
+    @ViewBuilder private func timelineMarker(_ marker: CoachTimeline.Marker) -> some View {
+        switch marker {
+        case .day(let date):
+            Text(CoachTimeline.dayLabel(for: date))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(HomeStyle.supportingText)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(AppPageStyle.surface, in: Capsule())
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 4)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier("coach.day")
+        case .pause:
+            Rectangle()
+                .fill(HomeStyle.supportingText.opacity(0.3))
+                .frame(height: 1)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 8)
+                .accessibilityHidden(true)
+        }
+    }
+
+    /// Finn's face, swaying while the model works, where the reply will appear
+    private var thinking: some View {
+        HStack(spacing: 10) {
+            ThinkingFace(coach: coach, size: thinkingFace, moves: !reduceMotion)
+            Text("Thinking")
+                .font(.subheadline)
+                .foregroundStyle(HomeStyle.supportingText)
+        }
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("coach.thinking")
     }
 
     /// the whole picture in one tap, sent like a typed question. Framed like Home's Last workout
@@ -313,21 +357,35 @@ struct CoachView: View {
         .accessibilityIdentifier("coach.suggestions")
     }
 
-    @ViewBuilder private func bubble(_ message: CoachMessage) -> some View {
+    @ViewBuilder private func bubble(_ message: CoachMessage, identifier: String? = nil, showsTime: Bool = true) -> some View {
         let isCoach = message.role == .coach
         HStack {
             if !isCoach {
                 Spacer(minLength: typeSize.isAccessibilitySize ? 0 : 40)
             }
-            VStack(alignment: .leading, spacing: 4) {
-                Text(message.text)
-                    .font(.body)
-                    .foregroundStyle(isCoach ? Color.primary : Color.black)
-                    .fixedSize(horizontal: false, vertical: true)
-                if isCoach, !history.isEmpty, let engine = message.engine {
-                    Text(engine.label)
-                        .font(.caption)
-                        .foregroundStyle(HomeStyle.supportingText)
+            // the time sits at the bottom right of the bubble, as in a messaging app
+            VStack(alignment: .trailing, spacing: 2) {
+                VStack(alignment: .leading, spacing: 6) {
+                    // like a group chat: the face and name of who is talking, above the text
+                    if isCoach {
+                        HStack(spacing: 6) {
+                            CoachAvatar(coach: coach, size: replyFace)
+                            Text(verbatim: "Finn")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(DashboardStyle.accent)
+                        }
+                    }
+                    Text(isCoach ? Self.formatted(message.text) : AttributedString(message.text))
+                        .font(.body)
+                        .foregroundStyle(isCoach ? Color.primary : Color.black)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
+                }
+                if showsTime {
+                    Text(CoachTimeline.time(of: message.sentAt))
+                        .font(.caption2)
+                        .monospacedDigit()
+                        .foregroundStyle(isCoach ? HomeStyle.supportingText : Color.black.opacity(0.6))
                 }
             }
             .padding(.horizontal, 14)
@@ -341,8 +399,14 @@ struct CoachView: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier(isCoach ? "coach.answer.\(message.engine?.rawValue ?? "opening")" :
-            "coach.question")
+        .accessibilityIdentifier(identifier ?? (isCoach ? "coach.answer.\(message.engine?.rawValue ?? "opening")" :
+                "coach.question"))
+    }
+
+    /// model replies can carry inline Markdown such as **bold**; show it styled, never as symbols
+    private static func formatted(_ text: String) -> AttributedString {
+        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        return (try? AttributedString(markdown: text, options: options)) ?? AttributedString(text)
     }
 
     private func scrollToLatest(using proxy: ScrollViewProxy, animated: Bool = true) {
@@ -361,5 +425,53 @@ struct CoachView: View {
         FinnHaptics.play(.selection)
         replyTask = Task { await conversation.send(text) }
         return true
+    }
+}
+
+/// Finn's face while a reply is on its way: it sways and breathes in place of a spinner. With
+/// Reduce Motion it only fades in and out
+private struct ThinkingFace: View {
+    let coach: Coach
+    let size: CGFloat
+    let moves: Bool
+
+    private struct Pose {
+        var scale = 1.0
+        var tilt = 0.0
+        var lift = 0.0
+    }
+
+    var body: some View {
+        if moves {
+            CoachAvatar(coach: coach, size: size)
+                .keyframeAnimator(initialValue: Pose(), repeating: true) { face, pose in
+                    face
+                        .scaleEffect(pose.scale)
+                        .rotationEffect(.degrees(pose.tilt))
+                        .offset(y: pose.lift)
+                } keyframes: { _ in
+                    KeyframeTrack(\.scale) {
+                        SpringKeyframe(1.12, duration: 0.5)
+                        SpringKeyframe(0.92, duration: 0.5)
+                        SpringKeyframe(1, duration: 0.4)
+                    }
+                    KeyframeTrack(\.tilt) {
+                        CubicKeyframe(-12, duration: 0.35)
+                        CubicKeyframe(12, duration: 0.7)
+                        CubicKeyframe(0, duration: 0.35)
+                    }
+                    KeyframeTrack(\.lift) {
+                        CubicKeyframe(-size * 0.1, duration: 0.7)
+                        CubicKeyframe(0, duration: 0.7)
+                    }
+                }
+        } else {
+            CoachAvatar(coach: coach, size: size)
+                .phaseAnimator([1.0, 0.4]) { face, opacity in
+                    face.opacity(opacity)
+                } animation: { _ in
+                    .easeInOut(duration: 0.9)
+                }
+        }
     }
 }
