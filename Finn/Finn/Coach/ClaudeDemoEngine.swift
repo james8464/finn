@@ -131,19 +131,16 @@
             history: [CoachMessage],
             language: CoachLanguage
         ) -> [String: Any] {
-            var messages: [[String: String]] = history.suffix(10).map { message in
+            // the same turns as Apple's models: alternating, starting with the person
+            let prompt = FoundationModelsCoachPrompt.make(
+                question: question, context: context, history: history, language: language
+            )
+            let messages = prompt.turns.map { message in
                 ["role": message.role == .person ? "user" : "assistant", "content": message.text]
-            }
-            // the API wants alternating roles starting with the person; the coach's opening line is dropped
-            if messages.first?["role"] == "assistant" {
-                messages.removeFirst()
-            }
-            messages.append(["role": "user", "content": FoundationModelsCoachPrompt.prompt(
-                question: question, context: context, history: []
-            )])
+            } + [["role": "user", "content": prompt.question]]
             return ["model": model,
                     "max_tokens": 300,
-                    "system": FoundationModelsCoachPrompt.instructions(language: language),
+                    "system": prompt.instructions,
                     "messages": messages]
         }
 

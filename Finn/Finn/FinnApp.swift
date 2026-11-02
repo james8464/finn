@@ -57,8 +57,11 @@ struct FinnApp: App {
                         exerciseClassifier: ProcessInfo.processInfo.arguments
                             .contains("-finn-ui-demo-recognition") ? DemoExerciseClassifier() : nil,
                         preferences: FinnPreferences(
+                            // `-finn-ui-demo-suite NAME` keeps the demo's defaults between launches,
+                            // for tests of what survives a relaunch
                             defaults: UserDefaults(
-                                suiteName: "FinnDemo-\(UUID().uuidString)"
+                                suiteName: Self.argument(after: "-finn-ui-demo-suite")
+                                    ?? "FinnDemo-\(UUID().uuidString)"
                             ) ?? .standard,
                             handsFreeByDefault: ProcessInfo.processInfo.arguments
                                 .contains("-finn-ui-hands-free")

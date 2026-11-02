@@ -39,6 +39,8 @@ struct ContentView: View {
     @State private var workoutPlanNeedsGeneration = false
     @State private var guidedWorkout: GuidedWorkout?
     @State private var plannedWorkouts: PlannedWorkoutStore
+    /// the conversation with Finn, kept between launches
+    @State private var coachTranscript: CoachTranscriptStore
     @State private var suggestedWorkout: PlannedWorkout?
     @State private var suggestionPlanner = PersonalisedWorkoutPlanner()
     @State private var showsGuidedWorkout = false
@@ -154,6 +156,7 @@ struct ContentView: View {
                                                     limitsFreeWorkouts: Self.limitsFreeWorkouts))
         _guidedWorkout = State(initialValue: GuidedWorkoutStore(defaults: preferences.defaults).load())
         _plannedWorkouts = State(initialValue: PlannedWorkoutStore(defaults: preferences.defaults))
+        _coachTranscript = State(initialValue: CoachTranscriptStore(defaults: preferences.defaults))
         let initialHistory = (try? startup?.history.get()) ?? []
         let initialPlan = PersonalisedWorkoutRules.make(context: WorkoutPlanningContext(
             profile: preferences.onboardingProfile, history: initialHistory))
@@ -226,6 +229,7 @@ struct ContentView: View {
                 preferences.resetLocalChoices()
                 guidedWorkout = nil
                 plannedWorkouts.clear()
+                coachTranscript.clear()
                 route = nil
             }
             Button("Cancel", role: .cancel) {}
@@ -598,7 +602,7 @@ struct ContentView: View {
             }
         case .workout: workoutHome
         case .progress: progressPage
-        case .coach: CoachView(history: model.history, planningContext: workoutPlanningContext, onStartWorkout: startGuidedWorkout, store: plannedWorkouts)
+        case .coach: CoachView(history: model.history, planningContext: workoutPlanningContext, transcript: coachTranscript)
         }
     }
 
@@ -745,7 +749,7 @@ struct ContentView: View {
         case .history: historyPage
         case .options: optionsPage
         case .privacy: privacyPage
-        case .coach: CoachView(history: model.history, planningContext: workoutPlanningContext, onStartWorkout: startGuidedWorkout, store: plannedWorkouts)
+        case .coach: CoachView(history: model.history, planningContext: workoutPlanningContext, transcript: coachTranscript)
         case .lastWorkout:
             if let last = model.history.first {
                 historyDetail(last)
@@ -1210,7 +1214,7 @@ struct ContentView: View {
                     }
                     }
                 DisclosureGroup {
-                    Text("Coach uses your question and saved set summaries. When available, Apple Intelligence processes them on this iPhone. Camera frames and raw pose points are never included.")
+                    Text("Coach uses your question, your conversation with Finn, your first-launch answers and saved set summaries. When available, Apple Intelligence processes them on this iPhone. The conversation stays on this iPhone until you delete all data. Camera frames and raw pose points are never included.")
                 } label: {
                     WrappingText(text: String(localized: "Coach"))
                 }
@@ -1850,7 +1854,7 @@ struct ContentView: View {
                         }
                         }
                         .modifier(AppSurface())
-                        NavigationLink { CoachView(history: model.history, planningContext: workoutPlanningContext, onStartWorkout: startGuidedWorkout, store: plannedWorkouts) } label: {
+                        NavigationLink { CoachView(history: model.history, planningContext: workoutPlanningContext, transcript: coachTranscript) } label: {
                             Label("Ask the coach", systemImage: "bubble.left.and.text.bubble.right")
                                 .frame(minHeight: 44, alignment: .leading)
                         }

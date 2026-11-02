@@ -32665,6 +32665,156 @@
           }
         }
       }
+    },
+    "Talk to Finn": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Habla con Finn"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parle avec Finn"
+          }
+        }
+      }
+    },
+    "Message Finn": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escribe a Finn"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écris à Finn"
+          }
+        }
+      }
+    },
+    "Apple Intelligence writes the answers on this iPhone, using your saved sets.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence redacta las respuestas en este iPhone, a partir de tus series guardadas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence rédige les réponses sur cet iPhone, à partir de tes séries enregistrées."
+          }
+        }
+      }
+    },
+    "Apple Private Cloud Compute writes the answers, using your saved sets.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Private Cloud Compute redacta las respuestas, a partir de tus series guardadas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Private Cloud Compute rédige les réponses, à partir de tes séries enregistrées."
+          }
+        }
+      }
+    },
+    "Debug demo: Claude writes the answers, using your saved sets.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demo de depuración: Claude redacta las respuestas, a partir de tus series guardadas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démo de débogage : Claude rédige les réponses, à partir de tes séries enregistrées."
+          }
+        }
+      }
+    },
+    "Explains how the Coach writes its answers": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explica cómo el entrenador redacta sus respuestas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explique comment Coach rédige ses réponses"
+          }
+        }
+      }
+    },
+    "Turn on Apple Intelligence in Settings > Apple Intelligence & Siri to chat with the coach.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa Apple Intelligence en Ajustes > Apple Intelligence y Siri para hablar con el entrenador."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active Apple Intelligence dans Réglages > Apple Intelligence et Siri pour discuter avec le coach."
+          }
+        }
+      }
+    },
+    "Coach answers with a language model and can make mistakes. It cannot diagnose an injury or assess your whole technique.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El entrenador responde con un modelo de lenguaje y puede equivocarse. No puede diagnosticar lesiones ni evaluar toda tu técnica."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coach répond avec un modèle de langage et peut se tromper. Il ne peut pas diagnostiquer une blessure ni évaluer toute ta technique."
+          }
+        }
+      }
+    },
+    "Coach uses your question, your conversation with Finn, your first-launch answers and saved set summaries. When available, Apple Intelligence processes them on this iPhone. The conversation stays on this iPhone until you delete all data. Camera frames and raw pose points are never included.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coach uses your question, your conversation with Finn, your first-launch answers and saved set summaries. When available, Apple Intelligence processes them on this iPhone. The conversation stays on this iPhone until you delete all data. Camera frames and raw pose points are never included."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coach usa tu pregunta, tu conversación con Finn, tus respuestas del primer inicio y los resúmenes de tus series guardadas. Cuando está disponible, Apple Intelligence los procesa en este iPhone. La conversación se queda en este iPhone hasta que borres todos los datos. Nunca se incluyen imágenes de la cámara ni puntos de postura sin procesar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coach utilise ta question, ta conversation avec Finn, tes réponses du premier lancement et les résumés de tes séries enregistrées. Quand c’est possible, Apple Intelligence les traite sur cet iPhone. La conversation reste sur cet iPhone jusqu’à ce que tu supprimes toutes les données. Les images de la caméra et les points de pose bruts ne sont jamais inclus."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
