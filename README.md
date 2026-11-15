@@ -29,7 +29,7 @@ The camera shows framing and a pose overlay, counts reps live, and supports manu
 
 ### Results
 
-Each set shows a measured count and **at most one** supported range or posture observation. Weak evidence produces a retake reason or "no supported pattern." Partial sets can retain a count without posture advice.
+Each set shows a measured count and **at most one** supported range or posture observation. Weak evidence produces a retake reason or "no supported pattern." Partial sets can retain a count without posture advice. A rep taken during a sustained turn does not supply side-view technique evidence. The measured count stays available, and range comparisons require a consistent view. When multiple people are visible, the 3D camera-angle estimate must agree with the tracked athlete’s torso.
 
 > **Note:** A squat whose knee and ankle Vision cannot read often enough (phone on the floor, feet at the picture's edge, person turning or stepping out of view and back) is counted from the hips going down and up, without posture advice; a front view is counted the same way, with a tip to turn (15 October).
 
@@ -43,6 +43,8 @@ Side-view form checks produce an observation when a fault appears on **at least 
 | Deadlift | Knees and hinge |
 
 A few words of the same advice appear large on the camera screen during the set. A check that cannot see its joints says so.
+
+The camera pipeline uses [Vision 2D pose](https://developer.apple.com/documentation/vision/detecting-human-body-poses-in-images) to follow the athlete and [Vision 3D pose](https://developer.apple.com/documentation/vision/identifying-3d-human-body-poses-in-images) to check viewpoint. [MediaPipe Pose Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker?tab=iOS) is an on-device candidate for a future comparison, especially where additional landmarks could help. The [multi-view fitness dataset](https://data.mendeley.com/datasets/kgbb3yn47p/3) provides real side, front, and diagonal recordings for squats and push-ups. Its whole-video labels do not validate individual technique cues.
 
 History stores local summaries, compares compatible sets, identifies a recurring pattern, and shares text through the system sheet.
 

@@ -388,6 +388,8 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
     /// True when the joints were clear in only 65 to 80% of the set: its clear reps were counted,
     /// without advice or comparison. Nil for a fully visible set and in older summaries.
     let partlyVisible: Bool?
+    /// False when the camera angle changed or did not support range comparisons.
+    let rangeComparisonSupported: Bool?
 
     init(
         id: UUID,
@@ -401,7 +403,8 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
         cameraView: CameraView = .side,
         issues: [SetIssue]? = nil,
         formMeasurements: [FormMeasurement]? = nil,
-        partlyVisible: Bool? = nil
+        partlyVisible: Bool? = nil,
+        rangeComparisonSupported: Bool? = nil
     ) {
         self.id = id
         self.sessionID = sessionID
@@ -415,11 +418,12 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
         self.issues = issues
         self.formMeasurements = formMeasurements
         self.partlyVisible = partlyVisible
+        self.rangeComparisonSupported = rangeComparisonSupported
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, sessionID, capturedAt, bodySide, analysis, cue, cueResponse
-        case exercise, cameraView, issues, formMeasurements, partlyVisible
+        case exercise, cameraView, issues, formMeasurements, partlyVisible, rangeComparisonSupported
     }
 
     /// `exercise`, `cameraView` and `cueResponse` arrived after the first saved sets, and a
@@ -448,6 +452,7 @@ nonisolated struct SetSummary: Codable, Equatable, Identifiable {
             forKey: .formMeasurements
         )
         partlyVisible = try container.decodeIfPresent(Bool.self, forKey: .partlyVisible)
+        rangeComparisonSupported = try container.decodeIfPresent(Bool.self, forKey: .rangeComparisonSupported)
     }
 }
 

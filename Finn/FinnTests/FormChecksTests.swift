@@ -82,6 +82,26 @@ struct FormChecksTests {
         #expect(trusted.findings.first?.check == .squatChestDrop)
     }
 
+    @Test func brieflyTurningKeepsTheCountAndRestrictsWhatEachCueCanUse() throws {
+        let frames = squats(thighAtBottom: 45, extraLean: 55).map { frame in
+            frame.with(deviation: (4.2 ... 4.9).contains(frame.time) ? 60 : 5)
+        }
+        let analysis = try measured(frames, .squat)
+        #expect(analysis.reps.count == 6)
+        let review = FormChecks.review(analysis, frames: frames, definition: .squat)
+        #expect(review.findings.first?.reps == [1, 2, 4, 5, 6])
+        var monitor = LiveSetMonitor(definition: .squat)
+        let events = monitor.update(with: frames)
+        #expect(monitor.countedReps == 6)
+        #expect(!monitor.supportsRangeCoaching)
+        #expect(!events.contains { event in
+            switch event {
+            case .formFault(_, rep: 3), .shorterThanFirstReps: true
+            default: false
+            }
+        })
+    }
+
     // MARK: Push-up
 
     @Test func cleanPushUpsGetNoAdvice() throws {

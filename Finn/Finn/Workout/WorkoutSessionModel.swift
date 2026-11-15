@@ -638,7 +638,12 @@ final class WorkoutSessionModel {
 // the count the set ends on is the one shown: the live count can be one rep behind
             // (a rep ended after its last analysis) and must never differ in the other direction.
             liveRepCount = analysis.reps.count
-            repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
+            let sideView = diagnostics?.angledView == nil && diagnostics?.postureFromSide != false
+            let supportsRange = sideView
+                && (!checksCameraAngle || !ViewCheck.hasSustainedTurn(during: analysis.reps, in: setFrames))
+            if supportsRange {
+                repExtremes = RepExtremes.make(analysis, frames: setFrames, definition: definition)
+            }
             let review = FormChecks.review(analysis, frames: setFrames, definition: definition,
                                            viewCheck: checksCameraAngle ? .enforce : .ignore)
             formNotes = review.notes
@@ -646,9 +651,8 @@ final class WorkoutSessionModel {
             // visible set is counted but not advised on. A push-up is accepted from any view, so its
             // angle is not in `angledView`: `postureFromSide` carries it, and the form checks' note
             // "no form advice for this set" must then be the whole truth (15 October).
-            let advisable = diagnostics?.angledView == nil && diagnostics?.partialVisibility == nil
-                && diagnostics?.postureFromSide != false
-            let changeCue = advisable ? CueSelector.select(from: analysis, exercise: definition) : nil
+            let advisable = sideView && diagnostics?.partialVisibility == nil
+            let changeCue = advisable && supportsRange ? CueSelector.select(from: analysis, exercise: definition) : nil
 // one observation: a form fault seen on several reps comes before a change between the first
             // and last reps.
             let findings = advisable ? review.findings : []
@@ -662,7 +666,7 @@ final class WorkoutSessionModel {
             setHeartRate = SetHeartRate.make(setHeartRateReadings)
             record(analysis: analysis, cue: cue, exercise: exercise, frames: setFrames, issues: issues,
                    formMeasurements: advisable ? review.measurements : [],
-                   partlyVisible: diagnostics?.partialVisibility != nil)
+                   partlyVisible: diagnostics?.partialVisibility != nil, supportsRange: supportsRange)
             offerPersonalisationIfDue()
         case .insufficientView(let reason):
             result = .insufficientView(reason)
@@ -1147,7 +1151,7 @@ final class WorkoutSessionModel {
 
     private func record(analysis: SetAnalysis, cue: Cue?, exercise: ExerciseKind, frames: [PoseFrame],
                         issues: [SetIssue], formMeasurements: [FormMeasurement],
-                        partlyVisible: Bool = false) {
+                        partlyVisible: Bool, supportsRange: Bool) {
         guard case .usable(let side) = EvidenceGate.assess(
             frames, requirement: exercise.definition.evidence, allowsPartial: partlyVisible) else { return }
         let now = currentDate()
@@ -1167,7 +1171,8 @@ final class WorkoutSessionModel {
             bodySide: side, analysis: analysis, cue: cue, cueResponse: .unanswered,
             exercise: exercise, issues: issues,
             formMeasurements: formMeasurements.isEmpty ? nil : formMeasurements,
-            partlyVisible: partlyVisible ? true : nil
+            partlyVisible: partlyVisible ? true : nil,
+            rangeComparisonSupported: supportsRange ? nil : false
         )
 // history is newest session first; each session's sets are oldest first. A recording from a
         // different side or with too little evidence cannot hide an older comparable set.

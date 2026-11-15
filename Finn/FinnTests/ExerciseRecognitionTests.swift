@@ -5,6 +5,15 @@ import Testing
 @testable import Finn
 
 struct ExerciseRecognizerTests {
+    @Test func emptyPoseWindowsCannotNameAnExercise() {
+        let classifier = ScriptedClassifier { _ in ("squat", 0.99) }
+        let frames = keypointFrames(seconds: 6).map {
+            PoseFrame(time: $0.time, subjectCount: 1, joints: [:], athleteTracking: .hidden)
+        }
+        #expect(ExerciseRecognizer.recognise(frames, using: classifier) == .uncertain)
+        #expect(classifier.calls == 0)
+    }
+
     @Test func confidentAgreementNamesTheExercise() {
         let classifier = ScriptedClassifier { _ in ("push_up", 0.95) }
         #expect(ExerciseRecognizer.recognise(keypointFrames(seconds: 6), using: classifier)

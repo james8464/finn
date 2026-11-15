@@ -1125,7 +1125,7 @@ struct ChosenExerciseTests {
     /// says Finn checks push-up form from the side only. The range observation, read from an elbow
     /// angle the view bent, must not follow below it. From the side, the same reps get it.
     @Test func frontOnPushUpsGetNoRangeAdviceEvenWhenTheRangeShrinks() async throws {
-        func measure(deviation: Double?) async throws -> (cue: Cue?, reps: Int, notes: [String]) {
+        func measure(deviation: Double?) async throws -> (cue: Cue?, reps: Int, notes: [String], hasRangeDetails: Bool, supportsComparison: Bool) {
             let source = TestPoseSource()
             let defaults = try #require(UserDefaults(suiteName: "FinnFront-\(UUID())"))
             let model = WorkoutSessionModel(source: source, preferences: FinnPreferences(defaults: defaults))
@@ -1159,17 +1159,21 @@ struct ChosenExerciseTests {
             await model.endSet()
             guard case .measured(let analysis, let cue) = model.result else {
                 Issue.record("Expected the push-ups to be counted, got \(String(describing: model.result))")
-                return (nil, 0, [])
+                return (nil, 0, [], false, false)
             }
-            return (cue, analysis.reps.count, model.formNotes)
+            return (cue, analysis.reps.count, model.formNotes, model.repExtremes != nil,
+                    model.currentSession?.sets.last?.rangeComparisonSupported != false)
         }
         // from the side the same reps get advice (the shallow reps trip the depth check first).
         let side = try await measure(deviation: nil)
         #expect(side.reps == 6)
         #expect(side.cue != nil)
+        #expect(side.supportsComparison)
         let front = try await measure(deviation: 84)
         #expect(front.reps == 6)
         #expect(front.cue == nil)
+        #expect(!front.hasRangeDetails)
+        #expect(!front.supportsComparison)
         #expect(front.notes.first?.hasPrefix("Finn checks push-up form from the side only.") == true)
     }
 }

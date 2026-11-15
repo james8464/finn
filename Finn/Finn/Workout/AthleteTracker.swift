@@ -80,6 +80,7 @@ nonisolated struct AthleteTracker {
     /// Where everyone else was then: a coach or partner beside the athlete is never taken for them.
     private var lastOthers: [Box] = []
     private(set) var isLocked = false
+    private(set) var trackingRevision = 0
     private var lastMatchTime = -Double.infinity
     /// When the current person was first followed.
     private var followedSince = -Double.infinity
@@ -184,6 +185,7 @@ nonisolated struct AthleteTracker {
     }
 
     private mutating func forget() {
+        trackingRevision += 1
         memory = [:]
         size = 0
         lastBox = nil

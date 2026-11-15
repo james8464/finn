@@ -71,6 +71,97 @@ nonisolated enum ViewCheck {
         return acos(min(1, cosine)) * 180 / .pi
     }
 
+    /// Vision 3D returns one person. In a crowd, require several projected torso joints to
+    /// match the tracked 2D athlete more closely than every other detected person.
+    static func matchesTrackedTorso(
+        _ projection: [BodyJoint: SIMD2<Double>],
+        athlete: [BodyJoint: JointPoint],
+        bystanders: [[BodyJoint: JointPoint]],
+        aspectRatio: Double
+    ) -> Bool {
+        guard aspectRatio.isFinite, aspectRatio > 0,
+              projection.values.allSatisfy({ $0.x.isFinite && $0.y.isFinite }),
+              let minX = projection.values.map(\.x).min(),
+              let maxX = projection.values.map(\.x).max(),
+              let minY = projection.values.map(\.y).min(),
+              let maxY = projection.values.map(\.y).max() else {
+            return false
+        }
+        let scale = hypot(maxX - minX, (maxY - minY) * aspectRatio)
+        guard scale > 0 else {
+            return false
+        }
+        let maximumError = 0.30
+        let minimumSeparation = 0.12
+        func error(for joints: [BodyJoint: JointPoint]) -> (count: Int, rms: Double, closest: Double)? {
+            var count = 0
+            var squaredError = 0.0
+            var minimumSquaredError = Double.infinity
+            for (joint, projected) in projection {
+                guard let measured = joints[joint], measured.isUsable,
+                      measured.confidence >= AthleteTracker.jointConfidence else {
+                    continue
+                }
+                let dx = measured.x - projected.x
+                let dy = (measured.y - projected.y) * aspectRatio
+                let squaredDistance = dx * dx + dy * dy
+                squaredError += squaredDistance
+                minimumSquaredError = min(minimumSquaredError, squaredDistance)
+                count += 1
+            }
+            guard count > 0 else {
+                return nil
+            }
+            return (count, sqrt(squaredError / Double(count)) / scale, sqrt(minimumSquaredError) / scale)
+        }
+        guard let athleteError = error(for: athlete), athleteError.count >= 3, athleteError.rms <= maximumError else {
+            return false
+        }
+        return bystanders.allSatisfy { person in
+            guard let otherError = error(for: person) else {
+                return false
+            }
+            // A cropped bystander can be ruled out if every visible torso point is far away.
+            if otherError.count < 3 {
+                return otherError.closest > maximumError + minimumSeparation
+            }
+            return otherError.rms - athleteError.rms >= minimumSeparation
+        }
+    }
+
+    static func hasSustainedTurn(during reps: [RepMetric], in frames: [PoseFrame]) -> Bool {
+        guard let first = reps.first, let last = reps.last else {
+            return false
+        }
+        return hasSustainedTurn(frames.lazy.filter { (first.startTime ... last.endTime).contains($0.time) })
+    }
+
+    /// At the nominal 3D sampling rate, two successive samples span about 0.27 s.
+    /// Longer gaps provide no evidence of a continuous turn, and a lone spike is ignored.
+    static func hasSustainedTurn(_ frames: some Sequence<PoseFrame>) -> Bool {
+        var firstOffSide: TimeInterval?
+        var previousOffSide: TimeInterval?
+        for frame in frames {
+            guard let deviation = frame.profileDeviationDegrees else {
+                continue
+            }
+            guard deviation > maximumSideDeviationDegrees else {
+                firstOffSide = nil
+                previousOffSide = nil
+                continue
+            }
+            if let previousOffSide, frame.time - previousOffSide <= 0.6 {
+                if let firstOffSide, frame.time - firstOffSide >= 0.25 {
+                    return true
+                }
+            } else {
+                firstOffSide = frame.time
+            }
+            previousOffSide = frame.time
+        }
+        return false
+    }
+
     static func assess(_ frames: [PoseFrame], expected: ExpectedView) -> Verdict {
         let estimates = frames.filter { $0.profileDeviationDegrees != nil }
         let deviations = estimates.compactMap(\.profileDeviationDegrees)
