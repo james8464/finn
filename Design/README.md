@@ -27,8 +27,8 @@ The whole app is dark-only, whatever the system appearance. The look is calm and
 
 ### Using pink
 
-- Never use `#FF2D92` at 100% on a big button or a large surface. At full strength it is for lines: underlines, outlines, card edges, chart lines.
-- A filled pink surface is translucent, 75% at most. Finn's next-workout card on Home and the next workout on the Workout tab share one surface: `#FF2D92` from 55% to 30%, a 1.5-point full-strength edge, a soft glow and white text. Try Finn does not follow this rule yet: its fill goes from 80% to 50%, with a 2-point edge and a stronger glow.
+- At 100%, `#FF2D92` is for lines up to 2 points (underlines, outlines, card edges, chart lines) and small marks up to 8 points on their shorter side.
+- Any larger pink surface, button included, is 75% opacity or less. Finn's next-workout card on Home and the next workout on the Workout tab share one surface: `#FF2D92` from 55% to 30%, a 1.5-point full-strength edge, a soft glow and white text. Try Finn does not follow this rule yet: its fill goes from 80% to 50%, with a 2-point edge and a stronger glow.
 - `#F15FA1` is never a fill: lines and text only.
 - The outline that groups the Finn card and Last workout is 1 point of `#FF2D92` at 40%.
 - One exception, for legibility: with Reduce Transparency or Increase Contrast the Finn cards become solid `#FF2D92` with black text.

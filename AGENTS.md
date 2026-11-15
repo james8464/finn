@@ -23,7 +23,7 @@ Code and tests first, then [README.md](README.md) (current status: update it whe
 ## Interface
 - Follow [the brand system](Design/README.md) for colour, type and voice. Read it before changing how a screen looks; if a screen and the brand system disagree, the brand system wins.
 - Dark-only, whatever the system appearance. Do not add or test a light mode.
-- Brand pink is exact sRGB `#FF2D92`. At 100% it is for lines (2 pt max) and small marks (8 pt max on the shorter side) only. Any larger pink surface, button included, is 75% opacity or less. Do not add a new pink.
+- Brand pink is exact sRGB `#FF2D92`. At 100% it is for lines (2 pt max) and small marks (8 pt max on the shorter side) only. Any larger pink surface, button included, is 75% opacity or less; the one exception is the solid fallback for Reduce Transparency and Increase Contrast in the brand system. Do not add a new pink.
 - Native navigation and controls, and system text styles.
 - Every screen works with Reduce Transparency and Increase Contrast.
 - Apple design questions: the Apple design skill or [the local HIG index](docs/design/apple-hig-agent-reference.md), then Apple's own page.
@@ -39,16 +39,24 @@ Test in English and French only, at the default text size. Never write or run te
 
 ## Commands, fastest first
 - Logic tests, no simulator: `zsh tools/test_backend.sh`. About 20 seconds: 260 tests, rebuilt from scratch each run. CI runs it in the `replay` job.
-- One test class on a simulator (the full UI suite takes ~45 min; CI runs it on every pull request):
+- One test class on a simulator, one run at a time (about 2 min; leave the full UI suite, ~45 min, to CI, which runs it on every pull request):
   ```bash
-  xcodebuild test -project Finn/Finn.xcodeproj -scheme Finn -destination 'platform=iOS Simulator,name=iPhone 18 Pro' -only-testing:FinnUITests/DashboardUITests CODE_SIGNING_ALLOWED=NO
+  xcodebuild test -quiet -project Finn/Finn.xcodeproj -scheme Finn -destination 'platform=iOS Simulator,name=iPhone 18 Pro' -only-testing:FinnUITests/DashboardUITests CODE_SIGNING_ALLOWED=NO
   ```
-- Debug launch arguments for checking a screen: `-finn-ui-demo` (labelled sample data, throwaway storage), `-finn-ui-onboarding`, `-finn-ui-paywall`, `-finn-ui-demo-purchase` (stands for a purchase).
-- Formatting settings are in `.swiftformat`; run `swiftformat --lint Finn --config .swiftformat` when it is installed. Style: [code style](docs/development/code-style.md).
+- Check a screen: build, install, open the screen with launch arguments, wait about 10 seconds (a black screenshot means the app is still starting), then take a screenshot.
+  ```bash
+  xcodebuild build -quiet -project Finn/Finn.xcodeproj -scheme Finn -destination 'platform=iOS Simulator,name=iPhone 18 Pro' -derivedDataPath .build/DerivedData CODE_SIGNING_ALLOWED=NO
+  xcrun simctl bootstatus 'iPhone 18 Pro' -b
+  xcrun simctl install 'iPhone 18 Pro' .build/DerivedData/Build/Products/Debug-iphonesimulator/Finn.app
+  xcrun simctl launch --terminate-running-process 'iPhone 18 Pro' ai.mwm.build.challenge.team.08 -finn-ui-demo -finn-open coach -AppleLanguages '(fr)' -AppleLocale fr_FR
+  xcrun simctl io 'iPhone 18 Pro' screenshot /tmp/finn-coach-fr.png
+  ```
+  Leave out `-AppleLanguages` and `-AppleLocale` for English. `-finn-open` takes `coach`, `progress`, `workout`, `history`, `options`, `privacy`, `awards`, `health` or `camera-primer`. Other launch arguments: `-finn-ui-demo` (labelled sample data, throwaway storage), `-finn-ui-onboarding`, `-finn-ui-paywall`, `-finn-ui-demo-purchase` (stands for a purchase).
+- Style: [code style](docs/development/code-style.md). Formatting settings are in `.swiftformat`, but SwiftFormat isn't installed: don't reformat code you didn't change.
 
 ## Done means
 1. The simulator tests for what you touched pass.
-2. Changed screens checked in the simulator in English and French.
+2. Changed screens checked in the simulator in English and French (see "Check a screen").
 3. New strings have English and French.
 4. README updated if user-visible behaviour changed.
 5. Work on a branch from the first edit. Nobody pushes to `main`: changes reach it only through a pull request.
