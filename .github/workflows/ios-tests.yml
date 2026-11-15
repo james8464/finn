@@ -95,6 +95,9 @@ jobs:
             -collect-test-diagnostics never \
             -only-testing:FinnUITests/DashboardUITests/testProductionLaunchRendersAllTabsAndDestinations \
             ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO
+      - name: Test analysis and Coach logic without a simulator
+        if: ${{ !cancelled() && matrix.suite == 'replay' }}
+        run: zsh tools/test_backend.sh
       - name: Replay generated workout videos through Vision
         timeout-minutes: 30
         if: ${{ !cancelled() && matrix.suite == 'replay' }}

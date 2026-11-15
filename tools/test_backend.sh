@@ -36,9 +36,9 @@ sources += ["Finn/Finn/Workout/" + name + ".swift" for name in [
     "FormTrend", "SkeletonGeometry", "FinnPreferences", "ModelGenerationGate", "ComparisonNarrator"
 ]]
 sources += ["Finn/Finn/Coach/" + name + ".swift" for name in [
-    "CoachContext", "CoachEngine", "CoachConversation", "ClaudeDemoEngine"
+    "CoachContext", "CoachEngine", "CoachConversation", "CoachTranscriptStore", "CoachTimeline", "CoachMemory", "ClaudeDemoEngine"
 ]]
-sources += ["Finn/Finn/Onboarding/OnboardingProfile.swift"]
+sources += ["Finn/Finn/Onboarding/" + name + ".swift" for name in ["OnboardingProfile", "Coach"]]
 for relative in sources:
     source = root / relative
     (source_folder / source.name).symlink_to(source)
