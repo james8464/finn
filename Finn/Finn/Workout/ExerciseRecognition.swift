@@ -60,8 +60,13 @@ nonisolated enum ExerciseRecognizer {
             starts = (0 ..< maximumWindows).map { starts[Int((Double($0) * step).rounded())] }
         }
 
-        let predictions = starts.compactMap {
-            try? classifier.classify(window: Array(poses[$0 ..< ($0 + length)]))
+        let predictions = starts.compactMap { start -> ClassifierPrediction? in
+            let window = poses[start ..< (start + length)]
+            let observed = window.count { !$0.allSatisfy { $0 == 0 } }
+            guard observed * 5 >= length * 4 else {
+                return nil
+            }
+            return try? classifier.classify(window: Array(window))
         }
         return decide(predictions)
     }

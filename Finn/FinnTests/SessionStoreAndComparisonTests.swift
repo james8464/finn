@@ -3,6 +3,16 @@ import Testing
 @testable import Finn
 
 struct SessionStoreAndComparisonTests {
+    @Test func offAngleRangesAreNotComparedAfterReloading() throws {
+        let session = UUID()
+        let side = set(sessionID: session, range: 0.4)
+        let offAngle = set(sessionID: session, range: 0.3, rangeComparisonSupported: false)
+        let restored = try JSONDecoder().decode(SetSummary.self, from: JSONEncoder().encode(offAngle))
+        #expect(restored.rangeComparisonSupported == false)
+        #expect(SetComparison.compare(side, restored) == nil)
+        #expect(SetComparison.compare(restored, side) == nil)
+    }
+
     @Test func invalidMeasurementsCannotReplaceGoodHistory() throws {
         let url = temporaryURL()
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
@@ -289,7 +299,8 @@ struct SessionStoreAndComparisonTests {
         side: BodySide = .left,
         view: CameraView = .side,
         rubric: String = SquatRubric.version,
-        exercise: ExerciseKind = .bodyweightSquat
+        exercise: ExerciseKind = .bodyweightSquat,
+        rangeComparisonSupported: Bool? = nil
     ) -> SetSummary {
         let reps = (1 ... 6).map { number in
             RepMetric(
@@ -308,7 +319,8 @@ struct SessionStoreAndComparisonTests {
             cue: nil,
             cueResponse: .unanswered,
             exercise: exercise,
-            cameraView: view
+            cameraView: view,
+            rangeComparisonSupported: rangeComparisonSupported
         )
     }
 }

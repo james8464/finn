@@ -3,6 +3,41 @@ import Testing
 @testable import Finn
 
 struct PoseIntegrityTests {
+    @Test func projectedTorsoMustBelongToTheTrackedAthlete() {
+        let projection: [BodyJoint: SIMD2<Double>] = [
+            .leftShoulder: SIMD2(0.40, 0.30), .rightShoulder: SIMD2(0.46, 0.30),
+            .leftHip: SIMD2(0.42, 0.51), .rightHip: SIMD2(0.48, 0.51),
+        ]
+        func joints(shift: Double) -> [BodyJoint: JointPoint] {
+            projection.mapValues { JointPoint(x: $0.x + shift, y: $0.y, confidence: 0.95) }
+        }
+        let tracked = joints(shift: 0.01)
+        #expect(ViewCheck.matchesTrackedTorso(projection, athlete: tracked, bystanders: [joints(shift: 0.09)], aspectRatio: 1))
+        #expect(!ViewCheck.matchesTrackedTorso(projection, athlete: joints(shift: 0.09), bystanders: [tracked], aspectRatio: 1))
+        #expect(!ViewCheck.matchesTrackedTorso(projection, athlete: tracked, bystanders: [joints(shift: 0.012)], aspectRatio: 1))
+        let distant = joints(shift: 0.20).filter { $0.key == .leftHip }
+        let overlapping = tracked.filter { $0.key == .leftHip }
+        #expect(ViewCheck.matchesTrackedTorso(projection, athlete: tracked, bystanders: [distant], aspectRatio: 1))
+        #expect(!ViewCheck.matchesTrackedTorso(projection, athlete: tracked, bystanders: [overlapping], aspectRatio: 1))
+        #expect(!ViewCheck.matchesTrackedTorso(projection.filter { $0.key == .leftHip }, athlete: tracked,
+                                              bystanders: [joints(shift: 0.09)], aspectRatio: 1))
+    }
+
+    @Test func aSustainedTurnCannotBeHiddenByTheSetsMedianAngle() {
+        func frames(_ deviations: [Double?]) -> [PoseFrame] {
+            deviations.enumerated().map {
+                PoseFrame(time: Double($0.offset) * 0.27, subjectCount: 1, joints: [:], profileDeviationDegrees: $0.element)
+            }
+        }
+        let turned = frames([5, 7, 58, 62, 6, 5, 7])
+        #expect(ViewCheck.assess(turned, expected: .side) == .matches(medianDeviation: 7, estimates: 7))
+        #expect(ViewCheck.hasSustainedTurn(turned))
+        let rep = RepMetric(number: 1, startTime: 1.0, endTime: 1.6, relativeRange: 0.4)
+        #expect(!ViewCheck.hasSustainedTurn(during: [rep], in: turned))
+        #expect(!ViewCheck.hasSustainedTurn(frames([5, 7, 60, 6, 5])))
+        #expect(!ViewCheck.hasSustainedTurn(frames([5, 59, nil, nil, 62, 6, 7])))
+    }
+
     @Test(arguments: [Double.nan, .infinity, -.infinity, -0.01, 1.01])
     func invalidCoordinatesAreMissingEvidence(value: Double) {
         let frame = PoseFrame(time: 0, subjectCount: 1, joints: [

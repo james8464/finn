@@ -733,6 +733,7 @@ nonisolated enum FormChecks {
             return true
         }
         return median(estimates) <= ViewCheck.maximumSideDeviationDegrees
+            && !ViewCheck.hasSustainedTurn(frames)
     }
 
     /// The thigh's length over the set (its 90th percentile, the length seen standing).

@@ -23,6 +23,7 @@ nonisolated final class PoseFrameAnalyzer {
     /// joints the latest silhouette check found off the person, kept out of the two frames until the
     /// next check. Only refuted joints are carried: a joint the check never saw is not removed.
     private var lastRefutedJoints: Set<BodyJoint> = []
+    private var hadAthlete = false
 
     /// keep following the current athlete until `releaseAthlete()`; called when a set starts
     func lockAthlete() {
@@ -33,6 +34,7 @@ nonisolated final class PoseFrameAnalyzer {
     func releaseAthlete() {
         tracker.reset()
         lastRefutedJoints = []
+        hadAthlete = false
     }
 
     func analyse(_ pixelBuffer: CVPixelBuffer, time: TimeInterval, estimateAngle: Bool) -> PoseFrame {
@@ -42,10 +44,11 @@ nonisolated final class PoseFrameAnalyzer {
         let request = VNDetectHumanBodyPoseRequest()
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
         analysedFrames += 1
-        let verifySilhouette = analysedFrames % Self.silhouetteInterval == 0
         do {
             try handler.perform([request])
         } catch {
+            hadAthlete = false
+            lastRefutedJoints = []
             return PoseFrame(
                 time: time,
                 subjectCount: 0,
@@ -57,15 +60,14 @@ nonisolated final class PoseFrameAnalyzer {
 
         let observations = request.results ?? []
         let people = observations.map(Self.joints(of:))
+        let revision = tracker.trackingRevision
         let athlete = tracker.select(people, aspectRatio: aspectRatio, time: time)
+        let verifySilhouette = !hadAthlete || revision != tracker.trackingRevision
+            || analysedFrames % Self.silhouetteInterval == 0
+        hadAthlete = athlete != nil
         var joints: [BodyJoint: JointPoint] = [:]
         var keypoints: [Float]?
         if let athlete {
-            // the same 18-point layout Create ML extracts from training clips
-            if let array = try? observations[athlete].keypointsMultiArray() {
-                let values = MLShapedArray<Float>(converting: array).scalars
-                keypoints = values.count == ExerciseRecognizer.keypointCount ? values : nil
-            }
             joints = people[athlete]
             if verifySilhouette {
                 let mask = Self.personMask(Self.segmentation(of: handler))
@@ -82,14 +84,22 @@ nonisolated final class PoseFrameAnalyzer {
                 // framing can alternate between "visible" and "move the phone" over covered feet
                 joints = joints.filter { !lastRefutedJoints.contains($0.key) }
             }
-        } else if verifySilhouette {
+            // The classifier uses Vision's original tensor. Skip it when it contains joints
+            // explicitly rejected by the mask rather than letting it see an inferred movement.
+            if lastRefutedJoints.isEmpty, let array = try? observations[athlete].keypointsMultiArray() {
+                let values = MLShapedArray<Float>(converting: array).scalars
+                keypoints = values.count == ExerciseRecognizer.keypointCount ? values : nil
+            }
+        } else {
             lastRefutedJoints = []
         }
+        let bystanders = people.indices.filter { $0 != athlete }.map { people[$0] }
         var profileDeviation: Double?
         if estimateAngle, athlete != nil, analysedFrames % Self.cameraAngleInterval == 0 {
-            profileDeviation = cameraAngle(in: pixelBuffer, athlete: joints)
+            profileDeviation = cameraAngle(
+                in: pixelBuffer, athlete: joints, bystanders: bystanders, aspectRatio: aspectRatio
+            )
         }
-        let bystanders = people.indices.filter { $0 != athlete }.map { people[$0] }.filter { !$0.isEmpty }
         return PoseFrame(
             time: time,
             subjectCount: observations.count,
@@ -98,7 +108,7 @@ nonisolated final class PoseFrameAnalyzer {
             keypoints: keypoints,
             profileDeviationDegrees: profileDeviation,
             athleteTracking: athlete == nil ? .hidden : .tracked,
-            bystanders: bystanders
+            bystanders: bystanders.filter { !$0.isEmpty }
         )
     }
 
@@ -177,7 +187,12 @@ nonisolated final class PoseFrameAnalyzer {
     /// `cameraRelativePosition` only shifts them by the root's position without turning them, so
     /// the body always looked square to the camera: every set read as filmed from the front
     /// (74 to 89° on 50 side-view videos)
-    private func cameraAngle(in pixelBuffer: CVPixelBuffer, athlete: [BodyJoint: JointPoint]) -> Double? {
+    private func cameraAngle(
+        in pixelBuffer: CVPixelBuffer,
+        athlete: [BodyJoint: JointPoint],
+        bystanders: [[BodyJoint: JointPoint]],
+        aspectRatio: Double
+    ) -> Double? {
         guard
             (try? sequenceHandler.perform([poseRequest3D], on: pixelBuffer, orientation: .up)) != nil,
             let body = poseRequest3D.results?.first,
@@ -198,6 +213,22 @@ nonisolated final class PoseFrameAnalyzer {
             (minX - margin ... maxX + margin).contains(rootX),
             (minY - margin ... maxY + margin).contains(rootY) else {
             return nil
+        }
+        if !bystanders.isEmpty {
+            let torso: [(BodyJoint, VNHumanBodyPose3DObservation.JointName)] = [
+                (.leftShoulder, .leftShoulder), (.rightShoulder, .rightShoulder),
+                (.leftHip, .leftHip), (.rightHip, .rightHip),
+            ]
+            var projection: [BodyJoint: SIMD2<Double>] = [:]
+            for (joint, name) in torso {
+                if let point = try? body.pointInImage(name) {
+                    projection[joint] = SIMD2(Double(point.location.x), 1 - Double(point.location.y))
+                }
+            }
+            guard ViewCheck.matchesTrackedTorso(projection, athlete: athlete,
+                                              bystanders: bystanders, aspectRatio: aspectRatio) else {
+                return nil
+            }
         }
         let toCamera = body.cameraOriginMatrix
         func position(_ joint: VNHumanBodyPose3DObservation.JointName) -> SIMD3<Double>? {

@@ -315,12 +315,13 @@ nonisolated struct LiveSetMonitor {
             analysisAccepted = true
             midMovement = diagnostics?.unfinished ?? false
             reps = analysis.reps
-            rangeAdviceFromSide = diagnostics?.partialVisibility == nil && diagnostics?
+            let canCheckForm = diagnostics?.partialVisibility == nil && diagnostics?
                 .countedFromShoulders != true
                 && diagnostics?.countedFromHips != true
                 && Self.seenFromTheSide(set)
+            rangeAdviceFromSide = canCheckForm && !ViewCheck.hasSustainedTurn(during: reps, in: set)
             if reps.count > highestSaid {
-                latestReview = rangeAdviceFromSide
+                latestReview = canCheckForm
                     ? FormChecks.review(analysis, frames: set, definition: definition)
                     : FormReview()
             }
@@ -456,10 +457,7 @@ nonisolated extension LiveSetMonitor {
     /// same checks as the result, on the set so far, and silent for a partly visible set, a push-up
     /// counted from the shoulders, or a person filmed at an angle.
     fileprivate func formFault(onRep number: Int) -> FormCheck? {
-        guard rangeAdviceFromSide else {
-            return nil
-        }
-        return latestReview.findings(through: number, exercise: definition.kind).first { finding in
+        latestReview.findings(through: number, exercise: definition.kind).first { finding in
             finding.reps.contains(number) && number - (lastFormCue[finding.check] ?? Int.min / 2) >= Self
                 .cueSpacing
         }?.check
