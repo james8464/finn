@@ -6,7 +6,7 @@ The editable iPhone and Watch app icon is [Finn/Finn/AppIcon.icon](Finn/Finn/App
 
 | Status | Details |
 |--------|---------|
-| **Date** | 16 October 2026 |
+| **Date** | Features as of 14 November 2026; device evidence from 16 October 2026 |
 | **Coverage** | Simulator + replay |
 | **Device testing** | Development-signed build launched on iPhone 16 Pro Max; live camera opened after permission |
 | **Gaps** | No real-person set or independent expert review of coaching accuracy |
@@ -48,11 +48,13 @@ History stores local summaries, compares compatible sets, identifies a recurring
 
 ### Interface and Coach
 
-The Home, Progress, Coach and Workout tabs keep their navigation state. Home shows recent sessions, measured progress and awards. Progress combines posture guidance with saved strength history and a separately labelled projection. Posture shows looping illustrated exercise movements, short cues and comparisons with eligible saved measurements. The illustrations are guidance, not validated video of a person. System text and adaptive layouts support larger text. See the [design research](docs/architecture/specs/2026-10-15-native-ui-design.md) and [HIG review](docs/design/hig-ui-coverage.md).
+The Home, Progress, Coach and Workout tabs keep their navigation state. Home shows recent sessions, measured progress and awards. Progress combines posture guidance with saved strength history and a separately labelled projection. Posture shows looping illustrated exercise movements, short cues and comparisons with eligible saved measurements. The illustrations are guidance, not validated video of a person. The app is dark-only, whatever the system appearance. System text and adaptive layouts support larger text. See the [design research](docs/architecture/specs/2026-10-15-native-ui-design.md) and [HIG review](docs/design/hig-ui-coverage.md).
 
 First launch asks for a goal, experience level, favourite exercises, and spoken feedback preference; these choices stay on the iPhone. Awards mark measured milestones, including a set with no pattern flagged by Finn's current checks; they do not certify perfect form.
 
-Coach uses Apple Intelligence, when available, to select up to two relevant saved sets. The selected goal and level can guide that selection; Finn writes the displayed response from recorded counts and observations. Invalid model output and unavailable models use fixed text. A Claude demo is Debug-only. Source information is available beside the composer. Onboarding includes a StoreKit paywall with a local test catalog; App Store purchase behavior still needs production verification.
+Coach is a chat with Finn on the on-device Apple Intelligence model, streamed word by word in the person's language. It knows the onboarding answers and sees saved sets only when a question is about training; it must quote their labels and numbers exactly, never invent results, and give no medical advice. The thread is kept between launches and cleared by Delete all data. When the model is unavailable, Finn says why and lists the saved records; when it declines, Finn answers with fixed text. Private Cloud Compute is not used (the app lacks the entitlement). A Claude demo engine exists in Debug builds only.
+
+Onboarding ends with the Finn Coach+ offer (weekly or annual subscription, StoreKit, local test catalog in `Finn/TestConfig.storekit`). Without Finn Coach+, one free workout is allowed every 14 days ([`WorkoutAccess.swift`](Finn/Finn/Workout/WorkoutAccess.swift)); demo input and tests are not limited. App Store purchase behavior still needs production verification.
 
 ### Apple Watch
 
@@ -77,7 +79,7 @@ The embedded extension shows the last measured set and can open the camera on it
 | Bundle ID | `ai.mwm.build.challenge.team.08` |
 | Apple Developer team in the project | `2FN6Y5NHS5` |
 | Analytics SDK | None in the checked-in project |
-| StoreKit catalog and paywall | Onboarding flow and local test catalog implemented; production verification pending |
+| StoreKit catalog and paywall | Finn Coach+ offer, free-workout limit and local test catalog implemented; production verification pending |
 | Privacy draft | [docs/release/app-privacy-answers.md](docs/release/app-privacy-answers.md) — review against the final signed archive before publication |
 
 If the team adopts MWM signing or an SDK, update the code and privacy documents before submission.
@@ -86,7 +88,7 @@ If the team adopts MWM signing or an SDK, update the code and privacy documents 
 
 ## Evidence and Limits
 
-Automated checks cover Swift logic, simulator flows, and generated video replays; the [16 October cleanup checks](docs/maintenance/project-cleanup-2026-10-16.md) record the latest 562 unit-test passes and focused UI checks. The [15 October report](docs/validation/automated-checks-2026-10-15.md) remains historical evidence for that build. A small public-video spot check has no independent rep or cue annotation. No consenting, varied-person test set or qualified trainer review has established:
+Automated checks cover Swift logic, simulator flows, and generated video replays; the [16 October cleanup checks](docs/maintenance/project-cleanup-2026-10-16.md) recorded 562 unit-test passes and focused UI checks at that date (the suite has since grown). The [15 October report](docs/validation/automated-checks-2026-10-15.md) remains historical evidence for that build. A small public-video spot check has no independent rep or cue annotation. No consenting, varied-person test set or qualified trainer review has established:
 
 - Rep-count accuracy
 - Cue quality
@@ -107,19 +109,13 @@ The app checks visibility, viewpoint, and which person it follows before giving 
 
 ## Product Direction
 
-The next gate is a dependable iPhone set-to-set loop on physical devices, with expert-reviewed cues. Apple Watch timing and haptics can then be tested against camera-only analysis. Widgets and Live Activities need device and provisioning checks. AirPods head motion, iPhone Duo placement, Apple TV, running analysis, accounts, subscriptions, and a paid model need separate evidence and design.
+The next gate is a dependable iPhone set-to-set loop on physical devices, with expert-reviewed cues. Apple Watch timing and haptics can then be tested against camera-only analysis. Widgets and Live Activities need device and provisioning checks. AirPods head motion, iPhone Duo placement, Apple TV, running analysis, accounts, and a server-side model need separate evidence and design.
 
 ---
 
 ## For Contributors and Agents
 
-| Rule | Description |
-|------|-------------|
-| **Keep status current** | Update this README's build status when behavior changes. Flag discrepancies with older plans. |
-| **Facts from rules** | Derive coaching facts from measured, versioned rules. The Coach model may select saved sets, but its prose is never shown. Models must not decide whether movement is safe. |
-| **Permissions in context** | Ask for camera and Health permissions in context. Keep workout video local and unsaved. Changing data handling requires a deliberate product and privacy-policy update. |
-| **Label demo data** | Keep public copy aligned with the signed build and its validation. |
-| **Apple interface work** | Use the [local HIG reference](docs/design/apple-hig-agent-reference.md) and its official source links. |
+Rules, commands and the definition of done are in [AGENTS.md](AGENTS.md). Update this README's status when behavior changes.
 
 ---
 

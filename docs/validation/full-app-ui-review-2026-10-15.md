@@ -76,7 +76,7 @@ The [design screenshots](../design/screenshots/finn) and [release candidates](..
 
 Eight screenshot blobs and their image references were replaced in `Design/Finn — Brand Theme.fig`, preserving the editable document structure. ZIP integrity and every image hash/reference were validated. The refreshed export was also copied to `~/Downloads/Finn — Brand Theme.fig`. Its cached overview thumbnail is unchanged; the editable screenshot contents are updated.
 
-Inspected captures include [Workout](../design/screenshots/finn/06-choix-exercice-pompes.png), [Options](../design/screenshots/finn/12-options.png), [Privacy](../design/screenshots/finn/13-confidentialite.png), [Coach](../design/screenshots/finn/review/coach-dark.png), and [largest-text Coach with keyboard](../design/screenshots/finn/review/coach-largest-text-keyboard.png).
+Inspected captures include [Workout](../release/screenshots/iphone-6.9-1320x2868-02-accueil-pompes.png), [Options](../release/screenshots/iphone-6.9-1320x2868-05-options.png), [Privacy](../release/screenshots/iphone-6.9-1320x2868-06-confidentialite.png), [Coach](../design/screenshots/finn/review/coach-dark.png), and [largest-text Coach with keyboard](../design/screenshots/finn/review/coach-largest-text-keyboard.png).
 
 Physical iPhone installation was attempted with the existing MWM team and bundle identifiers. Xcode rejected signing because the connected iPhone is not included in the development profiles and this account cannot register devices. Real-device camera, Apple Health authorization/write, headphones and Apple Intelligence/PCC service behavior therefore still need device verification by an authorized team member. Simulator and fixture tests cannot certify those external services or App Store acceptance.
 

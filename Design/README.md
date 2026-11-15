@@ -1,4 +1,4 @@
-# Finn brand theme
+# Finn brand system
 
 - [Live Figma brand guide](https://www.figma.com/design/Y9asB4rM1J0tJcbr7Wim2q)
 - [Production app icon and flat artwork](../Finn/BrandArtwork/README.md)
@@ -12,21 +12,31 @@ The live Figma guide covers the broader identity. The current production icon an
 
 ## Colour
 
-Home uses a minimalist charcoal background, borderless cards and the exact Figma pink `#FF2D92` in place of lime. The source is [`brand/pink/selection`, node 68:12](https://www.figma.com/design/Y9asB4rM1J0tJcbr7Wim2q?node-id=68-12), verified from the live file on 15 October 2026. Utility controls keep their semantic colours. See [interface rules](../docs/design/home-dashboard.md).
+The whole app is dark-only, whatever the system appearance. The look is calm and restrained, like the brand cover: charcoal, white text, and pink as a thin accent rather than a surface.
 
 | Token | Hex | Role |
 | --- | --- | --- |
-| Black | `#000000` | Light appearance labels and primary action |
-| White | `#FFFFFF` | Light canvas; dark appearance labels and primary action |
-| Supporting | `#474747` | Reference for small supporting text in Light Mode |
-| Grouped | `#F2F2F7` | Reference for optional grouped surfaces in Light Mode |
-| Separator | `#C6C6C8` | Reference for quiet divisions in Light Mode |
-| Pink accent | `#FF2D92` | Home selection and highlights |
+| Charcoal | `#202020` | Brand cover and welcome screen background |
+| Home background | `#090909` | Behind the Home cards |
+| White | `#FFFFFF` | Text; supporting text is white at 70% |
+| Pink | `#FF2D92` | The brand accent ([Figma `brand/pink/selection`, node 68:12](https://www.figma.com/design/Y9asB4rM1J0tJcbr7Wim2q?node-id=68-12)). Exact sRGB value |
+| Soft pink | `#F15FA1` | Lines and text only |
+| Light pink | `#FF78B5` | Links and small highlights on supporting screens |
 | Icon ground | `#24282D` | App icon background |
+| Destructive | `#FF453A` | Deletion only |
 
-The iPhone interface uses semantic iOS colours (`systemBackground`, primary labels, system separators) and a monochrome adaptive action. Supporting copy uses 72% of the adaptive primary label because the default secondary gray missed a small-text contrast audit in Light Mode. The values above are Figma references, not fixed overrides for system colours. The system resolves Light, Dark, and increased contrast appearances. Reserve colour for meaningful platform states such as a destructive action; never use colour alone to communicate a form judgement. The camera view should leave the person and their movement clearly visible.
+### Using pink
 
-The capture **Stop set** control is white over the camera in both appearances; red would suggest that Finn is recording video. History uses contrast-tested destructive red (`#C62828` in Light Mode, `#FF453A` in Dark Mode) only for deletion. This is a functional state, not a brand accent.
+- Never use `#FF2D92` at 100% on a big button or a large surface. At full strength it is for lines: underlines, outlines, card edges, chart lines.
+- A filled pink surface is translucent, 75% at most. Finn's next-workout card on Home and the next workout on the Workout tab share one surface: `#FF2D92` from 55% to 30%, a 1.5-point full-strength edge, a soft glow and white text. Try Finn does not follow this rule yet: its fill goes from 80% to 50%, with a 2-point edge and a stronger glow.
+- `#F15FA1` is never a fill: lines and text only.
+- The outline that groups the Finn card and Last workout is 1 point of `#FF2D92` at 40%.
+- One exception, for legibility: with Reduce Transparency or Increase Contrast the Finn cards become solid `#FF2D92` with black text.
+- Do not add a new pink. Use the tokens above (`DashboardStyle.accent` in code).
+
+Supporting screens use the system's dark grouped surfaces and native controls. Reserve other colours for meaningful states such as a destructive action; never use colour alone to communicate a form judgement. The camera view should leave the person and their movement clearly visible. See [what each screen contains](../docs/design/home-dashboard.md).
+
+The capture **Stop set** control is white over the camera; red would suggest that Finn is recording video. History uses destructive red only for deletion. This is a functional state, not a brand accent.
 
 Use SF Symbols for interface actions where appropriate. Keep the app icon custom; Apple's [SF Symbols guidance](https://developer.apple.com/design/human-interface-guidelines/sf-symbols) prohibits using the symbols, or confusingly similar images, in app icons and logos.
 

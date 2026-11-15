@@ -1,5 +1,7 @@
 # Finn+ : proposition de modèle freemium
 
+> **État au 14 novembre 2026 :** ce document est la proposition d'origine, pas ce qui est codé. L'app propose désormais **Finn Coach+** (abonnement hebdomadaire ou annuel, à la fin de l'onboarding) et, sans abonnement, **une séance gratuite tous les 14 jours** ([`WorkoutAccess.swift`](../../Finn/Finn/Workout/WorkoutAccess.swift), catalogue de test [`TestConfig.storekit`](../../Finn/TestConfig.storekit)). Le [README](../../README.md) fait foi.
+
 Rédigé le 15 octobre 2026 pour le pitch du 16 octobre (Build Challenge Apple × MWM). Proposition seulement : aucun achat intégré n'est codé, et la version 1.0 soumise ce soir reste gratuite (`docs/release/app-store-fiche.md`). Ce que l'app fait aujourd'hui est décrit dans `README.md`, « Current state » ; ce document ne le change pas.
 
 ## Le modèle en cinq lignes
