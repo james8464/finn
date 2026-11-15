@@ -52,8 +52,8 @@ struct LivePersonalisedCoachTests {
         #expect(unavailable.preparedLanguages.isEmpty)
         let available = StubLiveCoachSelector(available: true)
         let coach = LivePersonalisedCoach(selector: available)
-        coach.prepare(language: .spanish)
-        #expect(available.preparedLanguages == [.spanish])
+        coach.prepare(language: .french)
+        #expect(available.preparedLanguages == [.french])
         coach.reset()
         #expect(available.resetCount == 1)
     }
@@ -101,6 +101,21 @@ struct LivePersonalisedCoachTests {
         #expect(lines.count == 1)
     }
 
+    @Test func countEncouragementLeavesTheModelAvailableForTechnique() async {
+        let engine = StubLiveCoachSelector(available: true)
+        let coach = LivePersonalisedCoach(selector: engine, now: { 10 })
+        var lines: [String] = []
+        coach.update(event: .repCounted(5), reps: reps, definition: definition,
+                     canCompareRange: true, context: .init(), language: .english) { lines.append($0) }
+        coach.update(event: .formFault(.squatDepth, rep: 5), reps: reps, definition: definition,
+                     canCompareRange: true, context: .init(), language: .english) { lines.append($0) }
+        await waitForRequest(engine)
+        #expect(lines.count == 2)
+        #expect(engine.requestedChoices.contains { $0.id == "action:squatDepth" })
+        engine.finish(index: 0)
+        coach.reset()
+    }
+
     @Test func modelThrottleNeverThrottlesTheLocalTechniqueCue() async {
         let engine = StubLiveCoachSelector(available: true)
         let coach = LivePersonalisedCoach(selector: engine, now: { 10 })
@@ -143,15 +158,12 @@ struct LivePersonalisedCoachTests {
     }
 
     @Test func historicalMessageUsesTheResolvedLanguage() {
-        for language in [CoachLanguage.french, .spanish] {
-            let choices = LiveCoachChoices.make(event: .formFault(.squatDepth, rep: 5), reps: reps,
-                                               definition: definition, canCompareRange: true,
-                                               context: .init(priorAcceptedChecks: [.squatDepth]),
-                                               language: language)
-            let history = choices.first { $0.id.hasPrefix("history:") }
-            #expect(history != nil)
-            #expect(history?.text.contains("earlier sets") == false)
-        }
+        let choices = LiveCoachChoices.make(event: .formFault(.squatDepth, rep: 5), reps: reps,
+                                           definition: definition, canCompareRange: true,
+                                           context: .init(priorAcceptedChecks: [.squatDepth]),
+                                           language: .french)
+        let history = choices.first { $0.id.hasPrefix("history:") }
+        #expect(history?.text.hasPrefix("Ce point apparaissait aussi") == true)
     }
 
     private func waitForRequest(_ engine: StubLiveCoachSelector) async {
@@ -167,6 +179,7 @@ struct LivePersonalisedCoachTests {
 private final class StubLiveCoachSelector: LiveCoachSelecting {
     let available: Bool
     private(set) var calls = 0
+    private(set) var requestedChoices: [LiveCoachChoice] = []
     private(set) var preparedLanguages: [CoachLanguage] = []
     private(set) var resetCount = 0
     private var continuation: CheckedContinuation<Int, Never>?
@@ -179,6 +192,7 @@ private final class StubLiveCoachSelector: LiveCoachSelecting {
     func select(from choices: [LiveCoachChoice], context: LiveCoachContext,
                 language: CoachLanguage) async throws -> Int {
         calls += 1
+        requestedChoices = choices
         return await withCheckedContinuation { continuation = $0 }
     }
 

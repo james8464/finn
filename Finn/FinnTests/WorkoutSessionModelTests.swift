@@ -285,6 +285,7 @@ struct WorkoutSessionModelTests {
             return
         }
         #expect(analysis.reps.count == 6)
+        #expect(model.frameCount == 0)
     }
 
     @Test func cameraClockRestartClearsPreviousSegmentCoachingAndCount() async throws {

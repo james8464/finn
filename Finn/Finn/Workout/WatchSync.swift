@@ -127,6 +127,10 @@ final class WatchSync {
         follow()
     }
 
+    deinit {
+        heartbeatTask?.cancel()
+    }
+
     /// The screen shown now, without a tap, for a watch that just opened Finn.
     var current: WatchState? {
         guard var state = lastSent else {
@@ -187,8 +191,15 @@ final class WatchSync {
         if next.stage == .capturing, heartbeatTask == nil {
             heartbeatTask = Task { [weak self] in
                 while !Task.isCancelled {
-                    try? await Task.sleep(for: .seconds(5))
-                    self?.heartbeat()
+                    do {
+                        try await Task.sleep(for: .seconds(5))
+                    } catch {
+                        return
+                    }
+                    guard let self else {
+                        return
+                    }
+                    self.heartbeat()
                 }
             }
         } else if next.stage != .capturing {

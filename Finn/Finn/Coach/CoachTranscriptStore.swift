@@ -14,6 +14,7 @@ final class CoachTranscriptStore {
     private let defaults: UserDefaults
     /// oldest first
     private(set) var turns: [CoachMessage]
+    private(set) var clearRevision = 0
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -32,6 +33,7 @@ final class CoachTranscriptStore {
     func clear() {
         turns = []
         defaults.removeObject(forKey: Self.key)
+        clearRevision += 1
     }
 
     /// the latest turns, without empty or repeated messages

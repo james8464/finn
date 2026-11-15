@@ -204,6 +204,23 @@ struct FormChecksTests {
         #expect(!cleanEvents.contains { if case .formFault = $0 { true } else { false } })
     }
 
+    @Test func aTechniqueCueDoesNotHideMeasuredPace() {
+        let frames = squats(thighAtBottom: 45, extraLean: 25).map { frame in
+            let elapsedInFastRep = min(2, max(0, frame.time - 8))
+            let time = frame.time - elapsedInFastRep * 0.4
+            return PoseFrame(time: time, subjectCount: frame.subjectCount, joints: frame.joints)
+        }
+        var monitor = LiveSetMonitor(definition: .squat)
+        let events = monitor.update(with: frames)
+        #expect(events.contains { event in
+            if case .formFault(_, rep: 5) = event {
+                return true
+            }
+            return false
+        })
+        #expect(monitor.sawFasterRep)
+    }
+
     @Test func formFaultIsRememberedForTheFrequentPattern() throws {
         let analysis = try measured(squats(thighAtBottom: 45, extraLean: 5), .squat)
         let review = FormChecks.review(

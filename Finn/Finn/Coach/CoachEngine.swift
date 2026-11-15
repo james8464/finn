@@ -1,10 +1,9 @@
 import Foundation
 import FoundationModels
-import os
 
 /// where an answer came from, shown discreetly under the conversation
 nonisolated enum CoachEngineKind: String, Codable, Equatable, Sendable {
-    /// Apple's server model on Private Cloud Compute, through Foundation Models (iOS 27)
+    /// Retained to decode transcripts from builds that used Private Cloud Compute.
     case privateCloudCompute
     /// the on-device Apple Intelligence model
     case onDevice
@@ -126,42 +125,6 @@ extension CoachEngine {
     }
 }
 
-/// reads why Foundation Models cannot run, once per check, and says what to do about it
-@MainActor
-enum CoachModelAvailability {
-    static let log = Logger(subsystem: "ai.mwm.build.challenge.team.08", category: "coach")
-
-    static func reason(for availability: SystemLanguageModel.Availability, engine: String) -> String? {
-        switch availability {
-        case .available:
-            return nil
-        case .unavailable(let reason):
-            log
-                .notice(
-                    "\(engine, privacy: .public) unavailable: \(String(describing: reason), privacy: .public)"
-                )
-            switch reason {
-            case .deviceNotEligible:
-                return String(
-                    localized: "This iPhone cannot run Apple Intelligence, so the coach answers from Finn's records only."
-                )
-            case .appleIntelligenceNotEnabled:
-                return String(
-                    localized: "Turn on Apple Intelligence in Settings > Apple Intelligence & Siri to chat with the coach."
-                )
-            case .modelNotReady:
-                return String(
-                    localized: "Apple Intelligence is still downloading its model. Until then the coach answers from Finn's records only."
-                )
-            @unknown default:
-                return String(
-                    localized: "No language model is available right now, so the coach answers from Finn's records only."
-                )
-            }
-        }
-    }
-}
-
 /// what one model turn produced
 nonisolated enum CoachTurnOutcome: Sendable {
     case text(String)
@@ -213,7 +176,13 @@ final class CoachResponder {
         history: [CoachMessage],
         onPartial: @escaping @MainActor (String) -> Void = { _ in }
     ) async -> CoachMessage {
-        guard !Task.isCancelled, let engine = selector.current() else {
+        guard !Task.isCancelled else {
+            return unavailableAnswer(to: question, context: context)
+        }
+        if let recap = CoachFallback.recordedRecap(to: question, context: context, language: language) {
+            return CoachMessage(role: .coach, text: recap, engine: .fallback)
+        }
+        guard let engine = selector.current() else {
             return unavailableAnswer(to: question, context: context)
         }
         let draft = CoachReplyDraft()
@@ -225,6 +194,9 @@ final class CoachResponder {
                     history: history,
                     language: language
                 ) { partial in
+                    guard !Task.isCancelled else {
+                        return
+                    }
                     draft.text = partial
                     onPartial(partial)
                 }
@@ -278,321 +250,5 @@ enum CoachModelErrors {
         default:
             return false
         }
-    }
-}
-
-/// one turn as the model reads it: the rules and what Finn knows about the person, the earlier
-/// messages as real turns, then the person's new message. A small model follows a conversation
-/// far better as turns than as quoted text, and reads the memory once instead of every message
-nonisolated struct CoachPrompt: Equatable, Sendable {
-    /// the rules, then the onboarding answers and the saved sets
-    let instructions: String
-    /// earlier messages, oldest first, alternating and starting with the person
-    let turns: [CoachMessage]
-    /// the message to answer now
-    let question: String
-
-    /// the same turn for a Foundation Models session
-    var transcript: Transcript {
-        var entries: [Transcript.Entry] = [.instructions(Transcript.Instructions(
-            segments: Self.segments(instructions),
-            toolDefinitions: []
-        ))]
-        for turn in turns {
-            let segments = Self.segments(turn.text)
-            entries.append(turn.role == .person
-                ? .prompt(Transcript.Prompt(segments: segments))
-                : .response(Transcript.Response(assetIDs: [], segments: segments)))
-        }
-        return Transcript(entries: entries)
-    }
-
-    private static func segments(_ text: String) -> [Transcript.Segment] {
-        [.text(Transcript.TextSegment(content: text))]
-    }
-}
-
-/// shared by the Foundation Models engines and the Claude demo. Every turn starts a fresh session
-/// from the saved state, so the model rereads the whole memory each time and a changed answer or a
-/// new set reaches the next reply
-@MainActor
-enum FoundationModelsCoachPrompt {
-    static let maximumQuestionCharacters = 2_000
-    /// the whole turn when the model's window is unknown: what fits the 8,192-token on-device window
-    nonisolated static let maximumPromptCharacters = 18_000
-    /// a dozen short answers; the limit only stops a pasted essay
-    static let profileCharacters = 1_500
-    static let setCharacters = 4_000
-    /// one earlier message: about the longest reply the model writes
-    static let messageCharacters = 1_500
-    static let maximumResponseTokens = 350
-    /// on the low side: chat text measured about 4 characters a token, dates and counts under 3
-    static let charactersPerToken = 2.5
-
-    static var options: GenerationOptions {
-        GenerationOptions(temperature: 0.7, maximumResponseTokens: maximumResponseTokens)
-    }
-
-    /// the characters a turn can use in a model's window, once the reply and a margin are counted
-    static func characterBudget(contextSize: Int) -> Int {
-        max(0, Int(Double(contextSize - maximumResponseTokens - 256) * charactersPerToken))
-    }
-
-    /// the app's rules alone: trusted text, never the person's data
-    static func instructions(language: CoachLanguage) -> String {
-        CoachInstructions.text(language: language)
-    }
-
-    /// the rules and the memory always; then as many of the latest messages as the rest of
-    /// `maximumCharacters` holds, so a long conversation forgets its oldest turns first
-    static func make(
-        question: String,
-        context: CoachContext,
-        history: [CoachMessage],
-        language: CoachLanguage,
-        maximumCharacters: Int = maximumPromptCharacters
-    ) -> CoachPrompt {
-        let previous = history.last { $0.role == .person }?.text ?? ""
-        let sets = max(setsNeeded(for: question), setsNeeded(for: previous))
-        let instructions = instructions(language: language) + "\n\n"
-            + memory(context: context, language: language, sets: sets)
-        let question = String(question.prefix(maximumQuestionCharacters))
-        return CoachPrompt(
-            instructions: instructions,
-            turns: turns(history, maximumCharacters: maximumCharacters - instructions.count - question.count),
-            question: question
-        )
-    }
-
-    /// what Finn knows: the onboarding answers, then the saved sets with the latest first. Set
-    /// labels are in the app's language, so a French reply says "Série 8" by itself.
-    /// The on-device model reads a list of sets poorly: with "Set 8" in view during small talk it
-    /// offered saved sets as workouts to do, and with several listed it often took the one before
-    /// for the last. So it sees no set for small talk, the latest alone for a question about the
-    /// last session, and the list only to compare sets or to look at a numbered one
-    static func memory(context: CoachContext, language: CoachLanguage, sets: SetsNeeded) -> String {
-        var sections: [String] = []
-        if let profile = context.profile, !profile.isEmpty {
-            sections.append("About the person, from their onboarding answers:\n" + profile.prefix(profileCharacters))
-        }
-        let heading = "Saved sets, recorded with the camera. Workouts you suggest in this chat are not saved sets.\n"
-        if context.isEmpty {
-            sections.append("Saved sets: no saved sets yet.")
-        } else {
-            switch sets {
-            case .none:
-                sections.append("Saved sets: they have recorded sets with Finn. The details come with questions about their training.")
-            case .latest:
-                sections.append(heading + context.memoryText(maximumCharacters: setCharacters, setWord: language.setWord, latestOnly: true))
-            case .all:
-                sections.append(heading + context.memoryText(maximumCharacters: setCharacters, setWord: language.setWord))
-            }
-        }
-        return sections.joined(separator: "\n\n")
-    }
-
-    /// how much of the saved sets a turn needs
-    nonisolated enum SetsNeeded: Int, Comparable, Sendable {
-        case none, latest, all
-
-        static func < (lhs: Self, rhs: Self) -> Bool {
-            lhs.rawValue < rhs.rawValue
-        }
-    }
-
-    /// what a message asks about their recorded training, in English, French or Spanish: a
-    /// comparison or a numbered set needs every set; the last session, reps, technique or what to
-    /// work on next needs the latest. It covers the suggested questions and the analysis card
-    nonisolated static func setsNeeded(for message: String) -> SetsNeeded {
-        let text = message.lowercased().folding(options: [.diacriticInsensitive], locale: nil)
-        let all = #"(\bsets?|serie)\s*#?\s*\d|\bsets\b|series|progres|improv|better|worse|compar|chang|cambi|"#
-            + #"evol|analy|bilan|mieux|mejor|peor|over time|au fil|trend"#
-        if text.range(of: all, options: .regularExpression) != nil {
-            return .all
-        }
-        let latest = #"\bset\b|serie|\brep|\blast\b|latest|dernier|derniere|ultim|record|enregistr|"#
-            + #"technique|tecnica|posture|postura|next time|prochaine fois|proxima vez"#
-        return text.range(of: latest, options: .regularExpression) != nil ? .latest : .none
-    }
-
-    /// the latest whole messages that fit, as alternating turns that start with the person and
-    /// end with Finn. The app's fixed greeting is left out: the model did not write it, and
-    /// rereading its set summary made replies circle back to it
-    private static func turns(_ history: [CoachMessage], maximumCharacters: Int) -> [CoachMessage] {
-        var merged: [CoachMessage] = []
-        for message in history where message.role == .person || message.engine != nil {
-            let text = String(message.text.prefix(messageCharacters))
-            if let last = merged.last, last.role == message.role {
-                merged[merged.count - 1] = CoachMessage(
-                    id: last.id, role: last.role, text: last.text + "\n" + text, engine: last.engine, sentAt: last.sentAt
-                )
-            } else {
-                merged.append(CoachMessage(
-                    id: message.id, role: message.role, text: text, engine: message.engine, sentAt: message.sentAt
-                ))
-            }
-        }
-        // a question left unanswered is asked again now
-        if merged.last?.role == .person {
-            merged.removeLast()
-        }
-        var remaining = maximumCharacters
-        var kept: [CoachMessage] = []
-        for message in merged.reversed() {
-            guard message.text.count <= remaining else {
-                break
-            }
-            kept.append(message)
-            remaining -= message.text.count
-        }
-        kept.reverse()
-        if kept.first?.role == .coach {
-            kept.removeFirst()
-        }
-        return kept
-    }
-}
-
-@MainActor
-final class OnDeviceCoachEngine: CoachEngine {
-    let kind: CoachEngineKind = .onDevice
-    private var preparedSession: LanguageModelSession?
-    private var preparedLanguage: CoachLanguage?
-
-    func prepare(language: CoachLanguage) {
-        guard available, SystemLanguageModel.default.supportsLocale(language.locale) else {
-            return
-        }
-        guard preparedSession == nil || preparedLanguage != language else {
-            return
-        }
-        let session = makeSession(language: language)
-        session.prewarm()
-        preparedSession = session
-        preparedLanguage = language
-    }
-
-    /// loads the model before the first message; each turn then starts its own session
-    private func makeSession(language: CoachLanguage) -> LanguageModelSession {
-        LanguageModelSession(
-            model: SystemLanguageModel.default,
-            instructions: FoundationModelsCoachPrompt.instructions(language: language)
-        )
-    }
-
-    var available: Bool {
-        if case .available = SystemLanguageModel.default.availability {
-            return true
-        }
-        return false
-    }
-
-    var unavailableReason: String? {
-        CoachModelAvailability.reason(
-            for: SystemLanguageModel.default.availability,
-            engine: "On-device model"
-        )
-    }
-
-    func reply(
-        to question: String,
-        context: CoachContext,
-        history: [CoachMessage],
-        language: CoachLanguage
-    ) async throws -> String {
-        try await streamReply(to: question, context: context, history: history, language: language) { _ in }
-    }
-
-    func streamReply(
-        to question: String,
-        context: CoachContext,
-        history: [CoachMessage],
-        language: CoachLanguage,
-        onPartial: @escaping @MainActor (String) -> Void
-    ) async throws -> String {
-        guard available, SystemLanguageModel.default.supportsLocale(language.locale) else {
-            throw CoachGenerationError.unavailable
-        }
-        try Task.checkCancellation()
-        // the prewarmed session only loaded the model; this turn starts from its own transcript
-        preparedSession = nil
-        preparedLanguage = nil
-        // as much of the conversation as this model's window holds
-        let prompt = FoundationModelsCoachPrompt.make(
-            question: question,
-            context: context,
-            history: history,
-            language: language,
-            maximumCharacters: FoundationModelsCoachPrompt.characterBudget(
-                contextSize: SystemLanguageModel.default.contextSize
-            )
-        )
-        do {
-            return try await stream(prompt, onPartial: onPartial)
-        } catch let error as LanguageModelError {
-            // the safety check sometimes stops a harmless reply, even one to "ok", before it
-            // starts; a second pass usually goes through. A refusal is the model's own choice
-            guard case .guardrailViolation = error else {
-                throw error
-            }
-            CoachModelAvailability.log.notice("Guardrail stopped a coach reply; trying once more")
-            return try await stream(prompt, onPartial: onPartial)
-        }
-    }
-
-    private func stream(_ prompt: CoachPrompt, onPartial: @escaping @MainActor (String) -> Void) async throws -> String {
-        let session = LanguageModelSession(model: SystemLanguageModel.default, transcript: prompt.transcript)
-        var written = ""
-        for try await snapshot in session.streamResponse(to: prompt.question, options: FoundationModelsCoachPrompt.options) {
-            try Task.checkCancellation()
-            written = snapshot.content
-            onPartial(written)
-        }
-        return written
-    }
-}
-
-private enum CoachGenerationError: Error {
-    case unavailable
-}
-
-@available(iOS 27, *)
-@MainActor
-final class PrivateCloudComputeCoachEngine: CoachEngine {
-    let kind: CoachEngineKind = .privateCloudCompute
-    private let model = PrivateCloudComputeLanguageModel()
-
-    var available: Bool {
-        if case .available = model.availability {
-            return true
-        }
-        return false
-    }
-
-    /// PCC logs its own reason; the sentence for the person comes from the on-device model, whose
-    /// reason (Apple Intelligence off, model downloading) is the one they can act on
-    var unavailableReason: String? {
-        if case .unavailable(let reason) = model.availability {
-            CoachModelAvailability.log
-                .notice("Private Cloud Compute unavailable: \(String(describing: reason), privacy: .public)")
-        }
-        return CoachModelAvailability.reason(
-            for: SystemLanguageModel.default.availability,
-            engine: "On-device model"
-        )
-    }
-
-    func reply(
-        to question: String,
-        context: CoachContext,
-        history: [CoachMessage],
-        language: CoachLanguage
-    ) async throws -> String {
-        let prompt = FoundationModelsCoachPrompt.make(
-            question: question, context: context, history: history, language: language
-        )
-        let session = LanguageModelSession(model: model, transcript: prompt.transcript)
-        let response = try await session.respond(to: prompt.question, options: FoundationModelsCoachPrompt.options)
-        return response.content
     }
 }

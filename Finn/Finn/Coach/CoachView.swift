@@ -96,11 +96,9 @@ struct CoachView: View {
         .onChange(of: history) { _, updated in conversation.refresh(history: updated, profile: profile) }
         .onChange(of: profile) { _, updated in conversation.refresh(history: history, profile: updated) }
         // Delete all data emptied the saved conversation: the screen starts over too
-        .onChange(of: savedConversation?.turns.isEmpty) { _, isEmpty in
-            if isEmpty == true, conversation.messages.count > 1 {
-                replyTask?.cancel()
-                conversation.forget()
-            }
+        .onChange(of: savedConversation?.clearRevision) {
+            replyTask?.cancel()
+            conversation.forget()
         }
         .onDisappear {
             replyTask?.cancel()

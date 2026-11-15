@@ -76,7 +76,7 @@ final class WorkoutSessionModel {
     @ObservationIgnored private let angleClassifier: (any AngleWindowClassifying)?
     @ObservationIgnored private let ruleClassifier: (any AngleWindowClassifying)?
     private var collectionTask: Task<Void, Never>?
-    private var frames: [PoseFrame] = []
+    @ObservationIgnored private var frames: [PoseFrame] = []
     private var previewFrames: [PoseFrame] = []
     /// Latest Vision 3D profile deviations seen while framing, newest last.
     var previewDeviations: [Double] { previewEstimates.map { $0.deviation } }
@@ -174,7 +174,7 @@ final class WorkoutSessionModel {
     /// The 3D camera-angle verdict for the latest analysed set, kept for the validation readout.
     private(set) var lastViewVerdict: ViewCheck.Verdict = .unavailable
     var usesExerciseRecognition: Bool { recognisesExercise && recognitionMethod != .unavailable }
-    private(set) var frameCount = 0
+    var frameCount: Int { frames.count }
     private(set) var framingStatus: FramingStatus = .checking
     /// While framing, the joint that keeps the set from starting cleanly, named on screen.
     private(set) var unclearJoint: JointRole?
@@ -265,8 +265,6 @@ final class WorkoutSessionModel {
     private(set) var athleteInView = false
     /// The latest set showed the person's most frequent pattern again.
     private(set) var repeatedPattern: MistakeProfile?
-    /// Receives each live event of a running set, for a connected Apple Watch.
-    @ObservationIgnored var onLiveEvent: ((LiveSetEvent, ExerciseKind) -> Void)?
     /// Whether tapping Done saves the session to Apple Health as a workout, so it appears in the
     /// Fitness app. Off by default; turning it on asks Health for permission (`requestFitnessAccess`).
     var savesToFitness: Bool {
@@ -402,7 +400,6 @@ final class WorkoutSessionModel {
         stopTappedAt = nil
         cueDismissed = false
         frames = []
-        frameCount = 0
         previewFrames = []
         previewEstimates = []
         lastViewVerdict = .unavailable
@@ -469,7 +466,6 @@ final class WorkoutSessionModel {
                             self.liveCaption = nil
                         }
                         self.frames.append(frame)
-                        self.frameCount = self.frames.count
                         if self.stage == .capturing { self.followLiveSet() }
                     }
                 }
@@ -478,6 +474,9 @@ final class WorkoutSessionModel {
                 guard !self.isStopping else { return }
                 self.framingWatchdog?.cancel()
                 self.framingWatchdog = nil
+                if self.stage == .capturing {
+                    self.personalisedLiveCoach.reset()
+                }
                 if self.stage == .capturing && self.source.endedAtLimit {
                     self.endedAtLimit = true
                     self.stage = .analyzing
@@ -492,6 +491,7 @@ final class WorkoutSessionModel {
                     self.completeAnalysis()
                     self.announceResult()
                 } else if self.stage == .capturing {
+                    self.releaseCapturedFrames()
                     self.result = .interrupted
                     self.stage = .result
                 } else if self.stage == .framing || self.isCountingDown {
@@ -539,7 +539,6 @@ final class WorkoutSessionModel {
         framingWatchdog?.cancel()
         framingWatchdog = nil
         frames = []
-        frameCount = 0
         for remaining in stride(from: max(0, countdown), through: 1, by: -1) {
             stage = .countdown(remaining)
             say("\(remaining)")
@@ -585,6 +584,7 @@ final class WorkoutSessionModel {
 
     private func completeAnalysis() {
         defer {
+            releaseCapturedFrames()
             if let stopTappedAt {
                 let parts = stopTappedAt.duration(to: ContinuousClock.now).components
                 lastStopToResultMilliseconds = max(0, Int(parts.seconds) * 1_000 +
@@ -671,6 +671,11 @@ final class WorkoutSessionModel {
         case .failed(let reason):
             result = .failed(reason)
         }
+    }
+
+    private func releaseCapturedFrames() {
+        liveMonitor = nil
+        frames = []
     }
 
     /// The general retake advice fits a refusal for joints Finn could not see; other refusals
@@ -835,28 +840,36 @@ final class WorkoutSessionModel {
     @ObservationIgnored private var livePersonalisationContext = LiveCoachContext()
 
     private func followLiveSet() {
-        guard var monitor = liveMonitor else { return }
-        let events = monitor.update(with: frames)
-        liveMonitor = monitor
+        guard let events = liveMonitor?.update(with: frames), let monitor = liveMonitor else {
+            return
+        }
         let definition = monitor.definition
-        for event in events {
-            switch event {
-            case .repCounted(let count), .repCountRevised(let count):
-                liveRepCount = count
-                if case .repCountRevised = event { liveCoachMessage = nil }
-            default:
-                liveCaption = event.caption(for: definition)
+        if let event = LiveSetEvent.coachingEvent(in: events) {
+            liveRepCount = monitor.countedReps
+            if events.contains(where: { event in
+                if case .repCountRevised = event {
+                    return true
+                }
+                return false
+            }) {
+                liveCaption = nil
+                liveCoachMessage = nil
             }
-            if let line = WatchCoachRules.line(for: event, reps: monitor.reps, definition: definition,
-                                               canCompareRange: monitor.supportsRangeCoaching) {
-                liveCoachMessage = line
+            if let caption = event.caption(for: definition) {
+                liveCaption = caption
             }
-            personalisedLiveCoach.update(event: event, reps: monitor.reps, definition: definition,
-                                         canCompareRange: monitor.supportsRangeCoaching, context: livePersonalisationContext) { [weak self] line in
-                guard let self, self.stage == .capturing else { return }
+            personalisedLiveCoach.update(
+                event: event,
+                reps: monitor.reps,
+                definition: definition,
+                canCompareRange: monitor.supportsRangeCoaching,
+                context: livePersonalisationContext
+            ) { [weak self] line in
+                guard let self, self.stage == .capturing else {
+                    return
+                }
                 self.liveCoachMessage = line
             }
-            onLiveEvent?(event, definition.kind)
         }
         if let phrase = LiveSetEvent.phrase(for: events, definition: definition) {
             say(phrase)
@@ -1252,7 +1265,6 @@ final class WorkoutSessionModel {
         livePose = nil
         athleteInView = false
         framingStatus = .checking
-        frameCount = 0
         captureStartedAt = nil
         result = nil
         movementNote = nil

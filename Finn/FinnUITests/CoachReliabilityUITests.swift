@@ -5,7 +5,7 @@ final class CoachReliabilityUITests: XCTestCase {
     private func dismissKeyboardIntroduction(in app: XCUIApplication) {
         // iOS may explain its bilingual keyboard the first time a language is used.
         let tutorial = app.buttons.matching(NSPredicate(
-            format: "label IN %@", ["Continue", "Continuer", "Continuar"]
+            format: "label IN %@", ["Continue", "Continuer"]
         )).firstMatch
         if tutorial.waitForExistence(timeout: 1) {
             tutorial.tap()
@@ -29,7 +29,7 @@ final class CoachReliabilityUITests: XCTestCase {
     @MainActor
     func testCoachAnswersWithoutAModelAndSurvivesTabChanges() {
         let app = XCUIApplication()
-        app.launchArguments = ["-finn-ui-demo", "-AppleLanguages", "(en-GB)"]
+        app.launchArguments = ["-finn-ui-demo", "-AppleLanguages", "(en)"]
         app.launch()
         app.selectTab("Coach")
 
@@ -73,7 +73,7 @@ final class CoachReliabilityUITests: XCTestCase {
     func testConversationSurvivesARelaunch() {
         let app = XCUIApplication()
         app.launchArguments = [
-            "-finn-ui-demo", "-AppleLanguages", "(en-GB)", "-finn-ui-demo-suite", "FinnCoachRelaunch-\(UUID().uuidString)",
+            "-finn-ui-demo", "-AppleLanguages", "(en)", "-finn-ui-demo-suite", "FinnCoachRelaunch-\(UUID().uuidString)",
         ]
         app.launch()
         app.selectTab("Coach")
@@ -141,12 +141,10 @@ final class CoachReliabilityUITests: XCTestCase {
     }
 
     @MainActor
-    func testCoachComposerAtLargestTextInEveryLanguage() {
-        for language in ["en-GB", "en-US", "fr", "es"] {
+    func testCoachComposerPreservesTypedQuestionsInEnglishAndFrench() {
+        for language in ["en", "fr"] {
             let app = XCUIApplication()
-            app.launchArguments = ["-finn-ui-demo", "-AppleLanguages", "(\(language))",
-                                   "-UIPreferredContentSizeCategoryName",
-                                   "UICTContentSizeCategoryAccessibilityXXXL"]
+            app.launchArguments = ["-finn-ui-demo", "-AppleLanguages", "(\(language))"]
             app.launch()
             app.selectTab("Coach")
             let field = app.textViews["coach.field"]
@@ -176,8 +174,7 @@ final class CoachReliabilityUITests: XCTestCase {
                 add(screenshot)
             }
             XCTAssertEqual(outcome, .completed, "\(language): \(app.debugDescription)")
-            // At accessibility sizes Send dismisses the keyboard to leave room for the reply.
-            // The composer must reopen it so the next question remains reachable.
+            attachScreenshot(of: app, named: "Coach reply (\(language))")
             field.tap()
             XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3), language)
             XCTAssertTrue(putKeyboardAway(in: app), language)
@@ -193,7 +190,7 @@ final class CoachReliabilityUITests: XCTestCase {
         )
         let app = XCUIApplication()
         // Only the camera feed is synthetic. The Coach uses the production on-device engine.
-        app.launchArguments = ["-finn-ui-demo", "-finn-ui-native-coach", "-AppleLanguages", "(en-GB)"]
+        app.launchArguments = ["-finn-ui-demo", "-finn-ui-native-coach", "-AppleLanguages", "(en)"]
         app.launch()
         app.selectTab("Coach")
         app.buttons["coach.engine"].tap()

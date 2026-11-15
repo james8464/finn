@@ -149,6 +149,22 @@ nonisolated enum LiveSetEvent: Equatable, Sendable {
         }
     }
 
+    /// A technique cue takes priority over a count milestone in the same review.
+    /// A count revision invalidates cues from before that revision.
+    static func coachingEvent(in events: [Self]) -> Self? {
+        for event in events.reversed() {
+            switch event {
+            case .repCounted:
+                continue
+            case .repCountRevised:
+                return events.last
+            case .fasterThanFirstReps, .shorterThanFirstReps, .formFault:
+                return event
+            }
+        }
+        return events.last
+    }
+
     /// What to say for one live update: the latest count, then any observation, as one phrase
     /// ("4. Range is shorter"). Queued as separate phrases, a count and two observations made the
     /// announcer drop its backlog when it fell behind, count included.
@@ -388,18 +404,13 @@ nonisolated struct LiveSetMonitor {
         return gone >= (seenLeaving ? Self.leftAfter : Self.hiddenAfter)
     }
 
-    /// At most one observation per rep, said with its count. A shorter range comes first, the same
-    /// reading as the end-of-set observation; a quicker rep not pointed out then is pointed out on
-    /// the next one if it is still quicker.
+    /// At most one observation per rep. A repeated form fault takes priority, then shorter range,
+    /// then pace. Record a faster rep for the set summary even when another cue takes priority.
     private mutating func cues(forRep number: Int) -> [LiveSetEvent] {
         guard reps.indices.contains(number - 1) else {
             return []
         }
         let rep = reps[number - 1]
-        if let fault = formFault(onRep: number) {
-            lastFormCue[fault] = number
-            return [.formFault(fault, rep: number)]
-        }
         var faster = false
         if number >= 4 {
             let first = reps.prefix(3).map(\.duration).sorted()[1]
@@ -407,6 +418,10 @@ nonisolated struct LiveSetMonitor {
         }
         if faster {
             sawFasterRep = true
+        }
+        if let fault = formFault(onRep: number) {
+            lastFormCue[fault] = number
+            return [.formFault(fault, rep: number)]
         }
         if rangeAdviceFromSide, number >= 3, number - lastShorterCue >= Self.cueSpacing {
             let first = (reps[0].relativeRange + reps[1].relativeRange) / 2

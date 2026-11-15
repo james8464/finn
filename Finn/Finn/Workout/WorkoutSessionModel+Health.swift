@@ -13,6 +13,10 @@ extension WorkoutSessionModel {
         preferences.personalisationOffered = true
         guard isOn else {
             healthSnapshot = nil
+            liveHeartRate = nil
+            liveHeartRateAt = nil
+            setHeartRate = nil
+            setHeartRateReadings.removeAll()
             return
         }
         await health?.requestAccess()

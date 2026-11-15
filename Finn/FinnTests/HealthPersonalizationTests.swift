@@ -213,6 +213,13 @@ struct HealthSessionTests {
         await setup.model.setPersonalisesWithHealth(false)
         #expect(setup.model.resultHealthNotes.isEmpty)
         #expect(setup.model.readinessNote == nil)
+        #expect(setup.model.currentHeartRate == nil)
+        #expect(setup.model.setHeartRate == nil)
+        #expect(setup.model.setHeartRateReadings.isEmpty)
+
+        await setup.model.setPersonalisesWithHealth(true)
+        #expect(setup.model.currentHeartRate == nil)
+        #expect(!setup.model.resultHealthNotes.contains { $0.text.contains("130 bpm") })
     }
 
     @Test func demoInputNeverOffersOrReadsHealth() async throws {

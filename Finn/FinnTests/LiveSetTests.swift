@@ -466,6 +466,14 @@ nonisolated struct LiveSetMonitorTests {
         #expect(LiveSetEvent.repCountRevised(3).caption(for: .pushUp) == nil)
     }
 
+    @Test func liveCoachingPrioritisesTechniqueWithinOneAnalysis() {
+        let fault = LiveSetEvent.formFault(.squatDepth, rep: 3)
+        #expect(LiveSetEvent.coachingEvent(in: [.repCounted(3), fault, .repCounted(5)]) == fault)
+        #expect(LiveSetEvent.coachingEvent(in: [fault, .repCountRevised(2)]) == .repCountRevised(2))
+        #expect(LiveSetEvent.coachingEvent(in: [.repCountRevised(2), .repCounted(3)]) == .repCounted(3))
+        #expect(LiveSetEvent.coachingEvent(in: []) == nil)
+    }
+
     /// Push-ups at about 0.5 s a cycle, all complete: every one is said and every one is in the result.
     @Test func fastCompletePushUpsAreCountedLiveAndInTheResult() {
         let frames = fastPushUps(plank: 2, reps: 20, cycle: 0.5, topBend: 0, bottomBend: 80)
