@@ -1,8 +1,8 @@
 # Welcome screen handoff
 
-> Latest visual revision: “Plumb / Welcome — Brand Theme Cover” supersedes the default layout below. It uses the cover’s #202020 background, Inter Semi Bold wordmark and statement, “Find Blue Online” with a pink underline, the existing squat photo with a charcoal-to-black fade, and a black lower panel containing “Welcome to Plum” and a gray button with pink text. The earlier 200% study remains an archived layout reference and does not represent this revision. Recheck text scaling during implementation.
+> Latest visual revision: the “Welcome — Brand Theme Cover” frame supersedes the default layout below. It uses the cover’s #202020 background, Inter Semi Bold wordmark and statement, a pink underline, the existing squat photo with a charcoal-to-black fade, and a black lower panel containing “Welcome to Finn” and a gray button with pink text. The earlier 200% study remains an archived layout reference and does not represent this revision. Recheck text scaling during implementation.
 
-Design: `Design/plumb.pen`, “Plumb / Welcome — HIG refined” and “Plumb / Welcome — 200% text study”.
+Design: `Design/Finn.pen`, the “Welcome — HIG refined” and “Welcome — 200% text study” frames (made when the app was still called Plumb; frame names in the file may keep that prefix).
 
 ## Visual decisions
 
@@ -11,7 +11,7 @@ Design: `Design/plumb.pen`, “Plumb / Welcome — HIG refined” and “Plumb /
 - Use neutral page indicators with a 44-point control area. Connect to the existing three introductory pages; omit the control if these pages are absent.
 - Primary button: 52 points high. Skip: 64 × 44 points. Keep bottom controls above the system safe area.
 - Preview uses Inter because this editor rejects SF Pro. Production uses the system font: largeTitle bold for the slogan, title2 bold for the brand, body for Skip, headline for the primary action. Do not bundle Inter.
-- This branded introductory screen retains its requested dark presentation in either system appearance. Other screens retain their own appearance behavior.
+- Like the whole app, this screen is dark-only, whatever the system appearance.
 
 ## Accessibility and behavior
 
@@ -24,7 +24,7 @@ Design: `Design/plumb.pen`, “Plumb / Welcome — HIG refined” and “Plumb /
 
 ## Verification
 
-Visually reviewed default and 200% studies for overlapping text, alignment, photo placement, action visibility, and safe-area spacing. The design is static: VoiceOver, focus order, actual system font metrics, Dynamic Type extremes, landscape, small devices, localization, and light/dark system settings still require app-level testing.
+Visually reviewed default and 200% studies for overlapping text, alignment, photo placement, action visibility, and safe-area spacing. The design is static: VoiceOver, focus order, actual system font metrics, Dynamic Type extremes, landscape, small devices and localization still require app-level testing.
 
 ## Apple sources
 

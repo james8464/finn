@@ -8,7 +8,7 @@
 
 **Tech Stack:** Swift 6, SwiftUI, AVFoundation, Vision, XCTest, Swift Testing, iOS 27 simulator.
 
-**Spec:** `docs/superpowers/specs/2026-10-12-workout-replay-and-capture-design.md`
+**Spec:** `docs/architecture/specs/2026-10-12-workout-replay-and-capture-design.md`
 
 ## Tasks
 

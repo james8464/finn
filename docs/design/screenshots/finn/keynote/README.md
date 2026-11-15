@@ -1,6 +1,6 @@
 # Keynote captures
 
-Page 11 of [Finn — Brand Theme](https://www.figma.com/design/Y9asB4rM1J0tJcbr7Wim2q?node-id=99-2) uses these simulator renders.
+Page 11 of [Finn — Brand Theme](https://www.figma.com/design/Y9asB4rM1J0tJcbr7Wim2q?node-id=99-2) uses these simulator renders. The images live once, in [the keynote's captures](../../../../../Design/Presentation/Finn-Keynote-2026-10-16/assets/captures/), where the keynote build reads them; `manifest.json` here records their Figma placement.
 
 The workout is a scripted sample, not an athlete recording or an accuracy demonstration. `-finn-ui-demo -finn-presentation-capture` keeps temporary storage and disables live coach services. The second flag hides debug badges only in this export mode and supplies a full-body pose fixture. Normal Debug tours retain their input badge; production behaviour is unchanged.
 
