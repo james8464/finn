@@ -46,6 +46,8 @@ A few words of the same advice appear large on the camera screen during the set.
 
 History stores local summaries, compares compatible sets, identifies a recurring pattern, and shares text through the system sheet.
 
+Turning off Health personalisation clears the current Health snapshot and any heart-rate readings held for coaching.
+
 ### Interface and Coach
 
 The Home, Progress, Coach and Workout tabs keep their navigation state. Home shows recent sessions, measured progress and awards. Progress combines posture guidance with saved strength history and a separately labelled projection. Posture shows looping illustrated exercise movements, short cues and comparisons with eligible saved measurements. The illustrations are guidance, not validated video of a person. The app is dark-only, whatever the system appearance. System text and adaptive layouts support larger text. See the [design research](docs/architecture/specs/2026-10-15-native-ui-design.md) and [HIG review](docs/design/hig-ui-coverage.md).
@@ -54,11 +56,11 @@ First launch asks for a goal, experience level, favourite exercises, and spoken 
 
 Coach is a chat with Finn on the on-device Apple Intelligence model, streamed word by word in the person's language. It knows the onboarding answers and sees saved sets only when a question is about training; it must quote their labels and numbers exactly, never invent results, and give no medical advice. The thread is kept between launches and cleared by Delete all data. If the saved workout context changes while a reply is streaming, Coach clears the draft and answers from the updated records. Direct questions about the latest set use the saved record without model inference. The model is prompted to keep small talk conversational. When the model is unavailable, Finn says why and lists the saved records; when it declines, Finn answers with fixed text. Private Cloud Compute is not used (the app lacks the entitlement). A Claude demo engine exists in Debug builds only.
 
-Onboarding ends with the Finn Coach+ offer (weekly or annual subscription, StoreKit, local test catalog in `Finn/TestConfig.storekit`). Without Finn Coach+, one free workout is allowed every 14 days ([`WorkoutAccess.swift`](Finn/Finn/Workout/WorkoutAccess.swift)); demo input and tests are not limited. App Store purchase behavior still needs production verification.
+Onboarding ends with the Finn Coach+ offer (weekly or annual subscription, StoreKit, local test catalog in `Finn/TestConfig.storekit`). Without Finn Coach+, one free workout is allowed every 14 days ([`WorkoutAccess.swift`](Finn/Finn/Workout/WorkoutAccess.swift)); demo input and tests are not limited. If StoreKit returns no eligible plans, the paywall offers Finn Free and a retry. App Store purchase behavior still needs production verification.
 
 ### Apple Watch
 
-An embedded companion mirrors the exercise, stage, count, and observation. It supports wrist taps and start/stop messages. It compiles for simulators but **has not been checked on a physical watch**.
+An embedded companion mirrors the exercise, stage and coaching, and shows rep progress for sets with a target. The iPhone starts and stops sets. The Watch offers optional rhythm taps. Physical Watch delivery still needs verification.
 
 ### Apple Health
 

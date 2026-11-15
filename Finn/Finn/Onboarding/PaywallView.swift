@@ -43,6 +43,7 @@ struct PaywallView: View {
     @State private var plan: CoachPlan?
     @State private var products: [String: Product] = [:]
     @State private var hasLoadedProducts = false
+    @State private var isLoadingProducts = false
     @State private var isBusy = false
     @State private var notice: Notice?
     @State private var eligibleForFreeTrial = false
@@ -227,6 +228,7 @@ struct PaywallView: View {
                 .font(.body)
                 .foregroundStyle(HomeStyle.supportingText)
             Button("Try again") { Task { await loadProducts() } }
+                .disabled(isLoadingProducts)
                 .font(.body.weight(.medium))
                 .accessibilityIdentifier("plan.retry")
         }
@@ -445,7 +447,7 @@ struct PaywallView: View {
     }
 
     private var hasPurchasableOffers: Bool {
-        CoachPlan.allCases.contains { products[$0.productID] != nil }
+        CoachPlan.allCases.contains(where: offerIsAvailable)
     }
 
     /// on sale, and for the trial, not used yet by this Apple Account
@@ -477,19 +479,37 @@ struct PaywallView: View {
     }
 
     private func loadProducts() async {
-        defer { hasLoadedProducts = true }
+        guard !isLoadingProducts else { return }
+        isLoadingProducts = true
+        defer { isLoadingProducts = false }
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-finn-ui-no-storekit-products") { return }
+        if ProcessInfo.processInfo.arguments.contains("-finn-ui-no-storekit-products") {
+            hasLoadedProducts = true
+            return
+        }
         #endif
-        guard let loaded = try? await Product.products(for: CoachPlan.allCases.map(\.productID)) else { return }
-        products = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
-        if let subscription = products[CoachPlan.trial.productID]?.subscription,
-           let offer = subscription.introductoryOffer, Self.isTwoWeekFreeTrial(offer) {
-            eligibleForFreeTrial = await subscription.isEligibleForIntroOffer
-            trialAlreadyUsed = !eligibleForFreeTrial
-        } else {
-            eligibleForFreeTrial = false
-            trialAlreadyUsed = false
+        do {
+            let loaded = try await Product.products(for: CoachPlan.allCases.map(\.productID))
+            let loadedProducts = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
+            var eligible = false
+            var trialUsed = false
+            if let subscription = loadedProducts[CoachPlan.trial.productID]?.subscription,
+               let offer = subscription.introductoryOffer, Self.isTwoWeekFreeTrial(offer) {
+                eligible = await subscription.isEligibleForIntroOffer
+                trialUsed = !eligible
+            }
+            guard !Task.isCancelled else { return }
+            products = loadedProducts
+            eligibleForFreeTrial = eligible
+            trialAlreadyUsed = trialUsed
+            if let plan, !offerIsAvailable(plan) {
+                self.plan = nil
+            }
+            hasLoadedProducts = true
+        } catch {
+            if !Task.isCancelled {
+                hasLoadedProducts = true
+            }
         }
     }
 
