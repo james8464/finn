@@ -59,6 +59,22 @@
         }
       }
     },
+    "%lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld sur %2$lld"
+          }
+        }
+      }
+    },
     "%lld seconds" : {
       "localizations" : {
         "en-GB" : {
@@ -83,6 +99,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld secondes"
+          }
+        }
+      }
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld/%2$lld"
           }
         }
       }
@@ -145,7 +177,14 @@
       }
     },
     "Coaching will resume when your iPhone reconnects." : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les conseils reprendront quand ton iPhone se reconnectera."
+          }
+        }
+      }
     },
     "DEMO INPUT" : {
       "localizations" : {
@@ -434,7 +473,6 @@
       }
     },
     "Reps counted" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en-GB" : {
           "stringUnit" : {

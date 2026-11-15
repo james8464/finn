@@ -38,7 +38,7 @@ UserDefaults keys, Codable fields, localization keys, accessibility identifiers,
 Test in English and French only, at the default text size. Never write or run tests at larger text sizes or in Spanish, en-GB or en-US. UI tests that still do are leftovers: don't copy them.
 
 ## Commands, fastest first
-- Logic tests, no simulator: `zsh tools/test_backend.sh`. It is broken today (its source list is behind the code): repair it before relying on it.
+- Logic tests, no simulator: `zsh tools/test_backend.sh`. About 20 seconds: 260 tests, rebuilt from scratch each run. CI runs it in the `replay` job.
 - One test class on a simulator (the full UI suite takes ~45 min; CI runs it on every pull request):
   ```bash
   xcodebuild test -project Finn/Finn.xcodeproj -scheme Finn -destination 'platform=iOS Simulator,name=iPhone 18 Pro' -only-testing:FinnUITests/DashboardUITests CODE_SIGNING_ALLOWED=NO

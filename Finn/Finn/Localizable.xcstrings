@@ -5,6 +5,7 @@
       "localizations": {}
     },
     "Monthly": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": { "stringUnit": { "state": "translated", "value": "Monthly" } },
         "en-US": { "stringUnit": { "state": "translated", "value": "Monthly" } },
@@ -13,6 +14,7 @@
       }
     },
     "1 week free, then billed monthly": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": { "stringUnit": { "state": "translated", "value": "1 week free, then billed monthly" } },
         "en-US": { "stringUnit": { "state": "translated", "value": "1 week free, then billed monthly" } },
@@ -21,6 +23,7 @@
       }
     },
     "%@ / month": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": { "stringUnit": { "state": "translated", "value": "%@ / month" } },
         "en-US": { "stringUnit": { "state": "translated", "value": "%@ / month" } },
@@ -29,6 +32,7 @@
       }
     },
     "%@ charged today, then monthly. Renews automatically. Cancel in Settings at least 24 hours before renewal.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": { "stringUnit": { "state": "translated", "value": "%@ charged today, then monthly. Renews automatically. Cancel in Settings at least 24 hours before renewal." } },
         "en-US": { "stringUnit": { "state": "translated", "value": "%@ charged today, then monthly. Renews automatically. Cancel in Settings at least 24 hours before renewal." } },
@@ -37,6 +41,7 @@
       }
     },
     "%@ today. After 1 week, %@/month. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": { "stringUnit": { "state": "translated", "value": "%1$@ today. After 1 week, %2$@/month. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only." } },
         "en-US": { "stringUnit": { "state": "translated", "value": "%1$@ today. After 1 week, %2$@/month. Renews automatically. Cancel in Settings at least 24 hours before renewal. Eligible subscribers only." } },
@@ -417,6 +422,7 @@
       }
     },
     "%@ charged today, then weekly. Renews automatically. Cancel in Settings at least 24 hours before renewal.": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -433,6 +439,7 @@
       }
     },
     "%@ charged today, then yearly. Renews automatically. Cancel in Settings at least 24 hours before renewal.": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -921,6 +928,7 @@
       }
     },
     "%@, %@": {
+      "extractionState": "stale",
       "comment": "VoiceOver: day, then time of the next workout.",
       "localizations": {
         "en-GB": {
@@ -2006,6 +2014,16 @@
         }
       }
     },
+    "%lld min": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min"
+          }
+        }
+      }
+    },
     "%lld new badges": {
       "extractionState": "stale",
       "localizations": {
@@ -2623,11 +2641,33 @@
         }
       }
     },
+    "%lld sets of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld sets of %2$lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld séries de %2$lld"
+          }
+        }
+      }
+    },
     "%lld/%lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "new",
+            "value": "%1$lld/%2$lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
             "value": "%1$lld/%2$lld"
           }
         }
@@ -2803,7 +2843,14 @@
       }
     },
     "00:18": {
-      "localizations": {}
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "00:18"
+          }
+        }
+      }
     },
     "00:18 · Example session": {
       "localizations": {
@@ -3039,6 +3086,16 @@
         }
       }
     },
+    "1 second": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 seconde"
+          }
+        }
+      }
+    },
     "1 session": {
       "localizations": {
         "fr": {
@@ -3198,7 +3255,6 @@
       }
     },
     "3D view: %lld° from profile": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -3227,7 +3283,6 @@
       }
     },
     "3D view: no estimate": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -3288,7 +3343,14 @@
       }
     },
     "6": {
-      "localizations": {}
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "6"
+          }
+        }
+      }
     },
     "6 squat reps": {
       "localizations": {
@@ -3376,7 +3438,6 @@
       }
     },
     "A demo key is stored in this iPhone's Keychain. Off, the coach uses Foundation Models.": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -3633,6 +3694,7 @@
       }
     },
     "Account": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -3760,6 +3822,7 @@
       }
     },
     "Adjusts the detail in set feedback.": {
+      "extractionState": "stale",
       "localizations": {
         "fr": {
           "stringUnit": {
@@ -3870,9 +3933,6 @@
           }
         }
       }
-    },
-    "AirPods": {
-      "localizations": {}
     },
     "AirPods or any headphones": {
       "extractionState": "stale",
@@ -4155,14 +4215,6 @@
         }
       }
     },
-    "Answered by Apple Intelligence on this device.": {
-      "comment": "A description of the coach's response.",
-      "isCommentAutoGenerated": true
-    },
-    "Answered by Apple Private Cloud Compute.": {
-      "comment": "A description of the coach's response.",
-      "isCommentAutoGenerated": true
-    },
     "Answers come from Apple Intelligence on this iPhone, from your saved sets only.": {
       "extractionState": "stale",
       "localizations": {
@@ -4322,6 +4374,7 @@
       }
     },
     "Apple Intelligence chose the sets; the details come from Finn's records.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -4366,6 +4419,7 @@
       }
     },
     "Apple Private Cloud Compute": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -4394,6 +4448,7 @@
       }
     },
     "Apple Private Cloud Compute chose the sets; the details come from Finn's records.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -4808,6 +4863,7 @@
       }
     },
     "Ask about your sets": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -5485,6 +5541,26 @@
         }
       }
     },
+    "Camera access is off": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’accès à la caméra est désactivé"
+          }
+        }
+      }
+    },
+    "Camera access is restricted": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’accès à la caméra est limité"
+          }
+        }
+      }
+    },
     "Camera access needed": {
       "localizations": {
         "en-GB": {
@@ -6077,6 +6153,7 @@
       }
     },
     "Chest dropping forward at the bottom": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -6347,6 +6424,7 @@
       }
     },
     "Choose a focus for set feedback.": {
+      "extractionState": "stale",
       "localizations": {
         "fr": {
           "stringUnit": {
@@ -6550,6 +6628,7 @@
       }
     },
     "Claude Sonnet (debug demo)": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -6589,6 +6668,7 @@
       }
     },
     "Cleaner technique": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -6628,6 +6708,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Technique plus propre"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer"
           }
         }
       }
@@ -6689,6 +6779,7 @@
       }
     },
     "Coach can describe saved measurements. It cannot diagnose an injury or assess your whole technique.": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -6705,7 +6796,6 @@
       }
     },
     "Coach demo through Claude Sonnet": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -6734,6 +6824,7 @@
       }
     },
     "Coach uses your question and saved set summaries. Apple Intelligence may process them on this iPhone or through Apple's Private Cloud Compute. Camera frames and raw pose points are never included.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -6756,6 +6847,7 @@
       }
     },
     "Coach uses your question and saved set summaries. When available, Apple Intelligence processes them on this iPhone. Camera frames and raw pose points are never included.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -6985,6 +7077,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Par rapport à ta série précédente"
+          }
+        }
+      }
+    },
+    "Composes a workout from your saved sets": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose une séance à partir de tes séries enregistrées"
           }
         }
       }
@@ -7274,6 +7376,7 @@
       }
     },
     "Current: %@": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -7330,7 +7433,6 @@
       }
     },
     "DEMO INPUT": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -7475,7 +7577,6 @@
       }
     },
     "Debug build only. The App Store build has none of this: it uses Foundation Models and nothing else.": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -7504,6 +7605,7 @@
       }
     },
     "Debug demo: Claude chose the sets; the details come from Finn's records.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -7530,10 +7632,6 @@
           }
         }
       }
-    },
-    "Debug demo: answered by Claude Sonnet via Anthropic API.": {
-      "comment": "A description of the coach's response when using the debug demo.",
-      "isCommentAutoGenerated": true
     },
     "Debug demo: answers come from Claude Sonnet, from your saved sets only.": {
       "extractionState": "stale",
@@ -7901,7 +7999,6 @@
       }
     },
     "Developer": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -7936,6 +8033,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Découvrez votre premier objectif"
+          }
+        }
+      }
+    },
+    "Do each exercise in Finn, then tick it here. Validate when the workout is finished and it is kept in Next workouts.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fais chaque exercice dans Finn, puis coche-le ici. Valide quand la séance est terminée : elle est gardée dans Prochaines séances."
           }
         }
       }
@@ -8024,6 +8131,16 @@
         }
       }
     },
+    "Double tap to change": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touche deux fois pour modifier"
+          }
+        }
+      }
+    },
     "Drawing of a %@, seen from the side": {
       "localizations": {
         "en-GB": {
@@ -8081,6 +8198,7 @@
       }
     },
     "Drawn from the pose points of each rep’s lowest moment. No image is kept.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -8741,6 +8859,7 @@
       }
     },
     "Explains how the Coach chooses its answer": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -8886,6 +9005,7 @@
       }
     },
     "Feel the tempo on your wrist. Hear my cues through your AirPods or iPhone.": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -8897,6 +9017,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sens le tempo à ton poignet. Entends mes conseils dans tes AirPods ou sur ton iPhone."
+          }
+        }
+      }
+    },
+    "Feel the tempo on your wrist. Hear my cues through your iPhone.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sens le tempo à ton poignet. Entends mes conseils sur ton iPhone."
           }
         }
       }
@@ -9658,6 +9788,7 @@
       }
     },
     "Finn couldn’t check your %@: your %@ wasn’t clear enough at the bottom of the reps.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -10198,6 +10329,16 @@
         }
       }
     },
+    "Finn needs the camera to count your reps and check your form. Video is not saved. Turn on Camera for Finn in Settings.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finn a besoin de la caméra pour compter tes répétitions et vérifier ta technique. La vidéo n’est pas enregistrée. Active Caméra pour Finn dans Réglages."
+          }
+        }
+      }
+    },
     "Finn reads Health only if you turn on Personalize with Health: heart rate, resting heart rate, heart rate variability, VO2 max, workouts, active energy, steps, sleep, age, weight and height, to adapt its advice to you. It never writes calories or heart rate, and nothing leaves this iPhone through Finn.": {
       "localizations": {
         "en-GB": {
@@ -10484,6 +10625,22 @@
         }
       }
     },
+    "Finn: %@ %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Finn: %1$@ %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finn : %1$@ %2$@"
+          }
+        }
+      }
+    },
     "Finn: your next workout, %@, %@, %@. %@": {
       "comment": "VoiceOver label of the coach card: day, time, intensity, then Finn's encouragement.",
       "localizations": {
@@ -10669,8 +10826,15 @@
         }
       }
     },
-    "Free trial · 2 weeks": {
-      "localizations": {}
+    "Free trial already used": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essai gratuit déjà utilisé"
+          }
+        }
+      }
     },
     "From %lld sessions: ": {
       "localizations": {
@@ -11237,6 +11401,7 @@
       }
     },
     "Get stronger": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -12584,6 +12749,7 @@
       }
     },
     "I train now and then": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -12612,6 +12778,7 @@
       }
     },
     "I train often": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -12867,6 +13034,7 @@
       }
     },
     "Illustrated guide · ranges vary": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -12951,6 +13119,7 @@
       }
     },
     "Illustration: AirPods, and an Apple Watch showing a workout in progress.": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -12978,6 +13147,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Illustration : un homme s'entraîne pendant que Finn le coache en direct sur son iPhone."
+          }
+        }
+      }
+    },
+    "Illustration: an Apple Watch showing a workout in progress.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illustration : une Apple Watch qui affiche une séance en cours."
           }
         }
       }
@@ -13015,6 +13194,7 @@
       }
     },
     "In your ears, on your wrist": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -13915,6 +14095,16 @@
         }
       }
     },
+    "Last done %@": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière fois le %@"
+          }
+        }
+      }
+    },
     "Last movement not finished": {
       "localizations": {
         "en-GB": {
@@ -13944,7 +14134,6 @@
       }
     },
     "Last session": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -14174,6 +14363,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Launch animation": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation de lancement"
           }
         }
       }
@@ -14436,6 +14635,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Peu, mais souvent. Je t'aide à tenir le rythme."
+          }
+        }
+      }
+    },
+    "Loading": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement"
           }
         }
       }
@@ -15198,6 +15407,7 @@
       }
     },
     "More reps over time, with a range you can repeat.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -15507,6 +15717,7 @@
       }
     },
     "New to this": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -15530,6 +15741,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je débute"
+          }
+        }
+      }
+    },
+    "New workout": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouvelle séance"
           }
         }
       }
@@ -15586,6 +15807,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Prochaine séance"
+          }
+        }
+      }
+    },
+    "Next workouts": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prochaines séances"
           }
         }
       }
@@ -15684,6 +15915,7 @@
       }
     },
     "No account, no upload": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -16044,7 +16276,6 @@
       }
     },
     "No demo key stored: the coach uses Foundation Models. Paste a key below to enable the demo.": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -16673,6 +16904,16 @@
         }
       }
     },
+    "Not done": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas fait"
+          }
+        }
+      }
+    },
     "Not earned yet": {
       "localizations": {
         "en-GB": {
@@ -17243,6 +17484,16 @@
         }
       }
     },
+    "On your wrist": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À ton poignet"
+          }
+        }
+      }
+    },
     "On-device Apple Intelligence": {
       "localizations": {
         "en-GB": {
@@ -17507,6 +17758,16 @@
         }
       }
     },
+    "Opens Finn’s page in Settings": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre la page de Finn dans Réglages"
+          }
+        }
+      }
+    },
     "Opens the Workout tab.": {
       "localizations": {
         "en-GB": {
@@ -17563,7 +17824,18 @@
         }
       }
     },
+    "Opens the camera. Finn counts your reps and checks your form.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre la caméra. Finn compte tes répétitions et vérifie ta technique."
+          }
+        }
+      }
+    },
     "Opens workout setup.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -17592,7 +17864,6 @@
       }
     },
     "Opens your history": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -17797,7 +18068,6 @@
       }
     },
     "Paste the demo API key": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -19012,6 +19282,7 @@
       }
     },
     "Recognized as %@ on this iPhone, so Finn used it instead of %@. Your next sets use %@.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -19046,6 +19317,7 @@
       }
     },
     "Recognized as %@ on this iPhone.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -19258,7 +19530,6 @@
       }
     },
     "Remove the stored key": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -19287,6 +19558,7 @@
       }
     },
     "Renews automatically. Cancel in Settings at least 24 hours before renewal. Trial for eligible subscribers.": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -19642,6 +19914,16 @@
         }
       }
     },
+    "Replay": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejouer"
+          }
+        }
+      }
+    },
     "Replay demo": {
       "localizations": {
         "en-GB": {
@@ -19671,6 +19953,7 @@
       }
     },
     "Replay onboarding": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -19743,6 +20026,7 @@
       }
     },
     "Reps %@": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -20162,6 +20446,7 @@
       }
     },
     "Review your recorded sets and comparisons.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -20431,7 +20716,6 @@
       }
     },
     "Save": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -20516,6 +20800,7 @@
       }
     },
     "Saved observations only": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -20847,6 +21132,7 @@
       }
     },
     "See the rep counts and comparisons Finn measured.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -20875,6 +21161,7 @@
       }
     },
     "See what each set looked like and change one thing at a time.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -21693,6 +21980,7 @@
       }
     },
     "Short sets, often. Finn keeps the history.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -22426,6 +22714,7 @@
       }
     },
     "Skip this": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -22577,6 +22866,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genoux légèrement fléchis"
+          }
+        }
+      }
+    },
+    "Something on this iPhone, such as Screen Time, limits the camera. Finn needs it to count your reps and check your form. Video is not saved.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un réglage de cet iPhone, comme Temps d’écran, limite la caméra. Finn en a besoin pour compter tes répétitions et vérifier ta technique. La vidéo n’est pas enregistrée."
           }
         }
       }
@@ -22950,6 +23249,7 @@
       }
     },
     "Start": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -23203,6 +23503,7 @@
       }
     },
     "Start light and compare with your own earlier sets.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -23287,6 +23588,7 @@
       }
     },
     "Start with one recorded observation at a time.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -23371,6 +23673,7 @@
       }
     },
     "Starts again from the welcome screens. Your sets and settings are kept.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -23970,6 +24273,16 @@
         }
       }
     },
+    "Target: %lld reps": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Objectif : %lld répétitions"
+          }
+        }
+      }
+    },
     "Tells you your last measured set: exercise, reps, when, and the observation Finn recorded.": {
       "localizations": {
         "en-GB": {
@@ -24334,7 +24647,14 @@
       }
     },
     "Then %@ / year": {
-      "localizations": {}
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puis %@ / an"
+          }
+        }
+      }
     },
     "Then I won't let you coast.": {
       "localizations": {
@@ -24549,6 +24869,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Réflexion"
+          }
+        }
+      }
+    },
+    "This Apple Account has already used the free trial. Choose Weekly or Annual to subscribe.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce compte Apple a déjà utilisé l’essai gratuit. Choisis Hebdomadaire ou Annuel pour t’abonner."
           }
         }
       }
@@ -24935,6 +25265,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trois répétitions comptées. Trouve un rythme que tu peux tenir."
+          }
+        }
+      }
+    },
+    "Tick every exercise first": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coche d’abord chaque exercice"
           }
         }
       }
@@ -25416,6 +25756,16 @@
         }
       }
     },
+    "Try exercise": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essayer l’exercice"
+          }
+        }
+      }
+    },
     "Try keeping a comfortable, similar knee bend through each hinge.": {
       "localizations": {
         "en-GB": {
@@ -25640,6 +25990,16 @@
         }
       }
     },
+    "Try your first exercise:": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essaie ton premier exercice :"
+          }
+        }
+      }
+    },
     "Turn a little: side to the camera": {
       "localizations": {
         "en-GB": {
@@ -25669,6 +26029,7 @@
       }
     },
     "Turn on Apple Intelligence in Settings > Apple Intelligence & Siri, and the coach will pick the sets for you.": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -25824,7 +26185,18 @@
         }
       }
     },
+    "Unless you turn it off in Options, Finn reads pose points after a set to recognise the exercise from your joint angles. Pose points and video stay on this iPhone.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sauf si tu la coupes dans Options, Finn lit les points de pose après une série pour reconnaître l’exercice d’après les angles de tes articulations. Les points de pose et la vidéo restent sur cet iPhone."
+          }
+        }
+      }
+    },
     "Unless you turn it off in Options, Finn reads pose points after a set to recognize the exercise from your joint angles. Pose points and video stay on this iPhone.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -26019,7 +26391,6 @@
       }
     },
     "VIDEO FILE INPUT": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -26047,8 +26418,17 @@
         }
       }
     },
+    "Validate workout": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valider la séance"
+          }
+        }
+      }
+    },
     "Validation 3D view · %@": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -26077,7 +26457,6 @@
       }
     },
     "Validation timing · Stop to result: %lld ms": {
-      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -26177,6 +26556,7 @@
       }
     },
     "Watch rhythm and short set sounds are optional. Sounds respect Silent Mode.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -27250,6 +27630,16 @@
         }
       }
     },
+    "You've used your free workout.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu as utilisé ta séance gratuite."
+          }
+        }
+      }
+    },
     "Your %@ check flagged %lld of %lld reps, down from %lld of %lld in the previous comparable set.": {
       "localizations": {
         "en": {
@@ -27425,6 +27815,7 @@
       }
     },
     "Your chest dropped forward at the bottom %@: your torso leaned about %lld° more than your shins.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -27735,6 +28126,7 @@
       }
     },
     "Your hips rose above the line from your shoulders to your ankles %@, by about %lld%% of your torso length.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -27803,6 +28195,7 @@
       }
     },
     "Your hips sagged below the line from your shoulders to your ankles %@, by about %lld%% of your torso length.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -28045,6 +28438,7 @@
       }
     },
     "Your knees bent about %lld° at the bottom of the hinge %@, more like a squat than a stiff-leg deadlift.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -28357,6 +28751,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ton prénom"
+          }
+        }
+      }
+    },
+    "Your next free workout is in two weeks.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta prochaine séance gratuite est dans deux semaines."
+          }
+        }
+      }
+    },
+    "Your next free workout: %@.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta prochaine séance gratuite : %@."
           }
         }
       }
@@ -28710,6 +29124,7 @@
       }
     },
     "Your torso leaned about %lld° forward at the bottom %@.": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -28833,6 +29248,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ton objectif, %@"
+          }
+        }
+      }
+    },
+    "Your workout": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta séance"
           }
         }
       }
@@ -29881,6 +30306,7 @@
       }
     },
     "measured reps": {
+      "extractionState": "stale",
       "localizations": {
         "fr": {
           "stringUnit": {
@@ -31122,7 +31548,14 @@
       }
     },
     "·": {
-      "localizations": {}
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "·"
+          }
+        }
+      }
     },
     "—": {
       "extractionState": "stale",
@@ -31883,6 +32316,7 @@
       }
     },
     "2 weeks free, then billed yearly": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -32017,6 +32451,7 @@
       }
     },
     "Finn Workout": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -32145,6 +32580,7 @@
       }
     },
     "Pay with Apple Pay": {
+      "extractionState": "stale",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -32527,6 +32963,7 @@
       }
     },
     "Pricing will appear when the App Store is available. You can continue with Finn Free.": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
@@ -32611,6 +33048,7 @@
       }
     },
     "Plan a workout": {
+      "extractionState": "stale",
       "localizations": {
         "en-GB": {
           "stringUnit": {
