@@ -25,7 +25,7 @@ Choose one of six exercises:
 | **Side-view** | Squat, push-up, static lunge, stiff-leg deadlift |
 | **Shoulder-movement** | Pull-ups, bar muscle-ups |
 
-The camera shows framing and a pose overlay, counts reps live, and supports manual or hands-free sets. Counts and selected observations can be spoken through the system audio route.
+The camera shows framing and a pose overlay, counts reps live, and supports manual or hands-free sets. Counts and selected observations can be spoken through the system audio route. When one camera review catches up on several reps, the iPhone and Watch show a measured technique cue ahead of count encouragement. Count encouragement uses fixed wording so it does not delay personalisation of the next technique cue.
 
 ### Results
 
@@ -52,7 +52,7 @@ The Home, Progress, Coach and Workout tabs keep their navigation state. Home sho
 
 First launch asks for a goal, experience level, favourite exercises, and spoken feedback preference; these choices stay on the iPhone. Awards mark measured milestones, including a set with no pattern flagged by Finn's current checks; they do not certify perfect form.
 
-Coach is a chat with Finn on the on-device Apple Intelligence model, streamed word by word in the person's language. It knows the onboarding answers and sees saved sets only when a question is about training; it must quote their labels and numbers exactly, never invent results, and give no medical advice. The thread is kept between launches and cleared by Delete all data. When the model is unavailable, Finn says why and lists the saved records; when it declines, Finn answers with fixed text. Private Cloud Compute is not used (the app lacks the entitlement). A Claude demo engine exists in Debug builds only.
+Coach is a chat with Finn on the on-device Apple Intelligence model, streamed word by word in the person's language. It knows the onboarding answers and sees saved sets only when a question is about training; it must quote their labels and numbers exactly, never invent results, and give no medical advice. The thread is kept between launches and cleared by Delete all data. If the saved workout context changes while a reply is streaming, Coach clears the draft and answers from the updated records. Direct questions about the latest set use the saved record without model inference. The model is prompted to keep small talk conversational. When the model is unavailable, Finn says why and lists the saved records; when it declines, Finn answers with fixed text. Private Cloud Compute is not used (the app lacks the entitlement). A Claude demo engine exists in Debug builds only.
 
 Onboarding ends with the Finn Coach+ offer (weekly or annual subscription, StoreKit, local test catalog in `Finn/TestConfig.storekit`). Without Finn Coach+, one free workout is allowed every 14 days ([`WorkoutAccess.swift`](Finn/Finn/Workout/WorkoutAccess.swift)); demo input and tests are not limited. App Store purchase behavior still needs production verification.
 

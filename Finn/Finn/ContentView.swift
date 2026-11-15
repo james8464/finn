@@ -1662,7 +1662,6 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, minHeight: liveCueSize * 1.6)
             .background(.white, in: RoundedRectangle(cornerRadius: 22))
             .opacity(currentLiveCue == nil ? 0 : 1)
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: currentLiveCue)
             .accessibilityHidden(currentLiveCue == nil)
             .accessibilityIdentifier("capture.liveCaption")
     }

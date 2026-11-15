@@ -36,7 +36,8 @@ sources += ["Finn/Finn/Workout/" + name + ".swift" for name in [
     "FormTrend", "SkeletonGeometry", "FinnPreferences", "ModelGenerationGate", "ComparisonNarrator"
 ]]
 sources += ["Finn/Finn/Coach/" + name + ".swift" for name in [
-    "CoachContext", "CoachEngine", "CoachConversation", "CoachTranscriptStore", "CoachTimeline", "CoachMemory", "ClaudeDemoEngine"
+    "CoachContext", "CoachFallback", "CoachEngine", "CoachPrompt", "OnDeviceCoachEngine",
+    "CoachConversation", "CoachTranscriptStore", "CoachTimeline", "CoachMemory", "ClaudeDemoEngine"
 ]]
 sources += ["Finn/Finn/Onboarding/" + name + ".swift" for name in ["OnboardingProfile", "Coach"]]
 for relative in sources:

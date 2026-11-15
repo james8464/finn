@@ -10,7 +10,8 @@ final class CoachConversation {
     /// the coach's reply as the model writes it; nil until its first words arrive
     private(set) var draftReply: String?
     /// the turn allowed to update `draftReply`, so a late word from an earlier turn is ignored
-    private var currentTurn: UUID?
+    @ObservationIgnored private var currentTurn: UUID?
+    @ObservationIgnored private var contextRevision = 0
     private(set) var context: CoachContext
     private let responder: CoachResponder
     /// where the turns are kept between launches; nil keeps them for this screen only
@@ -57,8 +58,7 @@ final class CoachConversation {
             // simulator can advertise PCC as available, then trap inside FoundationModels
             if
                 ProcessInfo.processInfo.arguments.contains("-finn-presentation-capture") ||
-                (ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") &&
-                    !ProcessInfo.processInfo.arguments.contains("-finn-ui-native-coach")) {
+                ProcessInfo.processInfo.arguments.contains("-finn-ui-demo") {
                 self.init(
                     history: history,
                     responder: CoachResponder(selector: CoachEngineSelector(engines: [])),
@@ -101,6 +101,8 @@ final class CoachConversation {
             return
         }
         context = updated
+        contextRevision += 1
+        draftReply = nil
         if messages.count == 1, let greeting = messages.first {
             messages[0] = CoachMessage(
                 id: greeting.id,
@@ -131,8 +133,11 @@ final class CoachConversation {
             currentTurn = nil
         }
         let askedContext = context
+        let askedRevision = contextRevision
+        let transcriptRevision = transcript?.clearRevision
         let answer = await responder.answer(question, context: askedContext, history: earlier) { [weak self] partial in
-            guard let self, self.currentTurn == turn else {
+            guard let self, self.currentTurn == turn, self.contextRevision == askedRevision,
+                  self.transcript?.clearRevision == transcriptRevision else {
                 return
             }
             self.draftReply = partial
@@ -141,15 +146,19 @@ final class CoachConversation {
         guard currentTurn == turn else {
             return
         }
+        guard transcript?.clearRevision == transcriptRevision else {
+            forget()
+            return
+        }
         guard !Task.isCancelled else {
             // stopped mid-reply: keep what the model had written, like any chat. Nothing else
-            if answer.engine != .fallback, context == askedContext {
+            if answer.engine != .fallback, contextRevision == askedRevision {
                 messages.append(answer)
             }
             remember()
             return
         }
-        if context == askedContext {
+        if contextRevision == askedRevision {
             messages.append(answer)
         } else {
             // History can change while the model is working. Answer from the current records

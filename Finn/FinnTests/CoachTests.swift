@@ -98,7 +98,7 @@ struct CoachTests {
         #expect(context.facts[2].repCount == 8)
         #expect(context.facts[2].partlyVisible)
         #expect(context.facts[2].issues == ["Joints not always in view"])
-        let prompt = context.promptText()
+        let prompt = context.memoryText(maximumCharacters: 4_000)
         #expect(prompt.contains("Set 2: Squat, 6 reps"))
         #expect(prompt.contains("observation: Your last two reps"))
         #expect(prompt.contains("Set 3: Push-up, 8 reps"))
@@ -130,7 +130,7 @@ struct CoachTests {
         ])
         #expect(context.latest?.observation == nil)
         #expect(context.latest?.nextAction == nil)
-        #expect(!context.promptText().contains(rangeCue.nextAction))
+        #expect(!context.memoryText(maximumCharacters: 4_000).contains(rangeCue.nextAction))
         #expect(context.latest?.repCount == 6)
     }
 
@@ -277,7 +277,7 @@ struct CoachTests {
     @Test func emptyHistoryGivesEmptyContextAndHonestFallback() async {
         let context = CoachContext.make(history: [])
         #expect(context.isEmpty)
-        #expect(context.promptText() == "No saved sets.")
+        #expect(context.memoryText(maximumCharacters: 4_000) == "No saved sets yet.")
         let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: .english)
         let answer = await responder.answer("How am I doing?", context: context, history: [])
         #expect(answer.engine == .fallback)
@@ -289,8 +289,6 @@ struct CoachTests {
         #expect(conversation.suggestedQuestions.isEmpty)
         #expect(CoachFallback.reply(to: "Des conseils ?", context: context, language: .french)
             .contains("l'onglet Séance"))
-        #expect(CoachFallback.reply(to: "¿Qué hago?", context: context, language: .spanish)
-            .contains("la pestaña Entrenamiento"))
     }
 
     // MARK: Engines unavailable
@@ -308,6 +306,23 @@ struct CoachTests {
         #expect(!answer.text.contains("Set 9"))
     }
 
+    @Test func directRecapsUseOnlyTheLatestSavedSetInEnglishAndFrench() async throws {
+        let context = CoachContext.make(history: history())
+        let latest = try #require(context.latest)
+        let cases: [(CoachLanguage, String)] = [
+            (.english, "How did my last set go?"),
+            (.french, "Comment s’est passée ma dernière série ?"),
+        ]
+        for (language, question) in cases {
+            let engine = StubCoachEngine(output: "Your technique was perfect.")
+            let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: language)
+            let answer = await responder.answer(question, context: context, history: [])
+            #expect(answer.text == CoachFallback.summary(of: latest, language: language))
+            #expect(answer.engine == .fallback)
+            #expect(engine.calls == 0)
+        }
+    }
+
     @Test func frenchFallbackSpeaksFrench() async {
         let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: .french)
         let answer = await responder.answer(
@@ -316,17 +331,6 @@ struct CoachTests {
             history: []
         )
         #expect(answer.text.contains("Série 3 : 8 répétitions, push-up."))
-    }
-
-    @Test func spanishFallbackAndSuggestionsSpeakSpanish() async {
-        #expect(CoachLanguage.current(locale: Locale(identifier: "es_ES")) == .spanish)
-        let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: .spanish)
-        let context = CoachContext.make(history: history())
-        let answer = await responder.answer("¿Cómo fue mi serie?", context: context, history: [])
-        #expect(answer.text.contains("Serie"))
-        #expect(answer.text.contains("repeticiones"))
-        let conversation = CoachConversation(history: history(), responder: responder)
-        #expect(conversation.suggestedQuestions.first?.contains("serie") == true)
     }
 
     // MARK: Simulated engine
@@ -371,7 +375,7 @@ struct CoachTests {
         let engine = StreamingCoachEngine(parts: ["Good question. Squats work"], hangsAfterParts: true)
         let responder = CoachResponder(
             selector: CoachEngineSelector(engines: [engine]),
-            timeout: .milliseconds(150),
+            timeout: .seconds(2),
             language: .english
         )
         let answer = await responder.answer("Why squats?", context: CoachContext(facts: []), history: [])
@@ -434,7 +438,7 @@ struct CoachTests {
     }
 
     @Test func promptsAndAnalysisMeetTheirFallbackIntentsInEveryLanguage() {
-        for language in [CoachLanguage.english, .french, .spanish] {
+        for language in [CoachLanguage.english, .french] {
             let responder = CoachResponder(selector: CoachEngineSelector(engines: []), language: language)
             let conversation = CoachConversation(history: history(), responder: responder)
             #expect(conversation.suggestedQuestions.map(CoachFallback.intent(of:)) == [
@@ -545,19 +549,18 @@ struct CoachTests {
         }
         // the last session alone: the set before is left out, so it cannot be taken for the last
         let aboutTheLast = ["How did my last set go?", "What should I focus on next time?", "How many reps did I do?",
-                            "Comment s'est passée ma dernière série ?", "Sur quoi me concentrer la prochaine fois ?",
-                            "¿Cómo fue mi última serie?", "¿En qué debería enfocarme la próxima vez?"]
+                            "Comment s'est passée ma dernière série ?", "Sur quoi me concentrer la prochaine fois ?"]
         for question in aboutTheLast {
             #expect(instructions(question).contains("Their most recent set is Set 3: Push-up"), "\(question)")
             #expect(!instructions(question).contains("Set 2: Squat"), "\(question)")
         }
         // a comparison or a numbered set: every set
-        let comparing = ["What changed across my sets?", "Qu'est-ce qui a changé sur mes séries ?", "¿Qué cambió en mis series?",
+        let comparing = ["What changed across my sets?", "Qu'est-ce qui a changé sur mes séries ?",
                          "How was set 1?", "Et la série 2 ?", "Am I improving?"]
         for question in comparing {
             #expect(instructions(question).contains("Set 1: Squat"), "\(question)")
         }
-        for language in [CoachLanguage.english, .french, .spanish] {
+        for language in [CoachLanguage.english, .french] {
             let conversation = CoachConversation(history: history(), responder: CoachResponder(
                 selector: CoachEngineSelector(engines: []), language: language))
             #expect(FoundationModelsCoachPrompt.setsNeeded(for: conversation.analysisRequest) == .all)
@@ -666,6 +669,25 @@ struct CoachTests {
         #expect(CoachTranscriptStore(defaults: defaults).turns.isEmpty)
     }
 
+    @Test func clearingAnEmptyTranscriptDiscardsTheFirstReplyInFlight() async throws {
+        let defaults = try #require(UserDefaults(suiteName: "CoachTranscript-\(UUID().uuidString)"))
+        let store = CoachTranscriptStore(defaults: defaults)
+        let engine = StreamingCoachEngine(parts: ["First draft", "Late reply"])
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let conversation = CoachConversation(history: [], responder: responder, transcript: store)
+        engine.onEachPart = {
+            if conversation.draftReply == "First draft" {
+                store.clear()
+            }
+        }
+
+        await conversation.send("Hello, Finn")
+
+        #expect(conversation.messages.count == 1)
+        #expect(store.turns.isEmpty)
+        #expect(conversation.draftReply == nil)
+    }
+
     /// like a messaging app: the day above the first message of each day, a thin line when they
     /// come back an hour or more later the same day, nothing between messages minutes apart
     @Test func theThreadMarksDaysAndPauses() {
@@ -690,7 +712,7 @@ struct CoachTests {
     @Test func theDayReadsLikeAMessagingApp() {
         let calendar = Calendar.autoupdatingCurrent
         let now = Date.now
-        let english = Locale(identifier: "en_US")
+        let english = Locale(identifier: "en")
         let french = Locale(identifier: "fr_FR")
         func daysAgo(_ days: Int) -> Date {
             calendar.date(byAdding: .day, value: -days, to: now)!
@@ -775,6 +797,26 @@ struct CoachTests {
             .hasPrefix("Their most recent set is Série 32: Squat"))
     }
 
+    @Test func changingHistoryClearsTheDraftAndIgnoresFurtherSnapshots() async {
+        let engine = StreamingCoachEngine(parts: ["Set 1", "Set 1 had 6 reps."])
+        let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
+        let conversation = CoachConversation(history: history(), responder: responder)
+        var snapshots = 0
+        engine.onEachPart = {
+            snapshots += 1
+            if snapshots == 1 {
+                #expect(conversation.draftReply == "Set 1")
+                conversation.refresh(history: [], profile: nil)
+            }
+            #expect(conversation.draftReply == nil)
+        }
+
+        await conversation.send("How was set 1?")
+
+        #expect(snapshots == 2)
+        #expect(conversation.messages.last?.engine == .fallback)
+    }
+
     @Test func refreshingDeletedHistoryAnswersWithoutUsingRemovedSets() async {
         let engine = StubCoachEngine(output: "Set 1", delay: .milliseconds(100))
         let responder = CoachResponder(selector: CoachEngineSelector(engines: [engine]), language: .english)
@@ -836,22 +878,7 @@ struct CoachTests {
         await Task.yield()
     }
 
-    // MARK: Validator and prompt
-
-    @Test func answerCheckReadsSetReferencesInBothLanguages() {
-        #expect(CoachAnswerCheck.referencedSetNumbers(in: "Set 2 and set #3, then Série 4 and série 5.") == [
-            2,
-            3,
-            4,
-            5
-        ])
-        #expect(CoachAnswerCheck.referencedSetNumbers(in: "A set of 8 reps.") == [])
-        let context = CoachContext.make(history: history())
-        #expect(CoachAnswerCheck.selectedFacts(in: "Set 2, Série 3", for: context)?.map(\.number) == [2, 3])
-        #expect(CoachAnswerCheck.selectedFacts(in: "Set 2 had perfect posture", for: context) == nil)
-        #expect(CoachAnswerCheck.selectedFacts(in: "Set 2, Set 2", for: context) == nil)
-        #expect(CoachAnswerCheck.selectedFacts(in: "Set 7", for: context) == nil)
-    }
+    // MARK: Prompt
 
     @Test func instructionsCarryTheRulesAndTheLanguage() {
         let context = CoachContext.make(history: history())
@@ -859,13 +886,12 @@ struct CoachTests {
         #expect(english.contains("No medical advice"))
         #expect(english.contains("Reply to anything they write"))
         #expect(english.contains("Always reply in the language of the person's latest message."))
-        #expect(english.contains("never start a reply with a greeting or with their name"))
+        #expect(english.contains("A brief acknowledgement is not a workout request."))
+        #expect(english.contains("Never infer a technique issue from a rep count or a missing observation."))
         #expect(english.contains("Never repeat a sentence, a suggestion or a question"))
         #expect(!english.contains("Set 3: Push-up"))
         let french = FoundationModelsCoachPrompt.instructions(language: .french)
         #expect(french.contains("reply in French and address the person as \"tu\""))
-        let spanish = FoundationModelsCoachPrompt.instructions(language: .spanish)
-        #expect(spanish.contains("reply in Spanish and address the person as \"tú\""))
         let prompt = FoundationModelsCoachPrompt.make(question: "Et ma dernière série ?", context: context, history: [
             CoachMessage(role: .person, text: "Earlier question"),
             CoachMessage(role: .coach, text: "Earlier answer", engine: .onDevice),

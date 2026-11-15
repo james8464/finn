@@ -79,6 +79,31 @@ final class WorkoutFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testMeasuredTechniqueCueAppearsInEnglishAndFrench() {
+        let cases = [
+            (language: "en", start: "Start set", cue: "Chest up"),
+            (language: "fr", start: "Démarrer la série", cue: "Poitrine haute"),
+        ]
+        for item in cases {
+            let app = XCUIApplication()
+            app.launchArguments = ["-finn-ui-demo", "-finn-ui-demo-form-fault", "-AppleLanguages", "(\(item.language))"]
+            app.launch()
+            app.openWorkoutTab()
+            app.buttons["Squat"].tap()
+            app.buttons["home.start"].tap()
+            let start = app.buttons[item.start]
+            XCTAssertTrue(start.waitForExistence(timeout: 8))
+            start.tap()
+            let cue = app.staticTexts.matching(identifier: "capture.liveCaption").matching(
+                NSPredicate(format: "label CONTAINS[cd] %@", item.cue)
+            ).firstMatch
+            XCTAssertTrue(cue.waitForExistence(timeout: 15), app.debugDescription)
+            capture(app, name: "Measured technique cue (\(item.language))")
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testCaptureShowsElapsedTimeAndResetsForNextSet() {
         let app = XCUIApplication()
         app.launchArguments.append("-finn-ui-demo")
